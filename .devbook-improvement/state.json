@@ -5781,7 +5781,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 512.3638494999997,
+    "elapsed_seconds": 515.4674633999997,
     "calls_reserved": 18,
     "responses_received": 18,
     "attempted_paths": [
@@ -6377,7 +6377,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:22:38.242884Z",
+    "checkpoint_at": "2026-11-07T06:22:41.346497Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -19636,16 +19636,16 @@
       "failed_at": "2026-11-04T20:02:29.090534Z"
     },
     "ai-ml-4edf0823": {
-      "workload_id": "b98a816444094ceaa557c175133e1e93",
+      "workload_id": "f57944c05f7944ee8610e2bd6384fd74",
       "topic_id": "ai-ml-4edf0823",
       "batch": {
         "topic": "AI & ML",
         "topic_id": "ai-ml-4edf0823",
         "notes": [
           {
-            "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
-            "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Mapping text into a dense vector space where semantic similarity becomes geometric proximity.\"\nlevel: [\"2\"]\npriority: High\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Embeddings\"\nflashcard_uid: \"485a25d5\"\ncreated: \"2026-02-27T12:56:16.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:28:37.406Z\"\n---\n\nEmbeddings turn text into vectors so that related meanings occupy nearby points. That geometry lets retrieval match \"throttle partner API traffic\" with a document about \"rate limiting for partner plan\" even when the wording does not overlap.\n\nAn encoder model, usually a transformer trained with a contrastive objective, reads a text span and produces a fixed-length vector. Training pulls similar pairs together and pushes unrelated pairs apart. At query time, the same model embeds the query, and the index finds nearby stored vectors with cosine similarity or dot product. Those neighbors are the candidate chunks.\n\n```mermaid\nsequenceDiagram\n    participant Q as Query Text\n    participant E as Embedding Model\n    participant VS as Vector Space\n    participant I as ANN Index\n    participant R as Top-k Results\n    Q->>E: Encode query\n    E->>VS: Query vector 1x768\n    Note over VS: Cosine similarity\\nagainst stored chunk vectors\n    VS->>I: ANN search -- HNSW or IVF\n    I->>R: Return k nearest chunks\n```\n\nLeaderboard quality is only a starting point. The useful model is the one that meets recall and latency targets on the actual corpus, at an acceptable cost. A model that tops MTEB can still mishandle internal terminology.\n\n# Embedding Model Selection\n\n## Model Families\n\nProduction RAG systems usually start with one of these model families.\n\n**Proprietary API models.** OpenAI `text-embedding-3-small` (1536 dimensions) and `text-embedding-3-large` (3072 dimensions) support a `dimensions` parameter for Matryoshka truncation at inference time. Cohere `embed-v3` distinguishes `search_document` from `search_query` through `input_type` and covers more than 100 languages. Per-token rates change, so cost comparisons need current provider pricing.\n\n**Open-source bi-encoders.** Sentence Transformers (SBERT) includes `all-MiniLM-L6-v2` (384 dimensions, 22M parameters) and `all-mpnet-base-v2` (768 dimensions, 109M parameters). Local inference removes per-token API charges, but the serving hardware and model lifecycle become an internal concern.\n\n**Domain-finetuned models.** A base model can be adapted when internal terminology is the measured source of retrieval misses. In a Databricks FinanceBench experiment, `gte-large-en-v1.5` (0.4B parameters) fine-tuned on synthetic domain data reached [[Monitoring#Retrieval Quality Metrics|Recall@10]] of 0.552 versus 0.44 for `text-embedding-3-large`. Adaptation commonly uses continued masked-language pre-training or contrastive training on query-document pairs.\n\n## Dimensionality\n\nHigher dimensions give the model more room to represent fine-grained distinctions. But higher dimensions also mean more storage (4 bytes × dimensions per vector), more compute for similarity search, and higher ANN index memory.\n\nMatryoshka Representation Learning (MRL) trains models so that prefixes of the full vector remain independently meaningful. OpenAI reports `text-embedding-3-large` at 256 dimensions outperforming `ada-002` at 1536 dimensions on the aggregate MTEB benchmark. That result motivates testing shorter vectors, but corpus-specific Recall@k must establish the retrieval tradeoff. Shorter vectors can reduce storage and search work, with full dimensions reserved for cases that need them.\n\nA two-stage design can generate the full embedding once, normalize and index its reduced prefix for ANN search, then score the small candidate set with the retained full vector or a cross-encoder. Full vectors must live outside the ANN index or be recomputed for the candidates. Retaining them reduces ANN memory and search work but not total vector storage; recomputing them trades storage for API cost and latency.\n\n## Similarity Metrics\n\nThe similarity metric defines what \"near\" means in the vector space.\n\n**Cosine similarity** measures the angle between vectors, ignoring magnitude. Most embedding models are trained with cosine objectives, making it the default choice. Range: -1 to 1 (1 = identical direction).\n\n**Dot product** is cosine similarity scaled by vector magnitudes. For L2-normalized vectors, dot product equals cosine similarity. Normalization is model-specific: OpenAI documents its embedding vectors as length-normalized, while another model may preserve magnitude as part of the signal. The selected model's documentation, not a general assumption about every API, determines whether its vectors are normalized.\n\n**Euclidean (L2) distance** measures straight-line distance in vector space. For length-normalized vectors, squared L2 distance equals 2 − 2 × cosine similarity, so L2 and cosine produce identical rankings; OpenAI documents this for its normalized embeddings. For unnormalized vectors, L2 also reflects vector magnitude and can rank neighbors differently from cosine, so the metric follows the geometry the model's documentation specifies.\n\nCosine similarity is the safe default unless the model documentation specifies another metric.\n\n# Pitfalls\n\n## Distribution Shift on Internal Terminology\n\nA model that scores well on MTEB can still fail on a specific domain. Internal acronyms or product names may be poorly represented in the training data, leaving related queries and documents far apart in vector space.\n\nDetection: recall@k on a held-out set of domain-specific queries is compared with recall@k on generic queries. A significant gap signals distribution shift.\n\nThe repair depends on the failure. Domain adaptation can improve semantic placement, while [[Retrieval|hybrid retrieval]] lets BM25 recover exact terminology that dense retrieval misses.\n\n## Embedding Model Swap Invalidation\n\nChanging the embedding model — even a minor version — invalidates every stored vector. The new model produces vectors in a different geometric space. Cosine similarity between old and new vectors is meaningless.\n\nThis means re-embedding the entire corpus: for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100 and hours of ingestion time. Keying the [[Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching|embedding cache]] by model name + version prevents serving stale vectors.\n\n## Benchmark Leaderboard Overfitting\n\nMTEB aggregates several task families. A model can rank first overall while performing poorly on retrieval because strong classification or semantic-similarity results lift its average. RAG selection therefore uses the `Retrieval` category scores and then a test against a corpus-specific evaluation set.\n\n## Multilingual Embedding Collapse\n\nModels trained primarily on English text cluster non-English content into a smaller region of vector space, reducing separation between distinct concepts. A Spanish query about \"seguridad informática\" and one about \"seguridad alimentaria\" may land closer together than they should because the model undertrained on Spanish semantic distinctions.\n\nMitigation: models with explicit multilingual training (Cohere `embed-v3`, SBERT multilingual variants) reduce the risk, and recall is evaluated per language separately.\n\n# Tradeoffs\n\n| Factor | Proprietary API | Open-Source Self-Hosted | Domain-Finetuned |\n| --- | --- | --- | --- |\n| Cost at scale | Per-token pricing -- scales linearly | Infrastructure cost -- GPU amortized across volume | Training cost upfront -- inference same as base |\n| Recall on general text | High -- trained on massive web corpora | Competitive -- top models match proprietary on MTEB | Depends on base model and training data quality |\n| Recall on domain text | Can miss internal terminology | Same limitation as proprietary | Potentially higher when domain training improves held-out retrieval |\n| Latency | Network round-trip + provider queue | Local inference -- no network hop | Same as self-hosted base model |\n| Operational burden | Minimal -- API call | High -- GPU infra and model serving and updates | Highest -- training pipeline plus serving |\n| Vendor lock-in | Model changes break vector index | Full control over versioning | Full control |\n| Dimensionality control | Some models support MRL truncation | Full control via model choice | Full control |\n\nThe simplest model that establishes a credible recall baseline is the right starting point. Fine-tuning is justified only after failed queries show that domain semantics, rather than chunk boundaries or retrieval configuration, are the bottleneck. Better embeddings cannot repair bad chunks.\n\n# Questions\n\n<!-- qard-id: bb5874a0-b6ba-4318-ab29-25a6079c807a -->\n> [!qard]- How do embeddings support semantic retrieval?\n> An embedding is a vector of numbers that a model produces for a piece of text. The model places texts with related meaning close together, so the distance between two vectors measures how related the texts are. The vector's length is set by the model and, for some models such as OpenAI's `text-embedding-3` family, by a requested output size.\n>\n> Semantic retrieval relies on that geometry:\n>\n> 1. **Indexing:** the embedding model converts each document chunk into a vector, which is stored in a vector index.\n> 2. **Query:** the same model, with the same output size, converts the query into a vector in the same space.\n> 3. **Ranking:** a similarity measure, such as cosine similarity, ranks the stored vectors by closeness to the query vector. The nearest chunks become retrieval candidates.\n>\n> Because matching depends on meaning rather than shared words, a query about throttling partner API traffic can find a document about rate limiting for partners. A high similarity score is only a relevance signal. It does not prove that a chunk answers the question, so retrieval quality still has to be evaluated.\n>\n> [Vector embeddings (OpenAI)](https://developers.openai.com/api/docs/guides/embeddings) · [Vector search overview (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-overview)\n\n<!-- qard-id: cbeb031d-1919-44df-9d70-3df6fafd8901 -->\n> [!qard]- How do Matryoshka embeddings reduce vector storage?\n> Matryoshka Representation Learning (MRL) trains an embedding so that its first dimensions already form a useful coarse representation, and later dimensions add finer detail. A prefix of the vector, such as its first 256 values, therefore still works as a lower-dimensional embedding. Storing only that prefix reduces vector storage.\n>\n> - **Storage:** at the same data type, 256 values instead of 1536 is one-sixth of the raw vector payload. IDs, metadata and index structures do not shrink by the same factor, so the whole index shrinks less.\n> - **Search cost:** shorter vectors also reduce distance-computation work.\n> - **Availability:** shortening is model-specific. OpenAI's `text-embedding-3` models accept a `dimensions` parameter. A vector truncated manually is re-normalized before cosine or dot-product search.\n>\n> [Embeddings guide (OpenAI)](https://developers.openai.com/api/docs/guides/embeddings) · [Matryoshka Representation Learning (arXiv)](https://arxiv.org/abs/2205.13147)\n\n> [!qard]- How should a shorter embedding dimension be validated?\n> Fewer embedding dimensions can lower retrieval quality on a particular corpus.\n>\n> A shorter vector is validated by running the same labeled queries at each candidate dimension and comparing Recall@k and latency. The preferred dimension is the smallest one that still meets the recall and latency targets. A design that re-scores candidates with full-length vectors has to store them elsewhere or recompute them, which adds storage, API cost or latency.\n>\n> [Embeddings guide (OpenAI)](https://developers.openai.com/api/docs/guides/embeddings) · [Matryoshka Representation Learning (arXiv)](https://arxiv.org/abs/2205.13147)\n\n<!-- qard-id: d153db49-a943-4334-bb4e-310ba8915adb -->\n> [!qard]- What happens to retrieval when queries use embeddings from a new model but the corpus still has vectors from the old model?\n> Retrieval quality breaks. The query vector and the stored vectors come from different vector spaces, so the distances between them do not measure relatedness, and the ranking becomes effectively arbitrary.\n>\n> Each embedding model learns its own coordinate system, so the same text receives unrelated vectors from two different models. If both models produce vectors of the same length, the search can still run without any error while returning poor results. That makes the mismatch easy to miss.\n>\n> A model change therefore requires re-embedding the whole corpus with the new model. A safe migration builds and validates the new index first and only then switches query traffic, for example by moving a collection alias. Embedding-cache keys include the model name and version, so cached vectors from the old model are not reused with the new one.\n>\n> [Configure a vectorizer (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-configure-vectorizer)\n\n# References\n\n- [Embeddings guide — text-embedding-3 models and MRL (OpenAI)](https://platform.openai.com/docs/guides/embeddings)\n- [MTEB leaderboard — filter by Retrieval task (Hugging Face)](https://huggingface.co/spaces/mteb/leaderboard)\n- [Matryoshka Representation Learning — original MRL paper (arXiv)](https://arxiv.org/abs/2205.13147)\n- [Azure OpenAI embeddings — deployment and SDK usage (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/embeddings)\n",
-            "hash": "5fd5e002d4b4a5cf4a463fed95629b02c2a86d8a695ceb6915a7af26763acb49",
+            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+            "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Embedding and detecting a keyed statistical pattern in LLM token choices without adding visible markers.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-08-24T13:55:31.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-08-24T13:55:09.085Z\"\n---\n\nLLM text watermarking leaves a keyed statistical pattern in the token choices made during generation. Nothing visible is added to the response: there are no hidden characters, metadata fields, or extra tokens. The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.\n\nThis makes a watermark different from a general AI-text classifier. A classifier looks for learned traits of machine-written text and may be applied to any passage. A watermark detector checks for a signal deliberately introduced by a cooperating model provider. A positive result is evidence that the corresponding model was involved; it is not proof of who wrote the text, who owns it, or whether every word came from the model.\n\n# How Generative Watermarking Works\n\n[[Home/AI & ML/LLM/Generation|Generation]] normally samples each next token from a probability distribution conditioned on the preceding text. A generative watermark changes how randomness is used inside that sampling step:\n\n1. The model produces its next-token distribution after controls such as temperature and top-p have been applied.\n2. A pseudorandom seed is derived from a secret watermark key and the recent token context.\n3. The sampler uses that seed to prefer particular candidates while staying within choices the model already considers plausible.\n4. Repeating this process creates a correlation between the key, the context, and the emitted tokens.\n5. A detector reconstructs the keyed scores from the finished text and compares their aggregate with a decision threshold.\n\nSynthID-Text implements this with **Tournament sampling**. It samples several candidate tokens from the model distribution, pairs them, and lets keyed pseudorandom scoring functions select the winner of each round. The final token therefore tends to score highly under those functions. Detection averages the same scores across the passage:\n\n$$\n\\operatorname{Score}(x)=\\frac{1}{mT}\\sum_{t=1}^{T}\\sum_{\\ell=1}^{m}g_\\ell(x_t,r_t)\n$$\n\nHere, $T$ is the number of scored tokens, $m$ is the number of tournament layers, $r_t$ is the context-and-key-derived seed, and $g_\\ell$ is a keyed scoring function. Watermarked text should accumulate a higher score than unwatermarked text, but the result remains statistical rather than absolute.\n\n# Quality and Detectability\n\nWatermark strength competes with output quality and diversity. A **non-distortionary** configuration preserves the model's output distribution at a defined scope when averaged over watermark seeds. SynthID-Text's production configuration was designed to preserve response quality while accepting some reduction in diversity between repeated responses. A stronger, distortionary configuration makes detection easier by changing the distribution more aggressively, at the cost of some quality.\n\nThe SynthID-Text study found no statistically significant quality difference between watermarked and unwatermarked outputs in standard evaluations, a controlled human preference study, or feedback from approximately 20 million live Gemini responses. Its measured sampling overhead was also small relative to model inference. These results establish production feasibility for the evaluated configurations; they do not make every watermarking method quality-neutral.\n\nDetection improves with two sources of evidence:\n\n- **Longer text.** More model-selected tokens provide more observations, so the score separates more reliably from chance.\n- **Higher-entropy choices.** When several next tokens are plausible, the sampler has room to encode the keyed preference without choosing an implausible token.\n\nThe signal is therefore weak in short passages and low-entropy output. Exact facts, constrained code, and light proofreading leave few interchangeable choices. Translations and original prose provide more opportunities because the model chooses most of the wording.\n\n# Limits\n\n- **Absence is inconclusive.** A missing or weak signal may mean the text is human-written, produced by another model, too short, heavily constrained, lightly edited, or scrubbed through rewriting.\n- **Presence provides limited evidence.** Detection cannot distinguish original generation from substantial model editing, and it carries no user, organization, or conversation identity.\n- **Editing removes evidence.** Light edits may leave enough signal to detect, while paraphrasing and complete rewrites progressively destroy the keyed correlations.\n- **Coverage requires cooperation.** Providers must apply a watermark during generation. Models or deployments that do not participate remain outside that detector's coverage.\n- **Errors still need policy.** A threshold trades false positives against false negatives. High-stakes uses need calibrated thresholds and an abstention result when the evidence is uncertain.\n- **The mechanism is attackable.** Stealing, spoofing, and scrubbing watermarks remain active research problems, especially for openly distributed models.\n\nA watermark is therefore an attribution signal, not a universal AI detector or an authorship verdict. It is most useful alongside provenance records, content credentials for file formats that support them, and process-level disclosure rather than as the sole basis for punishment or access decisions.\n\n# References\n\n- [How Claude's text watermark works](https://www.anthropic.com/news/claude-text-watermark)\n- [Scalable watermarking for identifying large language model outputs](https://www.nature.com/articles/s41586-024-08025-4)\n",
+            "hash": "24f68824944f8fe95e8fef46966fdd025e314ec62c34ca823023522988d087bc",
             "topic": "AI & ML",
             "violations": [],
             "needs_fixing_ids": [],
@@ -19661,147 +19661,184 @@
       },
       "proposal": {
         "version": 1,
-        "edits": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
-            "expected_hash": "5fd5e002d4b4a5cf4a463fed95629b02c2a86d8a695ceb6915a7af26763acb49",
-            "before": "Cohere `embed-v3` distinguishes `search_document` from `search_query` through `input_type` and covers more than 100 languages.",
-            "after": "Cohere Embed v3 distinguishes `search_document` from `search_query` through `input_type`. The `embed-multilingual-v3.0` model covers more than 100 languages, while `embed-english-v3.0` handles English only.",
-            "reason": "Separates the English and multilingual Cohere v3 variants so the language-coverage claim applies only to the multilingual model.",
-            "kind": "note",
-            "learning_target": "same",
-            "essential_meanings": [
-              "Only the multilingual Cohere v3 model covers 100+ languages",
-              "The English v3 model is English-only"
-            ],
-            "sources": [
-              {
-                "url": "https://docs.cohere.com/docs/cohere-embed",
-                "claim": "embed-multilingual-v3.0 supports over 100 languages; embed-english-v3.0 is English-only.",
-                "version": "Embed v3"
-              }
-            ],
-            "feedback_keys": [],
-            "problem": "The note credits Cohere embed-v3 generically with 100+ language coverage, but only the multilingual variant has it.",
-            "reader_benefit": "Prevents choosing the English variant for a non-English corpus."
-          },
-          {
-            "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
-            "expected_hash": "5fd5e002d4b4a5cf4a463fed95629b02c2a86d8a695ceb6915a7af26763acb49",
-            "before": "models with explicit multilingual training (Cohere `embed-v3`, SBERT multilingual variants)",
-            "after": "models with explicit multilingual training (Cohere `embed-multilingual-v3.0`, SBERT multilingual variants)",
-            "reason": "Names the multilingual variant in the mitigation so the English-only model is not implied to help.",
-            "kind": "note",
-            "learning_target": "same",
-            "essential_meanings": [
-              "The multilingual mitigation requires the multilingual Cohere variant"
-            ],
-            "sources": [
-              {
-                "url": "https://docs.cohere.com/docs/cohere-embed",
-                "claim": "embed-multilingual-v3.0 is the multilingual Embed v3 model; the English models handle English only.",
-                "version": "Embed v3"
-              }
-            ],
-            "feedback_keys": [],
-            "problem": "The multilingual mitigation names the Cohere v3 family generically, which includes English-only models.",
-            "reader_benefit": "Gives an accurate, actionable model choice for multilingual recall."
-          }
-        ],
+        "edits": [],
         "dispositions": [
           {
-            "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
-            "outcome": "changed",
-            "reason": "The review's Cohere finding was verified against Cohere's documentation. Two small edits now name the multilingual variant where the note claims 100+ language coverage and a multilingual mitigation. The rest of the note was rechecked and left alone: the contrastive-encoder explanation, the MRL hedging, the L2/cosine identity, the $100 re-embedding arithmetic and the three cards."
+            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+            "outcome": "keep",
+            "reason": "Audited the whole note. The opening separates a keyed watermark from a general AI-text classifier. The sampling steps and the Tournament sampling and score formula match the SynthID-Text description. The quality and detectability section keeps the non-distortionary versus distortionary trade-off. The limits list is consistent with itself. I fetched the Anthropic article, which confirms the note's claims that the watermark is a SynthID-Text variant, adds no characters or tokens, carries no identity, is weak on short text and on factual or exact-code output, and is removed by heavy rewriting. It also states that Claude translations are watermarked, which supports the note's comment on translations. The Nature reference is the primary SynthID-Text paper. The References section is two bare descriptive links, with no frontmatter or lifecycle issues, no code fences and no cards. I found no defect that justifies an edit."
           }
         ],
-        "feedback": [],
-        "decisions": []
+        "feedback": []
       },
       "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Embeddings.md": "5fd5e002d4b4a5cf4a463fed95629b02c2a86d8a695ceb6915a7af26763acb49"
+        "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": "24f68824944f8fe95e8fef46966fdd025e314ec62c34ca823023522988d087bc"
       },
       "feedback_keys": [],
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "repair_inputs": {
-        "Vault/Home/AI & ML/LLM/Embeddings.md": ""
+        "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": ""
       },
       "prepared_source_version": 1,
-      "prepared_at": "2026-11-05T20:10:51.860294Z",
-      "review_repair_key": "32b0cc5e2b5b37ba76914a79e69541c3fd46c313888d3723d36b691b2a871bdf",
-      "repair_reserved": true,
-      "repair_review": {
-        "verdict": "CHANGES REQUIRED",
-        "overall_reason": "The keep disposition is not justified. The note applies Cohere `embed-v3` to multilingual coverage without distinguishing the English and multilingual variants. The rest of the note is accurate, and no edit was proposed.",
+      "prepared_at": "2026-11-07T06:22:17.365305Z",
+      "review_evidence": {
+        "raw_review": {
+          "verdict": "CLEAN",
+          "notes": [
+            {
+              "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+              "verdict": "CLEAN",
+              "summary": "The note explains the mechanism, the quality/detectability trade-off and the limits accurately and in order. I found no concrete defect, so keeping it unchanged is justified.",
+              "page_type": "Concept — frontmatter, optional References (two bare descriptive links), no cards, no code fences.",
+              "current_text_evidence": [
+                {
+                  "quote": "The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.",
+                  "line_start": 14,
+                  "reason": "The opening states the operating idea and separates a watermark from a classifier in the next paragraph."
+                },
+                {
+                  "quote": "Synth ID-Text implements this with **Tournament sampling**.",
+                  "line_start": 28,
+                  "reason": "Placeholder"
+                },
+                {
+                  "quote": "The signal is therefore weak in short passages and low-entropy output.",
+                  "line_start": 47,
+                  "reason": "The note derives the weakness from the two detection factors stated just before it, which makes the explanation order sound."
+                },
+                {
+                  "quote": "A threshold trades false positives against false negatives.",
+                  "line_start": 54,
+                  "reason": "The limits are specific and consistent, and they carry the engineering judgment about thresholds and abstention."
+                }
+              ],
+              "target_resolution": "JUSTIFIED UNCHANGED",
+              "split_suggestion": "No split: one coherent topic (generative text watermarking); the sections are interdependent.",
+              "findings": [],
+              "source_checks": [],
+              "rejection_equivalence": [],
+              "quality": {
+                "accuracy": "PASS",
+                "clarity": "PASS",
+                "question_quality": "NOT APPLICABLE",
+                "identity_safety": "NOT APPLICABLE",
+                "rules_compliance": "PASS"
+              }
+            }
+          ],
+          "overall_reason": "The whole note was audited independently. The Anthropic article confirms the SynthID-Text variant, weakness on short and factual text, translations being watermarked, and the absence of identity. The Nature reference is the primary paper. No concrete defect was found, and no edits were proposed.",
+          "change_checks": []
+        },
+        "bindings": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+            "citation_index": 3,
+            "reported_line_start": 54,
+            "resolved_line_start": 55
+          }
+        ],
+        "source_hashes": {
+          "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": "24f68824944f8fe95e8fef46966fdd025e314ec62c34ca823023522988d087bc"
+        },
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+      },
+      "completed_review": {
+        "verdict": "CLEAN",
         "notes": [
           {
-            "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
-            "verdict": "CHANGES REQUIRED",
-            "summary": "The note is well structured and mostly accurate. The cost arithmetic, the L2/cosine identity and the MRL hedging all hold. One concrete factual imprecision remains: Cohere `embed-v3` is credited with 100+ language coverage and multilingual training. Only the `embed-multilingual-v3.0` variant has that coverage, while the English variant does not. The keep disposition missed this.",
-            "page_type": "Concept — frontmatter and Qard identity metadata are protected; Questions and References are present and optional.",
+            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains the mechanism, the quality/detectability trade-off and the limits accurately and in order. I found no concrete defect, so keeping it unchanged is justified.",
+            "page_type": "Concept — frontmatter, optional References (two bare descriptive links), no cards, no code fences.",
             "current_text_evidence": [
               {
-                "quote": "Cohere `embed-v3` distinguishes `search_document` from `search_query` through `input_type` and covers more than 100 languages.",
-                "line_start": 43,
-                "reason": "Cohere's v3 family has separate English and multilingual models. Only the multilingual model covers 100+ languages, so the sentence is imprecise."
+                "quote": "The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.",
+                "line_start": 14,
+                "reason": "The opening states the operating idea and separates a watermark from a classifier in the next paragraph."
               },
               {
-                "quote": "models with explicit multilingual training (Cohere `embed-v3`, SBERT multilingual variants)",
-                "line_start": 93,
-                "reason": "The multilingual mitigation names the family generically. An English-only v3 model would not mitigate the problem, so the variant must be named."
+                "quote": "Synth ID-Text implements this with **Tournament sampling**.",
+                "line_start": 28,
+                "reason": "Placeholder"
               },
               {
-                "quote": "for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100",
-                "line_start": 83,
-                "reason": "The arithmetic is correct: 5B tokens at $0.02 per million tokens is $100."
-              }
-            ],
-            "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: the model selection, dimensionality, metrics and pitfalls all serve one coherent selection decision.",
-            "findings": [
+                "quote": "The signal is therefore weak in short passages and low-entropy output.",
+                "line_start": 47,
+                "reason": "The note derives the weakness from the two detection factors stated just before it, which makes the explanation order sound."
+              },
               {
-                "severity": "Medium",
-                "dimension": "Accuracy",
-                "location": "Model Families (line 43) and Multilingual Embedding Collapse (line 93)",
-                "evidence": "\"Cohere `embed-v3` ... covers more than 100 languages\" and \"explicit multilingual training (Cohere `embed-v3`...)\"",
-                "effect": "A reader could assume every Cohere v3 model is multilingual. The English variant is not, so this can lead to a wrong model choice for non-English corpora.",
-                "fix": "Name `embed-multilingual-v3.0` for the 100+ language claim and the multilingual mitigation. Note that `embed-english-v3.0` is English-focused."
+                "quote": "A threshold trades false positives against false negatives.",
+                "line_start": 55,
+                "reason": "The limits are specific and consistent, and they carry the engineering judgment about thresholds and abstention."
               }
             ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: one coherent topic (generative text watermarking); the sections are interdependent.",
+            "findings": [],
             "source_checks": [],
             "rejection_equivalence": [],
             "quality": {
-              "accuracy": "FAIL",
+              "accuracy": "PASS",
               "clarity": "PASS",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
               "rules_compliance": "PASS"
             }
           }
         ],
+        "overall_reason": "The whole note was audited independently. The Anthropic article confirms the SynthID-Text variant, weakness on short and factual text, translations being watermarked, and the absence of identity. The Nature reference is the primary paper. No concrete defect was found, and no edits were proposed.",
         "change_checks": []
       },
-      "repair_previous_proposal": {
-        "version": 1,
-        "edits": [],
-        "dispositions": [
+      "blocked_review": {
+        "verdict": "CLEAN",
+        "notes": [
           {
-            "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
-            "outcome": "keep",
-            "reason": "I read the whole note and checked it against its claims. The contrastive-encoder explanation matches the diagram. The MRL claims are correctly hedged: OpenAI's MTEB result is presented as motivation to test shorter vectors, not as a guarantee, and the two-stage storage tradeoff is stated accurately. The metric section is right that squared L2 equals 2 − 2·cosine for normalized vectors, and it tells the reader to follow the model's documentation. The re-embedding cost of 10M chunks × 500 tokens × $0.02/1M comes to about $100, which matches the note. The pitfalls, tradeoffs table and three cards (retrieval, MRL storage, dimension validation, model-swap mismatch) each test one task, and their answers include the conditions and limits. known_violations is empty. The prose is direct and has no padding. I found no verified defect, so I made no edit."
+            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains the mechanism, the quality/detectability trade-off and the limits accurately and in order. I found no concrete defect, so keeping it unchanged is justified.",
+            "page_type": "Concept — frontmatter, optional References (two bare descriptive links), no cards, no code fences.",
+            "current_text_evidence": [
+              {
+                "quote": "The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.",
+                "line_start": 14,
+                "reason": "The opening states the operating idea and separates a watermark from a classifier in the next paragraph."
+              },
+              {
+                "quote": "Synth ID-Text implements this with **Tournament sampling**.",
+                "line_start": 28,
+                "reason": "Placeholder"
+              },
+              {
+                "quote": "The signal is therefore weak in short passages and low-entropy output.",
+                "line_start": 47,
+                "reason": "The note derives the weakness from the two detection factors stated just before it, which makes the explanation order sound."
+              },
+              {
+                "quote": "A threshold trades false positives against false negatives.",
+                "line_start": 55,
+                "reason": "The limits are specific and consistent, and they carry the engineering judgment about thresholds and abstention."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: one coherent topic (generative text watermarking); the sections are interdependent.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
           }
         ],
-        "feedback": [],
-        "decisions": []
+        "overall_reason": "The whole note was audited independently. The Anthropic article confirms the SynthID-Text variant, weakness on short and factual text, translations being watermarked, and the absence of identity. The Nature reference is the primary paper. No concrete defect was found, and no edits were proposed.",
+        "change_checks": []
       },
-      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "feedback_snapshot": [],
-      "blocked_review": {
-        "stage": "deterministic_application",
-        "reason": "source URL missing from owning note: https://docs.cohere.com/docs/cohere-embed"
-      },
-      "failed_at": "2026-11-05T20:10:55.396248Z"
+      "feedback_snapshot": []
     }
   },
   "parked_review_repairs": {},
@@ -21508,6 +21545,174 @@
         "change_checks": []
       },
       "feedback_snapshot": []
+    },
+    "fea8ce49b2a6630a297165dc909914a735da0922424ca8f4e81453629af9197b": {
+      "workload_id": "b98a816444094ceaa557c175133e1e93",
+      "topic_id": "ai-ml-4edf0823",
+      "batch": {
+        "topic": "AI & ML",
+        "topic_id": "ai-ml-4edf0823",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+            "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Mapping text into a dense vector space where semantic similarity becomes geometric proximity.\"\nlevel: [\"2\"]\npriority: High\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Embeddings\"\nflashcard_uid: \"485a25d5\"\ncreated: \"2026-02-27T12:56:16.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:28:37.406Z\"\n---\n\nEmbeddings turn text into vectors so that related meanings occupy nearby points. That geometry lets retrieval match \"throttle partner API traffic\" with a document about \"rate limiting for partner plan\" even when the wording does not overlap.\n\nAn encoder model, usually a transformer trained with a contrastive objective, reads a text span and produces a fixed-length vector. Training pulls similar pairs together and pushes unrelated pairs apart. At query time, the same model embeds the query, and the index finds nearby stored vectors with cosine similarity or dot product. Those neighbors are the candidate chunks.\n\n```mermaid\nsequenceDiagram\n    participant Q as Query Text\n    participant E as Embedding Model\n    participant VS as Vector Space\n    participant I as ANN Index\n    participant R as Top-k Results\n    Q->>E: Encode query\n    E->>VS: Query vector 1x768\n    Note over VS: Cosine similarity\\nagainst stored chunk vectors\n    VS->>I: ANN search -- HNSW or IVF\n    I->>R: Return k nearest chunks\n```\n\nLeaderboard quality is only a starting point. The useful model is the one that meets recall and latency targets on the actual corpus, at an acceptable cost. A model that tops MTEB can still mishandle internal terminology.\n\n# Embedding Model Selection\n\n## Model Families\n\nProduction RAG systems usually start with one of these model families.\n\n**Proprietary API models.** OpenAI `text-embedding-3-small` (1536 dimensions) and `text-embedding-3-large` (3072 dimensions) support a `dimensions` parameter for Matryoshka truncation at inference time. Cohere `embed-v3` distinguishes `search_document` from `search_query` through `input_type` and covers more than 100 languages. Per-token rates change, so cost comparisons need current provider pricing.\n\n**Open-source bi-encoders.** Sentence Transformers (SBERT) includes `all-MiniLM-L6-v2` (384 dimensions, 22M parameters) and `all-mpnet-base-v2` (768 dimensions, 109M parameters). Local inference removes per-token API charges, but the serving hardware and model lifecycle become an internal concern.\n\n**Domain-finetuned models.** A base model can be adapted when internal terminology is the measured source of retrieval misses. In a Databricks FinanceBench experiment, `gte-large-en-v1.5` (0.4B parameters) fine-tuned on synthetic domain data reached [[Monitoring#Retrieval Quality Metrics|Recall@10]] of 0.552 versus 0.44 for `text-embedding-3-large`. Adaptation commonly uses continued masked-language pre-training or contrastive training on query-document pairs.\n\n## Dimensionality\n\nHigher dimensions give the model more room to represent fine-grained distinctions. But higher dimensions also mean more storage (4 bytes × dimensions per vector), more compute for similarity search, and higher ANN index memory.\n\nMatryoshka Representation Learning (MRL) trains models so that prefixes of the full vector remain independently meaningful. OpenAI reports `text-embedding-3-large` at 256 dimensions outperforming `ada-002` at 1536 dimensions on the aggregate MTEB benchmark. That result motivates testing shorter vectors, but corpus-specific Recall@k must establish the retrieval tradeoff. Shorter vectors can reduce storage and search work, with full dimensions reserved for cases that need them.\n\nA two-stage design can generate the full embedding once, normalize and index its reduced prefix for ANN search, then score the small candidate set with the retained full vector or a cross-encoder. Full vectors must live outside the ANN index or be recomputed for the candidates. Retaining them reduces ANN memory and search work but not total vector storage; recomputing them trades storage for API cost and latency.\n\n## Similarity Metrics\n\nThe similarity metric defines what \"near\" means in the vector space.\n\n**Cosine similarity** measures the angle between vectors, ignoring magnitude. Most embedding models are trained with cosine objectives, making it the default choice. Range: -1 to 1 (1 = identical direction).\n\n**Dot product** is cosine similarity scaled by vector magnitudes. For L2-normalized vectors, dot product equals cosine similarity. Normalization is model-specific: OpenAI documents its embedding vectors as length-normalized, while another model may preserve magnitude as part of the signal. The selected model's documentation, not a general assumption about every API, determines whether its vectors are normalized.\n\n**Euclidean (L2) distance** measures straight-line distance in vector space. For length-normalized vectors, squared L2 distance equals 2 − 2 × cosine similarity, so L2 and cosine produce identical rankings; OpenAI documents this for its normalized embeddings. For unnormalized vectors, L2 also reflects vector magnitude and can rank neighbors differently from cosine, so the metric follows the geometry the model's documentation specifies.\n\nCosine similarity is the safe default unless the model documentation specifies another metric.\n\n# Pitfalls\n\n## Distribution Shift on Internal Terminology\n\nA model that scores well on MTEB can still fail on a specific domain. Internal acronyms or product names may be poorly represented in the training data, leaving related queries and documents far apart in vector space.\n\nDetection: recall@k on a held-out set of domain-specific queries is compared with recall@k on generic queries. A significant gap signals distribution shift.\n\nThe repair depends on the failure. Domain adaptation can improve semantic placement, while [[Retrieval|hybrid retrieval]] lets BM25 recover exact terminology that dense retrieval misses.\n\n## Embedding Model Swap Invalidation\n\nChanging the embedding model — even a minor version — invalidates every stored vector. The new model produces vectors in a different geometric space. Cosine similarity between old and new vectors is meaningless.\n\nThis means re-embedding the entire corpus: for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100 and hours of ingestion time. Keying the [[Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching|embedding cache]] by model name + version prevents serving stale vectors.\n\n## Benchmark Leaderboard Overfitting\n\nMTEB aggregates several task families. A model can rank first overall while performing poorly on retrieval because strong classification or semantic-similarity results lift its average. RAG selection therefore uses the `Retrieval` category scores and then a test against a corpus-specific evaluation set.\n\n## Multilingual Embedding Collapse\n\nModels trained primarily on English text cluster non-English content into a smaller region of vector space, reducing separation between distinct concepts. A Spanish query about \"seguridad informática\" and one about \"seguridad alimentaria\" may land closer together than they should because the model undertrained on Spanish semantic distinctions.\n\nMitigation: models with explicit multilingual training (Cohere `embed-v3`, SBERT multilingual variants) reduce the risk, and recall is evaluated per language separately.\n\n# Tradeoffs\n\n| Factor | Proprietary API | Open-Source Self-Hosted | Domain-Finetuned |\n| --- | --- | --- | --- |\n| Cost at scale | Per-token pricing -- scales linearly | Infrastructure cost -- GPU amortized across volume | Training cost upfront -- inference same as base |\n| Recall on general text | High -- trained on massive web corpora | Competitive -- top models match proprietary on MTEB | Depends on base model and training data quality |\n| Recall on domain text | Can miss internal terminology | Same limitation as proprietary | Potentially higher when domain training improves held-out retrieval |\n| Latency | Network round-trip + provider queue | Local inference -- no network hop | Same as self-hosted base model |\n| Operational burden | Minimal -- API call | High -- GPU infra and model serving and updates | Highest -- training pipeline plus serving |\n| Vendor lock-in | Model changes break vector index | Full control over versioning | Full control |\n| Dimensionality control | Some models support MRL truncation | Full control via model choice | Full control |\n\nThe simplest model that establishes a credible recall baseline is the right starting point. Fine-tuning is justified only after failed queries show that domain semantics, rather than chunk boundaries or retrieval configuration, are the bottleneck. Better embeddings cannot repair bad chunks.\n\n# Questions\n\n<!-- qard-id: bb5874a0-b6ba-4318-ab29-25a6079c807a -->\n> [!qard]- How do embeddings support semantic retrieval?\n> An embedding is a vector of numbers that a model produces for a piece of text. The model places texts with related meaning close together, so the distance between two vectors measures how related the texts are. The vector's length is set by the model and, for some models such as OpenAI's `text-embedding-3` family, by a requested output size.\n>\n> Semantic retrieval relies on that geometry:\n>\n> 1. **Indexing:** the embedding model converts each document chunk into a vector, which is stored in a vector index.\n> 2. **Query:** the same model, with the same output size, converts the query into a vector in the same space.\n> 3. **Ranking:** a similarity measure, such as cosine similarity, ranks the stored vectors by closeness to the query vector. The nearest chunks become retrieval candidates.\n>\n> Because matching depends on meaning rather than shared words, a query about throttling partner API traffic can find a document about rate limiting for partners. A high similarity score is only a relevance signal. It does not prove that a chunk answers the question, so retrieval quality still has to be evaluated.\n>\n> [Vector embeddings (OpenAI)](https://developers.openai.com/api/docs/guides/embeddings) · [Vector search overview (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-overview)\n\n<!-- qard-id: cbeb031d-1919-44df-9d70-3df6fafd8901 -->\n> [!qard]- How do Matryoshka embeddings reduce vector storage?\n> Matryoshka Representation Learning (MRL) trains an embedding so that its first dimensions already form a useful coarse representation, and later dimensions add finer detail. A prefix of the vector, such as its first 256 values, therefore still works as a lower-dimensional embedding. Storing only that prefix reduces vector storage.\n>\n> - **Storage:** at the same data type, 256 values instead of 1536 is one-sixth of the raw vector payload. IDs, metadata and index structures do not shrink by the same factor, so the whole index shrinks less.\n> - **Search cost:** shorter vectors also reduce distance-computation work.\n> - **Availability:** shortening is model-specific. OpenAI's `text-embedding-3` models accept a `dimensions` parameter. A vector truncated manually is re-normalized before cosine or dot-product search.\n>\n> [Embeddings guide (OpenAI)](https://developers.openai.com/api/docs/guides/embeddings) · [Matryoshka Representation Learning (arXiv)](https://arxiv.org/abs/2205.13147)\n\n> [!qard]- How should a shorter embedding dimension be validated?\n> Fewer embedding dimensions can lower retrieval quality on a particular corpus.\n>\n> A shorter vector is validated by running the same labeled queries at each candidate dimension and comparing Recall@k and latency. The preferred dimension is the smallest one that still meets the recall and latency targets. A design that re-scores candidates with full-length vectors has to store them elsewhere or recompute them, which adds storage, API cost or latency.\n>\n> [Embeddings guide (OpenAI)](https://developers.openai.com/api/docs/guides/embeddings) · [Matryoshka Representation Learning (arXiv)](https://arxiv.org/abs/2205.13147)\n\n<!-- qard-id: d153db49-a943-4334-bb4e-310ba8915adb -->\n> [!qard]- What happens to retrieval when queries use embeddings from a new model but the corpus still has vectors from the old model?\n> Retrieval quality breaks. The query vector and the stored vectors come from different vector spaces, so the distances between them do not measure relatedness, and the ranking becomes effectively arbitrary.\n>\n> Each embedding model learns its own coordinate system, so the same text receives unrelated vectors from two different models. If both models produce vectors of the same length, the search can still run without any error while returning poor results. That makes the mismatch easy to miss.\n>\n> A model change therefore requires re-embedding the whole corpus with the new model. A safe migration builds and validates the new index first and only then switches query traffic, for example by moving a collection alias. Embedding-cache keys include the model name and version, so cached vectors from the old model are not reused with the new one.\n>\n> [Configure a vectorizer (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-configure-vectorizer)\n\n# References\n\n- [Embeddings guide — text-embedding-3 models and MRL (OpenAI)](https://platform.openai.com/docs/guides/embeddings)\n- [MTEB leaderboard — filter by Retrieval task (Hugging Face)](https://huggingface.co/spaces/mteb/leaderboard)\n- [Matryoshka Representation Learning — original MRL paper (arXiv)](https://arxiv.org/abs/2205.13147)\n- [Azure OpenAI embeddings — deployment and SDK usage (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/embeddings)\n",
+            "hash": "5fd5e002d4b4a5cf4a463fed95629b02c2a86d8a695ceb6915a7af26763acb49",
+            "topic": "AI & ML",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+            "expected_hash": "5fd5e002d4b4a5cf4a463fed95629b02c2a86d8a695ceb6915a7af26763acb49",
+            "before": "Cohere `embed-v3` distinguishes `search_document` from `search_query` through `input_type` and covers more than 100 languages.",
+            "after": "Cohere Embed v3 distinguishes `search_document` from `search_query` through `input_type`. The `embed-multilingual-v3.0` model covers more than 100 languages, while `embed-english-v3.0` handles English only.",
+            "reason": "Separates the English and multilingual Cohere v3 variants so the language-coverage claim applies only to the multilingual model.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "Only the multilingual Cohere v3 model covers 100+ languages",
+              "The English v3 model is English-only"
+            ],
+            "sources": [
+              {
+                "url": "https://docs.cohere.com/docs/cohere-embed",
+                "claim": "embed-multilingual-v3.0 supports over 100 languages; embed-english-v3.0 is English-only.",
+                "version": "Embed v3"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The note credits Cohere embed-v3 generically with 100+ language coverage, but only the multilingual variant has it.",
+            "reader_benefit": "Prevents choosing the English variant for a non-English corpus."
+          },
+          {
+            "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+            "expected_hash": "5fd5e002d4b4a5cf4a463fed95629b02c2a86d8a695ceb6915a7af26763acb49",
+            "before": "models with explicit multilingual training (Cohere `embed-v3`, SBERT multilingual variants)",
+            "after": "models with explicit multilingual training (Cohere `embed-multilingual-v3.0`, SBERT multilingual variants)",
+            "reason": "Names the multilingual variant in the mitigation so the English-only model is not implied to help.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "The multilingual mitigation requires the multilingual Cohere variant"
+            ],
+            "sources": [
+              {
+                "url": "https://docs.cohere.com/docs/cohere-embed",
+                "claim": "embed-multilingual-v3.0 is the multilingual Embed v3 model; the English models handle English only.",
+                "version": "Embed v3"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The multilingual mitigation names the Cohere v3 family generically, which includes English-only models.",
+            "reader_benefit": "Gives an accurate, actionable model choice for multilingual recall."
+          }
+        ],
+        "dispositions": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+            "outcome": "changed",
+            "reason": "The review's Cohere finding was verified against Cohere's documentation. Two small edits now name the multilingual variant where the note claims 100+ language coverage and a multilingual mitigation. The rest of the note was rechecked and left alone: the contrastive-encoder explanation, the MRL hedging, the L2/cosine identity, the $100 re-embedding arithmetic and the three cards."
+          }
+        ],
+        "feedback": [],
+        "decisions": []
+      },
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Embeddings.md": "5fd5e002d4b4a5cf4a463fed95629b02c2a86d8a695ceb6915a7af26763acb49"
+      },
+      "feedback_keys": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/AI & ML/LLM/Embeddings.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-05T20:10:51.860294Z",
+      "review_repair_key": "32b0cc5e2b5b37ba76914a79e69541c3fd46c313888d3723d36b691b2a871bdf",
+      "repair_reserved": true,
+      "repair_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep disposition is not justified. The note applies Cohere `embed-v3` to multilingual coverage without distinguishing the English and multilingual variants. The rest of the note is accurate, and no edit was proposed.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is well structured and mostly accurate. The cost arithmetic, the L2/cosine identity and the MRL hedging all hold. One concrete factual imprecision remains: Cohere `embed-v3` is credited with 100+ language coverage and multilingual training. Only the `embed-multilingual-v3.0` variant has that coverage, while the English variant does not. The keep disposition missed this.",
+            "page_type": "Concept — frontmatter and Qard identity metadata are protected; Questions and References are present and optional.",
+            "current_text_evidence": [
+              {
+                "quote": "Cohere `embed-v3` distinguishes `search_document` from `search_query` through `input_type` and covers more than 100 languages.",
+                "line_start": 43,
+                "reason": "Cohere's v3 family has separate English and multilingual models. Only the multilingual model covers 100+ languages, so the sentence is imprecise."
+              },
+              {
+                "quote": "models with explicit multilingual training (Cohere `embed-v3`, SBERT multilingual variants)",
+                "line_start": 93,
+                "reason": "The multilingual mitigation names the family generically. An English-only v3 model would not mitigate the problem, so the variant must be named."
+              },
+              {
+                "quote": "for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100",
+                "line_start": 83,
+                "reason": "The arithmetic is correct: 5B tokens at $0.02 per million tokens is $100."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the model selection, dimensionality, metrics and pitfalls all serve one coherent selection decision.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy",
+                "location": "Model Families (line 43) and Multilingual Embedding Collapse (line 93)",
+                "evidence": "\"Cohere `embed-v3` ... covers more than 100 languages\" and \"explicit multilingual training (Cohere `embed-v3`...)\"",
+                "effect": "A reader could assume every Cohere v3 model is multilingual. The English variant is not, so this can lead to a wrong model choice for non-English corpora.",
+                "fix": "Name `embed-multilingual-v3.0` for the 100+ language claim and the multilingual mitigation. Note that `embed-english-v3.0` is English-focused."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "repair_previous_proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+            "outcome": "keep",
+            "reason": "I read the whole note and checked it against its claims. The contrastive-encoder explanation matches the diagram. The MRL claims are correctly hedged: OpenAI's MTEB result is presented as motivation to test shorter vectors, not as a guarantee, and the two-stage storage tradeoff is stated accurately. The metric section is right that squared L2 equals 2 − 2·cosine for normalized vectors, and it tells the reader to follow the model's documentation. The re-embedding cost of 10M chunks × 500 tokens × $0.02/1M comes to about $100, which matches the note. The pitfalls, tradeoffs table and three cards (retrieval, MRL storage, dimension validation, model-swap mismatch) each test one task, and their answers include the conditions and limits. known_violations is empty. The prose is direct and has no padding. I found no verified defect, so I made no edit."
+          }
+        ],
+        "feedback": [],
+        "decisions": []
+      },
+      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "feedback_snapshot": [],
+      "blocked_review": {
+        "stage": "deterministic_application",
+        "reason": "source URL missing from owning note: https://docs.cohere.com/docs/cohere-embed"
+      },
+      "failed_at": "2026-11-05T20:10:55.396248Z"
     }
   },
   "completed_review_holds": {
@@ -21690,163 +21895,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "f57944c05f7944ee8610e2bd6384fd74",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Embedding and detecting a keyed statistical pattern in LLM token choices without adding visible markers.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-08-24T13:55:31.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-08-24T13:55:09.085Z\"\n---\n\nLLM text watermarking leaves a keyed statistical pattern in the token choices made during generation. Nothing visible is added to the response: there are no hidden characters, metadata fields, or extra tokens. The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.\n\nThis makes a watermark different from a general AI-text classifier. A classifier looks for learned traits of machine-written text and may be applied to any passage. A watermark detector checks for a signal deliberately introduced by a cooperating model provider. A positive result is evidence that the corresponding model was involved; it is not proof of who wrote the text, who owns it, or whether every word came from the model.\n\n# How Generative Watermarking Works\n\n[[Home/AI & ML/LLM/Generation|Generation]] normally samples each next token from a probability distribution conditioned on the preceding text. A generative watermark changes how randomness is used inside that sampling step:\n\n1. The model produces its next-token distribution after controls such as temperature and top-p have been applied.\n2. A pseudorandom seed is derived from a secret watermark key and the recent token context.\n3. The sampler uses that seed to prefer particular candidates while staying within choices the model already considers plausible.\n4. Repeating this process creates a correlation between the key, the context, and the emitted tokens.\n5. A detector reconstructs the keyed scores from the finished text and compares their aggregate with a decision threshold.\n\nSynthID-Text implements this with **Tournament sampling**. It samples several candidate tokens from the model distribution, pairs them, and lets keyed pseudorandom scoring functions select the winner of each round. The final token therefore tends to score highly under those functions. Detection averages the same scores across the passage:\n\n$$\n\\operatorname{Score}(x)=\\frac{1}{mT}\\sum_{t=1}^{T}\\sum_{\\ell=1}^{m}g_\\ell(x_t,r_t)\n$$\n\nHere, $T$ is the number of scored tokens, $m$ is the number of tournament layers, $r_t$ is the context-and-key-derived seed, and $g_\\ell$ is a keyed scoring function. Watermarked text should accumulate a higher score than unwatermarked text, but the result remains statistical rather than absolute.\n\n# Quality and Detectability\n\nWatermark strength competes with output quality and diversity. A **non-distortionary** configuration preserves the model's output distribution at a defined scope when averaged over watermark seeds. SynthID-Text's production configuration was designed to preserve response quality while accepting some reduction in diversity between repeated responses. A stronger, distortionary configuration makes detection easier by changing the distribution more aggressively, at the cost of some quality.\n\nThe SynthID-Text study found no statistically significant quality difference between watermarked and unwatermarked outputs in standard evaluations, a controlled human preference study, or feedback from approximately 20 million live Gemini responses. Its measured sampling overhead was also small relative to model inference. These results establish production feasibility for the evaluated configurations; they do not make every watermarking method quality-neutral.\n\nDetection improves with two sources of evidence:\n\n- **Longer text.** More model-selected tokens provide more observations, so the score separates more reliably from chance.\n- **Higher-entropy choices.** When several next tokens are plausible, the sampler has room to encode the keyed preference without choosing an implausible token.\n\nThe signal is therefore weak in short passages and low-entropy output. Exact facts, constrained code, and light proofreading leave few interchangeable choices. Translations and original prose provide more opportunities because the model chooses most of the wording.\n\n# Limits\n\n- **Absence is inconclusive.** A missing or weak signal may mean the text is human-written, produced by another model, too short, heavily constrained, lightly edited, or scrubbed through rewriting.\n- **Presence provides limited evidence.** Detection cannot distinguish original generation from substantial model editing, and it carries no user, organization, or conversation identity.\n- **Editing removes evidence.** Light edits may leave enough signal to detect, while paraphrasing and complete rewrites progressively destroy the keyed correlations.\n- **Coverage requires cooperation.** Providers must apply a watermark during generation. Models or deployments that do not participate remain outside that detector's coverage.\n- **Errors still need policy.** A threshold trades false positives against false negatives. High-stakes uses need calibrated thresholds and an abstention result when the evidence is uncertain.\n- **The mechanism is attackable.** Stealing, spoofing, and scrubbing watermarks remain active research problems, especially for openly distributed models.\n\nA watermark is therefore an attribution signal, not a universal AI detector or an authorship verdict. It is most useful alongside provenance records, content credentials for file formats that support them, and process-level disclosure rather than as the sole basis for punishment or access decisions.\n\n# References\n\n- [How Claude's text watermark works](https://www.anthropic.com/news/claude-text-watermark)\n- [Scalable watermarking for identifying large language model outputs](https://www.nature.com/articles/s41586-024-08025-4)\n",
-          "hash": "24f68824944f8fe95e8fef46966fdd025e314ec62c34ca823023522988d087bc",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note. The opening separates a keyed watermark from a general AI-text classifier. The sampling steps and the Tournament sampling and score formula match the SynthID-Text description. The quality and detectability section keeps the non-distortionary versus distortionary trade-off. The limits list is consistent with itself. I fetched the Anthropic article, which confirms the note's claims that the watermark is a SynthID-Text variant, adds no characters or tokens, carries no identity, is weak on short text and on factual or exact-code output, and is removed by heavy rewriting. It also states that Claude translations are watermarked, which supports the note's comment on translations. The Nature reference is the primary SynthID-Text paper. The References section is two bare descriptive links, with no frontmatter or lifecycle issues, no code fences and no cards. I found no defect that justifies an edit."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": "24f68824944f8fe95e8fef46966fdd025e314ec62c34ca823023522988d087bc"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-07T06:22:17.365305Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-            "verdict": "CLEAN",
-            "summary": "The note explains the mechanism, the quality/detectability trade-off and the limits accurately and in order. I found no concrete defect, so keeping it unchanged is justified.",
-            "page_type": "Concept — frontmatter, optional References (two bare descriptive links), no cards, no code fences.",
-            "current_text_evidence": [
-              {
-                "quote": "The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.",
-                "line_start": 14,
-                "reason": "The opening states the operating idea and separates a watermark from a classifier in the next paragraph."
-              },
-              {
-                "quote": "Synth ID-Text implements this with **Tournament sampling**.",
-                "line_start": 28,
-                "reason": "Placeholder"
-              },
-              {
-                "quote": "The signal is therefore weak in short passages and low-entropy output.",
-                "line_start": 47,
-                "reason": "The note derives the weakness from the two detection factors stated just before it, which makes the explanation order sound."
-              },
-              {
-                "quote": "A threshold trades false positives against false negatives.",
-                "line_start": 54,
-                "reason": "The limits are specific and consistent, and they carry the engineering judgment about thresholds and abstention."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: one coherent topic (generative text watermarking); the sections are interdependent.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The whole note was audited independently. The Anthropic article confirms the SynthID-Text variant, weakness on short and factual text, translations being watermarked, and the absence of identity. The Nature reference is the primary paper. No concrete defect was found, and no edits were proposed.",
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-          "citation_index": 3,
-          "reported_line_start": 54,
-          "resolved_line_start": 55
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": "24f68824944f8fe95e8fef46966fdd025e314ec62c34ca823023522988d087bc"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-          "verdict": "CLEAN",
-          "summary": "The note explains the mechanism, the quality/detectability trade-off and the limits accurately and in order. I found no concrete defect, so keeping it unchanged is justified.",
-          "page_type": "Concept — frontmatter, optional References (two bare descriptive links), no cards, no code fences.",
-          "current_text_evidence": [
-            {
-              "quote": "The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.",
-              "line_start": 14,
-              "reason": "The opening states the operating idea and separates a watermark from a classifier in the next paragraph."
-            },
-            {
-              "quote": "Synth ID-Text implements this with **Tournament sampling**.",
-              "line_start": 28,
-              "reason": "Placeholder"
-            },
-            {
-              "quote": "The signal is therefore weak in short passages and low-entropy output.",
-              "line_start": 47,
-              "reason": "The note derives the weakness from the two detection factors stated just before it, which makes the explanation order sound."
-            },
-            {
-              "quote": "A threshold trades false positives against false negatives.",
-              "line_start": 55,
-              "reason": "The limits are specific and consistent, and they carry the engineering judgment about thresholds and abstention."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: one coherent topic (generative text watermarking); the sections are interdependent.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The whole note was audited independently. The Anthropic article confirms the SynthID-Text variant, weakness on short and factual text, translations being watermarked, and the absence of identity. The Nature reference is the primary paper. No concrete defect was found, and no edits were proposed.",
-      "change_checks": []
     }
   }
 }
