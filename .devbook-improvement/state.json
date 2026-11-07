@@ -6199,9 +6199,9 @@
     "version": 1,
     "id": "b9235098cfe341bd98cce55faa026472",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 425.0862224,
+    "elapsed_seconds": 428.7425695,
     "calls_reserved": 13,
     "responses_received": 13,
     "attempted_paths": [
@@ -6210,7 +6210,8 @@
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md"
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
+      "Vault/Home/AI & ML/Machine Learning/Machine Learning.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6590,10 +6591,83 @@
           },
           "model_calls": 11
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
+                "outcome": "keep",
+                "reason": "Read the whole note against its purpose as a folder hub. The opening states when ML fits and when rules remain better, and links to Spectrum Of Automations. The Mermaid pipeline matches the eleven stage sections in order, including the monitoring-to-collection loop. The stage prose is accurate and carries conditions: label ownership and disagreement, future-information leakage, train/inference transform parity, time- or group-based splits for correlated rows, a holdout kept out of tuning, random search before Bayesian optimization, immutable registry artifacts with lineage, latency budgets that include feature lookup, and drift as a signal rather than proof of degradation. These match standard practice, as in Google's Rules of ML and the Hidden Technical Debt paper that the note already cites. The voice is direct and impersonal. The note has no cards, so there is no question quality issue. The Datacore block, frontmatter and references (bare, topic-specific links) are intact, and every code fence has a language identifier. known_violations is empty. No factual or editorial defect was found, so no edit is warranted."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
+                "verdict": "CLEAN",
+                "summary": "Whole-note read of the FolderNote hub. The opening gives when ML fits versus rules. The pipeline diagram matches the eleven stage sections in order. Each stage states mechanisms and conditions: leakage, train/inference parity, group or time splits, holdout discipline, immutable registry artifacts, tail-latency budgets, and drift as a signal rather than proof. No factual, terminology, ordering or repetition defect was found, so keeping it unchanged is justified.",
+                "page_type": "FolderNote — hub with protected Datacore folder-map block; Questions optional and absent; References are bare topic-specific links.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Machine learning fits problems where useful behavior can be learned from examples more cheaply than it can be expressed as rules.",
+                    "line_start": 15,
+                    "reason": "Opens by saying when ML applies, which introduces the topic quickly. The next paragraph states the rules boundary."
+                  },
+                  {
+                    "quote": "a feature built with future information can make every offline result look convincing while guaranteeing a production failure",
+                    "line_start": 49,
+                    "reason": "Concrete leakage mechanism with its consequence, in a direct whiteboard voice."
+                  },
+                  {
+                    "quote": "Repeated inspection quietly turns a test set into another validation set.",
+                    "line_start": 55,
+                    "reason": "States the condition that changes the evaluation decision."
+                  },
+                  {
+                    "quote": "Track input quality and [[Data Drift]] while waiting, but do not confuse drift with proof that predictions became worse.",
+                    "line_start": 76,
+                    "reason": "Gives the important boundary between drift and quality loss. The wikilink is purposeful."
+                  },
+                  {
+                    "quote": "Promotion changes the stage of an existing version rather than overwriting the artifact.",
+                    "line_start": 67,
+                    "reason": "Explains the registry mechanism and why rollback becomes mechanical."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the stages form one coherent pipeline that depends on shared concepts such as leakage, the holdout and train/inference parity. Separate notes would break that flow.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The single note was independently read in full. It is accurate, clear and compliant: code fences have languages, the Datacore block is intact, and the references are bare topic-specific links. No concrete defect was found, and the keep is justified.",
+            "change_checks": []
+          },
+          "model_calls": 13
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:25:11.470582Z",
+    "checkpoint_at": "2026-11-07T13:25:15.126930Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
