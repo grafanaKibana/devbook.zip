@@ -6598,15 +6598,16 @@
     "version": 1,
     "id": "b75e350f352448edb997b51c2cb9ee03",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T22:00:53.128724Z",
-    "elapsed_seconds": 214.59256859999994,
+    "elapsed_seconds": 217.44433779999994,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/AI & ML/Responsible AI.md",
       "Vault/Home/AI & ML/AI & ML.md",
-      "Vault/Home/AI & ML/LLM/Agents/Agents.md"
+      "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6824,10 +6825,88 @@
           },
           "model_calls": 6
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+                "outcome": "keep",
+                "reason": "I read the whole note against its text and the benchmark facts. The opening explains that benchmarks score a model plus scaffold and limits their use to shortlisting. The table matches the benchmarks' published setups: SWE-bench resolves issues against hidden tests, tau-bench reports pass^k, GAIA uses exact match, WebArena uses self-hosted web apps, AgentBench spans 8 environments, and BFCL scores AST and executable accuracy. The leaderboard section states the conditions that matter: a fixed scaffold to isolate the model, pass@1 versus pass^k, contamination, and missing cost and latency data. The worked example is arithmetically and logically sound, and it correctly says no winner can be named without repeated trials on the same tasks and budget. The single Qard tests one dependent task (scaffold and run conditions change results) and is consistent with the note and with tau-bench. References are real primary sources, and the wikilinks are plain and appropriate. The only blemish is the cosmetic tau-bench versus τ-bench spelling, which does not justify an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no accuracy, clarity, question-quality or rules defects. The keep is justified, and there are no edits, feedback decisions or sources to check.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate and explains in a sound order: the model-plus-scaffold framing, a task-shape table, leaderboard-reading conditions, why public scores miss internal workloads, and a worked example. The one Qard tests a single dependent task. No edit is warranted.",
+                "page_type": "Concept — typed frontmatter retained, optional Questions and References present and valid, no Links section, code fence has a language (text).",
+                "current_text_evidence": [
+                  {
+                    "quote": "A leaderboard score cannot make the final selection. It measures the model, prompt, tools, retry policy, and agent loop as one system.",
+                    "line_start": 19,
+                    "reason": "States the operating idea and the key boundary early, so the topic is recoverable."
+                  },
+                  {
+                    "quote": "| AgentBench | 8 environments | Interactive tasks across OS, DB, web, games | per-environment success |",
+                    "line_start": 29,
+                    "reason": "Table facts (8 environments, per-environment success) match the published benchmarks, as do the other rows."
+                  },
+                  {
+                    "quote": "`pass^k` requires the task to succeed on every one of `k` attempts, so it exposes intermittent failures that an average hides.",
+                    "line_start": 37,
+                    "reason": "Correct mechanism for tau-bench's reliability metric."
+                  },
+                  {
+                    "quote": "Human verification improves issue and test quality; it does not isolate public tasks from training.",
+                    "line_start": 38,
+                    "reason": "Separates curation from contamination, which is a precise and correct condition."
+                  },
+                  {
+                    "quote": "The example exposes missing evidence rather than a winner.",
+                    "line_start": 62,
+                    "reason": "The worked example's conclusion is logically sound; it makes no unsupported winner claim and correctly separates choosing a system from isolating the model."
+                  },
+                  {
+                    "quote": "> [!qard]- Why can one base model produce very different results on the same agent benchmark?",
+                    "line_start": 67,
+                    "reason": "The card is a single dependent explanation (scaffold and run conditions change the score), self-contained, with the primary source on the answer side and a retained ID comment."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the benchmark table, reading rules and worked example form one coherent evaluation topic, and the neighboring evaluation notes are already linked.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 8
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T22:04:27.720827Z",
+    "checkpoint_at": "2026-11-07T22:04:30.572596Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
