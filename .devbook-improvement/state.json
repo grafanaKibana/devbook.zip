@@ -5659,9 +5659,9 @@
     "version": 1,
     "id": "f57944c05f7944ee8610e2bd6384fd74",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 338.5266722999998,
+    "elapsed_seconds": 342.0745526999998,
     "calls_reserved": 12,
     "responses_received": 12,
     "attempted_paths": [
@@ -5669,7 +5669,8 @@
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
       "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
-      "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md"
+      "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+      "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6037,10 +6038,78 @@
           },
           "model_calls": 10
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against the current text and the primary papers it cites. The CoT, zero-shot CoT, Self-Consistency and ToT attributions (Wei 2022, Kojima 2022, Wang 2022, Yao 2023) match the papers. Both worked examples are arithmetically correct: the apple example gives 10, and the sister example gives 70-3=67. The ToT description of proposing, evaluating and searching with backtracking is accurate, and the diagram matches it. The cost-ladder framing and the tradeoffs table are consistent with the prose, and the cheapest-method-first guidance is sound. The three Qards each test one dependent task, such as when a technique helps and why or how it fails. Their answers carry conditions, limits and primary sources, with no bundled independent questions. The prose reads clearly, with no repetition or terminology drift. No known violations are open. Any edit would be cosmetic."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
+                "verdict": "CLEAN",
+                "summary": "Independent full read found accurate attributions, correct worked examples, a coherent cost-ladder order, and three single-task Qards with conditions and primary sources. No concrete defect justifies an edit, so a keep is right.",
+                "page_type": "Concept — typed frontmatter retained; optional Questions and References present and well formed; Qard IDs protected; language-tagged fences.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The methods form a cost ladder.",
+                    "line_start": 19,
+                    "reason": "The opening frames CoT, Self-Consistency and ToT as escalating cost, and the later sections and table follow that order."
+                  },
+                  {
+                    "quote": "It also creates more tokens in which an early mistake can spread, so the trace needs verification rather than trust.",
+                    "line_start": 28,
+                    "reason": "Keeps the key CoT limit, error propagation, instead of overclaiming benefit."
+                  },
+                  {
+                    "quote": "Visible reasoning also has a product boundary.",
+                    "line_start": 45,
+                    "reason": "Adds a practical engineering boundary beyond the papers and is stated concisely."
+                  },
+                  {
+                    "quote": "The method helps when independent samples fail differently and the final answer can be compared mechanically.",
+                    "line_start": 51,
+                    "reason": "States the condition and failure mode for Self-Consistency, which the card then tests without duplicating it."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: CoT, Self-Consistency and ToT form one compact comparison and the cost ladder is clearer kept together.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is accurate, readable and well ordered. Its Qards each test one dependent task, and no proposed edits exist to reject. The keep is justified.",
+            "change_checks": []
+          },
+          "model_calls": 12
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:19:44.405703Z",
+    "checkpoint_at": "2026-11-07T06:19:47.953584Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
