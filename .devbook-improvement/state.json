@@ -6697,9 +6697,9 @@
     "version": 1,
     "id": "b75e350f352448edb997b51c2cb9ee03",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T22:00:53.128724Z",
-    "elapsed_seconds": 319.56830300000007,
+    "elapsed_seconds": 322.4920865000001,
     "calls_reserved": 12,
     "responses_received": 12,
     "attempted_paths": [
@@ -6707,7 +6707,8 @@
       "Vault/Home/AI & ML/AI & ML.md",
       "Vault/Home/AI & ML/LLM/Agents/Agents.md",
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md"
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -7071,10 +7072,84 @@
           },
           "model_calls": 10
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+                "outcome": "keep",
+                "reason": "Read the whole note against its text. The four axes (validity, selection, arguments, necessity) are defined consistently in the prose, the flowchart, the metrics table and the worked refund example. The 4851 vs 4815 example is internally consistent. The 95%/70% to 82.5% arithmetic is correct. The scorer tradeoff table matches the Ground Truth section. The pitfalls state exact-match and ordering conditions precisely, including that order matters when one call is a precondition for the next. The single Qard tests one dependent behavior-and-why task, hedges root-cause claims appropriately, and cites the BFCL source on the answer side. References are two relevant primary sources with no trailing annotations. Wikilinks and fenced-code language identifiers are present, and known_violations is empty. No factual defect or teaching gap was found, so an edit would be cosmetic."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate and internally consistent. The four axes, the flowchart, the metrics table, the worked refund example and the tradeoff table all agree. No concrete defect or essential gap was found, so keeping it unchanged is justified.",
+                "page_type": "Concept — authorable prose with optional Questions and References; no special-page protections.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Four properties are scored separately: validity, selection, arguments, and necessity.",
+                    "line_start": 19,
+                    "reason": "States the operating idea early. The flowchart, bullet list and metrics table later follow the same four axes."
+                  },
+                  {
+                    "quote": "If selection is 95% and argument accuracy is 70%, argument handling is the first area to investigate. Averaging them to 82.5% destroys that diagnosis.",
+                    "line_start": 53,
+                    "reason": "The arithmetic is correct (95 and 70 average to 82.5). It also illustrates why the axes are scored separately."
+                  },
+                  {
+                    "quote": "Order becomes part of correctness only when one call establishes a precondition for the next",
+                    "line_start": 96,
+                    "reason": "Gives the condition that limits the order-insensitivity advice, so the pitfall keeps its mechanism and exception."
+                  },
+                  {
+                    "quote": "Caught only because the reference pinned order_id=4815.",
+                    "line_start": 75,
+                    "reason": "The worked example matches the argument-error definition and the 4851 vs 4815 case used elsewhere."
+                  },
+                  {
+                    "quote": "These patterns are leads to investigate, not proof of the root cause.",
+                    "line_start": 113,
+                    "reason": "The Qard hedges root-cause claims in the same way as the prose. Its answer covers one dependent behavior-and-why task and cites BFCL on the answer side."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: validity, selection, arguments and necessity form one coherent evaluation topic, and separating them would remove the diagnostic comparison between the axes.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The complete note was read and the before and current text are identical. There are no edits, no feedback and no known violations. The prose, example, tables, pitfalls, Qard and References are accurate and coherent, and the existing Qard ID is untouched. The keep disposition is supported.",
+            "change_checks": []
+          },
+          "model_calls": 12
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T22:06:12.696563Z",
+    "checkpoint_at": "2026-11-07T22:06:15.620347Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
