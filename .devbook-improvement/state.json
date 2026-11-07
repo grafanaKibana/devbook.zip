@@ -5359,11 +5359,11 @@
     "version": 1,
     "id": "f57944c05f7944ee8610e2bd6384fd74",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 77.6851804,
+    "elapsed_seconds": 85.5145237,
     "calls_reserved": 3,
-    "responses_received": 2,
+    "responses_received": 3,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Model Selection and Routing.md"
     ],
@@ -5439,7 +5439,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:15:23.564212Z",
+    "checkpoint_at": "2026-11-07T06:15:31.393561Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -20420,5 +20420,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "f57944c05f7944ee8610e2bd6384fd74",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Repeatable loops that generate, evaluate, and select prompt candidates against a validation set.\"\nlevel: [\"3\"]\npriority: Low\nstatus: Done\npublish: true\ncreated: \"2026-02-28T13:40:02.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.480Z\"\n---\n\nManual prompt tuning works until prompts multiply. Model upgrades, new domains, and changing examples then turn each wording change into another experiment. Automated prompt optimization makes that experiment explicit: generate candidates, score them on a fixed evaluation set, and keep the variant that performs best.\n\nThe method does not remove judgment. It moves judgment into the objective, dataset, and acceptance threshold. A bad evaluator will select a bad prompt with impressive consistency. APE, Active-Prompt, and DSP optimize different parts of the guidance supplied to a model. PAL appears afterward as a useful contrast: it changes where reasoning executes rather than searching for a better prompt.\n\n# Automatic Prompt Engineer (APE)\n\nZhou et al. (2022) frame instruction discovery as search. An LLM proposes instruction candidates, each candidate runs against a validation set, and the measured objective determines which prompt survives. The prompt behaves like a small program. The evaluator supplies its tests.\n\nIn the paper's experiments, APE found a zero-shot reasoning instruction that outperformed the familiar \"Let's think step by step\" trigger on several benchmarks. That result is evidence that small wording changes can matter. It is not evidence that one discovered phrase transfers unchanged to every model or task.\n\n# Active-Prompt\n\nDiao et al. (2023) target the demonstration set rather than the instruction. Fixed chain-of-thought examples waste annotation effort when they cover cases the model already handles. Active-Prompt samples several answers, measures disagreement, and sends the uncertain examples for human annotation.\n\nThe loop is:\n\n1. Sample multiple outputs and estimate uncertainty from disagreement.\n2. Select the examples with the highest uncertainty.\n3. Obtain human reasoning annotations for those examples.\n4. Use the targeted demonstrations during inference.\n\nThis is active learning applied to prompt demonstrations. Human time goes to cases that reveal a decision boundary instead of another easy example.\n\n# Directional Stimulus Prompting\n\nLi et al. (2023) propose Directional Stimulus Prompting (DSP). A smaller trainable policy model produces hints, or directional stimuli, for a larger frozen language model. Those hints can name useful terms or indicate what the final response should emphasize.\n\nThe operational boundary is clear: DSP is no longer prompt search alone. It introduces a trainable controller, its data, and another model in the serving path.\n\n# Adjacent Technique: Program-Aided Language Models (PAL)\n\nGao et al. (2022) move deterministic computation out of a natural-language scratchpad. The model translates a problem into a program, typically Python, and an interpreter computes the result.\n\nThat separation helps when the hard part is arithmetic or symbolic manipulation. The model still has to produce the right program, so execution removes calculation errors without removing specification errors.\n\nConcrete example (math word problem):\n\n```python\n# If there are 17 boxes with 24 screws each, and 39 extra screws,\n# total screws = 17*24 + 39\nboxes = 17\nscrews_per_box = 24\nextra = 39\nanswer = boxes * screws_per_box + extra\nprint(answer)  # 447\n```\n\nThe interpreter returns an exact result for the program it receives. If the program encodes the problem incorrectly, it returns the wrong answer just as exactly. The same boundary appears in tool-using agents: language selects and parameterizes a tool. The tool performs the deterministic operation.\n\n**APE-style candidate scoring loop** (simplified):\n\n```python\n# Generate candidate prompts, score each on a validation set, keep the best\ncandidates = llm.generate(\n    f\"Generate 5 instruction variants for this task: {task_description}\",\n    n=5\n)\n\nscores = []\nfor candidate in candidates:\n    correct = 0\n    for example in validation_set:\n        output = llm.complete(candidate + \"\\n\" + example[\"input\"])\n        correct += (output.strip() == example[\"expected\"])\n    scores.append(correct / len(validation_set))\n\nbest_prompt = candidates[scores.index(max(scores))]\n```\n\n# Pitfalls\n\n**Optimizing against a weak evaluation set.** A small or unrepresentative set rewards noise and blind spots. Keep optimization and final test data separate, cover the production distribution, and report uncertainty around score changes. There is no universal minimum sample count. It depends on the metric, effect size, and acceptable error.\n\n**Treating benchmark gains as product gains.** A prompt that improves a math benchmark says little about customer-intent classification. Public benchmarks compare methods under controlled conditions. Release decisions need production-shaped examples and metrics tied to the actual failure cost.\n\n**Confusing prompt optimization with tool execution.** PAL does not search for a better instruction or demonstration set. It changes the solution path by generating code for an interpreter. That boundary helps when the decisive step is computation, such as arithmetic or unit conversion, but it is a poor substitute for semantic judgment.\n\n**Overfitting to remembered failures.** Repeatedly patching a prompt around a few incidents can damage ordinary cases. Keep a held-out test set, version prompt and evaluator changes together, and define rollback criteria before running the search.\n\n# Tradeoffs\n\nThe first three rows optimize instructions, demonstrations, or learned stimuli. PAL is included to show the adjacent execution boundary rather than a fourth prompt-search method.\n\n| Method | Core benefit | Main requirement | Practical limitation |\n| --- | --- | --- | --- |\n| APE | Automates prompt search and ranking | Validation/evaluation set | Search cost and benchmark dependence |\n| Active-Prompt | Improves annotation efficiency | Human-labeled CoT for selected samples | Human loop still required |\n| DSP | Learns targeted guidance for a frozen LLM | Trainable policy model | Extra model training complexity |\n| PAL | Moves deterministic calculation into execution | Code interpreter/runtime | Best for tasks that can be formalized computationally |\n\nManual tuning remains the cheaper choice for a small number of stable prompts. Automation earns its operating cost when prompts are retuned repeatedly and quality can be scored with enough confidence to guide the search.\n\n# References\n\n- [Zhou et al. 2022 - Large Language Models Are Human-Level Prompt Engineers (APE)](https://arxiv.org/abs/2211.01910)\n- [Diao et al. 2023 - Active Prompting with Chain-of-Thought for Large Language Models](https://arxiv.org/abs/2302.12246)\n- [Li et al. 2023 - Directional Stimulus Prompting](https://arxiv.org/abs/2302.11520)\n- [Gao et al. 2022 - PAL: Program-Aided Language Models](https://arxiv.org/abs/2211.10435)\n",
+          "hash": "8e3ee72eb850f6a2a2a3e433b6d57369a5cc2b20321bf9832cff812fcc5eb5d0",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+          "outcome": "keep",
+          "reason": "Read the whole note against the cited papers (APE, Active-Prompt, DSP, PAL). The APE loop, the Active-Prompt uncertainty-based annotation, DSP's small trainable policy model steering a frozen LLM, and PAL's program generation with interpreter execution are all described accurately. The note limits claims to the tested benchmarks. The pitfalls cover evaluator quality, overfitting and benchmark transfer, and the tradeoff table separates PAL as an adjacent technique. The code samples are labeled and fenced with languages. The note has no Questions section, so there are no cards to audit. References are bare descriptive links. Prose is direct and has little repetition, and no known violations exist. An edit would be cosmetic churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md": "8e3ee72eb850f6a2a2a3e433b6d57369a5cc2b20321bf9832cff812fcc5eb5d0"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-07T06:15:31.393533Z"
   }
 }
