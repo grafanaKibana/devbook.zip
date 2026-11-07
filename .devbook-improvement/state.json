@@ -4839,6 +4839,61 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md": {
+      "content_hash": "d820700c92577d931fb374bffa153c1fbe4985c3754c5aa1dee790560525ceef",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "d820700c92577d931fb374bffa153c1fbe4985c3754c5aa1dee790560525ceef",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
+          "verdict": "CLEAN",
+          "summary": "I read the whole note independently. It defines the five levels by who holds decision authority, and it states the key boundary that the level belongs to an action and its risk, not to the model as a whole. The caveats on shadow mode, automation bias, calibration, the conservative flowchart and illustrative thresholds are accurate. Nothing needs editing.",
+          "page_type": "Concept — frontmatter is typed and status is Done, which the owner set. There are no Qards. The References section is a single bare link to a real book. Both code fences carry a python language identifier.",
+          "current_text_evidence": [
+            {
+              "quote": "The level belongs to an action and its risk, not to the model as a whole.",
+              "line_start": 16,
+              "reason": "States the core operating idea and boundary that the rest of the note builds on."
+            },
+            {
+              "quote": "It still carries compute, privacy, and operational risk, so \"no automated action\" does not mean \"no risk.\"",
+              "line_start": 30,
+              "reason": "Gives shadow mode its correct condition instead of the common claim that it carries no risk."
+            },
+            {
+              "quote": "It is not a required sequence for every feature.",
+              "line_start": 75,
+              "reason": "Qualifies the flowchart and avoids implying a mandatory maturity ladder. The same paragraph also qualifies the word accuracy."
+            },
+            {
+              "quote": "Their values are illustrative: production thresholds come from calibrated probabilities",
+              "line_start": 104,
+              "reason": "Prevents the code thresholds from being read as recommended values, and names the real inputs to a threshold choice."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the levels, decision framework, implementation examples and failure modes all explain one concept, and the note is a coherent length.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -6256,7 +6311,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 544.5049918000001,
+    "elapsed_seconds": 548.6036337,
     "calls_reserved": 17,
     "responses_received": 17,
     "attempted_paths": [
@@ -6792,7 +6847,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:27:10.889353Z",
+    "checkpoint_at": "2026-11-07T13:27:14.987994Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -10818,6 +10873,74 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/Machine Learning/Machine Learning.md": "9f45ca90abde313dbbb69bbcb4d54d4f0554adc09afa0334e3955eedf91c2d53"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "ba9a8b9a42befdda971b0b149f135a6ae0312b216ecb8b3208d74e5b8a13a3eb": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The single note is accurate and coherent, and it has no concrete rule violations. The keep is justified and no edits are proposed.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
+            "verdict": "CLEAN",
+            "summary": "I read the whole note independently. It defines the five levels by who holds decision authority, and it states the key boundary that the level belongs to an action and its risk, not to the model as a whole. The caveats on shadow mode, automation bias, calibration, the conservative flowchart and illustrative thresholds are accurate. Nothing needs editing.",
+            "page_type": "Concept — frontmatter is typed and status is Done, which the owner set. There are no Qards. The References section is a single bare link to a real book. Both code fences carry a python language identifier.",
+            "current_text_evidence": [
+              {
+                "quote": "The level belongs to an action and its risk, not to the model as a whole.",
+                "line_start": 16,
+                "reason": "States the core operating idea and boundary that the rest of the note builds on."
+              },
+              {
+                "quote": "It still carries compute, privacy, and operational risk, so \"no automated action\" does not mean \"no risk.\"",
+                "line_start": 30,
+                "reason": "Gives shadow mode its correct condition instead of the common claim that it carries no risk."
+              },
+              {
+                "quote": "It is not a required sequence for every feature.",
+                "line_start": 76,
+                "reason": "Qualifies the flowchart and avoids implying a mandatory maturity ladder. The same paragraph also qualifies the word accuracy."
+              },
+              {
+                "quote": "Their values are illustrative: production thresholds come from calibrated probabilities",
+                "line_start": 105,
+                "reason": "Prevents the code thresholds from being read as recommended values, and names the real inputs to a threshold choice."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the levels, decision framework, implementation examples and failure modes all explain one concept, and the note is a coherent length.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
+          "citation_index": 2,
+          "reported_line_start": 76,
+          "resolved_line_start": 75
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
+          "citation_index": 3,
+          "reported_line_start": 105,
+          "resolved_line_start": 104
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md": "d820700c92577d931fb374bffa153c1fbe4985c3754c5aa1dee790560525ceef"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -23603,169 +23726,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "b9235098cfe341bd98cce55faa026472",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [Machine Learning]\nsummary: \"Five levels of AI involvement, from fully human-driven to fully autonomous.\"\nlevel: [\"1\"]\npriority: Low\nstatus: Done\npublish: true\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.495Z\"\n---\n\nThe automation spectrum is a deployment model for deciding how much authority an AI system receives. It runs from human-only work through observation and assistance to autonomous action. Each step changes the blast radius of a bad prediction.\n\nIt is not a maturity ladder that every feature must climb. One workflow may automate low-value routing while requiring approval for refunds, account locks, or legal decisions. The level belongs to an action and its risk, not to the model as a whole.\n\n# The Five Levels\n\n## 1. Human Only\n\nThe task runs without model output. This is the baseline for effort, quality, and handling time.\n\n**Example:** a support agent reads and answers every ticket.\n\n## 2. Shadow Mode\n\nThe model sees production-shaped inputs and records what it would have done. Its output does not change the customer-facing decision.\n\nShadow mode tests the full data and inference path while preserving the current decision path. It can reveal production skew, latency, and missing fields. It still carries compute, privacy, and operational risk, so \"no automated action\" does not mean \"no risk.\"\n\n**Example:** a fraud model scores transactions in parallel with the existing process. Once outcomes arrive, its scores are compared with those outcomes and with the current policy.\n\n## 3. AI Assistance\n\nThe model proposes a result, and a person approves or changes it before any action. The interface must make rejection easy. A nominal approval step becomes automation bias when reviewers simply accept the default.\n\n**Example:** suspicious transactions enter an analyst queue with the model score and relevant evidence. The analyst decides whether to block them.\n\n## 4. Partial Automation\n\nThe system acts automatically inside a defined policy and routes the rest to people. Confidence alone is not enough. The policy also needs action-specific costs, calibrated scores, and explicit exclusions for cases the model has not earned authority over.\n\n**Example:** high-confidence low-value refunds are approved automatically, while large amounts and unfamiliar account patterns always go to review.\n\n## 5. Full Automation\n\nThe system acts across its whole declared scope without per-case approval. Humans own monitoring, incident response, and policy changes. A deterministic fallback or kill switch is still part of the design.\n\n**Example:** a low-stakes document router assigns every incoming file automatically, while the team monitors corrections and queue backlogs.\n\n# Decision Framework\n\n| Level | When to use | Risk |\n|---|---|---|\n| Shadow Mode | New behavior needs production evidence | No decision impact. Compute and data-handling risk remain |\n| AI Assistance | Errors need case-by-case human judgment | Reviewers can miss or rubber-stamp bad suggestions |\n| Partial Automation | A bounded slice has measured, recoverable errors | Automated mistakes occur inside that slice |\n| Full Automation | The declared scope is low risk or tightly controlled | Mistakes can propagate across the whole scope |\n\n```mermaid\nflowchart TD\n    A[New AI feature] --> B[Start in Shadow Mode]\n    B --> C{Accuracy validated on production data?}\n    C -->|No| B\n    C -->|Yes| D[Move to AI Assistance]\n    D --> E{Precision on confident cases above threshold?}\n    E -->|No| D\n    E -->|Yes| F[Move to Partial Automation]\n    F --> G{Error cost low or monitoring robust?}\n    G -->|No| F\n    G -->|Yes| H[Move to Full Automation]\n```\n\nThe diagram shows a conservative path for consequential features or cases where production distribution is uncertain. It is not a required sequence for every feature. A reversible, low-risk action can begin with a bounded canary. \"Accuracy\" is also shorthand. The release gate should use the metric tied to the action's cost, such as precision at a required recall, and check it across the cohorts included in the automated scope.\n\n# Implementation Shape\n\nThe authority boundary should be visible in code and configuration. These examples show the two points where systems often start.\n\n**Shadow mode:** run the model, record the result, and leave the current decision path untouched.\n\n```python\ndef process_transaction_shadow(tx: Transaction) -> None:\n    prediction = fraud_model.predict(tx)  # model runs\n    logger.info(\"shadow_prediction\", tx_id=tx.id, score=prediction.score,\n                predicted_fraud=prediction.is_fraud)  # logged only\n    # No action taken — human team reviews logs to measure accuracy\n```\n\n**Partial automation:** apply a reviewed policy to one score range and escalate the rest.\n\n```python\ndef process_transaction_partial(tx: Transaction) -> Action:\n    prediction = fraud_model.predict(tx)\n    fraud_probability = prediction.fraud_probability\n    if fraud_probability >= 0.95:         # high risk: block\n        return Action.BLOCK\n    if fraud_probability <= 0.05:         # low risk: allow\n        return Action.ALLOW\n    return Action.QUEUE_FOR_REVIEW         # uncertain: human review\n```\n\nThe two-sided risk bands distinguish a confident negative from an uncertain prediction. Their values are illustrative: production thresholds come from calibrated probabilities and the relative costs of false blocks and missed fraud. The policy also checks whether the action is reversible, whether the case matches validated cohorts, and whether an explicit exclusion requires review.\n\n# What Goes Wrong When Automation Advances Too Fast\n\n## Skipping Production-Shaped Observation\n\nOffline evaluation can miss schema differences, delayed labels, and cohorts absent from the test set. Going straight to automated action makes those mismatches customer-visible.\n\nShadow mode is one way to gather production evidence, but it is not always required. A reversible, low-volume canary may be cheaper for a low-risk feature. The evidence window should cover the important traffic cycles and enough labeled outcomes, not an arbitrary number of weeks.\n\n## Moving to Full Automation Too Early\n\nAutomation without a baseline can fail quietly. If label quality arrives late and no proxy or correction signal is tracked, errors accumulate until a person notices the downstream damage.\n\nThe release gate needs measurable quality by important cohort, an owner for alerts, and a tested rollback or fallback. System health belongs beside model metrics because a good prediction delivered too late is still a failed action.\n\n# Tradeoffs\n\n| Approach | Human effort | Error risk | When to use |\n|---|---|---|---|\n| Human Only | High | Existing human-process risk | Baseline or judgment-heavy work |\n| Shadow Mode | High | No model-driven decisions | Measuring production behavior |\n| AI Assistance | Medium | Human review plus automation bias | High-cost decisions that need case review |\n| Partial Automation | Lower | Bounded automated blast radius | Recoverable cases with proven policy constraints |\n| Full Automation | Monitoring and incident response | Broadest blast radius | Narrow, well-controlled, low-cost actions |\n\nMore authority can reduce queue work while increasing how far one bad policy or drift event spreads. Error cost, reversibility, production evidence, and operational ownership decide the level. Team confidence is not evidence.\n\n# References\n\n- [ML deployment strategies (Chip Huyen, Designing Machine Learning Systems)](https://www.oreilly.com/library/view/designing-machine-learning/9781098107956/)\n",
-          "hash": "d820700c92577d931fb374bffa153c1fbe4985c3754c5aa1dee790560525ceef",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
-          "outcome": "keep",
-          "reason": "I read the whole note against its contract. It has no Qard cards, and known_violations is empty. The five levels are defined by who holds decision authority. The note says the level belongs to the action and its risk, not to the model. Shadow mode correctly keeps compute, privacy and operational risk. Assistance names automation bias. Partial automation requires calibrated scores, action costs and exclusions. Full automation keeps a fallback or kill switch. The decision table, flowchart, tradeoffs table and both code examples agree with each other. The flowchart is explicitly marked as a conservative path, not a required sequence. It also warns that accuracy is shorthand for a cost-tied metric. The thresholds in the partial-automation code are labelled illustrative. The Python fences have language identifiers, the voice is whiteboard-style and impersonal, and the single reference is a real book. The claims are general engineering judgment, not version-specific facts. An edit would be cosmetic churn."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md": "d820700c92577d931fb374bffa153c1fbe4985c3754c5aa1dee790560525ceef"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-07T13:26:46.646140Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "The single note is accurate and coherent, and it has no concrete rule violations. The keep is justified and no edits are proposed.",
-        "change_checks": [],
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
-            "verdict": "CLEAN",
-            "summary": "I read the whole note independently. It defines the five levels by who holds decision authority, and it states the key boundary that the level belongs to an action and its risk, not to the model as a whole. The caveats on shadow mode, automation bias, calibration, the conservative flowchart and illustrative thresholds are accurate. Nothing needs editing.",
-            "page_type": "Concept — frontmatter is typed and status is Done, which the owner set. There are no Qards. The References section is a single bare link to a real book. Both code fences carry a python language identifier.",
-            "current_text_evidence": [
-              {
-                "quote": "The level belongs to an action and its risk, not to the model as a whole.",
-                "line_start": 16,
-                "reason": "States the core operating idea and boundary that the rest of the note builds on."
-              },
-              {
-                "quote": "It still carries compute, privacy, and operational risk, so \"no automated action\" does not mean \"no risk.\"",
-                "line_start": 30,
-                "reason": "Gives shadow mode its correct condition instead of the common claim that it carries no risk."
-              },
-              {
-                "quote": "It is not a required sequence for every feature.",
-                "line_start": 76,
-                "reason": "Qualifies the flowchart and avoids implying a mandatory maturity ladder. The same paragraph also qualifies the word accuracy."
-              },
-              {
-                "quote": "Their values are illustrative: production thresholds come from calibrated probabilities",
-                "line_start": 105,
-                "reason": "Prevents the code thresholds from being read as recommended values, and names the real inputs to a threshold choice."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the levels, decision framework, implementation examples and failure modes all explain one concept, and the note is a coherent length.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ]
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
-          "citation_index": 2,
-          "reported_line_start": 76,
-          "resolved_line_start": 75
-        },
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
-          "citation_index": 3,
-          "reported_line_start": 105,
-          "resolved_line_start": 104
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md": "d820700c92577d931fb374bffa153c1fbe4985c3754c5aa1dee790560525ceef"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "The single note is accurate and coherent, and it has no concrete rule violations. The keep is justified and no edits are proposed.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
-          "verdict": "CLEAN",
-          "summary": "I read the whole note independently. It defines the five levels by who holds decision authority, and it states the key boundary that the level belongs to an action and its risk, not to the model as a whole. The caveats on shadow mode, automation bias, calibration, the conservative flowchart and illustrative thresholds are accurate. Nothing needs editing.",
-          "page_type": "Concept — frontmatter is typed and status is Done, which the owner set. There are no Qards. The References section is a single bare link to a real book. Both code fences carry a python language identifier.",
-          "current_text_evidence": [
-            {
-              "quote": "The level belongs to an action and its risk, not to the model as a whole.",
-              "line_start": 16,
-              "reason": "States the core operating idea and boundary that the rest of the note builds on."
-            },
-            {
-              "quote": "It still carries compute, privacy, and operational risk, so \"no automated action\" does not mean \"no risk.\"",
-              "line_start": 30,
-              "reason": "Gives shadow mode its correct condition instead of the common claim that it carries no risk."
-            },
-            {
-              "quote": "It is not a required sequence for every feature.",
-              "line_start": 75,
-              "reason": "Qualifies the flowchart and avoids implying a mandatory maturity ladder. The same paragraph also qualifies the word accuracy."
-            },
-            {
-              "quote": "Their values are illustrative: production thresholds come from calibrated probabilities",
-              "line_start": 104,
-              "reason": "Prevents the code thresholds from being read as recommended values, and names the real inputs to a threshold choice."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the levels, decision framework, implementation examples and failure modes all explain one concept, and the note is a coherent length.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
     }
   }
 }
