@@ -6379,9 +6379,9 @@
     "version": 1,
     "id": "b9235098cfe341bd98cce55faa026472",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 613.3637555000001,
+    "elapsed_seconds": 617.3448413000001,
     "calls_reserved": 19,
     "responses_received": 19,
     "attempted_paths": [
@@ -6393,7 +6393,8 @@
       "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
       "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
       "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md",
-      "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md"
+      "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
+      "Vault/Home/AI & ML/Machine Learning/Types/Types.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6983,10 +6984,93 @@
           },
           "model_calls": 17
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and standard ML definitions. The opening frames the taxonomy by learning signal. Each of the five sections gives a mechanism, an evaluation concern and a failure mode, with accurate examples (k-means, PCA, isolation forest, pseudo-labeling, consistency regularization, delayed reward and specification gaming). The comparison table agrees with the prose. The Mermaid decision flow correctly places reinforcement learning as the reward-based branch and separates unsupervised from self-supervised learning. Bandits are correctly described as the immediate-reward case. Both Qards each test one coherent comparison task, and their answers match the body and cite relevant sources. The references are relevant, there are no known violations, and the code fences have language identifiers. No factual or editorial defect justifies an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent full-note audit found no factual, editorial, structural or Qard-quality defect. No edits were proposed and none are needed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
+                "verdict": "CLEAN",
+                "summary": "The note classifies ML by learning signal. Each paradigm section gives a mechanism, an evaluation concern and a failure mode. The table, the decision flow and the two comparison Qards agree with the prose. Keeping it unchanged is justified.",
+                "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx map block. Questions and References are optional and present. Code fences carry language identifiers (datacorejsx, mermaid).",
+                "current_text_evidence": [
+                  {
+                    "quote": "The useful way to classify machine learning is by its learning signal.",
+                    "line_start": 19,
+                    "reason": "The opening sets the organizing principle immediately, so the reader can re-enter the topic."
+                  },
+                  {
+                    "quote": "Backpropagation is one way to do that for differentiable models, while trees use different fitting procedures.",
+                    "line_start": 30,
+                    "reason": "This precise qualification avoids implying that every supervised model trains by gradient descent."
+                  },
+                  {
+                    "quote": "Majority classes tend to receive more confident pseudo-labels, so per-class validation and calibration matter more than the headline metric.",
+                    "line_start": 56,
+                    "reason": "The note names the concrete failure mode of semi-supervised learning together with its mitigation."
+                  },
+                  {
+                    "quote": "Delayed reward makes credit assignment harder, but reward can also arrive immediately.",
+                    "line_start": 64,
+                    "reason": "The note states the condition accurately instead of equating RL with delayed reward."
+                  },
+                  {
+                    "quote": "Bandit problems, in which each action affects only its immediate reward, are the simplest reinforcement-learning setting.",
+                    "line_start": 94,
+                    "reason": "The note draws the sequential and bandit boundary correctly, and it matches the flowchart node."
+                  },
+                  {
+                    "quote": "That evidence can be label-free or use labels collected only for evaluation.",
+                    "line_start": 106,
+                    "reason": "The first Qard keeps the evaluation nuance for unsupervised learning, so the answer is not oversimplified."
+                  },
+                  {
+                    "quote": "Taxonomies differ on where self-supervised learning belongs.",
+                    "line_start": 123,
+                    "reason": "The second Qard acknowledges the taxonomy ambiguity, and it cites the Google glossary and Spinning Up on the answer side."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the five paradigms share one organizing axis, the learning signal. The comparison table and decision flow depend on seeing them together, so separate notes would fragment that axis.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 19
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:28:19.748118Z",
+    "checkpoint_at": "2026-11-07T13:28:23.729204Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
