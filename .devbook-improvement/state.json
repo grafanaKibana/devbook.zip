@@ -5839,9 +5839,9 @@
     "version": 1,
     "id": "f57944c05f7944ee8610e2bd6384fd74",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 575.5959999999997,
+    "elapsed_seconds": 579.0674285999996,
     "calls_reserved": 20,
     "responses_received": 20,
     "attempted_paths": [
@@ -5853,7 +5853,8 @@
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
       "Vault/Home/AI & ML/LLM/Safety/Guardrails.md",
       "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md",
-      "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md"
+      "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+      "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6503,10 +6504,83 @@
           },
           "model_calls": 18
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against the OWASP Top 10 for LLM Applications 2025. The ID/name table (LLM01–LLM10) matches the 2025 list. The mechanism sections for LLM01, 02, 05 and 06 and the shorter sections for LLM03, 04, 07, 08, 09 and 10 are accurate. Their controls follow OWASP guidance: least privilege, authorization outside the model, output encoding, and parameterized queries. The traditional-analog table, pitfalls and defense-tradeoff table are consistent with those sections and add little repetition. The four existing cards each test one gradeable task and cite appropriate OWASP sources. Their claims agree with the body text, including the hedged statement about prevention of prompt injection. The question-card IDs are preserved. There are no known violations, no owner feedback and no open proposals. The references are real, primary or reputable, and appear as bare links. A rewrite would be churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate against the OWASP 2025 list and has a sound explanation order. It opens with the trust boundary, then gives the list table, the architecture-shaping risks, the remaining risks, the traditional analogs, pitfalls and tradeoffs. The four Qards each test one gradeable task, and the hedged claim about prevention is correct. No edit would give a concrete benefit, so keeping the note unchanged is justified.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present, whiteboard voice. Qard IDs are protected.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The list also names System Prompt Leakage, Vector and Embedding Weaknesses, and Misinformation as separate risks.",
+                    "line_start": 19,
+                    "reason": "The 2025 list does contain these as separate entries (LLM07, LLM08, LLM09). The claim is accurate and sets the scope."
+                  },
+                  {
+                    "quote": "Samsung's internal-data incident shows the input side of the risk: confidential code was pasted into an external service.",
+                    "line_start": 50,
+                    "reason": "The 2023 incident was engineers pasting confidential code into ChatGPT. It is a correct, concrete example, and the RAG output-side contrast follows directly."
+                  },
+                  {
+                    "quote": "A sound design assumes the prompt can be observed. Secrets and authorization decisions belong outside it.",
+                    "line_start": 82,
+                    "reason": "The LLM07 guidance matches OWASP: do not treat the system prompt as a secret or as a security control. It is consistent with the cards."
+                  },
+                  {
+                    "quote": "Natural-language interpretation has no parameterization mechanism equivalent to a prepared SQL statement.",
+                    "line_start": 114,
+                    "reason": "The note states the key mechanism behind the injection pitfall precisely. The matching SQL-versus-prompt card is consistent with it and is not redundant."
+                  },
+                  {
+                    "quote": "That statement describes current techniques. It does not prove that a stronger boundary can never be built.",
+                    "line_start": 171,
+                    "reason": "The card attributes the hedged claim correctly to OWASP and keeps the limit that applies. The answer-side sources are primary OWASP pages."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note is one coherent catalog with its architectural risks, the remaining entries and the defense tradeoffs. Its parts depend on each other.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "I read the whole note against the OWASP 2025 list. The IDs, names, controls and examples are accurate, and the explanation order works. The cards are single-task with preserved IDs and OWASP sources. No concrete defect was found, so the keep is justified.",
+            "change_checks": []
+          },
+          "model_calls": 20
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:23:41.475035Z",
+    "checkpoint_at": "2026-11-07T06:23:44.946464Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
