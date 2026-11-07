@@ -6024,15 +6024,16 @@
     "version": 1,
     "id": "b9235098cfe341bd98cce55faa026472",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 232.27991889999993,
+    "elapsed_seconds": 236.98794779999992,
     "calls_reserved": 7,
     "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Safety/Safety.md",
       "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md"
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6192,10 +6193,88 @@
           "reason": "wikilink removal requires explicit target-specific semantic rationale",
           "model_calls": 5
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note. The confusion-matrix definitions and the precision, recall and F1 formulas are correct. The worked example sums to 100 cases and gives precision 0.80, recall 0.762 (shown as 0.76) and F1 0.78. The two-threshold table values also check out: 90/150 = 0.60, 90/100 = 0.90, 55/65 = 0.85 and 55/100 = 0.55. The multi-class averaging claims are accurate, including that micro precision and recall equal accuracy for single-label multi-class classification. The threshold diagram is hedged correctly as the usual direction, not a guarantee. The pitfalls (F1 hiding asymmetric failures, comparing arbitrary thresholds, optimizing one metric without a constraint, accuracy under imbalance) are sound and consistent with the PR-AUC and ROC-AUC sibling cards. Code fences have language identifiers, and the references are relevant. There are no cards in this note and no known violations. The prose reads direct and in order, so no edit would add value."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no factual, editorial, structural or rule defects. The keep is justified and no edits were proposed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate and ordered well: matrix, metrics, threshold effect, worked numbers, multi-class averaging, then pitfalls. I recomputed every number and found no errors. The prose is direct and has no padding, so leaving it unchanged is justified.",
+                "page_type": "Concept — typed frontmatter, optional Questions absent (allowed), References present as bare link bullets, code fences carry language identifiers.",
+                "current_text_evidence": [
+                  {
+                    "quote": "A release decision then compares models at the same constraint, such as maximizing precision while keeping recall above 0.95.",
+                    "line_start": 14,
+                    "reason": "The opening states the operating idea and the decision condition right away."
+                  },
+                  {
+                    "quote": "The diagram describes the usual direction, not a guarantee for every finite sample.",
+                    "line_start": 56,
+                    "reason": "Hedges the threshold effect correctly, so the note does not overclaim monotonic behaviour."
+                  },
+                  {
+                    "quote": "| 0.80 | 55 | 10 | 45 | 0.85 | 0.55 |",
+                    "line_start": 84,
+                    "reason": "55/65 = 0.846 and 55/100 = 0.55 are correct. The row shows the precision/recall trade-off at a second threshold."
+                  },
+                  {
+                    "quote": "F1        = 2 * (0.80 * 0.76) / (0.80 + 0.76) = 0.78",
+                    "line_start": 76,
+                    "reason": "The worked example sums to 100 cases. F1 is about 0.78 whether it is computed from the rounded or the exact recall."
+                  },
+                  {
+                    "quote": "for single-label multi-class classification, micro precision and recall equal accuracy",
+                    "line_start": 96,
+                    "reason": "The claim is correct and carries the condition (single-label) it depends on."
+                  },
+                  {
+                    "quote": "Always predicting \"not fraud\" yields 99.9% accuracy when fraud prevalence is 0.1%",
+                    "line_start": 106,
+                    "reason": "The imbalance arithmetic is correct and makes the pitfall concrete."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: binary metrics, thresholds and multi-class averaging are one coherent evaluation topic, and the note is compact.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 7
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:21:58.664275Z",
+    "checkpoint_at": "2026-11-07T13:22:03.372305Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
