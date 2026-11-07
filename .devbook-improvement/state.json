@@ -5489,14 +5489,15 @@
     "version": 1,
     "id": "f57944c05f7944ee8610e2bd6384fd74",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 171.28409759999997,
+    "elapsed_seconds": 174.91261269999995,
     "calls_reserved": 6,
     "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
-      "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md"
+      "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+      "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -5650,10 +5651,83 @@
           },
           "model_calls": 4
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
+                "outcome": "keep",
+                "reason": "I read the whole note against its text and the cited primary works. The opening defines in-context learning as prompt-conditioned next-token prediction with no weight updates, which matches Brown et al. 2020. The Min et al. 2022 passage is appropriately hedged: it says demonstration format, label space and input distribution explain much of the performance, and that corrupted labels hurt less than expected. It also says correct labels remain the right production choice. The zero-shot, one-shot and few-shot sections use consistent JSON and sentiment examples, and the code fences all carry language identifiers. The demonstration-set, limitations and pitfalls sections cover ordering effects, context pressure and root-cause fixes without repeating each other. The tradeoffs table is qualified: format control is labeled a heuristic, the facts column is scoped, and schema enforcement is routed to structured outputs. The three cards each test one gradeable task, with a decision, a comparison and a scope question. They are accurate and cite sources. Known violations are empty. No defect is verified, so edits would only be cosmetic."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note read found no concrete defect. The note is accurate, hedged where the evidence is mixed, and has no known violations. The cards test single dependent tasks. No edits were proposed, and a keep is justified.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
+                "verdict": "CLEAN",
+                "summary": "The note explains in-context learning as prompt-conditioned next-token prediction with no weight updates, then moves through zero-shot, one-shot and few-shot with consistent examples. Its claims are hedged where the evidence is mixed. Limitations, pitfalls and the tradeoff table add judgment without repeating each other. The three cards each test a single task. The keep is justified and no defect was invented.",
+                "page_type": "Concept — authorable prose with optional Questions and References present; all code fences carry language identifiers; the wikilink [[Reasoning Techniques]] is the only internal link and is explained in prose.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The model still predicts the next token at inference time.",
+                    "line_start": 17,
+                    "reason": "The opening states the mechanism: no weight updates, with demonstrations shifting next-token prediction. This matches Brown et al. 2020."
+                  },
+                  {
+                    "quote": "Corrupting labels did less damage than a simple input-label mapping account would predict.",
+                    "line_start": 69,
+                    "reason": "This is an appropriately hedged statement of Min et al. 2022. It is followed by the production caveat that correct labels remain the right choice."
+                  },
+                  {
+                    "quote": "The facts column describes only the evidence that each technique supplies automatically.",
+                    "line_start": 138,
+                    "reason": "This scopes the table correctly. It also says schema enforcement needs structured outputs or validation, which avoids overclaiming format control."
+                  },
+                  {
+                    "quote": "> [!qard]- When should a prompt move from zero-shot to one-shot or few-shot?",
+                    "line_start": 145,
+                    "reason": "This is a single decision question. The answer is gated on evaluation, covers the mechanism and conditions, and cites sources on the answer side."
+                  },
+                  {
+                    "quote": "> [!qard]- How does in-context learning differ from fine-tuning and retrieval?",
+                    "line_start": 159,
+                    "reason": "This is one focused comparison. The table covers what changes, what is supplied, how long the effect lasts and the cost, so it is a single gradeable task."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: zero-shot, one-shot and few-shot prompting share one mechanism and one decision path. Separating them would fragment the shot-count comparison.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 6
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:16:57.163127Z",
+    "checkpoint_at": "2026-11-07T06:17:00.791643Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
