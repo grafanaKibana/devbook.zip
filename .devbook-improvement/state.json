@@ -5959,11 +5959,11 @@
     "version": 1,
     "id": "b9235098cfe341bd98cce55faa026472",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 149.78282959999999,
+    "elapsed_seconds": 163.25869229999995,
     "calls_reserved": 5,
-    "responses_received": 4,
+    "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Safety/Safety.md",
       "Vault/Home/AI & ML/Machine Learning/Data Drift.md"
@@ -6118,7 +6118,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:20:36.167187Z",
+    "checkpoint_at": "2026-11-07T13:20:49.643049Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -22545,5 +22545,70 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "b9235098cfe341bd98cce55faa026472",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [Machine Learning]\nsummary: \"Whether predicted probabilities match reality: 0.7 predictions should be right about 70% of the time.\"\nlevel: [\"2\"]\npriority: Medium\nstatus: Done\npublish: true\ncreated: \"2026-06-11T07:39:53.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.492Z\"\n---\n\nCalibration asks whether predicted probabilities keep their promises. Among cases scored near 0.7, roughly 70% should be positive. This is separate from discrimination, the ranking property measured by [[ROC-AUC and PR-AUC|ROC-AUC]]. A monotonic transformation can leave AUC unchanged while turning useful probabilities into nonsense. And a model that predicts the base rate for every case can be calibrated while ranking nothing well.\n\nThe distinction becomes operational when code consumes the number. Expected-value rules such as `p × value > cost`, abstention gates, and risk scores all assume that 0.9 means something stable. A miscalibrated score breaks that arithmetic even when the ordering is good. Modern neural networks often lean overconfident, assigning probabilities near 1.0 more often than their observed accuracy supports (Guo et al., 2017).\n\n```mermaid\n---\nconfig:\n  themeVariables:\n    xyChart:\n      plotColorPalette: \"#9CA3AF, #EF4444\"\n---\nxychart-beta\n  title Reliability diagram intuition\n  x-axis Mean predicted probability 0 --> 1\n  y-axis Observed frequency 0 --> 1\n  line [0.0, 0.25, 0.5, 0.75, 1.0]\n  line [0.0, 0.13, 0.32, 0.55, 0.78]\n```\n\nThe gray diagonal marks perfect calibration. The red curve falls below it: predictions near 0.75 are positive only about 0.55 of the time. That model is overconfident. A curve above the diagonal indicates underconfidence.\n\n# Reliability Diagrams\n\nA reliability diagram makes the failure visible. Predictions are grouped into probability bins. Each point compares the bin's mean prediction with its observed positive rate. A calibrated bin lands on the diagonal.\n\n- **Below the diagonal:** the model is overconfident. Observed positives are less common than predicted.\n- **Above the diagonal:** the model is underconfident. Positives occur more often than predicted.\n- **A bent or S-shaped curve:** the error changes across the score range, which a single global correction may not repair.\n\nPair the curve with a score histogram. A point near the diagonal carries little evidence when its bin contains only a handful of cases. Sparse bins can also dominate worst-bin metrics.\n\n# Calibration Metrics\n\n**Brier score** is mean squared error between probability and a 0/1 outcome. Lower is better. As a proper scoring rule, its expected value is minimized by reporting the true probability. Its decomposition separates reliability from resolution, which explains why a constant base-rate forecast can be calibrated yet unhelpful.\n\n**Expected Calibration Error (ECE)** averages the absolute gap between mean confidence and observed frequency across bins, weighted by bin size. It is convenient and fragile. Change the number of bins or switch from equal-width to equal-frequency bins and the value changes. **Maximum Calibration Error (MCE)** keeps only the largest bin gap, making it sensitive to sparse bins.\n\n**Log loss (negative log-likelihood)** is another proper scoring rule. It punishes a confident mistake much more sharply than Brier score. The loss grows without bound as the assigned probability approaches the wrong certainty. The same distinction appears in the [[ROC-AUC and PR-AUC]] comparison.\n\n| Metric | What it captures | Watch out for |\n| --- | --- | --- |\n| Brier score | Calibration + sharpness in one proper score | Less interpretable than a curve. Mixes two effects |\n| ECE | Average calibration gap across confidence bins | Sensitive to bin count and binning scheme |\n| MCE | Worst-bin calibration gap | Dominated by sparse, noisy bins |\n| Log loss | Calibration with heavy penalty for confident mistakes | Explodes on a single confident wrong prediction. Needs clipping |\n| Reliability diagram | Where and how calibration fails | Bins with few samples look misleading |\n\n# Post-hoc Calibration Methods\n\nPost-hoc calibration fits a small mapping from model scores to probabilities. That mapping needs data held out from model fitting, while the final test set stays untouched for evaluation.\n\n- **Platt scaling** fits a sigmoid to model scores. It uses few parameters and works with modest calibration sets, but the sigmoid shape limits what it can correct. ML.NET exposes it through `mlContext.BinaryClassification.Calibrators.Platt`.\n- **Isotonic regression** learns a monotonic step function. It can follow irregular score distortions, though small calibration sets make the steps noisy and prone to overfitting. It is available as `Calibrators.Isotonic` in ML.NET and `CalibratedClassifierCV(method=\"isotonic\")` in scikit-learn.\n- **Temperature scaling** divides logits by one learned scalar before softmax. The argmax stays the same, so class predictions do not change. One scalar handles global overconfidence well, but it cannot fix errors that differ by class or region.\n\nToken-level [[Generation|logprobs]] are sometimes treated as LLM confidence. They need the same empirical check before being used as an escalation gate. A likelihood over the next token is not automatically a calibrated probability that an answer is correct.\n\n# Pitfalls\n\n**Trusting AUC as evidence of good probabilities.** AUC is unchanged by strictly monotonic score transformations. A model can keep an AUC of 0.92 while cases scored at 0.95 are positive only 60% of the time. Probability-driven decisions therefore need a calibration check of their own.\n\n**Calibrating on the test set.** Fitting the mapping on the same cases used for the reported score leaks evaluation data. Use a dedicated calibration split or cross-validated calibration, then evaluate once on a separate test set.\n\n**Reading ECE without the histogram.** A low average can hide a bad high-confidence region with few, expensive cases. Inspect the curve and the number of samples behind each point. MCE can surface the region, though it becomes noisy when the bin is tiny.\n\n**Assuming calibration survives distribution shift.** Calibration belongs to a model-distribution pair. After [[Data Drift]], the old mapping may fail even if ranking quality survives. Measure again on recent labeled data before reusing it.\n\n# Tradeoffs\n\n| Method | Data needed | Flexibility | Effect on accuracy | Best for |\n| --- | --- | --- | --- | --- |\n| Platt scaling | Low | Low — assumes sigmoid distortion | Ranking stays. Thresholded labels may change | Small calibration sets. SVM-style scores |\n| Isotonic regression | High | High — any monotonic distortion | Does not reverse score order, but stepwise ties can change ranking metrics. Thresholded labels may change | Larger sets where the distortion is non-sigmoid |\n| Temperature scaling | Low | Low — single global scalar | Unchanged (argmax preserved) | Neural network logits. Overconfidence |\n| Retrain with a proper scoring loss | Full retrain | Built into training | Can change | Training is controlled and calibration belongs in the model objective |\n\nStart with the curve and a proper scoring rule on held-out data. Ranking-only systems may not need calibrated probabilities. When a formula or person acts on the number, choose the smallest correction that matches the observed shape: temperature scaling for a global logit error, Platt for a sigmoid-shaped distortion, or isotonic with enough data for a more irregular monotonic mapping. Recheck after model or distribution changes.\n\n# References\n\n- [On Calibration of Modern Neural Networks (Guo et al., ICML 2017)](https://arxiv.org/abs/1706.04599)\n- [Probability calibration (scikit-learn user guide)](https://scikit-learn.org/stable/modules/calibration.html)\n- [ML.NET calibrators namespace (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/microsoft.ml.calibrators?view=ml-dotnet-preview)\n- [Verification of Forecasts Expressed in Terms of Probability (Brier, 1950)](https://journals.ametsoc.org/view/journals/mwre/78/1/1520-0493_1950_078_0001_vofeit_2_0_co_2.xml)\n",
+          "hash": "13350b65ba40ba8dfc9fa6f53f6383b55b11e29af0d072b00baa07f57d7898ed",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+          "expected_hash": "13350b65ba40ba8dfc9fa6f53f6383b55b11e29af0d072b00baa07f57d7898ed",
+          "before": " The loss grows without bound as the assigned probability approaches the wrong certainty. The same distinction appears in the [[ROC-AUC and PR-AUC]] comparison.",
+          "after": " The loss grows without bound as the assigned probability approaches the wrong certainty.",
+          "reason": "Removes a vague cross-reference that claims an unnamed 'same distinction' appears in the ROC-AUC note; the ranking-versus-probability link is already made in the opening paragraph.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Log loss grows without bound as probability approaches the wrong certainty"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The log-loss paragraph ends with a sentence whose referent ('the same distinction') is unclear and unsupported, and it duplicates the opening link.",
+          "reader_benefit": "The metric paragraph ends on its actual point without a confusing, unspecified reference."
+        }
+      ],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+          "outcome": "changed",
+          "reason": "Audited the full note: discrimination vs calibration, reliability diagram reading, Brier/ECE/MCE/log loss, Platt/isotonic/temperature behavior, pitfalls and tradeoff table are accurate and consistent with the scikit-learn and Guo et al. material. Only a vague dangling cross-reference sentence was removed for clarity."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": "13350b65ba40ba8dfc9fa6f53f6383b55b11e29af0d072b00baa07f57d7898ed"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-07T13:20:49.643032Z"
   }
 }
