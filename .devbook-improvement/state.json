@@ -5899,11 +5899,11 @@
     "version": 1,
     "id": "b9235098cfe341bd98cce55faa026472",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 84.2486265,
+    "elapsed_seconds": 96.1735969,
     "calls_reserved": 3,
-    "responses_received": 2,
+    "responses_received": 3,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Safety/Safety.md"
     ],
@@ -5984,7 +5984,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:19:30.632986Z",
+    "checkpoint_at": "2026-11-07T13:19:42.557965Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -22411,5 +22411,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "b9235098cfe341bd98cce55faa026472",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [Machine Learning]\nsummary: \"When production inputs shift away from training data, potentially weakening model predictions without an obvious error.\"\nlevel: [\"1\"]\npriority: Low\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"Machine Learning/Data Drift\"\nflashcard_uid: \"3212f70c\"\ncreated: \"2026-02-16T19:44:24.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.491Z\"\n---\n\nData drift means production inputs no longer look like the data used to train a model. Nothing has to crash. The service can keep returning predictions while their quality slips because customers changed behavior, a new camera changed the image distribution, or an upstream pipeline started encoding a field differently.\n\nDrift is a warning, not proof that the model is wrong. The useful question is whether the change reaches features the model relies on and whether it changes the relationship between inputs and outcomes.\n\n# Types of Drift\n\n| Type | What changes | Example |\n|------|-------------|---------|\n| **Data drift** (feature drift) | P(X), the input distribution | Users start asking questions in a new language |\n| **Label drift** (prior probability shift) | P(Y), the label distribution | Fraud rate increases from 1% to 5% |\n| **Concept drift** | P(Y\\|X), the relationship between inputs and labels | \"Spam\" patterns change as spammers adapt |\n| **Covariate shift** | P(X) changes but P(Y\\|X) stays the same | New user segment with different demographics |\n\nConcept drift is the stronger failure signal because the learned mapping itself has aged. That usually calls for new labels and an updated model, though a policy or threshold change may contain the immediate risk. Plain feature drift can be harmless when the shifted feature has little influence or the model still generalizes.\n\n# Detection Methods\n\n**Population Stability Index (PSI)** compares binned feature distributions. It is common in credit scoring, but its familiar 0.1 and 0.2 cutoffs are conventions rather than universal statistical guarantees.\n\n```python\nimport numpy as np\n\ndef psi(expected, actual, bins=10, eps=1e-6):\n    \"\"\"Compute PSI between baseline and current feature distributions.\"\"\"\n    if len(expected) == 0 or len(actual) == 0:\n        raise ValueError(\"PSI requires non-empty baseline and current samples\")\n    if np.unique(expected).size < 2:\n        raise ValueError(\"PSI is undefined for a constant baseline\")\n\n    quantiles = np.quantile(expected, np.linspace(0, 1, bins + 1))\n    edges = np.concatenate(([-np.inf], np.unique(quantiles[1:-1]), [np.inf]))\n    if len(edges) < 3:\n        raise ValueError(\"PSI requires at least two baseline intervals\")\n\n    exp_counts, _ = np.histogram(expected, bins=edges)\n    act_counts, _ = np.histogram(actual, bins=edges)\n    exp_p = np.maximum(exp_counts / max(exp_counts.sum(), 1), eps)\n    act_p = np.maximum(act_counts / max(act_counts.sum(), 1), eps)\n    return float(np.sum((act_p - exp_p) * np.log(act_p / exp_p)))\n\n# PSI < 0.1: no significant drift\n# PSI 0.1–0.2: moderate drift, investigate\n# PSI > 0.2: significant drift, action required\n```\n\nThe function is deliberately small. Infinite outer edges retain current values outside the baseline range. A constant baseline still cannot define useful quantile bins, so the function fails instead of reporting zero drift; that feature is better monitored as a constant-to-novel categorical change. A production implementation must also define missing-value handling. Its comments show conventional PSI triage bands, not statistical significance or automatic retraining rules. Those bands need calibration for each feature and decision.\n\n**Kolmogorov-Smirnov (KS) test** compares two numeric samples through the largest gap between their empirical cumulative distributions. With large samples it can flag tiny, operationally irrelevant differences, so the effect size and minimum sample size still matter. Monitoring many features also creates many hypothesis tests. The alert policy needs a multiple-testing rule or another way to control the resulting false positives.\n\n**Chi-square test** works with categorical counts. Sparse categories need to be combined or handled separately because low expected counts make the result unreliable.\n\n**Jensen-Shannon divergence** gives a symmetric distance between distributions. Its bound depends on the logarithm base. Base 2 gives a value from 0 to 1.\n\n# Monitoring Workflow\n\n```text\n1. Define baseline\n   └── Training data distribution OR last 30 days of stable serving\n\n2. Compute drift metrics per feature\n   └── PSI for numeric, chi-square for categorical\n   └── Run daily or per batch\n\n3. Segment monitoring\n   └── Break down by region, device, user tier\n   └── Averages hide drift in subpopulations\n\n4. Alert on threshold breach\n   └── PSI > 0.2, KS p-value < 0.05\n\n5. Investigate\n   └── Rule out pipeline issues first (schema changes, ETL bugs, encoding changes)\n   └── Check model performance if labels are available\n\n6. Respond\n   └── Retrain on recent data\n   └── Update feature engineering\n   └── Adjust decision thresholds\n   └── Route to manual review for high-risk cases\n```\n\n# Pitfalls\n\n**Drift without a performance drop.** A feature can move without changing decisions, especially when the model barely uses it. When labels are available, performance on recent data is stronger evidence than a feature-level alert. Retraining every time PSI crosses a line adds cost and can replace a stable model with a worse one.\n\n**Averages hide affected cohorts.** A global PSI of 0.05 can coexist with 0.4 for one region or device class. Segmented checks along boundaries that matter to the product expose such cohorts, provided each segment has enough samples to avoid noisy alarms.\n\n**Labels arrive late.** Fraud may be confirmed weeks after scoring. Input drift, confidence distributions, escalation rates, and re-contact rates can provide early warning, but none proves that accuracy fell. The delayed ground truth remains the check that closes the loop.\n\n**Treating every alert as concept drift.** A change in P(X) does not establish a change in P(Y|X). Investigation first rules out schema changes and broken joins, then inspects prediction behavior and labeled performance. The response may be a pipeline repair, a threshold adjustment, or retraining. The metric alone cannot choose.\n\n# Tradeoffs\n\n## Detection Method Selection\n\n| Method | Feature type | Sensitivity | Interpretability | Use when |\n|--------|------------|------------|-----------------|----------|\n| PSI | Numeric | Medium | High (conventional bands: 0.1, 0.2) | Credit scoring and similar workflows. Bands need per-feature calibration |\n| KS test | Numeric | High | Medium (p-value) | General numeric features. Sensitive to small shifts |\n| Chi-square | Categorical | Medium | Medium | Categorical features with stable cardinality |\n| Jensen-Shannon divergence | Any | High | Low (0–1 scale) | Comparing distributions symmetrically. Bounded output |\n| Model performance metrics | Any | Highest | High | When labels are available. Most direct signal |\n\nThe monitoring method should match the feature and the decision. PSI is familiar in regulated credit workflows. KS is useful for numeric samples, and chi-square fits categorical counts. None outranks recent labeled performance. When labels lag, proxy metrics and prediction distributions can narrow the investigation without pretending to be ground truth.\n\n## Retraining Strategy\n\n| Strategy | Trigger | Cost | Risk | Use when |\n|----------|---------|------|------|----------|\n| Scheduled retraining | Time-based (weekly, monthly) | Predictable | May retrain unnecessarily | Stable domains with predictable drift cycles |\n| Drift-triggered retraining | PSI/KS threshold breach | Variable | May miss slow drift | Domains with irregular drift patterns |\n| Continuous learning | Every new batch | High | Catastrophic forgetting | High-velocity data streams with fast-changing patterns |\n| Manual review + retrain | Human decision | Low (infrequent) | Slow response | Low-volume, high-stakes models where retraining is expensive |\n\nScheduled retraining is predictable when labels arrive on a regular cadence and the domain changes gradually. Drift-triggered retraining reacts faster, but it needs a second gate: enough fresh labels to show that an update beats the deployed model. High-stakes, low-volume systems often keep a human release decision because one noisy alert is a weak reason to replace a model.\n\n# Questions\n\n<!-- qard-id: 88c67018-a43a-46a1-b62c-5f7c06b2fad7 -->\n> [!qard]- What is the difference between data drift and concept drift?\n> Data drift, in its narrow sense, is a change in the input distribution P(X). Concept drift is a change in the relationship between inputs and outcomes, P(Y|X). After concept drift, the same input tends to have a different correct answer.\n>\n> - **What changes:** with input (covariate) drift, the mix of feature values shifts, for example when a new user segment with different demographics arrives. With concept drift, the mapping from inputs to outcomes changes, for example when spam patterns change as spammers adapt.\n> - **Effect on the model:** input drift may or may not reduce quality. It matters when the shift reaches features the model relies on or regions where the model generalizes poorly. Concept drift means the learned mapping is out of date, so predictions can be wrong even for inputs that look familiar.\n> - **Evidence needed:** input drift can be measured from unlabeled production inputs by comparing feature distributions with a baseline. Confirming concept drift needs outcome labels, because unlabeled inputs cannot show whether the relationship between inputs and outcomes has changed.\n> \n> The term \"data drift\" is used inconsistently, sometimes for any change in distribution. Stating which distribution is monitored, such as P(X) or P(Y|X), avoids that ambiguity. An input-distribution alert neither proves that model quality fell nor rules out concept drift. Recent labeled outcomes, which often arrive late, are the stronger check.\n>\n> [Gama et al., A Survey on Concept Drift Adaptation](https://doi.org/10.1145/2523813)\n\n# References\n\n- [Data drift in machine learning models (Evidently AI)](https://www.evidentlyai.com/ml-in-production/data-drift)\n- [Monitoring ML models in production (Google MLOps)](https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning)\n- [Failing Loudly: An Empirical Study of Methods for Detecting Dataset Shift (Rabanser et al., 2019)](https://arxiv.org/abs/1810.11953)\n",
+          "hash": "f3f6e4d711fcf778de1731ccad3957eaad84d2e6be04bc5feb3b2964fef4ce4d",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
+          "outcome": "keep",
+          "reason": "I read the whole note against its text and the standard literature. The drift taxonomy is correct: P(X) for feature drift and covariate shift, P(Y) for label drift, and P(Y|X) for concept drift. The PSI code handles constant baselines, duplicate quantile edges, out-of-range values and zero bins. The prose correctly says the 0.1/0.2 bands are conventions. The KS (large-sample sensitivity, multiple testing), chi-square (sparse categories) and Jensen-Shannon (base-2 bound of 0 to 1) caveats are accurate. The pitfalls cover segmentation, late labels and misreading P(X) change as concept drift, and they match the Gama survey and Rabanser et al. cited in the note. The retraining tradeoffs are coherent. The single Qard tests one dependent contrast (data drift versus concept drift) with a primary source on the answer side. The References are relevant and have no trailing annotations. The note has no known violations, no flagged cards, and no duplicated or padded passages. Any rewrite would be cosmetic."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/Machine Learning/Data Drift.md": "f3f6e4d711fcf778de1731ccad3957eaad84d2e6be04bc5feb3b2964fef4ce4d"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/Machine Learning/Data Drift.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-07T13:19:42.557928Z"
   }
 }
