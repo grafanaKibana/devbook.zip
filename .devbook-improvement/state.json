@@ -6309,9 +6309,9 @@
     "version": 1,
     "id": "b9235098cfe341bd98cce55faa026472",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 548.6036337,
+    "elapsed_seconds": 553.6482335000001,
     "calls_reserved": 17,
     "responses_received": 17,
     "attempted_paths": [
@@ -6322,7 +6322,8 @@
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
       "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
       "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
-      "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md"
+      "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md",
+      "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6844,10 +6845,78 @@
           },
           "model_calls": 15
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
+                "outcome": "keep",
+                "reason": "I read the whole note against its contract. It has no Qard cards, and known_violations is empty. The five levels are defined by who holds decision authority. The note says the level belongs to the action and its risk, not to the model. Shadow mode correctly keeps compute, privacy and operational risk. Assistance names automation bias. Partial automation requires calibrated scores, action costs and exclusions. Full automation keeps a fallback or kill switch. The decision table, flowchart, tradeoffs table and both code examples agree with each other. The flowchart is explicitly marked as a conservative path, not a required sequence. It also warns that accuracy is shorthand for a cost-tied metric. The thresholds in the partial-automation code are labelled illustrative. The Python fences have language identifiers, the voice is whiteboard-style and impersonal, and the single reference is a real book. The claims are general engineering judgment, not version-specific facts. An edit would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The single note is accurate and coherent, and it has no concrete rule violations. The keep is justified and no edits are proposed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole note independently. It defines the five levels by who holds decision authority, and it states the key boundary that the level belongs to an action and its risk, not to the model as a whole. The caveats on shadow mode, automation bias, calibration, the conservative flowchart and illustrative thresholds are accurate. Nothing needs editing.",
+                "page_type": "Concept — frontmatter is typed and status is Done, which the owner set. There are no Qards. The References section is a single bare link to a real book. Both code fences carry a python language identifier.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The level belongs to an action and its risk, not to the model as a whole.",
+                    "line_start": 16,
+                    "reason": "States the core operating idea and boundary that the rest of the note builds on."
+                  },
+                  {
+                    "quote": "It still carries compute, privacy, and operational risk, so \"no automated action\" does not mean \"no risk.\"",
+                    "line_start": 30,
+                    "reason": "Gives shadow mode its correct condition instead of the common claim that it carries no risk."
+                  },
+                  {
+                    "quote": "It is not a required sequence for every feature.",
+                    "line_start": 75,
+                    "reason": "Qualifies the flowchart and avoids implying a mandatory maturity ladder. The same paragraph also qualifies the word accuracy."
+                  },
+                  {
+                    "quote": "Their values are illustrative: production thresholds come from calibrated probabilities",
+                    "line_start": 104,
+                    "reason": "Prevents the code thresholds from being read as recommended values, and names the real inputs to a threshold choice."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the levels, decision framework, implementation examples and failure modes all explain one concept, and the note is a coherent length.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 17
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:27:14.987994Z",
+    "checkpoint_at": "2026-11-07T13:27:20.032595Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
