@@ -6199,11 +6199,11 @@
     "version": 1,
     "id": "b9235098cfe341bd98cce55faa026472",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 450.2881698,
+    "elapsed_seconds": 459.8830937999999,
     "calls_reserved": 14,
-    "responses_received": 13,
+    "responses_received": 14,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Safety/Safety.md",
       "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
@@ -6667,7 +6667,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:25:36.672530Z",
+    "checkpoint_at": "2026-11-07T13:25:46.267453Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -23479,5 +23479,54 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "b9235098cfe341bd98cce55faa026472",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [Machine Learning]\nsummary: \"Turning language into machine-usable representations for extraction, classification, search, and generation. Transformers are now common.\"\nlevel: [\"1\"]\npriority: Low\nstatus: Done\npublish: true\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.494Z\"\n---\n\nNatural language processing (NLP) turns text or speech into representations a machine can use, then maps those representations to a task such as search, classification, extraction, translation, or generation. The machine does not \"understand\" language in the human sense. It learns statistical structure that can be useful enough to operate on language.\n\nTransformers changed the default implementation path. Many systems now start with a pretrained model and adapt it through prompting or fine-tuning. Rules and sparse features still win when the pattern is narrow, stable, and easy to audit. A larger model earns its cost when the input varies enough that hand-written cases become the real maintenance burden.\n\n# Core NLP Tasks\n\n## Tokenization\n\nTokenization converts text into the integer units accepted by a model. Tokens are not words. BPE and WordPiece vocabularies often split an unfamiliar word into reusable subword pieces, while punctuation and whitespace can become separate units.\n\n```text\nInput:  \"Unbelievable performance!\"\nTokens: [\"Un\", \"##believ\", \"##able\", \" performance\", \"!\"]\n```\n\nThe token list is illustrative rather than the output of one specific tokenizer: WordPiece uses `##` continuation markers, while byte-level BPE token displays often preserve leading spaces. Exact segmentation comes from the tokenizer shipped with the model.\n\nFor transformer models, token count controls context usage and often API cost. The count depends on the exact tokenizer, so character or word counts are only rough estimates.\n\n## Named Entity Recognition (NER)\n\nNamed entity recognition locates spans and assigns labels such as person, organization, date, or monetary value.\n\n```text\nInput:  \"Microsoft acquired GitHub for $7.5 billion in 2018.\"\nOutput: Microsoft [ORG], GitHub [ORG], $7.5 billion [MONEY], 2018 [DATE]\n```\n\nNER supports document indexing and structured extraction. A generic NER label set is not automatically a PII detector. Production compliance work usually needs domain-specific labels, policy rules, and evaluation on the actual documents.\n\n## Sentiment Analysis\n\nSentiment analysis assigns a polarity or score to text. Whole-document sentiment is often too coarse when one sentence praises delivery and criticizes product quality.\n\n```text\n\"The delivery was fast but the product quality was disappointing.\"\n→ Mixed sentiment: positive (delivery), negative (quality)\n```\n\nAspect-based models attach sentiment to the thing being discussed, preserving that distinction.\n\n## Text Classification\n\nText classification maps a document to one or more predefined labels. Spam detection, routing, and intent recognition are common cases. The label policy and ambiguous examples usually matter more than the choice between two similar model architectures.\n\n## Machine Translation\n\nMachine translation maps text between languages while trying to preserve meaning and register. Encoder-decoder transformers are common, but proper nouns, domain terminology, and low-resource languages still need focused evaluation.\n\n## Question Answering and Summarization\n\nExtractive question answering selects an answer span from supplied context. Generative QA writes an answer and can introduce claims absent from that context. Summarization has the same split between compression and generation. Evaluation must therefore cover factual support, not only fluent wording.\n\n# What Transformers Changed\n\nEarlier NLP stacks commonly paired task-specific features with recurrent networks, convolutional models, or conditional random fields. Transformers made large-scale pretraining reusable across tasks. The same base representation can be fine-tuned for classification, extraction, or generation.\n\nThat reuse reduced the amount of labeled data needed for many tasks. It did not remove task design. Prompted and fine-tuned models still inherit the limits of their training data, context window, label definition, and evaluation set.\n\nDense vector representations used by semantic search and RAG are covered in [[Embeddings]].\n\n# NLP in .NET\n\nThe .NET implementation choice depends on latency, data policy, and how narrow the task is:\n\n- **Azure AI Language** exposes managed classification and extraction features through a service API.\n- **ML.NET** can train or consume local text-classification pipelines when data and inference need to remain inside the application boundary.\n- **Microsoft Agent Framework with an LLM provider** fits multi-step language workflows, though simple classification rarely needs an agent loop.\n\n```csharp\n// Azure AI Language: sentiment analysis\nvar client = new TextAnalyticsClient(endpoint, new AzureKeyCredential(key));\nvar result = await client.AnalyzeSentimentAsync(\"The product quality was excellent.\");\nConsole.WriteLine($\"Sentiment: {result.Value.Sentiment}\");  // Positive\nConsole.WriteLine($\"Confidence: {result.Value.ConfidenceScores.Positive:P}\");\n```\n\n# Pitfalls\n\n## Estimating Tokens from Words\n\nWord counts hide tokenizer and language effects. A budget derived from English prose can fail on code, identifiers, or another language because the same visible length may produce many more tokens.\n\nCount with the tokenizer for the deployed model. Cost and truncation tests should include the actual language mix and representative long inputs.\n\n## Language Bias in Pre-Trained Models\n\nMultilingual support in a model card does not guarantee equal quality. Training mix, tokenizer coverage, and benchmark availability vary by language. Evaluate each supported language and the code-switching patterns seen in production. A language-specific model may be the better fit when one language carries most of the traffic or the task is high stakes.\n\n# Tradeoffs\n\n## NLP Approach Selection\n\n| Approach | Accuracy | Cost | Latency | Customization | Use when |\n|----------|---------|------|---------|--------------|----------|\n| Rule-based (regex, keyword) | Narrow but predictable | Near zero | Usually lowest | Direct | Stable formats and explicit patterns |\n| Fine-tuned small model (BERT, DistilBERT) | Task-dependent | Training + hosting | Often low | Training data and model | Repeated classification or extraction at scale |\n| LLM via prompting | Task-dependent | Per call | Usually highest | Prompt, tools, retrieval | Variable inputs and generative work |\n| Azure AI Language (managed) | Task-dependent | Per call | Network-bound | Service configuration | Standard managed language features |\n\nStart with rules when the pattern is explicit. A small fine-tuned model suits a stable, repeated task once labeled data exists and unit cost matters. Prompted LLMs are useful for variable or generative work, but they bring network latency and a broader failure surface. Managed language APIs trade model control for less infrastructure.\n\n## Monolingual Vs Multilingual Models\n\n| Model type | Per-language accuracy | Languages | Model size | Use when |\n|-----------|---------------------|-----------|-----------|----------|\n| Monolingual (e.g., English BERT) | Often strongest in its language | 1 | Usually smaller | One-language product with enough data |\n| Multilingual (mBERT, XLM-R) | Varies by language | Many | Usually larger | Shared model across several languages |\n| General-purpose LLM | Varies by model and language | Many | Hosted or very large | Generative tasks where broad coverage offsets cost |\n\nBenchmark the actual languages before choosing. A multilingual model simplifies operations, while separate monolingual models can improve quality at the cost of several training and deployment paths. General-purpose LLMs add broad coverage, but their latency and data boundary may decide the issue before benchmark accuracy does.\n\n# References\n\n- [Hugging Face NLP Course](https://huggingface.co/learn/nlp-course/chapter1/1)\n- [Attention Is All You Need (Vaswani et al., 2017)](https://arxiv.org/abs/1706.03762)\n- [Azure AI Language documentation (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/ai-services/language-service/)\n",
+          "hash": "3e99540bf9fcd1c8370c8c0de9f1ec5b4c1f4003eca1524053753b13b9683c13",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against its text and general knowledge of NLP. The opening is accurate: it defines NLP and states the limit that models learn statistical structure rather than understanding language. The tokenization section correctly flags its example as illustrative and notes that WordPiece uses ## markers and byte-level BPE keeps leading spaces. The NER, sentiment, extractive vs generative QA, and transformer-reuse explanations are correct and carry the conditions that matter, such as NER not being a PII detector and token counts depending on the tokenizer. The .NET section uses the real TextAnalyticsClient API with AnalyzeSentimentAsync, which returns the Sentiment and ConfidenceScores properties shown. The tradeoff tables name the condition that changes each decision. The note has no Qard cards, so there is no question-quality issue, and the three references are relevant, bare links. No violations are known or flagged. The prose is direct and non-repetitive, so any edit would be cosmetic churn."
+        }
+      ],
+      "feedback": [],
+      "decisions": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md": "3e99540bf9fcd1c8370c8c0de9f1ec5b4c1f4003eca1524053753b13b9683c13"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-07T13:25:46.267443Z"
   }
 }
