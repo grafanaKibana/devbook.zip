@@ -4424,6 +4424,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/AI & ML/LLM/Safety/Safety.md": {
+      "content_hash": "ea085780c5b58c124edc2975470faa3e040e75644bee82abc1819ec22e5d2da5",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "ea085780c5b58c124edc2975470faa3e040e75644bee82abc1819ec22e5d2da5",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/AI & ML/LLM/Safety/Safety.md",
+          "verdict": "CLEAN",
+          "summary": "The folder note ties safety to each layer of the LLM stack. It separates security from reliability failures and states that the two overlap. Its defense-in-depth section treats prompt rules as advisory and structural controls as enforcement. Both cards are focused and sourced on the answer side. No error or gap warrants an edit.",
+          "page_type": "FolderNote — keeps tags [FolderNote] and the protected datacorejsx map. Questions and References are optional and present, with one authoritative reference.",
+          "current_text_evidence": [
+            {
+              "quote": "The distinction changes the response. Security threat modeling considers how an adversary could exploit the system",
+              "line_start": 26,
+              "reason": "States the security-versus-reliability split and its effect on the response, and acknowledges that the categories overlap, so the boundary is recoverable."
+            },
+            {
+              "quote": "**Harness** enforces deterministic controls such as sandboxing, permission gates, and least-privilege credentials in code",
+              "line_start": 38,
+              "reason": "Maps each runtime layer to a concrete control, which makes the mechanism visible and in a sensible order."
+            },
+            {
+              "quote": "Perfection is the wrong target.",
+              "line_start": 46,
+              "reason": "Ends the defense-in-depth section with a decided engineering stance on blast radius and recovery evidence."
+            },
+            {
+              "quote": "A hallucinated tool call is a reliability failure. It also becomes a security incident",
+              "line_start": 61,
+              "reason": "Gives an accurate, conditional example of how the two failure types overlap, consistent with OWASP LLM06 Excessive Agency."
+            },
+            {
+              "quote": "Prompt instructions still help by guiding normal behavior and reducing mistakes.",
+              "line_start": 76,
+              "reason": "Gives the second card a bounded answer that preserves the exception that prompts are still a useful layer, and its output-handling point matches OWASP LLM05."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: Guardrails, OWASP and Hallucinations already live in sibling notes. This hub is a concise orientation, and the security-versus-reliability framing is coherent as it stands.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -5841,14 +5901,14 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 54.82244589999999,
+    "elapsed_seconds": 58.964622899999995,
     "calls_reserved": 2,
     "responses_received": 2,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:19:01.206804Z",
+    "checkpoint_at": "2026-11-07T13:19:05.348981Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -9564,6 +9624,73 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md": "669576539bc6bc1fca2cb3632368961850aa913d81951f51dafeab7ae929e850"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "8addb14716404ec8f3c27709b6e109d6c688bfe4b6c27deac94175ebc4d27e5d": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The keep is justified. The note is accurate and coherent, both cards test one gradeable task, and no concrete violation or defect was found.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Safety/Safety.md",
+            "verdict": "CLEAN",
+            "summary": "The folder note ties safety to each layer of the LLM stack. It separates security from reliability failures and states that the two overlap. Its defense-in-depth section treats prompt rules as advisory and structural controls as enforcement. Both cards are focused and sourced on the answer side. No error or gap warrants an edit.",
+            "page_type": "FolderNote — keeps tags [FolderNote] and the protected datacorejsx map. Questions and References are optional and present, with one authoritative reference.",
+            "current_text_evidence": [
+              {
+                "quote": "The distinction changes the response. Security threat modeling considers how an adversary could exploit the system",
+                "line_start": 26,
+                "reason": "States the security-versus-reliability split and its effect on the response, and acknowledges that the categories overlap, so the boundary is recoverable."
+              },
+              {
+                "quote": "**Harness** enforces deterministic controls such as sandboxing, permission gates, and least-privilege credentials in code",
+                "line_start": 38,
+                "reason": "Maps each runtime layer to a concrete control, which makes the mechanism visible and in a sensible order."
+              },
+              {
+                "quote": "Perfection is the wrong target.",
+                "line_start": 46,
+                "reason": "Ends the defense-in-depth section with a decided engineering stance on blast radius and recovery evidence."
+              },
+              {
+                "quote": "A hallucinated tool call is a reliability failure. It also becomes a security incident",
+                "line_start": 61,
+                "reason": "Gives an accurate, conditional example of how the two failure types overlap, consistent with OWASP LLM06 Excessive Agency."
+              },
+              {
+                "quote": "Prompt instructions still help by guiding normal behavior and reducing mistakes.",
+                "line_start": 75,
+                "reason": "Gives the second card a bounded answer that preserves the exception that prompts are still a useful layer, and its output-handling point matches OWASP LLM05."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: Guardrails, OWASP and Hallucinations already live in sibling notes. This hub is a concise orientation, and the security-versus-reliability framing is coherent as it stands.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Safety/Safety.md",
+          "citation_index": 4,
+          "reported_line_start": 75,
+          "resolved_line_start": 76
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Safety/Safety.md": "ea085780c5b58c124edc2975470faa3e040e75644bee82abc1819ec22e5d2da5"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -22207,173 +22334,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "b9235098cfe341bd98cce55faa026472",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Safety/Safety.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Applying guardrails across an LLM system to limit security threats and unsupported output.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"3\"]\npriority: Medium\nstatus: Done\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Safety/Safety\"\nflashcard_uid: \"920e124b\"\ncreated: \"2026-07-13T19:23:03.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-13T19:25:45.048Z\"\n---\n\nSafety cuts across the whole LLM system. [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]] can expose an instruction boundary, while [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]] can admit poisoned evidence. [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]] may expose an overpowered tool, and [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]] can let a bad action repeat. Safety belongs in every layer, much like [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]].\n\nThe folder divides the problem along a security-versus-reliability boundary:\n\n- [[Guardrails]] describes the defensive controls applied around inputs, outputs, and runtime actions.\n- [[OWASP vulnerabilities on AI LLM|OWASP LLM Top 10]] organizes adversarial failures such as prompt injection and excessive agency.\n- [[Hallucinations]] covers unsupported output that appears without an attacker because the model predicts likely tokens rather than verifying truth.\n\nThe distinction changes the response. Security threat modeling considers how an adversary could exploit the system, so it calls for isolation, policy, and least privilege. Those controls also contain accidents such as an overpowered agent disclosing data without malicious input. Reliability failures arise from generation itself and need grounding plus verification. The categories can overlap, and one set of controls cannot replace the other.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Where Safety Attaches to the Ladder\n\nEach runtime layer owns a different part of the safety boundary:\n\n- **Prompt and context** keep trusted instructions separate from retrieved or tool-returned content ([[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering|Prompt Engineering]], [[Home/AI & ML/LLM/Context Engineering/Context Engineering|Context Engineering]]). Grounding through [[Home/AI & ML/LLM/Context Engineering/RAG/RAG|RAG]] also reduces some [[Hallucinations]].\n- **Harness** enforces deterministic controls such as sandboxing, permission gates, and least-privilege credentials in code ([[Home/AI & ML/LLM/Harness Engineering/Harness Engineering|Harness Engineering]]).\n- **Loop** pauses for human approval when an action is irreversible or cannot be checked safely ([[Home/AI & ML/LLM/Loop Engineering/Loop Engineering|Loop Engineering]]).\n- **Measurement** uses the offline cases, release gates, and production signals in [[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]]. An untested safety control is only an assumption.\n\n# Defense in Depth\n\nDefense in depth assumes that any single control can fail. A prompt rule such as \"never call `delete`\" is advisory and may collapse under [[OWASP vulnerabilities on AI LLM|prompt injection]] or a poisoned tool description. Structural controls hold outside the model: validate inputs, isolate untrusted content, gate privileged actions, and check outputs before downstream systems consume them.\n\nPerfection is the wrong target. The practical target is a system where failures have a limited blast radius and produce evidence that makes recovery possible.\n\n# Questions\n\n<!-- qard-id: 025fc250-bb7e-45c2-978e-cb3b569c5e6b -->\n> [!qard]- How do security failures and reliability failures differ, and why does the distinction matter?\n> A security failure breaks a protection boundary: data is disclosed, or an access or action happens that should not be allowed. An attacker can cause it, and so can an ordinary model mistake. A reliability failure is incorrect or unsupported output, and it can occur with no attacker at all. The distinction matters because each type of failure is limited by different controls, and neither set of controls replaces the other.\n>\n> | Aspect | Security failure | Reliability failure |\n> |---|---|---|\n> | What goes wrong | Unauthorized disclosure, access or action. | An incorrect, unsupported or confabulated answer. |\n> | Typical cause | Prompt injection or other hostile input, or a model error in a system that gives the model too much authority. | Generation itself; no adversary is needed. |\n> | Controls | Least privilege, authorization enforced outside the model, and isolation. They limit the damage whatever produced the bad request. | Grounding in evidence, checking claims against sources, and evaluating answer quality. |\n> | What those controls do not fix | A tightly permissioned system can still give a wrong answer. | Grounding and claim checks do not stop a manipulated or mistaken request from running a privileged action. |\n>\n> One incident can be both. A hallucinated tool call is a reliability failure. It also becomes a security incident when an overprivileged agent executes it and the result is unauthorized disclosure or access, or a damaging action. If the agent lacked permission for that action, enforcement outside the model would refuse the call, and the error would stay a reliability failure.\n>\n> [OWASP LLM06:2025 Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/) · [NIST AI 600-1](https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf)\n\n<!-- qard-id: 5ff9fec5-3943-4ab8-9715-3337c068516c -->\n> [!qard]- Why are prompt-level guardrails insufficient on their own?\n> Prompt-level guardrails are insufficient on their own because a prompt only influences what the model generates. The prompt cannot enforce anything at the point where that output is used. The model also follows instructions probabilistically, so prompt injection or an ordinary model error can make it ignore a rule such as \"never call `delete`\".\n>\n> Enforcement therefore happens in deterministic code at the points where model output takes effect:\n>\n> - **Output handling:** the code that consumes model output treats it as untrusted input. It validates or encodes the output for its destination, for example with parameterized SQL, context-aware HTML encoding or schema checks on tool arguments.\n> - **Authorization:** application code or the downstream service checks each requested action against the caller's permissions. The model does not make that decision.\n> - **Impact limits:** least-privilege tools and isolation such as sandboxing limit the damage when a bad request passes the other checks.\n> - **Human approval:** reserved for actions whose consequences justify the delay, such as irreversible operations.\n> \n> Prompt instructions still help by guiding normal behavior and reducing mistakes. They are a useful layer, not an enforcement mechanism.\n>\n> [OWASP LLM05:2025 Improper Output Handling](https://genai.owasp.org/llmrisk/llm052025-improper-output-handling/) · [OWASP LLM06:2025 Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)\n\n# References\n\n- [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/)\n",
-          "hash": "ea085780c5b58c124edc2975470faa3e040e75644bee82abc1819ec22e5d2da5",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Safety/Safety.md",
-          "outcome": "keep",
-          "reason": "Audited the whole folder note against its text and the cited OWASP and NIST sources. The opening ties safety to each layer (prompt, context, harness, loop, evaluation) and links resolve to sibling notes. The security-versus-reliability split is stated correctly, and the note says the two overlap: an accident can be a security failure, and one control set cannot replace the other. The ladder section assigns deterministic controls to the harness and human approval to the loop. Defense in depth correctly treats prompt rules as advisory and structural controls as enforcement. Both cards test one gradeable task each. The first is a focused comparison with an accurate hallucinated-tool-call example. The second explains why prompts cannot enforce, and its output-handling point matches OWASP LLM05 and LLM06. Sources are on the answer side with real URLs. Frontmatter is valid, the datacorejsx block is protected, and References has one authoritative link. No factual error, gap or redundancy was found. There are no known violations, so edits would only add churn."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/LLM/Safety/Safety.md": "ea085780c5b58c124edc2975470faa3e040e75644bee82abc1819ec22e5d2da5"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/LLM/Safety/Safety.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-07T13:18:39.486031Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "The keep is justified. The note is accurate and coherent, both cards test one gradeable task, and no concrete violation or defect was found.",
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Safety/Safety.md",
-            "verdict": "CLEAN",
-            "summary": "The folder note ties safety to each layer of the LLM stack. It separates security from reliability failures and states that the two overlap. Its defense-in-depth section treats prompt rules as advisory and structural controls as enforcement. Both cards are focused and sourced on the answer side. No error or gap warrants an edit.",
-            "page_type": "FolderNote — keeps tags [FolderNote] and the protected datacorejsx map. Questions and References are optional and present, with one authoritative reference.",
-            "current_text_evidence": [
-              {
-                "quote": "The distinction changes the response. Security threat modeling considers how an adversary could exploit the system",
-                "line_start": 26,
-                "reason": "States the security-versus-reliability split and its effect on the response, and acknowledges that the categories overlap, so the boundary is recoverable."
-              },
-              {
-                "quote": "**Harness** enforces deterministic controls such as sandboxing, permission gates, and least-privilege credentials in code",
-                "line_start": 38,
-                "reason": "Maps each runtime layer to a concrete control, which makes the mechanism visible and in a sensible order."
-              },
-              {
-                "quote": "Perfection is the wrong target.",
-                "line_start": 46,
-                "reason": "Ends the defense-in-depth section with a decided engineering stance on blast radius and recovery evidence."
-              },
-              {
-                "quote": "A hallucinated tool call is a reliability failure. It also becomes a security incident",
-                "line_start": 61,
-                "reason": "Gives an accurate, conditional example of how the two failure types overlap, consistent with OWASP LLM06 Excessive Agency."
-              },
-              {
-                "quote": "Prompt instructions still help by guiding normal behavior and reducing mistakes.",
-                "line_start": 75,
-                "reason": "Gives the second card a bounded answer that preserves the exception that prompts are still a useful layer, and its output-handling point matches OWASP LLM05."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: Guardrails, OWASP and Hallucinations already live in sibling notes. This hub is a concise orientation, and the security-versus-reliability framing is coherent as it stands.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Safety/Safety.md",
-          "citation_index": 4,
-          "reported_line_start": 75,
-          "resolved_line_start": 76
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Safety/Safety.md": "ea085780c5b58c124edc2975470faa3e040e75644bee82abc1819ec22e5d2da5"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "The keep is justified. The note is accurate and coherent, both cards test one gradeable task, and no concrete violation or defect was found.",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Safety/Safety.md",
-          "verdict": "CLEAN",
-          "summary": "The folder note ties safety to each layer of the LLM stack. It separates security from reliability failures and states that the two overlap. Its defense-in-depth section treats prompt rules as advisory and structural controls as enforcement. Both cards are focused and sourced on the answer side. No error or gap warrants an edit.",
-          "page_type": "FolderNote — keeps tags [FolderNote] and the protected datacorejsx map. Questions and References are optional and present, with one authoritative reference.",
-          "current_text_evidence": [
-            {
-              "quote": "The distinction changes the response. Security threat modeling considers how an adversary could exploit the system",
-              "line_start": 26,
-              "reason": "States the security-versus-reliability split and its effect on the response, and acknowledges that the categories overlap, so the boundary is recoverable."
-            },
-            {
-              "quote": "**Harness** enforces deterministic controls such as sandboxing, permission gates, and least-privilege credentials in code",
-              "line_start": 38,
-              "reason": "Maps each runtime layer to a concrete control, which makes the mechanism visible and in a sensible order."
-            },
-            {
-              "quote": "Perfection is the wrong target.",
-              "line_start": 46,
-              "reason": "Ends the defense-in-depth section with a decided engineering stance on blast radius and recovery evidence."
-            },
-            {
-              "quote": "A hallucinated tool call is a reliability failure. It also becomes a security incident",
-              "line_start": 61,
-              "reason": "Gives an accurate, conditional example of how the two failure types overlap, consistent with OWASP LLM06 Excessive Agency."
-            },
-            {
-              "quote": "Prompt instructions still help by guiding normal behavior and reducing mistakes.",
-              "line_start": 76,
-              "reason": "Gives the second card a bounded answer that preserves the exception that prompts are still a useful layer, and its output-handling point matches OWASP LLM05."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: Guardrails, OWASP and Hallucinations already live in sibling notes. This hub is a concise orientation, and the security-versus-reliability framing is coherent as it stands.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
     }
   }
 }
