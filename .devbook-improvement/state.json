@@ -6755,9 +6755,9 @@
     "version": 1,
     "id": "b75e350f352448edb997b51c2cb9ee03",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T22:00:53.128724Z",
-    "elapsed_seconds": 373.07587410000014,
+    "elapsed_seconds": 375.90420240000014,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -6766,7 +6766,8 @@
       "Vault/Home/AI & ML/LLM/Agents/Agents.md",
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md"
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -7204,10 +7205,88 @@
           },
           "model_calls": 12
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                "outcome": "keep",
+                "reason": "I read the whole note against its text and the LangSmith/agentevals trajectory-match model. The four modes (strict, unordered, subset, superset) are defined correctly and in the right direction (agent ⊆ reference, agent ⊇ reference). The worked example is consistent: both agents pass superset and the judge separates them. The tradeoff table, the brittleness pitfall (unordered and superset do not accept search+filter in place of query), the long-trace and outcome-leakage pitfalls, and the episode-level versus step-level section are accurate and mutually consistent. The single card tests one comparison task, has a self-contained question, and its answer states conditions and the hybrid exception. The references are relevant and the Mermaid and text fences have language identifiers. I found no factual error, gap or redundancy that an edit would improve, and no known violations."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                "verdict": "CLEAN",
+                "summary": "Independent whole-note read found accurate mode definitions, a consistent worked example, a coherent tradeoff table, sound pitfalls and one well-formed comparison card. No concrete defect justifies an edit, so the keep is warranted.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present and useful; the Qard ID is protected metadata.",
+                "current_text_evidence": [
+                  {
+                    "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                    "line_start": 27,
+                    "reason": "Subset direction is correct and tied to a concrete safety use (read-only task never calls a write tool)."
+                  },
+                  {
+                    "quote": "**Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration.",
+                    "line_start": 28,
+                    "reason": "Superset direction is correct, and the note states the limitation that bloated traces still pass."
+                  },
+                  {
+                    "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+                    "line_start": 66,
+                    "reason": "The worked example agrees with the mode definitions and demonstrates why reference matching alone misses waste."
+                  },
+                  {
+                    "quote": "A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.",
+                    "line_start": 49,
+                    "reason": "The explanation order is sound: the cheap episode-level gate comes first, then step-level localization, with cost named."
+                  },
+                  {
+                    "quote": "neither accepts `search` and `filter` in place of `query`",
+                    "line_start": 83,
+                    "reason": "The brittleness pitfall states the precise limit of unordered and superset matching and the remedy (additional reference path or custom rule)."
+                  },
+                  {
+                    "quote": "Several valid paths do not automatically require a judge.",
+                    "line_start": 112,
+                    "reason": "The card answer states the exception to the main rule, with a hybrid alternative, and the question is a single focused comparison."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: reference matching, trace judging and step versus episode granularity are one coherent evaluation topic, and each section is compact.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is accurate, readable and coherent. The card tests one comparison task with a self-contained question, and the ID is untouched. There are no edits, no known violations and no unsupported claims, so keeping the note unchanged is justified.",
+            "change_checks": []
+          },
+          "model_calls": 14
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T22:07:06.204135Z",
+    "checkpoint_at": "2026-11-07T22:07:09.032464Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
