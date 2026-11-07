@@ -5724,9 +5724,9 @@
     "version": 1,
     "id": "f57944c05f7944ee8610e2bd6384fd74",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 394.45214489999984,
+    "elapsed_seconds": 398.71663249999983,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -5735,7 +5735,8 @@
       "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
-      "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md"
+      "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
+      "Vault/Home/AI & ML/LLM/Safety/Guardrails.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6171,10 +6172,88 @@
           },
           "model_calls": 12
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Safety/Guardrails.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Safety/Guardrails.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and known OWASP/Azure guidance. The four-boundary model (input, context, output, runtime) is consistent with the diagram and sections. The note states that classifiers and regex screens are fallible and that authorization stays in application code, which matches OWASP LLM01/LLM05/LLM06. The schema example is correct, and the note says outright that the schema does not grant permission. The injection mitigations are ordered sensibly and carry their limits (structural separation is guidance, regexes catch only familiar wording, and privilege separation has a stated data-reach condition). The pitfalls section adds distinct points. Every fenced block has a language identifier. The single Qard tests one coherent task (which controls stop output becoming action), has a preserved ID and primary-source citations, and its answer agrees with the body. There were no known violations and no owner feedback. No defect was found that would justify an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Safety/Guardrails.md",
+                "verdict": "CLEAN",
+                "summary": "Independent whole-note audit found no accuracy, clarity, structure or question-quality defect. The four-boundary model, the diagram, the section order, the stated limits of each control and the single Qard are consistent and technically sound. No edit is warranted.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied, no hand-rolled navigation.",
+                "current_text_evidence": [
+                  {
+                    "quote": "One filter cannot cover all four boundaries.",
+                    "line_start": 17,
+                    "reason": "The opening names the four boundaries (input, context, output, runtime) and the reason for layering. The diagram and the H2 sections follow the same split."
+                  },
+                  {
+                    "quote": "This helps the model interpret provenance, but it is guidance rather than a security boundary.",
+                    "line_start": 90,
+                    "reason": "Structural separation is stated with its limit, which avoids overclaiming and matches OWASP guidance."
+                  },
+                  {
+                    "quote": "But the regular expressions only catch familiar wording.",
+                    "line_start": 107,
+                    "reason": "The regex example is immediately qualified, so it works as an illustration and is not presented as a defense."
+                  },
+                  {
+                    "quote": "The schema narrows the command surface. It does not grant permission by itself.",
+                    "line_start": 141,
+                    "reason": "The output-contract example states the key boundary: schema validity is not authorization."
+                  },
+                  {
+                    "quote": "**Overly broad tool access.**",
+                    "line_start": 147,
+                    "reason": "The pitfalls add distinct engineering judgment about per-task tool exposure, not a repeat of earlier sections."
+                  },
+                  {
+                    "quote": "> [!qard]- Which guardrails keep unsafe model output from becoming an unsafe action?",
+                    "line_start": 156,
+                    "reason": "The card tests one coherent task. It is self-contained, keeps its ID comment, and its answer agrees with the body and cites primary sources."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: input, context, output and runtime controls plus prompt-injection defense form one coherent layered-defense topic, and separating them would remove the defense-in-depth reasoning.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The complete note was read independently and holds up on accuracy, ordering, terminology, voice and the single Qard. There are no known violations, owner feedback, edits or rejected proposals, so keeping it unchanged is justified.",
+            "change_checks": []
+          },
+          "model_calls": 14
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:20:40.331178Z",
+    "checkpoint_at": "2026-11-07T06:20:44.595665Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
