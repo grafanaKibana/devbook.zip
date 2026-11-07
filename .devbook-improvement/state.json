@@ -5961,7 +5961,7 @@
     "status": "active",
     "phase": "author_completed",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 163.25869229999995,
+    "elapsed_seconds": 166.90042869999996,
     "calls_reserved": 5,
     "responses_received": 5,
     "attempted_paths": [
@@ -6118,7 +6118,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:20:49.643049Z",
+    "checkpoint_at": "2026-11-07T13:20:53.284785Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -20285,16 +20285,16 @@
       "failed_at": "2026-11-04T20:02:29.090534Z"
     },
     "ai-ml-4edf0823": {
-      "workload_id": "f57944c05f7944ee8610e2bd6384fd74",
+      "workload_id": "b9235098cfe341bd98cce55faa026472",
       "topic_id": "ai-ml-4edf0823",
       "batch": {
         "topic": "AI & ML",
         "topic_id": "ai-ml-4edf0823",
         "notes": [
           {
-            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-            "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Embedding and detecting a keyed statistical pattern in LLM token choices without adding visible markers.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-08-24T13:55:31.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-08-24T13:55:09.085Z\"\n---\n\nLLM text watermarking leaves a keyed statistical pattern in the token choices made during generation. Nothing visible is added to the response: there are no hidden characters, metadata fields, or extra tokens. The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.\n\nThis makes a watermark different from a general AI-text classifier. A classifier looks for learned traits of machine-written text and may be applied to any passage. A watermark detector checks for a signal deliberately introduced by a cooperating model provider. A positive result is evidence that the corresponding model was involved; it is not proof of who wrote the text, who owns it, or whether every word came from the model.\n\n# How Generative Watermarking Works\n\n[[Home/AI & ML/LLM/Generation|Generation]] normally samples each next token from a probability distribution conditioned on the preceding text. A generative watermark changes how randomness is used inside that sampling step:\n\n1. The model produces its next-token distribution after controls such as temperature and top-p have been applied.\n2. A pseudorandom seed is derived from a secret watermark key and the recent token context.\n3. The sampler uses that seed to prefer particular candidates while staying within choices the model already considers plausible.\n4. Repeating this process creates a correlation between the key, the context, and the emitted tokens.\n5. A detector reconstructs the keyed scores from the finished text and compares their aggregate with a decision threshold.\n\nSynthID-Text implements this with **Tournament sampling**. It samples several candidate tokens from the model distribution, pairs them, and lets keyed pseudorandom scoring functions select the winner of each round. The final token therefore tends to score highly under those functions. Detection averages the same scores across the passage:\n\n$$\n\\operatorname{Score}(x)=\\frac{1}{mT}\\sum_{t=1}^{T}\\sum_{\\ell=1}^{m}g_\\ell(x_t,r_t)\n$$\n\nHere, $T$ is the number of scored tokens, $m$ is the number of tournament layers, $r_t$ is the context-and-key-derived seed, and $g_\\ell$ is a keyed scoring function. Watermarked text should accumulate a higher score than unwatermarked text, but the result remains statistical rather than absolute.\n\n# Quality and Detectability\n\nWatermark strength competes with output quality and diversity. A **non-distortionary** configuration preserves the model's output distribution at a defined scope when averaged over watermark seeds. SynthID-Text's production configuration was designed to preserve response quality while accepting some reduction in diversity between repeated responses. A stronger, distortionary configuration makes detection easier by changing the distribution more aggressively, at the cost of some quality.\n\nThe SynthID-Text study found no statistically significant quality difference between watermarked and unwatermarked outputs in standard evaluations, a controlled human preference study, or feedback from approximately 20 million live Gemini responses. Its measured sampling overhead was also small relative to model inference. These results establish production feasibility for the evaluated configurations; they do not make every watermarking method quality-neutral.\n\nDetection improves with two sources of evidence:\n\n- **Longer text.** More model-selected tokens provide more observations, so the score separates more reliably from chance.\n- **Higher-entropy choices.** When several next tokens are plausible, the sampler has room to encode the keyed preference without choosing an implausible token.\n\nThe signal is therefore weak in short passages and low-entropy output. Exact facts, constrained code, and light proofreading leave few interchangeable choices. Translations and original prose provide more opportunities because the model chooses most of the wording.\n\n# Limits\n\n- **Absence is inconclusive.** A missing or weak signal may mean the text is human-written, produced by another model, too short, heavily constrained, lightly edited, or scrubbed through rewriting.\n- **Presence provides limited evidence.** Detection cannot distinguish original generation from substantial model editing, and it carries no user, organization, or conversation identity.\n- **Editing removes evidence.** Light edits may leave enough signal to detect, while paraphrasing and complete rewrites progressively destroy the keyed correlations.\n- **Coverage requires cooperation.** Providers must apply a watermark during generation. Models or deployments that do not participate remain outside that detector's coverage.\n- **Errors still need policy.** A threshold trades false positives against false negatives. High-stakes uses need calibrated thresholds and an abstention result when the evidence is uncertain.\n- **The mechanism is attackable.** Stealing, spoofing, and scrubbing watermarks remain active research problems, especially for openly distributed models.\n\nA watermark is therefore an attribution signal, not a universal AI detector or an authorship verdict. It is most useful alongside provenance records, content credentials for file formats that support them, and process-level disclosure rather than as the sole basis for punishment or access decisions.\n\n# References\n\n- [How Claude's text watermark works](https://www.anthropic.com/news/claude-text-watermark)\n- [Scalable watermarking for identifying large language model outputs](https://www.nature.com/articles/s41586-024-08025-4)\n",
-            "hash": "24f68824944f8fe95e8fef46966fdd025e314ec62c34ca823023522988d087bc",
+            "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+            "content": "---\ntopic: [AI & ML]\nsubtopic: [Machine Learning]\nsummary: \"Whether predicted probabilities match reality: 0.7 predictions should be right about 70% of the time.\"\nlevel: [\"2\"]\npriority: Medium\nstatus: Done\npublish: true\ncreated: \"2026-06-11T07:39:53.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.492Z\"\n---\n\nCalibration asks whether predicted probabilities keep their promises. Among cases scored near 0.7, roughly 70% should be positive. This is separate from discrimination, the ranking property measured by [[ROC-AUC and PR-AUC|ROC-AUC]]. A monotonic transformation can leave AUC unchanged while turning useful probabilities into nonsense. And a model that predicts the base rate for every case can be calibrated while ranking nothing well.\n\nThe distinction becomes operational when code consumes the number. Expected-value rules such as `p × value > cost`, abstention gates, and risk scores all assume that 0.9 means something stable. A miscalibrated score breaks that arithmetic even when the ordering is good. Modern neural networks often lean overconfident, assigning probabilities near 1.0 more often than their observed accuracy supports (Guo et al., 2017).\n\n```mermaid\n---\nconfig:\n  themeVariables:\n    xyChart:\n      plotColorPalette: \"#9CA3AF, #EF4444\"\n---\nxychart-beta\n  title Reliability diagram intuition\n  x-axis Mean predicted probability 0 --> 1\n  y-axis Observed frequency 0 --> 1\n  line [0.0, 0.25, 0.5, 0.75, 1.0]\n  line [0.0, 0.13, 0.32, 0.55, 0.78]\n```\n\nThe gray diagonal marks perfect calibration. The red curve falls below it: predictions near 0.75 are positive only about 0.55 of the time. That model is overconfident. A curve above the diagonal indicates underconfidence.\n\n# Reliability Diagrams\n\nA reliability diagram makes the failure visible. Predictions are grouped into probability bins. Each point compares the bin's mean prediction with its observed positive rate. A calibrated bin lands on the diagonal.\n\n- **Below the diagonal:** the model is overconfident. Observed positives are less common than predicted.\n- **Above the diagonal:** the model is underconfident. Positives occur more often than predicted.\n- **A bent or S-shaped curve:** the error changes across the score range, which a single global correction may not repair.\n\nPair the curve with a score histogram. A point near the diagonal carries little evidence when its bin contains only a handful of cases. Sparse bins can also dominate worst-bin metrics.\n\n# Calibration Metrics\n\n**Brier score** is mean squared error between probability and a 0/1 outcome. Lower is better. As a proper scoring rule, its expected value is minimized by reporting the true probability. Its decomposition separates reliability from resolution, which explains why a constant base-rate forecast can be calibrated yet unhelpful.\n\n**Expected Calibration Error (ECE)** averages the absolute gap between mean confidence and observed frequency across bins, weighted by bin size. It is convenient and fragile. Change the number of bins or switch from equal-width to equal-frequency bins and the value changes. **Maximum Calibration Error (MCE)** keeps only the largest bin gap, making it sensitive to sparse bins.\n\n**Log loss (negative log-likelihood)** is another proper scoring rule. It punishes a confident mistake much more sharply than Brier score. The loss grows without bound as the assigned probability approaches the wrong certainty. The same distinction appears in the [[ROC-AUC and PR-AUC]] comparison.\n\n| Metric | What it captures | Watch out for |\n| --- | --- | --- |\n| Brier score | Calibration + sharpness in one proper score | Less interpretable than a curve. Mixes two effects |\n| ECE | Average calibration gap across confidence bins | Sensitive to bin count and binning scheme |\n| MCE | Worst-bin calibration gap | Dominated by sparse, noisy bins |\n| Log loss | Calibration with heavy penalty for confident mistakes | Explodes on a single confident wrong prediction. Needs clipping |\n| Reliability diagram | Where and how calibration fails | Bins with few samples look misleading |\n\n# Post-hoc Calibration Methods\n\nPost-hoc calibration fits a small mapping from model scores to probabilities. That mapping needs data held out from model fitting, while the final test set stays untouched for evaluation.\n\n- **Platt scaling** fits a sigmoid to model scores. It uses few parameters and works with modest calibration sets, but the sigmoid shape limits what it can correct. ML.NET exposes it through `mlContext.BinaryClassification.Calibrators.Platt`.\n- **Isotonic regression** learns a monotonic step function. It can follow irregular score distortions, though small calibration sets make the steps noisy and prone to overfitting. It is available as `Calibrators.Isotonic` in ML.NET and `CalibratedClassifierCV(method=\"isotonic\")` in scikit-learn.\n- **Temperature scaling** divides logits by one learned scalar before softmax. The argmax stays the same, so class predictions do not change. One scalar handles global overconfidence well, but it cannot fix errors that differ by class or region.\n\nToken-level [[Generation|logprobs]] are sometimes treated as LLM confidence. They need the same empirical check before being used as an escalation gate. A likelihood over the next token is not automatically a calibrated probability that an answer is correct.\n\n# Pitfalls\n\n**Trusting AUC as evidence of good probabilities.** AUC is unchanged by strictly monotonic score transformations. A model can keep an AUC of 0.92 while cases scored at 0.95 are positive only 60% of the time. Probability-driven decisions therefore need a calibration check of their own.\n\n**Calibrating on the test set.** Fitting the mapping on the same cases used for the reported score leaks evaluation data. Use a dedicated calibration split or cross-validated calibration, then evaluate once on a separate test set.\n\n**Reading ECE without the histogram.** A low average can hide a bad high-confidence region with few, expensive cases. Inspect the curve and the number of samples behind each point. MCE can surface the region, though it becomes noisy when the bin is tiny.\n\n**Assuming calibration survives distribution shift.** Calibration belongs to a model-distribution pair. After [[Data Drift]], the old mapping may fail even if ranking quality survives. Measure again on recent labeled data before reusing it.\n\n# Tradeoffs\n\n| Method | Data needed | Flexibility | Effect on accuracy | Best for |\n| --- | --- | --- | --- | --- |\n| Platt scaling | Low | Low — assumes sigmoid distortion | Ranking stays. Thresholded labels may change | Small calibration sets. SVM-style scores |\n| Isotonic regression | High | High — any monotonic distortion | Does not reverse score order, but stepwise ties can change ranking metrics. Thresholded labels may change | Larger sets where the distortion is non-sigmoid |\n| Temperature scaling | Low | Low — single global scalar | Unchanged (argmax preserved) | Neural network logits. Overconfidence |\n| Retrain with a proper scoring loss | Full retrain | Built into training | Can change | Training is controlled and calibration belongs in the model objective |\n\nStart with the curve and a proper scoring rule on held-out data. Ranking-only systems may not need calibrated probabilities. When a formula or person acts on the number, choose the smallest correction that matches the observed shape: temperature scaling for a global logit error, Platt for a sigmoid-shaped distortion, or isotonic with enough data for a more irregular monotonic mapping. Recheck after model or distribution changes.\n\n# References\n\n- [On Calibration of Modern Neural Networks (Guo et al., ICML 2017)](https://arxiv.org/abs/1706.04599)\n- [Probability calibration (scikit-learn user guide)](https://scikit-learn.org/stable/modules/calibration.html)\n- [ML.NET calibrators namespace (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/microsoft.ml.calibrators?view=ml-dotnet-preview)\n- [Verification of Forecasts Expressed in Terms of Probability (Brier, 1950)](https://journals.ametsoc.org/view/journals/mwre/78/1/1520-0493_1950_078_0001_vofeit_2_0_co_2.xml)\n",
+            "hash": "13350b65ba40ba8dfc9fa6f53f6383b55b11e29af0d072b00baa07f57d7898ed",
             "topic": "AI & ML",
             "violations": [],
             "needs_fixing_ids": [],
@@ -20310,184 +20310,50 @@
       },
       "proposal": {
         "version": 1,
-        "edits": [],
+        "edits": [
+          {
+            "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+            "expected_hash": "13350b65ba40ba8dfc9fa6f53f6383b55b11e29af0d072b00baa07f57d7898ed",
+            "before": " The loss grows without bound as the assigned probability approaches the wrong certainty. The same distinction appears in the [[ROC-AUC and PR-AUC]] comparison.",
+            "after": " The loss grows without bound as the assigned probability approaches the wrong certainty.",
+            "reason": "Removes a vague cross-reference that claims an unnamed 'same distinction' appears in the ROC-AUC note; the ranking-versus-probability link is already made in the opening paragraph.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "Log loss grows without bound as probability approaches the wrong certainty"
+            ],
+            "sources": [],
+            "feedback_keys": [],
+            "problem": "The log-loss paragraph ends with a sentence whose referent ('the same distinction') is unclear and unsupported, and it duplicates the opening link.",
+            "reader_benefit": "The metric paragraph ends on its actual point without a confusing, unspecified reference."
+          }
+        ],
         "dispositions": [
           {
-            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-            "outcome": "keep",
-            "reason": "Audited the whole note. The opening separates a keyed watermark from a general AI-text classifier. The sampling steps and the Tournament sampling and score formula match the SynthID-Text description. The quality and detectability section keeps the non-distortionary versus distortionary trade-off. The limits list is consistent with itself. I fetched the Anthropic article, which confirms the note's claims that the watermark is a SynthID-Text variant, adds no characters or tokens, carries no identity, is weak on short text and on factual or exact-code output, and is removed by heavy rewriting. It also states that Claude translations are watermarked, which supports the note's comment on translations. The Nature reference is the primary SynthID-Text paper. The References section is two bare descriptive links, with no frontmatter or lifecycle issues, no code fences and no cards. I found no defect that justifies an edit."
+            "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+            "outcome": "changed",
+            "reason": "Audited the full note: discrimination vs calibration, reliability diagram reading, Brier/ECE/MCE/log loss, Platt/isotonic/temperature behavior, pitfalls and tradeoff table are accurate and consistent with the scikit-learn and Guo et al. material. Only a vague dangling cross-reference sentence was removed for clarity."
           }
         ],
         "feedback": []
       },
       "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": "24f68824944f8fe95e8fef46966fdd025e314ec62c34ca823023522988d087bc"
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": "13350b65ba40ba8dfc9fa6f53f6383b55b11e29af0d072b00baa07f57d7898ed"
       },
       "feedback_keys": [],
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "repair_inputs": {
-        "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": ""
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": ""
       },
       "prepared_source_version": 1,
-      "prepared_at": "2026-11-07T06:22:17.365305Z",
-      "review_evidence": {
-        "raw_review": {
-          "verdict": "CLEAN",
-          "notes": [
-            {
-              "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-              "verdict": "CLEAN",
-              "summary": "The note explains the mechanism, the quality/detectability trade-off and the limits accurately and in order. I found no concrete defect, so keeping it unchanged is justified.",
-              "page_type": "Concept — frontmatter, optional References (two bare descriptive links), no cards, no code fences.",
-              "current_text_evidence": [
-                {
-                  "quote": "The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.",
-                  "line_start": 14,
-                  "reason": "The opening states the operating idea and separates a watermark from a classifier in the next paragraph."
-                },
-                {
-                  "quote": "Synth ID-Text implements this with **Tournament sampling**.",
-                  "line_start": 28,
-                  "reason": "Placeholder"
-                },
-                {
-                  "quote": "The signal is therefore weak in short passages and low-entropy output.",
-                  "line_start": 47,
-                  "reason": "The note derives the weakness from the two detection factors stated just before it, which makes the explanation order sound."
-                },
-                {
-                  "quote": "A threshold trades false positives against false negatives.",
-                  "line_start": 54,
-                  "reason": "The limits are specific and consistent, and they carry the engineering judgment about thresholds and abstention."
-                }
-              ],
-              "target_resolution": "JUSTIFIED UNCHANGED",
-              "split_suggestion": "No split: one coherent topic (generative text watermarking); the sections are interdependent.",
-              "findings": [],
-              "source_checks": [],
-              "rejection_equivalence": [],
-              "quality": {
-                "accuracy": "PASS",
-                "clarity": "PASS",
-                "question_quality": "NOT APPLICABLE",
-                "identity_safety": "NOT APPLICABLE",
-                "rules_compliance": "PASS"
-              }
-            }
-          ],
-          "overall_reason": "The whole note was audited independently. The Anthropic article confirms the SynthID-Text variant, weakness on short and factual text, translations being watermarked, and the absence of identity. The Nature reference is the primary paper. No concrete defect was found, and no edits were proposed.",
-          "change_checks": []
-        },
-        "bindings": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-            "citation_index": 3,
-            "reported_line_start": 54,
-            "resolved_line_start": 55
-          }
-        ],
-        "source_hashes": {
-          "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": "24f68824944f8fe95e8fef46966fdd025e314ec62c34ca823023522988d087bc"
-        },
-        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-      },
-      "completed_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-            "verdict": "CLEAN",
-            "summary": "The note explains the mechanism, the quality/detectability trade-off and the limits accurately and in order. I found no concrete defect, so keeping it unchanged is justified.",
-            "page_type": "Concept — frontmatter, optional References (two bare descriptive links), no cards, no code fences.",
-            "current_text_evidence": [
-              {
-                "quote": "The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.",
-                "line_start": 14,
-                "reason": "The opening states the operating idea and separates a watermark from a classifier in the next paragraph."
-              },
-              {
-                "quote": "Synth ID-Text implements this with **Tournament sampling**.",
-                "line_start": 28,
-                "reason": "Placeholder"
-              },
-              {
-                "quote": "The signal is therefore weak in short passages and low-entropy output.",
-                "line_start": 47,
-                "reason": "The note derives the weakness from the two detection factors stated just before it, which makes the explanation order sound."
-              },
-              {
-                "quote": "A threshold trades false positives against false negatives.",
-                "line_start": 55,
-                "reason": "The limits are specific and consistent, and they carry the engineering judgment about thresholds and abstention."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: one coherent topic (generative text watermarking); the sections are interdependent.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The whole note was audited independently. The Anthropic article confirms the SynthID-Text variant, weakness on short and factual text, translations being watermarked, and the absence of identity. The Nature reference is the primary paper. No concrete defect was found, and no edits were proposed.",
-        "change_checks": []
-      },
+      "prepared_at": "2026-11-07T13:20:49.643032Z",
+      "feedback_snapshot": [],
       "blocked_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-            "verdict": "CLEAN",
-            "summary": "The note explains the mechanism, the quality/detectability trade-off and the limits accurately and in order. I found no concrete defect, so keeping it unchanged is justified.",
-            "page_type": "Concept — frontmatter, optional References (two bare descriptive links), no cards, no code fences.",
-            "current_text_evidence": [
-              {
-                "quote": "The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.",
-                "line_start": 14,
-                "reason": "The opening states the operating idea and separates a watermark from a classifier in the next paragraph."
-              },
-              {
-                "quote": "Synth ID-Text implements this with **Tournament sampling**.",
-                "line_start": 28,
-                "reason": "Placeholder"
-              },
-              {
-                "quote": "The signal is therefore weak in short passages and low-entropy output.",
-                "line_start": 47,
-                "reason": "The note derives the weakness from the two detection factors stated just before it, which makes the explanation order sound."
-              },
-              {
-                "quote": "A threshold trades false positives against false negatives.",
-                "line_start": 55,
-                "reason": "The limits are specific and consistent, and they carry the engineering judgment about thresholds and abstention."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: one coherent topic (generative text watermarking); the sections are interdependent.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The whole note was audited independently. The Anthropic article confirms the SynthID-Text variant, weakness on short and factual text, translations being watermarked, and the absence of identity. The Nature reference is the primary paper. No concrete defect was found, and no edits were proposed.",
-        "change_checks": []
+        "stage": "deterministic_application",
+        "reason": "wikilink removal requires explicit target-specific semantic rationale"
       },
-      "feedback_snapshot": []
+      "failed_at": "2026-11-07T13:20:53.284274Z"
     }
   },
   "parked_review_repairs": {},
@@ -22362,6 +22228,282 @@
         "reason": "source URL missing from owning note: https://docs.cohere.com/docs/cohere-embed"
       },
       "failed_at": "2026-11-05T20:10:55.396248Z"
+    },
+    "c4d67411307d5096f20e06c5850d253b989c67196cd4b001538d45602d21e7a5": {
+      "workload_id": "b9235098cfe341bd98cce55faa026472",
+      "topic_id": "ai-ml-4edf0823",
+      "batch": {
+        "topic": "AI & ML",
+        "topic_id": "ai-ml-4edf0823",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+            "content": "---\ntopic: [AI & ML]\nsubtopic: [Machine Learning]\nsummary: \"Whether predicted probabilities match reality: 0.7 predictions should be right about 70% of the time.\"\nlevel: [\"2\"]\npriority: Medium\nstatus: Done\npublish: true\ncreated: \"2026-06-11T07:39:53.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.492Z\"\n---\n\nCalibration asks whether predicted probabilities keep their promises. Among cases scored near 0.7, roughly 70% should be positive. This is separate from discrimination, the ranking property measured by [[ROC-AUC and PR-AUC|ROC-AUC]]. A monotonic transformation can leave AUC unchanged while turning useful probabilities into nonsense. And a model that predicts the base rate for every case can be calibrated while ranking nothing well.\n\nThe distinction becomes operational when code consumes the number. Expected-value rules such as `p × value > cost`, abstention gates, and risk scores all assume that 0.9 means something stable. A miscalibrated score breaks that arithmetic even when the ordering is good. Modern neural networks often lean overconfident, assigning probabilities near 1.0 more often than their observed accuracy supports (Guo et al., 2017).\n\n```mermaid\n---\nconfig:\n  themeVariables:\n    xyChart:\n      plotColorPalette: \"#9CA3AF, #EF4444\"\n---\nxychart-beta\n  title Reliability diagram intuition\n  x-axis Mean predicted probability 0 --> 1\n  y-axis Observed frequency 0 --> 1\n  line [0.0, 0.25, 0.5, 0.75, 1.0]\n  line [0.0, 0.13, 0.32, 0.55, 0.78]\n```\n\nThe gray diagonal marks perfect calibration. The red curve falls below it: predictions near 0.75 are positive only about 0.55 of the time. That model is overconfident. A curve above the diagonal indicates underconfidence.\n\n# Reliability Diagrams\n\nA reliability diagram makes the failure visible. Predictions are grouped into probability bins. Each point compares the bin's mean prediction with its observed positive rate. A calibrated bin lands on the diagonal.\n\n- **Below the diagonal:** the model is overconfident. Observed positives are less common than predicted.\n- **Above the diagonal:** the model is underconfident. Positives occur more often than predicted.\n- **A bent or S-shaped curve:** the error changes across the score range, which a single global correction may not repair.\n\nPair the curve with a score histogram. A point near the diagonal carries little evidence when its bin contains only a handful of cases. Sparse bins can also dominate worst-bin metrics.\n\n# Calibration Metrics\n\n**Brier score** is mean squared error between probability and a 0/1 outcome. Lower is better. As a proper scoring rule, its expected value is minimized by reporting the true probability. Its decomposition separates reliability from resolution, which explains why a constant base-rate forecast can be calibrated yet unhelpful.\n\n**Expected Calibration Error (ECE)** averages the absolute gap between mean confidence and observed frequency across bins, weighted by bin size. It is convenient and fragile. Change the number of bins or switch from equal-width to equal-frequency bins and the value changes. **Maximum Calibration Error (MCE)** keeps only the largest bin gap, making it sensitive to sparse bins.\n\n**Log loss (negative log-likelihood)** is another proper scoring rule. It punishes a confident mistake much more sharply than Brier score. The loss grows without bound as the assigned probability approaches the wrong certainty. The same distinction appears in the [[ROC-AUC and PR-AUC]] comparison.\n\n| Metric | What it captures | Watch out for |\n| --- | --- | --- |\n| Brier score | Calibration + sharpness in one proper score | Less interpretable than a curve. Mixes two effects |\n| ECE | Average calibration gap across confidence bins | Sensitive to bin count and binning scheme |\n| MCE | Worst-bin calibration gap | Dominated by sparse, noisy bins |\n| Log loss | Calibration with heavy penalty for confident mistakes | Explodes on a single confident wrong prediction. Needs clipping |\n| Reliability diagram | Where and how calibration fails | Bins with few samples look misleading |\n\n# Post-hoc Calibration Methods\n\nPost-hoc calibration fits a small mapping from model scores to probabilities. That mapping needs data held out from model fitting, while the final test set stays untouched for evaluation.\n\n- **Platt scaling** fits a sigmoid to model scores. It uses few parameters and works with modest calibration sets, but the sigmoid shape limits what it can correct. ML.NET exposes it through `mlContext.BinaryClassification.Calibrators.Platt`.\n- **Isotonic regression** learns a monotonic step function. It can follow irregular score distortions, though small calibration sets make the steps noisy and prone to overfitting. It is available as `Calibrators.Isotonic` in ML.NET and `CalibratedClassifierCV(method=\"isotonic\")` in scikit-learn.\n- **Temperature scaling** divides logits by one learned scalar before softmax. The argmax stays the same, so class predictions do not change. One scalar handles global overconfidence well, but it cannot fix errors that differ by class or region.\n\nToken-level [[Generation|logprobs]] are sometimes treated as LLM confidence. They need the same empirical check before being used as an escalation gate. A likelihood over the next token is not automatically a calibrated probability that an answer is correct.\n\n# Pitfalls\n\n**Trusting AUC as evidence of good probabilities.** AUC is unchanged by strictly monotonic score transformations. A model can keep an AUC of 0.92 while cases scored at 0.95 are positive only 60% of the time. Probability-driven decisions therefore need a calibration check of their own.\n\n**Calibrating on the test set.** Fitting the mapping on the same cases used for the reported score leaks evaluation data. Use a dedicated calibration split or cross-validated calibration, then evaluate once on a separate test set.\n\n**Reading ECE without the histogram.** A low average can hide a bad high-confidence region with few, expensive cases. Inspect the curve and the number of samples behind each point. MCE can surface the region, though it becomes noisy when the bin is tiny.\n\n**Assuming calibration survives distribution shift.** Calibration belongs to a model-distribution pair. After [[Data Drift]], the old mapping may fail even if ranking quality survives. Measure again on recent labeled data before reusing it.\n\n# Tradeoffs\n\n| Method | Data needed | Flexibility | Effect on accuracy | Best for |\n| --- | --- | --- | --- | --- |\n| Platt scaling | Low | Low — assumes sigmoid distortion | Ranking stays. Thresholded labels may change | Small calibration sets. SVM-style scores |\n| Isotonic regression | High | High — any monotonic distortion | Does not reverse score order, but stepwise ties can change ranking metrics. Thresholded labels may change | Larger sets where the distortion is non-sigmoid |\n| Temperature scaling | Low | Low — single global scalar | Unchanged (argmax preserved) | Neural network logits. Overconfidence |\n| Retrain with a proper scoring loss | Full retrain | Built into training | Can change | Training is controlled and calibration belongs in the model objective |\n\nStart with the curve and a proper scoring rule on held-out data. Ranking-only systems may not need calibrated probabilities. When a formula or person acts on the number, choose the smallest correction that matches the observed shape: temperature scaling for a global logit error, Platt for a sigmoid-shaped distortion, or isotonic with enough data for a more irregular monotonic mapping. Recheck after model or distribution changes.\n\n# References\n\n- [On Calibration of Modern Neural Networks (Guo et al., ICML 2017)](https://arxiv.org/abs/1706.04599)\n- [Probability calibration (scikit-learn user guide)](https://scikit-learn.org/stable/modules/calibration.html)\n- [ML.NET calibrators namespace (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/microsoft.ml.calibrators?view=ml-dotnet-preview)\n- [Verification of Forecasts Expressed in Terms of Probability (Brier, 1950)](https://journals.ametsoc.org/view/journals/mwre/78/1/1520-0493_1950_078_0001_vofeit_2_0_co_2.xml)\n",
+            "hash": "13350b65ba40ba8dfc9fa6f53f6383b55b11e29af0d072b00baa07f57d7898ed",
+            "topic": "AI & ML",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [
+          {
+            "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+            "expected_hash": "13350b65ba40ba8dfc9fa6f53f6383b55b11e29af0d072b00baa07f57d7898ed",
+            "before": " The loss grows without bound as the assigned probability approaches the wrong certainty. The same distinction appears in the [[ROC-AUC and PR-AUC]] comparison.",
+            "after": " The loss grows without bound as the assigned probability approaches the wrong certainty.",
+            "reason": "Removes a vague cross-reference that claims an unnamed 'same distinction' appears in the ROC-AUC note; the ranking-versus-probability link is already made in the opening paragraph.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "Log loss grows without bound as probability approaches the wrong certainty"
+            ],
+            "sources": [],
+            "feedback_keys": [],
+            "problem": "The log-loss paragraph ends with a sentence whose referent ('the same distinction') is unclear and unsupported, and it duplicates the opening link.",
+            "reader_benefit": "The metric paragraph ends on its actual point without a confusing, unspecified reference."
+          }
+        ],
+        "dispositions": [
+          {
+            "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+            "outcome": "changed",
+            "reason": "Audited the full note: discrimination vs calibration, reliability diagram reading, Brier/ECE/MCE/log loss, Platt/isotonic/temperature behavior, pitfalls and tradeoff table are accurate and consistent with the scikit-learn and Guo et al. material. Only a vague dangling cross-reference sentence was removed for clarity."
+          }
+        ],
+        "feedback": []
+      },
+      "source_hashes": {
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": "13350b65ba40ba8dfc9fa6f53f6383b55b11e29af0d072b00baa07f57d7898ed"
+      },
+      "feedback_keys": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-07T13:20:49.643032Z",
+      "feedback_snapshot": [],
+      "blocked_review": {
+        "stage": "deterministic_application",
+        "reason": "wikilink removal requires explicit target-specific semantic rationale"
+      },
+      "failed_at": "2026-11-07T13:20:53.284274Z"
+    },
+    "ac1e5f732c5968b0a1885d6c69a6da5cab6906ab047846efe28c3ccbece4dce0": {
+      "workload_id": "f57944c05f7944ee8610e2bd6384fd74",
+      "topic_id": "ai-ml-4edf0823",
+      "batch": {
+        "topic": "AI & ML",
+        "topic_id": "ai-ml-4edf0823",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+            "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Embedding and detecting a keyed statistical pattern in LLM token choices without adding visible markers.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-08-24T13:55:31.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-08-24T13:55:09.085Z\"\n---\n\nLLM text watermarking leaves a keyed statistical pattern in the token choices made during generation. Nothing visible is added to the response: there are no hidden characters, metadata fields, or extra tokens. The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.\n\nThis makes a watermark different from a general AI-text classifier. A classifier looks for learned traits of machine-written text and may be applied to any passage. A watermark detector checks for a signal deliberately introduced by a cooperating model provider. A positive result is evidence that the corresponding model was involved; it is not proof of who wrote the text, who owns it, or whether every word came from the model.\n\n# How Generative Watermarking Works\n\n[[Home/AI & ML/LLM/Generation|Generation]] normally samples each next token from a probability distribution conditioned on the preceding text. A generative watermark changes how randomness is used inside that sampling step:\n\n1. The model produces its next-token distribution after controls such as temperature and top-p have been applied.\n2. A pseudorandom seed is derived from a secret watermark key and the recent token context.\n3. The sampler uses that seed to prefer particular candidates while staying within choices the model already considers plausible.\n4. Repeating this process creates a correlation between the key, the context, and the emitted tokens.\n5. A detector reconstructs the keyed scores from the finished text and compares their aggregate with a decision threshold.\n\nSynthID-Text implements this with **Tournament sampling**. It samples several candidate tokens from the model distribution, pairs them, and lets keyed pseudorandom scoring functions select the winner of each round. The final token therefore tends to score highly under those functions. Detection averages the same scores across the passage:\n\n$$\n\\operatorname{Score}(x)=\\frac{1}{mT}\\sum_{t=1}^{T}\\sum_{\\ell=1}^{m}g_\\ell(x_t,r_t)\n$$\n\nHere, $T$ is the number of scored tokens, $m$ is the number of tournament layers, $r_t$ is the context-and-key-derived seed, and $g_\\ell$ is a keyed scoring function. Watermarked text should accumulate a higher score than unwatermarked text, but the result remains statistical rather than absolute.\n\n# Quality and Detectability\n\nWatermark strength competes with output quality and diversity. A **non-distortionary** configuration preserves the model's output distribution at a defined scope when averaged over watermark seeds. SynthID-Text's production configuration was designed to preserve response quality while accepting some reduction in diversity between repeated responses. A stronger, distortionary configuration makes detection easier by changing the distribution more aggressively, at the cost of some quality.\n\nThe SynthID-Text study found no statistically significant quality difference between watermarked and unwatermarked outputs in standard evaluations, a controlled human preference study, or feedback from approximately 20 million live Gemini responses. Its measured sampling overhead was also small relative to model inference. These results establish production feasibility for the evaluated configurations; they do not make every watermarking method quality-neutral.\n\nDetection improves with two sources of evidence:\n\n- **Longer text.** More model-selected tokens provide more observations, so the score separates more reliably from chance.\n- **Higher-entropy choices.** When several next tokens are plausible, the sampler has room to encode the keyed preference without choosing an implausible token.\n\nThe signal is therefore weak in short passages and low-entropy output. Exact facts, constrained code, and light proofreading leave few interchangeable choices. Translations and original prose provide more opportunities because the model chooses most of the wording.\n\n# Limits\n\n- **Absence is inconclusive.** A missing or weak signal may mean the text is human-written, produced by another model, too short, heavily constrained, lightly edited, or scrubbed through rewriting.\n- **Presence provides limited evidence.** Detection cannot distinguish original generation from substantial model editing, and it carries no user, organization, or conversation identity.\n- **Editing removes evidence.** Light edits may leave enough signal to detect, while paraphrasing and complete rewrites progressively destroy the keyed correlations.\n- **Coverage requires cooperation.** Providers must apply a watermark during generation. Models or deployments that do not participate remain outside that detector's coverage.\n- **Errors still need policy.** A threshold trades false positives against false negatives. High-stakes uses need calibrated thresholds and an abstention result when the evidence is uncertain.\n- **The mechanism is attackable.** Stealing, spoofing, and scrubbing watermarks remain active research problems, especially for openly distributed models.\n\nA watermark is therefore an attribution signal, not a universal AI detector or an authorship verdict. It is most useful alongside provenance records, content credentials for file formats that support them, and process-level disclosure rather than as the sole basis for punishment or access decisions.\n\n# References\n\n- [How Claude's text watermark works](https://www.anthropic.com/news/claude-text-watermark)\n- [Scalable watermarking for identifying large language model outputs](https://www.nature.com/articles/s41586-024-08025-4)\n",
+            "hash": "24f68824944f8fe95e8fef46966fdd025e314ec62c34ca823023522988d087bc",
+            "topic": "AI & ML",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+            "outcome": "keep",
+            "reason": "Audited the whole note. The opening separates a keyed watermark from a general AI-text classifier. The sampling steps and the Tournament sampling and score formula match the SynthID-Text description. The quality and detectability section keeps the non-distortionary versus distortionary trade-off. The limits list is consistent with itself. I fetched the Anthropic article, which confirms the note's claims that the watermark is a SynthID-Text variant, adds no characters or tokens, carries no identity, is weak on short text and on factual or exact-code output, and is removed by heavy rewriting. It also states that Claude translations are watermarked, which supports the note's comment on translations. The Nature reference is the primary SynthID-Text paper. The References section is two bare descriptive links, with no frontmatter or lifecycle issues, no code fences and no cards. I found no defect that justifies an edit."
+          }
+        ],
+        "feedback": []
+      },
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": "24f68824944f8fe95e8fef46966fdd025e314ec62c34ca823023522988d087bc"
+      },
+      "feedback_keys": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-07T06:22:17.365305Z",
+      "review_evidence": {
+        "raw_review": {
+          "verdict": "CLEAN",
+          "notes": [
+            {
+              "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+              "verdict": "CLEAN",
+              "summary": "The note explains the mechanism, the quality/detectability trade-off and the limits accurately and in order. I found no concrete defect, so keeping it unchanged is justified.",
+              "page_type": "Concept — frontmatter, optional References (two bare descriptive links), no cards, no code fences.",
+              "current_text_evidence": [
+                {
+                  "quote": "The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.",
+                  "line_start": 14,
+                  "reason": "The opening states the operating idea and separates a watermark from a classifier in the next paragraph."
+                },
+                {
+                  "quote": "Synth ID-Text implements this with **Tournament sampling**.",
+                  "line_start": 28,
+                  "reason": "Placeholder"
+                },
+                {
+                  "quote": "The signal is therefore weak in short passages and low-entropy output.",
+                  "line_start": 47,
+                  "reason": "The note derives the weakness from the two detection factors stated just before it, which makes the explanation order sound."
+                },
+                {
+                  "quote": "A threshold trades false positives against false negatives.",
+                  "line_start": 54,
+                  "reason": "The limits are specific and consistent, and they carry the engineering judgment about thresholds and abstention."
+                }
+              ],
+              "target_resolution": "JUSTIFIED UNCHANGED",
+              "split_suggestion": "No split: one coherent topic (generative text watermarking); the sections are interdependent.",
+              "findings": [],
+              "source_checks": [],
+              "rejection_equivalence": [],
+              "quality": {
+                "accuracy": "PASS",
+                "clarity": "PASS",
+                "question_quality": "NOT APPLICABLE",
+                "identity_safety": "NOT APPLICABLE",
+                "rules_compliance": "PASS"
+              }
+            }
+          ],
+          "overall_reason": "The whole note was audited independently. The Anthropic article confirms the SynthID-Text variant, weakness on short and factual text, translations being watermarked, and the absence of identity. The Nature reference is the primary paper. No concrete defect was found, and no edits were proposed.",
+          "change_checks": []
+        },
+        "bindings": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+            "citation_index": 3,
+            "reported_line_start": 54,
+            "resolved_line_start": 55
+          }
+        ],
+        "source_hashes": {
+          "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": "24f68824944f8fe95e8fef46966fdd025e314ec62c34ca823023522988d087bc"
+        },
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+      },
+      "completed_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains the mechanism, the quality/detectability trade-off and the limits accurately and in order. I found no concrete defect, so keeping it unchanged is justified.",
+            "page_type": "Concept — frontmatter, optional References (two bare descriptive links), no cards, no code fences.",
+            "current_text_evidence": [
+              {
+                "quote": "The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.",
+                "line_start": 14,
+                "reason": "The opening states the operating idea and separates a watermark from a classifier in the next paragraph."
+              },
+              {
+                "quote": "Synth ID-Text implements this with **Tournament sampling**.",
+                "line_start": 28,
+                "reason": "Placeholder"
+              },
+              {
+                "quote": "The signal is therefore weak in short passages and low-entropy output.",
+                "line_start": 47,
+                "reason": "The note derives the weakness from the two detection factors stated just before it, which makes the explanation order sound."
+              },
+              {
+                "quote": "A threshold trades false positives against false negatives.",
+                "line_start": 55,
+                "reason": "The limits are specific and consistent, and they carry the engineering judgment about thresholds and abstention."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: one coherent topic (generative text watermarking); the sections are interdependent.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The whole note was audited independently. The Anthropic article confirms the SynthID-Text variant, weakness on short and factual text, translations being watermarked, and the absence of identity. The Nature reference is the primary paper. No concrete defect was found, and no edits were proposed.",
+        "change_checks": []
+      },
+      "blocked_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains the mechanism, the quality/detectability trade-off and the limits accurately and in order. I found no concrete defect, so keeping it unchanged is justified.",
+            "page_type": "Concept — frontmatter, optional References (two bare descriptive links), no cards, no code fences.",
+            "current_text_evidence": [
+              {
+                "quote": "The detector instead asks whether the sequence of choices is unusually consistent with the sampling decisions produced by a particular watermark key.",
+                "line_start": 14,
+                "reason": "The opening states the operating idea and separates a watermark from a classifier in the next paragraph."
+              },
+              {
+                "quote": "Synth ID-Text implements this with **Tournament sampling**.",
+                "line_start": 28,
+                "reason": "Placeholder"
+              },
+              {
+                "quote": "The signal is therefore weak in short passages and low-entropy output.",
+                "line_start": 47,
+                "reason": "The note derives the weakness from the two detection factors stated just before it, which makes the explanation order sound."
+              },
+              {
+                "quote": "A threshold trades false positives against false negatives.",
+                "line_start": 55,
+                "reason": "The limits are specific and consistent, and they carry the engineering judgment about thresholds and abstention."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: one coherent topic (generative text watermarking); the sections are interdependent.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The whole note was audited independently. The Anthropic article confirms the SynthID-Text variant, weakness on short and factual text, translations being watermarked, and the absence of identity. The Nature reference is the primary paper. No concrete defect was found, and no edits were proposed.",
+        "change_checks": []
+      },
+      "feedback_snapshot": []
     }
   },
   "completed_review_holds": {
@@ -22545,70 +22687,5 @@
       },
       "feedback_snapshot": []
     }
-  },
-  "pending_author_proposal": {
-    "workload_id": "b9235098cfe341bd98cce55faa026472",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [Machine Learning]\nsummary: \"Whether predicted probabilities match reality: 0.7 predictions should be right about 70% of the time.\"\nlevel: [\"2\"]\npriority: Medium\nstatus: Done\npublish: true\ncreated: \"2026-06-11T07:39:53.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.492Z\"\n---\n\nCalibration asks whether predicted probabilities keep their promises. Among cases scored near 0.7, roughly 70% should be positive. This is separate from discrimination, the ranking property measured by [[ROC-AUC and PR-AUC|ROC-AUC]]. A monotonic transformation can leave AUC unchanged while turning useful probabilities into nonsense. And a model that predicts the base rate for every case can be calibrated while ranking nothing well.\n\nThe distinction becomes operational when code consumes the number. Expected-value rules such as `p × value > cost`, abstention gates, and risk scores all assume that 0.9 means something stable. A miscalibrated score breaks that arithmetic even when the ordering is good. Modern neural networks often lean overconfident, assigning probabilities near 1.0 more often than their observed accuracy supports (Guo et al., 2017).\n\n```mermaid\n---\nconfig:\n  themeVariables:\n    xyChart:\n      plotColorPalette: \"#9CA3AF, #EF4444\"\n---\nxychart-beta\n  title Reliability diagram intuition\n  x-axis Mean predicted probability 0 --> 1\n  y-axis Observed frequency 0 --> 1\n  line [0.0, 0.25, 0.5, 0.75, 1.0]\n  line [0.0, 0.13, 0.32, 0.55, 0.78]\n```\n\nThe gray diagonal marks perfect calibration. The red curve falls below it: predictions near 0.75 are positive only about 0.55 of the time. That model is overconfident. A curve above the diagonal indicates underconfidence.\n\n# Reliability Diagrams\n\nA reliability diagram makes the failure visible. Predictions are grouped into probability bins. Each point compares the bin's mean prediction with its observed positive rate. A calibrated bin lands on the diagonal.\n\n- **Below the diagonal:** the model is overconfident. Observed positives are less common than predicted.\n- **Above the diagonal:** the model is underconfident. Positives occur more often than predicted.\n- **A bent or S-shaped curve:** the error changes across the score range, which a single global correction may not repair.\n\nPair the curve with a score histogram. A point near the diagonal carries little evidence when its bin contains only a handful of cases. Sparse bins can also dominate worst-bin metrics.\n\n# Calibration Metrics\n\n**Brier score** is mean squared error between probability and a 0/1 outcome. Lower is better. As a proper scoring rule, its expected value is minimized by reporting the true probability. Its decomposition separates reliability from resolution, which explains why a constant base-rate forecast can be calibrated yet unhelpful.\n\n**Expected Calibration Error (ECE)** averages the absolute gap between mean confidence and observed frequency across bins, weighted by bin size. It is convenient and fragile. Change the number of bins or switch from equal-width to equal-frequency bins and the value changes. **Maximum Calibration Error (MCE)** keeps only the largest bin gap, making it sensitive to sparse bins.\n\n**Log loss (negative log-likelihood)** is another proper scoring rule. It punishes a confident mistake much more sharply than Brier score. The loss grows without bound as the assigned probability approaches the wrong certainty. The same distinction appears in the [[ROC-AUC and PR-AUC]] comparison.\n\n| Metric | What it captures | Watch out for |\n| --- | --- | --- |\n| Brier score | Calibration + sharpness in one proper score | Less interpretable than a curve. Mixes two effects |\n| ECE | Average calibration gap across confidence bins | Sensitive to bin count and binning scheme |\n| MCE | Worst-bin calibration gap | Dominated by sparse, noisy bins |\n| Log loss | Calibration with heavy penalty for confident mistakes | Explodes on a single confident wrong prediction. Needs clipping |\n| Reliability diagram | Where and how calibration fails | Bins with few samples look misleading |\n\n# Post-hoc Calibration Methods\n\nPost-hoc calibration fits a small mapping from model scores to probabilities. That mapping needs data held out from model fitting, while the final test set stays untouched for evaluation.\n\n- **Platt scaling** fits a sigmoid to model scores. It uses few parameters and works with modest calibration sets, but the sigmoid shape limits what it can correct. ML.NET exposes it through `mlContext.BinaryClassification.Calibrators.Platt`.\n- **Isotonic regression** learns a monotonic step function. It can follow irregular score distortions, though small calibration sets make the steps noisy and prone to overfitting. It is available as `Calibrators.Isotonic` in ML.NET and `CalibratedClassifierCV(method=\"isotonic\")` in scikit-learn.\n- **Temperature scaling** divides logits by one learned scalar before softmax. The argmax stays the same, so class predictions do not change. One scalar handles global overconfidence well, but it cannot fix errors that differ by class or region.\n\nToken-level [[Generation|logprobs]] are sometimes treated as LLM confidence. They need the same empirical check before being used as an escalation gate. A likelihood over the next token is not automatically a calibrated probability that an answer is correct.\n\n# Pitfalls\n\n**Trusting AUC as evidence of good probabilities.** AUC is unchanged by strictly monotonic score transformations. A model can keep an AUC of 0.92 while cases scored at 0.95 are positive only 60% of the time. Probability-driven decisions therefore need a calibration check of their own.\n\n**Calibrating on the test set.** Fitting the mapping on the same cases used for the reported score leaks evaluation data. Use a dedicated calibration split or cross-validated calibration, then evaluate once on a separate test set.\n\n**Reading ECE without the histogram.** A low average can hide a bad high-confidence region with few, expensive cases. Inspect the curve and the number of samples behind each point. MCE can surface the region, though it becomes noisy when the bin is tiny.\n\n**Assuming calibration survives distribution shift.** Calibration belongs to a model-distribution pair. After [[Data Drift]], the old mapping may fail even if ranking quality survives. Measure again on recent labeled data before reusing it.\n\n# Tradeoffs\n\n| Method | Data needed | Flexibility | Effect on accuracy | Best for |\n| --- | --- | --- | --- | --- |\n| Platt scaling | Low | Low — assumes sigmoid distortion | Ranking stays. Thresholded labels may change | Small calibration sets. SVM-style scores |\n| Isotonic regression | High | High — any monotonic distortion | Does not reverse score order, but stepwise ties can change ranking metrics. Thresholded labels may change | Larger sets where the distortion is non-sigmoid |\n| Temperature scaling | Low | Low — single global scalar | Unchanged (argmax preserved) | Neural network logits. Overconfidence |\n| Retrain with a proper scoring loss | Full retrain | Built into training | Can change | Training is controlled and calibration belongs in the model objective |\n\nStart with the curve and a proper scoring rule on held-out data. Ranking-only systems may not need calibrated probabilities. When a formula or person acts on the number, choose the smallest correction that matches the observed shape: temperature scaling for a global logit error, Platt for a sigmoid-shaped distortion, or isotonic with enough data for a more irregular monotonic mapping. Recheck after model or distribution changes.\n\n# References\n\n- [On Calibration of Modern Neural Networks (Guo et al., ICML 2017)](https://arxiv.org/abs/1706.04599)\n- [Probability calibration (scikit-learn user guide)](https://scikit-learn.org/stable/modules/calibration.html)\n- [ML.NET calibrators namespace (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/microsoft.ml.calibrators?view=ml-dotnet-preview)\n- [Verification of Forecasts Expressed in Terms of Probability (Brier, 1950)](https://journals.ametsoc.org/view/journals/mwre/78/1/1520-0493_1950_078_0001_vofeit_2_0_co_2.xml)\n",
-          "hash": "13350b65ba40ba8dfc9fa6f53f6383b55b11e29af0d072b00baa07f57d7898ed",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
-          "expected_hash": "13350b65ba40ba8dfc9fa6f53f6383b55b11e29af0d072b00baa07f57d7898ed",
-          "before": " The loss grows without bound as the assigned probability approaches the wrong certainty. The same distinction appears in the [[ROC-AUC and PR-AUC]] comparison.",
-          "after": " The loss grows without bound as the assigned probability approaches the wrong certainty.",
-          "reason": "Removes a vague cross-reference that claims an unnamed 'same distinction' appears in the ROC-AUC note; the ranking-versus-probability link is already made in the opening paragraph.",
-          "kind": "note",
-          "learning_target": "same",
-          "essential_meanings": [
-            "Log loss grows without bound as probability approaches the wrong certainty"
-          ],
-          "sources": [],
-          "feedback_keys": [],
-          "problem": "The log-loss paragraph ends with a sentence whose referent ('the same distinction') is unclear and unsupported, and it duplicates the opening link.",
-          "reader_benefit": "The metric paragraph ends on its actual point without a confusing, unspecified reference."
-        }
-      ],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
-          "outcome": "changed",
-          "reason": "Audited the full note: discrimination vs calibration, reliability diagram reading, Brier/ECE/MCE/log loss, Platt/isotonic/temperature behavior, pitfalls and tradeoff table are accurate and consistent with the scikit-learn and Guo et al. material. Only a vague dangling cross-reference sentence was removed for clarity."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": "13350b65ba40ba8dfc9fa6f53f6383b55b11e29af0d072b00baa07f57d7898ed"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-07T13:20:49.643032Z"
   }
 }
