@@ -5604,16 +5604,17 @@
     "version": 1,
     "id": "f57944c05f7944ee8610e2bd6384fd74",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 284.8415608999998,
+    "elapsed_seconds": 288.0312028999998,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
       "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
-      "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md"
+      "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
+      "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -5908,10 +5909,83 @@
           },
           "model_calls": 8
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+                "outcome": "keep",
+                "reason": "I read the whole note against its current text. The opening ties prompts to sampling and to the system interface. The four-element anatomy has a worked example that uses all four elements. The settings section correctly separates temperature, top-p, max tokens and stop sequences, and it labels its ranges as heuristics that need evaluation. The instruction and role examples are concrete. The Mermaid flow agrees with the prose, and the Pitfalls cover injection, schema-valid but wrong content, and token-budget collapse. The two existing Qards each test one gradeable task. Their answers cover conditions and exceptions, such as parameter support varying by model and reasoning tokens counting toward output limits. Their cited OpenAI claims match the vendor's documented behavior. The code fences have language identifiers, and the note has no unresolved known violations. I found no factual error or learning gap, so I made no edits."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note read found no factual, structural, voice or question-quality defect. No edits were proposed, so keeping the note unchanged is justified.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+                "verdict": "CLEAN",
+                "summary": "The note explains prompt anatomy, settings, instruction and role prompting, technique selection and pitfalls accurately and in a whiteboard voice. Both Qards each test one dependent task and carry answer-side primary sources, and no edit is warranted.",
+                "page_type": "FolderNote — keeps tags FolderNote and the protected datacorejsx map; Questions and References are optional and present; MD040 satisfied.",
+                "current_text_evidence": [
+                  {
+                    "quote": "These starting ranges are heuristics. Production values need task-specific evaluation on the chosen model.",
+                    "line_start": 56,
+                    "reason": "The settings table is correctly hedged, so the numeric ranges are not presented as facts."
+                  },
+                  {
+                    "quote": "Strict output shape needs structured output or schema validation.",
+                    "line_start": 135,
+                    "reason": "The prose is consistent with the Mermaid flow above it and states the boundary that examples cover semantics a schema cannot."
+                  },
+                  {
+                    "quote": "**Correct shape, wrong content.**",
+                    "line_start": 140,
+                    "reason": "The pitfall names a concrete failure, schema-valid but invented values, and its mitigation."
+                  },
+                  {
+                    "quote": "Why must prompt instructions and generation settings be evaluated together?",
+                    "line_start": 146,
+                    "reason": "This is a single dependent why-explanation with conditions, such as model and endpoint parameter support, and an answer-side source."
+                  },
+                  {
+                    "quote": "How can an output-token cap limit cost without truncating valid answers?",
+                    "line_start": 157,
+                    "reason": "This is one coherent sizing and truncation task. The answer covers reasoning tokens, context sharing, truncation detection and the endpoint-specific parameter names."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note is a compact hub, and its child notes already cover in-context learning, reasoning, composition and optimization separately.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 10
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:18:50.720591Z",
+    "checkpoint_at": "2026-11-07T06:18:53.910233Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
