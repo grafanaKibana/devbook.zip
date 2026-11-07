@@ -4894,6 +4894,76 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/AI & ML/Machine Learning/Types/Types.md": {
+      "content_hash": "3a824ae2486026a43e240336075aa921cfd99554b80d3b2896e58b01ac626a9f",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "3a824ae2486026a43e240336075aa921cfd99554b80d3b2896e58b01ac626a9f",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
+          "verdict": "CLEAN",
+          "summary": "The note classifies ML by learning signal. Each paradigm section gives a mechanism, an evaluation concern and a failure mode. The table, the decision flow and the two comparison Qards agree with the prose. Keeping it unchanged is justified.",
+          "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx map block. Questions and References are optional and present. Code fences carry language identifiers (datacorejsx, mermaid).",
+          "current_text_evidence": [
+            {
+              "quote": "The useful way to classify machine learning is by its learning signal.",
+              "line_start": 19,
+              "reason": "The opening sets the organizing principle immediately, so the reader can re-enter the topic."
+            },
+            {
+              "quote": "Backpropagation is one way to do that for differentiable models, while trees use different fitting procedures.",
+              "line_start": 30,
+              "reason": "This precise qualification avoids implying that every supervised model trains by gradient descent."
+            },
+            {
+              "quote": "Majority classes tend to receive more confident pseudo-labels, so per-class validation and calibration matter more than the headline metric.",
+              "line_start": 56,
+              "reason": "The note names the concrete failure mode of semi-supervised learning together with its mitigation."
+            },
+            {
+              "quote": "Delayed reward makes credit assignment harder, but reward can also arrive immediately.",
+              "line_start": 64,
+              "reason": "The note states the condition accurately instead of equating RL with delayed reward."
+            },
+            {
+              "quote": "Bandit problems, in which each action affects only its immediate reward, are the simplest reinforcement-learning setting.",
+              "line_start": 94,
+              "reason": "The note draws the sequential and bandit boundary correctly, and it matches the flowchart node."
+            },
+            {
+              "quote": "That evidence can be label-free or use labels collected only for evaluation.",
+              "line_start": 106,
+              "reason": "The first Qard keeps the evaluation nuance for unsupervised learning, so the answer is not oversimplified."
+            },
+            {
+              "quote": "Taxonomies differ on where self-supervised learning belongs.",
+              "line_start": 123,
+              "reason": "The second Qard acknowledges the taxonomy ambiguity, and it cites the Google glossary and Spinning Up on the answer side."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the five paradigms share one organizing axis, the learning signal. The comparison table and decision flow depend on seeing them together, so separate notes would fragment that axis.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -6311,7 +6381,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 608.8299671000001,
+    "elapsed_seconds": 613.3637555000001,
     "calls_reserved": 19,
     "responses_received": 19,
     "attempted_paths": [
@@ -6916,7 +6986,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:28:15.214329Z",
+    "checkpoint_at": "2026-11-07T13:28:19.748118Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -11010,6 +11080,95 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md": "d820700c92577d931fb374bffa153c1fbe4985c3754c5aa1dee790560525ceef"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "9b3bb44808204fef0846446845e6b86195a732e3ae0c91b26d8eaccfc8fd84e5": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Independent full-note audit found no factual, editorial, structural or Qard-quality defect. No edits were proposed and none are needed.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
+            "verdict": "CLEAN",
+            "summary": "The note classifies ML by learning signal. Each paradigm section gives a mechanism, an evaluation concern and a failure mode. The table, the decision flow and the two comparison Qards agree with the prose. Keeping it unchanged is justified.",
+            "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx map block. Questions and References are optional and present. Code fences carry language identifiers (datacorejsx, mermaid).",
+            "current_text_evidence": [
+              {
+                "quote": "The useful way to classify machine learning is by its learning signal.",
+                "line_start": 19,
+                "reason": "The opening sets the organizing principle immediately, so the reader can re-enter the topic."
+              },
+              {
+                "quote": "Backpropagation is one way to do that for differentiable models, while trees use different fitting procedures.",
+                "line_start": 30,
+                "reason": "This precise qualification avoids implying that every supervised model trains by gradient descent."
+              },
+              {
+                "quote": "Majority classes tend to receive more confident pseudo-labels, so per-class validation and calibration matter more than the headline metric.",
+                "line_start": 56,
+                "reason": "The note names the concrete failure mode of semi-supervised learning together with its mitigation."
+              },
+              {
+                "quote": "Delayed reward makes credit assignment harder, but reward can also arrive immediately.",
+                "line_start": 64,
+                "reason": "The note states the condition accurately instead of equating RL with delayed reward."
+              },
+              {
+                "quote": "Bandit problems, in which each action affects only its immediate reward, are the simplest reinforcement-learning setting.",
+                "line_start": 95,
+                "reason": "The note draws the sequential and bandit boundary correctly, and it matches the flowchart node."
+              },
+              {
+                "quote": "That evidence can be label-free or use labels collected only for evaluation.",
+                "line_start": 104,
+                "reason": "The first Qard keeps the evaluation nuance for unsupervised learning, so the answer is not oversimplified."
+              },
+              {
+                "quote": "Taxonomies differ on where self-supervised learning belongs.",
+                "line_start": 118,
+                "reason": "The second Qard acknowledges the taxonomy ambiguity, and it cites the Google glossary and Spinning Up on the answer side."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the five paradigms share one organizing axis, the learning signal. The comparison table and decision flow depend on seeing them together, so separate notes would fragment that axis.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
+          "citation_index": 4,
+          "reported_line_start": 95,
+          "resolved_line_start": 94
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
+          "citation_index": 5,
+          "reported_line_start": 104,
+          "resolved_line_start": 106
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
+          "citation_index": 6,
+          "reported_line_start": 118,
+          "resolved_line_start": 123
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/Machine Learning/Types/Types.md": "3a824ae2486026a43e240336075aa921cfd99554b80d3b2896e58b01ac626a9f"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -23795,205 +23954,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "b9235098cfe341bd98cce55faa026472",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
-          "content": "---\ntitle: Machine Learning Types\ntopic: [AI & ML]\nsubtopic: [Machine Learning]\nsummary: \"How a model learns from data and feedback. The choice drives data, training, and evaluation.\"\ntags: [FolderNote]\npublish: true\nstatus: Done\npriority: Low\nlevel: [\"1\"]\nqard-deck: \"AI & ML\"\nqard-topic: \"Machine Learning/Types/Types\"\nflashcard_uid: \"d3a3edaf\"\ncreated: \"2026-02-19T22:34:10.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.496Z\"\n---\n\nThe useful way to classify machine learning is by its learning signal. Labels, proxy targets, rewards, or the absence of a target determine what the training loop can optimize and how its result can be evaluated. Model architecture comes later.\n\nThat boundary matters. A classifier trained from labeled tickets and an agent learning from delayed rewards may use similar neural-network components, but they solve different problems and fail in different ways.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Supervised learning\n\nSupervised learning fits a function from inputs to known targets. A training example might pair a support ticket with its owning team, an image with a class, or a house with its sale price. The learning algorithm reduces error on those pairs. Backpropagation is one way to do that for differentiable models, while trees use different fitting procedures.\n\nThe held-out set must represent the production decisions that matter. Overall accuracy can look healthy while recall for a rare fraud class collapses. Labels can also encode old policy or annotation mistakes, and distribution shift makes yesterday's validation score a poor description of today's traffic.\n\nThis is usually the first choice for classification, regression, or ranking when the target is explicit and trustworthy. It has the cleanest evaluation story because predictions can be compared with answers the model did not see during training.\n\n# Unsupervised learning\n\nUnsupervised learning has inputs but no target variable. Its objective imposes a notion of structure: k-means minimizes distance to cluster centers, PCA preserves directions of high variance, and an isolation forest treats easily isolated observations as unusual.\n\nThe objective is only a proxy for usefulness. Two merchant clusters can be mathematically well separated and still mean nothing to a risk policy. Results therefore need an external check, such as whether the segments explain different behavior or improve a downstream decision. Random initialization, scaling, and feature choice can change the grouping substantially.\n\nIt fits exploratory analysis, representation reduction, and anomaly detection when labeled outcomes do not exist. But a cluster ID is not a discovered truth. It is the output of a chosen objective and feature space.\n\n# Self-supervised learning\n\nSelf-supervised learning derives targets from the data itself. A language model predicts hidden or subsequent tokens. A vision model may learn that two transformed views came from the same image. No human annotator supplies those targets.\n\nThe usual payoff is a representation that can support several downstream tasks. It may be fine-tuned with labels, used to create embeddings, or prompted directly. Transfer is strongest when the pretraining data and proxy task expose the distinctions needed later. Lower pretraining loss alone does not prove that retrieval, classification, or generation improved.\n\nPretraining can consume far more data and compute than a task-specific supervised model. It earns that cost when reusable representations or scarce labels matter, especially for language and vision.\n\n# Semi-supervised learning\n\nSemi-supervised learning uses labeled and unlabeled examples for the same target task. A common loop trains a supervised baseline, assigns pseudo-labels to confident unlabeled examples, and retrains with the enlarged set. Consistency regularization takes another route by penalizing predictions that change under harmless input transformations.\n\nThe unlabeled pool helps only when it resembles the production distribution and the starting model is good enough to supply useful signal. Otherwise pseudo-labeling feeds early mistakes back into training. Majority classes tend to receive more confident pseudo-labels, so per-class validation and calibration matter more than the headline metric.\n\nThis approach is worth considering when labels are expensive, unlabeled data is plentiful, and a supervised baseline already establishes what success means.\n\n# Reinforcement learning\n\nReinforcement learning learns a policy for choosing actions in an environment. The environment returns observations and rewards, possibly long after the action that caused them. Training seeks a policy with high expected cumulative reward rather than the best isolated prediction.\n\nSequential interaction and credit assignment justify RL. A routing policy, for example, may trade an immediate handling cost against the later chance of resolution. Delayed reward makes credit assignment harder, but reward can also arrive immediately. The same machinery is needless for a one-step ticket classifier with known labels.\n\nReward design sets the real objective. An incomplete proxy invites specification gaming, while exploration can be unsafe or expensive on a live system. Offline simulation helps, but the simulator can teach behavior that exploits its own blind spots. Production use needs stronger guardrails and evaluation than a conventional prediction service.\n\n# How the Learning Signals Differ\n\n| Type | Learning signal | Evaluation question | Common failure |\n|---|---|---|---|\n| Supervised | Human- or system-provided target | Does it predict held-out targets on important slices? | Label errors or production drift |\n| Unsupervised | Structure imposed by an objective | Does the discovered structure help a real decision? | Mathematically tidy but useless groups |\n| Self-supervised | Targets derived from raw data | Does the representation transfer to the downstream task? | Proxy loss improves without useful transfer |\n| Semi-supervised | A few labels plus unlabeled examples | Does unlabeled data beat the supervised baseline safely? | Confirmation bias from wrong pseudo-labels |\n| Reinforcement | Reward from interaction | Does the policy improve long-term return under constraints? | Reward gaming or unsafe exploration |\n\n# Choosing the Learning Signal\n\n```mermaid\nflowchart TD\n    A{Is the learning signal a reward for chosen actions?} -->|Yes| D[\"Reinforcement learning: sequential if actions change later state, bandit if not\"]\n    A -->|No| B{Do you have reliable target labels?}\n    B -->|Yes| E[Supervised learning]\n    B -->|Some| C[Semi-supervised learning]\n    B -->|None| G{What should the model learn?}\n    G -->|Task-relevant structure| H[Unsupervised learning]\n    G -->|Transferable representations from self-generated targets| I[Self-supervised learning]\n    G -->|Neither| F[Collect labels or use rules]\n```\n\nReliable labels and a clear target point to supervised learning. With no labels, the choice depends on the desired output: unsupervised methods look for task-relevant structure, while self-supervised methods learn reusable representations from proxy targets. A small labeled set can anchor a semi-supervised approach.\n\nReinforcement learning is the narrow branch. It needs an environment or simulator that returns a reward for chosen actions; per-example target labels are not its defining input. When actions also change later state, the problem is sequential and rewards must be credited across steps. Bandit problems, in which each action affects only its immediate reward, are the simplest reinforcement-learning setting. If the problem can be reduced to independent labeled examples, a supervised formulation is easier to test and operate.\n\n# Questions\n\n> [!qard]- What is the difference between supervised and unsupervised learning?\n> Supervised learning trains on inputs paired with known targets and learns to predict those targets. Unsupervised learning trains on inputs without targets. It finds structure defined by a chosen objective, such as groups of similar examples.\n>\n> | Aspect | Supervised learning | Unsupervised learning |\n> |---|---|---|\n> | Training data | Examples with labels, such as tickets paired with their owning team or houses paired with their sale price. | Examples without labels, such as merchant transaction histories. |\n> | What training optimizes | Error between predictions and the known targets. | An objective that defines structure, for example how close examples are to their cluster centers in k-means, or how much variance PCA keeps. |\n> | Typical tasks | Classification, regression and ranking. | Clustering, dimensionality reduction and anomaly detection. |\n> | How results are evaluated | Directly, by comparing predictions with held-out labels the model did not see during training. | Training gives no answers to compare against, and a good objective score is only a proxy. Usefulness needs external evidence, such as whether the structure explains different behavior or improves a real decision. That evidence can be label-free or use labels collected only for evaluation. |\n> | Common failure | Label errors, held-out data that does not represent production, or distribution shift. | Structure that is mathematically tidy but useless. Feature choice, scaling and random initialization can change the result substantially. |\n>\n> A cluster is therefore not a discovered truth. It is the output of a chosen objective and feature space.\n>\n> [Google Machine Learning Glossary](https://developers.google.com/machine-learning/glossary)\n\n<!-- qard-id: eae4d15f-44e2-4fe2-bb4d-495806ec28d1 -->\n> [!qard]- How do supervised, self-supervised, and reinforcement learning differ in their learning signal, even when all three use neural networks?\n> The three paradigms differ in where the training signal comes from. Supervised learning uses a target supplied for each example. Self-supervised learning derives targets automatically from the input data. Reinforcement learning uses rewards that an environment returns in response to actions, and it optimizes expected cumulative reward.\n>\n> | Paradigm | Learning signal | Example | What training optimizes |\n> |---|---|---|---|\n> | Supervised | A label for each example, provided by people or by another system. | Support tickets paired with the team that owns them. | Agreement between predictions and the given labels. |\n> | Self-supervised | A proxy target derived from the data itself, with no human annotation. | Predicting the next token, or a hidden one, in text. | Performance on the proxy task, usually to learn representations that are reused for other tasks. |\n> | Reinforcement | A reward from the environment after an action. The reward may arrive immediately or only after later actions. | A routing policy rewarded when tickets get resolved. | A policy with high expected cumulative reward (return) over time. |\n>\n> The architecture does not determine the paradigm: similar neural-network components can be trained with any of these signals. The signal determines what training can optimize and how the result is evaluated. Taxonomies differ on where self-supervised learning belongs. It is sometimes described as turning an unsupervised problem into a supervised one by creating surrogate labels from unlabeled data.\n>\n> [Google Machine Learning Glossary](https://developers.google.com/machine-learning/glossary) · [OpenAI Spinning Up: Key Concepts in RL](https://spinningup.openai.com/en/latest/spinningup/rl_intro.html)\n\n# References\n\n- [Google ML Intro — What is ML?](https://developers.google.com/machine-learning/intro-to-ml/what-is-ml)\n- [scikit-learn — Supervised learning](https://scikit-learn.org/stable/supervised_learning.html)\n- [OpenAI Spinning Up in Deep RL](https://spinningup.openai.com/en/latest/spinningup/rl_intro.html)\n",
-          "hash": "3a824ae2486026a43e240336075aa921cfd99554b80d3b2896e58b01ac626a9f",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its text and standard ML definitions. The opening frames the taxonomy by learning signal. Each of the five sections gives a mechanism, an evaluation concern and a failure mode, with accurate examples (k-means, PCA, isolation forest, pseudo-labeling, consistency regularization, delayed reward and specification gaming). The comparison table agrees with the prose. The Mermaid decision flow correctly places reinforcement learning as the reward-based branch and separates unsupervised from self-supervised learning. Bandits are correctly described as the immediate-reward case. Both Qards each test one coherent comparison task, and their answers match the body and cite relevant sources. The references are relevant, there are no known violations, and the code fences have language identifiers. No factual or editorial defect justifies an edit."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/Machine Learning/Types/Types.md": "3a824ae2486026a43e240336075aa921cfd99554b80d3b2896e58b01ac626a9f"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/Machine Learning/Types/Types.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-07T13:27:52.493063Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "Independent full-note audit found no factual, editorial, structural or Qard-quality defect. No edits were proposed and none are needed.",
-        "change_checks": [],
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
-            "verdict": "CLEAN",
-            "summary": "The note classifies ML by learning signal. Each paradigm section gives a mechanism, an evaluation concern and a failure mode. The table, the decision flow and the two comparison Qards agree with the prose. Keeping it unchanged is justified.",
-            "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx map block. Questions and References are optional and present. Code fences carry language identifiers (datacorejsx, mermaid).",
-            "current_text_evidence": [
-              {
-                "quote": "The useful way to classify machine learning is by its learning signal.",
-                "line_start": 19,
-                "reason": "The opening sets the organizing principle immediately, so the reader can re-enter the topic."
-              },
-              {
-                "quote": "Backpropagation is one way to do that for differentiable models, while trees use different fitting procedures.",
-                "line_start": 30,
-                "reason": "This precise qualification avoids implying that every supervised model trains by gradient descent."
-              },
-              {
-                "quote": "Majority classes tend to receive more confident pseudo-labels, so per-class validation and calibration matter more than the headline metric.",
-                "line_start": 56,
-                "reason": "The note names the concrete failure mode of semi-supervised learning together with its mitigation."
-              },
-              {
-                "quote": "Delayed reward makes credit assignment harder, but reward can also arrive immediately.",
-                "line_start": 64,
-                "reason": "The note states the condition accurately instead of equating RL with delayed reward."
-              },
-              {
-                "quote": "Bandit problems, in which each action affects only its immediate reward, are the simplest reinforcement-learning setting.",
-                "line_start": 95,
-                "reason": "The note draws the sequential and bandit boundary correctly, and it matches the flowchart node."
-              },
-              {
-                "quote": "That evidence can be label-free or use labels collected only for evaluation.",
-                "line_start": 104,
-                "reason": "The first Qard keeps the evaluation nuance for unsupervised learning, so the answer is not oversimplified."
-              },
-              {
-                "quote": "Taxonomies differ on where self-supervised learning belongs.",
-                "line_start": 118,
-                "reason": "The second Qard acknowledges the taxonomy ambiguity, and it cites the Google glossary and Spinning Up on the answer side."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the five paradigms share one organizing axis, the learning signal. The comparison table and decision flow depend on seeing them together, so separate notes would fragment that axis.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ]
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
-          "citation_index": 4,
-          "reported_line_start": 95,
-          "resolved_line_start": 94
-        },
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
-          "citation_index": 5,
-          "reported_line_start": 104,
-          "resolved_line_start": 106
-        },
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
-          "citation_index": 6,
-          "reported_line_start": 118,
-          "resolved_line_start": 123
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/Machine Learning/Types/Types.md": "3a824ae2486026a43e240336075aa921cfd99554b80d3b2896e58b01ac626a9f"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "Independent full-note audit found no factual, editorial, structural or Qard-quality defect. No edits were proposed and none are needed.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
-          "verdict": "CLEAN",
-          "summary": "The note classifies ML by learning signal. Each paradigm section gives a mechanism, an evaluation concern and a failure mode. The table, the decision flow and the two comparison Qards agree with the prose. Keeping it unchanged is justified.",
-          "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx map block. Questions and References are optional and present. Code fences carry language identifiers (datacorejsx, mermaid).",
-          "current_text_evidence": [
-            {
-              "quote": "The useful way to classify machine learning is by its learning signal.",
-              "line_start": 19,
-              "reason": "The opening sets the organizing principle immediately, so the reader can re-enter the topic."
-            },
-            {
-              "quote": "Backpropagation is one way to do that for differentiable models, while trees use different fitting procedures.",
-              "line_start": 30,
-              "reason": "This precise qualification avoids implying that every supervised model trains by gradient descent."
-            },
-            {
-              "quote": "Majority classes tend to receive more confident pseudo-labels, so per-class validation and calibration matter more than the headline metric.",
-              "line_start": 56,
-              "reason": "The note names the concrete failure mode of semi-supervised learning together with its mitigation."
-            },
-            {
-              "quote": "Delayed reward makes credit assignment harder, but reward can also arrive immediately.",
-              "line_start": 64,
-              "reason": "The note states the condition accurately instead of equating RL with delayed reward."
-            },
-            {
-              "quote": "Bandit problems, in which each action affects only its immediate reward, are the simplest reinforcement-learning setting.",
-              "line_start": 94,
-              "reason": "The note draws the sequential and bandit boundary correctly, and it matches the flowchart node."
-            },
-            {
-              "quote": "That evidence can be label-free or use labels collected only for evaluation.",
-              "line_start": 106,
-              "reason": "The first Qard keeps the evaluation nuance for unsupervised learning, so the answer is not oversimplified."
-            },
-            {
-              "quote": "Taxonomies differ on where self-supervised learning belongs.",
-              "line_start": 123,
-              "reason": "The second Qard acknowledges the taxonomy ambiguity, and it cites the Google glossary and Spinning Up on the answer side."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the five paradigms share one organizing axis, the learning signal. The comparison table and decision flow depend on seeing them together, so separate notes would fragment that axis.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
     }
   }
 }
