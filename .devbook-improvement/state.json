@@ -5841,14 +5841,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 0.0010859,
+    "elapsed_seconds": 4.701007799999999,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:18:06.385566Z"
+    "checkpoint_at": "2026-11-07T13:18:11.085363Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
