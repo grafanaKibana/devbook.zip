@@ -6598,11 +6598,11 @@
     "version": 1,
     "id": "b75e350f352448edb997b51c2cb9ee03",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-07T22:00:53.128724Z",
-    "elapsed_seconds": 236.07128359999996,
+    "elapsed_seconds": 244.44399989999997,
     "calls_reserved": 9,
-    "responses_received": 8,
+    "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/AI & ML/Responsible AI.md",
       "Vault/Home/AI & ML/AI & ML.md",
@@ -6906,7 +6906,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T22:04:49.199543Z",
+    "checkpoint_at": "2026-11-07T22:04:57.572258Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -24750,5 +24750,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "b75e350f352448edb997b51c2cb9ee03",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
+          "content": "---\ntitle: Agent Evaluation\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Measures outcome and process separately over a trajectory, since a task can fail by many paths.\"\nlevel: [\"3\"]\npriority: High\nstatus: Done\ntags: [FolderNote]\npublish: true\ncreated: \"2026-06-12T18:21:46.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.404Z\"\n---\n\nEvaluating an [[Home/AI & ML/LLM/Agents/Agents|agent]] means evaluating a *trajectory*, not a single answer. The agent chooses a tool, reads the result, and decides what to do next. Two runs can reach the same result by very different routes. A third can look reasonable for several steps and then fail. A final-answer score hides that difference. Agent evaluation separates the **outcome** (was the task completed?) from the **process** (was the route sound and efficient?).\n\nAgent evaluation reuses the machinery in [[Home/AI & ML/LLM/Evaluation/Evaluation|LLM Evaluation]]: [[Building an Evaluation Set|building the task set]], applying [[Deterministic Checks]] to tool schemas and arguments, using [[LLM-as-a-Judge]] for semantic grading, and closing the [[Online Evaluation and AB Tests|online/A-B loop]]. The difference is the unit being scored. These checks operate over a sequence of actions rather than one model response.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# What to Measure\n\n```mermaid\nflowchart TD\n    T[Task] --> A[Agent trajectory: tool calls + observations + steps]\n    A --> O[Outcome eval]\n    A --> P[Process eval]\n    O --> O1[Task success: final state correct]\n    P --> P1[Tool-call correctness]\n    P --> P2[Trajectory quality: reasonable path]\n    P --> P3[Efficiency: steps, cost, latency]\n    P --> P4[Robustness: error recovery, termination]\n```\n\n- **Task success (outcome).** Check the resulting state, not the agent's claim about it. Assert the refund row, run the generated code against tests, or diff the written file. This is the closest thing to ground truth, but it says nothing about how the agent arrived there.\n- **Tool-call correctness (process).** Check whether each tool was appropriate, its arguments were valid, and the call was needed. Schema and allowlist checks belong in [[Deterministic Checks]]. Judging necessity or tool choice often needs a reference trace or a rubric. [[Tool-Call Evaluation]] breaks this down into selection, arguments, validity, and necessity.\n- **Trajectory quality (process).** Inspect whether the trace follows a reasonable route. Wandering, repeated work, and lucky recovery from a bad branch matter even when the final state is correct. [[Trajectory Evaluation]] covers reference matching and rubric-based judgment for the whole trace.\n- **Efficiency.** Record steps, token cost, and wall-clock latency per task. Fourteen calls for work that normally takes four is a regression even if both runs succeed. More steps also create more places for the run to go wrong.\n- **Robustness and termination.** Inject tool failures and watch what happens. The agent must recover when recovery is possible and stop when the task is complete. Track loops, oscillation, and step-cap hits directly. A one-shot evaluation cannot expose them.\n\nAverage success hides shaky behavior. A task that passes 6 runs out of 10 is materially different from one that passes every time, although either can look perfect in a single demo. Run each task `k` times and report the share solved on *all* attempts, using a pass^k-style reliability metric alongside the mean pass rate.\n\n[[Agent Benchmarks]] explains what public suites such as SWE-bench, tau-bench, GAIA, and WebArena actually measure. Those scores are useful orientation, though they rarely predict performance on a private toolset and task distribution.\n\n# Example\n\nA per-task scorecard for a customer-support agent (one task, run k=5 times):\n\n```text\nTask: \"Refund the damaged item on order #4815 and email the customer\"\n\nOutcome (verifiable end state):\n- refund_issued(order=4815, amount=full)   -> assert DB row\n- email_sent(to=customer, topic=refund)    -> assert outbox\n\nProcess (per trajectory):\n- Tool-call validity: all calls schema-valid, no disallowed actions  (deterministic)\n- Tool selection: used lookup_order before issue_refund               (judge / reference)\n- Efficiency: 4 steps, $0.011, 3.2s   (budget: <=6 steps, <$0.02, <5s)\n- Termination: stopped after success, no loop\n\nReliability: solved on 5/5 runs  (pass^5 = 1.0)\n```\n\n# Tradeoffs\n\n| Approach | What it catches | Cost | When to rely on it |\n| --- | --- | --- | --- |\n| Outcome-only (verifiable end state) | Whether the task was completed | Low: one state assertion, no judge | Every task. It is strong evidence but blind to path quality |\n| Reference-trajectory match | Deviation from a known route | High: reference traces require manual upkeep | Narrow tasks where one route genuinely dominates |\n| LLM-as-judge over the trace | Whether the path and tool choices make sense | Medium: one judge call per trajectory | Open-ended tasks with several valid routes, calibrated against human labels |\n| Efficiency / cost counters | Waste and looping | Very low: instrumentation only | Every task, paired with outcome checks |\n\nGate releases on **verifiable task success plus efficiency limits**. Both are cheap and objective. Add trajectory judgment when many routes are valid and the outcome cannot separate a clean solve from a lucky one. Hand-built reference traces belong only on narrow, high-stakes tasks. Maintaining them across a broad suite becomes its own project.\n\n# References\n\n- [Trajectory evaluations -- reference-match and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)\n",
+          "hash": "9d6c3ab926115ea0252031dfb5538c720d0a4a8b5755c6c0c1bc3196558c4c4a",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "changed"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
+          "outcome": "keep",
+          "reason": "Audited the whole FolderNote against its current text and the cited LangSmith trajectory-evals page. The opening separates outcome from process over a trajectory, and the mermaid diagram matches the five bullets below it. The bullets cover task success, tool-call correctness, trajectory quality, efficiency and robustness, and each links to the child note that owns the detail. The pass^k reliability paragraph is accurate. The scorecard example is internally consistent, with 5/5 solved runs giving pass^5 = 1.0. The tradeoffs table matches the release-gating advice. The reference-trajectory row correctly says reference traces are costly to maintain and suit only narrow tasks, which is consistent with the LangSmith reference-match versus judge distinction. The note has no cards, so there is no card-quality issue. Its wikilinks, code fences, References section and voice conform to the contract. I found no factual error, gap or redundancy that an edit would fix, so I made no change."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md": "9d6c3ab926115ea0252031dfb5538c720d0a4a8b5755c6c0c1bc3196558c4c4a"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-07T22:04:57.572249Z"
   }
 }
