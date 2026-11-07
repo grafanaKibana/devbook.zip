@@ -6909,9 +6909,9 @@
     "version": 1,
     "id": "b75e350f352448edb997b51c2cb9ee03",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T22:00:53.128724Z",
-    "elapsed_seconds": 538.4535049000001,
+    "elapsed_seconds": 541.2671629000001,
     "calls_reserved": 20,
     "responses_received": 20,
     "attempted_paths": [
@@ -6923,7 +6923,8 @@
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md"
+      "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -7585,10 +7586,79 @@
           },
           "model_calls": 18
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+                "outcome": "keep",
+                "reason": "I read the whole note against its text. It opens with the retrieval-unit trade-off and a concrete retention-policy example. The strategy-selection table is tied to observed failures. Each of the six strategies explains its mechanism, a fit condition and its failure modes. The mechanisms are accurate: separator-based recursive splitting, parser-driven structure-aware splitting, similarity-threshold semantic splitting, parent lookup by ID in parent-child, and non-deterministic agentic boundaries. Recursive-splitting limits on tables and code are stated with the right conditions. The practical baselines and the tradeoff table are hedged as tendencies. The five cards each test one task. They carry sources, and their answers agree with the note, including the Azure index-projection caveat. There are no known violations, no feedback and no open proposals. The references are relevant. I found no factual or editorial defect that justifies an edit, so a forced change would only add churn."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole note and found no concrete factual, structural or question-quality defect. The keep is justified: the opening gives the trade-off and a concrete example, and each strategy states its mechanism, fit condition and failure modes. The four cards each test one gradeable task and carry sources. The author's disposition says \"five cards\" but the note has four. That is a minor miscount in the disposition, not a defect in the note.",
+                "page_type": "Concept — the note has typed frontmatter and optional Questions and References sections. The voice is impersonal and whiteboard-style, all code fences carry language identifiers (mermaid), and the Qard IDs are protected.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Chunking sets the unit of retrieval. Large chunks carry more surrounding text but waste context on noise.",
+                    "line_start": 17,
+                    "reason": "The opening states the central trade-off and the boundary quickly, before any detail."
+                  },
+                  {
+                    "quote": "A raw character split can put the exception in another chunk.",
+                    "line_start": 19,
+                    "reason": "A concrete retention-policy example shows the failure mechanism and makes the idea recoverable."
+                  },
+                  {
+                    "quote": "| Split clauses, tables, or code blocks break answer correctness | Structure-aware |",
+                    "line_start": 27,
+                    "reason": "The selection table ties each strategy to an observed failure and an upgrade trigger, so it supports an engineering decision."
+                  },
+                  {
+                    "quote": "Custom separators for table and code-block delimiters only make those positions preferred split points",
+                    "line_start": 86,
+                    "reason": "The recursive-splitting limits are stated with the correct conditions. They cover table rows, oversized blocks and the atomic-unit policy, so no mechanism is over-simplified."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the six strategies share one decision (how to set the unit of retrieval) and are compared in a single selection table and a single tradeoff table. Splitting them would make the comparison harder to follow.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is accurate and clear. Its explanation order works: the trade-off and example come first, then the selection table, the strategies, the baselines and the tradeoff table. Repetition is limited and purposeful. The four cards are single-task, carry sources, and agree with the prose, including the Azure caveat. There are no edits, so no edit or source checks apply.",
+            "change_checks": []
+          },
+          "model_calls": 20
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T22:09:51.581769Z",
+    "checkpoint_at": "2026-11-07T22:09:54.395428Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
