@@ -6377,727 +6377,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "b9235098cfe341bd98cce55faa026472",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 637.6249618,
-    "calls_reserved": 19,
-    "responses_received": 19,
-    "attempted_paths": [
-      "Vault/Home/AI & ML/LLM/Safety/Safety.md",
-      "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
-      "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
-      "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md",
-      "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
-      "Vault/Home/AI & ML/Machine Learning/Types/Types.md"
-    ],
+    "id": "b75e350f352448edb997b51c2cb9ee03",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-07T22:00:53.128724Z",
+    "elapsed_seconds": 0.0010709,
+    "calls_reserved": 0,
+    "responses_received": 0,
+    "attempted_paths": [],
     "accepted_records": [],
-    "outcomes": [
-      {
-        "path": "Vault/Home/AI & ML/LLM/Safety/Safety.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Safety/Safety.md",
-                "outcome": "keep",
-                "reason": "Audited the whole folder note against its text and the cited OWASP and NIST sources. The opening ties safety to each layer (prompt, context, harness, loop, evaluation) and links resolve to sibling notes. The security-versus-reliability split is stated correctly, and the note says the two overlap: an accident can be a security failure, and one control set cannot replace the other. The ladder section assigns deterministic controls to the harness and human approval to the loop. Defense in depth correctly treats prompt rules as advisory and structural controls as enforcement. Both cards test one gradeable task each. The first is a focused comparison with an accurate hallucinated-tool-call example. The second explains why prompts cannot enforce, and its output-handling point matches OWASP LLM05 and LLM06. Sources are on the answer side with real URLs. Frontmatter is valid, the datacorejsx block is protected, and References has one authoritative link. No factual error, gap or redundancy was found. There are no known violations, so edits would only add churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The keep is justified. The note is accurate and coherent, both cards test one gradeable task, and no concrete violation or defect was found.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Safety/Safety.md",
-                "verdict": "CLEAN",
-                "summary": "The folder note ties safety to each layer of the LLM stack. It separates security from reliability failures and states that the two overlap. Its defense-in-depth section treats prompt rules as advisory and structural controls as enforcement. Both cards are focused and sourced on the answer side. No error or gap warrants an edit.",
-                "page_type": "FolderNote — keeps tags [FolderNote] and the protected datacorejsx map. Questions and References are optional and present, with one authoritative reference.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The distinction changes the response. Security threat modeling considers how an adversary could exploit the system",
-                    "line_start": 26,
-                    "reason": "States the security-versus-reliability split and its effect on the response, and acknowledges that the categories overlap, so the boundary is recoverable."
-                  },
-                  {
-                    "quote": "**Harness** enforces deterministic controls such as sandboxing, permission gates, and least-privilege credentials in code",
-                    "line_start": 38,
-                    "reason": "Maps each runtime layer to a concrete control, which makes the mechanism visible and in a sensible order."
-                  },
-                  {
-                    "quote": "Perfection is the wrong target.",
-                    "line_start": 46,
-                    "reason": "Ends the defense-in-depth section with a decided engineering stance on blast radius and recovery evidence."
-                  },
-                  {
-                    "quote": "A hallucinated tool call is a reliability failure. It also becomes a security incident",
-                    "line_start": 61,
-                    "reason": "Gives an accurate, conditional example of how the two failure types overlap, consistent with OWASP LLM06 Excessive Agency."
-                  },
-                  {
-                    "quote": "Prompt instructions still help by guiding normal behavior and reducing mistakes.",
-                    "line_start": 76,
-                    "reason": "Gives the second card a bounded answer that preserves the exception that prompts are still a useful layer, and its output-handling point matches OWASP LLM05."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: Guardrails, OWASP and Hallucinations already live in sibling notes. This hub is a concise orientation, and the security-versus-reliability framing is coherent as it stands.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 2
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
-                "outcome": "keep",
-                "reason": "I read the whole note against its text and the standard literature. The drift taxonomy is correct: P(X) for feature drift and covariate shift, P(Y) for label drift, and P(Y|X) for concept drift. The PSI code handles constant baselines, duplicate quantile edges, out-of-range values and zero bins. The prose correctly says the 0.1/0.2 bands are conventions. The KS (large-sample sensitivity, multiple testing), chi-square (sparse categories) and Jensen-Shannon (base-2 bound of 0 to 1) caveats are accurate. The pitfalls cover segmentation, late labels and misreading P(X) change as concept drift, and they match the Gama survey and Rabanser et al. cited in the note. The retraining tradeoffs are coherent. The single Qard tests one dependent contrast (data drift versus concept drift) with a primary source on the answer side. The References are relevant and have no trailing annotations. The note has no known violations, no flagged cards, and no duplicated or padded passages. Any rewrite would be cosmetic."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
-                "verdict": "CLEAN",
-                "summary": "I read the whole note independently. The taxonomy, PSI code and caveats, test caveats, pitfalls and tradeoffs are accurate. The single Qard tests one focused comparison, and the references are relevant. No concrete defect justifies an edit.",
-                "page_type": "Concept — frontmatter and Qard ID metadata are intact. The code fences have language identifiers, Questions and References are optional and present, and there is no Links section.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Drift is a warning, not proof that the model is wrong.",
-                    "line_start": 19,
-                    "reason": "The opening states the operating idea and the key boundary: a change in inputs is not the same as a change in model quality."
-                  },
-                  {
-                    "quote": "| **Concept drift** | P(Y\\|X), the relationship between inputs and labels |",
-                    "line_start": 27,
-                    "reason": "The taxonomy is correct: P(X) for feature drift and covariate shift, P(Y) for label drift, P(Y|X) for concept drift."
-                  },
-                  {
-                    "quote": "A constant baseline still cannot define useful quantile bins, so the function fails instead of reporting zero drift",
-                    "line_start": 62,
-                    "reason": "The code and prose agree on the edge cases. The 0.1 and 0.2 PSI bands are described as conventions and not as statistical guarantees."
-                  },
-                  {
-                    "quote": "The monitoring method should match the feature and the decision.",
-                    "line_start": 120,
-                    "reason": "The tradeoff prose gives a decision condition and puts labeled performance above feature-level alerts. The explanation order from definition to detection, workflow, pitfalls and tradeoffs is sound and not repetitive."
-                  },
-                  {
-                    "quote": "> [!qard]- What is the difference between data drift and concept drift?",
-                    "line_start": 136,
-                    "reason": "This is one dependent comparison and so is independently gradeable. It keeps its qard-id and has a primary source on the answer side."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note covers one coherent topic, detecting and responding to drift. The sections depend on each other, so a split would not give independently useful pages.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The note is accurate, clear and complete for its depth. The kept Qard is a single focused comparison with its ID preserved. There are no edits and no known violations, so an edit would be cosmetic.",
-            "change_checks": []
-          },
-          "model_calls": 4
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
-        "outcome": "proposal_blocked",
-        "reason": "wikilink removal requires explicit target-specific semantic rationale",
-        "result": {
-          "status": "proposal_blocked",
-          "stage": "deterministic_application",
-          "reason": "wikilink removal requires explicit target-specific semantic rationale",
-          "model_calls": 5
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note. The confusion-matrix definitions and the precision, recall and F1 formulas are correct. The worked example sums to 100 cases and gives precision 0.80, recall 0.762 (shown as 0.76) and F1 0.78. The two-threshold table values also check out: 90/150 = 0.60, 90/100 = 0.90, 55/65 = 0.85 and 55/100 = 0.55. The multi-class averaging claims are accurate, including that micro precision and recall equal accuracy for single-label multi-class classification. The threshold diagram is hedged correctly as the usual direction, not a guarantee. The pitfalls (F1 hiding asymmetric failures, comparing arbitrary thresholds, optimizing one metric without a constraint, accuracy under imbalance) are sound and consistent with the PR-AUC and ROC-AUC sibling cards. Code fences have language identifiers, and the references are relevant. There are no cards in this note and no known violations. The prose reads direct and in order, so no edit would add value."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note audit found no factual, editorial, structural or rule defects. The keep is justified and no edits were proposed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate and ordered well: matrix, metrics, threshold effect, worked numbers, multi-class averaging, then pitfalls. I recomputed every number and found no errors. The prose is direct and has no padding, so leaving it unchanged is justified.",
-                "page_type": "Concept — typed frontmatter, optional Questions absent (allowed), References present as bare link bullets, code fences carry language identifiers.",
-                "current_text_evidence": [
-                  {
-                    "quote": "A release decision then compares models at the same constraint, such as maximizing precision while keeping recall above 0.95.",
-                    "line_start": 14,
-                    "reason": "The opening states the operating idea and the decision condition right away."
-                  },
-                  {
-                    "quote": "The diagram describes the usual direction, not a guarantee for every finite sample.",
-                    "line_start": 56,
-                    "reason": "Hedges the threshold effect correctly, so the note does not overclaim monotonic behaviour."
-                  },
-                  {
-                    "quote": "| 0.80 | 55 | 10 | 45 | 0.85 | 0.55 |",
-                    "line_start": 84,
-                    "reason": "55/65 = 0.846 and 55/100 = 0.55 are correct. The row shows the precision/recall trade-off at a second threshold."
-                  },
-                  {
-                    "quote": "F1        = 2 * (0.80 * 0.76) / (0.80 + 0.76) = 0.78",
-                    "line_start": 76,
-                    "reason": "The worked example sums to 100 cases. F1 is about 0.78 whether it is computed from the rounded or the exact recall."
-                  },
-                  {
-                    "quote": "for single-label multi-class classification, micro precision and recall equal accuracy",
-                    "line_start": 96,
-                    "reason": "The claim is correct and carries the condition (single-label) it depends on."
-                  },
-                  {
-                    "quote": "Always predicting \"not fraud\" yields 99.9% accuracy when fraud prevalence is 0.1%",
-                    "line_start": 106,
-                    "reason": "The imbalance arithmetic is correct and makes the pitfall concrete."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: binary metrics, thresholds and multi-class averaging are one coherent evaluation topic, and the note is compact.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 7
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
-                "outcome": "keep",
-                "reason": "I read the whole folder note against its current text and found no defect that needs an edit. The opening frames offline score as a proxy and links the detailed pages. The four-decision section covers decision cost, splits that resemble the future, tradeoff-exposing metric sets and slices. It then ties them to the offline-online gap, and that tie is sound. The metric-family summary correctly separates threshold metrics, ranking metrics, calibration metrics and retrieval metrics. The regression section's claims match the standard definitions in the scikit-learn and ML.NET references: RMSE penalizes large errors, MAE is linear, MAPE fails at zero, and quantile loss targets a conditional quantile. The pitfalls section on proxy optimization, leakage and threshold selection on the test set is accurate. The datacorejsx block is a protected FolderNote map, and the note has no cards. The References section has two relevant bare link bullets, and the code fence has a language identifier. No known violations are listed. The note is compact and has no repetition worth cutting, so a forced rewrite would be cosmetic."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The single FolderNote was audited in full and has no concrete defect. The keep is justified: content is accurate and compact, the protected map block is intact, the References are valid, and there are no cards or rule violations.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
-                "verdict": "CLEAN",
-                "summary": "The note frames offline score as a proxy and links the detailed pages. It then covers decision cost, splits, metric pairing and slices, and ties them to the offline-online gap. The metric and regression definitions are standard and accurate, and the pitfalls are correct. No edit is needed, since any rewrite would be cosmetic.",
-                "page_type": "FolderNote. It keeps tags: [FolderNote], the datacorejsx folder map is protected, and Questions and References are optional. There are no cards, and the References are two bare relevant links.",
-                "current_text_evidence": [
-                  {
-                    "quote": "An offline score is only a proxy for that answer.",
-                    "line_start": 16,
-                    "reason": "The opening states the operating idea quickly and links the detailed metric pages."
-                  },
-                  {
-                    "quote": "Accuracy says little on a fraud dataset with a 0.1% positive rate.",
-                    "line_start": 27,
-                    "reason": "A concrete example shows why metric choice follows decision cost."
-                  },
-                  {
-                    "quote": "Offline evaluation can block a bad release.",
-                    "line_start": 32,
-                    "reason": "The offline-online gap is stated with its practical limit."
-                  },
-                  {
-                    "quote": "**RMSE** squares each error before averaging, so a few large misses dominate the result.",
-                    "line_start": 42,
-                    "reason": "The regression definitions are accurate and each states when it fits."
-                  },
-                  {
-                    "quote": "Select the operating point on validation data, then report it once on the untouched test set.",
-                    "line_start": 55,
-                    "reason": "The pitfall gives the correct remedy for threshold selection leakage."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note is a compact hub, and the detailed metric families already live in dedicated pages.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 9
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against standard metric definitions. The ROC and PR construction is correct. The AUC probabilistic interpretation, including ties counted as half, is correct. The fixed 0.5 ROC baseline and the prevalence-dependent PR baseline are correct. The caveat that PR-AUC implementations differ matches scikit-learn's average_precision_score documentation. The ML.NET properties AreaUnderRocCurve and AreaUnderPrecisionRecallCurve exist on BinaryClassificationMetrics, and the code example is coherent. The 100 positives / 100,000 negatives example checks out: 1,000/100,000 = 1% FPR, and 80/1,080 ≈ 7% precision. Both Qards test one gradeable task each, and their answers carry sources. The tradeoff table, pitfalls and references are accurate, non-redundant and in a consistent voice. No violations are known. I found no factual or editorial defect that justifies a change."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
-                "verdict": "CLEAN",
-                "summary": "Independent whole-note audit found the definitions, baselines, probabilistic interpretation, worked 100/100,000 example, ML.NET property names and tradeoff table accurate and well ordered. The keep is justified. The only issues are minor and non-blocking: `ROC AUC` and ROC-AUC are used inconsistently, and the prevalence baseline appears several times, which suits recall.",
-                "page_type": "Concept — authorable prose with optional Questions and References; frontmatter and Qard IDs protected; mermaid and csharp fences have language identifiers.",
-                "current_text_evidence": [
-                  {
-                    "quote": "PR-AUC puts the positive class in the foreground, making false positives visible when positives are rare.",
-                    "line_start": 19,
-                    "reason": "The opening states the operating idea and the key boundary, the prevalence-dependent PR baseline, before the mechanics."
-                  },
-                  {
-                    "quote": "it is the chance that a randomly chosen positive receives a higher score than a randomly chosen negative, with a tie counted as half.",
-                    "line_start": 63,
-                    "reason": "This is the correct probabilistic interpretation of ROC-AUC. It also correctly says PR-AUC has no equally simple interpretation and that implementations differ."
-                  },
-                  {
-                    "quote": "catching 80 positives while flagging 1,000 negatives gives a false-positive rate of 1%, yet only 80 of the 1,080 alerts, about 7%, are correct.",
-                    "line_start": 158,
-                    "reason": "The arithmetic is verified (1,000/100,000 = 1%; 80/1,080 ≈ 7.4%). It shows concretely why ROC can look strong while the positive queue stays noisy."
-                  },
-                  {
-                    "quote": "The threshold is swept on validation data, a point that satisfies the constraint is chosen, and the frozen point is then evaluated on separate test data.",
-                    "line_start": 118,
-                    "reason": "This gives a sound, decided procedure for threshold selection that avoids test-set leakage, so the note covers the boundary that AUC does not pick a threshold."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: ROC-AUC and PR-AUC are one comparison topic, and the curves, interpretation, choice and pitfalls are best read together.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "No concrete defect found. Facts are correct and the structure is coherent. The Qards are bounded, each answer is a dependent explanation, and both carry sources. IDs are intact and there are no edits to evaluate.",
-            "change_checks": []
-          },
-          "model_calls": 11
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
-                "outcome": "keep",
-                "reason": "Read the whole note against its purpose as a folder hub. The opening states when ML fits and when rules remain better, and links to Spectrum Of Automations. The Mermaid pipeline matches the eleven stage sections in order, including the monitoring-to-collection loop. The stage prose is accurate and carries conditions: label ownership and disagreement, future-information leakage, train/inference transform parity, time- or group-based splits for correlated rows, a holdout kept out of tuning, random search before Bayesian optimization, immutable registry artifacts with lineage, latency budgets that include feature lookup, and drift as a signal rather than proof of degradation. These match standard practice, as in Google's Rules of ML and the Hidden Technical Debt paper that the note already cites. The voice is direct and impersonal. The note has no cards, so there is no question quality issue. The Datacore block, frontmatter and references (bare, topic-specific links) are intact, and every code fence has a language identifier. known_violations is empty. No factual or editorial defect was found, so no edit is warranted."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
-                "verdict": "CLEAN",
-                "summary": "Whole-note read of the FolderNote hub. The opening gives when ML fits versus rules. The pipeline diagram matches the eleven stage sections in order. Each stage states mechanisms and conditions: leakage, train/inference parity, group or time splits, holdout discipline, immutable registry artifacts, tail-latency budgets, and drift as a signal rather than proof. No factual, terminology, ordering or repetition defect was found, so keeping it unchanged is justified.",
-                "page_type": "FolderNote — hub with protected Datacore folder-map block; Questions optional and absent; References are bare topic-specific links.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Machine learning fits problems where useful behavior can be learned from examples more cheaply than it can be expressed as rules.",
-                    "line_start": 15,
-                    "reason": "Opens by saying when ML applies, which introduces the topic quickly. The next paragraph states the rules boundary."
-                  },
-                  {
-                    "quote": "a feature built with future information can make every offline result look convincing while guaranteeing a production failure",
-                    "line_start": 49,
-                    "reason": "Concrete leakage mechanism with its consequence, in a direct whiteboard voice."
-                  },
-                  {
-                    "quote": "Repeated inspection quietly turns a test set into another validation set.",
-                    "line_start": 55,
-                    "reason": "States the condition that changes the evaluation decision."
-                  },
-                  {
-                    "quote": "Track input quality and [[Data Drift]] while waiting, but do not confuse drift with proof that predictions became worse.",
-                    "line_start": 76,
-                    "reason": "Gives the important boundary between drift and quality loss. The wikilink is purposeful."
-                  },
-                  {
-                    "quote": "Promotion changes the stage of an existing version rather than overwriting the artifact.",
-                    "line_start": 67,
-                    "reason": "Explains the registry mechanism and why rollback becomes mechanical."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the stages form one coherent pipeline that depends on shared concepts such as leakage, the holdout and train/inference parity. Separate notes would break that flow.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The single note was independently read in full. It is accurate, clear and compliant: code fences have languages, the Datacore block is intact, and the references are bare topic-specific links. No concrete defect was found, and the keep is justified.",
-            "change_checks": []
-          },
-          "model_calls": 13
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text and general knowledge of NLP. The opening is accurate: it defines NLP and states the limit that models learn statistical structure rather than understanding language. The tokenization section correctly flags its example as illustrative and notes that WordPiece uses ## markers and byte-level BPE keeps leading spaces. The NER, sentiment, extractive vs generative QA, and transformer-reuse explanations are correct and carry the conditions that matter, such as NER not being a PII detector and token counts depending on the tokenizer. The .NET section uses the real TextAnalyticsClient API with AnalyzeSentimentAsync, which returns the Sentiment and ConfidenceScores properties shown. The tradeoff tables name the condition that changes each decision. The note has no Qard cards, so there is no question-quality issue, and the three references are relevant, bare links. No violations are known or flagged. The prose is direct and non-repetitive, so any edit would be cosmetic churn."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md",
-                "verdict": "CLEAN",
-                "summary": "Independent whole-note audit found no accuracy, clarity, structure or rules defects. The note has no Qard cards, bare reference links, correct code, and decision-oriented tradeoff tables, so keeping it unchanged is justified.",
-                "page_type": "Concept — typed frontmatter retained; optional Questions absent (allowed); References are bare descriptive links; fenced blocks have language identifiers (text, csharp).",
-                "current_text_evidence": [
-                  {
-                    "quote": "The token list is illustrative rather than the output of one specific tokenizer",
-                    "line_start": 29,
-                    "reason": "Explicitly qualifies the tokenization example, so WordPiece versus byte-level BPE conventions are not misrepresented."
-                  },
-                  {
-                    "quote": "A generic NER label set is not automatically a PII detector.",
-                    "line_start": 42,
-                    "reason": "States a real boundary and the condition for production compliance use, giving engineering judgment instead of definition alone."
-                  },
-                  {
-                    "quote": "Multilingual support in a model card does not guarantee equal quality.",
-                    "line_start": 101,
-                    "reason": "Pitfall carries mechanism (training mix, tokenizer coverage) and a decision condition; prose is direct and non-repetitive."
-                  },
-                  {
-                    "quote": "var result = await client.AnalyzeSentimentAsync(\"The product quality was excellent.\");",
-                    "line_start": 86,
-                    "reason": "Matches the real Azure.AI.TextAnalytics API: Value.Sentiment and ConfidenceScores.Positive exist."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: tasks, transformer shift, .NET options, pitfalls and tradeoffs form one coherent introductory NLP overview; sections are not independently large enough to warrant separate notes.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The only note was independently read in full. The keep is supported: the content is accurate, whiteboard-voiced, free of repetition, compliant with the rules, and has no known violations or cards. Any edit would be cosmetic.",
-            "change_checks": []
-          },
-          "model_calls": 15
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
-                "outcome": "keep",
-                "reason": "I read the whole note against its contract. It has no Qard cards, and known_violations is empty. The five levels are defined by who holds decision authority. The note says the level belongs to the action and its risk, not to the model. Shadow mode correctly keeps compute, privacy and operational risk. Assistance names automation bias. Partial automation requires calibrated scores, action costs and exclusions. Full automation keeps a fallback or kill switch. The decision table, flowchart, tradeoffs table and both code examples agree with each other. The flowchart is explicitly marked as a conservative path, not a required sequence. It also warns that accuracy is shorthand for a cost-tied metric. The thresholds in the partial-automation code are labelled illustrative. The Python fences have language identifiers, the voice is whiteboard-style and impersonal, and the single reference is a real book. The claims are general engineering judgment, not version-specific facts. An edit would be cosmetic churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The single note is accurate and coherent, and it has no concrete rule violations. The keep is justified and no edits are proposed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
-                "verdict": "CLEAN",
-                "summary": "I read the whole note independently. It defines the five levels by who holds decision authority, and it states the key boundary that the level belongs to an action and its risk, not to the model as a whole. The caveats on shadow mode, automation bias, calibration, the conservative flowchart and illustrative thresholds are accurate. Nothing needs editing.",
-                "page_type": "Concept — frontmatter is typed and status is Done, which the owner set. There are no Qards. The References section is a single bare link to a real book. Both code fences carry a python language identifier.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The level belongs to an action and its risk, not to the model as a whole.",
-                    "line_start": 16,
-                    "reason": "States the core operating idea and boundary that the rest of the note builds on."
-                  },
-                  {
-                    "quote": "It still carries compute, privacy, and operational risk, so \"no automated action\" does not mean \"no risk.\"",
-                    "line_start": 30,
-                    "reason": "Gives shadow mode its correct condition instead of the common claim that it carries no risk."
-                  },
-                  {
-                    "quote": "It is not a required sequence for every feature.",
-                    "line_start": 75,
-                    "reason": "Qualifies the flowchart and avoids implying a mandatory maturity ladder. The same paragraph also qualifies the word accuracy."
-                  },
-                  {
-                    "quote": "Their values are illustrative: production thresholds come from calibrated probabilities",
-                    "line_start": 104,
-                    "reason": "Prevents the code thresholds from being read as recommended values, and names the real inputs to a threshold choice."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the levels, decision framework, implementation examples and failure modes all explain one concept, and the note is a coherent length.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 17
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text and standard ML definitions. The opening frames the taxonomy by learning signal. Each of the five sections gives a mechanism, an evaluation concern and a failure mode, with accurate examples (k-means, PCA, isolation forest, pseudo-labeling, consistency regularization, delayed reward and specification gaming). The comparison table agrees with the prose. The Mermaid decision flow correctly places reinforcement learning as the reward-based branch and separates unsupervised from self-supervised learning. Bandits are correctly described as the immediate-reward case. Both Qards each test one coherent comparison task, and their answers match the body and cite relevant sources. The references are relevant, there are no known violations, and the code fences have language identifiers. No factual or editorial defect justifies an edit."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent full-note audit found no factual, editorial, structural or Qard-quality defect. No edits were proposed and none are needed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
-                "verdict": "CLEAN",
-                "summary": "The note classifies ML by learning signal. Each paradigm section gives a mechanism, an evaluation concern and a failure mode. The table, the decision flow and the two comparison Qards agree with the prose. Keeping it unchanged is justified.",
-                "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx map block. Questions and References are optional and present. Code fences carry language identifiers (datacorejsx, mermaid).",
-                "current_text_evidence": [
-                  {
-                    "quote": "The useful way to classify machine learning is by its learning signal.",
-                    "line_start": 19,
-                    "reason": "The opening sets the organizing principle immediately, so the reader can re-enter the topic."
-                  },
-                  {
-                    "quote": "Backpropagation is one way to do that for differentiable models, while trees use different fitting procedures.",
-                    "line_start": 30,
-                    "reason": "This precise qualification avoids implying that every supervised model trains by gradient descent."
-                  },
-                  {
-                    "quote": "Majority classes tend to receive more confident pseudo-labels, so per-class validation and calibration matter more than the headline metric.",
-                    "line_start": 56,
-                    "reason": "The note names the concrete failure mode of semi-supervised learning together with its mitigation."
-                  },
-                  {
-                    "quote": "Delayed reward makes credit assignment harder, but reward can also arrive immediately.",
-                    "line_start": 64,
-                    "reason": "The note states the condition accurately instead of equating RL with delayed reward."
-                  },
-                  {
-                    "quote": "Bandit problems, in which each action affects only its immediate reward, are the simplest reinforcement-learning setting.",
-                    "line_start": 94,
-                    "reason": "The note draws the sequential and bandit boundary correctly, and it matches the flowchart node."
-                  },
-                  {
-                    "quote": "That evidence can be label-free or use labels collected only for evaluation.",
-                    "line_start": 106,
-                    "reason": "The first Qard keeps the evaluation nuance for unsupervised learning, so the answer is not oversimplified."
-                  },
-                  {
-                    "quote": "Taxonomies differ on where self-supervised learning belongs.",
-                    "line_start": 123,
-                    "reason": "The second Qard acknowledges the taxonomy ambiguity, and it cites the Google glossary and Spinning Up on the answer side."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the five paradigms share one organizing axis, the learning signal. The comparison table and decision flow depend on seeing them together, so separate notes would fragment that axis.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 19
-        }
-      }
-    ],
+    "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:28:44.009324Z",
-    "topic": "AI & ML",
-    "topic_id": "ai-ml-4edf0823",
-    "current_batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/Responsible AI.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: []\nsummary: \"Designing and operating AI so failures are bounded, decisions explainable, and impact fair.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Done\npublish: true\ncreated: \"2026-06-11T06:20:33.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.496Z\"\n---\n\nResponsible AI turns broad duties toward people into engineering constraints. The work begins before model selection: identify who can be affected, decide which failures are unacceptable, then build controls and evidence around the full system. A strong model inside a weak decision process is still an unsafe product.\n\nFrameworks organize this work differently. Microsoft uses six principles: fairness, reliability and safety, privacy and security, inclusiveness, transparency, and accountability. NIST AI RMF instead organizes risk work around Govern, Map, Measure, and Manage. The labels differ, but both require concrete ownership, measurement, and response rather than a policy document that sits beside the system.\n\n# The Six Principles\n\n## Fairness\n\nFairness asks whether the system creates unjustified differences in outcomes or quality of service. There is no universal fairness metric. Equal error rates, equal acceptance rates, and well-calibrated scores can conflict when groups have different base rates, so the product and legal context must determine which harms matter and how they are measured.\n\nAggregate accuracy is weak evidence. Evaluation needs slices based on plausible harm, enough samples to make those results meaningful, and uncertainty reported beside each metric. Protected attributes may be necessary for this audit even when they are excluded from prediction. Proxy features can still reproduce the same disparity.\n\nMitigation follows diagnosis. A representation gap may call for better data. A threshold policy may need separate review. A feature can encode a historical decision that should never have been learned. Rebalancing or post-processing a score without understanding the cause can move the disparity somewhere less visible.\n\n## Reliability and Safety\n\nReliability means the system behaves within its stated operating conditions. Safety asks what happens outside them. Tests should cover distribution shifts, malformed input, dependency failure, adversarial use, and cases where the model is uncertain but still produces a confident-looking answer.\n\nThe response must be designed before deployment. Low-confidence or high-impact cases can fall back to a safer workflow, abstain, or require review. Staged rollout limits exposure while the evidence is still thin. [[Spectrum Of Automations]] describes the progression from shadow mode to full automation.\n\nSafety claims also need a boundary. “Human reviewed” says little unless the reviewer has useful context, enough time, and authority to stop the action. Automation bias can turn an approval screen into a rubber stamp.\n\n## Privacy and Security\n\nTraining data, prompts, retrieved context, model output, and logs can all contain sensitive information. Data minimization is the first control: collect and retain only what the system needs for a defined purpose. Encryption and access control then reduce exposure, but they do not repair unnecessary collection.\n\nPseudonymization lowers some risk while the re-identification key or linkable attributes still exist. It does not make data anonymous. Claims of anonymization need an explicit attack model and evidence that records cannot reasonably be linked back to people. Production telemetry deserves the same review as training data because prompts and outputs often recreate the sensitive fields removed upstream.\n\nSecurity controls belong outside the model. Retrieval must enforce the caller's authorization, tools should carry the smallest useful permissions, and side effects need deterministic checks. [[OWASP vulnerabilities on AI LLM]] covers the main LLM application risks. [[Guardrails]] shows how layered controls contain them.\n\n## Inclusiveness\n\nInclusiveness asks whether people can use the system under real conditions. That includes accessibility, language and dialect coverage, device constraints, and failure modes for groups missing from product research or evaluation data.\n\nRepresentative testing is necessary, but participation matters earlier. People affected by a high-impact system can reveal harms that a benchmark cannot express: a workflow may be technically accurate and still be unusable, humiliating, or impossible to contest. Their input should change requirements, not merely validate a finished design.\n\n## Transparency\n\nTransparency gives each audience the information needed to make a decision. Operators need model versions, data lineage, evaluation results, known limits, and change history. Affected people need a plain explanation of the system's role, the information used, the consequence of the decision, and the available appeal path.\n\nModel cards and datasheets make claims inspectable, while logs connect those claims to a particular production decision. More disclosure is not automatically better. But publishing technical detail that exposes personal data or weakens security creates a new risk, so the useful question is what each audience needs and what evidence supports it.\n\nExplainability is narrower than transparency. An explanation can describe the factors behind one result without proving that the system is fair, safe, or suitable for the decision.\n\n## Accountability\n\nAccountability assigns a person or role to every material decision across the lifecycle. Ownership covers release approval, risk acceptance, incident response, model retirement, and the authority to pause the system. “The model decided” is a missing owner, not an explanation.\n\nGovernance becomes real through artifacts: an impact assessment, approved evaluation criteria, versioned evidence, monitored limits, incident records, and a route for appeal or correction. The amount of process should match the potential harm. A recommendation for music and an eligibility decision should not pass through the same gate.\n\n# Risk Mapping, Release, and Monitoring\n\nResponsible AI works best as a release discipline rather than a final review:\n\n1. **Map the decision.** Record the intended use, affected people, downstream action, and credible misuse.\n2. **Define limits.** State unacceptable harms, operating conditions, escalation triggers, and who owns each one.\n3. **Measure the system.** Test data quality and model behavior by relevant slice, including failure and abuse cases.\n4. **Add controls.** Constrain data access and actions. Provide abstention, review, appeal, or rollback where the impact warrants it.\n5. **Release with evidence.** Version the model, policy, evaluation set, results, and approval together.\n6. **Watch outcomes.** Monitor the chosen risk indicators, investigate incidents, and re-evaluate after material changes.\n\nA control without evidence is an intention. A metric without an owner is telemetry. The loop connects both to a decision.\n\n# References\n\n- [Microsoft Responsible AI](https://www.microsoft.com/en-us/ai/responsible-ai)\n- [AI Risk Management Framework (NIST)](https://www.nist.gov/itl/ai-risk-management-framework)\n- [Model Cards for Model Reporting (Mitchell et al., 2019)](https://arxiv.org/abs/1810.03993)\n- [Datasheets for Datasets (Gebru et al., 2021)](https://arxiv.org/abs/1803.09010)\n- [Fairness and Machine Learning (Barocas, Hardt, Narayanan)](https://fairmlbook.org/)\n",
-          "hash": "49e5ee0af218a81807e26c4c6ded38d9963d24b6b43e8e4e99e59956f48e8535",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-07T13:42:55.951225Z",
-    "stop_reason": "call_limit",
-    "sealed_at": "2026-11-07T13:28:44.009327Z"
+    "checkpoint_at": "2026-11-07T22:00:53.129424Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -18287,6 +17578,730 @@
       "reservation_deadline": "2026-11-07T06:38:16.547271Z",
       "stop_reason": "call_limit",
       "sealed_at": "2026-11-07T06:23:48.072825Z"
+    },
+    "b9235098cfe341bd98cce55faa026472": {
+      "version": 1,
+      "id": "b9235098cfe341bd98cce55faa026472",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-07T13:18:06.384851Z",
+      "elapsed_seconds": 637.6249618,
+      "calls_reserved": 19,
+      "responses_received": 19,
+      "attempted_paths": [
+        "Vault/Home/AI & ML/LLM/Safety/Safety.md",
+        "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
+        "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
+        "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md",
+        "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
+        "Vault/Home/AI & ML/Machine Learning/Types/Types.md"
+      ],
+      "accepted_records": [],
+      "outcomes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Safety/Safety.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Safety/Safety.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole folder note against its text and the cited OWASP and NIST sources. The opening ties safety to each layer (prompt, context, harness, loop, evaluation) and links resolve to sibling notes. The security-versus-reliability split is stated correctly, and the note says the two overlap: an accident can be a security failure, and one control set cannot replace the other. The ladder section assigns deterministic controls to the harness and human approval to the loop. Defense in depth correctly treats prompt rules as advisory and structural controls as enforcement. Both cards test one gradeable task each. The first is a focused comparison with an accurate hallucinated-tool-call example. The second explains why prompts cannot enforce, and its output-handling point matches OWASP LLM05 and LLM06. Sources are on the answer side with real URLs. Frontmatter is valid, the datacorejsx block is protected, and References has one authoritative link. No factual error, gap or redundancy was found. There are no known violations, so edits would only add churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The keep is justified. The note is accurate and coherent, both cards test one gradeable task, and no concrete violation or defect was found.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Safety/Safety.md",
+                  "verdict": "CLEAN",
+                  "summary": "The folder note ties safety to each layer of the LLM stack. It separates security from reliability failures and states that the two overlap. Its defense-in-depth section treats prompt rules as advisory and structural controls as enforcement. Both cards are focused and sourced on the answer side. No error or gap warrants an edit.",
+                  "page_type": "FolderNote — keeps tags [FolderNote] and the protected datacorejsx map. Questions and References are optional and present, with one authoritative reference.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The distinction changes the response. Security threat modeling considers how an adversary could exploit the system",
+                      "line_start": 26,
+                      "reason": "States the security-versus-reliability split and its effect on the response, and acknowledges that the categories overlap, so the boundary is recoverable."
+                    },
+                    {
+                      "quote": "**Harness** enforces deterministic controls such as sandboxing, permission gates, and least-privilege credentials in code",
+                      "line_start": 38,
+                      "reason": "Maps each runtime layer to a concrete control, which makes the mechanism visible and in a sensible order."
+                    },
+                    {
+                      "quote": "Perfection is the wrong target.",
+                      "line_start": 46,
+                      "reason": "Ends the defense-in-depth section with a decided engineering stance on blast radius and recovery evidence."
+                    },
+                    {
+                      "quote": "A hallucinated tool call is a reliability failure. It also becomes a security incident",
+                      "line_start": 61,
+                      "reason": "Gives an accurate, conditional example of how the two failure types overlap, consistent with OWASP LLM06 Excessive Agency."
+                    },
+                    {
+                      "quote": "Prompt instructions still help by guiding normal behavior and reducing mistakes.",
+                      "line_start": 76,
+                      "reason": "Gives the second card a bounded answer that preserves the exception that prompts are still a useful layer, and its output-handling point matches OWASP LLM05."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: Guardrails, OWASP and Hallucinations already live in sibling notes. This hub is a concise orientation, and the security-versus-reliability framing is coherent as it stands.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 2
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note against its text and the standard literature. The drift taxonomy is correct: P(X) for feature drift and covariate shift, P(Y) for label drift, and P(Y|X) for concept drift. The PSI code handles constant baselines, duplicate quantile edges, out-of-range values and zero bins. The prose correctly says the 0.1/0.2 bands are conventions. The KS (large-sample sensitivity, multiple testing), chi-square (sparse categories) and Jensen-Shannon (base-2 bound of 0 to 1) caveats are accurate. The pitfalls cover segmentation, late labels and misreading P(X) change as concept drift, and they match the Gama survey and Rabanser et al. cited in the note. The retraining tradeoffs are coherent. The single Qard tests one dependent contrast (data drift versus concept drift) with a primary source on the answer side. The References are relevant and have no trailing annotations. The note has no known violations, no flagged cards, and no duplicated or padded passages. Any rewrite would be cosmetic."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
+                  "verdict": "CLEAN",
+                  "summary": "I read the whole note independently. The taxonomy, PSI code and caveats, test caveats, pitfalls and tradeoffs are accurate. The single Qard tests one focused comparison, and the references are relevant. No concrete defect justifies an edit.",
+                  "page_type": "Concept — frontmatter and Qard ID metadata are intact. The code fences have language identifiers, Questions and References are optional and present, and there is no Links section.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Drift is a warning, not proof that the model is wrong.",
+                      "line_start": 19,
+                      "reason": "The opening states the operating idea and the key boundary: a change in inputs is not the same as a change in model quality."
+                    },
+                    {
+                      "quote": "| **Concept drift** | P(Y\\|X), the relationship between inputs and labels |",
+                      "line_start": 27,
+                      "reason": "The taxonomy is correct: P(X) for feature drift and covariate shift, P(Y) for label drift, P(Y|X) for concept drift."
+                    },
+                    {
+                      "quote": "A constant baseline still cannot define useful quantile bins, so the function fails instead of reporting zero drift",
+                      "line_start": 62,
+                      "reason": "The code and prose agree on the edge cases. The 0.1 and 0.2 PSI bands are described as conventions and not as statistical guarantees."
+                    },
+                    {
+                      "quote": "The monitoring method should match the feature and the decision.",
+                      "line_start": 120,
+                      "reason": "The tradeoff prose gives a decision condition and puts labeled performance above feature-level alerts. The explanation order from definition to detection, workflow, pitfalls and tradeoffs is sound and not repetitive."
+                    },
+                    {
+                      "quote": "> [!qard]- What is the difference between data drift and concept drift?",
+                      "line_start": 136,
+                      "reason": "This is one dependent comparison and so is independently gradeable. It keeps its qard-id and has a primary source on the answer side."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note covers one coherent topic, detecting and responding to drift. The sections depend on each other, so a split would not give independently useful pages.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The note is accurate, clear and complete for its depth. The kept Qard is a single focused comparison with its ID preserved. There are no edits and no known violations, so an edit would be cosmetic.",
+              "change_checks": []
+            },
+            "model_calls": 4
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+          "outcome": "proposal_blocked",
+          "reason": "wikilink removal requires explicit target-specific semantic rationale",
+          "result": {
+            "status": "proposal_blocked",
+            "stage": "deterministic_application",
+            "reason": "wikilink removal requires explicit target-specific semantic rationale",
+            "model_calls": 5
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note. The confusion-matrix definitions and the precision, recall and F1 formulas are correct. The worked example sums to 100 cases and gives precision 0.80, recall 0.762 (shown as 0.76) and F1 0.78. The two-threshold table values also check out: 90/150 = 0.60, 90/100 = 0.90, 55/65 = 0.85 and 55/100 = 0.55. The multi-class averaging claims are accurate, including that micro precision and recall equal accuracy for single-label multi-class classification. The threshold diagram is hedged correctly as the usual direction, not a guarantee. The pitfalls (F1 hiding asymmetric failures, comparing arbitrary thresholds, optimizing one metric without a constraint, accuracy under imbalance) are sound and consistent with the PR-AUC and ROC-AUC sibling cards. Code fences have language identifiers, and the references are relevant. There are no cards in this note and no known violations. The prose reads direct and in order, so no edit would add value."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note audit found no factual, editorial, structural or rule defects. The keep is justified and no edits were proposed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate and ordered well: matrix, metrics, threshold effect, worked numbers, multi-class averaging, then pitfalls. I recomputed every number and found no errors. The prose is direct and has no padding, so leaving it unchanged is justified.",
+                  "page_type": "Concept — typed frontmatter, optional Questions absent (allowed), References present as bare link bullets, code fences carry language identifiers.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "A release decision then compares models at the same constraint, such as maximizing precision while keeping recall above 0.95.",
+                      "line_start": 14,
+                      "reason": "The opening states the operating idea and the decision condition right away."
+                    },
+                    {
+                      "quote": "The diagram describes the usual direction, not a guarantee for every finite sample.",
+                      "line_start": 56,
+                      "reason": "Hedges the threshold effect correctly, so the note does not overclaim monotonic behaviour."
+                    },
+                    {
+                      "quote": "| 0.80 | 55 | 10 | 45 | 0.85 | 0.55 |",
+                      "line_start": 84,
+                      "reason": "55/65 = 0.846 and 55/100 = 0.55 are correct. The row shows the precision/recall trade-off at a second threshold."
+                    },
+                    {
+                      "quote": "F1        = 2 * (0.80 * 0.76) / (0.80 + 0.76) = 0.78",
+                      "line_start": 76,
+                      "reason": "The worked example sums to 100 cases. F1 is about 0.78 whether it is computed from the rounded or the exact recall."
+                    },
+                    {
+                      "quote": "for single-label multi-class classification, micro precision and recall equal accuracy",
+                      "line_start": 96,
+                      "reason": "The claim is correct and carries the condition (single-label) it depends on."
+                    },
+                    {
+                      "quote": "Always predicting \"not fraud\" yields 99.9% accuracy when fraud prevalence is 0.1%",
+                      "line_start": 106,
+                      "reason": "The imbalance arithmetic is correct and makes the pitfall concrete."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: binary metrics, thresholds and multi-class averaging are one coherent evaluation topic, and the note is compact.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 7
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole folder note against its current text and found no defect that needs an edit. The opening frames offline score as a proxy and links the detailed pages. The four-decision section covers decision cost, splits that resemble the future, tradeoff-exposing metric sets and slices. It then ties them to the offline-online gap, and that tie is sound. The metric-family summary correctly separates threshold metrics, ranking metrics, calibration metrics and retrieval metrics. The regression section's claims match the standard definitions in the scikit-learn and ML.NET references: RMSE penalizes large errors, MAE is linear, MAPE fails at zero, and quantile loss targets a conditional quantile. The pitfalls section on proxy optimization, leakage and threshold selection on the test set is accurate. The datacorejsx block is a protected FolderNote map, and the note has no cards. The References section has two relevant bare link bullets, and the code fence has a language identifier. No known violations are listed. The note is compact and has no repetition worth cutting, so a forced rewrite would be cosmetic."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The single FolderNote was audited in full and has no concrete defect. The keep is justified: content is accurate and compact, the protected map block is intact, the References are valid, and there are no cards or rule violations.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note frames offline score as a proxy and links the detailed pages. It then covers decision cost, splits, metric pairing and slices, and ties them to the offline-online gap. The metric and regression definitions are standard and accurate, and the pitfalls are correct. No edit is needed, since any rewrite would be cosmetic.",
+                  "page_type": "FolderNote. It keeps tags: [FolderNote], the datacorejsx folder map is protected, and Questions and References are optional. There are no cards, and the References are two bare relevant links.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "An offline score is only a proxy for that answer.",
+                      "line_start": 16,
+                      "reason": "The opening states the operating idea quickly and links the detailed metric pages."
+                    },
+                    {
+                      "quote": "Accuracy says little on a fraud dataset with a 0.1% positive rate.",
+                      "line_start": 27,
+                      "reason": "A concrete example shows why metric choice follows decision cost."
+                    },
+                    {
+                      "quote": "Offline evaluation can block a bad release.",
+                      "line_start": 32,
+                      "reason": "The offline-online gap is stated with its practical limit."
+                    },
+                    {
+                      "quote": "**RMSE** squares each error before averaging, so a few large misses dominate the result.",
+                      "line_start": 42,
+                      "reason": "The regression definitions are accurate and each states when it fits."
+                    },
+                    {
+                      "quote": "Select the operating point on validation data, then report it once on the untouched test set.",
+                      "line_start": 55,
+                      "reason": "The pitfall gives the correct remedy for threshold selection leakage."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note is a compact hub, and the detailed metric families already live in dedicated pages.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 9
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against standard metric definitions. The ROC and PR construction is correct. The AUC probabilistic interpretation, including ties counted as half, is correct. The fixed 0.5 ROC baseline and the prevalence-dependent PR baseline are correct. The caveat that PR-AUC implementations differ matches scikit-learn's average_precision_score documentation. The ML.NET properties AreaUnderRocCurve and AreaUnderPrecisionRecallCurve exist on BinaryClassificationMetrics, and the code example is coherent. The 100 positives / 100,000 negatives example checks out: 1,000/100,000 = 1% FPR, and 80/1,080 ≈ 7% precision. Both Qards test one gradeable task each, and their answers carry sources. The tradeoff table, pitfalls and references are accurate, non-redundant and in a consistent voice. No violations are known. I found no factual or editorial defect that justifies a change."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md",
+                  "verdict": "CLEAN",
+                  "summary": "Independent whole-note audit found the definitions, baselines, probabilistic interpretation, worked 100/100,000 example, ML.NET property names and tradeoff table accurate and well ordered. The keep is justified. The only issues are minor and non-blocking: `ROC AUC` and ROC-AUC are used inconsistently, and the prevalence baseline appears several times, which suits recall.",
+                  "page_type": "Concept — authorable prose with optional Questions and References; frontmatter and Qard IDs protected; mermaid and csharp fences have language identifiers.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "PR-AUC puts the positive class in the foreground, making false positives visible when positives are rare.",
+                      "line_start": 19,
+                      "reason": "The opening states the operating idea and the key boundary, the prevalence-dependent PR baseline, before the mechanics."
+                    },
+                    {
+                      "quote": "it is the chance that a randomly chosen positive receives a higher score than a randomly chosen negative, with a tie counted as half.",
+                      "line_start": 63,
+                      "reason": "This is the correct probabilistic interpretation of ROC-AUC. It also correctly says PR-AUC has no equally simple interpretation and that implementations differ."
+                    },
+                    {
+                      "quote": "catching 80 positives while flagging 1,000 negatives gives a false-positive rate of 1%, yet only 80 of the 1,080 alerts, about 7%, are correct.",
+                      "line_start": 158,
+                      "reason": "The arithmetic is verified (1,000/100,000 = 1%; 80/1,080 ≈ 7.4%). It shows concretely why ROC can look strong while the positive queue stays noisy."
+                    },
+                    {
+                      "quote": "The threshold is swept on validation data, a point that satisfies the constraint is chosen, and the frozen point is then evaluated on separate test data.",
+                      "line_start": 118,
+                      "reason": "This gives a sound, decided procedure for threshold selection that avoids test-set leakage, so the note covers the boundary that AUC does not pick a threshold."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: ROC-AUC and PR-AUC are one comparison topic, and the curves, interpretation, choice and pitfalls are best read together.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "No concrete defect found. Facts are correct and the structure is coherent. The Qards are bounded, each answer is a dependent explanation, and both carry sources. IDs are intact and there are no edits to evaluate.",
+              "change_checks": []
+            },
+            "model_calls": 11
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
+                  "outcome": "keep",
+                  "reason": "Read the whole note against its purpose as a folder hub. The opening states when ML fits and when rules remain better, and links to Spectrum Of Automations. The Mermaid pipeline matches the eleven stage sections in order, including the monitoring-to-collection loop. The stage prose is accurate and carries conditions: label ownership and disagreement, future-information leakage, train/inference transform parity, time- or group-based splits for correlated rows, a holdout kept out of tuning, random search before Bayesian optimization, immutable registry artifacts with lineage, latency budgets that include feature lookup, and drift as a signal rather than proof of degradation. These match standard practice, as in Google's Rules of ML and the Hidden Technical Debt paper that the note already cites. The voice is direct and impersonal. The note has no cards, so there is no question quality issue. The Datacore block, frontmatter and references (bare, topic-specific links) are intact, and every code fence has a language identifier. known_violations is empty. No factual or editorial defect was found, so no edit is warranted."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Machine Learning.md",
+                  "verdict": "CLEAN",
+                  "summary": "Whole-note read of the FolderNote hub. The opening gives when ML fits versus rules. The pipeline diagram matches the eleven stage sections in order. Each stage states mechanisms and conditions: leakage, train/inference parity, group or time splits, holdout discipline, immutable registry artifacts, tail-latency budgets, and drift as a signal rather than proof. No factual, terminology, ordering or repetition defect was found, so keeping it unchanged is justified.",
+                  "page_type": "FolderNote — hub with protected Datacore folder-map block; Questions optional and absent; References are bare topic-specific links.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Machine learning fits problems where useful behavior can be learned from examples more cheaply than it can be expressed as rules.",
+                      "line_start": 15,
+                      "reason": "Opens by saying when ML applies, which introduces the topic quickly. The next paragraph states the rules boundary."
+                    },
+                    {
+                      "quote": "a feature built with future information can make every offline result look convincing while guaranteeing a production failure",
+                      "line_start": 49,
+                      "reason": "Concrete leakage mechanism with its consequence, in a direct whiteboard voice."
+                    },
+                    {
+                      "quote": "Repeated inspection quietly turns a test set into another validation set.",
+                      "line_start": 55,
+                      "reason": "States the condition that changes the evaluation decision."
+                    },
+                    {
+                      "quote": "Track input quality and [[Data Drift]] while waiting, but do not confuse drift with proof that predictions became worse.",
+                      "line_start": 76,
+                      "reason": "Gives the important boundary between drift and quality loss. The wikilink is purposeful."
+                    },
+                    {
+                      "quote": "Promotion changes the stage of an existing version rather than overwriting the artifact.",
+                      "line_start": 67,
+                      "reason": "Explains the registry mechanism and why rollback becomes mechanical."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the stages form one coherent pipeline that depends on shared concepts such as leakage, the holdout and train/inference parity. Separate notes would break that flow.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The single note was independently read in full. It is accurate, clear and compliant: code fences have languages, the Datacore block is intact, and the references are bare topic-specific links. No concrete defect was found, and the keep is justified.",
+              "change_checks": []
+            },
+            "model_calls": 13
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text and general knowledge of NLP. The opening is accurate: it defines NLP and states the limit that models learn statistical structure rather than understanding language. The tokenization section correctly flags its example as illustrative and notes that WordPiece uses ## markers and byte-level BPE keeps leading spaces. The NER, sentiment, extractive vs generative QA, and transformer-reuse explanations are correct and carry the conditions that matter, such as NER not being a PII detector and token counts depending on the tokenizer. The .NET section uses the real TextAnalyticsClient API with AnalyzeSentimentAsync, which returns the Sentiment and ConfidenceScores properties shown. The tradeoff tables name the condition that changes each decision. The note has no Qard cards, so there is no question-quality issue, and the three references are relevant, bare links. No violations are known or flagged. The prose is direct and non-repetitive, so any edit would be cosmetic churn."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md",
+                  "verdict": "CLEAN",
+                  "summary": "Independent whole-note audit found no accuracy, clarity, structure or rules defects. The note has no Qard cards, bare reference links, correct code, and decision-oriented tradeoff tables, so keeping it unchanged is justified.",
+                  "page_type": "Concept — typed frontmatter retained; optional Questions absent (allowed); References are bare descriptive links; fenced blocks have language identifiers (text, csharp).",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The token list is illustrative rather than the output of one specific tokenizer",
+                      "line_start": 29,
+                      "reason": "Explicitly qualifies the tokenization example, so WordPiece versus byte-level BPE conventions are not misrepresented."
+                    },
+                    {
+                      "quote": "A generic NER label set is not automatically a PII detector.",
+                      "line_start": 42,
+                      "reason": "States a real boundary and the condition for production compliance use, giving engineering judgment instead of definition alone."
+                    },
+                    {
+                      "quote": "Multilingual support in a model card does not guarantee equal quality.",
+                      "line_start": 101,
+                      "reason": "Pitfall carries mechanism (training mix, tokenizer coverage) and a decision condition; prose is direct and non-repetitive."
+                    },
+                    {
+                      "quote": "var result = await client.AnalyzeSentimentAsync(\"The product quality was excellent.\");",
+                      "line_start": 86,
+                      "reason": "Matches the real Azure.AI.TextAnalytics API: Value.Sentiment and ConfidenceScores.Positive exist."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: tasks, transformer shift, .NET options, pitfalls and tradeoffs form one coherent introductory NLP overview; sections are not independently large enough to warrant separate notes.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The only note was independently read in full. The keep is supported: the content is accurate, whiteboard-voiced, free of repetition, compliant with the rules, and has no known violations or cards. Any edit would be cosmetic.",
+              "change_checks": []
+            },
+            "model_calls": 15
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note against its contract. It has no Qard cards, and known_violations is empty. The five levels are defined by who holds decision authority. The note says the level belongs to the action and its risk, not to the model. Shadow mode correctly keeps compute, privacy and operational risk. Assistance names automation bias. Partial automation requires calibrated scores, action costs and exclusions. Full automation keeps a fallback or kill switch. The decision table, flowchart, tradeoffs table and both code examples agree with each other. The flowchart is explicitly marked as a conservative path, not a required sequence. It also warns that accuracy is shorthand for a cost-tied metric. The thresholds in the partial-automation code are labelled illustrative. The Python fences have language identifiers, the voice is whiteboard-style and impersonal, and the single reference is a real book. The claims are general engineering judgment, not version-specific facts. An edit would be cosmetic churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The single note is accurate and coherent, and it has no concrete rule violations. The keep is justified and no edits are proposed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md",
+                  "verdict": "CLEAN",
+                  "summary": "I read the whole note independently. It defines the five levels by who holds decision authority, and it states the key boundary that the level belongs to an action and its risk, not to the model as a whole. The caveats on shadow mode, automation bias, calibration, the conservative flowchart and illustrative thresholds are accurate. Nothing needs editing.",
+                  "page_type": "Concept — frontmatter is typed and status is Done, which the owner set. There are no Qards. The References section is a single bare link to a real book. Both code fences carry a python language identifier.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The level belongs to an action and its risk, not to the model as a whole.",
+                      "line_start": 16,
+                      "reason": "States the core operating idea and boundary that the rest of the note builds on."
+                    },
+                    {
+                      "quote": "It still carries compute, privacy, and operational risk, so \"no automated action\" does not mean \"no risk.\"",
+                      "line_start": 30,
+                      "reason": "Gives shadow mode its correct condition instead of the common claim that it carries no risk."
+                    },
+                    {
+                      "quote": "It is not a required sequence for every feature.",
+                      "line_start": 75,
+                      "reason": "Qualifies the flowchart and avoids implying a mandatory maturity ladder. The same paragraph also qualifies the word accuracy."
+                    },
+                    {
+                      "quote": "Their values are illustrative: production thresholds come from calibrated probabilities",
+                      "line_start": 104,
+                      "reason": "Prevents the code thresholds from being read as recommended values, and names the real inputs to a threshold choice."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the levels, decision framework, implementation examples and failure modes all explain one concept, and the note is a coherent length.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 17
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text and standard ML definitions. The opening frames the taxonomy by learning signal. Each of the five sections gives a mechanism, an evaluation concern and a failure mode, with accurate examples (k-means, PCA, isolation forest, pseudo-labeling, consistency regularization, delayed reward and specification gaming). The comparison table agrees with the prose. The Mermaid decision flow correctly places reinforcement learning as the reward-based branch and separates unsupervised from self-supervised learning. Bandits are correctly described as the immediate-reward case. Both Qards each test one coherent comparison task, and their answers match the body and cite relevant sources. The references are relevant, there are no known violations, and the code fences have language identifiers. No factual or editorial defect justifies an edit."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent full-note audit found no factual, editorial, structural or Qard-quality defect. No edits were proposed and none are needed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/Machine Learning/Types/Types.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note classifies ML by learning signal. Each paradigm section gives a mechanism, an evaluation concern and a failure mode. The table, the decision flow and the two comparison Qards agree with the prose. Keeping it unchanged is justified.",
+                  "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx map block. Questions and References are optional and present. Code fences carry language identifiers (datacorejsx, mermaid).",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The useful way to classify machine learning is by its learning signal.",
+                      "line_start": 19,
+                      "reason": "The opening sets the organizing principle immediately, so the reader can re-enter the topic."
+                    },
+                    {
+                      "quote": "Backpropagation is one way to do that for differentiable models, while trees use different fitting procedures.",
+                      "line_start": 30,
+                      "reason": "This precise qualification avoids implying that every supervised model trains by gradient descent."
+                    },
+                    {
+                      "quote": "Majority classes tend to receive more confident pseudo-labels, so per-class validation and calibration matter more than the headline metric.",
+                      "line_start": 56,
+                      "reason": "The note names the concrete failure mode of semi-supervised learning together with its mitigation."
+                    },
+                    {
+                      "quote": "Delayed reward makes credit assignment harder, but reward can also arrive immediately.",
+                      "line_start": 64,
+                      "reason": "The note states the condition accurately instead of equating RL with delayed reward."
+                    },
+                    {
+                      "quote": "Bandit problems, in which each action affects only its immediate reward, are the simplest reinforcement-learning setting.",
+                      "line_start": 94,
+                      "reason": "The note draws the sequential and bandit boundary correctly, and it matches the flowchart node."
+                    },
+                    {
+                      "quote": "That evidence can be label-free or use labels collected only for evaluation.",
+                      "line_start": 106,
+                      "reason": "The first Qard keeps the evaluation nuance for unsupervised learning, so the answer is not oversimplified."
+                    },
+                    {
+                      "quote": "Taxonomies differ on where self-supervised learning belongs.",
+                      "line_start": 123,
+                      "reason": "The second Qard acknowledges the taxonomy ambiguity, and it cites the Google glossary and Spinning Up on the answer side."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the five paradigms share one organizing axis, the learning signal. The comparison table and decision flow depend on seeing them together, so separate notes would fragment that axis.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 19
+          }
+        }
+      ],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-07T13:28:44.009324Z",
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "current_batch": {
+        "topic": "AI & ML",
+        "topic_id": "ai-ml-4edf0823",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/Responsible AI.md",
+            "content": "---\ntopic: [AI & ML]\nsubtopic: []\nsummary: \"Designing and operating AI so failures are bounded, decisions explainable, and impact fair.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Done\npublish: true\ncreated: \"2026-06-11T06:20:33.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.496Z\"\n---\n\nResponsible AI turns broad duties toward people into engineering constraints. The work begins before model selection: identify who can be affected, decide which failures are unacceptable, then build controls and evidence around the full system. A strong model inside a weak decision process is still an unsafe product.\n\nFrameworks organize this work differently. Microsoft uses six principles: fairness, reliability and safety, privacy and security, inclusiveness, transparency, and accountability. NIST AI RMF instead organizes risk work around Govern, Map, Measure, and Manage. The labels differ, but both require concrete ownership, measurement, and response rather than a policy document that sits beside the system.\n\n# The Six Principles\n\n## Fairness\n\nFairness asks whether the system creates unjustified differences in outcomes or quality of service. There is no universal fairness metric. Equal error rates, equal acceptance rates, and well-calibrated scores can conflict when groups have different base rates, so the product and legal context must determine which harms matter and how they are measured.\n\nAggregate accuracy is weak evidence. Evaluation needs slices based on plausible harm, enough samples to make those results meaningful, and uncertainty reported beside each metric. Protected attributes may be necessary for this audit even when they are excluded from prediction. Proxy features can still reproduce the same disparity.\n\nMitigation follows diagnosis. A representation gap may call for better data. A threshold policy may need separate review. A feature can encode a historical decision that should never have been learned. Rebalancing or post-processing a score without understanding the cause can move the disparity somewhere less visible.\n\n## Reliability and Safety\n\nReliability means the system behaves within its stated operating conditions. Safety asks what happens outside them. Tests should cover distribution shifts, malformed input, dependency failure, adversarial use, and cases where the model is uncertain but still produces a confident-looking answer.\n\nThe response must be designed before deployment. Low-confidence or high-impact cases can fall back to a safer workflow, abstain, or require review. Staged rollout limits exposure while the evidence is still thin. [[Spectrum Of Automations]] describes the progression from shadow mode to full automation.\n\nSafety claims also need a boundary. “Human reviewed” says little unless the reviewer has useful context, enough time, and authority to stop the action. Automation bias can turn an approval screen into a rubber stamp.\n\n## Privacy and Security\n\nTraining data, prompts, retrieved context, model output, and logs can all contain sensitive information. Data minimization is the first control: collect and retain only what the system needs for a defined purpose. Encryption and access control then reduce exposure, but they do not repair unnecessary collection.\n\nPseudonymization lowers some risk while the re-identification key or linkable attributes still exist. It does not make data anonymous. Claims of anonymization need an explicit attack model and evidence that records cannot reasonably be linked back to people. Production telemetry deserves the same review as training data because prompts and outputs often recreate the sensitive fields removed upstream.\n\nSecurity controls belong outside the model. Retrieval must enforce the caller's authorization, tools should carry the smallest useful permissions, and side effects need deterministic checks. [[OWASP vulnerabilities on AI LLM]] covers the main LLM application risks. [[Guardrails]] shows how layered controls contain them.\n\n## Inclusiveness\n\nInclusiveness asks whether people can use the system under real conditions. That includes accessibility, language and dialect coverage, device constraints, and failure modes for groups missing from product research or evaluation data.\n\nRepresentative testing is necessary, but participation matters earlier. People affected by a high-impact system can reveal harms that a benchmark cannot express: a workflow may be technically accurate and still be unusable, humiliating, or impossible to contest. Their input should change requirements, not merely validate a finished design.\n\n## Transparency\n\nTransparency gives each audience the information needed to make a decision. Operators need model versions, data lineage, evaluation results, known limits, and change history. Affected people need a plain explanation of the system's role, the information used, the consequence of the decision, and the available appeal path.\n\nModel cards and datasheets make claims inspectable, while logs connect those claims to a particular production decision. More disclosure is not automatically better. But publishing technical detail that exposes personal data or weakens security creates a new risk, so the useful question is what each audience needs and what evidence supports it.\n\nExplainability is narrower than transparency. An explanation can describe the factors behind one result without proving that the system is fair, safe, or suitable for the decision.\n\n## Accountability\n\nAccountability assigns a person or role to every material decision across the lifecycle. Ownership covers release approval, risk acceptance, incident response, model retirement, and the authority to pause the system. “The model decided” is a missing owner, not an explanation.\n\nGovernance becomes real through artifacts: an impact assessment, approved evaluation criteria, versioned evidence, monitored limits, incident records, and a route for appeal or correction. The amount of process should match the potential harm. A recommendation for music and an eligibility decision should not pass through the same gate.\n\n# Risk Mapping, Release, and Monitoring\n\nResponsible AI works best as a release discipline rather than a final review:\n\n1. **Map the decision.** Record the intended use, affected people, downstream action, and credible misuse.\n2. **Define limits.** State unacceptable harms, operating conditions, escalation triggers, and who owns each one.\n3. **Measure the system.** Test data quality and model behavior by relevant slice, including failure and abuse cases.\n4. **Add controls.** Constrain data access and actions. Provide abstention, review, appeal, or rollback where the impact warrants it.\n5. **Release with evidence.** Version the model, policy, evaluation set, results, and approval together.\n6. **Watch outcomes.** Monitor the chosen risk indicators, investigate incidents, and re-evaluate after material changes.\n\nA control without evidence is an intention. A metric without an owner is telemetry. The loop connects both to a decision.\n\n# References\n\n- [Microsoft Responsible AI](https://www.microsoft.com/en-us/ai/responsible-ai)\n- [AI Risk Management Framework (NIST)](https://www.nist.gov/itl/ai-risk-management-framework)\n- [Model Cards for Model Reporting (Mitchell et al., 2019)](https://arxiv.org/abs/1810.03993)\n- [Datasheets for Datasets (Gebru et al., 2021)](https://arxiv.org/abs/1803.09010)\n- [Fairness and Machine Learning (Barocas, Hardt, Narayanan)](https://fairmlbook.org/)\n",
+            "hash": "49e5ee0af218a81807e26c4c6ded38d9963d24b6b43e8e4e99e59956f48e8535",
+            "topic": "AI & ML",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
+      "reservation_deadline": "2026-11-07T13:42:55.951225Z",
+      "stop_reason": "call_limit",
+      "sealed_at": "2026-11-07T13:28:44.009327Z"
     }
   },
   "feedback_workloads": {
