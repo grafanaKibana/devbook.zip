@@ -5659,10 +5659,10 @@
     "version": 1,
     "id": "f57944c05f7944ee8610e2bd6384fd74",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 357.75996479999975,
-    "calls_reserved": 12,
+    "elapsed_seconds": 361.5027824999998,
+    "calls_reserved": 13,
     "responses_received": 12,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
@@ -6109,7 +6109,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:20:03.638996Z",
+    "checkpoint_at": "2026-11-07T06:20:07.381814Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -6134,7 +6134,7 @@
       "pr": null
     },
     "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-07T06:34:25.989971Z"
+    "reservation_deadline": "2026-11-07T06:35:07.085777Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
