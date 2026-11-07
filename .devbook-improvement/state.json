@@ -5959,13 +5959,14 @@
     "version": 1,
     "id": "b9235098cfe341bd98cce55faa026472",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T13:18:06.384851Z",
-    "elapsed_seconds": 123.37752719999999,
+    "elapsed_seconds": 127.29817529999998,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
-      "Vault/Home/AI & ML/LLM/Safety/Safety.md"
+      "Vault/Home/AI & ML/LLM/Safety/Safety.md",
+      "Vault/Home/AI & ML/Machine Learning/Data Drift.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6041,10 +6042,83 @@
           },
           "model_calls": 2
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
+                "outcome": "keep",
+                "reason": "I read the whole note against its text and the standard literature. The drift taxonomy is correct: P(X) for feature drift and covariate shift, P(Y) for label drift, and P(Y|X) for concept drift. The PSI code handles constant baselines, duplicate quantile edges, out-of-range values and zero bins. The prose correctly says the 0.1/0.2 bands are conventions. The KS (large-sample sensitivity, multiple testing), chi-square (sparse categories) and Jensen-Shannon (base-2 bound of 0 to 1) caveats are accurate. The pitfalls cover segmentation, late labels and misreading P(X) change as concept drift, and they match the Gama survey and Rabanser et al. cited in the note. The retraining tradeoffs are coherent. The single Qard tests one dependent contrast (data drift versus concept drift) with a primary source on the answer side. The References are relevant and have no trailing annotations. The note has no known violations, no flagged cards, and no duplicated or padded passages. Any rewrite would be cosmetic."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/Machine Learning/Data Drift.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole note independently. The taxonomy, PSI code and caveats, test caveats, pitfalls and tradeoffs are accurate. The single Qard tests one focused comparison, and the references are relevant. No concrete defect justifies an edit.",
+                "page_type": "Concept — frontmatter and Qard ID metadata are intact. The code fences have language identifiers, Questions and References are optional and present, and there is no Links section.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Drift is a warning, not proof that the model is wrong.",
+                    "line_start": 19,
+                    "reason": "The opening states the operating idea and the key boundary: a change in inputs is not the same as a change in model quality."
+                  },
+                  {
+                    "quote": "| **Concept drift** | P(Y\\|X), the relationship between inputs and labels |",
+                    "line_start": 27,
+                    "reason": "The taxonomy is correct: P(X) for feature drift and covariate shift, P(Y) for label drift, P(Y|X) for concept drift."
+                  },
+                  {
+                    "quote": "A constant baseline still cannot define useful quantile bins, so the function fails instead of reporting zero drift",
+                    "line_start": 62,
+                    "reason": "The code and prose agree on the edge cases. The 0.1 and 0.2 PSI bands are described as conventions and not as statistical guarantees."
+                  },
+                  {
+                    "quote": "The monitoring method should match the feature and the decision.",
+                    "line_start": 120,
+                    "reason": "The tradeoff prose gives a decision condition and puts labeled performance above feature-level alerts. The explanation order from definition to detection, workflow, pitfalls and tradeoffs is sound and not repetitive."
+                  },
+                  {
+                    "quote": "> [!qard]- What is the difference between data drift and concept drift?",
+                    "line_start": 136,
+                    "reason": "This is one dependent comparison and so is independently gradeable. It keeps its qard-id and has a primary source on the answer side."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one coherent topic, detecting and responding to drift. The sections depend on each other, so a split would not give independently useful pages.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is accurate, clear and complete for its depth. The kept Qard is a single focused comparison with its ID preserved. There are no edits and no known violations, so an edit would be cosmetic.",
+            "change_checks": []
+          },
+          "model_calls": 4
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T13:20:09.761883Z",
+    "checkpoint_at": "2026-11-07T13:20:13.682533Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
