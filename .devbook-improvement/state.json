@@ -1732,13 +1732,64 @@
       }
     },
     "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": {
-      "content_hash": "4f589dc0925e05c2d3cc3f2174f075899717c8fd3bc6aaf5d0103553b66b337d",
-      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
-      "outcome": "changed",
+      "content_hash": "20ccb6a689de948486231a17b582c8f9f1c45355df4cebbb491a19312a5bef85",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
       "repair_input_hash": "",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_process": "focused-whole-note-v1",
-      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "20ccb6a689de948486231a17b582c8f9f1c45355df4cebbb491a19312a5bef85",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate and internally consistent. The four axes, the flowchart, the metrics table, the worked refund example and the tradeoff table all agree. No concrete defect or essential gap was found, so keeping it unchanged is justified.",
+          "page_type": "Concept — authorable prose with optional Questions and References; no special-page protections.",
+          "current_text_evidence": [
+            {
+              "quote": "Four properties are scored separately: validity, selection, arguments, and necessity.",
+              "line_start": 19,
+              "reason": "States the operating idea early. The flowchart, bullet list and metrics table later follow the same four axes."
+            },
+            {
+              "quote": "If selection is 95% and argument accuracy is 70%, argument handling is the first area to investigate. Averaging them to 82.5% destroys that diagnosis.",
+              "line_start": 53,
+              "reason": "The arithmetic is correct (95 and 70 average to 82.5). It also illustrates why the axes are scored separately."
+            },
+            {
+              "quote": "Order becomes part of correctness only when one call establishes a precondition for the next",
+              "line_start": 96,
+              "reason": "Gives the condition that limits the order-insensitivity advice, so the pitfall keeps its mechanism and exception."
+            },
+            {
+              "quote": "Caught only because the reference pinned order_id=4815.",
+              "line_start": 75,
+              "reason": "The worked example matches the argument-error definition and the 4851 vs 4815 case used elsewhere."
+            },
+            {
+              "quote": "These patterns are leads to investigate, not proof of the root cause.",
+              "line_start": 113,
+              "reason": "The Qard hedges root-cause claims in the same way as the prose. Its answer covers one dependent behavior-and-why task and cites BFCL on the answer side."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: validity, selection, arguments and necessity form one coherent evaluation topic, and separating them would remove the diagnostic comparison between the axes.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     },
     "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md": {
       "content_hash": "37cef958ff95ae157eeb3035c43bd43000229e446a6ce9e88be1d5de93ff0729",
@@ -6648,7 +6699,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-07T22:00:53.128724Z",
-    "elapsed_seconds": 316.2760200000001,
+    "elapsed_seconds": 319.56830300000007,
     "calls_reserved": 12,
     "responses_received": 12,
     "attempted_paths": [
@@ -7023,7 +7074,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T22:06:09.404281Z",
+    "checkpoint_at": "2026-11-07T22:06:12.696563Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -11431,6 +11482,91 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md": "9d6c3ab926115ea0252031dfb5538c720d0a4a8b5755c6c0c1bc3196558c4c4a"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "f8e83e81ea89df6e5309978cd1f8002d715eeefc48eb2a022f738148f74bcded": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate and internally consistent. The four axes, the flowchart, the metrics table, the worked refund example and the tradeoff table all agree. No concrete defect or essential gap was found, so keeping it unchanged is justified.",
+            "page_type": "Concept — authorable prose with optional Questions and References; no special-page protections.",
+            "current_text_evidence": [
+              {
+                "quote": "Four properties are scored separately: validity, selection, arguments, and necessity.",
+                "line_start": 19,
+                "reason": "States the operating idea early. The flowchart, bullet list and metrics table later follow the same four axes."
+              },
+              {
+                "quote": "If selection is 95% and argument accuracy is 70%, argument handling is the first area to investigate. Averaging them to 82.5% destroys that diagnosis.",
+                "line_start": 54,
+                "reason": "The arithmetic is correct (95 and 70 average to 82.5). It also illustrates why the axes are scored separately."
+              },
+              {
+                "quote": "Order becomes part of correctness only when one call establishes a precondition for the next",
+                "line_start": 97,
+                "reason": "Gives the condition that limits the order-insensitivity advice, so the pitfall keeps its mechanism and exception."
+              },
+              {
+                "quote": "Caught only because the reference pinned order_id=4815.",
+                "line_start": 76,
+                "reason": "The worked example matches the argument-error definition and the 4851 vs 4815 case used elsewhere."
+              },
+              {
+                "quote": "These patterns are leads to investigate, not proof of the root cause.",
+                "line_start": 119,
+                "reason": "The Qard hedges root-cause claims in the same way as the prose. Its answer covers one dependent behavior-and-why task and cites BFCL on the answer side."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: validity, selection, arguments and necessity form one coherent evaluation topic, and separating them would remove the diagnostic comparison between the axes.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The complete note was read and the before and current text are identical. There are no edits, no feedback and no known violations. The prose, example, tables, pitfalls, Qard and References are accurate and coherent, and the existing Qard ID is untouched. The keep disposition is supported.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+          "citation_index": 1,
+          "reported_line_start": 54,
+          "resolved_line_start": 53
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+          "citation_index": 2,
+          "reported_line_start": 97,
+          "resolved_line_start": 96
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+          "citation_index": 3,
+          "reported_line_start": 76,
+          "resolved_line_start": 75
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+          "citation_index": 4,
+          "reported_line_start": 119,
+          "resolved_line_start": 113
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": "20ccb6a689de948486231a17b582c8f9f1c45355df4cebbb491a19312a5bef85"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -24940,192 +25076,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "b75e350f352448edb997b51c2cb9ee03",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Scoring each agent tool call on four axes: right tool, correct arguments, valid call, and necessity.\"\nlevel: [\"3\"]\npriority: High\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Tool-Call Evaluation\"\nflashcard_uid: \"1d83d54c\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-11-04T06:47:28.050Z\"\npublished: \"2026-07-08T13:28:37.404Z\"\n---\n\nA tool call is where an agent stops describing an action and asks a system to perform it. Failures at this boundary are concrete: the agent can name the wrong tool, send the wrong value in valid JSON, invent a function, or repeat a call that changed nothing.\n\nFour properties are scored separately: validity, selection, arguments, and necessity. A combined \"tool accuracy\" number hides which decision failed. Separate scores suggest where to investigate: selection failures point toward routing or tool descriptions, and argument failures toward weak grounding or an unsafe schema. These are leads, not proven root causes.\n\nThis is the detailed version of tool-call correctness in [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]]. A [[Deterministic Checks|deterministic check]] handles structure. An [[LLM-as-a-Judge|LLM judge]] or labeled reference handles decisions whose meaning depends on conversation state.\n\n# What a Tool Call Can Get Wrong\n\n```mermaid\nflowchart TD\n    S[Tool call] --> V[Valid?]\n    V -->|malformed / unknown tool / wrong arity| F1[Invalid call]\n    V -->|schema-valid| SEL[Right tool for this step?]\n    SEL -->|wrong tool / no call when needed / call when none needed| F2[Selection error]\n    SEL -->|correct tool| ARG[Arguments correct?]\n    ARG -->|schema-valid but wrong values| F3[Argument error]\n    ARG -->|correct| NEC[Necessary?]\n    NEC -->|duplicate / no progress| F4[Redundant call]\n    NEC -->|advances task| OK[Good call]\n```\n\n- **Validity** asks whether the tool exists and whether its arguments parse against the schema. This check is deterministic and can run before execution.\n- **Selection** asks whether the current state calls for this tool. It covers both needless calls and the opposite failure: answering from memory when fresh state was required.\n- **Arguments** checks meaning after structure has passed. `{\"order_id\": \"4851\"}` is valid JSON even when the conversation identifies order `4815`. Time zones and dropped search constraints fail the same way.\n- **Necessity** checks whether the call advances the task. Repeating the same read against unchanged state raises cost and often marks the start of a loop.\n\n# Metrics\n\n| Metric | What it measures | Scorer |\n| --- | --- | --- |\n| Invalid-call rate | Fraction of calls that are malformed, unknown, or schema-invalid | Deterministic |\n| Tool-selection accuracy | Right tool chosen for the step (incl. correctly choosing *no* call) | Reference or judge |\n| Argument match | Arguments equal the expected values — exact for ids/enums, semantic for free text | Reference (exact) + judge (semantic) |\n| Redundant-call rate | Duplicate or no-progress calls per task | Deterministic (hash of tool+args) + judge |\n| Calls-per-task | Total calls vs the minimum a clean solve needs | Counter |\n\nSelection and argument accuracy are scored separately. If selection is 95% and argument accuracy is 70%, argument handling is the first area to investigate. Averaging them to 82.5% destroys that diagnosis.\n\n# Ground Truth\n\nReference-based evaluation stores the expected `(tool, arguments)` for a step. Tool equality scores selection. Field comparison scores the arguments. Successful human or agent traces are usually better raw material than hand-written cases. This is the trace equivalent of deriving [[Retrieval Evaluation Sets|retrieval eval sets]] from known source evidence.\n\nReference-free evaluation starts with schema validation and exact-duplicate detection. A judge then reads the conversation and tool catalog to score selection or necessity. This works before labeled traces exist, but it is weak at catching a plausible value that differs from the real target by one digit.\n\n# Example\n\nPer-call scoring for one step of a support agent:\n\n```text\nState: user asked \"refund my order, it arrived broken\" (order #4815 in context)\nAgent call: issue_refund(order_id=\"4851\", amount=\"full\")\n\n- Valid:      yes (schema-valid, real tool)            [deterministic: PASS]\n- Selection:  issue_refund is correct here             [reference: PASS]\n- Arguments:  order_id 4851 != expected 4815           [reference: FAIL]\n- Necessary:  refund operation needed, not a repeat    [PASS]\n\nVerdict: schema-valid call, wrong target order — the failure deterministic\nchecks cannot see. Caught only because the reference pinned order_id=4815.\n```\n\n# Tradeoffs\n\n| Scorer | Catches | Cost | Blind to |\n| --- | --- | --- | --- |\n| Deterministic checks | Malformed calls and unknown tools via schema validation; exact duplicates via comparison with earlier calls | Lowest — runs pre-execution | Semantically wrong arguments, wrong tool choice |\n| Reference match | Wrong tool, wrong argument values | Medium — needs labeled traces | Valid alternate tools/paths the reference didn't list |\n| LLM judge | Tool-choice reasonableness, necessity, semantic args | Highest — a judge call per step, plus judge bias | Subtle value errors a reference would pin exactly |\n\nDeterministic validity checks fit every call: they are cheap and can block malformed requests before execution. Reference matching fits tools where a wrong value is expensive, such as payments or deletion. A judge fits open-ended selection and necessity decisions, provided its scores are calibrated against human labels. Otherwise it may reward a longer trace simply because the trace looks more thorough.\n\n# Pitfalls\n\n## Exact Argument Match Flags Semantically-equal Values\n\nString equality marks `\"refund the full amount\"` wrong against `\"full refund\"`, even though the action is identical. Exact matching belongs on identifiers, enums, and booleans. Natural-language fields need normalization or a semantic scorer.\n\n## Order-sensitive Scoring Punishes Valid Reorderings\n\nAn exact reference sequence penalizes harmless reordering of independent reads. Comparing those calls as a set avoids that penalty. Order becomes part of correctness only when one call establishes a precondition for the next, such as looking up an order before issuing its refund.\n\n## Schema-valid Hides Semantically Wrong\n\nThe riskiest call may be perfectly valid: real tool, valid schema, wrong account. Structural checks should be paired with reference or semantic argument checks. Irreversible actions also need confirmation or a dry run at the execution boundary.\n\n# Questions\n\n<!-- qard-id: 23f9e773-456c-4f3f-b85a-96dcd927918e -->\n> [!qard]- Why should tool selection and argument accuracy be measured separately?\n> Because they score different decisions that fail for different reasons. Tool selection asks whether the agent called the right tool for the current step, including recognizing when no call is needed. Argument accuracy asks whether a correctly chosen tool received the right values.\n>\n> A combined score hides which decision failed. For example, 95% selection accuracy and 70% argument accuracy average to 82.5%, and that single number no longer shows that arguments are the weak point. Separate scores point an investigation in a direction:\n>\n> - **Selection failures** often suggest unclear tool descriptions or a routing problem.\n> - **Argument failures** often suggest weak grounding in the conversation or a loosely constrained schema. A call can name the right tool in schema-valid form and still send order `4851` when the conversation identifies order `4815`.\n> \n> These patterns are leads to investigate, not proof of the root cause.\n>\n> How argument accuracy is scored also depends on the field. Exact matching fits identifiers, enums and booleans with one defined value. Free-text fields need normalization or a semantic check, which is valid only where the tool contract accepts equivalent wording.\n>\n> [Berkeley Function Calling Leaderboard](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)\n\n# References\n\n- [Berkeley Function-Calling Leaderboard (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)\n- [Tool use (function calling) overview (Anthropic Docs)](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)\n",
-          "hash": "20ccb6a689de948486231a17b582c8f9f1c45355df4cebbb491a19312a5bef85",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-          "outcome": "keep",
-          "reason": "Read the whole note against its text. The four axes (validity, selection, arguments, necessity) are defined consistently in the prose, the flowchart, the metrics table and the worked refund example. The 4851 vs 4815 example is internally consistent. The 95%/70% to 82.5% arithmetic is correct. The scorer tradeoff table matches the Ground Truth section. The pitfalls state exact-match and ordering conditions precisely, including that order matters when one call is a precondition for the next. The single Qard tests one dependent behavior-and-why task, hedges root-cause claims appropriately, and cites the BFCL source on the answer side. References are two relevant primary sources with no trailing annotations. Wikilinks and fenced-code language identifiers are present, and known_violations is empty. No factual defect or teaching gap was found, so an edit would be cosmetic."
-        }
-      ],
-      "feedback": [],
-      "decisions": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": "20ccb6a689de948486231a17b582c8f9f1c45355df4cebbb491a19312a5bef85"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-07T22:05:47.051130Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-            "verdict": "CLEAN",
-            "summary": "The note is accurate and internally consistent. The four axes, the flowchart, the metrics table, the worked refund example and the tradeoff table all agree. No concrete defect or essential gap was found, so keeping it unchanged is justified.",
-            "page_type": "Concept — authorable prose with optional Questions and References; no special-page protections.",
-            "current_text_evidence": [
-              {
-                "quote": "Four properties are scored separately: validity, selection, arguments, and necessity.",
-                "line_start": 19,
-                "reason": "States the operating idea early. The flowchart, bullet list and metrics table later follow the same four axes."
-              },
-              {
-                "quote": "If selection is 95% and argument accuracy is 70%, argument handling is the first area to investigate. Averaging them to 82.5% destroys that diagnosis.",
-                "line_start": 54,
-                "reason": "The arithmetic is correct (95 and 70 average to 82.5). It also illustrates why the axes are scored separately."
-              },
-              {
-                "quote": "Order becomes part of correctness only when one call establishes a precondition for the next",
-                "line_start": 97,
-                "reason": "Gives the condition that limits the order-insensitivity advice, so the pitfall keeps its mechanism and exception."
-              },
-              {
-                "quote": "Caught only because the reference pinned order_id=4815.",
-                "line_start": 76,
-                "reason": "The worked example matches the argument-error definition and the 4851 vs 4815 case used elsewhere."
-              },
-              {
-                "quote": "These patterns are leads to investigate, not proof of the root cause.",
-                "line_start": 119,
-                "reason": "The Qard hedges root-cause claims in the same way as the prose. Its answer covers one dependent behavior-and-why task and cites BFCL on the answer side."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: validity, selection, arguments and necessity form one coherent evaluation topic, and separating them would remove the diagnostic comparison between the axes.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The complete note was read and the before and current text are identical. There are no edits, no feedback and no known violations. The prose, example, tables, pitfalls, Qard and References are accurate and coherent, and the existing Qard ID is untouched. The keep disposition is supported.",
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-          "citation_index": 1,
-          "reported_line_start": 54,
-          "resolved_line_start": 53
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-          "citation_index": 2,
-          "reported_line_start": 97,
-          "resolved_line_start": 96
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-          "citation_index": 3,
-          "reported_line_start": 76,
-          "resolved_line_start": 75
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-          "citation_index": 4,
-          "reported_line_start": 119,
-          "resolved_line_start": 113
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": "20ccb6a689de948486231a17b582c8f9f1c45355df4cebbb491a19312a5bef85"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-          "verdict": "CLEAN",
-          "summary": "The note is accurate and internally consistent. The four axes, the flowchart, the metrics table, the worked refund example and the tradeoff table all agree. No concrete defect or essential gap was found, so keeping it unchanged is justified.",
-          "page_type": "Concept — authorable prose with optional Questions and References; no special-page protections.",
-          "current_text_evidence": [
-            {
-              "quote": "Four properties are scored separately: validity, selection, arguments, and necessity.",
-              "line_start": 19,
-              "reason": "States the operating idea early. The flowchart, bullet list and metrics table later follow the same four axes."
-            },
-            {
-              "quote": "If selection is 95% and argument accuracy is 70%, argument handling is the first area to investigate. Averaging them to 82.5% destroys that diagnosis.",
-              "line_start": 53,
-              "reason": "The arithmetic is correct (95 and 70 average to 82.5). It also illustrates why the axes are scored separately."
-            },
-            {
-              "quote": "Order becomes part of correctness only when one call establishes a precondition for the next",
-              "line_start": 96,
-              "reason": "Gives the condition that limits the order-insensitivity advice, so the pitfall keeps its mechanism and exception."
-            },
-            {
-              "quote": "Caught only because the reference pinned order_id=4815.",
-              "line_start": 75,
-              "reason": "The worked example matches the argument-error definition and the 4851 vs 4815 case used elsewhere."
-            },
-            {
-              "quote": "These patterns are leads to investigate, not proof of the root cause.",
-              "line_start": 113,
-              "reason": "The Qard hedges root-cause claims in the same way as the prose. Its answer covers one dependent behavior-and-why task and cites BFCL on the answer side."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: validity, selection, arguments and necessity form one coherent evaluation topic, and separating them would remove the diagnostic comparison between the axes.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The complete note was read and the before and current text are identical. There are no edits, no feedback and no known violations. The prose, example, tables, pitfalls, Qard and References are accurate and coherent, and the existing Qard ID is untouched. The keep disposition is supported.",
-      "change_checks": []
     }
   }
 }
