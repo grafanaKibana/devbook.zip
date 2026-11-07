@@ -5359,11 +5359,11 @@
     "version": 1,
     "id": "f57944c05f7944ee8610e2bd6384fd74",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 88.8343256,
+    "elapsed_seconds": 107.2817519,
     "calls_reserved": 4,
-    "responses_received": 3,
+    "responses_received": 4,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Model Selection and Routing.md"
     ],
@@ -5439,7 +5439,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:15:34.713355Z",
+    "checkpoint_at": "2026-11-07T06:15:53.160781Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -20467,6 +20467,169 @@
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-07T06:15:31.393533Z"
+    "prepared_at": "2026-11-07T06:15:31.393533Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The note is accurate, well ordered and self-contained. It has no concrete rule violations and no Questions cards. Its references are bare descriptive primary-source links. Keeping it unchanged is justified, and an edit would be cosmetic churn.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+            "verdict": "CLEAN",
+            "summary": "I read the whole note. It explains APE, Active-Prompt, DSP and PAL accurately, keeps claims scoped to what the papers tested, and separates PAL as an adjacent technique. The prose is direct and has little repetition. The code fences carry language identifiers, and the pitfalls and tradeoffs support engineering judgment. No edit is warranted.",
+            "page_type": "Concept — authorable prose. Questions are optional and absent. References are bare descriptive links. Frontmatter is typed, and status Done was not set by an agent.",
+            "current_text_evidence": [
+              {
+                "quote": "The method does not remove judgment. It moves judgment into the objective, dataset, and acceptance threshold.",
+                "line_start": 16,
+                "reason": "States the operating idea and its key limit early, in whiteboard voice."
+              },
+              {
+                "quote": "That result is evidence that small wording changes can matter. It is not evidence that one discovered phrase transfers unchanged to every model or task.",
+                "line_start": 22,
+                "reason": "Scopes the APE claim to what the paper tested, so it does not overgeneralize."
+              },
+              {
+                "quote": "Human time goes to cases that reveal a decision boundary instead of another easy example.",
+                "line_start": 34,
+                "reason": "Gives the Active-Prompt mechanism and its rationale accurately, as active learning over demonstrations."
+              },
+              {
+                "quote": "The operational boundary is clear: DSP is no longer prompt search alone.",
+                "line_start": 40,
+                "reason": "Names the concrete cost of DSP: a trainable controller, its data, and another model in the serving path."
+              },
+              {
+                "quote": "execution removes calculation errors without removing specification errors.",
+                "line_start": 46,
+                "reason": "Names the PAL limit precisely, and the arithmetic example (17*24+39=447) is correct."
+              },
+              {
+                "quote": "There is no universal minimum sample count.",
+                "line_start": 84,
+                "reason": "Pitfalls avoid false precision and name the conditions that matter."
+              },
+              {
+                "quote": "Manual tuning remains the cheaper choice for a small number of stable prompts.",
+                "line_start": 102,
+                "reason": "Closes with a decision condition for when automation earns its cost."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note is one coherent topic. PAL is explicitly framed as an adjacent contrast, and the length is justified by the four-method comparison.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+          "citation_index": 2,
+          "reported_line_start": 34,
+          "resolved_line_start": 35
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+          "citation_index": 3,
+          "reported_line_start": 40,
+          "resolved_line_start": 41
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+          "citation_index": 4,
+          "reported_line_start": 46,
+          "resolved_line_start": 47
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+          "citation_index": 5,
+          "reported_line_start": 84,
+          "resolved_line_start": 85
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+          "citation_index": 6,
+          "reported_line_start": 102,
+          "resolved_line_start": 104
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md": "8e3ee72eb850f6a2a2a3e433b6d57369a5cc2b20321bf9832cff812fcc5eb5d0"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The note is accurate, well ordered and self-contained. It has no concrete rule violations and no Questions cards. Its references are bare descriptive primary-source links. Keeping it unchanged is justified, and an edit would be cosmetic churn.",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+          "verdict": "CLEAN",
+          "summary": "I read the whole note. It explains APE, Active-Prompt, DSP and PAL accurately, keeps claims scoped to what the papers tested, and separates PAL as an adjacent technique. The prose is direct and has little repetition. The code fences carry language identifiers, and the pitfalls and tradeoffs support engineering judgment. No edit is warranted.",
+          "page_type": "Concept — authorable prose. Questions are optional and absent. References are bare descriptive links. Frontmatter is typed, and status Done was not set by an agent.",
+          "current_text_evidence": [
+            {
+              "quote": "The method does not remove judgment. It moves judgment into the objective, dataset, and acceptance threshold.",
+              "line_start": 16,
+              "reason": "States the operating idea and its key limit early, in whiteboard voice."
+            },
+            {
+              "quote": "That result is evidence that small wording changes can matter. It is not evidence that one discovered phrase transfers unchanged to every model or task.",
+              "line_start": 22,
+              "reason": "Scopes the APE claim to what the paper tested, so it does not overgeneralize."
+            },
+            {
+              "quote": "Human time goes to cases that reveal a decision boundary instead of another easy example.",
+              "line_start": 35,
+              "reason": "Gives the Active-Prompt mechanism and its rationale accurately, as active learning over demonstrations."
+            },
+            {
+              "quote": "The operational boundary is clear: DSP is no longer prompt search alone.",
+              "line_start": 41,
+              "reason": "Names the concrete cost of DSP: a trainable controller, its data, and another model in the serving path."
+            },
+            {
+              "quote": "execution removes calculation errors without removing specification errors.",
+              "line_start": 47,
+              "reason": "Names the PAL limit precisely, and the arithmetic example (17*24+39=447) is correct."
+            },
+            {
+              "quote": "There is no universal minimum sample count.",
+              "line_start": 85,
+              "reason": "Pitfalls avoid false precision and name the conditions that matter."
+            },
+            {
+              "quote": "Manual tuning remains the cheaper choice for a small number of stable prompts.",
+              "line_start": 104,
+              "reason": "Closes with a decision condition for when automation earns its cost."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note is one coherent topic. PAL is explicitly framed as an adjacent contrast, and the length is justified by the four-method comparison.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
