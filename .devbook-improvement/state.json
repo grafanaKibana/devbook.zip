@@ -5604,11 +5604,11 @@
     "version": 1,
     "id": "f57944c05f7944ee8610e2bd6384fd74",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-07T06:14:05.879571Z",
-    "elapsed_seconds": 307.55070699999976,
+    "elapsed_seconds": 316.9572063999998,
     "calls_reserved": 11,
-    "responses_received": 10,
+    "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Model Selection and Routing.md",
       "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
@@ -5985,7 +5985,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T06:19:13.429738Z",
+    "checkpoint_at": "2026-11-07T06:19:22.836237Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -21219,5 +21219,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "f57944c05f7944ee8610e2bd6384fd74",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Making intermediate reasoning explicit with Chain-of-Thought, Self-Consistency, and Tree of Thoughts.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Prompt Engineering/Reasoning Techniques\"\nflashcard_uid: \"cd09ceaf\"\ncreated: \"2026-02-28T13:40:02.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.482Z\"\n---\n\nSome tasks cannot be answered reliably in one jump. Arithmetic, logic, and planning all require state to survive across several decisions. Reasoning techniques give the model or its surrounding system more room to construct, compare, and check those decisions.\n\nThe methods form a cost ladder. Chain-of-Thought elicits one path. Self-Consistency samples several paths and aggregates their answers. Tree of Thoughts adds an explicit search procedure with branching and backtracking. None guarantees correct reasoning, and a convincing trace is still only model output.\n\n# Chain-of-Thought Prompting\n\nWei et al. (2022) showed that worked reasoning examples can improve performance on sufficiently large models. Two forms became common:\n\n1. Few-shot CoT: worked examples in the prompt show a reasoning process and final-answer format.\n2. Zero-shot CoT: an instruction such as \"Let's think step by step\" is appended to the prompt (Kojima et al. 2022).\n\nAn external scratchpad can turn one difficult generation into a sequence of smaller continuations. That often helps on benchmark problems with explicit intermediate state. It also creates more tokens in which an early mistake can spread, so the trace needs verification rather than trust.\n\nExample (same task, with and without CoT):\n\n```text\nQuestion: I buy 10 apples, give away 4, buy 5 more, then eat 1. How many remain?\n\nDirect answer (no CoT): 11  (incorrect)\n\nCoT-style answer:\nStart with 10.\nGive away 4 -> 6.\nBuy 5 -> 11.\nEat 1 -> 10.\nFinal answer: 10  (correct)\n```\n\nVisible reasoning also has a product boundary. Some model APIs return concise answers or summaries rather than hidden internal reasoning, and exposing a long scratchpad is rarely the right user interface. Production systems usually need verifiable intermediate results, tool outputs, or a concise rationale.\n\n# Self-Consistency\n\nSelf-Consistency (Wang et al. 2022) samples several reasoning paths instead of accepting one greedy path. The system groups equivalent final answers and selects the most frequent one.\n\nThe method helps when independent samples fail differently and the final answer can be compared mechanically. It is much weaker for open-ended outputs where two correct answers may not match and a majority can repeat the same misconception.\n\n```text\nQuestion: When I was 6, my sister was half my age. Now I'm 70. How old is she?\n\nSampled path 1 -> 67\nSampled path 2 -> 67\nSampled path 3 -> 35\n\nMajority vote -> 67 (correct)\n```\n\nCost and token use grow roughly with the sample count. Calls can run in parallel to reduce wall-clock latency, but they still consume capacity, and the aggregation rule becomes another part of the system to test.\n\n# Tree of Thoughts\n\nTree of Thoughts (ToT), proposed by Yao et al. (2023), wraps the model in a search algorithm. The model proposes candidate states and may help score them. Breadth-first, depth-first, or beam-like search decides which branches continue. Dead ends can be abandoned instead of becoming the rest of one irreversible completion.\n\n```mermaid\nflowchart TD\n    S[Problem] --> A[Thought A]\n    S --> B[Thought B]\n    A --> A1[Evaluate A1]\n    A --> A2[Evaluate A2]\n    B --> B1[Evaluate B1]\n    B --> B2[Evaluate B2]\n    A2 --> X[Dead end]\n    X --> A[Backtrack]\n    B1 --> G[Goal reached]\n```\n\nToT fits problems with meaningful alternatives, delayed consequences, and a state that can be evaluated along the way. Straightforward extraction has no useful search tree. Ordinary arithmetic is usually cheaper to send to a calculator.\n\n# Tradeoffs\n\n| Technique | Calls | Accuracy profile | Best use case | Main downside |\n| --- | --- | --- | --- | --- |\n| Chain-of-Thought | 1 | Strong baseline for many reasoning tasks | Arithmetic, logic, structured step-by-step tasks | Can lock into one bad chain |\n| Self-Consistency | N | Better than single CoT on many verifiable tasks | Tasks with a clear final answer suitable for voting | Higher cost and latency |\n| Tree of Thoughts | Many (branching) | Can improve tasks with a useful search state | Problems needing exploration, lookahead, backtracking | Most expensive and operationally complex |\n\nThe preferred method is the cheapest one that clears the evaluation target:\n\n1. The baseline is one direct call with an answer format that can be checked.\n2. CoT-style decomposition is added when the task genuinely has intermediate state.\n3. Self-consistency fits when final answers can be normalized and voted on.\n4. ToT is reserved for problems that contain an actual search space.\n\n# Questions\n\n<!-- qard-id: 8e316cf0-1e09-43c4-9612-3f8972f851fc -->\n> [!qard]- When can Chain-of-Thought prompting help, and when can it add risk or waste?\n> Chain-of-Thought prompting can help when a task carries intermediate state across several steps, such as multi-step arithmetic, and the model is large enough to use worked reasoning. It can waste tokens when the task has little intermediate state. It can also waste them on models that already reason internally and whose provider advises against explicit step-by-step prompts. It adds risk when the visible trace is trusted as proof.\n>\n> **Where it helped:** in Wei et al. (2022), chain-of-thought demonstrations improved some tested arithmetic, commonsense and symbolic benchmarks, and the gains depended on model scale. Writing out intermediate steps can turn one hard generation into a sequence of smaller continuations. These are results for the tested benchmarks and models, not a universal rule.\n>\n> **Where it can add risk or waste:**\n>\n> - **Cost:** longer outputs add tokens and latency. That cost is waste whenever the reasoning does not improve the answer on the selected model and task.\n> - **Error propagation:** a longer trace has more steps in which an early wrong assumption can carry forward, and a fluent explanation does not show that the answer is right.\n> - **Little intermediate state:** simple extraction or lookup has few steps to make explicit, so extra reasoning tokens are unlikely to improve the result.\n> - **Internally reasoning models:** OpenAI's reasoning best practices advise against explicit “think step by step” instructions for its reasoning models, because those models already reason internally. Other providers and models need their own guidance and evaluation.\n> \n> Whether CoT helps is settled by comparing it with a direct prompt on the selected model and task, with the final answer checked independently of the trace.\n>\n> Sources: [Wei et al., Chain-of-Thought Prompting](https://arxiv.org/abs/2201.11903) · [OpenAI reasoning best practices](https://developers.openai.com/api/docs/guides/reasoning-best-practices)\n\n<!-- qard-id: 1ef10543-fe5e-41d7-bc88-d53c8e404ca5 -->\n> [!qard]- When does Tree of Thoughts justify its search cost over a single reasoning path?\n> Tree of Thoughts justifies its cost when a problem has a real search space. That means meaningful alternatives at intermediate steps, consequences that appear only later, and partial states that can be evaluated usefully. Without those, a single reasoning path or a direct call is cheaper.\n>\n> **How it works:** ToT wraps the model in a search procedure.\n>\n> 1. The model proposes several candidate next states, or thoughts, from the current state.\n> 2. An evaluator judges how promising each state is. The evaluator can be the model itself.\n> 3. A search strategy such as breadth-first or depth-first search keeps and expands the promising branches.\n> 4. When a branch is judged a dead end, it is abandoned and the search backtracks to an earlier state. This replaces continuing one irreversible completion.\n> \n> **Costs and limits:**\n>\n> - Work grows with branching and depth, because each expanded state needs generation and evaluation calls.\n> - The evaluator is the weak point. A poor evaluator can keep a bad branch or prune the one that leads to the solution.\n> - Straightforward extraction has no useful search tree, and plain arithmetic is cheaper with a calculator.\n> - The reported gains come from the tasks tested in the original paper and are not a general guarantee.\n> \n> Self-consistency sits between a single path and ToT. It samples complete paths independently and votes on their final answers, without evaluating intermediate states or backtracking from them.\n>\n> Sources: [Yao et al., Tree of Thoughts](https://arxiv.org/abs/2305.10601) · [Wang et al., Self-Consistency](https://arxiv.org/abs/2203.11171)\n\n<!-- qard-id: 6e8b7fc1-a648-424a-af2d-b9769d59392b -->\n> [!qard]- When does self-consistency help, and when can majority aggregation fail?\n> Self-consistency helps when independent samples tend to make different mistakes and their final answers can be normalized and compared, so the correct answer is likely to be the most common one. Majority aggregation fails when errors are correlated, so that most samples share the same mistake. It also fails when correct answers cannot be matched reliably.\n>\n> **How it works:**\n>\n> 1. The same prompt is sampled several times, producing different reasoning paths instead of one greedy path.\n> 2. Each path's final answer is extracted and normalized, so `67`, `67.0` and “sixty-seven” count as the same answer.\n> 3. Equivalent answers are grouped, and the most frequent one is selected.\n> \n> For example, three sampled paths for an age puzzle answer `67`, `67` and `35`, and the vote returns `67`.\n>\n> **Where it fails or costs too much:**\n>\n> - **Correlated errors:** if most samples repeat the same misconception, the wrong answer wins the vote.\n> - **Open-ended outputs:** two correct summaries rarely match word for word, so literal string voting splits the correct answers. A meaningful comparison rule is needed, and that rule must itself be tested.\n> - **Cost:** calls and tokens grow roughly with the number of samples. Parallel calls reduce elapsed time but still consume capacity.\n> \n> A comparison against a single-path baseline on the target task shows whether the extra calls pay off.\n>\n> Sources: [Wang et al., Self-Consistency Improves Chain of Thought Reasoning](https://arxiv.org/abs/2203.11171)\n\n# References\n\n- [Chain-of-Thought Prompting Elicits Reasoning in Large Language Models (Wei et al., 2022)](https://arxiv.org/abs/2201.11903)\n- [Large Language Models are Zero-Shot Reasoners (Kojima et al., 2022)](https://arxiv.org/abs/2205.11916)\n- [Self-Consistency Improves Chain of Thought Reasoning in Language Models (Wang et al., 2022)](https://arxiv.org/abs/2203.11171)\n- [Tree of Thoughts: Deliberate Problem Solving with Large Language Models (Yao et al., 2023)](https://arxiv.org/abs/2305.10601)\n",
+          "hash": "449e72eb2998f895cbae9561f5c16aefc7cd25d430e69a11c86bd7400f920ac3",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against the current text and the primary papers it cites. The CoT, zero-shot CoT, Self-Consistency and ToT attributions (Wei 2022, Kojima 2022, Wang 2022, Yao 2023) match the papers. Both worked examples are arithmetically correct: the apple example gives 10, and the sister example gives 70-3=67. The ToT description of proposing, evaluating and searching with backtracking is accurate, and the diagram matches it. The cost-ladder framing and the tradeoffs table are consistent with the prose, and the cheapest-method-first guidance is sound. The three Qards each test one dependent task, such as when a technique helps and why or how it fails. Their answers carry conditions, limits and primary sources, with no bundled independent questions. The prose reads clearly, with no repetition or terminology drift. No known violations are open. Any edit would be cosmetic."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md": "449e72eb2998f895cbae9561f5c16aefc7cd25d430e69a11c86bd7400f920ac3"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-07T06:19:22.836226Z"
   }
 }
