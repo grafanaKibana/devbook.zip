@@ -6487,10 +6487,10 @@
     "version": 1,
     "id": "b75e350f352448edb997b51c2cb9ee03",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "review_reserved",
     "started_at": "2026-11-07T22:00:53.128724Z",
-    "elapsed_seconds": 134.23285570000002,
-    "calls_reserved": 5,
+    "elapsed_seconds": 137.270356,
+    "calls_reserved": 6,
     "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/AI & ML/Responsible AI.md",
@@ -6642,7 +6642,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T22:03:07.361113Z",
+    "checkpoint_at": "2026-11-07T22:03:10.398615Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -6667,7 +6667,7 @@
       "pr": null
     },
     "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-07T22:17:58.770343Z"
+    "reservation_deadline": "2026-11-07T22:18:10.165017Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
