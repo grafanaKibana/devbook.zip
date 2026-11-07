@@ -6487,13 +6487,14 @@
     "version": 1,
     "id": "b75e350f352448edb997b51c2cb9ee03",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-07T22:00:53.128724Z",
-    "elapsed_seconds": 105.43874430000002,
+    "elapsed_seconds": 108.85600460000002,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
-      "Vault/Home/AI & ML/Responsible AI.md"
+      "Vault/Home/AI & ML/Responsible AI.md",
+      "Vault/Home/AI & ML/AI & ML.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -6564,10 +6565,84 @@
           },
           "model_calls": 2
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/AI & ML.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/AI & ML.md",
+                "outcome": "keep",
+                "reason": "I audited the whole note and found no verified defect, so it stays unchanged. The frontmatter is a valid FolderNote with the required tag, typed arrays, an allowed status of Creation, and the qard-deck and qard-topic overrides. The opening paragraph states the section's scope and the key boundary: data, evaluation and operation usually matter more than model choice. The Datacore folder map is protected and has its language identifier. The Questions section holds one card, and its protected qard-id is intact. That card tests one dependent decision: when classic ML fits better than an LLM, and the measurement condition that settles it. It does not bundle independent tasks. Its claims are accurate and generic: a defined prediction task with representative labels and a measurable objective makes classic ML a strong candidate, and measured quality, latency, cost and maintenance decide. The cited Google ML problem-framing and Rules of ML pages support this. I did not fetch them in this pass. The References section has one real, bare, topic-appropriate link. The card's wording is slightly roundabout, but a rewrite would be cosmetic and would risk the card's metadata. I judged an edit not worth that risk."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note is unchanged with no edits. My full read found no concrete defect, so the keep is justified.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/AI & ML.md",
+                "verdict": "CLEAN",
+                "summary": "The FolderNote has a clear scope opening, a protected folder map, one single-decision Qard with its ID intact, and one real reference. Reading the whole note turned up no accuracy, ordering, repetition or structure defect that would justify an edit.",
+                "page_type": "FolderNote: tags [FolderNote] retained. The Datacore folder map and the Qard ID are protected. Questions and References are optional.",
+                "current_text_evidence": [
+                  {
+                    "quote": "A gradient-boosted tree and an LLM can fail for the same reason",
+                    "line_start": 21,
+                    "reason": "The opening states the scope and the key boundary: data, evaluation and operation matter more than model choice. A reader can recover the idea at once, and the voice is direct."
+                  },
+                  {
+                    "quote": "```datacorejsx",
+                    "line_start": 23,
+                    "reason": "The protected folder-map block keeps its language identifier (MD040) and is unchanged."
+                  },
+                  {
+                    "quote": "<!-- qard-id: c28d8736-4f09-48e3-9a55-a635b6e08875 -->",
+                    "line_start": 30,
+                    "reason": "Qard identity metadata is intact directly above the callout."
+                  },
+                  {
+                    "quote": "Only the second decides.",
+                    "line_start": 32,
+                    "reason": "The answer states the decisive condition. Measured quality, latency, cost and maintenance settle the choice, and a good task fit only makes classic ML a candidate. The card tests one dependent decision and its condition, not bundled tasks."
+                  },
+                  {
+                    "quote": "[Microsoft AI for Beginners](https://microsoft.github.io/AI-For-Beginners/)",
+                    "line_start": 44,
+                    "reason": "The reference is a single bare, real, topic-appropriate link with no trailing annotation."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the hub is short, and its single card is one coherent decision. Child topics are already covered by the folder map.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "decision_checks": []
+          },
+          "model_calls": 4
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-07T22:02:38.567002Z",
+    "checkpoint_at": "2026-11-07T22:02:41.984264Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
