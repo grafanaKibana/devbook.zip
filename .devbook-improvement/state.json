@@ -7149,15 +7149,16 @@
     "version": 1,
     "id": "56e8c2737af74831bbd5ff5d77b67fd5",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-08T06:19:50.150495Z",
-    "elapsed_seconds": 206.07296219999992,
+    "elapsed_seconds": 209.9763930999999,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/Cloud/Cloud Cost Management.md",
       "Vault/Home/Cloud/Cloud.md",
-      "Vault/Home/Cloud/Disaster Recovery.md"
+      "Vault/Home/Cloud/Disaster Recovery.md",
+      "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -7369,10 +7370,93 @@
           },
           "model_calls": 6
         }
+      },
+      {
+        "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its current text and NIST SP 800-145. The opening correctly attributes IaaS, PaaS and SaaS to NIST and treats CaaS and FaaS as industry labels. The responsibility table has sensible boundaries: provider manages the managed Kubernetes control plane, and the team keeps identity, data and configuration. The selection rule is ordered, and it states the condition that overrides it (real constraints). The consequences section covers retries and idempotency, container portability limits, runtime retirement and cost shape. It has no factual defects, no repetition worth trimming and no known violations. The single Azure shared-responsibility reference is topic-specific and has no trailing annotation. The note has no Qard cards, and adding any would not repair a concrete gap. Edits would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+                "verdict": "CLEAN",
+                "summary": "Independent whole-note audit found no accuracy, clarity, voice or structure defect. The NIST attribution is correct, the table states responsibility splits and selection conditions, and the consequences section gives mechanisms (retry/idempotency, portability limits, cost shape). Keeping the note unchanged is justified.",
+                "page_type": "Concept — typed frontmatter intact, status Ready to Repeat is allowed, optional Questions absent (permitted), single bare References link, no code fences.",
+                "current_text_evidence": [
+                  {
+                    "quote": "NIST defines IaaS, PaaS, and SaaS. CaaS and FaaS are useful industry labels",
+                    "line_start": 14,
+                    "reason": "Correctly scopes the NIST definitions and flags CaaS/FaaS as non-NIST labels with product-dependent boundaries, which prevents a common factual error."
+                  },
+                  {
+                    "quote": "managed Kubernetes usually includes the control plane",
+                    "line_start": 21,
+                    "reason": "States the CaaS responsibility split with an appropriate hedge ('usually', 'varying node/network duties') instead of an absolute claim."
+                  },
+                  {
+                    "quote": "Managed does not mean responsibility-free.",
+                    "line_start": 26,
+                    "reason": "Gives the key boundary after the table: data, access, configuration and recovery stay with the team."
+                  },
+                  {
+                    "quote": "Use the highest managed layer that satisfies the real constraints:",
+                    "line_start": 30,
+                    "reason": "Gives the ordered decision rule and the condition that changes the choice, so the decision order is easy to rebuild."
+                  },
+                  {
+                    "quote": "Externally visible side effects need idempotency regardless of who operates the runtime.",
+                    "line_start": 43,
+                    "reason": "Gives the retry/redelivery mechanism and its engineering consequence in direct, impersonal prose."
+                  },
+                  {
+                    "quote": "a container standardizes the executable and filesystem, not identity, networking, storage, messaging, or database semantics.",
+                    "line_start": 44,
+                    "reason": "Precise portability limit; accurate and useful for interview judgment."
+                  },
+                  {
+                    "quote": "- [Azure shared responsibility in the cloud](https://learn.microsoft.com/en-us/azure/security/fundamentals/shared-responsibility)",
+                    "line_start": 50,
+                    "reason": "A topic-specific authoritative reference as a bare link with no trailing annotation, as the contract requires."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the models, selection rule and consequences form one coherent decision topic, and separating them would lose the comparison context.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The single note was read in full and independently assessed. It is accurate and clear, follows the concept-note rules, and has no known violations. The keep is justified, and any edit would be cosmetic churn.",
+            "change_checks": []
+          },
+          "model_calls": 8
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T06:23:16.223115Z",
+    "checkpoint_at": "2026-11-08T06:23:20.126546Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
