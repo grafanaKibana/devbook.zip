@@ -7264,11 +7264,11 @@
     "version": 1,
     "id": "a3c3eac724bf4b6c8037306f6a4e6530",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-08T13:40:02.820509Z",
-    "elapsed_seconds": 232.85506250000006,
+    "elapsed_seconds": 249.39514570000006,
     "calls_reserved": 8,
-    "responses_received": 7,
+    "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Algorithms.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search.md"
@@ -7418,7 +7418,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T13:43:55.675081Z",
+    "checkpoint_at": "2026-11-08T13:44:12.215164Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -27782,6 +27782,159 @@
       ],
       "feedback": []
     },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The single edit fixes the one factual error found in the prior review. Equality low[v]==disc[u] makes u a cut vertex only when u is not the root. The rest of the note checks out.",
+        "notes": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
+            "verdict": "CLEAN",
+            "summary": "The Bridge bullet now qualifies the equality case for non-root u and states the root exception. This removes the contradiction with the root rule. The rest of the note is accurate: disc/low definitions, strict bridge test, worked examples, parallel-edge handling, C# code and O(n+m) complexity.",
+            "page_type": "Concept note. It has no Qards, and References are present. The steptrace and complexity blocks are protected.",
+            "current_text_evidence": [
+              {
+                "quote": "for a non-root `u` the subtree remains cut off when `u` is deleted and `u` stays a cut vertex",
+                "line_start": 39,
+                "reason": "Equality low[v]>=disc[u] means nothing in v's subtree reaches above u, so deleting a non-root u strands the subtree. The claim is now correctly conditioned."
+              },
+              {
+                "quote": "A root `u` is the exception: it is a cut vertex only with two or more tree children.",
+                "line_start": 39,
+                "reason": "This is consistent with the Root cut vertex bullet and the Boundaries section. A triangle rooted at 0 is the case that the earlier wording got wrong."
+              },
+              {
+                "quote": "For non-root vertices, the single `>` versus `>=` is the entire distinction",
+                "line_start": 39,
+                "reason": "The overstatement is limited to the case where it holds. The root is decided by child count."
+              },
+              {
+                "quote": "`low[3] = 3 > disc[2] = 2` and `low[4] = 4 > disc[3] = 3`",
+                "line_start": 43,
+                "reason": "I rechecked the worked example. Edges 2-3 and 3-4 are bridges and vertices 2 and 3 are cut vertices, which is correct."
+              },
+              {
+                "quote": "the child edge entering the second triangle produces `low[child] == disc[2]`",
+                "line_start": 69,
+                "reason": "I traced the two-triangles example by DFS from 0. The result is equality, so >= flags vertex 2 and > flags no bridge, as the note says."
+              },
+              {
+                "quote": "Skipping only the specific parent edge by its id leaves the duplicate as a back edge",
+                "line_start": 71,
+                "reason": "The multigraph explanation matches the C# implementation, which skips by edge id."
+              }
+            ],
+            "target_resolution": "RESOLVED",
+            "split_suggestion": "No split: the cut-vertex and bridge rules share one low-link DFS and are most useful together.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "identity_safety": "NOT APPLICABLE",
+              "question_quality": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": [
+          {
+            "edit_index": 0,
+            "verdict": "WORTHWHILE",
+            "reason": "The defect is real: the old text said equality always leaves u a cut vertex and called >/>= the entire distinction. That is false for a root with one child and contradicted the Root bullet. The edit adds the non-root qualifier and the root exception, with no unsupported claims and no change to metadata."
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
+          "citation_index": 3,
+          "reported_line_start": 43,
+          "resolved_line_start": 41
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
+          "citation_index": 4,
+          "reported_line_start": 69,
+          "resolved_line_start": 106
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
+          "citation_index": 5,
+          "reported_line_start": 71,
+          "resolved_line_start": 108
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md": "08d3bd6c8859e7a90c072c99b98912c3c1bda8ef1e75bfea1fae34cb195b5cc0"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The single edit fixes the one factual error found in the prior review. Equality low[v]==disc[u] makes u a cut vertex only when u is not the root. The rest of the note checks out.",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
+          "verdict": "CLEAN",
+          "summary": "The Bridge bullet now qualifies the equality case for non-root u and states the root exception. This removes the contradiction with the root rule. The rest of the note is accurate: disc/low definitions, strict bridge test, worked examples, parallel-edge handling, C# code and O(n+m) complexity.",
+          "page_type": "Concept note. It has no Qards, and References are present. The steptrace and complexity blocks are protected.",
+          "current_text_evidence": [
+            {
+              "quote": "for a non-root `u` the subtree remains cut off when `u` is deleted and `u` stays a cut vertex",
+              "line_start": 39,
+              "reason": "Equality low[v]>=disc[u] means nothing in v's subtree reaches above u, so deleting a non-root u strands the subtree. The claim is now correctly conditioned."
+            },
+            {
+              "quote": "A root `u` is the exception: it is a cut vertex only with two or more tree children.",
+              "line_start": 39,
+              "reason": "This is consistent with the Root cut vertex bullet and the Boundaries section. A triangle rooted at 0 is the case that the earlier wording got wrong."
+            },
+            {
+              "quote": "For non-root vertices, the single `>` versus `>=` is the entire distinction",
+              "line_start": 39,
+              "reason": "The overstatement is limited to the case where it holds. The root is decided by child count."
+            },
+            {
+              "quote": "`low[3] = 3 > disc[2] = 2` and `low[4] = 4 > disc[3] = 3`",
+              "line_start": 41,
+              "reason": "I rechecked the worked example. Edges 2-3 and 3-4 are bridges and vertices 2 and 3 are cut vertices, which is correct."
+            },
+            {
+              "quote": "the child edge entering the second triangle produces `low[child] == disc[2]`",
+              "line_start": 106,
+              "reason": "I traced the two-triangles example by DFS from 0. The result is equality, so >= flags vertex 2 and > flags no bridge, as the note says."
+            },
+            {
+              "quote": "Skipping only the specific parent edge by its id leaves the duplicate as a back edge",
+              "line_start": 108,
+              "reason": "The multigraph explanation matches the C# implementation, which skips by edge id."
+            }
+          ],
+          "target_resolution": "RESOLVED",
+          "split_suggestion": "No split: the cut-vertex and bridge rules share one low-link DFS and are most useful together.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "identity_safety": "NOT APPLICABLE",
+            "question_quality": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": [
+        {
+          "edit_index": 0,
+          "verdict": "WORTHWHILE",
+          "reason": "The defect is real: the old text said equality always leaves u a cut vertex and called >/>= the entire distinction. That is false for a root with one child and contradicted the Root bullet. The edit adds the non-root qualifier and the root exception, with no unsupported claims and no change to metadata."
+        }
+      ]
+    }
   }
 }
