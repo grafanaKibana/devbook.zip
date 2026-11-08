@@ -7266,7 +7266,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-08T13:40:02.820509Z",
-    "elapsed_seconds": 195.09053460000004,
+    "elapsed_seconds": 198.70188550000003,
     "calls_reserved": 6,
     "responses_received": 6,
     "attempted_paths": [
@@ -7418,7 +7418,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T13:43:17.910553Z",
+    "checkpoint_at": "2026-11-08T13:43:21.521921Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
