@@ -6964,11 +6964,11 @@
     "version": 1,
     "id": "56e8c2737af74831bbd5ff5d77b67fd5",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-08T06:19:50.150495Z",
-    "elapsed_seconds": 73.4250065,
+    "elapsed_seconds": 81.4965111,
     "calls_reserved": 3,
-    "responses_received": 2,
+    "responses_received": 3,
     "attempted_paths": [
       "Vault/Home/Cloud/Cloud Cost Management.md"
     ],
@@ -7044,7 +7044,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T06:21:03.575161Z",
+    "checkpoint_at": "2026-11-08T06:21:11.646679Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
@@ -26183,5 +26183,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "56e8c2737af74831bbd5ff5d77b67fd5",
+    "topic_id": "cloud-b977b950",
+    "batch": {
+      "topic": "Cloud",
+      "topic_id": "cloud-b977b950",
+      "notes": [
+        {
+          "path": "Vault/Home/Cloud/Cloud.md",
+          "content": "---\nicon: cloudy\norder: 90\ncolor: \"#3b82f6\"\ntopic: [Cloud]\nsubtopic: []\nsummary: \"Using managed infrastructure without losing sight of the application responsibilities that remain.\"\ntags: [FolderNote]\npublish: true\nstatus: Creation\npriority: High\nlevel: [\"2\"]\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.344Z\"\n---\n\nCloud computing turns compute, storage, networking, and higher-level platforms into services that can be provisioned on demand. It moves an application's operating boundary; it does not remove it. A managed database can eliminate host maintenance while leaving schema design, access control, consistency, recovery, service limits, and cost with the application team.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# What the Application Team Still Owns\n\nThe exact split changes by service model, but several responsibilities remain with the system regardless of provider:\n\n- **Application behavior:** correctness, authorization, input validation, idempotency, and safe retries.\n- **Data:** classification, access policy, retention, consistency, migration, backup requirements, and restore validation.\n- **Service configuration:** region, capacity, scaling limits, network exposure, encryption settings, and dependency timeouts.\n- **Resilience:** failure handling, recovery objectives, degraded modes, and dependency fallbacks.\n- **Economics:** which code paths generate compute, requests, storage, transfer, and observability volume.\n\n[[IaaS, PaaS, SaaS, CaaS]] shows how this boundary moves as the provider manages more of the stack.\n\n# Architecture Questions Before Product Names\n\nStart from the workload contract:\n\n1. What kind of execution is required: request-driven service, event handler, batch job, container, or VM-bound process?\n2. What data model, consistency, transaction scope, retention, and query patterns must the system support?\n3. Which latency, throughput, availability, recovery point, and recovery time targets are real requirements?\n4. Which identity, residency, compliance, and network boundaries are fixed by the organization?\n5. Which provider-specific behaviors are worth accepting, and what would make migration necessary?\n\n[[Providers]] introduces AWS, Azure, and Google Cloud without treating similarly named products as equivalent. Product documentation must still confirm regional support, quotas, lifecycle, failure semantics, and price before a service becomes an architecture assumption.\n\n# Cloud Behavior Appears in Code\n\nCloud failures are ordinary distributed-system failures. APIs throttle, queues redeliver, functions retry, credentials expire, and regional dependencies become unavailable. The application therefore needs bounded retries, backpressure, idempotent side effects, observable dependency calls, and explicit timeout behavior. Managed services reduce infrastructure work but cannot infer these application semantics.\n\nCost and recovery also shape code. Chatty service boundaries multiply request and transfer charges. Unbounded telemetry or retention grows with traffic. A recovery design may require replayable events, compatible schemas, and writes that can be retried safely. [[Cloud Cost Management]] develops the cost side; [[Disaster Recovery]] connects RPO and RTO targets to application design.\n\n# References\n\n- [NIST SP 800-145: The NIST Definition of Cloud Computing](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-145.pdf)\n",
+          "hash": "b72f0295d3dd641e980b360d09145a16b35a331dd2f2cc72975c3d4bda4a2234",
+          "topic": "Cloud",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Cloud/Cloud.md",
+          "outcome": "keep",
+          "reason": "Audited the whole folder note. The opening defines cloud computing and the key boundary (operating responsibility shifts but remains). The ownership list covers application behavior, data, configuration, resilience and economics. The architecture questions are decision-oriented and the code-behavior section names concrete failure mechanisms: throttling, redelivery, retries, expiring credentials, idempotency and cost multiplication. This agrees with NIST SP 800-145 and standard shared-responsibility guidance. The Datacore map block is intact. Frontmatter is valid and the status is allowed. The single reference is an authoritative primary source. No Qards are present, and none are required. Wikilinks point to sibling topics with stated reasons. The voice is impersonal and direct, with no padding, so an edit would only churn the text."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Cloud/Cloud.md": "b72f0295d3dd641e980b360d09145a16b35a331dd2f2cc72975c3d4bda4a2234"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Cloud/Cloud.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-08T06:21:11.646643Z"
   }
 }
