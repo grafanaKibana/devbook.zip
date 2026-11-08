@@ -7149,11 +7149,11 @@
     "version": 1,
     "id": "56e8c2737af74831bbd5ff5d77b67fd5",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-08T06:19:50.150495Z",
-    "elapsed_seconds": 244.06573009999994,
+    "elapsed_seconds": 262.89764489999993,
     "calls_reserved": 10,
-    "responses_received": 9,
+    "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/Cloud/Cloud Cost Management.md",
       "Vault/Home/Cloud/Cloud.md",
@@ -7456,7 +7456,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T06:23:54.215884Z",
+    "checkpoint_at": "2026-11-08T06:24:13.047799Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
@@ -26716,6 +26716,135 @@
       "Vault/Home/Cloud/Providers.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-08T06:23:50.247445Z"
+    "prepared_at": "2026-11-08T06:23:50.247445Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CHANGES REQUIRED",
+        "notes": [
+          {
+            "path": "Vault/Home/Cloud/Providers.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is well structured and mostly accurate, but the capability map lists AWS App Runner as a current option for managed web or container applications. AWS closed App Runner to new customers on April 30, 2026, so the entry is outdated as of today (2026-11-08). The keep disposition missed this.",
+            "page_type": "Concept — frontmatter, optional References present; no Questions section, which is allowed.",
+            "current_text_evidence": [
+              {
+                "quote": "| Managed web or container application | App Runner, ECS with Fargate | App Service, Container Apps | Cloud Run |",
+                "line_start": 28,
+                "reason": "App Runner is presented as a current AWS option. AWS says it has been in maintenance mode and closed to new customers since 2026-04-30. AWS suggests ECS Express Mode as the migration path."
+              },
+              {
+                "quote": "The table translates categories, not guarantees.",
+                "line_start": 35,
+                "reason": "This sentence states the boundary of the table well and should be kept."
+              },
+              {
+                "quote": "Do not build a lowest-common-denominator cloud abstraction without a real multi-provider requirement.",
+                "line_start": 46,
+                "reason": "This is a clear, decided engineering judgment and should be kept."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the note is a compact comparison of providers and a selection method, and the two parts depend on each other.",
+            "findings": [
+              {
+                "severity": "High",
+                "dimension": "Accuracy",
+                "location": "Representative Capability Map, row 'Managed web or container application'",
+                "evidence": "The AWS cell lists 'App Runner'. AWS documentation says App Runner stopped accepting new customers on April 30, 2026, and is in maintenance mode.",
+                "effect": "A reader choosing a provider would be pointed to a service that new accounts cannot adopt.",
+                "fix": "Remove App Runner from the AWS cell and use 'ECS with Fargate, ECS Express Mode'. Verify the ECS Express Mode name before adding it."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The keep disposition leaves an outdated service, AWS App Runner, listed as a current option. AWS closed it to new customers on April 30, 2026, so the note has a High accuracy finding and needs an edit.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Cloud/Providers.md",
+          "citation_index": 0,
+          "reported_line_start": 28,
+          "resolved_line_start": 30
+        },
+        {
+          "path": "Vault/Home/Cloud/Providers.md",
+          "citation_index": 1,
+          "reported_line_start": 35,
+          "resolved_line_start": 37
+        },
+        {
+          "path": "Vault/Home/Cloud/Providers.md",
+          "citation_index": 2,
+          "reported_line_start": 46,
+          "resolved_line_start": 47
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Cloud/Providers.md": "927ecb74aaa888998cd20e09947db12c68c740f80b7474b9e7d69265b24a6789"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CHANGES REQUIRED",
+      "notes": [
+        {
+          "path": "Vault/Home/Cloud/Providers.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The note is well structured and mostly accurate, but the capability map lists AWS App Runner as a current option for managed web or container applications. AWS closed App Runner to new customers on April 30, 2026, so the entry is outdated as of today (2026-11-08). The keep disposition missed this.",
+          "page_type": "Concept — frontmatter, optional References present; no Questions section, which is allowed.",
+          "current_text_evidence": [
+            {
+              "quote": "| Managed web or container application | App Runner, ECS with Fargate | App Service, Container Apps | Cloud Run |",
+              "line_start": 30,
+              "reason": "App Runner is presented as a current AWS option. AWS says it has been in maintenance mode and closed to new customers since 2026-04-30. AWS suggests ECS Express Mode as the migration path."
+            },
+            {
+              "quote": "The table translates categories, not guarantees.",
+              "line_start": 37,
+              "reason": "This sentence states the boundary of the table well and should be kept."
+            },
+            {
+              "quote": "Do not build a lowest-common-denominator cloud abstraction without a real multi-provider requirement.",
+              "line_start": 47,
+              "reason": "This is a clear, decided engineering judgment and should be kept."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the note is a compact comparison of providers and a selection method, and the two parts depend on each other.",
+          "findings": [
+            {
+              "severity": "High",
+              "dimension": "Accuracy",
+              "location": "Representative Capability Map, row 'Managed web or container application'",
+              "evidence": "The AWS cell lists 'App Runner'. AWS documentation says App Runner stopped accepting new customers on April 30, 2026, and is in maintenance mode.",
+              "effect": "A reader choosing a provider would be pointed to a service that new accounts cannot adopt.",
+              "fix": "Remove App Runner from the AWS cell and use 'ECS with Fargate, ECS Express Mode'. Verify the ECS Express Mode name before adding it."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "FAIL",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The keep disposition leaves an outdated service, AWS App Runner, listed as a current option. AWS closed it to new customers on April 30, 2026, so the note has a High accuracy finding and needs an edit.",
+      "change_checks": []
+    }
   }
 }
