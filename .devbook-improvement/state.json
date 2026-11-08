@@ -5969,6 +5969,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm.md": {
+      "content_hash": "6f493d4bbca79de66acab191f048c69a862098332f3d48036bc7397c58f64a60",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "6f493d4bbca79de66acab191f048c69a862098332f3d48036bc7397c58f64a60",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm.md",
+          "verdict": "CLEAN",
+          "summary": "Independent whole-note read found the mechanism, cut-property justification, worked example, halving bound, complexity entries and boundary cases accurate and well ordered. No concrete error, rule violation or essential gap exists, so keeping it unchanged is justified.",
+          "page_type": "Concept — typed frontmatter intact, no cards, one bare reference, fenced blocks have languages (steptrace, complexity); protected tabs/complexity blocks untouched.",
+          "current_text_evidence": [
+            {
+              "quote": "The cut property certifies each selection.",
+              "line_start": 16,
+              "reason": "Gives the correctness argument (cheapest edge across a cut belongs to some MST) and names the tie/duplicate hazards, which is the key operating idea."
+            },
+            {
+              "quote": "the first round selects `AB` for `A`, `AB` for `B`, `BC` for `C`, and `CD` for `D`",
+              "line_start": 26,
+              "reason": "Worked example is arithmetically correct: C picks BC (2<3<4), D picks CD (3<5); after dedup AB, BC, CD span with weight 6."
+            },
+            {
+              "quote": "the number of active pieces there falls by at least half because each merged piece contains at least two previous ones",
+              "line_start": 28,
+              "reason": "Sound mechanism for the ⌈log₂ V⌉ round bound, correctly scoped per connected component."
+            },
+            {
+              "quote": "Selected edges still need a union-find check.",
+              "line_start": 118,
+              "reason": "Explains why duplicate nominations and earlier unions require the check; accurate and avoids cycles."
+            },
+            {
+              "quote": "the input is disconnected and the result is a minimum spanning forest",
+              "line_start": 116,
+              "reason": "Correctly states the disconnected-input boundary."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: a single coherent algorithm with its visualization, complexity and edge cases; nothing independently useful to separate.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -7386,7 +7446,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-08T13:40:02.820509Z",
-    "elapsed_seconds": 494.21715249999994,
+    "elapsed_seconds": 497.6056651999999,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -9084,7 +9144,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T13:48:17.037174Z",
+    "checkpoint_at": "2026-11-08T13:48:20.425687Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -30117,106 +30177,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "a3c3eac724bf4b6c8037306f6a4e6530",
-    "topic_id": "computer-science-445ddaa5",
-    "batch": {
-      "topic": "Computer Science",
-      "topic_id": "computer-science-445ddaa5",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm.md",
-          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Builds a minimum spanning tree in parallel rounds by adding each component's cheapest outgoing edge.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-07-11T16:12:59.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-12T14:27:20.402Z\"\n---\n\nA [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|minimum spanning tree]] can grow from many fragments at once. Borůvka's algorithm starts with one component per vertex. During each round, every component selects its cheapest outgoing edge. A [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]] accepts a selected edge only while its endpoints remain in different components. The merged components then become the input to the next round.\n\nThe cut property certifies each selection. A component defines a cut between its vertices and the rest of the graph, so its cheapest outgoing edge belongs to some MST. Two components may select the same edge, while several equal-weight selections may form a cycle. Deduplication and the union-find check keep a compatible forest.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"boruvka\"}\n```\n\nFor vertices `A, B, C, D` with edges `AB=1`, `AC=4`, `BC=2`, `BD=5`, `CD=3`, the first round selects `AB` for `A`, `AB` for `B`, `BC` for `C`, and `CD` for `D`. After duplicate removal, all three edges are safe and the graph becomes one component in a single round.\n\nWithin each original connected component, every current piece that is not yet complete chooses an edge to another piece. Once distinct choices are unioned, the number of active pieces there falls by at least half because each merged piece contains at least two previous ones. Isolated or already-complete components remain unchanged. Applying the contraction independently inside each connected component still gives at most `⌈log₂ V⌉` merging rounds.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Borůvka's Algorithm complexity\",\n  \"variables\": {\n    \"edgeCount\": {\n      \"symbol\": \"m\",\n      \"description\": \"number of edges\"\n    },\n    \"inverseAckermann\": {\n      \"symbol\": \"α(·)\",\n      \"description\": \"inverse Ackermann factor applied to its displayed argument\"\n    },\n    \"vertexCount\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of vertices\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Best\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Time\",\n              \"formula\": \"O(m · α(n))\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Estimate\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Time\",\n              \"formula\": \"distribution-dependent\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Worst\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Time\",\n              \"formula\": \"O(m · α(n) · log n)\"\n            }\n          ]\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"All executions\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# Boundary Cases\n\nParallel edges cause no special problem because only the lightest outgoing candidate for a component survives the round. Equal weights can produce different valid MSTs. A deterministic implementation therefore needs a stable tie-break such as normalized endpoint order.\n\nAn isolated component has no outgoing edge. If more than one component remains after a round and none can select an outgoing edge, the input is disconnected and the result is a minimum spanning forest.\n\nSelected edges still need a union-find check. Two components can nominate the same edge, and an earlier union may turn a later candidate into an internal edge. Appending every nomination would allow duplicates or cycles into the result.\n\n# References\n\n- [Otakar Borůvka on minimum spanning tree problem](https://doi.org/10.1016/S0012-365X(00)00224-7)\n",
-          "hash": "6f493d4bbca79de66acab191f048c69a862098332f3d48036bc7397c58f64a60",
-          "topic": "Computer Science",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm.md",
-          "outcome": "keep",
-          "reason": "Read the whole note and checked it against the standard algorithm. The worked example is correct: A and B choose AB, C chooses BC (2 beats 4 and 3), D chooses CD (3 beats 5). After deduplication AB, BC and CD form a spanning tree of weight 6 in one round. The cut-property explanation is correct. The halving argument (each merged piece contains at least two previous ones, so at most ⌈log₂ V⌉ rounds, applied per connected component) is sound. The complexity entries are consistent with O(m log n) rounds times near-constant union-find work. The boundary cases (parallel edges, tie-breaking, duplicate nominations, disconnected input giving a forest) are accurate and well ordered. The prose is direct and the explanation order works, so changes would be churn. There are no cards, and the single reference is relevant and bare. No known violations are unresolved."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm.md": "6f493d4bbca79de66acab191f048c69a862098332f3d48036bc7397c58f64a60"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-08T13:47:54.459716Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm.md",
-          "verdict": "CLEAN",
-          "summary": "Independent whole-note read found the mechanism, cut-property justification, worked example, halving bound, complexity entries and boundary cases accurate and well ordered. No concrete error, rule violation or essential gap exists, so keeping it unchanged is justified.",
-          "page_type": "Concept — typed frontmatter intact, no cards, one bare reference, fenced blocks have languages (steptrace, complexity); protected tabs/complexity blocks untouched.",
-          "current_text_evidence": [
-            {
-              "quote": "The cut property certifies each selection.",
-              "line_start": 16,
-              "reason": "Gives the correctness argument (cheapest edge across a cut belongs to some MST) and names the tie/duplicate hazards, which is the key operating idea."
-            },
-            {
-              "quote": "the first round selects `AB` for `A`, `AB` for `B`, `BC` for `C`, and `CD` for `D`",
-              "line_start": 26,
-              "reason": "Worked example is arithmetically correct: C picks BC (2<3<4), D picks CD (3<5); after dedup AB, BC, CD span with weight 6."
-            },
-            {
-              "quote": "the number of active pieces there falls by at least half because each merged piece contains at least two previous ones",
-              "line_start": 28,
-              "reason": "Sound mechanism for the ⌈log₂ V⌉ round bound, correctly scoped per connected component."
-            },
-            {
-              "quote": "Selected edges still need a union-find check.",
-              "line_start": 118,
-              "reason": "Explains why duplicate nominations and earlier unions require the check; accurate and avoids cycles."
-            },
-            {
-              "quote": "the input is disconnected and the result is a minimum spanning forest",
-              "line_start": 116,
-              "reason": "Correctly states the disconnected-input boundary."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: a single coherent algorithm with its visualization, complexity and edge cases; nothing independently useful to separate.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The note is accurate, clear and rule-compliant; the keep disposition is supported by current-text evidence and no edits are proposed.",
-      "change_checks": []
     }
   }
 }
