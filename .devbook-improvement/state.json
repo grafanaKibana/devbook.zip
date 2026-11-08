@@ -8602,11 +8602,11 @@
     "version": 1,
     "id": "b10487f268d742babc49b59ab87ef167",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-08T22:17:21.273772Z",
-    "elapsed_seconds": 627.5879366000007,
+    "elapsed_seconds": 645.4820051000007,
     "calls_reserved": 20,
-    "responses_received": 19,
+    "responses_received": 20,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md",
@@ -10454,7 +10454,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T22:27:48.861170Z",
+    "checkpoint_at": "2026-11-08T22:28:06.755239Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -31599,6 +31599,57 @@
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-08T22:27:45.475477Z"
+    "prepared_at": "2026-11-08T22:27:45.475477Z",
+    "completed_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The keep is not justified. The C# implementation declares `w` twice in one method scope, so it does not compile. The disposition said the code follows the same rules but did not catch this.",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The prose, trace and guard explanation are accurate and well ordered. The C# example has a compile error, which is a concrete accuracy defect in a note marked publish: true.",
+          "page_type": "Concept — no required sections; Questions are absent, which is allowed. The reference is a single primary source.",
+          "current_text_evidence": [
+            {
+              "quote": "On entry, set `disc[v] = low[v] = time++`, then push `v`.",
+              "line_start": 24,
+              "reason": "The prose and trace correctly describe the disc/low/onStack rules and the emission order."
+            },
+            {
+              "quote": "foreach (var w in _adjacency[v])",
+              "line_start": 88,
+              "reason": "The foreach declares `w` in a nested scope."
+            },
+            {
+              "quote": "int w;",
+              "line_start": 107,
+              "reason": "`int w;` is declared later in the enclosing method block. The enclosing declaration space includes the earlier foreach, so C# reports CS0136 and the code does not compile."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the note covers one algorithm, and the guard section depends on the same update rules.",
+          "findings": [
+            {
+              "severity": "High",
+              "dimension": "Accuracy",
+              "location": "`# C# Implementation`, StrongConnect: `foreach (var w ...)` and later `int w;`",
+              "evidence": "`foreach (var w in _adjacency[v])` and `int w;` in the same method scope. `int w;` is declared later in the enclosing block, so it conflicts with the foreach variable.",
+              "effect": "The published reference implementation fails to compile with CS0136. A reader copying it gets an error.",
+              "fix": "Rename one variable, for example the foreach variable to `next` and the pop variable to `member`, or use `int popped;` in the pop loop. Keep the logic unchanged."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "FAIL",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
