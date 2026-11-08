@@ -17900,11 +17900,13 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-08T22:19:50.758851Z",
-    "phase": "branch_updated",
-    "updated_at": "2026-11-08T22:28:37Z",
+    "phase": "pr_updated",
+    "updated_at": "2026-11-08T22:28:45Z",
     "evidence": {
       "commit_sha": "9627085ff5bb7d4c65d0c35e2d52e1d8941ee59c",
-      "branch_sha": "9627085ff5bb7d4c65d0c35e2d52e1d8941ee59c"
+      "branch_sha": "9627085ff5bb7d4c65d0c35e2d52e1d8941ee59c",
+      "pr_number": 218,
+      "created": true
     }
   },
   "export_operations": {
