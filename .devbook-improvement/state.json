@@ -6628,6 +6628,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components.md": {
+      "content_hash": "cda9a01ed3198232d349b07d2f7c036429334dea953866d7825302471874fe3d",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "cda9a01ed3198232d349b07d2f7c036429334dea953866d7825302471874fe3d",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components.md",
+          "verdict": "CLEAN",
+          "summary": "Independent whole-note audit found the SCC definition, condensation-DAG argument, undirected reduction, Tarjan and Kosaraju mechanisms, example output, and complexity entries accurate. The prose is direct and recoverable, and no concrete defect justifies an edit, so keeping it unchanged is correct.",
+          "page_type": "Concept — frontmatter intact (status Ready to Repeat), no Questions section (optional), two real references, fenced blocks all have language identifiers (steptrace, complexity, mermaid), protected tab/steptrace/complexity markup untouched.",
+          "current_text_evidence": [
+            {
+              "quote": "When `low[v] == disc[v]`, it pops one complete SCC. The stack is essential: an edge into an already-emitted component must not lower the active low link.",
+              "line_start": 36,
+              "reason": "Correct statement of Tarjan's root test and why the active stack is needed; it gives the mechanism and the exception."
+            },
+            {
+              "quote": "Individual vertex finish times are not a topological order inside an SCC. The useful property is at component level: decreasing maximum finish time orders the SCCs",
+              "line_start": 44,
+              "reason": "Precise and correct Kosaraju invariant, and it avoids the common misstatement about individual vertex finish times."
+            },
+            {
+              "quote": "Direction defines the problem. In an undirected graph, mutual reachability is ordinary reachability",
+              "line_start": 20,
+              "reason": "States the boundary with undirected connected components correctly and concisely."
+            },
+            {
+              "quote": "the visualization emits `{D, E}` and `{A, B, C}`",
+              "line_start": 32,
+              "reason": "Matches Tarjan's sink-first emission for the stated edge list; the example is verified correct."
+            },
+            {
+              "quote": "A package manager cannot order two packages that depend on each other through a cycle.",
+              "line_start": 14,
+              "reason": "Concrete motivating opening that introduces the topic quickly in a natural senior-engineer voice."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: SCC definition, condensation, and the Tarjan/Kosaraju mechanisms form one coherent topic, and Tarjan has its own linked note.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -8544,7 +8604,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-08T22:17:21.273772Z",
-    "elapsed_seconds": 584.2049909000006,
+    "elapsed_seconds": 588.3249355000006,
     "calls_reserved": 18,
     "responses_received": 18,
     "attempted_paths": [
@@ -10320,7 +10380,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T22:27:05.478224Z",
+    "checkpoint_at": "2026-11-08T22:27:09.598168Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -31417,106 +31477,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "b10487f268d742babc49b59ab87ef167",
-    "topic_id": "computer-science-445ddaa5",
-    "batch": {
-      "topic": "Computer Science",
-      "topic_id": "computer-science-445ddaa5",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components.md",
-          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Maximal mutually-reachable vertex sets of a digraph, identified by Kosaraju's or Tarjan's algorithm.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-07-10T06:24:36.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-10T05:55:51.618Z\"\n---\n\nA package manager cannot order two packages that depend on each other through a cycle. For dependency analysis, the whole cycle behaves as one unit.\n\nA **strongly connected component** (SCC) is a maximal set of vertices in which every vertex reaches every other. For any `u, v` in the set, paths exist both from `u` to `v` and from `v` to `u`. A [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS|depth-first traversal]] exposes the finish-time or low-link structure needed to recover this partition.\n\nCollapsing each SCC into one node produces the **condensation**, which is always a DAG. If two component nodes formed a cycle, their original vertices would be mutually reachable and the components would have merged. SCC decomposition therefore turns a cyclic dependency graph into units that can receive a [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort|topological order]]. The same reduction appears in 2-SAT and deadlock analysis.\n\nDirection defines the problem. In an undirected graph, mutual reachability is ordinary reachability, so the task reduces to connected components found by [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] or a flood fill.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"strongly-connected-components\"}\n```\n\nThe trace uses Tarjan's single-pass algorithm as the concrete way to expose this partition; the overview below also compares Kosaraju and Gabow.\n\nOn `A→B, B→C, C→A, C→D, D→E, E→D`, the visualization emits `{D, E}` and `{A, B, C}`. Inside each set every vertex reaches every other. Across the sets `{A, B, C}` reaches `{D, E}`, but not vice versa, so they cannot merge.\n\nContracting the two sets gives one edge, `A-B-C → D-E`. More generally, the condensation cannot contain a cycle: a cycle between two component nodes would make their original vertices mutually reachable, contradicting maximality. The result is therefore a DAG that can feed [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort|topological sorting]] and DAG dynamic programming.\n\n[[Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm|Tarjan's algorithm]] runs one DFS with discovery indices, low links, and an active-vertex stack. When `low[v] == disc[v]`, it pops one complete SCC. The stack is essential: an edge into an already-emitted component must not lower the active low link.\n\nKosaraju uses two ordinary traversals:\n\n1. DFS over `G`, pushing each vertex when it finishes.\n2. Reverse every edge to form `Gᵀ`.\n3. Pop vertices in decreasing finish time and DFS from each still-unvisited vertex in `Gᵀ`; each tree is one SCC.\n\nIndividual vertex finish times are not a topological order inside an SCC. The useful property is at component level: decreasing maximum finish time orders the SCCs of `G`'s condensation DAG from sources onward. The selected source SCC becomes a sink in `Gᵀ`, so the second DFS cannot escape it.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Strongly Connected Components complexity\",\n  \"variables\": {\n    \"edgeCount\": {\n      \"symbol\": \"m\",\n      \"description\": \"number of edges\"\n    },\n    \"vertexCount\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of vertices\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Tarjan\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Time\",\n              \"formula\": \"Θ(n + m)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Kosaraju\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Time\",\n              \"formula\": \"Θ(n + m)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Gabow\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Time\",\n              \"formula\": \"Θ(n + m)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Tarjan\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Kosaraju\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n + m)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Gabow\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# Components and the Condensation Graph\n\n> [!ABSTRACT]- Structural view\n>\n> ```mermaid\n> flowchart LR\n>   subgraph one [\"SCC A-B-C\"]\n>     A --> B\n>     B --> C\n>     C --> A\n>   end\n>   subgraph two [\"SCC D-E\"]\n>     D --> E\n>     E --> D\n>   end\n>   C --> D\n> ```\n> Collapsing each subgraph to a single node gives the condensation `A-B-C → D-E`, a two-node DAG.\n\n# References\n\n- [Finding strongly connected components](https://cp-algorithms.com/graph/strongly-connected-components.html)\n- [Path-Based Depth-First Search for Strong and Biconnected Components](https://doi.org/10.1016/S0020-0190%2800%2900051-X)\n",
-          "hash": "cda9a01ed3198232d349b07d2f7c036429334dea953866d7825302471874fe3d",
-          "topic": "Computer Science",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against standard SCC theory. The definition and maximality argument for the condensation DAG are correct. The undirected-graph reduction is correct. The example graph A→B, B→C, C→A, C→D, D→E, E→D gives {D,E} and {A,B,C}, emitted in Tarjan's sink-first order. The Tarjan description (low[v]==disc[v] pops a component, and the stack stops edges into emitted components from lowering low links) is accurate. The Kosaraju steps and the component-level finish-time property (decreasing maximum finish time, with the source SCC becoming a sink in Gᵀ) are correct. The complexity entries are Θ(n+m) time for all three algorithms. Auxiliary space is O(n) for Tarjan and Gabow, and O(n+m) for Kosaraju because it builds the transpose. The Mermaid diagram and both references are relevant and appropriate. The note has no Questions section or cards, which is optional. The prose is direct and non-repetitive enough that any rewrite would be cosmetic."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components.md": "cda9a01ed3198232d349b07d2f7c036429334dea953866d7825302471874fe3d"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-08T22:26:44.625785Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components.md",
-          "verdict": "CLEAN",
-          "summary": "Independent whole-note audit found the SCC definition, condensation-DAG argument, undirected reduction, Tarjan and Kosaraju mechanisms, example output, and complexity entries accurate. The prose is direct and recoverable, and no concrete defect justifies an edit, so keeping it unchanged is correct.",
-          "page_type": "Concept — frontmatter intact (status Ready to Repeat), no Questions section (optional), two real references, fenced blocks all have language identifiers (steptrace, complexity, mermaid), protected tab/steptrace/complexity markup untouched.",
-          "current_text_evidence": [
-            {
-              "quote": "When `low[v] == disc[v]`, it pops one complete SCC. The stack is essential: an edge into an already-emitted component must not lower the active low link.",
-              "line_start": 36,
-              "reason": "Correct statement of Tarjan's root test and why the active stack is needed; it gives the mechanism and the exception."
-            },
-            {
-              "quote": "Individual vertex finish times are not a topological order inside an SCC. The useful property is at component level: decreasing maximum finish time orders the SCCs",
-              "line_start": 44,
-              "reason": "Precise and correct Kosaraju invariant, and it avoids the common misstatement about individual vertex finish times."
-            },
-            {
-              "quote": "Direction defines the problem. In an undirected graph, mutual reachability is ordinary reachability",
-              "line_start": 20,
-              "reason": "States the boundary with undirected connected components correctly and concisely."
-            },
-            {
-              "quote": "the visualization emits `{D, E}` and `{A, B, C}`",
-              "line_start": 32,
-              "reason": "Matches Tarjan's sink-first emission for the stated edge list; the example is verified correct."
-            },
-            {
-              "quote": "A package manager cannot order two packages that depend on each other through a cycle.",
-              "line_start": 14,
-              "reason": "Concrete motivating opening that introduces the topic quickly in a natural senior-engineer voice."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: SCC definition, condensation, and the Tarjan/Kosaraju mechanisms form one coherent topic, and Tarjan has its own linked note.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The complete note is factually correct and readable, has no native rule violations, and the keep disposition is supported by current-text evidence. Remaining observations, such as some repetition of the condensation argument, are optional polish.",
-      "change_checks": []
     }
   }
 }
