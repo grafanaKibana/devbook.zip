@@ -7559,11 +7559,11 @@
     "version": 1,
     "id": "a3c3eac724bf4b6c8037306f6a4e6530",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-08T13:40:02.820509Z",
-    "elapsed_seconds": 658.5208755999997,
+    "elapsed_seconds": 671.9934492999997,
     "calls_reserved": 19,
-    "responses_received": 18,
+    "responses_received": 19,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Algorithms.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search.md",
@@ -9476,7 +9476,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T13:51:01.340899Z",
+    "checkpoint_at": "2026-11-08T13:51:14.813473Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -30612,5 +30612,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "a3c3eac724bf4b6c8037306f6a4e6530",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Single-source shortest paths on graphs with non-negative edge weights, greedily finalizing the closest tentative node and relaxing its outgoing edges.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Done\npublish: true\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.333Z\"\n---\n\nA weighted graph assigns each edge a non-negative cost — travel time, latency, price — and the question is the cheapest total cost from one source node to every other node. Dijkstra's algorithm keeps a single tentative distance per node, improves it only through edge relaxation, and commits nodes to a final distance in increasing order of that distance.\n\nThe commit order makes settle-once correct. Each vertex becomes settled when its smallest queued entry is removed. A lazy-deletion heap may later pop older entries for that same vertex and skip them. A settled distance can no longer change. Relaxing outgoing edges can only lower still-unsettled neighbours, never a node already behind the frontier. Non-negative weights are the precondition: they guarantee that leaving a settled node and returning through a longer detour cannot arrive cheaper.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n%% tabs %%\n\n%% tab: Midtown map %%\n\n```steptrace\n{\"algorithm\":\"dijkstra\",\"variant\":\"midtown-map\"}\n```\n\n%% tab: Cities %%\n\n```steptrace\n{\"algorithm\":\"dijkstra\",\"variant\":\"ukraine-cities\",\"start\":\"Lviv\",\"target\":\"Kharkiv\"}\n```\n\n%% endtabs %%\n\nMidtown makes direction and cost visible: Dijkstra expands from Seventh Avenue and West 47th Street in increasing accumulated street cost, respects one-way roads and the West 44th Street closure, and finishes by highlighting the cheapest route to Sixth Avenue and West 42nd Street. The Cities view runs the same distance-first search over a larger weighted network. In both views, Watch shows the current node, the edge being relaxed, the resulting distance change or settled distance, the nearest frontier entries, and how many nodes are settled; hovering or focusing the distances row lists every tentative distance. The map marks the current node, the active edge, the settled region, and the final path. No heuristic steers either search.\n\nThe loop maintains one invariant: when an unsettled node leaves the priority queue, its tentative distance already equals its true shortest-path distance. Later stale entries for that settled node do not make it settle again.\n\nSuppose node `u` is popped with tentative distance `d[u]`, and assume for contradiction a strictly shorter path `P` to `u` exists. `P` starts at the source, which is settled, and at some edge `(x, y)` it first crosses from the settled set into the unsettled set — `y` is the first unsettled node on `P`. Settling `x` already relaxed `(x, y)`, so `d[y]` is at most the length of `P` up to `y`. Since the remainder of `P` from `y` to `u` has non-negative length, that prefix is itself at most the length of all of `P`, giving `d[y] ≤ length(P) < d[u]`. But `u` was chosen as the smallest tentative distance among unsettled nodes, so `d[u] ≤ d[y]` — a contradiction.\n\nThe single step that makes the argument valid is that the tail from `y` to `u` cannot be negative. With a negative edge that tail could subtract from the cost, `d[y]` would no longer bound the full path, and a node could settle at a distance a later path beats.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Dijkstra complexity\",\n  \"variables\": {\n    \"edgeCount\": {\n      \"symbol\": \"m\",\n      \"description\": \"number of edges\"\n    },\n    \"vertexCount\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of vertices\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Binary heap + adjacency list\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Time\",\n              \"formula\": \"O((n + m) log n)\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Fibonacci heap\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Time\",\n              \"formula\": \"O(m + n log n)\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Array / linear scan\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Time\",\n              \"formula\": \"O(n²)\",\n              \"curveId\": \"quadratic\"\n            }\n          ]\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Binary heap + adjacency list\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n) decrease-key; O(m) lazy-deletion\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Fibonacci heap\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Array / linear scan\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# Where the Invariant Breaks\n\nA single negative edge violates settle-once. Take edges `A→B = 2`, `A→C = 3`, and `C→B = −2`. Dijkstra relaxes `A` to reach `B` at 2 and `C` at 3, extracts and settles `B` at 2, then extracts `C` at 3 and relaxes `C→B` to `3 + (−2) = 1`. `B` is already settled, so that improvement is discarded and `B` is reported at 2, while the true shortest distance `A→C→B` is 1. Nothing throws — the output is simply not a shortest-path tree. Weights that can be negative need [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford|Bellman-Ford]], which relaxes all edges `V − 1` times and drops the finalization assumption.\n\nA negative *cycle* makes a destination's shortest distance unbounded only when the source can reach the cycle and the cycle can reach that destination. Such a route can loop the cycle repeatedly before continuing to the destination, driving its cost below any bound. Other reachable vertices can still have finite shortest distances. Bellman-Ford detects cycles reachable from the source.\n\nThe second boundary is internal to the implementation. Standard binary heaps (including .NET's `PriorityQueue<TElement, TPriority>`) offer no `decrease-key`, so a relaxation pushes a fresh `(distance, node)` pair and leaves the older, larger one in the heap. A vertex still settles only once, but the queue can pop it repeatedly. The `if settled[node] continue` guard skips those stale entries before they rescan outgoing edges. Omitting the guard does not corrupt distances under the non-negative-weight precondition—the stale distance is larger than the one already processed—but every stale pop scans that vertex's outgoing adjacency again and repeats relaxations that already ran.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Control flow\n>\n> ```mermaid\n> flowchart TD\n>   A[dist source = 0, all others = infinity] --> B[Push source into min-priority-queue]\n>   B --> C{Queue empty}\n>   C -->|Yes| Z[dist holds every shortest distance]\n>   C -->|No| D[Pop node with smallest tentative distance]\n>   D --> E{Already settled}\n>   E -->|Yes, stale entry| C\n>   E -->|No| F[Mark node settled and relax outgoing edges]\n>   F --> G{Edge lowers a neighbour's tentative distance}\n>   G -->|Yes| H[Update neighbour and push it]\n>   G -->|No| C\n>   H --> C\n> ```\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> public static long[] Dijkstra(List<(int To, long Weight)>[] graph, int source)\n> {\n>     var dist = new long[graph.Length];\n>     Array.Fill(dist, long.MaxValue);\n>     dist[source] = 0;\n>\n>     var settled = new bool[graph.Length];\n>     var queue = new PriorityQueue<int, long>();\n>     queue.Enqueue(source, 0);\n>\n>     while (queue.TryDequeue(out var node, out var d))\n>     {\n>         if (settled[node])\n>         {\n>             continue; // stale entry: a cheaper pair already settled this node\n>         }\n>\n>         settled[node] = true;\n>\n>         foreach (var (to, weight) in graph[node])\n>         {\n>             if (weight < 0)\n>             {\n>                 throw new ArgumentOutOfRangeException(nameof(graph), \"Dijkstra requires non-negative weights.\");\n>             }\n>\n>             if (settled[to]) continue;\n>             var candidate = checked(d + weight);\n>             if (candidate >= dist[to]) continue;\n>\n>             dist[to] = candidate;\n>             queue.Enqueue(to, candidate);\n>         }\n>     }\n>\n>     return dist;\n> }\n> ```\n>\n> The lazy-deletion pattern replaces `decrease-key`: relaxation always pushes a new pair, while `settled` makes the first valid pop final and lets the guard discard later stale entries. A parallel `parent[]` array, written whenever `dist[to]` is lowered, reconstructs a path by walking backward from the target.\n\n# References\n\n- [A Note on Two Problems in Connexion with Graphs](https://doi.org/10.1007/BF01386390)\n- [Dijkstra — finding shortest paths from given vertex](https://cp-algorithms.com/graph/dijkstra.html)\n",
+          "hash": "237959f2359c188b999e1ed9dfa02d7825487478fd95a2546b639c32906df2d5",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note. The settle-once explanation and the contradiction proof are correct: x relaxed (x,y), the tail from y to u is non-negative, and u was the minimum. The negative-edge counterexample (A→B=2, A→C=3, C→B=−2) checks out: B settles at 2 while the true distance is 1. The negative-cycle condition (source reaches cycle, cycle reaches destination) is correct. The lazy-deletion discussion is accurate: stale pops are harmless with non-negative weights but cost repeated adjacency scans. The complexity table is consistent: O((n+m) log n) for a binary heap, O(m + n log n) for a Fibonacci heap, O(n²) for an array, and O(m) space for lazy deletion. The C# code matches the prose, with a settled guard, checked addition, and a negative-weight check. The Mermaid diagram matches the code. There is no Questions section, which is optional. References are two real primary or authoritative sources. The prose is direct and repeats little. Any edit would be cosmetic churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra.md": "237959f2359c188b999e1ed9dfa02d7825487478fd95a2546b639c32906df2d5"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-08T13:51:14.813461Z"
   }
 }
