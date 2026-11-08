@@ -7024,11 +7024,11 @@
     "version": 1,
     "id": "56e8c2737af74831bbd5ff5d77b67fd5",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-08T06:19:50.150495Z",
-    "elapsed_seconds": 126.7787525,
+    "elapsed_seconds": 134.7923679,
     "calls_reserved": 5,
-    "responses_received": 4,
+    "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/Cloud/Cloud Cost Management.md",
       "Vault/Home/Cloud/Cloud.md"
@@ -7178,7 +7178,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T06:21:56.928905Z",
+    "checkpoint_at": "2026-11-08T06:22:04.942521Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
@@ -26317,5 +26317,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "56e8c2737af74831bbd5ff5d77b67fd5",
+    "topic_id": "cloud-b977b950",
+    "batch": {
+      "topic": "Cloud",
+      "topic_id": "cloud-b977b950",
+      "notes": [
+        {
+          "path": "Vault/Home/Cloud/Disaster Recovery.md",
+          "content": "---\ntopic: [Cloud]\nsubtopic: []\nsummary: \"Turning RPO and RTO targets into recoverable data, compatible application state, and tested user flows.\"\nlevel: [\"2\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-07-18T07:07:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-16T07:10:34.939Z\"\n---\n\nDisaster recovery (DR) is the tested ability to restore a business flow after severe failure, data corruption, or regional loss. The target comes before the topology. If checkout may lose at most 10 minutes of accepted orders and must return within 45 minutes, its recovery point objective is 10 minutes and its recovery time objective is 45 minutes.\n\n# Recovery Objectives\n\n- **Recovery point objective (RPO)** is the maximum acceptable data loss measured in time. Every authoritative state store on the critical flow must be restorable or replayable to within that window. Disposable state needs a bounded rebuild path, while external systems need recovery and data-loss contracts compatible with the flow.\n- **Recovery time objective (RTO)** is the maximum acceptable interruption before the flow returns to its defined service level. Provisioning, restore, validation, traffic changes, and dependency recovery all consume it.\n\nDefine both per user flow. An API process can be running while identity, encryption keys, a database, a queue backlog, or a payment provider remains unavailable. The flow is still down.\n\n# Mechanisms Solve Different Failures\n\n| Mechanism | What it provides | What it does not prove |\n| --- | --- | --- |\n| Backup | A separate recoverable copy with retention or point-in-time history | That restore completes within RTO |\n| Replica | A current or near-current serving copy | Protection from corruption or deletion replicated from the primary |\n| Failover | A switch to another serving environment | That dependencies and data are consistent after the switch |\n| Recovery exercise | Evidence that the complete flow can return | That the next architecture or schema change preserves recovery |\n\nA sound design usually combines them. Replicas shorten interruption, backups retain earlier clean states, failover moves traffic, and exercises test the complete path.\n\n# Recovery Strategy Tradeoffs\n\n| Strategy | Architecture | Best fit | Main cost or risk |\n| --- | --- | --- | --- |\n| Backup and restore | Recreate the stack and restore a clean copy after failure | Flows that tolerate a longer RTO | Restore time grows with data and provisioning work |\n| Pilot light | Keep data and a minimal core ready in another location | Moderate RTO without a full standby | Dormant components and scale-up paths can fail when first needed |\n| Warm standby | Keep a smaller functional copy running | Short RTO for critical flows | Continuous cost and unproven scale-up capacity |\n| Active-active or hot standby | Keep production-capable capacity and current data in multiple locations | The shortest justified RTO | Conflict handling, coordinated change, wider failure propagation, and highest steady cost |\n\nUse the least complex strategy that meets the business target. Multi-region architecture is not automatically safer: a destructive deployment, invalid migration, or corrupted write can reach every region.\n\n# Application Design for Recovery\n\n- **Make side effects idempotent.** Queue replay, client retry, and failover can repeat accepted work.\n- **Preserve schema compatibility.** A standby or restored dataset may run against a different application version during recovery or failback.\n- **Separate recoverable state from disposable state.** Caches can be rebuilt; orders and identity records cannot. This distinction changes backup and validation work.\n- **Externalize environment-specific configuration.** Region names, endpoints, credentials, and feature flags must not require a code rewrite during recovery.\n- **Include every critical dependency.** Identity, keys, DNS, queues, object storage, third-party APIs, and deployment artifacts can block the user flow even when the main database is healthy.\n- **Define degraded behavior.** A read-only mode, queued write, or disabled optional feature may restore useful service before the entire topology returns.\n\n# Proving Recovery\n\nTest the user flow, not only infrastructure health. A useful exercise records the restored data timestamp, actual RPO and RTO, duplicate or missing side effects, manual interventions, capacity gaps, and failed assumptions. Repeat after material changes to data volume, schema, identity, topology, or deployment automation.\n\n# References\n\n- [NIST SP 800-34 Rev. 1: Contingency Planning Guide](https://csrc.nist.gov/pubs/sp/800/34/r1/final)\n- [AWS Well-Architected: Use defined recovery strategies](https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_planning_for_recovery_disaster_recovery.html)\n",
+          "hash": "4b6d0ebf372d430d0597cb7ed876258c43b7330be145fcb814439c174d74e33f",
+          "topic": "Cloud",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Cloud/Disaster Recovery.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against the current text and the NIST SP 800-34 and AWS Well-Architected DR guidance. The opening example gives consistent RPO (10 min) and RTO (45 min) values. The RPO/RTO definitions are accurate and correctly scoped per user flow. The mechanism table separates backup, replica, failover and exercise, and states what each does not prove, including replicated corruption. The strategy table matches the AWS strategies (backup and restore, pilot light, warm standby, active-active) with fitting costs and risks. The design and testing sections cover idempotency, schema compatibility, dependencies, degraded modes and measured exercises. The note has no Questions section, so there are no cards to check. References are two relevant primary sources, formatted as bare links. There are no known violations, no needs-fixing flags and no prose defects, so any edit would be churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Cloud/Disaster Recovery.md": "4b6d0ebf372d430d0597cb7ed876258c43b7330be145fcb814439c174d74e33f"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Cloud/Disaster Recovery.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-08T06:22:04.942504Z"
   }
 }
