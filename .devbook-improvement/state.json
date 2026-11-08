@@ -8492,9 +8492,9 @@
     "version": 1,
     "id": "b10487f268d742babc49b59ab87ef167",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-08T22:17:21.273772Z",
-    "elapsed_seconds": 462.6650666000003,
+    "elapsed_seconds": 467.3190239000003,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -8503,7 +8503,8 @@
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md",
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Kruskal's Algorithm.md"
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Kruskal's Algorithm.md",
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow.md"
     ],
     "accepted_records": [
       {
@@ -10128,10 +10129,84 @@
           },
           "model_calls": 12
         }
+      },
+      {
+        "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note. The worked example is correct: with unit capacities on s→a, s→b, a→b, a→t and b→t, the greedy path s→a→b→t blocks all forward paths, and the backward arc b→a lets s→b→a→t reach the maximum of 2. The min-cut argument is sound: S is the residual-reachable set, forward edges out of S are saturated, and no flow crosses back. The complexity entries are standard: Ford–Fulkerson O(m·f), Edmonds–Karp O(nm²), Dinic O(n²m), and O(V³E) for the matrix variant, which scans V² cells per BFS across O(VE) augmentations. The non-termination caveat for irrational capacities, the i XOR 1 paired-edge idiom and the C# code (including its stated limits on antiparallel edges) are accurate. There are no known violations and no cards. The prose explains the mechanism in a sound order, and the references are relevant. I found no defect worth an edit."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow.md",
+                "verdict": "CLEAN",
+                "summary": "Independent whole-note audit found no accuracy, clarity, ordering or structure defect. The unchanged note is a justified keep: the worked example, min-cut certificate argument, complexity bounds and caveats are correct, and no concrete edit would improve them.",
+                "page_type": "Concept — typed frontmatter, optional Questions omitted (no cards), References present as bare descriptive links; tabs, steptrace and complexity blocks preserved; all fences have language identifiers.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The **residual graph** makes that choice reversible.",
+                    "line_start": 18,
+                    "reason": "The prose introduces the backward-arc mechanism before the example, so the explanation order is sound and the idea is recoverable."
+                  },
+                  {
+                    "quote": "Take the unit-capacity network `s→a, s→b, a→b, a→t, b→t`; its maximum flow is 2",
+                    "line_start": 30,
+                    "reason": "I checked the example. Path s→a→b→t saturates s→a, a→b and b→t. s→b→a→t via the backward arc then reaches flow 2, which equals the source cut of 2."
+                  },
+                  {
+                    "quote": "Every original edge from `S` to `T` is saturated",
+                    "line_start": 36,
+                    "reason": "The min-cut certificate argument is correct: S is the residual-reachable set, forward edges out of S are saturated, and no flow crosses back."
+                  },
+                  {
+                    "quote": "changing its bounds to `O(V³E)` time and `O(V²)` auxiliary space",
+                    "line_start": 142,
+                    "reason": "This is correct: O(V²) per BFS across O(VE) augmentations gives O(V³E), and the matrix needs O(V²) space. The note also states the antiparallel-edge limit."
+                  },
+                  {
+                    "quote": "**Irrational capacities with adversarial path choice.**",
+                    "line_start": 150,
+                    "reason": "The non-termination caveat for plain Ford–Fulkerson is accurate and clearly bounded to its condition."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: residual graphs, the cut certificate, the complexity comparison and the failure modes all explain one algorithmic family, and the note is coherent as one page.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The whole note was independently read and found accurate and well ordered. It has no known violations, no cards and relevant references. No edits are proposed, so the keep is justified.",
+            "change_checks": []
+          },
+          "model_calls": 14
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T22:25:03.938297Z",
+    "checkpoint_at": "2026-11-08T22:25:08.592255Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
