@@ -6094,6 +6094,56 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS.md": {
+      "content_hash": "935cd60e736e0f50906e064226682fb2e0d99381116e957d20d47edccb8a8dc7",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "935cd60e736e0f50906e064226682fb2e0d99381116e957d20d47edccb8a8dc7",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS.md",
+          "verdict": "CLEAN",
+          "summary": "Independent whole-note audit found the traversal explanations, worked traces, complexity bounds and code accurate and clearly ordered. No concrete defect justifies an edit, so the keep is correct.",
+          "page_type": "Concept — no Questions section; the single reference is relevant; code fences have language identifiers; frontmatter is typed and unchanged.",
+          "current_text_evidence": [
+            {
+              "quote": "The central decision is which discovered vertex should be expanded next.",
+              "line_start": 14,
+              "reason": "The opening states the operating idea (queue vs stack frontier) quickly and names the resulting guarantees."
+            },
+            {
+              "quote": "Here it dequeues nine nodes — `A, B, C, D, E, F, G, I, H` — before `J`",
+              "line_start": 28,
+              "reason": "I re-traced BFS on the edge list: queue order is A,B,C,D,E,F,G,I,H, and J is discovered from I, giving the three-edge path A→D→I→J. The text is correct."
+            },
+            {
+              "quote": "reaching the target after five visits — half of BFS's count",
+              "line_start": 36,
+              "reason": "DFS visits A,B,E,H,J (five) via the four-edge path, versus ten visits for BFS including J. The claim holds and shows that DFS gives no length guarantee."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: BFS and DFS are one comparative topic, and the tabs, failure modes and implementation are interdependent. Dijkstra, Topological Sort and SCC already have separate notes.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -7511,7 +7561,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-08T13:40:02.820509Z",
-    "elapsed_seconds": 627.2169696999998,
+    "elapsed_seconds": 631.3212813999999,
     "calls_reserved": 18,
     "responses_received": 18,
     "attempted_paths": [
@@ -9362,7 +9412,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T13:50:30.036993Z",
+    "checkpoint_at": "2026-11-08T13:50:34.141305Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -30497,96 +30547,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "a3c3eac724bf4b6c8037306f6a4e6530",
-    "topic_id": "computer-science-445ddaa5",
-    "batch": {
-      "topic": "Computer Science",
-      "topic_id": "computer-science-445ddaa5",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS.md",
-          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"The two fundamental graph traversals: BFS gives distance ordering by layers, DFS gives depth ordering.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Done\npublish: true\ncreated: \"2026-02-20T23:50:18.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-12T14:27:20.402Z\"\n---\n\nReachability, fewest-hop paths, cycle detection, and component labelling all build on graph traversal. The central decision is which discovered vertex should be expanded next. A queue picks the oldest frontier entry, so breadth-first search widens one distance layer at a time. A stack picks the newest, so depth-first search follows one branch until it runs out and then backtracks. Both use a visited set and a frontier. Their ordering produces different guarantees.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n%% tabs %%\n\n%% tab: BFS (Breadth-First Search) %%\n\n```steptrace\n{\"algorithm\":\"bfs\",\"start\":\"A\",\"target\":\"J\",\"nodes\":[{\"id\":\"A\"},{\"id\":\"B\"},{\"id\":\"C\"},{\"id\":\"D\"},{\"id\":\"E\"},{\"id\":\"F\"},{\"id\":\"G\"},{\"id\":\"H\"},{\"id\":\"I\"},{\"id\":\"J\"}],\"edges\":[{\"from\":\"A\",\"to\":\"B\"},{\"from\":\"A\",\"to\":\"C\"},{\"from\":\"A\",\"to\":\"D\"},{\"from\":\"B\",\"to\":\"E\"},{\"from\":\"C\",\"to\":\"F\"},{\"from\":\"C\",\"to\":\"G\"},{\"from\":\"D\",\"to\":\"I\"},{\"from\":\"E\",\"to\":\"H\"},{\"from\":\"H\",\"to\":\"J\"},{\"from\":\"I\",\"to\":\"J\"}]}\n```\n\nBecause the queue is FIFO, a node enters the frontier only from one that is a single edge closer to the source, and it leaves before anything discovered later. Every node at distance `k` is therefore dequeued before any node at distance `k+1`. That yields the property BFS is chosen for: the first time it reaches a node is along a path with the fewest edges. Here it dequeues nine nodes — `A, B, C, D, E, F, G, I, H` — before `J`, yet the route it recorded to `J` runs `A → D → I → J`, three edges, the shortest by hop count rather than the four-edge branch through `H`. The frontier holds an entire distance layer at once, so its size tracks the graph's width. Edge weights are invisible to this ordering. A fewest-edges path is a shortest path only when every edge costs the same, which is why weighted graphs fall to [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] instead.\n\n%% tab: DFS (Depth-First Search) %%\n\n```steptrace\n{\"algorithm\":\"dfs\",\"start\":\"A\",\"target\":\"J\",\"nodes\":[{\"id\":\"A\"},{\"id\":\"B\"},{\"id\":\"C\"},{\"id\":\"D\"},{\"id\":\"E\"},{\"id\":\"F\"},{\"id\":\"G\"},{\"id\":\"H\"},{\"id\":\"I\"},{\"id\":\"J\"}],\"edges\":[{\"from\":\"A\",\"to\":\"B\"},{\"from\":\"A\",\"to\":\"C\"},{\"from\":\"A\",\"to\":\"D\"},{\"from\":\"B\",\"to\":\"E\"},{\"from\":\"C\",\"to\":\"F\"},{\"from\":\"C\",\"to\":\"G\"},{\"from\":\"D\",\"to\":\"I\"},{\"from\":\"E\",\"to\":\"H\"},{\"from\":\"H\",\"to\":\"J\"},{\"from\":\"I\",\"to\":\"J\"}]}\n```\n\nA stack is LIFO, so the most recently discovered neighbour is expanded next and the search commits to one branch before touching its siblings. From `A` it takes the first edge to `B`, then descends `B → E → H → J`, reaching the target after five visits — half of BFS's count — because that branch happened to contain `J`. But it arrives along `A → B → E → H → J`, four edges, not the three-edge route: depth-first order finds *a* path quickly and guarantees nothing about its length. The order in which nodes finish — the moment a node has no unexplored neighbours and backtracks — is what powers [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort|Topological Sort]], [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly Connected Components]], and directed-edge classification.\n\n%% endtabs %%\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"DFS BFS complexity\",\n  \"variables\": {\n    \"edgeCount\": {\n      \"symbol\": \"m\",\n      \"description\": \"number of edges\"\n    },\n    \"vertexCount\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of vertices\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"BFS\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Time\",\n              \"formula\": \"Θ(n + m)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"DFS\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Time\",\n              \"formula\": \"Θ(n + m)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"BFS\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"DFS\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# Where the Traversal Breaks\n\nThe visited set makes traversal terminate. Without it, a cycle such as `A → B → A` adds `A` to the frontier forever. Both implementations mark a vertex when it is discovered, before enqueueing or pushing it, so each vertex enters the frontier once. Marking only during expansion permits duplicates unless another guard rejects them.\n\nRecursive DFS stores one call frame per vertex on the current path. A chain of 100k vertices can therefore exhaust the call stack before the traversal finishes.\n\nCycle detection in a *directed* graph needs more than a visited flag. A back edge into a vertex still being explored closes a cycle. An edge into a finished vertex does not. DFS separates these cases with `unvisited`, `in-progress`, and `done` states. An edge to an in-progress vertex reports a cycle. Collapsing the last two states into one bit creates false positives.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Control flow\n>\n> ```mermaid\n> flowchart TD\n>   B0[Enqueue source, mark visited] --> B1{Queue empty}\n>   B1 -->|No| B2[Dequeue front v, record v]\n>   B2 --> B3[For each neighbour u of v]\n>   B3 --> B4{u visited}\n>   B4 -->|No| B5[Mark u visited, enqueue u]\n>   B4 -->|Yes| B3\n>   B5 --> B3\n>   B1 -->|Yes| B6[Done]\n> ```\n> ```mermaid\n> flowchart TD\n>   D0[Mark source visited, push source] --> D1{Stack empty}\n>   D1 -->|No| D2[Pop v]\n>   D2 --> D4[Record v]\n>   D4 --> D5[Mark and push each unvisited neighbour of v]\n>   D5 --> D1\n>   D1 -->|Yes| D6[Done]\n> ```\n\n> [!EXAMPLE]- C# implementations\n>\n> ```csharp\n> public static IReadOnlyList<int> Bfs(IReadOnlyList<int>[] adjacency, int source)\n> {\n>     var order = new List<int>();\n>     var visited = new bool[adjacency.Length];\n>     var queue = new Queue<int>();\n>\n>     visited[source] = true;          // mark on discovery, so each node enqueues once\n>     queue.Enqueue(source);\n>\n>     while (queue.Count > 0)\n>     {\n>         var node = queue.Dequeue();\n>         order.Add(node);\n>\n>         foreach (var next in adjacency[node])\n>         {\n>             if (visited[next]) continue;\n>             visited[next] = true;\n>             queue.Enqueue(next);\n>         }\n>     }\n>\n>     return order;\n> }\n>\n> public static IReadOnlyList<int> Dfs(IReadOnlyList<int>[] adjacency, int source)\n> {\n>     var order = new List<int>();\n>     var visited = new bool[adjacency.Length];\n>     var stack = new Stack<int>();\n>\n>     visited[source] = true;\n>     stack.Push(source);\n>\n>     while (stack.Count > 0)\n>     {\n>         var node = stack.Pop();\n>         order.Add(node);\n>\n>         for (var i = adjacency[node].Count - 1; i >= 0; i--)\n>         {\n>             var next = adjacency[node][i];\n>             if (visited[next]) continue;\n>             visited[next] = true;\n>             stack.Push(next);\n>         }\n>     }\n>\n>     return order;\n> }\n> ```\n> Both implementations mark on discovery, so each node enters its frontier once. DFS pushes neighbours in reverse to preserve the adjacency-list order on tree-shaped branches. Cross edges can still make an eager explicit-stack order differ from recursive DFS.\n\n# Comparison\n\nBFS fits distance and fewest-edge queries while a full layer still fits in memory. DFS fits problems driven by finish order or edge type, including topological sorting and cycle detection. Recursive or iterator-frame DFS keeps the active frontier to the current path. The eager explicit-stack form avoids call-stack overflow but may store more pending neighbours. Neither traversal solves weighted shortest paths. Once edge costs differ, [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] supplies the required cost ordering for non-negative weights.\n\n# References\n\n- [Undirected graphs](https://algs4.cs.princeton.edu/41graph/)\n",
-          "hash": "935cd60e736e0f50906e064226682fb2e0d99381116e957d20d47edccb8a8dc7",
-          "topic": "Computer Science",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS.md",
-          "outcome": "keep",
-          "reason": "I read the whole note and found no defects that justify an edit. I re-traced the BFS walkthrough on the given graph. The dequeue order is A, B, C, D, E, F, G, I, H. That is nine nodes before J, and J is discovered from I, so the recorded path A→D→I→J has three edges. The DFS trace A→B→E→H→J has five visits and a four-edge path, which matches the text. The Θ(n+m) time and O(n) auxiliary space bounds are standard. The explanations of mark-on-discovery, recursion depth, and three-state cycle detection in directed graphs are accurate. The C# code and the caveat that eager explicit-stack order can differ from recursive DFS are correct. The prose is direct and has no padding, and the Mermaid and code fences carry language identifiers. The note has no Qards and no known violations, and the single reference is relevant. Any rewrite would be cosmetic."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS.md": "935cd60e736e0f50906e064226682fb2e0d99381116e957d20d47edccb8a8dc7"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-08T13:50:06.350964Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS.md",
-          "verdict": "CLEAN",
-          "summary": "Independent whole-note audit found the traversal explanations, worked traces, complexity bounds and code accurate and clearly ordered. No concrete defect justifies an edit, so the keep is correct.",
-          "page_type": "Concept — no Questions section; the single reference is relevant; code fences have language identifiers; frontmatter is typed and unchanged.",
-          "current_text_evidence": [
-            {
-              "quote": "The central decision is which discovered vertex should be expanded next.",
-              "line_start": 14,
-              "reason": "The opening states the operating idea (queue vs stack frontier) quickly and names the resulting guarantees."
-            },
-            {
-              "quote": "Here it dequeues nine nodes — `A, B, C, D, E, F, G, I, H` — before `J`",
-              "line_start": 28,
-              "reason": "I re-traced BFS on the edge list: queue order is A,B,C,D,E,F,G,I,H, and J is discovered from I, giving the three-edge path A→D→I→J. The text is correct."
-            },
-            {
-              "quote": "reaching the target after five visits — half of BFS's count",
-              "line_start": 36,
-              "reason": "DFS visits A,B,E,H,J (five) via the four-edge path, versus ten visits for BFS including J. The claim holds and shows that DFS gives no length guarantee."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: BFS and DFS are one comparative topic, and the tabs, failure modes and implementation are interdependent. Dijkstra, Topological Sort and SCC already have separate notes.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The note is accurate, well ordered and free of concrete rule violations. The keep disposition is justified, and no edits were proposed.",
-      "change_checks": []
     }
   }
 }
