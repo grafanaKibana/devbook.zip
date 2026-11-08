@@ -7319,11 +7319,11 @@
     "version": 1,
     "id": "a3c3eac724bf4b6c8037306f6a4e6530",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-08T13:40:02.820509Z",
-    "elapsed_seconds": 392.7357235,
+    "elapsed_seconds": 406.6589728,
     "calls_reserved": 11,
-    "responses_received": 10,
+    "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Algorithms.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search.md",
@@ -8940,7 +8940,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T13:46:35.555744Z",
+    "checkpoint_at": "2026-11-08T13:46:49.478992Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -29872,5 +29872,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "a3c3eac724bf4b6c8037306f6a4e6530",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Runs forward and backward searches that meet.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Creation\npublish: true\ncreated: \"2026-07-10T06:24:36.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-10T08:56:48.119Z\"\n---\n\nFinding the shortest path between two specific vertices `s` and `t` with a single BFS means expanding vertices out to distance `d` from `s`. With branching factor `b` and shortest-path length `d`, that frontier grows as `b^d`. At `b = 10, d = 6`, the estimate is about a million vertices, most of them nowhere near `t`.\n\nBidirectional search launches a second BFS backward from `t` over reversed edges. Each side only has to reach depth `d/2` before the frontiers meet, so together they expand about `2·b^(d/2)` vertices. That is roughly two thousand for the same `b = 10, d = 6`. Two small frontiers sweep far less of the graph than one frontier covering the whole distance.\n\nThe saving has conditions. The goal must provide one or more enumerable states that can seed the backward search. The graph must also expose predecessors through a reverse adjacency list or an invertible move operator. A goal predicate alone is useless when its matching states cannot be listed.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"bidirectional-search\"}\n```\n\nTwo frontiers advance in parallel. `F` holds the vertices reached from `s` along forward edges; `B` holds the vertices reached from `t` along reversed edges. Each side records the distance at which it first reached every vertex.\n\nTake an unweighted graph where `s` and `t` are six edges apart. The forward BFS reaches depths 0, 1, 2, 3 from `s`; the backward BFS reaches depths 0, 1, 2, 3 from `t`. The two sides collide at a vertex three edges from each end, and neither BFS ever expands a fourth level. With branching factor `b`, the forward side holds about `b^3` vertices and the backward side about `b^3`, against the `b^6` a single BFS would expand to reach depth six. Splitting one path of length `d` into two halves is what caps each search at depth `d/2`.\n\nFor an unweighted graph the stopping rule is exact. Expansion proceeds one full BFS level at a time, alternating sides, and the search halts the first time a level completes with a vertex present in both visited sets. Because each side labels every vertex with its true BFS distance, a shared vertex `x` lies on a shortest path of length `distF[x] + distB[x]`. Scanning the rest of that level can choose a deterministic minimum-sum meeting when several appear, but it is not needed to rescue correctness. The path is rebuilt by following forward parents from `x` back to `s`, reversing, then appending the backward parents from `x` to `t`.\n\nAlternating complete levels keeps the search depths within one level in the trace. Expanding the smaller frontier is a useful heuristic on irregular graphs, but queue size alone does not guarantee balanced depth; a lopsided schedule can lose the idealized exponent-halving behavior.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Bidirectional Search complexity\",\n  \"variables\": {\n    \"branchingFactor\": {\n      \"symbol\": \"b\",\n      \"description\": \"fixed search-tree branching factor, b > 1\"\n    },\n    \"edgeCount\": {\n      \"symbol\": \"m\",\n      \"description\": \"number of edges\"\n    },\n    \"parameterD\": {\n      \"symbol\": \"d\",\n      \"description\": \"source-to-target solution depth; the horizontal axis samples d\"\n    },\n    \"vertexCount\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of vertices\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Best\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Time\",\n              \"formula\": \"O(1)\",\n              \"curveId\": \"constant\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Estimate\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Time\",\n              \"formula\": \"O(b^(d/2))\",\n              \"curveId\": \"exponential\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Worst\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Time\",\n              \"formula\": \"O(n + m)\"\n            }\n          ]\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Best\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(1)\",\n              \"curveId\": \"constant\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Estimate\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(b^(d/2))\",\n              \"curveId\": \"exponential\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Worst\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n)\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# Where the Clean Case Ends\n\nWeighted edges break first-touch termination. The frontiers now advance by cumulative cost, and the first shared vertex can belong to an expensive path while a cheaper meeting remains one relaxation away. Correct termination tracks the best known sum `μ = min(gF[u] + gB[u])` over met vertices. Expansion continues until the smallest forward key plus the smallest backward key reaches `μ`. At that point no unsettled path can beat the current meeting. Returning on first contact is the usual correctness bug. Unweighted BFS avoids it because level-order expansion settles distances in nondecreasing order.\n\nThe backward search needs an enumerable goal. A finite goal set can seed a multi-source BFS, but a predicate such as \"any solved state\" provides no starting frontier when its matching states cannot be listed. In that case the search must run forward and evaluate the predicate as it explores.\n\nPredecessors must be enumerable too. A directed graph needs a reverse adjacency list. An implicit state space needs an invertible move operator. Without incoming moves, the backward frontier stops at depth zero and the `b^(d/2)` model no longer applies. Undirected graphs provide reverse traversal for free.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Control flow (unweighted case)\n>\n> ```mermaid\n> flowchart TD\n>   A[Forward frontier at source, backward frontier at target] --> B{Either frontier empty}\n>   B -->|Yes| Z[No path exists]\n>   B -->|No| C[Expand the next side by one complete level]\n>   C --> D{A vertex now in both visited sets}\n>   D -->|No| B\n>   D -->|Yes| Y[Splice forward half with reversed backward half]\n> ```\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> // Unweighted bidirectional BFS. forward[v] lists successors of v,\n> // backward[v] lists its predecessors. Returns a shortest path s..t, or null.\n> public static IReadOnlyList<int>? ShortestPath(\n>     IReadOnlyList<IReadOnlyList<int>> forward,\n>     IReadOnlyList<IReadOnlyList<int>> backward,\n>     int source,\n>     int target)\n> {\n>     if (source == target)\n>     {\n>         return new[] { source };\n>     }\n>\n>     var parentF = new Dictionary<int, int> { [source] = source };\n>     var parentB = new Dictionary<int, int> { [target] = target };\n>     var distF = new Dictionary<int, int> { [source] = 0 };\n>     var distB = new Dictionary<int, int> { [target] = 0 };\n>     var frontierF = new Queue<int>(new[] { source });\n>     var frontierB = new Queue<int>(new[] { target });\n>\n>     var expandForward = true;\n>     while (frontierF.Count > 0 && frontierB.Count > 0)\n>     {\n>         // Alternate complete levels so the two search depths stay balanced.\n>         var meet = expandForward\n>             ? ExpandLevel(frontierF, forward, parentF, distF, distB)\n>             : ExpandLevel(frontierB, backward, parentB, distB, distF);\n>         expandForward = !expandForward;\n>\n>         if (meet is int x)\n>         {\n>             return Splice(x, parentF, parentB, source, target);\n>         }\n>     }\n>\n>     return null; // s and t are in different components\n> }\n>\n> // Expands one BFS level. Returns a deterministic minimum-sum meeting vertex\n> // from that level, or null when the two visited sets still do not overlap.\n> private static int? ExpandLevel(\n>     Queue<int> frontier,\n>     IReadOnlyList<IReadOnlyList<int>> edges,\n>     Dictionary<int, int> parent,\n>     Dictionary<int, int> distOwn,\n>     Dictionary<int, int> distOther)\n> {\n>     int? best = null;\n>     var bestCost = int.MaxValue;\n>\n>     for (var count = frontier.Count; count > 0; count--)\n>     {\n>         var node = frontier.Dequeue();\n>         foreach (var next in edges[node])\n>         {\n>             if (distOwn.ContainsKey(next))\n>             {\n>                 continue;\n>             }\n>\n>             parent[next] = node;\n>             distOwn[next] = distOwn[node] + 1;\n>\n>             if (distOther.TryGetValue(next, out var otherDist))\n>             {\n>                 var cost = distOwn[next] + otherDist;\n>                 if (cost < bestCost)\n>                 {\n>                     bestCost = cost;\n>                     best = next;\n>                 }\n>             }\n>             else\n>             {\n>                 frontier.Enqueue(next);\n>             }\n>         }\n>     }\n>\n>     return best;\n> }\n>\n> private static List<int> Splice(\n>     int meet,\n>     Dictionary<int, int> parentF,\n>     Dictionary<int, int> parentB,\n>     int source,\n>     int target)\n> {\n>     var path = new List<int>();\n>     for (var node = meet; node != source; node = parentF[node])\n>     {\n>         path.Add(node);\n>     }\n>     path.Add(source);\n>     path.Reverse();\n>\n>     // meet already holds the target when s->t is a single edge; the forward\n>     // walk above emitted it, so only append the backward half when it differs.\n>     if (meet != target)\n>     {\n>         for (var node = parentB[meet]; node != target; node = parentB[node])\n>         {\n>             path.Add(node);\n>         }\n>         path.Add(target);\n>     }\n>\n>     return path;\n> }\n> ```\n\n# References\n\n- [Bidirectional Search That Is Guaranteed to Meet in the Middle (Holte et al., AAAI 2016)](https://ojs.aaai.org/index.php/AAAI/article/view/10436)\n",
+          "hash": "42d9349b9faf85cdbcd1febdb23e9e0aa11810b7b0f5a3f0f01370be9afdf5cf",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note. The b^d vs 2·b^(d/2) estimate is correct (10^6 vs about 2000). The unweighted stop rule holds: if no overlap existed before a level, dist(s,t) ≥ k+j+1, and the first meeting gives at most k+j+1, so it is optimal. The weighted rule (stop when topF+topB ≥ μ) matches bidirectional Dijkstra. The C# code handles source==target, the single-edge case and meet==source correctly. Preconditions (enumerable goal, predecessor access) and the balanced-depth caveat are stated clearly. Complexity block and the single Holte et al. reference are consistent. No factual or editorial defect needs repair, and an edit would be cosmetic churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search.md": "42d9349b9faf85cdbcd1febdb23e9e0aa11810b7b0f5a3f0f01370be9afdf5cf"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-08T13:46:49.478983Z"
   }
 }
