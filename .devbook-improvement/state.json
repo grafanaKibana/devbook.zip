@@ -7149,11 +7149,11 @@
     "version": 1,
     "id": "56e8c2737af74831bbd5ff5d77b67fd5",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-08T06:19:50.150495Z",
-    "elapsed_seconds": 290.3486675,
+    "elapsed_seconds": 309.4739304,
     "calls_reserved": 11,
-    "responses_received": 10,
+    "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/Cloud/Cloud Cost Management.md",
       "Vault/Home/Cloud/Cloud.md",
@@ -7456,7 +7456,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T06:24:40.498822Z",
+    "checkpoint_at": "2026-11-08T06:24:59.624084Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
@@ -26926,12 +26926,35 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Cloud/Providers.md",
+          "expected_hash": "927ecb74aaa888998cd20e09947db12c68c740f80b7474b9e7d69265b24a6789",
+          "before": "| Managed web or container application | App Runner, ECS with Fargate | App Service, Container Apps | Cloud Run |",
+          "after": "| Managed web or container application | ECS with Fargate, ECS Express Mode | App Service, Container Apps | Cloud Run |",
+          "reason": "App Runner is closed to new customers, so the AWS cell now lists current options.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "AWS managed container options are ECS with Fargate and ECS Express Mode; App Runner is closed to new customers"
+          ],
+          "sources": [
+            {
+              "url": "https://docs.aws.amazon.com/apprunner/latest/dg/apprunner-availability-change.html",
+              "claim": "App Runner is no longer open to new customers from April 30, 2026 and is in maintenance mode; AWS recommends ECS Express Mode.",
+              "version": "AWS App Runner availability change, 2026"
+            }
+          ],
+          "feedback_keys": [],
+          "problem": "The capability map lists AWS App Runner as a current option, but AWS closed it to new customers on 2026-04-30.",
+          "reader_benefit": "Readers are pointed to AWS services they can adopt today."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Cloud/Providers.md",
-          "outcome": "keep",
-          "reason": "Read the whole note: the opening, both comparison tables, the five-step selection list, the closing lock-in and abstraction guidance, and the three references. The opening makes the main point that capability families match across providers but implementations do not. The Quick Orientation table correctly pairs each provider with its architecture guidance and .NET integration: AWS credential provider chain, DefaultAzureCredential with managed identities, and Google Application Default Credentials. The capability map lists real service names for each provider, including Cloud Run functions and Microsoft Foundry, and states that it translates categories, not guarantees. The selection steps put fixed constraints first and then cover services, workflow, cost and lock-in, with a clear boundary on multi-cloud abstraction. The note has no Questions section, which is optional. The references are three official, topic-specific bare links. The known_violations list is empty and no cards are flagged. I found no factual error or clarity defect, and I did not re-fetch the sources. Edits would be churn."
+          "outcome": "changed",
+          "reason": "Read the whole note. The prose, selection steps, .NET credential entries and references are sound. The one defect was App Runner in the AWS capability-map cell. AWS documentation confirms it is in maintenance mode and closed to new customers, with ECS Express Mode as the recommended path. The cell now lists ECS with Fargate and ECS Express Mode."
         }
       ],
       "feedback": []
@@ -26946,8 +26969,10 @@
       "Vault/Home/Cloud/Providers.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-08T06:23:50.247445Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-08T06:24:59.624066Z",
+    "review_repair_key": "f6eb90e0a37768cb20e0eb99bfd0f257b63f92d70fb9214886242859bb577983",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "notes": [
         {
@@ -27010,60 +27035,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "notes": [
-        {
-          "path": "Vault/Home/Cloud/Providers.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The note is well structured and mostly accurate, but the capability map lists AWS App Runner as a current option for managed web or container applications. AWS closed App Runner to new customers on April 30, 2026, so the entry is outdated as of today (2026-11-08). The keep disposition missed this.",
-          "page_type": "Concept — frontmatter, optional References present; no Questions section, which is allowed.",
-          "current_text_evidence": [
-            {
-              "quote": "| Managed web or container application | App Runner, ECS with Fargate | App Service, Container Apps | Cloud Run |",
-              "line_start": 30,
-              "reason": "App Runner is presented as a current AWS option. AWS says it has been in maintenance mode and closed to new customers since 2026-04-30. AWS suggests ECS Express Mode as the migration path."
-            },
-            {
-              "quote": "The table translates categories, not guarantees.",
-              "line_start": 37,
-              "reason": "This sentence states the boundary of the table well and should be kept."
-            },
-            {
-              "quote": "Do not build a lowest-common-denominator cloud abstraction without a real multi-provider requirement.",
-              "line_start": 47,
-              "reason": "This is a clear, decided engineering judgment and should be kept."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the note is a compact comparison of providers and a selection method, and the two parts depend on each other.",
-          "findings": [
-            {
-              "severity": "High",
-              "dimension": "Accuracy",
-              "location": "Representative Capability Map, row 'Managed web or container application'",
-              "evidence": "The AWS cell lists 'App Runner'. AWS documentation says App Runner stopped accepting new customers on April 30, 2026, and is in maintenance mode.",
-              "effect": "A reader choosing a provider would be pointed to a service that new accounts cannot adopt.",
-              "fix": "Remove App Runner from the AWS cell and use 'ECS with Fargate, ECS Express Mode'. Verify the ECS Express Mode name before adding it."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "FAIL",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The keep disposition leaves an outdated service, AWS App Runner, listed as a current option. AWS closed it to new customers on April 30, 2026, so the note has a High accuracy finding and needs an edit.",
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "f6eb90e0a37768cb20e0eb99bfd0f257b63f92d70fb9214886242859bb577983",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
