@@ -7079,10 +7079,10 @@
     "version": 1,
     "id": "56e8c2737af74831bbd5ff5d77b67fd5",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-08T06:19:50.150495Z",
-    "elapsed_seconds": 171.75258989999995,
-    "calls_reserved": 6,
+    "elapsed_seconds": 175.41130919999995,
+    "calls_reserved": 7,
     "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/Cloud/Cloud Cost Management.md",
@@ -7302,7 +7302,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T06:22:41.902742Z",
+    "checkpoint_at": "2026-11-08T06:22:45.561461Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
@@ -7327,7 +7327,7 @@
       "pr": null
     },
     "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-08T06:37:08.124468Z"
+    "reservation_deadline": "2026-11-08T06:37:45.264061Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
