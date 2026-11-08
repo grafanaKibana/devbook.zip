@@ -8379,7 +8379,7 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-08T22:17:21.273772Z",
-    "elapsed_seconds": 351.40465470000015,
+    "elapsed_seconds": 354.82536650000014,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
@@ -9947,7 +9947,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T22:23:12.677884Z",
+    "checkpoint_at": "2026-11-08T22:23:16.098595Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
