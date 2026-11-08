@@ -7149,16 +7149,16 @@
     "version": 1,
     "id": "a3c3eac724bf4b6c8037306f6a4e6530",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-08T13:40:02.820509Z",
-    "elapsed_seconds": 24.5215868,
+    "elapsed_seconds": 34.0389177,
     "calls_reserved": 1,
-    "responses_received": 0,
+    "responses_received": 1,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T13:40:27.341605Z",
+    "checkpoint_at": "2026-11-08T13:40:36.858934Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -27239,5 +27239,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "a3c3eac724bf4b6c8037306f6a4e6530",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Algorithms.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Step-by-step problem-solving procedures compared by runtime, memory, and complexity using Big O.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"4\"]\nstatus: Creation\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.333Z\"\n---\n\nAn algorithm is a finite procedure that turns an input into an output. Choosing one means deciding which costs matter for the workload: running time, memory, implementation risk, or behavior on hostile input.\n\nComplexity analysis ([[Home/Computer Science/Big O Notation|Big O]]) compares growth rates before any code is benchmarked. An O(n log n) sort can remain practical at input sizes where O(n²) work does not. Big O says nothing about constant factors or cache behavior, though, and it cannot predict the data a production system will receive. The final choice still needs measurements on representative inputs.\n\nConsider membership checks against a large list of IDs. Repeated queries can justify sorting once and using binary search. A single query usually cannot: the preprocessing costs more than a plain linear scan saves.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Algorithms Inside Systems\n\nSystem-design diagrams hide algorithms inside boxes labelled “cache,” “scheduler,” or “database.” Naming the mechanism makes its cost and failure boundary visible.\n\n| Mechanism | System use | Cost or failure boundary |\n| --- | --- | --- |\n| Hashing | Cache keys, partition selection, deduplication | Collisions require equality checks. Changing a naive modulo shard count remaps most keys |\n| Consistent hashing | Distributing keys across changing node sets | Reduces remapping. Virtual nodes or another weighted ownership scheme can reduce skew, which still requires load observation |\n| Trees and prefix search | Database indexes, routing tables, autocomplete | Shape and storage model determine update cost and range behavior |\n| Graph traversal | Dependency analysis, routing, recommendations | Cycles require visited-state. Dense graphs can dominate memory |\n| Heap-backed priority queues | Scheduling, timers, top-k selection | Efficient best-item access does not provide sorted iteration |\n| Bloom filters | Skipping absent database or object-store reads | False positives perform unnecessary work. False negatives are forbidden by construction |\n| Token buckets | Rate limiting with bounded bursts | A shared bucket needs atomic coordination. Per-node buckets only approximate a global limit |\n| Consensus | Replicated metadata and leader election | Safety requires quorum communication. A partition that cannot form a quorum loses progress while the quorum side can continue |\n\n![[Computer Science/Computer Science-Algorithms-18120000.jpg|theme-aware]]\n\nThe visual is a topic inventory, not a universal priority ranking. A design decision depends on the mechanism's invariant and where it fails under the actual workload.\n\n# References\n\n- [MIT 6.006 Introduction to Algorithms](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/)\n",
+          "hash": "5163fe3a84feec771d86cedc762044b7c206fa4b6d0708e765612a6cb30488dd",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Algorithms.md",
+          "outcome": "keep",
+          "reason": "Audited the whole folder note against its text and standard algorithm facts. The opening defines an algorithm and frames the choice as a cost tradeoff. It correctly says Big O ignores constant factors and cache behavior, so measurement is still needed. The sort-once versus linear-scan example is sound. In the systems table, naive modulo resharding remaps most keys and consistent hashing reduces remapping. Virtual nodes reduce skew. Heaps give best-item access without sorted iteration. Bloom filters have false positives and no false negatives. Token buckets need atomic coordination to enforce a global limit. Consensus needs a quorum to make progress. The note has the Datacore map, a single relevant reference, and no Questions section, which is optional. It has no card or violation to fix, and an edit would be cosmetic churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Algorithms.md": "5163fe3a84feec771d86cedc762044b7c206fa4b6d0708e765612a6cb30488dd"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Algorithms.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-08T13:40:36.858909Z"
   }
 }
