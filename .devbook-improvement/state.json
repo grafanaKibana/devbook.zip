@@ -7151,7 +7151,7 @@
     "status": "active",
     "phase": "evaluating",
     "started_at": "2026-11-08T06:19:50.150495Z",
-    "elapsed_seconds": 283.12802669999996,
+    "elapsed_seconds": 286.5172328,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
@@ -7456,7 +7456,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T06:24:33.278181Z",
+    "checkpoint_at": "2026-11-08T06:24:36.667387Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
@@ -24572,7 +24572,8 @@
     "1cb12d9ccd7fcc8097d310914ca72601ee9b147e23bfcc588ab6255970079a9b": 1,
     "b93534e9526b699a34ace92b02c074d15f38edf1d0fec15a56733e9002742af2": 1,
     "bd3ec5ecb043f96d504f5b1e0bdcd2ee7f1cd5e753e87abead798b567ef21e71": 1,
-    "32b0cc5e2b5b37ba76914a79e69541c3fd46c313888d3723d36b691b2a871bdf": 1
+    "32b0cc5e2b5b37ba76914a79e69541c3fd46c313888d3723d36b691b2a871bdf": 1,
+    "f6eb90e0a37768cb20e0eb99bfd0f257b63f92d70fb9214886242859bb577983": 1
   },
   "invalid_proposals": {
     "9fee84ff84d9689d5dfad3c6fe703f665c86a6d2a18f6f2293d1638835cd347c": {
@@ -27062,6 +27063,7 @@
     },
     "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
     "review_repair_key": "f6eb90e0a37768cb20e0eb99bfd0f257b63f92d70fb9214886242859bb577983",
-    "author_repair_pending": true
+    "author_repair_pending": true,
+    "repair_reserved": true
   }
 }
