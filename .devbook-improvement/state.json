@@ -7264,11 +7264,11 @@
     "version": 1,
     "id": "a3c3eac724bf4b6c8037306f6a4e6530",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-08T13:40:02.820509Z",
-    "elapsed_seconds": 167.8076106,
+    "elapsed_seconds": 187.25908850000002,
     "calls_reserved": 6,
-    "responses_received": 5,
+    "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Algorithms.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search.md"
@@ -7418,7 +7418,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T13:42:50.627629Z",
+    "checkpoint_at": "2026-11-08T13:43:10.079107Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -27546,6 +27546,57 @@
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-08T13:42:46.876342Z"
+    "prepared_at": "2026-11-08T13:42:46.876342Z",
+    "completed_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The keep disposition missed a factual error. The Bridge bullet says equality low[v] == disc[u] always keeps u a cut vertex, but that fails when u is the DFS root. Because of this, the note stays unresolved.",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The note is mostly accurate and well organized. One claim in the Bridge bullet is wrong for a root u: equality low[v]==disc[u] does not make u a cut vertex. The note also contradicts itself, since the Root cut vertex bullet and the Boundaries section say the root needs two or more children. The keep disposition's claim that every rule was verified is therefore unfounded.",
+          "page_type": "Concept — no cards. References are present. Frontmatter is typed. The steptrace and complexity blocks are protected.",
+          "current_text_evidence": [
+            {
+              "quote": "but it still forces traffic through the vertex `u`, so `u` stays a cut vertex",
+              "line_start": 39,
+              "reason": "This is true only for a non-root u. A triangle rooted at 0 gives low[1]==disc[0] while 0 is not a cut vertex. It also contradicts the root rule at line 38."
+            },
+            {
+              "quote": "The root is an articulation point only when it has two or more tree children",
+              "line_start": 38,
+              "reason": "This correct rule shows that the equality claim in the Bridge bullet needs a non-root qualifier."
+            },
+            {
+              "quote": "The single `>` versus `>=` is the entire distinction between cut edges and cut vertices.",
+              "line_start": 39,
+              "reason": "This overstates the difference, because the root is tested by child count rather than by the >= comparison."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the cut-vertex and bridge rules share one low-link DFS and are most useful together.",
+          "findings": [
+            {
+              "severity": "High",
+              "dimension": "Accuracy",
+              "location": "Visualization tab, Bridge bullet (line 39)",
+              "evidence": "\"it still forces traffic through the vertex `u`, so `u` stays a cut vertex\"",
+              "effect": "A reader would conclude that equality always marks u as an articulation point. That is false when u is the DFS root with a single child, such as a triangle rooted at 0. The claim also conflicts with the root rule in the same list.",
+              "fix": "Qualify the claim: for a non-root u, equality still makes u a cut vertex. Add that a root is a cut vertex only with two or more tree children. Soften \"the entire distinction\" to \"for non-root vertices\"."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "FAIL",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
