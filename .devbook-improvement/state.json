@@ -8252,11 +8252,11 @@
     "version": 1,
     "id": "b10487f268d742babc49b59ab87ef167",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-08T22:17:21.273772Z",
-    "elapsed_seconds": 245.40591100000006,
+    "elapsed_seconds": 256.65616580000005,
     "calls_reserved": 7,
-    "responses_received": 6,
+    "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md",
@@ -9669,7 +9669,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T22:21:26.679138Z",
+    "checkpoint_at": "2026-11-08T22:21:37.929393Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -30603,5 +30603,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "b10487f268d742babc49b59ab87ef167",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Expands whichever node looks closest by heuristic h(n) alone. Fast but not optimal.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-07-10T06:24:36.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-10T08:56:48.453Z\"\n---\n\nA grid pathfinder may value a quick route over the shortest route. A cost-aware search such as [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] counts the distance already travelled and can fan out in directions that lead away from the goal. Greedy Best-First Search ignores that accumulated cost. It orders the frontier only by `h(n)`, the estimated distance remaining, and expands whichever node currently looks closest to the target.\n\nThat ranking rule is also the weakness. The search cannot distinguish a short route from a long one that happens to end near the goal because `g(n)`, the cost already paid, never enters the comparison. A returned path may be far longer than necessary. On an infinite graph, an improving estimate can also pull the search down a branch that never terminates.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"greedy-best-first-search\"}\n```\n\nGreedy first moves downward because those cells have smaller `h`, then follows the lower corridor until a vertical barrier forces it back up and around. It reaches the goal with cost `12`. [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search|A*]] uses the same grid but ranks by `g + h`, returning the optimal upper route with cost `8`. The comparison isolates the missing term: Greedy knows both routes point toward the same goal but never charges itself for the four extra steps already taken.\n\nThe frontier is a priority queue keyed by `h(n)`. Each iteration pops the node with the smallest estimate, and if it is not the goal, pushes every unvisited neighbor keyed by that neighbor's own `h`. The trace accumulates edge weights only to report the returned path cost; they never affect priority. A visited set stops a node from entering the queue twice.\n\nThe only property this maintains is that the next node expanded is the one the heuristic currently rates closest to the goal. Nothing ties the order of expansion to the length of the path built so far, which is the guarantee a cost-aware search provides and this one drops. When `h` is accurate and the map is open, the estimate shrinks along an almost straight line and the goal is reached after expanding on the order of `m` nodes. When `h` points into an obstacle, the same rule keeps re-selecting cells that hug the barrier because they still score lowest, and the accumulated `g` that would expose the detour is never consulted.\n\nOne framing makes the family relationship exact: [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search|A*]] expands by `f = g + h`. Setting `g` to zero collapses `f` to `h`, which is precisely Greedy Best-First — the case where a node's history counts for nothing.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Greedy Best-First Search complexity\",\n  \"variables\": {\n    \"branchingFactor\": {\n      \"symbol\": \"b\",\n      \"description\": \"fixed search-tree branching factor, b > 1\"\n    },\n    \"secondarySize\": {\n      \"symbol\": \"m\",\n      \"description\": \"maximum search depth; the horizontal axis samples m\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Best\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Nodes generated or expanded\",\n              \"formula\": \"O(b·m)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Estimate\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Nodes generated or expanded\",\n              \"formula\": \"distribution-dependent; between O(b·m) and O(b^m)\",\n              \"curveFrom\": \"linear\",\n              \"curveTo\": \"exponential\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Worst\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Nodes generated or expanded\",\n              \"formula\": \"O(b^m)\",\n              \"curveId\": \"exponential\"\n            }\n          ]\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Best\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(b·m)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Estimate\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"distribution-dependent; between O(b·m) and O(b^m)\",\n              \"curveFrom\": \"linear\",\n              \"curveTo\": \"exponential\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Worst\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(b^m)\",\n              \"curveId\": \"exponential\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# When the Estimate Misleads\n\nEvery failure here comes from the missing `g` term.\n\n**A path that looks close but is long.** Suppose neighbor `A` is one cell from the goal by straight-line distance (`h(A) = 1`) but can reach it only through a corridor that winds around an obstacle. Neighbor `B` looks farther away (`h(B) = 5`) and lies on a direct route of about five steps. Greedy Best-First pops `A` because `1 < 5`, follows the corridor, and may reach the goal while `B` still waits in the frontier. Nothing marks the result as suboptimal. The ranking asks which node looks closer now, not which complete path costs less.\n\n**Loops without a visited set.** Without a closed set, the search can enqueue a node again after leaving it. A cyclic graph may then keep the frontier moving between low-`h` nodes. A visited set bounds this behavior on a finite graph. It cannot rescue an infinite graph where `h` keeps improving along a fruitless branch because no `g` bound forces the search to leave that region.\n\nA concave obstacle is the common concrete case. A wall cupping the goal gives every cell inside the pocket a tempting low `h`, so the search keeps returning to the blocked heading before it discovers the way around.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Control flow\n>\n> ```mermaid\n> flowchart TD\n>   A[Push source keyed by h of source] --> B{Priority queue empty}\n>   B -->|Yes| Z[No path found]\n>   B -->|No| C[Pop node u with smallest h]\n>   C --> D{u is the goal}\n>   D -->|Yes| Y[Reconstruct path from parents]\n>   D -->|No| E[For each unvisited neighbor v]\n>   E --> F[Set parent of v to u and mark visited]\n>   F --> G[Push v keyed by h of v, ignoring edge cost]\n>   G --> E\n>   E --> B\n> ```\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> public static IReadOnlyList<int>? GreedyBestFirstSearch(\n>     IReadOnlyList<IReadOnlyList<int>> neighbors,\n>     Func<int, int> heuristic,\n>     int source,\n>     int goal)\n> {\n>     var frontier = new PriorityQueue<int, int>();\n>     var parent = new Dictionary<int, int>();\n>     var visited = new HashSet<int> { source };\n>     frontier.Enqueue(source, heuristic(source));\n>\n>     while (frontier.Count > 0)\n>     {\n>         var u = frontier.Dequeue();\n>         if (u == goal)\n>         {\n>             return Reconstruct(u);\n>         }\n>\n>         foreach (var v in neighbors[u])\n>         {\n>             if (visited.Add(v))\n>             {\n>                 parent[v] = u;\n>                 frontier.Enqueue(v, heuristic(v)); // key is h(v) alone; edge cost never read\n>             }\n>         }\n>     }\n>\n>     return null;\n>\n>     List<int> Reconstruct(int node)\n>     {\n>         var path = new List<int> { node };\n>         while (parent.TryGetValue(node, out var previous))\n>         {\n>             node = previous;\n>             path.Add(node);\n>         }\n>         path.Reverse();\n>         return path;\n>     }\n> }\n> ```\n> The priority key is `heuristic(v)` with no `g` term, so the frontier orders by estimated distance to the goal alone. `visited` guarantees termination on a finite graph but says nothing about path length.\n\n# References\n\n- [Experiments with the Graph Traverser program](https://doi.org/10.1098/rspa.1966.0205)\n- [Heuristics (Amit's A* Pages, Stanford)](https://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html)\n",
+          "hash": "d832ac132dc705758a2d67460bbc6e13faa682231e3b1a97284b0e85c11cde52",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note. The opening states the mechanism: the frontier is keyed by h(n) alone, and g(n) is dropped. The Visualization tab matches the C# code: the key is h(v), edge cost is used only to report the path cost, and the visited set is marked at enqueue. The A* relationship (f=g+h with g=0 gives Greedy) is correct. The failure modes are accurate: a low-h path can be long, a concave obstacle traps the search, and a visited set bounds revisits on finite graphs but not on infinite ones. The Mermaid control flow agrees with the code. The complexity entries (best O(b·m), worst O(b^m) in the tree-search model with branching factor b and depth m) follow the standard textbook treatment. The prose is direct and avoids padding. There are no cards, and none are needed. The references are relevant: Doran and Michie's Graph Traverser paper and Amit Patel's heuristics page. No known violations are unresolved, and no defect warrants an edit."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search.md": "d832ac132dc705758a2d67460bbc6e13faa682231e3b1a97284b0e85c11cde52"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-08T22:21:37.929384Z"
   }
 }
