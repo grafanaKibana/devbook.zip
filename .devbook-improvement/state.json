@@ -7509,9 +7509,9 @@
     "version": 1,
     "id": "a3c3eac724bf4b6c8037306f6a4e6530",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-08T13:40:02.820509Z",
-    "elapsed_seconds": 563.9607305,
+    "elapsed_seconds": 567.7205958999999,
     "calls_reserved": 16,
     "responses_received": 16,
     "attempted_paths": [
@@ -7520,7 +7520,8 @@
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search.md",
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm.md"
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm.md",
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Connected Components.md"
     ],
     "accepted_records": [
       {
@@ -9280,10 +9281,88 @@
           },
           "model_calls": 14
         }
+      },
+      {
+        "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Connected Components.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Connected Components.md",
+                "outcome": "keep",
+                "reason": "I audited the whole note against its current text and standard graph-algorithm facts. The definition of a connected component is correct, and the note correctly sends directed graphs to strongly connected components. The outer loop is explained clearly: an unlabelled vertex must start a new component, and the A–F trace matches the C# code. The C# code labels a vertex when it is discovered, so no vertex is pushed twice, and its iterative stack avoids recursion overflow. The complexity tab is right: Θ(n+m) for traversal, O(n+m·α(n)) for union-find with rank and compression, and O(n) auxiliary space for both. The note says an undirected edge is scanned twice and that this changes only the constant. The Mermaid diagram matches the trace. The note has no Qard cards, and no known violations are listed. The note stays coherent and compact, so I found no factual or editorial defect worth an edit. The only blemish is a lowercase link-text sentence start in Comparison, which is cosmetic, so I left it."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Connected Components.md",
+                "verdict": "CLEAN",
+                "summary": "Independent whole-note audit found the note accurate, ordered well and compact. The definition, outer-loop explanation, trace, C# code, diagram and complexity data agree, so no edit is warranted.",
+                "page_type": "Concept — no required headings. Questions are absent, which is allowed. References hold one bare descriptive link. Code fences carry language identifiers (steptrace, text, complexity, mermaid, csharp).",
+                "current_text_evidence": [
+                  {
+                    "quote": "A **connected component** is a maximal set of vertices where every pair is joined by some path.",
+                    "line_start": 14,
+                    "reason": "The definition is correct and states maximality. The same paragraph separates the undirected case from the directed one, which needs strongly connected components."
+                  },
+                  {
+                    "quote": "The outer loop does the work that is easy to miss.",
+                    "line_start": 18,
+                    "reason": "This states the key mechanism: one traversal finds only one component, and the full partition needs a flood from every unlabelled vertex. The trace and the C# code both follow it."
+                  },
+                  {
+                    "quote": "component = [0,0,0,1,1,2]  id -> 3",
+                    "line_start": 40,
+                    "reason": "The final state of the trace matches the C# logic and the Mermaid diagram, which shows three components. Labels are assigned on discovery, so no vertex is stamped twice."
+                  },
+                  {
+                    "quote": "\"formula\": \"O(n + m · α(n))\"",
+                    "line_start": 92,
+                    "reason": "Union-find with rank and path compression is correctly bounded. DFS/BFS at Θ(n+m) and O(n) auxiliary space are also correct."
+                  },
+                  {
+                    "quote": "An undirected edge appears in two adjacency lists, which changes the constant count of scans but not the charted bound.",
+                    "line_start": 131,
+                    "reason": "The note correctly says that scanning each edge twice does not change the asymptotic bound."
+                  },
+                  {
+                    "quote": "Their extra machinery adds nothing on an undirected input.",
+                    "line_start": 195,
+                    "reason": "The comparison ends with a clear decision rule. It is slightly repetitive with the opening, but it is short and still serves as a recap."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: connected components, their DFS/BFS labelling and the union-find alternative are one coherent topic. Directed strongly connected components already have their own note.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The complete note was read independently. The facts, complexity bounds, trace, code and diagram are consistent. The voice is direct and impersonal. There are no known violations and no Qards. The lowercase sentence start in Comparison and the initialised/initialize spelling mix are cosmetic, so keeping the note unchanged is justified.",
+            "change_checks": []
+          },
+          "model_calls": 16
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T13:49:26.780780Z",
+    "checkpoint_at": "2026-11-08T13:49:30.540618Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
