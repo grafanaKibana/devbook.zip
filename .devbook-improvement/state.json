@@ -8132,16 +8132,16 @@
     "version": 1,
     "id": "b10487f268d742babc49b59ab87ef167",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-08T22:17:21.273772Z",
-    "elapsed_seconds": 21.531566700000003,
+    "elapsed_seconds": 30.880930000000003,
     "calls_reserved": 1,
-    "responses_received": 0,
+    "responses_received": 1,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T22:17:42.804795Z",
+    "checkpoint_at": "2026-11-08T22:17:52.154155Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -28342,5 +28342,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "b10487f268d742babc49b59ab87ef167",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"A directed graph with no directed cycle. In finite graphs, its reachability order enables dependency-first processing.\"\nlevel: [\"4\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-08-08T15:37:04.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-08-08T15:24:55.712Z\"\n---\n\nA **directed acyclic graph (DAG)** is a directed graph with no directed cycle. Direction gives each edge a one-way meaning such as prerequisite → dependent. Acyclicity prevents a dependency chain from returning to its start. The underlying [[Home/Computer Science/Data Structures/Graph Structures/Graph|Graph]] representation may vary. The DAG property concerns the relationships it represents.\n\nDefine `u ≺ v` when `v` is reachable from `u` by a path of positive length. In a DAG this relation is transitive because paths compose, and irreflexive because `u ≺ u` would be a directed cycle. Positive-length reachability is therefore a **strict partial order** on the vertices. Equivalently, allowing paths of length zero makes reachability reflexive and produces a partial order.\n\nFiniteness matters for the standard structural consequences. Every non-empty finite DAG has at least one source and at least one sink. A finite directed graph admits a [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort|topological ordering]] exactly when it is acyclic: the order linearizes the dependency constraints without changing them.\n\n> [!NOTE]\n> A DAG need not be a tree. It may have several sources or sinks, and two vertices may be connected by several distinct directed paths. A rooted directed tree is the narrower case in which every non-root vertex has exactly one parent.\n\n# Real-World Examples\n\n- **Build pipeline:** `source → compile → test → package`. Each edge points from a prerequisite to a dependent step, and no later step feeds back into an earlier one. A topological ordering therefore gives a valid execution sequence.\n- **Course prerequisites:** `Algebra → Calculus → Numerical Methods`. A valid prerequisite chain cannot eventually require the starting course again. The absence of that cycle makes it possible to order courses so every prerequisite comes first.\n- **Spreadsheet formulas:** `price, quantity → subtotal → tax → total`. Each formula reads values computed earlier in the dependency graph. Without a circular reference, the spreadsheet can evaluate cells in dependency order.\n\nDAGs model build and task dependencies directly. They also describe the state-dependency order in finite one-pass [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]]. For a general digraph, contracting each [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly Connected Component]] produces a condensation graph that is always a DAG, separating cyclic regions from the order between them.\n\n# References\n\n- [NIST Dictionary of Algorithms and Data Structures: directed acyclic graph](https://xlinux.nist.gov/dads/HTML/directAcycGraph.html)\n- [MIT 6.042J Mathematics for Computer Science, Session 18, sections 9.5–9.6](https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-spring-2015/mit6_042js15_session18.pdf)\n",
+          "hash": "9430128d291a6bf0daf0ff202eb2f04cb4ce2da0110e7ef4d58d8f96cf39c8c2",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note. The definition (directed graph with no directed cycle) is correct. The strict partial order argument is sound: positive-length reachability is transitive because paths compose, and irreflexive because u≺u would be a cycle. The reflexive variant is also stated correctly. The finite-graph claims are accurate: a non-empty finite DAG has at least one source and one sink, and a finite digraph has a topological ordering exactly when it is acyclic. The NOTE callout correctly separates DAGs from trees. The examples (build, prerequisites, spreadsheet) match the dependency-order idea. The SCC condensation claim is correct, and the DP link is appropriately qualified. The frontmatter is valid, the wikilinks use full paths with aliases, and the References are two relevant bare links (NIST DADS and MIT 6.042J). The note has no cards and no known violations. The prose is compact and direct, and nothing needed repair, so any edit would be churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md": "9430128d291a6bf0daf0ff202eb2f04cb4ce2da0110e7ef4d58d8f96cf39c8c2"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-08T22:17:52.154131Z"
   }
 }
