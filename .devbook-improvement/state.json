@@ -8432,10 +8432,10 @@
     "version": 1,
     "id": "b10487f268d742babc49b59ab87ef167",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-08T22:17:21.273772Z",
-    "elapsed_seconds": 419.9422228000002,
-    "calls_reserved": 12,
+    "elapsed_seconds": 423.54459570000023,
+    "calls_reserved": 13,
     "responses_received": 12,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md",
@@ -10071,7 +10071,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T22:24:21.215453Z",
+    "checkpoint_at": "2026-11-08T22:24:24.817826Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -10096,7 +10096,7 @@
       "pr": null
     },
     "base_sha": "fba0b54bbf3ab5a6699ba2a017e2f2e23fe559ba",
-    "reservation_deadline": "2026-11-08T22:38:40.427482Z",
+    "reservation_deadline": "2026-11-08T22:39:24.526843Z",
     "last_request": {
       "topic": "computer-science-445ddaa5",
       "generation": 2,
