@@ -7444,11 +7444,11 @@
     "version": 1,
     "id": "a3c3eac724bf4b6c8037306f6a4e6530",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-08T13:40:02.820509Z",
-    "elapsed_seconds": 524.258518,
+    "elapsed_seconds": 539.5618764,
     "calls_reserved": 15,
-    "responses_received": 14,
+    "responses_received": 15,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Algorithms.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search.md",
@@ -9218,7 +9218,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T13:48:47.078540Z",
+    "checkpoint_at": "2026-11-08T13:49:02.381898Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -30252,5 +30252,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "a3c3eac724bf4b6c8037306f6a4e6530",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Connected Components.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Partitions an undirected graph into maximal reachable vertex sets using DFS, BFS, or union-find.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-07-12T19:33:38.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-12T20:39:23.956Z\"\n---\n\nIn a friendship graph with 10M users, asking which users are connected to Ann and asking which cluster contains Ann are the same problem. A **connected component** is a maximal set of vertices where every pair is joined by some path. Reachability is symmetric in an undirected graph, so one traversal from any vertex covers its whole component. Directed graphs need a different definition: [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]] require paths in both directions and a two-pass or low-link algorithm.\n\nThe implementation depends on how the graph changes. For a static graph, [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS|DFS or BFS]] floods each reachable region and assigns a component id. When edges arrive incrementally, **[[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]]** merges their endpoints and answers `connected(a, b)` queries without rebuilding the partition.\n\nThe outer loop does the work that is easy to miss. One DFS finds only its source component. Finding the full partition requires another flood from every vertex left unlabelled by earlier traversals.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"connected-components\"}\n```\n\nKeep a `component[]` array initialised to \"unlabelled\". Scan vertices in any order; when one is still unlabelled, it must start a new component, so flood the entire set reachable from it — via a stack (DFS) or queue (BFS) — stamping each vertex with the current id, then increment the id. Marking a vertex when it is discovered prevents a second stamp.\n\nA trace on six vertices with edges `A-B, B-C, C-A, D-E` and isolated vertex `F`:\n\n```text\ncomponent = [-, -, -, -, -, -]   id = 0\n\nA unlabelled -> flood id 0: reach A,B,C   component = [0,0,0,-,-,-]  id -> 1\nB labelled, skip\nC labelled, skip\nD unlabelled -> flood id 1: reach D,E     component = [0,0,0,1,1,-]  id -> 2\nE labelled, skip\nF unlabelled -> flood id 2: reach F       component = [0,0,0,1,1,2]  id -> 3\n\n3 components: {A,B,C}, {D,E}, {F}\n```\n\nDFS and BFS produce identical labels — the partition does not depend on visit order, only on which vertices are mutually reachable.\n\nWhen edges arrive over time, [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] maintains the partition incrementally: initialize `V` singleton roots, then union each edge's endpoints. This is the same [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint-set]] forest used by [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|Kruskal's MST]]; union by rank keeps trees shallow, and path compression flattens the route each `find` traverses.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Connected Components complexity\",\n  \"variables\": {\n    \"edgeCount\": {\n      \"symbol\": \"m\",\n      \"description\": \"number of edges\"\n    },\n    \"inverseAckermann\": {\n      \"symbol\": \"α(·)\",\n      \"description\": \"inverse Ackermann factor applied to its displayed argument\"\n    },\n    \"vertexCount\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of vertices\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"DFS / BFS labelling\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Time\",\n              \"formula\": \"Θ(n + m)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Union-find (rank + compression)\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Time\",\n              \"formula\": \"O(n + m · α(n))\"\n            }\n          ]\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"DFS / BFS labelling\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n) — visited/label array plus frontier\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Union-find (rank + compression)\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n) — parent and rank arrays\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}\n```\n\nWith adjacency lists, traversal visits each vertex once and scans each stored adjacency entry once. An undirected edge appears in two adjacency lists, which changes the constant count of scans but not the charted bound.\n\n%% endtabs %%\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Three components in an undirected graph\n>\n> ```mermaid\n> flowchart LR\n>   subgraph c0[\"component 0\"]\n>     A((A)) --- B((B))\n>     B --- C((C))\n>     C --- A\n>   end\n>   subgraph c1[\"component 1\"]\n>     D((D)) --- E((E))\n>   end\n>   subgraph c2[\"component 2\"]\n>     F((F))\n>   end\n> ```\n> No edge crosses a subgraph boundary — that is exactly what makes each one a maximal component. An isolated vertex is its own component.\n\n> [!EXAMPLE]- DFS labelling in C#\n>\n> ```csharp\n> // Returns component ids and the authoritative component count.\n> public static (int[] component, int count) ConnectedComponents(List<int>[] adjacency)\n> {\n>     var n = adjacency.Length;\n>     var component = new int[n];\n>     Array.Fill(component, -1);            // -1 == unlabelled\n>     var id = 0;\n>\n>     for (var v = 0; v < n; v++)\n>     {\n>         if (component[v] != -1) continue; // already covered by an earlier flood\n>\n>         var stack = new Stack<int>();     // iterative DFS avoids deep-graph stack overflow\n>         stack.Push(v);\n>         component[v] = id;\n>\n>         while (stack.Count > 0)\n>         {\n>             var u = stack.Pop();\n>             foreach (var w in adjacency[u])\n>             {\n>                 if (component[w] != -1) continue;\n>                 component[w] = id;        // stamp on discovery, so no vertex enters twice\n>                 stack.Push(w);\n>             }\n>         }\n>\n>         id++;                             // next unvisited vertex opens the next component\n>     }\n>\n>     return (component, id);\n> }\n> ```\n> The outer loop is the part that turns a single traversal into a component decomposition: each unlabelled vertex it lands on is provably in a component nothing before it reached, so it earns a fresh id.\n\n# Comparison\n\nFor a static undirected graph, DFS or BFS labelling is the direct answer. One sweep produces both per-vertex ids and the component count. An iterative traversal avoids recursion overflow on deep graphs. [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]] belong to directed graphs. Their extra machinery adds nothing on an undirected input.\n\n# References\n\n- [Search for connected components in a graph](https://cp-algorithms.com/graph/search-for-connected-components.html)\n",
+          "hash": "62d81a578792e5ffea46d7756d69d02f85a6f2ab31028954e190a9bf86681d48",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Connected Components.md",
+          "outcome": "keep",
+          "reason": "I audited the whole note against its current text and standard graph-algorithm facts. The definition of a connected component is correct, and the note correctly sends directed graphs to strongly connected components. The outer loop is explained clearly: an unlabelled vertex must start a new component, and the A–F trace matches the C# code. The C# code labels a vertex when it is discovered, so no vertex is pushed twice, and its iterative stack avoids recursion overflow. The complexity tab is right: Θ(n+m) for traversal, O(n+m·α(n)) for union-find with rank and compression, and O(n) auxiliary space for both. The note says an undirected edge is scanned twice and that this changes only the constant. The Mermaid diagram matches the trace. The note has no Qard cards, and no known violations are listed. The note stays coherent and compact, so I found no factual or editorial defect worth an edit. The only blemish is a lowercase link-text sentence start in Comparison, which is cosmetic, so I left it."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Connected Components.md": "62d81a578792e5ffea46d7756d69d02f85a6f2ab31028954e190a9bf86681d48"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Connected Components.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-08T13:49:02.381889Z"
   }
 }
