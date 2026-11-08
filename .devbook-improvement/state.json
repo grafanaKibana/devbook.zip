@@ -8192,11 +8192,11 @@
     "version": 1,
     "id": "b10487f268d742babc49b59ab87ef167",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-08T22:17:21.273772Z",
-    "elapsed_seconds": 73.40395930000001,
+    "elapsed_seconds": 86.68104050000001,
     "calls_reserved": 3,
-    "responses_received": 2,
+    "responses_received": 3,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md"
     ],
@@ -8277,7 +8277,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T22:18:34.677188Z",
+    "checkpoint_at": "2026-11-08T22:18:47.954273Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -28478,5 +28478,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "b10487f268d742babc49b59ab87ef167",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Dynamic-programming all-pairs shortest paths.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Creation\npublish: true\ncreated: \"2026-07-10T06:24:36.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-10T05:55:48.750Z\"\n---\n\nFloyd-Warshall computes the shortest distance between every ordered pair in a weighted directed graph, producing a full `V×V` table. Running a single-source algorithm from each vertex can produce the same table, but on a dense graph that repeats much of the work. Negative edge weights also rule out Dijkstra.\n\nFloyd-Warshall fills the whole table with one triple loop by recasting the problem as [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|dynamic programming]] over a growing set of permitted waypoints. The sub-problem is \"the shortest path from `i` to `j` that may route only through intermediate vertices drawn from `{0..k}`.\" Beginning with direct edges alone and admitting one more permitted intermediate per stage, the last stage leaves every entry at its unrestricted shortest distance when no negative cycle is reachable on the route. Each stage `k` poses a single question at every pair: keep `dist[i][j]`, or improve it by going `i → k → j`. A negative cycle makes every pair that can reach it and then leave it have no finite shortest distance. The diagonal detects the condition, but the raw finite values left in the matrix are not valid answers for those pairs.\n\nThe decisive step is a single relaxation sweeping the whole distance matrix for one admitted intermediate vertex.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\n  \"algorithm\": \"floyd-warshall\",\n  \"nodes\": [0, 1, 2, 3],\n  \"edges\": [[0, 1, 3], [0, 3, 7], [1, 0, 8], [1, 2, 2], [2, 0, 5], [2, 3, 1], [3, 0, 2]]\n}\n```\n\nThe table starts with direct edges and `∞` for missing routes. At each stage `k`, the highlighted cell compares its current `dist[i][j]` with the route through `k`; green writes improve the matrix and gray cells keep the existing distance.\n\nLet `D^(k)[i][j]` mean the best `i`→`j` distance whose intermediate vertices are drawn from `{0..k}`; `D^(-1)` contains direct edges, zero-length self paths, and `∞` elsewhere. Each stage moves from `D^(k-1)` to `D^(k)` with:\n\n`D^(k)[i][j] = min(D^(k-1)[i][j], D^(k-1)[i][k] + D^(k-1)[k][j])`\n\nThe invariant: once stage `k` finishes, `D^(k)[i][j]` is the shortest finite `i`→`j` path using intermediate vertices only from `{0..k}`. Each pair has exactly two ways to satisfy stage `k`. Either the best path avoids `k`, and `D^(k-1)[i][j]` already holds it; or it passes through `k` exactly once, splitting into an `i`→`k` leg and a `k`→`j` leg that each use only earlier intermediates. Taking the smaller value extends the invariant while no negative cycle makes the optimum unbounded below.\n\nThat decomposition is why `k` is the outermost loop. It reads `dist[i][k]` and `dist[k][j]` as the previous stage left them, so the entire matrix has to finish updating for one `k` before the next begins. Running `i` or `j` outside `k` mixes cells from two different stages into one relaxation, and the recurrence consumes half-finished data.\n\nDuring stage `k` neither `dist[i][k]` nor `dist[k][j]` can improve — a shortest path through `k` never uses `k` as an intermediate of its own legs — so reading and writing the same array yields the values a separate previous copy would have held.\n\nA four-vertex run shows the layering. `∞` is shown as `.`:\n\n```text\nVertices 0..3, directed edges (weight):\n  0→1 (3)  0→3 (7)  1→0 (8)  1→2 (2)  2→0 (5)  2→3 (1)  3→0 (2)\n\ndist after init:            final all-pairs distances:\n      0   1   2   3               0   1   2   3\n  0 [ 0   3   .   7 ]         0 [ 0   3   5   6 ]\n  1 [ 8   0   2   . ]         1 [ 5   0   2   3 ]\n  2 [ 5   .   0   1 ]         2 [ 3   6   0   1 ]\n  3 [ 2   .   .   0 ]         3 [ 2   5   7   0 ]\n```\n\n`dist[0][3]` holds the direct edge `7` until vertex `2` becomes admissible at stage `k = 2`, where `0→2→3` costs `5 + 1 = 6` and wins. `dist[1][3]` first drops to `15` through vertex `0` at `k = 0`, then to `3` at `k = 2` via `1→2→3`. No diagonal entry ends negative, so the graph carries no negative cycle.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Floyd-Warshall complexity\",\n  \"variables\": {\n    \"vertexCount\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of vertices\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Every input\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Time\",\n              \"formula\": \"Θ(n³)\"\n            }\n          ]\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Every input\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Space\",\n              \"formula\": \"Θ(n²)\",\n              \"curveId\": \"quadratic\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Staged relaxation\n>\n> ```mermaid\n> flowchart TD\n>   A[Init direct weights and infinity elsewhere; dist i i equals min of zero and direct self-loop weight] --> B[Pick next intermediate k, k outermost]\n>   B --> C[Sweep every pair i and j]\n>   C --> D{dist i k plus dist k j less than dist i j}\n>   D -->|Yes| E[Set dist i j to the sum and next i j to next i k]\n>   D -->|No| F[Keep dist i j]\n>   E --> C\n>   F --> C\n>   C --> G{More intermediates remain}\n>   G -->|Yes| B\n>   G -->|No| H{Any dist i i below zero}\n>   H -->|Yes| I[Negative-cycle witness: mark reachable pairs minus infinity]\n>   H -->|No| J[Matrix holds all pairs distances]\n> ```\n\n> [!EXAMPLE]- C# implementation with path reconstruction\n>\n> ```csharp\n> public static (long?[,] Dist, int[,] Next) FloydWarshall(long?[,] weight)\n> {\n>     var n = weight.GetLength(0);\n>     if (weight.GetLength(1) != n)\n>     {\n>         throw new ArgumentException(\"Weight matrix must be square.\", nameof(weight));\n>     }\n>\n>     var dist = new long?[n, n];\n>     var next = new int[n, n];\n>\n>     for (var i = 0; i < n; i++)\n>     for (var j = 0; j < n; j++)\n>     {\n>         var direct = weight[i, j];\n>         dist[i, j] = i == j ? Math.Min(direct ?? 0, 0) : direct;\n>         next[i, j] = dist[i, j] is not null ? j : -1;\n>     }\n>\n>     for (var k = 0; k < n; k++)              // stage: k is outermost\n>     for (var i = 0; i < n; i++)\n>     for (var j = 0; j < n; j++)\n>     {\n>         if (dist[i, k] is null || dist[k, j] is null)\n>         {\n>             continue;\n>         }\n>\n>         var through = checked(dist[i, k]!.Value + dist[k, j]!.Value);\n>         if (dist[i, j] is null || through < dist[i, j])\n>         {\n>             dist[i, j] = through;\n>             next[i, j] = next[i, k];\n>         }\n>     }\n>\n>     return (dist, next);                     // inspect the diagonal before using any result\n> }\n>\n> public static List<int> Path(long?[,] dist, int[,] next, int i, int j)\n> {\n>     for (var k = 0; k < dist.GetLength(0); k++)\n>     {\n>         if (dist[k, k] is < 0 && dist[i, k] is not null && dist[k, j] is not null)\n>         {\n>             throw new InvalidOperationException(\"Path is unbounded through a negative cycle.\");\n>         }\n>     }\n>\n>     if (next[i, j] == -1)\n>     {\n>         return new List<int>();              // j unreachable from i\n>     }\n>\n>     var path = new List<int> { i };\n>     while (i != j)\n>     {\n>         i = next[i, j];\n>         path.Add(i);\n>     }\n>\n>     return path;\n> }\n> ```\n> A null weight means no direct edge. Every non-null weight is finite. The matrix must be square, and every path sum must fit in `long` — `checked` turns a violated numeric bound into an `OverflowException` instead of a false shortest path. `next[i, j]` stores the first hop of the current best `i`→`j` route and is rewritten to `next[i, k]` on each improving relaxation. `Path` rejects any pair that can reach and leave a negative-cycle witness. A raw `dist`/`next` pair cannot extract the concrete cycle, so that feature needs predecessor tracking during relaxation.\n\n# When the Reported Distances Are Wrong\n\nA negative edge is fine on its own — a stage relaxes through it and the invariant still holds. A negative cycle is not: looping it lowers the total without bound, so every pair that can reach the cycle and then leave it has shortest distance `−∞`. The signal lives on the diagonal. When `dist[w][w] < 0`, there is a negative closed walk reachable from `w` and back to `w`. It is a witness, not proof that `w` itself lies on a simple negative cycle. Every `dist[u][v]` with finite `dist[u][w]` and `dist[w][v]` is affected and must be marked `−∞` or excluded from results. The plain distance matrix detects this condition but does not extract the concrete cycle. Record predecessors during relaxation when the cycle itself matters.\n\nReordering the loops so `i` or `j` is outermost still compiles, runs, and terminates, but it relaxes pairs against cells from a stage that has not finished. The matrix comes back full of finite numbers that are simply wrong wherever a shortest path needed an intermediate whose row or column was consulted before that stage completed. Because nothing crashes, the defect hides until a specific graph exposes it.\n\nOverflow is the other silent corruptor. With `int.MaxValue` as `∞`, the unconditional `dist[i][k] + dist[k][j]` wraps to a large negative number whenever both operands are the sentinel, and that phantom shortcut then propagates through the rest of the sweep. Representing an absent edge as `null` avoids a numeric sentinel, but finite path sums can still exceed `long`. The checked addition in the sample makes that input-contract violation explicit.\n\n# References\n\n- [Robert W. Floyd, *Algorithm 97: Shortest Path*](https://doi.org/10.1145/367766.368168)\n- [All-pairs shortest paths, Floyd-Warshall (cp-algorithms)](https://cp-algorithms.com/graph/all-pair-shortest-path-floyd-warshall.html)\n",
+          "hash": "537e1d20b4286336eb139cfb1e50625657eaa454bd1a5e7349de3ba8615a3351",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md",
+          "outcome": "keep",
+          "reason": "I audited the whole note. I recomputed the four-vertex example by hand. The final matrix is correct, including 1→0 = 5 via 1→2→3→0, 0→3 = 6 at k=2, and dist[1][3] = 15 at k=0 then 3 at k=2. The recurrence, the base case D^(-1), and the argument for why k is the outermost loop are all sound. The in-place update claim holds when no negative cycle passes through k. The negative-cycle section is accurate: the diagonal is a witness, and affected pairs are those that can reach the witness and then leave it. The overflow discussion and the checked-addition and null-sentinel C# code are consistent with the prose and with the Mermaid diagram. The complexity block (Θ(n³) time, Θ(n²) space) is correct. The two references are relevant primary and canonical sources. There are no cards, and none are needed. The prose is direct and keeps its mechanisms, so I found no concrete defect worth an edit."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md": "537e1d20b4286336eb139cfb1e50625657eaa454bd1a5e7349de3ba8615a3351"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-08T22:18:47.954250Z"
   }
 }
