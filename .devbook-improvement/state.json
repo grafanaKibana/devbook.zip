@@ -8505,6 +8505,361 @@
           }
         ]
       }
+    },
+    "computer-science-445ddaa5:2": {
+      "topic_id": "computer-science-445ddaa5",
+      "generation": 2,
+      "number": 218,
+      "branch": "notes/automated-computer-science-445ddaa5-g2",
+      "status": "open",
+      "frozen": false,
+      "head_sha": "9627085ff5bb7d4c65d0c35e2d52e1d8941ee59c",
+      "export_required": true,
+      "export_operation_id": "b10487f268d742ba",
+      "automatic_export": true,
+      "proposal_records": [
+        {
+          "record_id": "aaf5f9e588714a7f25da7005cbff7c7167973b808499a5ad323475efa8bedfbd",
+          "workload_id": "b10487f268d742babc49b59ab87ef167",
+          "batch": {
+            "topic": "Computer Science",
+            "topic_id": "computer-science-445ddaa5",
+            "notes": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"4\"]\nstatus: Creation\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.334Z\"\n---\n\nGraph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Diagram\n\n```mermaid\nflowchart TD\n  A[Graph problem] --> B{Need reachability or levels}\n  B -->|Yes| C[DFS BFS]\n  B -->|No| D{Need minimum path cost}\n  D -->|Yes with non negative weights| E{Have a heuristic to the target}\n  E -->|Yes| E1[A Star Search]\n  E -->|No| E2[Dijkstra]\n  D -->|Can have negative edges| F[Bellman Ford]\n  D -->|Need all pairs shortest paths| G[Floyd Warshall]\n  A --> H{Need structure not distance}\n  H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]\n  H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]\n  H -->|Single points of failure| K[Articulation Points and Bridges]\n  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Throughput through a capacitated network| L[Maximum Flow]\n```\n\n# Algorithm Selection\n\n## Shortest Path\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|DFS]] | Traversal, cycle detection, finish-order primitives | O(V + E) | General graphs. Topological order still requires a DAG |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra\\|Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search\\|A* Search]] | Point-to-point shortest path | O((V + E) log E) with a consistent heuristic and lazy heap. Reopenings make runtime re-expansion-dependent | Non-negative weights. Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search\\|Greedy Best-First Search]] | Fast point-to-point path, not necessarily optimal | O((V + E) log E) with a lazy heap | Heuristic only. Sacrifices optimality for speed |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search\\|Bidirectional Search]] | Point-to-point shortest path | About O(b^(d/2)) rather than O(b^d) in the ideal state-space model | Target known. Backward search must be available |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford\\|Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges. Detects reachable negative cycles |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall\\|Floyd-Warshall]] | All-pairs shortest path | Θ(V³) time, Θ(V²) space | Small or dense graphs. Detects negative cycles |\n\n## Structure and Connectivity\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\\|Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort\\|Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\\|Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Connected Components\\|Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges\\|Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow\\|Maximum Flow]] | Max s–t throughput. Min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |\n\n> [!NOTE]\n> Not every graph problem admits a polynomial-time algorithm. [[Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle|Hamiltonian Cycle]] asks for a cycle that visits every vertex exactly once and is **NP-complete**. No polynomial-time algorithm is known. Exact methods take exponential time in the worst case.\n\n# References\n\n- [Graph algorithms](https://algs4.cs.princeton.edu/40graphs/)\n",
+                "hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
+                "topic": "Computer Science",
+                "violations": [],
+                "needs_fixing_ids": [],
+                "repair_input_hash": "",
+                "selection_reason": "new"
+              }
+            ],
+            "feedback": [],
+            "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+            "review_process": "focused-whole-note-v1",
+            "pr": null
+          },
+          "proposal": {
+            "version": 1,
+            "edits": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                "expected_hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
+                "before": "  H -->|Clusters in an undirected graph| M[Connected Components]\n",
+                "after": "  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n",
+                "reason": "Adds the Topological Sort note, listed in the selection table, to the decision diagram so every structure-oriented outcome has a route.",
+                "kind": "note",
+                "learning_target": "same",
+                "essential_meanings": [
+                  "Topological Sort is the choice for dependency ordering in a directed acyclic graph"
+                ],
+                "sources": [],
+                "feedback_keys": [],
+                "problem": "The decision diagram omits Topological Sort although the structure tables list it as a distinct answer to a dependency-order requirement.",
+                "reader_benefit": "The diagram now covers dependency ordering, so it matches the tables below it."
+              }
+            ],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                "outcome": "changed",
+                "reason": "Audited the opening, diagram, both tables, the NP-complete note and the reference. The complexities (BFS/DFS O(V+E), Dijkstra O((V+E) log V), Bellman-Ford O(VE), Floyd-Warshall Θ(V³), Edmonds-Karp O(VE²)), the A* consistency caveat and the Hamiltonian cycle claim are standard and correct. The one gap was that the diagram had no Topological Sort route, though the tables list it. The edit adds that route and leaves the rest unchanged."
+              }
+            ],
+            "feedback": []
+          },
+          "result": {
+            "sources": {
+              "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"4\"]\nstatus: Creation\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-08T22:19:50.758Z\"\npublished: \"2026-07-08T13:14:17.334Z\"\n---\n\nGraph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Diagram\n\n```mermaid\nflowchart TD\n  A[Graph problem] --> B{Need reachability or levels}\n  B -->|Yes| C[DFS BFS]\n  B -->|No| D{Need minimum path cost}\n  D -->|Yes with non negative weights| E{Have a heuristic to the target}\n  E -->|Yes| E1[A Star Search]\n  E -->|No| E2[Dijkstra]\n  D -->|Can have negative edges| F[Bellman Ford]\n  D -->|Need all pairs shortest paths| G[Floyd Warshall]\n  A --> H{Need structure not distance}\n  H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]\n  H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]\n  H -->|Single points of failure| K[Articulation Points and Bridges]\n  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n  H -->|Throughput through a capacitated network| L[Maximum Flow]\n```\n\n# Algorithm Selection\n\n## Shortest Path\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|DFS]] | Traversal, cycle detection, finish-order primitives | O(V + E) | General graphs. Topological order still requires a DAG |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra\\|Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search\\|A* Search]] | Point-to-point shortest path | O((V + E) log E) with a consistent heuristic and lazy heap. Reopenings make runtime re-expansion-dependent | Non-negative weights. Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search\\|Greedy Best-First Search]] | Fast point-to-point path, not necessarily optimal | O((V + E) log E) with a lazy heap | Heuristic only. Sacrifices optimality for speed |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search\\|Bidirectional Search]] | Point-to-point shortest path | About O(b^(d/2)) rather than O(b^d) in the ideal state-space model | Target known. Backward search must be available |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford\\|Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges. Detects reachable negative cycles |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall\\|Floyd-Warshall]] | All-pairs shortest path | Θ(V³) time, Θ(V²) space | Small or dense graphs. Detects negative cycles |\n\n## Structure and Connectivity\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\\|Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort\\|Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\\|Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Connected Components\\|Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges\\|Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow\\|Maximum Flow]] | Max s–t throughput. Min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |\n\n> [!NOTE]\n> Not every graph problem admits a polynomial-time algorithm. [[Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle|Hamiltonian Cycle]] asks for a cycle that visits every vertex exactly once and is **NP-complete**. No polynomial-time algorithm is known. Exact methods take exponential time in the worst case.\n\n# References\n\n- [Graph algorithms](https://algs4.cs.princeton.edu/40graphs/)\n"
+            },
+            "edits": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                "expected_hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
+                "before": "  H -->|Clusters in an undirected graph| M[Connected Components]\n",
+                "after": "  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n",
+                "reason": "Adds the Topological Sort note, listed in the selection table, to the decision diagram so every structure-oriented outcome has a route.",
+                "kind": "note",
+                "learning_target": "same",
+                "essential_meanings": [
+                  "Topological Sort is the choice for dependency ordering in a directed acyclic graph"
+                ],
+                "sources": [],
+                "feedback_keys": [],
+                "problem": "The decision diagram omits Topological Sort although the structure tables list it as a distinct answer to a dependency-order requirement.",
+                "reader_benefit": "The diagram now covers dependency ordering, so it matches the tables below it."
+              }
+            ],
+            "retired_ids": [],
+            "lineage": [],
+            "fingerprints": [
+              "30adda22600ad8750397ecbbfb9ef9b6a30416e17a44afcf12e6867bbed4c6a6"
+            ]
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                "verdict": "CLEAN",
+                "summary": "The whole folder note was read. The single edit closes a real gap: the decision diagram had no route to Topological Sort, although the tables list it. The edit is small, accurate and consistent with the rest of the note.",
+                "page_type": "FolderNote — keeps tags: [FolderNote] and the Datacore folder-map block. No Questions section, which is optional. One reference, which is a real and relevant primary source.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The required output comes first. Direction, weight semantics, and input density then narrow the valid choices.",
+                    "line_start": 15,
+                    "reason": "The opening states the selection logic and the BFS versus Dijkstra boundary directly, so no change is needed."
+                  },
+                  {
+                    "quote": "H -->|Dependency order in a DAG| N[Topological Sort]",
+                    "line_start": 39,
+                    "reason": "The new diagram route makes the diagram agree with the structure table. The DAG condition is stated correctly."
+                  },
+                  {
+                    "quote": "| Linear order respecting dependencies | O(V + E) | Directed acyclic graph |",
+                    "line_start": 63,
+                    "reason": "The table row confirms Topological Sort is a distinct outcome, so the diagram gap was real. Complexity and constraint are correct."
+                  },
+                  {
+                    "quote": "Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings",
+                    "line_start": 52,
+                    "reason": "The A* caveat is accurate. The Dijkstra, Bellman-Ford, Floyd-Warshall and Edmonds-Karp complexities are also standard and correct."
+                  }
+                ],
+                "target_resolution": "RESOLVED",
+                "split_suggestion": "No split: the note is a compact hub whose diagram and tables serve one purpose, choosing a graph algorithm. The per-algorithm notes already exist.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is accurate and clear. The one edit fixes a real diagram omission without changing meaning, and frontmatter and fences are intact.",
+            "change_checks": [
+              {
+                "edit_index": 0,
+                "verdict": "WORTHWHILE",
+                "reason": "Topological Sort was in the selection table but missing from the decision diagram. The added route covers that gap with the correct DAG condition and does not change any other content."
+              }
+            ]
+          },
+          "decisions": [],
+          "review_evidence": {
+            "raw_review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                  "verdict": "CLEAN",
+                  "summary": "The whole folder note was read. The single edit closes a real gap: the decision diagram had no route to Topological Sort, although the tables list it. The edit is small, accurate and consistent with the rest of the note.",
+                  "page_type": "FolderNote — keeps tags: [FolderNote] and the Datacore folder-map block. No Questions section, which is optional. One reference, which is a real and relevant primary source.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The required output comes first. Direction, weight semantics, and input density then narrow the valid choices.",
+                      "line_start": 15,
+                      "reason": "The opening states the selection logic and the BFS versus Dijkstra boundary directly, so no change is needed."
+                    },
+                    {
+                      "quote": "H -->|Dependency order in a DAG| N[Topological Sort]",
+                      "line_start": 39,
+                      "reason": "The new diagram route makes the diagram agree with the structure table. The DAG condition is stated correctly."
+                    },
+                    {
+                      "quote": "| Linear order respecting dependencies | O(V + E) | Directed acyclic graph |",
+                      "line_start": 64,
+                      "reason": "The table row confirms Topological Sort is a distinct outcome, so the diagram gap was real. Complexity and constraint are correct."
+                    },
+                    {
+                      "quote": "Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings",
+                      "line_start": 53,
+                      "reason": "The A* caveat is accurate. The Dijkstra, Bellman-Ford, Floyd-Warshall and Edmonds-Karp complexities are also standard and correct."
+                    }
+                  ],
+                  "target_resolution": "RESOLVED",
+                  "split_suggestion": "No split: the note is a compact hub whose diagram and tables serve one purpose, choosing a graph algorithm. The per-algorithm notes already exist.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The note is accurate and clear. The one edit fixes a real diagram omission without changing meaning, and frontmatter and fences are intact.",
+              "change_checks": [
+                {
+                  "edit_index": 0,
+                  "verdict": "WORTHWHILE",
+                  "reason": "Topological Sort was in the selection table but missing from the decision diagram. The added route covers that gap with the correct DAG condition and does not change any other content."
+                }
+              ]
+            },
+            "bindings": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                "citation_index": 2,
+                "reported_line_start": 64,
+                "resolved_line_start": 63
+              },
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                "citation_index": 3,
+                "reported_line_start": 53,
+                "resolved_line_start": 52
+              }
+            ],
+            "source_hashes": {
+              "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "ea680c126da74e3cb0f890a926c2f52ae7eaebc437b6f7d1e7f098af5021b270"
+            },
+            "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+          },
+          "source_hashes": {
+            "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877"
+          },
+          "prepared_source_version": 1,
+          "prepared_at": "2026-11-08T22:19:50.758851Z",
+          "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+          "calls_reserved": 6,
+          "elapsed_seconds": 221.44617210000004,
+          "accepted_at": "2026-11-08T22:21:02.719976Z",
+          "phase": "accepted"
+        }
+      ],
+      "base_note_hashes": {
+        "Vault/Home/Computer Science/Algorithms/Algorithms.md": "5163fe3a84feec771d86cedc762044b7c206fa4b6d0708e765612a6cb30488dd",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search.md": "2ae5db4bf03be72d4c8c79a0819cd8299000f3009868ab2d817900add3736b84",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md": "08d3bd6c8859e7a90c072c99b98912c3c1bda8ef1e75bfea1fae34cb195b5cc0",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford.md": "c6ea5edaca05324a41263bc4d8f4ff43ac1cdf6748f960d451acf71d331935e3",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search.md": "42d9349b9faf85cdbcd1febdb23e9e0aa11810b7b0f5a3f0f01370be9afdf5cf",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm.md": "6f493d4bbca79de66acab191f048c69a862098332f3d48036bc7397c58f64a60",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Connected Components.md": "62d81a578792e5ffea46d7756d69d02f85a6f2ab31028954e190a9bf86681d48",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS.md": "935cd60e736e0f50906e064226682fb2e0d99381116e957d20d47edccb8a8dc7",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra.md": "237959f2359c188b999e1ed9dfa02d7825487478fd95a2546b639c32906df2d5",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md": "9430128d291a6bf0daf0ff202eb2f04cb4ce2da0110e7ef4d58d8f96cf39c8c2",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md": "537e1d20b4286336eb139cfb1e50625657eaa454bd1a5e7349de3ba8615a3351",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search.md": "d832ac132dc705758a2d67460bbc6e13faa682231e3b1a97284b0e85c11cde52",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md": "d9eecd2071422c9e7129bff2c28e14c56ed9dba1ea30cd4e6f7787d916b9cc4b",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Kruskal's Algorithm.md": "36aeb05c22d405ecc7ab701099ae8bf65a60257add2a63a1bd22bf20e562b61d",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow.md": "39a2218ec050410f01974d0be830067653425fdf618c761e944aff200c01b1a3",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md": "a87194c58bf9ac47fa3b31a9c5424b6bd5731959cfe34ac2da5508e8c0f1e010",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components.md": "cda9a01ed3198232d349b07d2f7c036429334dea953866d7825302471874fe3d",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f",
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md": "f483d1a0be190e494ef34d38154b09718caec4ff0a44a4b9ed8679181eefe5fd",
+        "Vault/Home/Computer Science/Algorithms/Paradigms/Backtracking.md": "18efb18d07b562e6c1e9c88016f30556792e525842bebfc6658b1305354af823",
+        "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md": "c1718904068141d95d8e53cf74adcf148bce2182906bc4b4446ba06871063da6",
+        "Vault/Home/Computer Science/Algorithms/Paradigms/Divide and Conquer.md": "1e0903dbf937ff52293a4e1200782e3a678956accb2842737f845be30fa6a42f",
+        "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md": "1e4111756d04701fff53a49358eae8e0689efd63f765392a2b601cf67d529861",
+        "Vault/Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms.md": "998e60a3238dcbd3e7cf0637302779a35d455230c864193cb3d2c7d1d67b25d2",
+        "Vault/Home/Computer Science/Algorithms/Paradigms/Memoization.md": "5a1c1005a4fe8538fc27f1068b0ec2b0d030b80dd44a224e04e2953142bbf529",
+        "Vault/Home/Computer Science/Algorithms/Paradigms/Paradigms.md": "79593eb78131be6b3d728f9d866226926898a65799582f106aff9a341c20f5d1",
+        "Vault/Home/Computer Science/Algorithms/Patterns/Binary Search on Answer.md": "e35a8f64e2ad521ed218da8cf777226d8fe921a925cbc9996acbc3c8180a6da8",
+        "Vault/Home/Computer Science/Algorithms/Patterns/Bit Manipulation.md": "71f502b984bd84fc3b795fc39d96d56ba09eed41e5d5fa0d1dd68650db9b6a59",
+        "Vault/Home/Computer Science/Algorithms/Patterns/Cyclic Sort.md": "afb1e0c7e6525a90cc9f4e0dd88aa7021a033b8ca24374a18c566256974b4c6e",
+        "Vault/Home/Computer Science/Algorithms/Patterns/Fast and Slow Pointers.md": "4e3eb6340536b05a3db8f65e3a8f5c936527880119c812caf022316a5d61eac5",
+        "Vault/Home/Computer Science/Algorithms/Patterns/Merge Intervals.md": "86904805c0875a44470140eacdd9f96a706d8b6ee9ad8972a5d4692a3fa1820c",
+        "Vault/Home/Computer Science/Algorithms/Patterns/Monotonic Stack and Queue.md": "3be19290ce40f679c0f2017e01862fd37d46b2362d1c1c04f05f171a2081419b",
+        "Vault/Home/Computer Science/Algorithms/Patterns/Patterns.md": "37d6fc7d3c8844b5df366fcf2b8eccf402f21aa8faf197af967473af028e54a8",
+        "Vault/Home/Computer Science/Algorithms/Patterns/Prefix Sum.md": "fbea209d2c30218cfc5976575fd21f3648b4b2f24d86762bae310f1db5a200d0",
+        "Vault/Home/Computer Science/Algorithms/Patterns/Sliding Window.md": "9710e06b1d9744225d1269b83c231d76891a6312d8c944540663cc6bc8f3ce6e",
+        "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md": "f336cca11768386972222e91e7c53ff4394e1c1e0d78ed814f30d59dc89fecb6",
+        "Vault/Home/Computer Science/Algorithms/Patterns/Two Heaps.md": "0ae4f645a1317bcd62af43b28d1fddba5ab47e2ee8ceed22cc16b3a4cdd2fa11",
+        "Vault/Home/Computer Science/Algorithms/Patterns/Two Pointers.md": "72239cb59d220c5a71c0ec4756b8c38aa42490eafeeafb6af1ec85c3573b7d32",
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Binary Search.md": "27b74b18853d4ef7ab8677e858e82eed5c18ebc4dac82b0568f120be8f1e0b6f",
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md": "f7ccc19ba2618f4126719f9bbf5874079fa50b57ed6178395b07bb249e384d8b",
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Fibonacci Search.md": "054b8100535063942f0cabe7ae432e5c09b6e53243d290e78d15cd72b362f115",
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md": "90d0f916880fa582f393dc4e24b6cc5d599c04784c94342843335d4f34dc11a4",
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Jump Search.md": "a27be8e47990d51b7d0d8163e6c5eab3573c395c68bed890de04172d27a752d8",
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Linear Search.md": "d1f3373be8a042fc999d8ea83e2df0a537969eee6ba99c9b19318f67dd13bc4f",
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Search Algorithms.md": "cc94f91479f90bf976d387f071bcc95aeaa8996000fb67ca9d708155c4550aae",
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Aho-Corasick.md": "ccbc895ee68e1cc8fa523c7c459277e23548f4050c1cfb9a65c362ac9b938384",
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Boyer-Moore.md": "d270d2151c2694e1eee65d3dd48fc3d7d68801819fe766c6d0032c44aec27459",
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/KMP (Knuth-Morris-Pratt) Algorithm.md": "9629f4b72a439152dfb11adcdb6ec6e1e9dcdc39cddc37c38b784f3b8aaeb9a5",
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Rabin Karp Search.md": "0b39ba28bea98cc2ee37a8d71e3414058865ac4170d8c5b9133eae8ccfacd091",
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/String Matching.md": "2c48f5118b805efe73f679f334f77394a8ece0dc26b18093a83e88558922589f",
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Z-Algorithm.md": "f374f00385292441aaae58d11e10ac6817fa2b2894e88f652c9575d5e44db0d9",
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Ternary Search.md": "e32ee97a2a69c26eb86f4e5262bcb601b354d5439c9765f54f12f7d3b1a28a24",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Bogo Sort.md": "3965c2cf9985483b5562b9b462e42bbb02dda2807c4f09daa446b7176697d3cb",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md": "a6562fca0889559eee793fd9e28981f87c35717e718b74490121fc766e32a3d9",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Bucket Sort.md": "0d0cc81934f192568d664c1699e0cb734d8e2f455a0cd5cf1bc96a4b3fdeaa27",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Cocktail Shaker Sort.md": "b85bed86438ed1efbdd207c73cc5823fb5b9f0b790d6911ef5c4e938962efeff",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Comb Sort.md": "a17b63003b277954c8e417a0af3845f6c4aaf111dfe3d4342336f06ba0173af4",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Counting Sort.md": "a3cf915df958589523f8c8f56420ba99346c354423140444be864aeee3129190",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Cycle Sort.md": "13c2a7780e9c1b6553525c8e1d55ad937d74b0d31f9181fd4df82919435a9e82",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Gnome Sort.md": "d0068152d3295cf5eab5cc4bd7579485b0fbeca56b69f3516f54c12fbb6c9856",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Heap Sort.md": "ca4a2b996c4784609e7c31b6e1077a98013b595cd18296fc577aa99ded028f79",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort.md": "fc55ef751706134a05b7304122c9a2796f9b489467a0e84e965087799cfda0e9",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Introsort.md": "7857ba2ca44dd08ed6ebace5ef19d3fa3dd9ce8805a66baa90ff14623de8e1ae",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Merge Sort.md": "d6559ffd523f69d4daa85641b365982ea090b15d67bc786ae9317b3daaed19c9",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Odd-Even Sort.md": "ae12f8228bf8e787720cd621bdae16e4b727d75c42e4825d636a30c2ab4ee390",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Pancake Sort.md": "3aed112d77c6ff06adf048c30bf55c35ff0829a4e9ffb7287ae137553a990387",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md": "ab0007f1ca6ed0addd3e2f8cabac2ccf374c3b1fb2439a9cfc3cf9c6530ae1bf",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Radix Sort.md": "cba41f1187cb15c560707d7a6c90c471f5a4322ec07fe2ae4fe6efa38725bd31",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Selection Sort.md": "72dc6b8b874facf79da7f170747384af443853eb49e33a19c6e78d60c4a377d7",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Shell Sort.md": "046f377c9fbbb90f6ef8227c2e47a7c9e422cb00400f68ec58f5f994f95fcb65",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md": "fd442e92b0b2686d226907295bc49675db2feb1ee787d581487772a34ab00991",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Stooge Sort.md": "dbc395874bf7fddb5eac4e15d1a2368557a807e0960f8ace77232972e2aa136a",
+        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Tim Sort.md": "a2283142febaa59a554d9e78f4c51f49a7413b973493c5254615672338574237",
+        "Vault/Home/Computer Science/Big O Notation.md": "9d62e10caedf139d104ae63662a67921e7d79452f341fc8d7c602740013b386b",
+        "Vault/Home/Computer Science/Computer Science.md": "f0fd5b39cf52ea29505c50cc5cb48fa3f291536f5f945326c7da2a0cf6180366",
+        "Vault/Home/Computer Science/Data Structures/Composite Structures/Composite Structures.md": "c48afce0d15ba83846302e03f4ffaf97065a7a57ef47178c5e4478ef86e4f353",
+        "Vault/Home/Computer Science/Data Structures/Composite Structures/LRU Cache.md": "5ef060dfd2b783ece03efa9c3e831ed39f8972eea0db4ae7187222140bf8aba4",
+        "Vault/Home/Computer Science/Data Structures/Data Structures.md": "267c3c0866b2c926c95f53aff4cf01dc7aa18c8ce40e1ff6a827661e03d05091",
+        "Vault/Home/Computer Science/Data Structures/Geohash.md": "fb4a86d8df3bff5b66b5dc7f6b6f979963357c0c413edcd4e7cb8f722db0e545",
+        "Vault/Home/Computer Science/Data Structures/Graph Structures/Disjoint Set.md": "93beb12ec774d16acf3ddc926dd5e4f2e4e88dcdd9e472049c89b2b3ef8060cd",
+        "Vault/Home/Computer Science/Data Structures/Graph Structures/Graph Structures.md": "f0a45b2c29ba8293026c2bd725ce5085998d23332dcd77863c5dfad33fa0397a",
+        "Vault/Home/Computer Science/Data Structures/Graph Structures/Graph.md": "c28b705587856a40087463b220811660a7b59307efc8d6a607752ad8a05317a2",
+        "Vault/Home/Computer Science/Data Structures/Graph Structures/Union-Find.md": "be74fbc733d69aa20cf1bda6c41d071914870a09145ea91d41dc70e313a5d5a9",
+        "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Bloom Filter.md": "5b385e8fa148d648daebff6d7d45d1bea8606160efc8663577805af1591416eb",
+        "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Collision Resolution.md": "f11d164865ba211356a0e66a37bb54be9e058bfcd7e93923bf9450c595d4a321",
+        "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Hash Set.md": "9953880306305b7ab01bf40372c479c4b503cac49fba53ddc33457af201b6bfe",
+        "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Hash-based Structures.md": "3dfcde25d4b2c609e3abaca7f8e7804f24d6180312831645bf6b6c31c31fbd74",
+        "Vault/Home/Computer Science/Data Structures/Hash-based Structures/HashMap.md": "9e6cdf1f1841adc50e581665fa3fcb0586636d88444026aa0f561e7cecafd2ce",
+        "Vault/Home/Computer Science/Data Structures/Linear Structures/Arrays.md": "29629811c24cc35831a8189dcdff9e531138c40c45a1a8f65c343bcb61c565b9",
+        "Vault/Home/Computer Science/Data Structures/Linear Structures/Circular Buffer.md": "4ee03493156036320917d34751dd9936cbd0919faea4e031c021a84504d14ebd",
+        "Vault/Home/Computer Science/Data Structures/Linear Structures/Deque.md": "7a8d40b58383036766272944b1735359eca5c5aa79f23399d94c212baa62fb9b",
+        "Vault/Home/Computer Science/Data Structures/Linear Structures/Dynamic Array.md": "bf99c504918dd47aee8e22059b48fcca4fb744f415b218833d92abde54136f0e",
+        "Vault/Home/Computer Science/Data Structures/Linear Structures/Linear Structures.md": "ed4c46a275ec4583f89bf854d4816cf0329e314c4dd3195ef3cb919fb6690a88",
+        "Vault/Home/Computer Science/Data Structures/Linear Structures/LinkedList.md": "a0d265fb87a6700af61e41cc36c535994182834ecc2607a23274a5f538b3c5b3",
+        "Vault/Home/Computer Science/Data Structures/Linear Structures/Queue.md": "57acf88c2d3db623a70aa2a24711c834627ab34491776da00bb2ef857dbf1c71",
+        "Vault/Home/Computer Science/Data Structures/Linear Structures/Span.md": "4d70ffc2a3b87907063b8149eb273ba7b5807706edb4ac7e40d161616f9c299a",
+        "Vault/Home/Computer Science/Data Structures/Linear Structures/Stack.md": "d1f9b287e406b5ec501b70f50bc75df3101bc62d2743a098ce535cb88da18911",
+        "Vault/Home/Computer Science/Data Structures/Trees/AVL Tree.md": "ac96fb5d31539e40fe9fead6c1d35496d88687ddf9803379bb539bca4e7e0e45",
+        "Vault/Home/Computer Science/Data Structures/Trees/B+ Tree.md": "84217d51ce3776cbafe33f2ac0ec05f56f2d14365679ee55ca106bb10e2fc107",
+        "Vault/Home/Computer Science/Data Structures/Trees/B-tree.md": "45ea1660fa0492ed360a83c477905fad7ec9c1a7daaec24544c73b4f75b632ac",
+        "Vault/Home/Computer Science/Data Structures/Trees/Binary Search Tree.md": "dbae3fc7f5474bf9ed7bf4a16a53e251c3cf00f1beab74d9ca9b34c095797f36",
+        "Vault/Home/Computer Science/Data Structures/Trees/Fenwick Tree.md": "a7a050ad9e42755a3dd5cf61fb42a65c56157286bef772394c92fdf2a4394e13",
+        "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Binomial Queues.md": "13c91287e483ab2bbf3e5d9f4eb61cfb3684a4735518b686be7c60af8b6ac96f",
+        "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Fibonacci Heaps.md": "e23d26a826d32345e22ed6bbbbc77b4f2bab3da473330f68343b35a6e27d3674",
+        "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Heap-like.md": "077e612e15b56b0980d5ffea9f71a1ffa64be3a79a551edee35271bca40ae764",
+        "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Heap.md": "259eddd3b9fcabbd847611e72ffe39eefc4be143c9420335bd2e54f04ec3ecd9",
+        "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Leftist Heaps.md": "caf6ba13cb6427e33c8d6e2fd46d3fbcca4b5ec3367243cf8f6f454a3e1115b1",
+        "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Skew Heaps.md": "13ce14c1791563b02f51be828dbc6a194bd5a28f9616601afe749f2bbb5a45a1",
+        "Vault/Home/Computer Science/Data Structures/Trees/Quadtree.md": "16bfa6547b1255e1045889bcad5e08f574f11aae4278f3d635905ace09e56994",
+        "Vault/Home/Computer Science/Data Structures/Trees/Red-Black Tree.md": "c080f1de0222141697976a7a25ba10bc0784aef7edb50b7f205d68d5f52d86e3",
+        "Vault/Home/Computer Science/Data Structures/Trees/Segment Tree.md": "12f10453d746fd412268aa8cb07d26166f1aedc287d142e7ebb1c1ce608791c2",
+        "Vault/Home/Computer Science/Data Structures/Trees/Splay Tree.md": "e70ae30630f05b8dd8fbac64a29329a31c90946a3306990e7a2d6679d7ee0959",
+        "Vault/Home/Computer Science/Data Structures/Trees/Ternary Search Tree.md": "e9622d0f76bc31eedbf9c4fa75cb66c497bee7d0663dcae4c0d00120bfa1cef8",
+        "Vault/Home/Computer Science/Data Structures/Trees/Trees.md": "d0291ae589e3e372ceab2db0a5e3bcab92665b8ca8c788caa340a628431613f3",
+        "Vault/Home/Computer Science/Data Structures/Trees/Trie.md": "c2c5c516efe070bcd55955d91f85fb8ea40c40239cf80225981a3bab01c2ef0b",
+        "Vault/Home/Computer Science/Endianness.md": "bb8357d1c9d1d89a0f5e64149b8ed911b1f08a544dc6ab16fb02ee43171cd40b",
+        "Vault/Home/Computer Science/Memory Hierarchy.md": "e36504228c688b0992af1f3abd893e2af4bebcb033d9de5ccbff8fdd505359f3"
+      }
     }
   },
   "feedback": {
@@ -17288,627 +17643,7 @@
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
     }
   },
-  "pending_operation": {
-    "op_id": "b10487f268d742ba",
-    "topic": "computer-science-445ddaa5",
-    "generation": 2,
-    "branch": "notes/automated-computer-science-445ddaa5-g2",
-    "parent_head": "fba0b54bbf3ab5a6699ba2a017e2f2e23fe559ba",
-    "base_head": "fba0b54bbf3ab5a6699ba2a017e2f2e23fe559ba",
-    "source_hashes": {
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "8e1e41ded11fbc79e3792a3a591ae72086f721202b7cb76bec0640843f860c2a"
-    },
-    "candidate_hashes": {
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "ac902ffee37fa24d77fc6b65a5429a781dafa4f4b216cf6f58eae92b33fcdaa7"
-    },
-    "candidate": {
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"4\"]\nstatus: Creation\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-08T22:19:50.758Z\"\npublished: \"2026-07-08T13:14:17.334Z\"\n---\n\nGraph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Diagram\n\n```mermaid\nflowchart TD\n  A[Graph problem] --> B{Need reachability or levels}\n  B -->|Yes| C[DFS BFS]\n  B -->|No| D{Need minimum path cost}\n  D -->|Yes with non negative weights| E{Have a heuristic to the target}\n  E -->|Yes| E1[A Star Search]\n  E -->|No| E2[Dijkstra]\n  D -->|Can have negative edges| F[Bellman Ford]\n  D -->|Need all pairs shortest paths| G[Floyd Warshall]\n  A --> H{Need structure not distance}\n  H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]\n  H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]\n  H -->|Single points of failure| K[Articulation Points and Bridges]\n  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n  H -->|Throughput through a capacitated network| L[Maximum Flow]\n```\n\n# Algorithm Selection\n\n## Shortest Path\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|DFS]] | Traversal, cycle detection, finish-order primitives | O(V + E) | General graphs. Topological order still requires a DAG |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra\\|Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search\\|A* Search]] | Point-to-point shortest path | O((V + E) log E) with a consistent heuristic and lazy heap. Reopenings make runtime re-expansion-dependent | Non-negative weights. Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search\\|Greedy Best-First Search]] | Fast point-to-point path, not necessarily optimal | O((V + E) log E) with a lazy heap | Heuristic only. Sacrifices optimality for speed |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search\\|Bidirectional Search]] | Point-to-point shortest path | About O(b^(d/2)) rather than O(b^d) in the ideal state-space model | Target known. Backward search must be available |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford\\|Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges. Detects reachable negative cycles |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall\\|Floyd-Warshall]] | All-pairs shortest path | Θ(V³) time, Θ(V²) space | Small or dense graphs. Detects negative cycles |\n\n## Structure and Connectivity\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\\|Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort\\|Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\\|Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Connected Components\\|Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges\\|Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow\\|Maximum Flow]] | Max s–t throughput. Min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |\n\n> [!NOTE]\n> Not every graph problem admits a polynomial-time algorithm. [[Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle|Hamiltonian Cycle]] asks for a cycle that visits every vertex exactly once and is **NP-complete**. No polynomial-time algorithm is known. Exact methods take exponential time in the worst case.\n\n# References\n\n- [Graph algorithms](https://algs4.cs.princeton.edu/40graphs/)\n"
-    },
-    "feedback_revision": {
-      "allowlist": [
-        "45916288:grafanaKibana"
-      ],
-      "processed": {}
-    },
-    "edits": [
-      {
-        "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-        "feedback_keys": []
-      }
-    ],
-    "pending_feedback": [],
-    "pr_number": null,
-    "prior_pr_draft": null,
-    "prior_review_decision": null,
-    "prior_pr_head": null,
-    "title": "notes: improve Computer Science",
-    "body": "<!-- devbook-improvement:start topic=computer-science-445ddaa5 -->\n## 1. Note improvements\n\nReviewed 9 notes in Computer Science; improved 1. Calls: 20; elapsed: 652 seconds; stop: repair_pending.\n\n- [`Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-computer-science-445ddaa5-g2/Vault/Home/Computer%20Science/Algorithms/Graph%20Algorithms/Graph%20Algorithms.md) — The decision diagram omits Topological Sort although the structure tables list it as a distinct answer to a dependency-order requirement. Adds the Topological Sort note, listed in the selection table, to the decision diagram so every structure-oriented outcome has a route. The diagram now covers dependency ordering, so it matches the tables below it.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz export: awaiting the source-bound native export and checks.\n<!-- devbook-improvement:end -->\n\n<!-- devbook-improvement:topic=computer-science-445ddaa5;generation=2 -->\n",
-    "commit_message": "notes: improve computer-science-445ddaa5 [b10487f268d742ba]",
-    "receipts": {
-      "version": 2,
-      "workload_id": "b10487f268d742babc49b59ab87ef167",
-      "records": [
-        {
-          "record_id": "aaf5f9e588714a7f25da7005cbff7c7167973b808499a5ad323475efa8bedfbd",
-          "workload_id": "b10487f268d742babc49b59ab87ef167",
-          "batch": {
-            "topic": "Computer Science",
-            "topic_id": "computer-science-445ddaa5",
-            "notes": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"4\"]\nstatus: Creation\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.334Z\"\n---\n\nGraph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Diagram\n\n```mermaid\nflowchart TD\n  A[Graph problem] --> B{Need reachability or levels}\n  B -->|Yes| C[DFS BFS]\n  B -->|No| D{Need minimum path cost}\n  D -->|Yes with non negative weights| E{Have a heuristic to the target}\n  E -->|Yes| E1[A Star Search]\n  E -->|No| E2[Dijkstra]\n  D -->|Can have negative edges| F[Bellman Ford]\n  D -->|Need all pairs shortest paths| G[Floyd Warshall]\n  A --> H{Need structure not distance}\n  H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]\n  H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]\n  H -->|Single points of failure| K[Articulation Points and Bridges]\n  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Throughput through a capacitated network| L[Maximum Flow]\n```\n\n# Algorithm Selection\n\n## Shortest Path\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|DFS]] | Traversal, cycle detection, finish-order primitives | O(V + E) | General graphs. Topological order still requires a DAG |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra\\|Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search\\|A* Search]] | Point-to-point shortest path | O((V + E) log E) with a consistent heuristic and lazy heap. Reopenings make runtime re-expansion-dependent | Non-negative weights. Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search\\|Greedy Best-First Search]] | Fast point-to-point path, not necessarily optimal | O((V + E) log E) with a lazy heap | Heuristic only. Sacrifices optimality for speed |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search\\|Bidirectional Search]] | Point-to-point shortest path | About O(b^(d/2)) rather than O(b^d) in the ideal state-space model | Target known. Backward search must be available |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford\\|Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges. Detects reachable negative cycles |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall\\|Floyd-Warshall]] | All-pairs shortest path | Θ(V³) time, Θ(V²) space | Small or dense graphs. Detects negative cycles |\n\n## Structure and Connectivity\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\\|Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort\\|Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\\|Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Connected Components\\|Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges\\|Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow\\|Maximum Flow]] | Max s–t throughput. Min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |\n\n> [!NOTE]\n> Not every graph problem admits a polynomial-time algorithm. [[Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle|Hamiltonian Cycle]] asks for a cycle that visits every vertex exactly once and is **NP-complete**. No polynomial-time algorithm is known. Exact methods take exponential time in the worst case.\n\n# References\n\n- [Graph algorithms](https://algs4.cs.princeton.edu/40graphs/)\n",
-                "hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
-                "topic": "Computer Science",
-                "violations": [],
-                "needs_fixing_ids": [],
-                "repair_input_hash": "",
-                "selection_reason": "new"
-              }
-            ],
-            "feedback": [],
-            "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-            "review_process": "focused-whole-note-v1",
-            "pr": null
-          },
-          "proposal": {
-            "version": 1,
-            "edits": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "expected_hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
-                "before": "  H -->|Clusters in an undirected graph| M[Connected Components]\n",
-                "after": "  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n",
-                "reason": "Adds the Topological Sort note, listed in the selection table, to the decision diagram so every structure-oriented outcome has a route.",
-                "kind": "note",
-                "learning_target": "same",
-                "essential_meanings": [
-                  "Topological Sort is the choice for dependency ordering in a directed acyclic graph"
-                ],
-                "sources": [],
-                "feedback_keys": [],
-                "problem": "The decision diagram omits Topological Sort although the structure tables list it as a distinct answer to a dependency-order requirement.",
-                "reader_benefit": "The diagram now covers dependency ordering, so it matches the tables below it."
-              }
-            ],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "outcome": "changed",
-                "reason": "Audited the opening, diagram, both tables, the NP-complete note and the reference. The complexities (BFS/DFS O(V+E), Dijkstra O((V+E) log V), Bellman-Ford O(VE), Floyd-Warshall Θ(V³), Edmonds-Karp O(VE²)), the A* consistency caveat and the Hamiltonian cycle claim are standard and correct. The one gap was that the diagram had no Topological Sort route, though the tables list it. The edit adds that route and leaves the rest unchanged."
-              }
-            ],
-            "feedback": []
-          },
-          "result": {
-            "sources": {
-              "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"4\"]\nstatus: Creation\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-08T22:19:50.758Z\"\npublished: \"2026-07-08T13:14:17.334Z\"\n---\n\nGraph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Diagram\n\n```mermaid\nflowchart TD\n  A[Graph problem] --> B{Need reachability or levels}\n  B -->|Yes| C[DFS BFS]\n  B -->|No| D{Need minimum path cost}\n  D -->|Yes with non negative weights| E{Have a heuristic to the target}\n  E -->|Yes| E1[A Star Search]\n  E -->|No| E2[Dijkstra]\n  D -->|Can have negative edges| F[Bellman Ford]\n  D -->|Need all pairs shortest paths| G[Floyd Warshall]\n  A --> H{Need structure not distance}\n  H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]\n  H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]\n  H -->|Single points of failure| K[Articulation Points and Bridges]\n  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n  H -->|Throughput through a capacitated network| L[Maximum Flow]\n```\n\n# Algorithm Selection\n\n## Shortest Path\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|DFS]] | Traversal, cycle detection, finish-order primitives | O(V + E) | General graphs. Topological order still requires a DAG |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra\\|Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search\\|A* Search]] | Point-to-point shortest path | O((V + E) log E) with a consistent heuristic and lazy heap. Reopenings make runtime re-expansion-dependent | Non-negative weights. Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search\\|Greedy Best-First Search]] | Fast point-to-point path, not necessarily optimal | O((V + E) log E) with a lazy heap | Heuristic only. Sacrifices optimality for speed |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search\\|Bidirectional Search]] | Point-to-point shortest path | About O(b^(d/2)) rather than O(b^d) in the ideal state-space model | Target known. Backward search must be available |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford\\|Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges. Detects reachable negative cycles |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall\\|Floyd-Warshall]] | All-pairs shortest path | Θ(V³) time, Θ(V²) space | Small or dense graphs. Detects negative cycles |\n\n## Structure and Connectivity\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\\|Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort\\|Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\\|Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Connected Components\\|Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges\\|Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow\\|Maximum Flow]] | Max s–t throughput. Min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |\n\n> [!NOTE]\n> Not every graph problem admits a polynomial-time algorithm. [[Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle|Hamiltonian Cycle]] asks for a cycle that visits every vertex exactly once and is **NP-complete**. No polynomial-time algorithm is known. Exact methods take exponential time in the worst case.\n\n# References\n\n- [Graph algorithms](https://algs4.cs.princeton.edu/40graphs/)\n"
-            },
-            "edits": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "expected_hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
-                "before": "  H -->|Clusters in an undirected graph| M[Connected Components]\n",
-                "after": "  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n",
-                "reason": "Adds the Topological Sort note, listed in the selection table, to the decision diagram so every structure-oriented outcome has a route.",
-                "kind": "note",
-                "learning_target": "same",
-                "essential_meanings": [
-                  "Topological Sort is the choice for dependency ordering in a directed acyclic graph"
-                ],
-                "sources": [],
-                "feedback_keys": [],
-                "problem": "The decision diagram omits Topological Sort although the structure tables list it as a distinct answer to a dependency-order requirement.",
-                "reader_benefit": "The diagram now covers dependency ordering, so it matches the tables below it."
-              }
-            ],
-            "retired_ids": [],
-            "lineage": [],
-            "fingerprints": [
-              "30adda22600ad8750397ecbbfb9ef9b6a30416e17a44afcf12e6867bbed4c6a6"
-            ]
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "verdict": "CLEAN",
-                "summary": "The whole folder note was read. The single edit closes a real gap: the decision diagram had no route to Topological Sort, although the tables list it. The edit is small, accurate and consistent with the rest of the note.",
-                "page_type": "FolderNote — keeps tags: [FolderNote] and the Datacore folder-map block. No Questions section, which is optional. One reference, which is a real and relevant primary source.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The required output comes first. Direction, weight semantics, and input density then narrow the valid choices.",
-                    "line_start": 15,
-                    "reason": "The opening states the selection logic and the BFS versus Dijkstra boundary directly, so no change is needed."
-                  },
-                  {
-                    "quote": "H -->|Dependency order in a DAG| N[Topological Sort]",
-                    "line_start": 39,
-                    "reason": "The new diagram route makes the diagram agree with the structure table. The DAG condition is stated correctly."
-                  },
-                  {
-                    "quote": "| Linear order respecting dependencies | O(V + E) | Directed acyclic graph |",
-                    "line_start": 63,
-                    "reason": "The table row confirms Topological Sort is a distinct outcome, so the diagram gap was real. Complexity and constraint are correct."
-                  },
-                  {
-                    "quote": "Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings",
-                    "line_start": 52,
-                    "reason": "The A* caveat is accurate. The Dijkstra, Bellman-Ford, Floyd-Warshall and Edmonds-Karp complexities are also standard and correct."
-                  }
-                ],
-                "target_resolution": "RESOLVED",
-                "split_suggestion": "No split: the note is a compact hub whose diagram and tables serve one purpose, choosing a graph algorithm. The per-algorithm notes already exist.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The note is accurate and clear. The one edit fixes a real diagram omission without changing meaning, and frontmatter and fences are intact.",
-            "change_checks": [
-              {
-                "edit_index": 0,
-                "verdict": "WORTHWHILE",
-                "reason": "Topological Sort was in the selection table but missing from the decision diagram. The added route covers that gap with the correct DAG condition and does not change any other content."
-              }
-            ]
-          },
-          "decisions": [],
-          "review_evidence": {
-            "raw_review": {
-              "verdict": "CLEAN",
-              "notes": [
-                {
-                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                  "verdict": "CLEAN",
-                  "summary": "The whole folder note was read. The single edit closes a real gap: the decision diagram had no route to Topological Sort, although the tables list it. The edit is small, accurate and consistent with the rest of the note.",
-                  "page_type": "FolderNote — keeps tags: [FolderNote] and the Datacore folder-map block. No Questions section, which is optional. One reference, which is a real and relevant primary source.",
-                  "current_text_evidence": [
-                    {
-                      "quote": "The required output comes first. Direction, weight semantics, and input density then narrow the valid choices.",
-                      "line_start": 15,
-                      "reason": "The opening states the selection logic and the BFS versus Dijkstra boundary directly, so no change is needed."
-                    },
-                    {
-                      "quote": "H -->|Dependency order in a DAG| N[Topological Sort]",
-                      "line_start": 39,
-                      "reason": "The new diagram route makes the diagram agree with the structure table. The DAG condition is stated correctly."
-                    },
-                    {
-                      "quote": "| Linear order respecting dependencies | O(V + E) | Directed acyclic graph |",
-                      "line_start": 64,
-                      "reason": "The table row confirms Topological Sort is a distinct outcome, so the diagram gap was real. Complexity and constraint are correct."
-                    },
-                    {
-                      "quote": "Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings",
-                      "line_start": 53,
-                      "reason": "The A* caveat is accurate. The Dijkstra, Bellman-Ford, Floyd-Warshall and Edmonds-Karp complexities are also standard and correct."
-                    }
-                  ],
-                  "target_resolution": "RESOLVED",
-                  "split_suggestion": "No split: the note is a compact hub whose diagram and tables serve one purpose, choosing a graph algorithm. The per-algorithm notes already exist.",
-                  "findings": [],
-                  "source_checks": [],
-                  "rejection_equivalence": [],
-                  "quality": {
-                    "accuracy": "PASS",
-                    "clarity": "PASS",
-                    "question_quality": "NOT APPLICABLE",
-                    "identity_safety": "NOT APPLICABLE",
-                    "rules_compliance": "PASS"
-                  }
-                }
-              ],
-              "overall_reason": "The note is accurate and clear. The one edit fixes a real diagram omission without changing meaning, and frontmatter and fences are intact.",
-              "change_checks": [
-                {
-                  "edit_index": 0,
-                  "verdict": "WORTHWHILE",
-                  "reason": "Topological Sort was in the selection table but missing from the decision diagram. The added route covers that gap with the correct DAG condition and does not change any other content."
-                }
-              ]
-            },
-            "bindings": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "citation_index": 2,
-                "reported_line_start": 64,
-                "resolved_line_start": 63
-              },
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "citation_index": 3,
-                "reported_line_start": 53,
-                "resolved_line_start": 52
-              }
-            ],
-            "source_hashes": {
-              "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "ea680c126da74e3cb0f890a926c2f52ae7eaebc437b6f7d1e7f098af5021b270"
-            },
-            "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-          },
-          "source_hashes": {
-            "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877"
-          },
-          "prepared_source_version": 1,
-          "prepared_at": "2026-11-08T22:19:50.758851Z",
-          "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-          "calls_reserved": 6,
-          "elapsed_seconds": 221.44617210000004,
-          "accepted_at": "2026-11-08T22:21:02.719976Z",
-          "phase": "accepted"
-        }
-      ],
-      "proposal_history": [
-        {
-          "record_id": "aaf5f9e588714a7f25da7005cbff7c7167973b808499a5ad323475efa8bedfbd",
-          "workload_id": "b10487f268d742babc49b59ab87ef167",
-          "batch": {
-            "topic": "Computer Science",
-            "topic_id": "computer-science-445ddaa5",
-            "notes": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"4\"]\nstatus: Creation\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.334Z\"\n---\n\nGraph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Diagram\n\n```mermaid\nflowchart TD\n  A[Graph problem] --> B{Need reachability or levels}\n  B -->|Yes| C[DFS BFS]\n  B -->|No| D{Need minimum path cost}\n  D -->|Yes with non negative weights| E{Have a heuristic to the target}\n  E -->|Yes| E1[A Star Search]\n  E -->|No| E2[Dijkstra]\n  D -->|Can have negative edges| F[Bellman Ford]\n  D -->|Need all pairs shortest paths| G[Floyd Warshall]\n  A --> H{Need structure not distance}\n  H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]\n  H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]\n  H -->|Single points of failure| K[Articulation Points and Bridges]\n  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Throughput through a capacitated network| L[Maximum Flow]\n```\n\n# Algorithm Selection\n\n## Shortest Path\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|DFS]] | Traversal, cycle detection, finish-order primitives | O(V + E) | General graphs. Topological order still requires a DAG |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra\\|Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search\\|A* Search]] | Point-to-point shortest path | O((V + E) log E) with a consistent heuristic and lazy heap. Reopenings make runtime re-expansion-dependent | Non-negative weights. Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search\\|Greedy Best-First Search]] | Fast point-to-point path, not necessarily optimal | O((V + E) log E) with a lazy heap | Heuristic only. Sacrifices optimality for speed |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search\\|Bidirectional Search]] | Point-to-point shortest path | About O(b^(d/2)) rather than O(b^d) in the ideal state-space model | Target known. Backward search must be available |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford\\|Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges. Detects reachable negative cycles |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall\\|Floyd-Warshall]] | All-pairs shortest path | Θ(V³) time, Θ(V²) space | Small or dense graphs. Detects negative cycles |\n\n## Structure and Connectivity\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\\|Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort\\|Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\\|Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Connected Components\\|Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges\\|Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow\\|Maximum Flow]] | Max s–t throughput. Min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |\n\n> [!NOTE]\n> Not every graph problem admits a polynomial-time algorithm. [[Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle|Hamiltonian Cycle]] asks for a cycle that visits every vertex exactly once and is **NP-complete**. No polynomial-time algorithm is known. Exact methods take exponential time in the worst case.\n\n# References\n\n- [Graph algorithms](https://algs4.cs.princeton.edu/40graphs/)\n",
-                "hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
-                "topic": "Computer Science",
-                "violations": [],
-                "needs_fixing_ids": [],
-                "repair_input_hash": "",
-                "selection_reason": "new"
-              }
-            ],
-            "feedback": [],
-            "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-            "review_process": "focused-whole-note-v1",
-            "pr": null
-          },
-          "proposal": {
-            "version": 1,
-            "edits": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "expected_hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
-                "before": "  H -->|Clusters in an undirected graph| M[Connected Components]\n",
-                "after": "  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n",
-                "reason": "Adds the Topological Sort note, listed in the selection table, to the decision diagram so every structure-oriented outcome has a route.",
-                "kind": "note",
-                "learning_target": "same",
-                "essential_meanings": [
-                  "Topological Sort is the choice for dependency ordering in a directed acyclic graph"
-                ],
-                "sources": [],
-                "feedback_keys": [],
-                "problem": "The decision diagram omits Topological Sort although the structure tables list it as a distinct answer to a dependency-order requirement.",
-                "reader_benefit": "The diagram now covers dependency ordering, so it matches the tables below it."
-              }
-            ],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "outcome": "changed",
-                "reason": "Audited the opening, diagram, both tables, the NP-complete note and the reference. The complexities (BFS/DFS O(V+E), Dijkstra O((V+E) log V), Bellman-Ford O(VE), Floyd-Warshall Θ(V³), Edmonds-Karp O(VE²)), the A* consistency caveat and the Hamiltonian cycle claim are standard and correct. The one gap was that the diagram had no Topological Sort route, though the tables list it. The edit adds that route and leaves the rest unchanged."
-              }
-            ],
-            "feedback": []
-          },
-          "result": {
-            "sources": {
-              "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"4\"]\nstatus: Creation\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-08T22:19:50.758Z\"\npublished: \"2026-07-08T13:14:17.334Z\"\n---\n\nGraph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Diagram\n\n```mermaid\nflowchart TD\n  A[Graph problem] --> B{Need reachability or levels}\n  B -->|Yes| C[DFS BFS]\n  B -->|No| D{Need minimum path cost}\n  D -->|Yes with non negative weights| E{Have a heuristic to the target}\n  E -->|Yes| E1[A Star Search]\n  E -->|No| E2[Dijkstra]\n  D -->|Can have negative edges| F[Bellman Ford]\n  D -->|Need all pairs shortest paths| G[Floyd Warshall]\n  A --> H{Need structure not distance}\n  H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]\n  H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]\n  H -->|Single points of failure| K[Articulation Points and Bridges]\n  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n  H -->|Throughput through a capacitated network| L[Maximum Flow]\n```\n\n# Algorithm Selection\n\n## Shortest Path\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|DFS]] | Traversal, cycle detection, finish-order primitives | O(V + E) | General graphs. Topological order still requires a DAG |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra\\|Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search\\|A* Search]] | Point-to-point shortest path | O((V + E) log E) with a consistent heuristic and lazy heap. Reopenings make runtime re-expansion-dependent | Non-negative weights. Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search\\|Greedy Best-First Search]] | Fast point-to-point path, not necessarily optimal | O((V + E) log E) with a lazy heap | Heuristic only. Sacrifices optimality for speed |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search\\|Bidirectional Search]] | Point-to-point shortest path | About O(b^(d/2)) rather than O(b^d) in the ideal state-space model | Target known. Backward search must be available |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford\\|Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges. Detects reachable negative cycles |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall\\|Floyd-Warshall]] | All-pairs shortest path | Θ(V³) time, Θ(V²) space | Small or dense graphs. Detects negative cycles |\n\n## Structure and Connectivity\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\\|Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort\\|Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\\|Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Connected Components\\|Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges\\|Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow\\|Maximum Flow]] | Max s–t throughput. Min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |\n\n> [!NOTE]\n> Not every graph problem admits a polynomial-time algorithm. [[Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle|Hamiltonian Cycle]] asks for a cycle that visits every vertex exactly once and is **NP-complete**. No polynomial-time algorithm is known. Exact methods take exponential time in the worst case.\n\n# References\n\n- [Graph algorithms](https://algs4.cs.princeton.edu/40graphs/)\n"
-            },
-            "edits": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "expected_hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
-                "before": "  H -->|Clusters in an undirected graph| M[Connected Components]\n",
-                "after": "  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n",
-                "reason": "Adds the Topological Sort note, listed in the selection table, to the decision diagram so every structure-oriented outcome has a route.",
-                "kind": "note",
-                "learning_target": "same",
-                "essential_meanings": [
-                  "Topological Sort is the choice for dependency ordering in a directed acyclic graph"
-                ],
-                "sources": [],
-                "feedback_keys": [],
-                "problem": "The decision diagram omits Topological Sort although the structure tables list it as a distinct answer to a dependency-order requirement.",
-                "reader_benefit": "The diagram now covers dependency ordering, so it matches the tables below it."
-              }
-            ],
-            "retired_ids": [],
-            "lineage": [],
-            "fingerprints": [
-              "30adda22600ad8750397ecbbfb9ef9b6a30416e17a44afcf12e6867bbed4c6a6"
-            ]
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "verdict": "CLEAN",
-                "summary": "The whole folder note was read. The single edit closes a real gap: the decision diagram had no route to Topological Sort, although the tables list it. The edit is small, accurate and consistent with the rest of the note.",
-                "page_type": "FolderNote — keeps tags: [FolderNote] and the Datacore folder-map block. No Questions section, which is optional. One reference, which is a real and relevant primary source.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The required output comes first. Direction, weight semantics, and input density then narrow the valid choices.",
-                    "line_start": 15,
-                    "reason": "The opening states the selection logic and the BFS versus Dijkstra boundary directly, so no change is needed."
-                  },
-                  {
-                    "quote": "H -->|Dependency order in a DAG| N[Topological Sort]",
-                    "line_start": 39,
-                    "reason": "The new diagram route makes the diagram agree with the structure table. The DAG condition is stated correctly."
-                  },
-                  {
-                    "quote": "| Linear order respecting dependencies | O(V + E) | Directed acyclic graph |",
-                    "line_start": 63,
-                    "reason": "The table row confirms Topological Sort is a distinct outcome, so the diagram gap was real. Complexity and constraint are correct."
-                  },
-                  {
-                    "quote": "Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings",
-                    "line_start": 52,
-                    "reason": "The A* caveat is accurate. The Dijkstra, Bellman-Ford, Floyd-Warshall and Edmonds-Karp complexities are also standard and correct."
-                  }
-                ],
-                "target_resolution": "RESOLVED",
-                "split_suggestion": "No split: the note is a compact hub whose diagram and tables serve one purpose, choosing a graph algorithm. The per-algorithm notes already exist.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The note is accurate and clear. The one edit fixes a real diagram omission without changing meaning, and frontmatter and fences are intact.",
-            "change_checks": [
-              {
-                "edit_index": 0,
-                "verdict": "WORTHWHILE",
-                "reason": "Topological Sort was in the selection table but missing from the decision diagram. The added route covers that gap with the correct DAG condition and does not change any other content."
-              }
-            ]
-          },
-          "decisions": [],
-          "review_evidence": {
-            "raw_review": {
-              "verdict": "CLEAN",
-              "notes": [
-                {
-                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                  "verdict": "CLEAN",
-                  "summary": "The whole folder note was read. The single edit closes a real gap: the decision diagram had no route to Topological Sort, although the tables list it. The edit is small, accurate and consistent with the rest of the note.",
-                  "page_type": "FolderNote — keeps tags: [FolderNote] and the Datacore folder-map block. No Questions section, which is optional. One reference, which is a real and relevant primary source.",
-                  "current_text_evidence": [
-                    {
-                      "quote": "The required output comes first. Direction, weight semantics, and input density then narrow the valid choices.",
-                      "line_start": 15,
-                      "reason": "The opening states the selection logic and the BFS versus Dijkstra boundary directly, so no change is needed."
-                    },
-                    {
-                      "quote": "H -->|Dependency order in a DAG| N[Topological Sort]",
-                      "line_start": 39,
-                      "reason": "The new diagram route makes the diagram agree with the structure table. The DAG condition is stated correctly."
-                    },
-                    {
-                      "quote": "| Linear order respecting dependencies | O(V + E) | Directed acyclic graph |",
-                      "line_start": 64,
-                      "reason": "The table row confirms Topological Sort is a distinct outcome, so the diagram gap was real. Complexity and constraint are correct."
-                    },
-                    {
-                      "quote": "Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings",
-                      "line_start": 53,
-                      "reason": "The A* caveat is accurate. The Dijkstra, Bellman-Ford, Floyd-Warshall and Edmonds-Karp complexities are also standard and correct."
-                    }
-                  ],
-                  "target_resolution": "RESOLVED",
-                  "split_suggestion": "No split: the note is a compact hub whose diagram and tables serve one purpose, choosing a graph algorithm. The per-algorithm notes already exist.",
-                  "findings": [],
-                  "source_checks": [],
-                  "rejection_equivalence": [],
-                  "quality": {
-                    "accuracy": "PASS",
-                    "clarity": "PASS",
-                    "question_quality": "NOT APPLICABLE",
-                    "identity_safety": "NOT APPLICABLE",
-                    "rules_compliance": "PASS"
-                  }
-                }
-              ],
-              "overall_reason": "The note is accurate and clear. The one edit fixes a real diagram omission without changing meaning, and frontmatter and fences are intact.",
-              "change_checks": [
-                {
-                  "edit_index": 0,
-                  "verdict": "WORTHWHILE",
-                  "reason": "Topological Sort was in the selection table but missing from the decision diagram. The added route covers that gap with the correct DAG condition and does not change any other content."
-                }
-              ]
-            },
-            "bindings": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "citation_index": 2,
-                "reported_line_start": 64,
-                "resolved_line_start": 63
-              },
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "citation_index": 3,
-                "reported_line_start": 53,
-                "resolved_line_start": 52
-              }
-            ],
-            "source_hashes": {
-              "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "ea680c126da74e3cb0f890a926c2f52ae7eaebc437b6f7d1e7f098af5021b270"
-            },
-            "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-          },
-          "source_hashes": {
-            "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877"
-          },
-          "prepared_source_version": 1,
-          "prepared_at": "2026-11-08T22:19:50.758851Z",
-          "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-          "calls_reserved": 6,
-          "elapsed_seconds": 221.44617210000004,
-          "accepted_at": "2026-11-08T22:21:02.719976Z",
-          "phase": "accepted"
-        }
-      ],
-      "topic_id": "computer-science-445ddaa5",
-      "generation": 2,
-      "base_note_hashes": {
-        "Vault/Home/Computer Science/Algorithms/Algorithms.md": "5163fe3a84feec771d86cedc762044b7c206fa4b6d0708e765612a6cb30488dd",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search.md": "2ae5db4bf03be72d4c8c79a0819cd8299000f3009868ab2d817900add3736b84",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md": "08d3bd6c8859e7a90c072c99b98912c3c1bda8ef1e75bfea1fae34cb195b5cc0",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford.md": "c6ea5edaca05324a41263bc4d8f4ff43ac1cdf6748f960d451acf71d331935e3",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search.md": "42d9349b9faf85cdbcd1febdb23e9e0aa11810b7b0f5a3f0f01370be9afdf5cf",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm.md": "6f493d4bbca79de66acab191f048c69a862098332f3d48036bc7397c58f64a60",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Connected Components.md": "62d81a578792e5ffea46d7756d69d02f85a6f2ab31028954e190a9bf86681d48",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS.md": "935cd60e736e0f50906e064226682fb2e0d99381116e957d20d47edccb8a8dc7",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra.md": "237959f2359c188b999e1ed9dfa02d7825487478fd95a2546b639c32906df2d5",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md": "9430128d291a6bf0daf0ff202eb2f04cb4ce2da0110e7ef4d58d8f96cf39c8c2",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md": "537e1d20b4286336eb139cfb1e50625657eaa454bd1a5e7349de3ba8615a3351",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search.md": "d832ac132dc705758a2d67460bbc6e13faa682231e3b1a97284b0e85c11cde52",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md": "d9eecd2071422c9e7129bff2c28e14c56ed9dba1ea30cd4e6f7787d916b9cc4b",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Kruskal's Algorithm.md": "36aeb05c22d405ecc7ab701099ae8bf65a60257add2a63a1bd22bf20e562b61d",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow.md": "39a2218ec050410f01974d0be830067653425fdf618c761e944aff200c01b1a3",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md": "a87194c58bf9ac47fa3b31a9c5424b6bd5731959cfe34ac2da5508e8c0f1e010",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components.md": "cda9a01ed3198232d349b07d2f7c036429334dea953866d7825302471874fe3d",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f",
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md": "f483d1a0be190e494ef34d38154b09718caec4ff0a44a4b9ed8679181eefe5fd",
-        "Vault/Home/Computer Science/Algorithms/Paradigms/Backtracking.md": "18efb18d07b562e6c1e9c88016f30556792e525842bebfc6658b1305354af823",
-        "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md": "c1718904068141d95d8e53cf74adcf148bce2182906bc4b4446ba06871063da6",
-        "Vault/Home/Computer Science/Algorithms/Paradigms/Divide and Conquer.md": "1e0903dbf937ff52293a4e1200782e3a678956accb2842737f845be30fa6a42f",
-        "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md": "1e4111756d04701fff53a49358eae8e0689efd63f765392a2b601cf67d529861",
-        "Vault/Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms.md": "998e60a3238dcbd3e7cf0637302779a35d455230c864193cb3d2c7d1d67b25d2",
-        "Vault/Home/Computer Science/Algorithms/Paradigms/Memoization.md": "5a1c1005a4fe8538fc27f1068b0ec2b0d030b80dd44a224e04e2953142bbf529",
-        "Vault/Home/Computer Science/Algorithms/Paradigms/Paradigms.md": "79593eb78131be6b3d728f9d866226926898a65799582f106aff9a341c20f5d1",
-        "Vault/Home/Computer Science/Algorithms/Patterns/Binary Search on Answer.md": "e35a8f64e2ad521ed218da8cf777226d8fe921a925cbc9996acbc3c8180a6da8",
-        "Vault/Home/Computer Science/Algorithms/Patterns/Bit Manipulation.md": "71f502b984bd84fc3b795fc39d96d56ba09eed41e5d5fa0d1dd68650db9b6a59",
-        "Vault/Home/Computer Science/Algorithms/Patterns/Cyclic Sort.md": "afb1e0c7e6525a90cc9f4e0dd88aa7021a033b8ca24374a18c566256974b4c6e",
-        "Vault/Home/Computer Science/Algorithms/Patterns/Fast and Slow Pointers.md": "4e3eb6340536b05a3db8f65e3a8f5c936527880119c812caf022316a5d61eac5",
-        "Vault/Home/Computer Science/Algorithms/Patterns/Merge Intervals.md": "86904805c0875a44470140eacdd9f96a706d8b6ee9ad8972a5d4692a3fa1820c",
-        "Vault/Home/Computer Science/Algorithms/Patterns/Monotonic Stack and Queue.md": "3be19290ce40f679c0f2017e01862fd37d46b2362d1c1c04f05f171a2081419b",
-        "Vault/Home/Computer Science/Algorithms/Patterns/Patterns.md": "37d6fc7d3c8844b5df366fcf2b8eccf402f21aa8faf197af967473af028e54a8",
-        "Vault/Home/Computer Science/Algorithms/Patterns/Prefix Sum.md": "fbea209d2c30218cfc5976575fd21f3648b4b2f24d86762bae310f1db5a200d0",
-        "Vault/Home/Computer Science/Algorithms/Patterns/Sliding Window.md": "9710e06b1d9744225d1269b83c231d76891a6312d8c944540663cc6bc8f3ce6e",
-        "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md": "f336cca11768386972222e91e7c53ff4394e1c1e0d78ed814f30d59dc89fecb6",
-        "Vault/Home/Computer Science/Algorithms/Patterns/Two Heaps.md": "0ae4f645a1317bcd62af43b28d1fddba5ab47e2ee8ceed22cc16b3a4cdd2fa11",
-        "Vault/Home/Computer Science/Algorithms/Patterns/Two Pointers.md": "72239cb59d220c5a71c0ec4756b8c38aa42490eafeeafb6af1ec85c3573b7d32",
-        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Binary Search.md": "27b74b18853d4ef7ab8677e858e82eed5c18ebc4dac82b0568f120be8f1e0b6f",
-        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md": "f7ccc19ba2618f4126719f9bbf5874079fa50b57ed6178395b07bb249e384d8b",
-        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Fibonacci Search.md": "054b8100535063942f0cabe7ae432e5c09b6e53243d290e78d15cd72b362f115",
-        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md": "90d0f916880fa582f393dc4e24b6cc5d599c04784c94342843335d4f34dc11a4",
-        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Jump Search.md": "a27be8e47990d51b7d0d8163e6c5eab3573c395c68bed890de04172d27a752d8",
-        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Linear Search.md": "d1f3373be8a042fc999d8ea83e2df0a537969eee6ba99c9b19318f67dd13bc4f",
-        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Search Algorithms.md": "cc94f91479f90bf976d387f071bcc95aeaa8996000fb67ca9d708155c4550aae",
-        "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Aho-Corasick.md": "ccbc895ee68e1cc8fa523c7c459277e23548f4050c1cfb9a65c362ac9b938384",
-        "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Boyer-Moore.md": "d270d2151c2694e1eee65d3dd48fc3d7d68801819fe766c6d0032c44aec27459",
-        "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/KMP (Knuth-Morris-Pratt) Algorithm.md": "9629f4b72a439152dfb11adcdb6ec6e1e9dcdc39cddc37c38b784f3b8aaeb9a5",
-        "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Rabin Karp Search.md": "0b39ba28bea98cc2ee37a8d71e3414058865ac4170d8c5b9133eae8ccfacd091",
-        "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/String Matching.md": "2c48f5118b805efe73f679f334f77394a8ece0dc26b18093a83e88558922589f",
-        "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Z-Algorithm.md": "f374f00385292441aaae58d11e10ac6817fa2b2894e88f652c9575d5e44db0d9",
-        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Ternary Search.md": "e32ee97a2a69c26eb86f4e5262bcb601b354d5439c9765f54f12f7d3b1a28a24",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Bogo Sort.md": "3965c2cf9985483b5562b9b462e42bbb02dda2807c4f09daa446b7176697d3cb",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md": "a6562fca0889559eee793fd9e28981f87c35717e718b74490121fc766e32a3d9",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Bucket Sort.md": "0d0cc81934f192568d664c1699e0cb734d8e2f455a0cd5cf1bc96a4b3fdeaa27",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Cocktail Shaker Sort.md": "b85bed86438ed1efbdd207c73cc5823fb5b9f0b790d6911ef5c4e938962efeff",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Comb Sort.md": "a17b63003b277954c8e417a0af3845f6c4aaf111dfe3d4342336f06ba0173af4",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Counting Sort.md": "a3cf915df958589523f8c8f56420ba99346c354423140444be864aeee3129190",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Cycle Sort.md": "13c2a7780e9c1b6553525c8e1d55ad937d74b0d31f9181fd4df82919435a9e82",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Gnome Sort.md": "d0068152d3295cf5eab5cc4bd7579485b0fbeca56b69f3516f54c12fbb6c9856",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Heap Sort.md": "ca4a2b996c4784609e7c31b6e1077a98013b595cd18296fc577aa99ded028f79",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort.md": "fc55ef751706134a05b7304122c9a2796f9b489467a0e84e965087799cfda0e9",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Introsort.md": "7857ba2ca44dd08ed6ebace5ef19d3fa3dd9ce8805a66baa90ff14623de8e1ae",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Merge Sort.md": "d6559ffd523f69d4daa85641b365982ea090b15d67bc786ae9317b3daaed19c9",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Odd-Even Sort.md": "ae12f8228bf8e787720cd621bdae16e4b727d75c42e4825d636a30c2ab4ee390",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Pancake Sort.md": "3aed112d77c6ff06adf048c30bf55c35ff0829a4e9ffb7287ae137553a990387",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md": "ab0007f1ca6ed0addd3e2f8cabac2ccf374c3b1fb2439a9cfc3cf9c6530ae1bf",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Radix Sort.md": "cba41f1187cb15c560707d7a6c90c471f5a4322ec07fe2ae4fe6efa38725bd31",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Selection Sort.md": "72dc6b8b874facf79da7f170747384af443853eb49e33a19c6e78d60c4a377d7",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Shell Sort.md": "046f377c9fbbb90f6ef8227c2e47a7c9e422cb00400f68ec58f5f994f95fcb65",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md": "fd442e92b0b2686d226907295bc49675db2feb1ee787d581487772a34ab00991",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Stooge Sort.md": "dbc395874bf7fddb5eac4e15d1a2368557a807e0960f8ace77232972e2aa136a",
-        "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Tim Sort.md": "a2283142febaa59a554d9e78f4c51f49a7413b973493c5254615672338574237",
-        "Vault/Home/Computer Science/Big O Notation.md": "9d62e10caedf139d104ae63662a67921e7d79452f341fc8d7c602740013b386b",
-        "Vault/Home/Computer Science/Computer Science.md": "f0fd5b39cf52ea29505c50cc5cb48fa3f291536f5f945326c7da2a0cf6180366",
-        "Vault/Home/Computer Science/Data Structures/Composite Structures/Composite Structures.md": "c48afce0d15ba83846302e03f4ffaf97065a7a57ef47178c5e4478ef86e4f353",
-        "Vault/Home/Computer Science/Data Structures/Composite Structures/LRU Cache.md": "5ef060dfd2b783ece03efa9c3e831ed39f8972eea0db4ae7187222140bf8aba4",
-        "Vault/Home/Computer Science/Data Structures/Data Structures.md": "267c3c0866b2c926c95f53aff4cf01dc7aa18c8ce40e1ff6a827661e03d05091",
-        "Vault/Home/Computer Science/Data Structures/Geohash.md": "fb4a86d8df3bff5b66b5dc7f6b6f979963357c0c413edcd4e7cb8f722db0e545",
-        "Vault/Home/Computer Science/Data Structures/Graph Structures/Disjoint Set.md": "93beb12ec774d16acf3ddc926dd5e4f2e4e88dcdd9e472049c89b2b3ef8060cd",
-        "Vault/Home/Computer Science/Data Structures/Graph Structures/Graph Structures.md": "f0a45b2c29ba8293026c2bd725ce5085998d23332dcd77863c5dfad33fa0397a",
-        "Vault/Home/Computer Science/Data Structures/Graph Structures/Graph.md": "c28b705587856a40087463b220811660a7b59307efc8d6a607752ad8a05317a2",
-        "Vault/Home/Computer Science/Data Structures/Graph Structures/Union-Find.md": "be74fbc733d69aa20cf1bda6c41d071914870a09145ea91d41dc70e313a5d5a9",
-        "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Bloom Filter.md": "5b385e8fa148d648daebff6d7d45d1bea8606160efc8663577805af1591416eb",
-        "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Collision Resolution.md": "f11d164865ba211356a0e66a37bb54be9e058bfcd7e93923bf9450c595d4a321",
-        "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Hash Set.md": "9953880306305b7ab01bf40372c479c4b503cac49fba53ddc33457af201b6bfe",
-        "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Hash-based Structures.md": "3dfcde25d4b2c609e3abaca7f8e7804f24d6180312831645bf6b6c31c31fbd74",
-        "Vault/Home/Computer Science/Data Structures/Hash-based Structures/HashMap.md": "9e6cdf1f1841adc50e581665fa3fcb0586636d88444026aa0f561e7cecafd2ce",
-        "Vault/Home/Computer Science/Data Structures/Linear Structures/Arrays.md": "29629811c24cc35831a8189dcdff9e531138c40c45a1a8f65c343bcb61c565b9",
-        "Vault/Home/Computer Science/Data Structures/Linear Structures/Circular Buffer.md": "4ee03493156036320917d34751dd9936cbd0919faea4e031c021a84504d14ebd",
-        "Vault/Home/Computer Science/Data Structures/Linear Structures/Deque.md": "7a8d40b58383036766272944b1735359eca5c5aa79f23399d94c212baa62fb9b",
-        "Vault/Home/Computer Science/Data Structures/Linear Structures/Dynamic Array.md": "bf99c504918dd47aee8e22059b48fcca4fb744f415b218833d92abde54136f0e",
-        "Vault/Home/Computer Science/Data Structures/Linear Structures/Linear Structures.md": "ed4c46a275ec4583f89bf854d4816cf0329e314c4dd3195ef3cb919fb6690a88",
-        "Vault/Home/Computer Science/Data Structures/Linear Structures/LinkedList.md": "a0d265fb87a6700af61e41cc36c535994182834ecc2607a23274a5f538b3c5b3",
-        "Vault/Home/Computer Science/Data Structures/Linear Structures/Queue.md": "57acf88c2d3db623a70aa2a24711c834627ab34491776da00bb2ef857dbf1c71",
-        "Vault/Home/Computer Science/Data Structures/Linear Structures/Span.md": "4d70ffc2a3b87907063b8149eb273ba7b5807706edb4ac7e40d161616f9c299a",
-        "Vault/Home/Computer Science/Data Structures/Linear Structures/Stack.md": "d1f9b287e406b5ec501b70f50bc75df3101bc62d2743a098ce535cb88da18911",
-        "Vault/Home/Computer Science/Data Structures/Trees/AVL Tree.md": "ac96fb5d31539e40fe9fead6c1d35496d88687ddf9803379bb539bca4e7e0e45",
-        "Vault/Home/Computer Science/Data Structures/Trees/B+ Tree.md": "84217d51ce3776cbafe33f2ac0ec05f56f2d14365679ee55ca106bb10e2fc107",
-        "Vault/Home/Computer Science/Data Structures/Trees/B-tree.md": "45ea1660fa0492ed360a83c477905fad7ec9c1a7daaec24544c73b4f75b632ac",
-        "Vault/Home/Computer Science/Data Structures/Trees/Binary Search Tree.md": "dbae3fc7f5474bf9ed7bf4a16a53e251c3cf00f1beab74d9ca9b34c095797f36",
-        "Vault/Home/Computer Science/Data Structures/Trees/Fenwick Tree.md": "a7a050ad9e42755a3dd5cf61fb42a65c56157286bef772394c92fdf2a4394e13",
-        "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Binomial Queues.md": "13c91287e483ab2bbf3e5d9f4eb61cfb3684a4735518b686be7c60af8b6ac96f",
-        "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Fibonacci Heaps.md": "e23d26a826d32345e22ed6bbbbc77b4f2bab3da473330f68343b35a6e27d3674",
-        "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Heap-like.md": "077e612e15b56b0980d5ffea9f71a1ffa64be3a79a551edee35271bca40ae764",
-        "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Heap.md": "259eddd3b9fcabbd847611e72ffe39eefc4be143c9420335bd2e54f04ec3ecd9",
-        "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Leftist Heaps.md": "caf6ba13cb6427e33c8d6e2fd46d3fbcca4b5ec3367243cf8f6f454a3e1115b1",
-        "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Skew Heaps.md": "13ce14c1791563b02f51be828dbc6a194bd5a28f9616601afe749f2bbb5a45a1",
-        "Vault/Home/Computer Science/Data Structures/Trees/Quadtree.md": "16bfa6547b1255e1045889bcad5e08f574f11aae4278f3d635905ace09e56994",
-        "Vault/Home/Computer Science/Data Structures/Trees/Red-Black Tree.md": "c080f1de0222141697976a7a25ba10bc0784aef7edb50b7f205d68d5f52d86e3",
-        "Vault/Home/Computer Science/Data Structures/Trees/Segment Tree.md": "12f10453d746fd412268aa8cb07d26166f1aedc287d142e7ebb1c1ce608791c2",
-        "Vault/Home/Computer Science/Data Structures/Trees/Splay Tree.md": "e70ae30630f05b8dd8fbac64a29329a31c90946a3306990e7a2d6679d7ee0959",
-        "Vault/Home/Computer Science/Data Structures/Trees/Ternary Search Tree.md": "e9622d0f76bc31eedbf9c4fa75cb66c497bee7d0663dcae4c0d00120bfa1cef8",
-        "Vault/Home/Computer Science/Data Structures/Trees/Trees.md": "d0291ae589e3e372ceab2db0a5e3bcab92665b8ca8c788caa340a628431613f3",
-        "Vault/Home/Computer Science/Data Structures/Trees/Trie.md": "c2c5c516efe070bcd55955d91f85fb8ea40c40239cf80225981a3bab01c2ef0b",
-        "Vault/Home/Computer Science/Endianness.md": "bb8357d1c9d1d89a0f5e64149b8ed911b1f08a544dc6ab16fb02ee43171cd40b",
-        "Vault/Home/Computer Science/Memory Hierarchy.md": "e36504228c688b0992af1f3abd893e2af4bebcb033d9de5ccbff8fdd505359f3"
-      }
-    },
-    "export_required": true,
-    "automatic_export": true,
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-08T22:19:50.758851Z",
-    "phase": "pr_updated",
-    "updated_at": "2026-11-08T22:28:45Z",
-    "evidence": {
-      "commit_sha": "9627085ff5bb7d4c65d0c35e2d52e1d8941ee59c",
-      "branch_sha": "9627085ff5bb7d4c65d0c35e2d52e1d8941ee59c",
-      "pr_number": 218,
-      "created": true
-    }
-  },
+  "pending_operation": null,
   "export_operations": {
     "8ee974ce274c4cbc": {
       "op_id": "8ee974ce274c4cbc",
@@ -18341,6 +18076,641 @@
       "receipt_hash": "fad744e09bd25f6aca59841faeb41e8cb2b77860ba7161c5efb4cc5fbe826d24",
       "receipt_record_count": 1,
       "compacted": true
+    },
+    "b10487f268d742ba": {
+      "op_id": "b10487f268d742ba",
+      "topic": "computer-science-445ddaa5",
+      "generation": 2,
+      "branch": "notes/automated-computer-science-445ddaa5-g2",
+      "parent_head": "fba0b54bbf3ab5a6699ba2a017e2f2e23fe559ba",
+      "base_head": "fba0b54bbf3ab5a6699ba2a017e2f2e23fe559ba",
+      "source_hashes": {
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "8e1e41ded11fbc79e3792a3a591ae72086f721202b7cb76bec0640843f860c2a"
+      },
+      "candidate_hashes": {
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "ac902ffee37fa24d77fc6b65a5429a781dafa4f4b216cf6f58eae92b33fcdaa7"
+      },
+      "candidate": {
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"4\"]\nstatus: Creation\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-08T22:19:50.758Z\"\npublished: \"2026-07-08T13:14:17.334Z\"\n---\n\nGraph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Diagram\n\n```mermaid\nflowchart TD\n  A[Graph problem] --> B{Need reachability or levels}\n  B -->|Yes| C[DFS BFS]\n  B -->|No| D{Need minimum path cost}\n  D -->|Yes with non negative weights| E{Have a heuristic to the target}\n  E -->|Yes| E1[A Star Search]\n  E -->|No| E2[Dijkstra]\n  D -->|Can have negative edges| F[Bellman Ford]\n  D -->|Need all pairs shortest paths| G[Floyd Warshall]\n  A --> H{Need structure not distance}\n  H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]\n  H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]\n  H -->|Single points of failure| K[Articulation Points and Bridges]\n  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n  H -->|Throughput through a capacitated network| L[Maximum Flow]\n```\n\n# Algorithm Selection\n\n## Shortest Path\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|DFS]] | Traversal, cycle detection, finish-order primitives | O(V + E) | General graphs. Topological order still requires a DAG |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra\\|Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search\\|A* Search]] | Point-to-point shortest path | O((V + E) log E) with a consistent heuristic and lazy heap. Reopenings make runtime re-expansion-dependent | Non-negative weights. Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search\\|Greedy Best-First Search]] | Fast point-to-point path, not necessarily optimal | O((V + E) log E) with a lazy heap | Heuristic only. Sacrifices optimality for speed |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search\\|Bidirectional Search]] | Point-to-point shortest path | About O(b^(d/2)) rather than O(b^d) in the ideal state-space model | Target known. Backward search must be available |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford\\|Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges. Detects reachable negative cycles |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall\\|Floyd-Warshall]] | All-pairs shortest path | Θ(V³) time, Θ(V²) space | Small or dense graphs. Detects negative cycles |\n\n## Structure and Connectivity\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\\|Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort\\|Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\\|Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Connected Components\\|Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges\\|Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow\\|Maximum Flow]] | Max s–t throughput. Min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |\n\n> [!NOTE]\n> Not every graph problem admits a polynomial-time algorithm. [[Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle|Hamiltonian Cycle]] asks for a cycle that visits every vertex exactly once and is **NP-complete**. No polynomial-time algorithm is known. Exact methods take exponential time in the worst case.\n\n# References\n\n- [Graph algorithms](https://algs4.cs.princeton.edu/40graphs/)\n"
+      },
+      "feedback_revision": {
+        "allowlist": [
+          "45916288:grafanaKibana"
+        ],
+        "processed": {}
+      },
+      "edits": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+          "feedback_keys": []
+        }
+      ],
+      "pending_feedback": [],
+      "pr_number": null,
+      "prior_pr_draft": null,
+      "prior_review_decision": null,
+      "prior_pr_head": null,
+      "title": "notes: improve Computer Science",
+      "body": "<!-- devbook-improvement:start topic=computer-science-445ddaa5 -->\n## 1. Note improvements\n\nReviewed 9 notes in Computer Science; improved 1. Calls: 20; elapsed: 652 seconds; stop: repair_pending.\n\n- [`Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-computer-science-445ddaa5-g2/Vault/Home/Computer%20Science/Algorithms/Graph%20Algorithms/Graph%20Algorithms.md) — The decision diagram omits Topological Sort although the structure tables list it as a distinct answer to a dependency-order requirement. Adds the Topological Sort note, listed in the selection table, to the decision diagram so every structure-oriented outcome has a route. The diagram now covers dependency ordering, so it matches the tables below it.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz export: awaiting the source-bound native export and checks.\n<!-- devbook-improvement:end -->\n\n<!-- devbook-improvement:topic=computer-science-445ddaa5;generation=2 -->\n",
+      "commit_message": "notes: improve computer-science-445ddaa5 [b10487f268d742ba]",
+      "receipts": {
+        "version": 2,
+        "workload_id": "b10487f268d742babc49b59ab87ef167",
+        "records": [
+          {
+            "record_id": "aaf5f9e588714a7f25da7005cbff7c7167973b808499a5ad323475efa8bedfbd",
+            "workload_id": "b10487f268d742babc49b59ab87ef167",
+            "batch": {
+              "topic": "Computer Science",
+              "topic_id": "computer-science-445ddaa5",
+              "notes": [
+                {
+                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                  "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"4\"]\nstatus: Creation\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.334Z\"\n---\n\nGraph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Diagram\n\n```mermaid\nflowchart TD\n  A[Graph problem] --> B{Need reachability or levels}\n  B -->|Yes| C[DFS BFS]\n  B -->|No| D{Need minimum path cost}\n  D -->|Yes with non negative weights| E{Have a heuristic to the target}\n  E -->|Yes| E1[A Star Search]\n  E -->|No| E2[Dijkstra]\n  D -->|Can have negative edges| F[Bellman Ford]\n  D -->|Need all pairs shortest paths| G[Floyd Warshall]\n  A --> H{Need structure not distance}\n  H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]\n  H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]\n  H -->|Single points of failure| K[Articulation Points and Bridges]\n  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Throughput through a capacitated network| L[Maximum Flow]\n```\n\n# Algorithm Selection\n\n## Shortest Path\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|DFS]] | Traversal, cycle detection, finish-order primitives | O(V + E) | General graphs. Topological order still requires a DAG |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra\\|Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search\\|A* Search]] | Point-to-point shortest path | O((V + E) log E) with a consistent heuristic and lazy heap. Reopenings make runtime re-expansion-dependent | Non-negative weights. Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search\\|Greedy Best-First Search]] | Fast point-to-point path, not necessarily optimal | O((V + E) log E) with a lazy heap | Heuristic only. Sacrifices optimality for speed |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search\\|Bidirectional Search]] | Point-to-point shortest path | About O(b^(d/2)) rather than O(b^d) in the ideal state-space model | Target known. Backward search must be available |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford\\|Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges. Detects reachable negative cycles |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall\\|Floyd-Warshall]] | All-pairs shortest path | Θ(V³) time, Θ(V²) space | Small or dense graphs. Detects negative cycles |\n\n## Structure and Connectivity\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\\|Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort\\|Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\\|Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Connected Components\\|Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges\\|Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow\\|Maximum Flow]] | Max s–t throughput. Min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |\n\n> [!NOTE]\n> Not every graph problem admits a polynomial-time algorithm. [[Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle|Hamiltonian Cycle]] asks for a cycle that visits every vertex exactly once and is **NP-complete**. No polynomial-time algorithm is known. Exact methods take exponential time in the worst case.\n\n# References\n\n- [Graph algorithms](https://algs4.cs.princeton.edu/40graphs/)\n",
+                  "hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
+                  "topic": "Computer Science",
+                  "violations": [],
+                  "needs_fixing_ids": [],
+                  "repair_input_hash": "",
+                  "selection_reason": "new"
+                }
+              ],
+              "feedback": [],
+              "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+              "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+              "review_process": "focused-whole-note-v1",
+              "pr": null
+            },
+            "proposal": {
+              "version": 1,
+              "edits": [
+                {
+                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                  "expected_hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
+                  "before": "  H -->|Clusters in an undirected graph| M[Connected Components]\n",
+                  "after": "  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n",
+                  "reason": "Adds the Topological Sort note, listed in the selection table, to the decision diagram so every structure-oriented outcome has a route.",
+                  "kind": "note",
+                  "learning_target": "same",
+                  "essential_meanings": [
+                    "Topological Sort is the choice for dependency ordering in a directed acyclic graph"
+                  ],
+                  "sources": [],
+                  "feedback_keys": [],
+                  "problem": "The decision diagram omits Topological Sort although the structure tables list it as a distinct answer to a dependency-order requirement.",
+                  "reader_benefit": "The diagram now covers dependency ordering, so it matches the tables below it."
+                }
+              ],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                  "outcome": "changed",
+                  "reason": "Audited the opening, diagram, both tables, the NP-complete note and the reference. The complexities (BFS/DFS O(V+E), Dijkstra O((V+E) log V), Bellman-Ford O(VE), Floyd-Warshall Θ(V³), Edmonds-Karp O(VE²)), the A* consistency caveat and the Hamiltonian cycle claim are standard and correct. The one gap was that the diagram had no Topological Sort route, though the tables list it. The edit adds that route and leaves the rest unchanged."
+                }
+              ],
+              "feedback": []
+            },
+            "result": {
+              "sources": {
+                "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"4\"]\nstatus: Creation\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-08T22:19:50.758Z\"\npublished: \"2026-07-08T13:14:17.334Z\"\n---\n\nGraph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Diagram\n\n```mermaid\nflowchart TD\n  A[Graph problem] --> B{Need reachability or levels}\n  B -->|Yes| C[DFS BFS]\n  B -->|No| D{Need minimum path cost}\n  D -->|Yes with non negative weights| E{Have a heuristic to the target}\n  E -->|Yes| E1[A Star Search]\n  E -->|No| E2[Dijkstra]\n  D -->|Can have negative edges| F[Bellman Ford]\n  D -->|Need all pairs shortest paths| G[Floyd Warshall]\n  A --> H{Need structure not distance}\n  H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]\n  H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]\n  H -->|Single points of failure| K[Articulation Points and Bridges]\n  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n  H -->|Throughput through a capacitated network| L[Maximum Flow]\n```\n\n# Algorithm Selection\n\n## Shortest Path\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|DFS]] | Traversal, cycle detection, finish-order primitives | O(V + E) | General graphs. Topological order still requires a DAG |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra\\|Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search\\|A* Search]] | Point-to-point shortest path | O((V + E) log E) with a consistent heuristic and lazy heap. Reopenings make runtime re-expansion-dependent | Non-negative weights. Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search\\|Greedy Best-First Search]] | Fast point-to-point path, not necessarily optimal | O((V + E) log E) with a lazy heap | Heuristic only. Sacrifices optimality for speed |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search\\|Bidirectional Search]] | Point-to-point shortest path | About O(b^(d/2)) rather than O(b^d) in the ideal state-space model | Target known. Backward search must be available |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford\\|Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges. Detects reachable negative cycles |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall\\|Floyd-Warshall]] | All-pairs shortest path | Θ(V³) time, Θ(V²) space | Small or dense graphs. Detects negative cycles |\n\n## Structure and Connectivity\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\\|Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort\\|Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\\|Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Connected Components\\|Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges\\|Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow\\|Maximum Flow]] | Max s–t throughput. Min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |\n\n> [!NOTE]\n> Not every graph problem admits a polynomial-time algorithm. [[Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle|Hamiltonian Cycle]] asks for a cycle that visits every vertex exactly once and is **NP-complete**. No polynomial-time algorithm is known. Exact methods take exponential time in the worst case.\n\n# References\n\n- [Graph algorithms](https://algs4.cs.princeton.edu/40graphs/)\n"
+              },
+              "edits": [
+                {
+                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                  "expected_hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
+                  "before": "  H -->|Clusters in an undirected graph| M[Connected Components]\n",
+                  "after": "  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n",
+                  "reason": "Adds the Topological Sort note, listed in the selection table, to the decision diagram so every structure-oriented outcome has a route.",
+                  "kind": "note",
+                  "learning_target": "same",
+                  "essential_meanings": [
+                    "Topological Sort is the choice for dependency ordering in a directed acyclic graph"
+                  ],
+                  "sources": [],
+                  "feedback_keys": [],
+                  "problem": "The decision diagram omits Topological Sort although the structure tables list it as a distinct answer to a dependency-order requirement.",
+                  "reader_benefit": "The diagram now covers dependency ordering, so it matches the tables below it."
+                }
+              ],
+              "retired_ids": [],
+              "lineage": [],
+              "fingerprints": [
+                "30adda22600ad8750397ecbbfb9ef9b6a30416e17a44afcf12e6867bbed4c6a6"
+              ]
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                  "verdict": "CLEAN",
+                  "summary": "The whole folder note was read. The single edit closes a real gap: the decision diagram had no route to Topological Sort, although the tables list it. The edit is small, accurate and consistent with the rest of the note.",
+                  "page_type": "FolderNote — keeps tags: [FolderNote] and the Datacore folder-map block. No Questions section, which is optional. One reference, which is a real and relevant primary source.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The required output comes first. Direction, weight semantics, and input density then narrow the valid choices.",
+                      "line_start": 15,
+                      "reason": "The opening states the selection logic and the BFS versus Dijkstra boundary directly, so no change is needed."
+                    },
+                    {
+                      "quote": "H -->|Dependency order in a DAG| N[Topological Sort]",
+                      "line_start": 39,
+                      "reason": "The new diagram route makes the diagram agree with the structure table. The DAG condition is stated correctly."
+                    },
+                    {
+                      "quote": "| Linear order respecting dependencies | O(V + E) | Directed acyclic graph |",
+                      "line_start": 63,
+                      "reason": "The table row confirms Topological Sort is a distinct outcome, so the diagram gap was real. Complexity and constraint are correct."
+                    },
+                    {
+                      "quote": "Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings",
+                      "line_start": 52,
+                      "reason": "The A* caveat is accurate. The Dijkstra, Bellman-Ford, Floyd-Warshall and Edmonds-Karp complexities are also standard and correct."
+                    }
+                  ],
+                  "target_resolution": "RESOLVED",
+                  "split_suggestion": "No split: the note is a compact hub whose diagram and tables serve one purpose, choosing a graph algorithm. The per-algorithm notes already exist.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The note is accurate and clear. The one edit fixes a real diagram omission without changing meaning, and frontmatter and fences are intact.",
+              "change_checks": [
+                {
+                  "edit_index": 0,
+                  "verdict": "WORTHWHILE",
+                  "reason": "Topological Sort was in the selection table but missing from the decision diagram. The added route covers that gap with the correct DAG condition and does not change any other content."
+                }
+              ]
+            },
+            "decisions": [],
+            "review_evidence": {
+              "raw_review": {
+                "verdict": "CLEAN",
+                "notes": [
+                  {
+                    "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                    "verdict": "CLEAN",
+                    "summary": "The whole folder note was read. The single edit closes a real gap: the decision diagram had no route to Topological Sort, although the tables list it. The edit is small, accurate and consistent with the rest of the note.",
+                    "page_type": "FolderNote — keeps tags: [FolderNote] and the Datacore folder-map block. No Questions section, which is optional. One reference, which is a real and relevant primary source.",
+                    "current_text_evidence": [
+                      {
+                        "quote": "The required output comes first. Direction, weight semantics, and input density then narrow the valid choices.",
+                        "line_start": 15,
+                        "reason": "The opening states the selection logic and the BFS versus Dijkstra boundary directly, so no change is needed."
+                      },
+                      {
+                        "quote": "H -->|Dependency order in a DAG| N[Topological Sort]",
+                        "line_start": 39,
+                        "reason": "The new diagram route makes the diagram agree with the structure table. The DAG condition is stated correctly."
+                      },
+                      {
+                        "quote": "| Linear order respecting dependencies | O(V + E) | Directed acyclic graph |",
+                        "line_start": 64,
+                        "reason": "The table row confirms Topological Sort is a distinct outcome, so the diagram gap was real. Complexity and constraint are correct."
+                      },
+                      {
+                        "quote": "Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings",
+                        "line_start": 53,
+                        "reason": "The A* caveat is accurate. The Dijkstra, Bellman-Ford, Floyd-Warshall and Edmonds-Karp complexities are also standard and correct."
+                      }
+                    ],
+                    "target_resolution": "RESOLVED",
+                    "split_suggestion": "No split: the note is a compact hub whose diagram and tables serve one purpose, choosing a graph algorithm. The per-algorithm notes already exist.",
+                    "findings": [],
+                    "source_checks": [],
+                    "rejection_equivalence": [],
+                    "quality": {
+                      "accuracy": "PASS",
+                      "clarity": "PASS",
+                      "question_quality": "NOT APPLICABLE",
+                      "identity_safety": "NOT APPLICABLE",
+                      "rules_compliance": "PASS"
+                    }
+                  }
+                ],
+                "overall_reason": "The note is accurate and clear. The one edit fixes a real diagram omission without changing meaning, and frontmatter and fences are intact.",
+                "change_checks": [
+                  {
+                    "edit_index": 0,
+                    "verdict": "WORTHWHILE",
+                    "reason": "Topological Sort was in the selection table but missing from the decision diagram. The added route covers that gap with the correct DAG condition and does not change any other content."
+                  }
+                ]
+              },
+              "bindings": [
+                {
+                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                  "citation_index": 2,
+                  "reported_line_start": 64,
+                  "resolved_line_start": 63
+                },
+                {
+                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                  "citation_index": 3,
+                  "reported_line_start": 53,
+                  "resolved_line_start": 52
+                }
+              ],
+              "source_hashes": {
+                "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "ea680c126da74e3cb0f890a926c2f52ae7eaebc437b6f7d1e7f098af5021b270"
+              },
+              "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+              "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+            },
+            "source_hashes": {
+              "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877"
+            },
+            "prepared_source_version": 1,
+            "prepared_at": "2026-11-08T22:19:50.758851Z",
+            "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+            "calls_reserved": 6,
+            "elapsed_seconds": 221.44617210000004,
+            "accepted_at": "2026-11-08T22:21:02.719976Z",
+            "phase": "accepted"
+          }
+        ],
+        "proposal_history": [
+          {
+            "record_id": "aaf5f9e588714a7f25da7005cbff7c7167973b808499a5ad323475efa8bedfbd",
+            "workload_id": "b10487f268d742babc49b59ab87ef167",
+            "batch": {
+              "topic": "Computer Science",
+              "topic_id": "computer-science-445ddaa5",
+              "notes": [
+                {
+                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                  "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"4\"]\nstatus: Creation\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.334Z\"\n---\n\nGraph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Diagram\n\n```mermaid\nflowchart TD\n  A[Graph problem] --> B{Need reachability or levels}\n  B -->|Yes| C[DFS BFS]\n  B -->|No| D{Need minimum path cost}\n  D -->|Yes with non negative weights| E{Have a heuristic to the target}\n  E -->|Yes| E1[A Star Search]\n  E -->|No| E2[Dijkstra]\n  D -->|Can have negative edges| F[Bellman Ford]\n  D -->|Need all pairs shortest paths| G[Floyd Warshall]\n  A --> H{Need structure not distance}\n  H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]\n  H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]\n  H -->|Single points of failure| K[Articulation Points and Bridges]\n  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Throughput through a capacitated network| L[Maximum Flow]\n```\n\n# Algorithm Selection\n\n## Shortest Path\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|DFS]] | Traversal, cycle detection, finish-order primitives | O(V + E) | General graphs. Topological order still requires a DAG |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra\\|Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search\\|A* Search]] | Point-to-point shortest path | O((V + E) log E) with a consistent heuristic and lazy heap. Reopenings make runtime re-expansion-dependent | Non-negative weights. Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search\\|Greedy Best-First Search]] | Fast point-to-point path, not necessarily optimal | O((V + E) log E) with a lazy heap | Heuristic only. Sacrifices optimality for speed |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search\\|Bidirectional Search]] | Point-to-point shortest path | About O(b^(d/2)) rather than O(b^d) in the ideal state-space model | Target known. Backward search must be available |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford\\|Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges. Detects reachable negative cycles |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall\\|Floyd-Warshall]] | All-pairs shortest path | Θ(V³) time, Θ(V²) space | Small or dense graphs. Detects negative cycles |\n\n## Structure and Connectivity\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\\|Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort\\|Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\\|Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Connected Components\\|Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges\\|Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow\\|Maximum Flow]] | Max s–t throughput. Min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |\n\n> [!NOTE]\n> Not every graph problem admits a polynomial-time algorithm. [[Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle|Hamiltonian Cycle]] asks for a cycle that visits every vertex exactly once and is **NP-complete**. No polynomial-time algorithm is known. Exact methods take exponential time in the worst case.\n\n# References\n\n- [Graph algorithms](https://algs4.cs.princeton.edu/40graphs/)\n",
+                  "hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
+                  "topic": "Computer Science",
+                  "violations": [],
+                  "needs_fixing_ids": [],
+                  "repair_input_hash": "",
+                  "selection_reason": "new"
+                }
+              ],
+              "feedback": [],
+              "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+              "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+              "review_process": "focused-whole-note-v1",
+              "pr": null
+            },
+            "proposal": {
+              "version": 1,
+              "edits": [
+                {
+                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                  "expected_hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
+                  "before": "  H -->|Clusters in an undirected graph| M[Connected Components]\n",
+                  "after": "  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n",
+                  "reason": "Adds the Topological Sort note, listed in the selection table, to the decision diagram so every structure-oriented outcome has a route.",
+                  "kind": "note",
+                  "learning_target": "same",
+                  "essential_meanings": [
+                    "Topological Sort is the choice for dependency ordering in a directed acyclic graph"
+                  ],
+                  "sources": [],
+                  "feedback_keys": [],
+                  "problem": "The decision diagram omits Topological Sort although the structure tables list it as a distinct answer to a dependency-order requirement.",
+                  "reader_benefit": "The diagram now covers dependency ordering, so it matches the tables below it."
+                }
+              ],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                  "outcome": "changed",
+                  "reason": "Audited the opening, diagram, both tables, the NP-complete note and the reference. The complexities (BFS/DFS O(V+E), Dijkstra O((V+E) log V), Bellman-Ford O(VE), Floyd-Warshall Θ(V³), Edmonds-Karp O(VE²)), the A* consistency caveat and the Hamiltonian cycle claim are standard and correct. The one gap was that the diagram had no Topological Sort route, though the tables list it. The edit adds that route and leaves the rest unchanged."
+                }
+              ],
+              "feedback": []
+            },
+            "result": {
+              "sources": {
+                "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"4\"]\nstatus: Creation\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-08T22:19:50.758Z\"\npublished: \"2026-07-08T13:14:17.334Z\"\n---\n\nGraph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Diagram\n\n```mermaid\nflowchart TD\n  A[Graph problem] --> B{Need reachability or levels}\n  B -->|Yes| C[DFS BFS]\n  B -->|No| D{Need minimum path cost}\n  D -->|Yes with non negative weights| E{Have a heuristic to the target}\n  E -->|Yes| E1[A Star Search]\n  E -->|No| E2[Dijkstra]\n  D -->|Can have negative edges| F[Bellman Ford]\n  D -->|Need all pairs shortest paths| G[Floyd Warshall]\n  A --> H{Need structure not distance}\n  H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]\n  H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]\n  H -->|Single points of failure| K[Articulation Points and Bridges]\n  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n  H -->|Throughput through a capacitated network| L[Maximum Flow]\n```\n\n# Algorithm Selection\n\n## Shortest Path\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|DFS]] | Traversal, cycle detection, finish-order primitives | O(V + E) | General graphs. Topological order still requires a DAG |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra\\|Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search\\|A* Search]] | Point-to-point shortest path | O((V + E) log E) with a consistent heuristic and lazy heap. Reopenings make runtime re-expansion-dependent | Non-negative weights. Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search\\|Greedy Best-First Search]] | Fast point-to-point path, not necessarily optimal | O((V + E) log E) with a lazy heap | Heuristic only. Sacrifices optimality for speed |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search\\|Bidirectional Search]] | Point-to-point shortest path | About O(b^(d/2)) rather than O(b^d) in the ideal state-space model | Target known. Backward search must be available |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford\\|Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges. Detects reachable negative cycles |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall\\|Floyd-Warshall]] | All-pairs shortest path | Θ(V³) time, Θ(V²) space | Small or dense graphs. Detects negative cycles |\n\n## Structure and Connectivity\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\\|Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort\\|Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\\|Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Connected Components\\|Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges\\|Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow\\|Maximum Flow]] | Max s–t throughput. Min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |\n\n> [!NOTE]\n> Not every graph problem admits a polynomial-time algorithm. [[Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle|Hamiltonian Cycle]] asks for a cycle that visits every vertex exactly once and is **NP-complete**. No polynomial-time algorithm is known. Exact methods take exponential time in the worst case.\n\n# References\n\n- [Graph algorithms](https://algs4.cs.princeton.edu/40graphs/)\n"
+              },
+              "edits": [
+                {
+                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                  "expected_hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
+                  "before": "  H -->|Clusters in an undirected graph| M[Connected Components]\n",
+                  "after": "  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n",
+                  "reason": "Adds the Topological Sort note, listed in the selection table, to the decision diagram so every structure-oriented outcome has a route.",
+                  "kind": "note",
+                  "learning_target": "same",
+                  "essential_meanings": [
+                    "Topological Sort is the choice for dependency ordering in a directed acyclic graph"
+                  ],
+                  "sources": [],
+                  "feedback_keys": [],
+                  "problem": "The decision diagram omits Topological Sort although the structure tables list it as a distinct answer to a dependency-order requirement.",
+                  "reader_benefit": "The diagram now covers dependency ordering, so it matches the tables below it."
+                }
+              ],
+              "retired_ids": [],
+              "lineage": [],
+              "fingerprints": [
+                "30adda22600ad8750397ecbbfb9ef9b6a30416e17a44afcf12e6867bbed4c6a6"
+              ]
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                  "verdict": "CLEAN",
+                  "summary": "The whole folder note was read. The single edit closes a real gap: the decision diagram had no route to Topological Sort, although the tables list it. The edit is small, accurate and consistent with the rest of the note.",
+                  "page_type": "FolderNote — keeps tags: [FolderNote] and the Datacore folder-map block. No Questions section, which is optional. One reference, which is a real and relevant primary source.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The required output comes first. Direction, weight semantics, and input density then narrow the valid choices.",
+                      "line_start": 15,
+                      "reason": "The opening states the selection logic and the BFS versus Dijkstra boundary directly, so no change is needed."
+                    },
+                    {
+                      "quote": "H -->|Dependency order in a DAG| N[Topological Sort]",
+                      "line_start": 39,
+                      "reason": "The new diagram route makes the diagram agree with the structure table. The DAG condition is stated correctly."
+                    },
+                    {
+                      "quote": "| Linear order respecting dependencies | O(V + E) | Directed acyclic graph |",
+                      "line_start": 63,
+                      "reason": "The table row confirms Topological Sort is a distinct outcome, so the diagram gap was real. Complexity and constraint are correct."
+                    },
+                    {
+                      "quote": "Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings",
+                      "line_start": 52,
+                      "reason": "The A* caveat is accurate. The Dijkstra, Bellman-Ford, Floyd-Warshall and Edmonds-Karp complexities are also standard and correct."
+                    }
+                  ],
+                  "target_resolution": "RESOLVED",
+                  "split_suggestion": "No split: the note is a compact hub whose diagram and tables serve one purpose, choosing a graph algorithm. The per-algorithm notes already exist.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The note is accurate and clear. The one edit fixes a real diagram omission without changing meaning, and frontmatter and fences are intact.",
+              "change_checks": [
+                {
+                  "edit_index": 0,
+                  "verdict": "WORTHWHILE",
+                  "reason": "Topological Sort was in the selection table but missing from the decision diagram. The added route covers that gap with the correct DAG condition and does not change any other content."
+                }
+              ]
+            },
+            "decisions": [],
+            "review_evidence": {
+              "raw_review": {
+                "verdict": "CLEAN",
+                "notes": [
+                  {
+                    "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                    "verdict": "CLEAN",
+                    "summary": "The whole folder note was read. The single edit closes a real gap: the decision diagram had no route to Topological Sort, although the tables list it. The edit is small, accurate and consistent with the rest of the note.",
+                    "page_type": "FolderNote — keeps tags: [FolderNote] and the Datacore folder-map block. No Questions section, which is optional. One reference, which is a real and relevant primary source.",
+                    "current_text_evidence": [
+                      {
+                        "quote": "The required output comes first. Direction, weight semantics, and input density then narrow the valid choices.",
+                        "line_start": 15,
+                        "reason": "The opening states the selection logic and the BFS versus Dijkstra boundary directly, so no change is needed."
+                      },
+                      {
+                        "quote": "H -->|Dependency order in a DAG| N[Topological Sort]",
+                        "line_start": 39,
+                        "reason": "The new diagram route makes the diagram agree with the structure table. The DAG condition is stated correctly."
+                      },
+                      {
+                        "quote": "| Linear order respecting dependencies | O(V + E) | Directed acyclic graph |",
+                        "line_start": 64,
+                        "reason": "The table row confirms Topological Sort is a distinct outcome, so the diagram gap was real. Complexity and constraint are correct."
+                      },
+                      {
+                        "quote": "Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings",
+                        "line_start": 53,
+                        "reason": "The A* caveat is accurate. The Dijkstra, Bellman-Ford, Floyd-Warshall and Edmonds-Karp complexities are also standard and correct."
+                      }
+                    ],
+                    "target_resolution": "RESOLVED",
+                    "split_suggestion": "No split: the note is a compact hub whose diagram and tables serve one purpose, choosing a graph algorithm. The per-algorithm notes already exist.",
+                    "findings": [],
+                    "source_checks": [],
+                    "rejection_equivalence": [],
+                    "quality": {
+                      "accuracy": "PASS",
+                      "clarity": "PASS",
+                      "question_quality": "NOT APPLICABLE",
+                      "identity_safety": "NOT APPLICABLE",
+                      "rules_compliance": "PASS"
+                    }
+                  }
+                ],
+                "overall_reason": "The note is accurate and clear. The one edit fixes a real diagram omission without changing meaning, and frontmatter and fences are intact.",
+                "change_checks": [
+                  {
+                    "edit_index": 0,
+                    "verdict": "WORTHWHILE",
+                    "reason": "Topological Sort was in the selection table but missing from the decision diagram. The added route covers that gap with the correct DAG condition and does not change any other content."
+                  }
+                ]
+              },
+              "bindings": [
+                {
+                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                  "citation_index": 2,
+                  "reported_line_start": 64,
+                  "resolved_line_start": 63
+                },
+                {
+                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+                  "citation_index": 3,
+                  "reported_line_start": 53,
+                  "resolved_line_start": 52
+                }
+              ],
+              "source_hashes": {
+                "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "ea680c126da74e3cb0f890a926c2f52ae7eaebc437b6f7d1e7f098af5021b270"
+              },
+              "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+              "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+            },
+            "source_hashes": {
+              "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877"
+            },
+            "prepared_source_version": 1,
+            "prepared_at": "2026-11-08T22:19:50.758851Z",
+            "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+            "calls_reserved": 6,
+            "elapsed_seconds": 221.44617210000004,
+            "accepted_at": "2026-11-08T22:21:02.719976Z",
+            "phase": "accepted"
+          }
+        ],
+        "topic_id": "computer-science-445ddaa5",
+        "generation": 2,
+        "base_note_hashes": {
+          "Vault/Home/Computer Science/Algorithms/Algorithms.md": "5163fe3a84feec771d86cedc762044b7c206fa4b6d0708e765612a6cb30488dd",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search.md": "2ae5db4bf03be72d4c8c79a0819cd8299000f3009868ab2d817900add3736b84",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md": "08d3bd6c8859e7a90c072c99b98912c3c1bda8ef1e75bfea1fae34cb195b5cc0",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford.md": "c6ea5edaca05324a41263bc4d8f4ff43ac1cdf6748f960d451acf71d331935e3",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search.md": "42d9349b9faf85cdbcd1febdb23e9e0aa11810b7b0f5a3f0f01370be9afdf5cf",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm.md": "6f493d4bbca79de66acab191f048c69a862098332f3d48036bc7397c58f64a60",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Connected Components.md": "62d81a578792e5ffea46d7756d69d02f85a6f2ab31028954e190a9bf86681d48",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS.md": "935cd60e736e0f50906e064226682fb2e0d99381116e957d20d47edccb8a8dc7",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra.md": "237959f2359c188b999e1ed9dfa02d7825487478fd95a2546b639c32906df2d5",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md": "9430128d291a6bf0daf0ff202eb2f04cb4ce2da0110e7ef4d58d8f96cf39c8c2",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md": "537e1d20b4286336eb139cfb1e50625657eaa454bd1a5e7349de3ba8615a3351",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search.md": "d832ac132dc705758a2d67460bbc6e13faa682231e3b1a97284b0e85c11cde52",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md": "d9eecd2071422c9e7129bff2c28e14c56ed9dba1ea30cd4e6f7787d916b9cc4b",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Kruskal's Algorithm.md": "36aeb05c22d405ecc7ab701099ae8bf65a60257add2a63a1bd22bf20e562b61d",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow.md": "39a2218ec050410f01974d0be830067653425fdf618c761e944aff200c01b1a3",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md": "a87194c58bf9ac47fa3b31a9c5424b6bd5731959cfe34ac2da5508e8c0f1e010",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components.md": "cda9a01ed3198232d349b07d2f7c036429334dea953866d7825302471874fe3d",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f",
+          "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md": "f483d1a0be190e494ef34d38154b09718caec4ff0a44a4b9ed8679181eefe5fd",
+          "Vault/Home/Computer Science/Algorithms/Paradigms/Backtracking.md": "18efb18d07b562e6c1e9c88016f30556792e525842bebfc6658b1305354af823",
+          "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md": "c1718904068141d95d8e53cf74adcf148bce2182906bc4b4446ba06871063da6",
+          "Vault/Home/Computer Science/Algorithms/Paradigms/Divide and Conquer.md": "1e0903dbf937ff52293a4e1200782e3a678956accb2842737f845be30fa6a42f",
+          "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md": "1e4111756d04701fff53a49358eae8e0689efd63f765392a2b601cf67d529861",
+          "Vault/Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms.md": "998e60a3238dcbd3e7cf0637302779a35d455230c864193cb3d2c7d1d67b25d2",
+          "Vault/Home/Computer Science/Algorithms/Paradigms/Memoization.md": "5a1c1005a4fe8538fc27f1068b0ec2b0d030b80dd44a224e04e2953142bbf529",
+          "Vault/Home/Computer Science/Algorithms/Paradigms/Paradigms.md": "79593eb78131be6b3d728f9d866226926898a65799582f106aff9a341c20f5d1",
+          "Vault/Home/Computer Science/Algorithms/Patterns/Binary Search on Answer.md": "e35a8f64e2ad521ed218da8cf777226d8fe921a925cbc9996acbc3c8180a6da8",
+          "Vault/Home/Computer Science/Algorithms/Patterns/Bit Manipulation.md": "71f502b984bd84fc3b795fc39d96d56ba09eed41e5d5fa0d1dd68650db9b6a59",
+          "Vault/Home/Computer Science/Algorithms/Patterns/Cyclic Sort.md": "afb1e0c7e6525a90cc9f4e0dd88aa7021a033b8ca24374a18c566256974b4c6e",
+          "Vault/Home/Computer Science/Algorithms/Patterns/Fast and Slow Pointers.md": "4e3eb6340536b05a3db8f65e3a8f5c936527880119c812caf022316a5d61eac5",
+          "Vault/Home/Computer Science/Algorithms/Patterns/Merge Intervals.md": "86904805c0875a44470140eacdd9f96a706d8b6ee9ad8972a5d4692a3fa1820c",
+          "Vault/Home/Computer Science/Algorithms/Patterns/Monotonic Stack and Queue.md": "3be19290ce40f679c0f2017e01862fd37d46b2362d1c1c04f05f171a2081419b",
+          "Vault/Home/Computer Science/Algorithms/Patterns/Patterns.md": "37d6fc7d3c8844b5df366fcf2b8eccf402f21aa8faf197af967473af028e54a8",
+          "Vault/Home/Computer Science/Algorithms/Patterns/Prefix Sum.md": "fbea209d2c30218cfc5976575fd21f3648b4b2f24d86762bae310f1db5a200d0",
+          "Vault/Home/Computer Science/Algorithms/Patterns/Sliding Window.md": "9710e06b1d9744225d1269b83c231d76891a6312d8c944540663cc6bc8f3ce6e",
+          "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md": "f336cca11768386972222e91e7c53ff4394e1c1e0d78ed814f30d59dc89fecb6",
+          "Vault/Home/Computer Science/Algorithms/Patterns/Two Heaps.md": "0ae4f645a1317bcd62af43b28d1fddba5ab47e2ee8ceed22cc16b3a4cdd2fa11",
+          "Vault/Home/Computer Science/Algorithms/Patterns/Two Pointers.md": "72239cb59d220c5a71c0ec4756b8c38aa42490eafeeafb6af1ec85c3573b7d32",
+          "Vault/Home/Computer Science/Algorithms/Search Algorithms/Binary Search.md": "27b74b18853d4ef7ab8677e858e82eed5c18ebc4dac82b0568f120be8f1e0b6f",
+          "Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md": "f7ccc19ba2618f4126719f9bbf5874079fa50b57ed6178395b07bb249e384d8b",
+          "Vault/Home/Computer Science/Algorithms/Search Algorithms/Fibonacci Search.md": "054b8100535063942f0cabe7ae432e5c09b6e53243d290e78d15cd72b362f115",
+          "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md": "90d0f916880fa582f393dc4e24b6cc5d599c04784c94342843335d4f34dc11a4",
+          "Vault/Home/Computer Science/Algorithms/Search Algorithms/Jump Search.md": "a27be8e47990d51b7d0d8163e6c5eab3573c395c68bed890de04172d27a752d8",
+          "Vault/Home/Computer Science/Algorithms/Search Algorithms/Linear Search.md": "d1f3373be8a042fc999d8ea83e2df0a537969eee6ba99c9b19318f67dd13bc4f",
+          "Vault/Home/Computer Science/Algorithms/Search Algorithms/Search Algorithms.md": "cc94f91479f90bf976d387f071bcc95aeaa8996000fb67ca9d708155c4550aae",
+          "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Aho-Corasick.md": "ccbc895ee68e1cc8fa523c7c459277e23548f4050c1cfb9a65c362ac9b938384",
+          "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Boyer-Moore.md": "d270d2151c2694e1eee65d3dd48fc3d7d68801819fe766c6d0032c44aec27459",
+          "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/KMP (Knuth-Morris-Pratt) Algorithm.md": "9629f4b72a439152dfb11adcdb6ec6e1e9dcdc39cddc37c38b784f3b8aaeb9a5",
+          "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Rabin Karp Search.md": "0b39ba28bea98cc2ee37a8d71e3414058865ac4170d8c5b9133eae8ccfacd091",
+          "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/String Matching.md": "2c48f5118b805efe73f679f334f77394a8ece0dc26b18093a83e88558922589f",
+          "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Z-Algorithm.md": "f374f00385292441aaae58d11e10ac6817fa2b2894e88f652c9575d5e44db0d9",
+          "Vault/Home/Computer Science/Algorithms/Search Algorithms/Ternary Search.md": "e32ee97a2a69c26eb86f4e5262bcb601b354d5439c9765f54f12f7d3b1a28a24",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Bogo Sort.md": "3965c2cf9985483b5562b9b462e42bbb02dda2807c4f09daa446b7176697d3cb",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md": "a6562fca0889559eee793fd9e28981f87c35717e718b74490121fc766e32a3d9",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Bucket Sort.md": "0d0cc81934f192568d664c1699e0cb734d8e2f455a0cd5cf1bc96a4b3fdeaa27",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Cocktail Shaker Sort.md": "b85bed86438ed1efbdd207c73cc5823fb5b9f0b790d6911ef5c4e938962efeff",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Comb Sort.md": "a17b63003b277954c8e417a0af3845f6c4aaf111dfe3d4342336f06ba0173af4",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Counting Sort.md": "a3cf915df958589523f8c8f56420ba99346c354423140444be864aeee3129190",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Cycle Sort.md": "13c2a7780e9c1b6553525c8e1d55ad937d74b0d31f9181fd4df82919435a9e82",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Gnome Sort.md": "d0068152d3295cf5eab5cc4bd7579485b0fbeca56b69f3516f54c12fbb6c9856",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Heap Sort.md": "ca4a2b996c4784609e7c31b6e1077a98013b595cd18296fc577aa99ded028f79",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort.md": "fc55ef751706134a05b7304122c9a2796f9b489467a0e84e965087799cfda0e9",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Introsort.md": "7857ba2ca44dd08ed6ebace5ef19d3fa3dd9ce8805a66baa90ff14623de8e1ae",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Merge Sort.md": "d6559ffd523f69d4daa85641b365982ea090b15d67bc786ae9317b3daaed19c9",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Odd-Even Sort.md": "ae12f8228bf8e787720cd621bdae16e4b727d75c42e4825d636a30c2ab4ee390",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Pancake Sort.md": "3aed112d77c6ff06adf048c30bf55c35ff0829a4e9ffb7287ae137553a990387",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md": "ab0007f1ca6ed0addd3e2f8cabac2ccf374c3b1fb2439a9cfc3cf9c6530ae1bf",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Radix Sort.md": "cba41f1187cb15c560707d7a6c90c471f5a4322ec07fe2ae4fe6efa38725bd31",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Selection Sort.md": "72dc6b8b874facf79da7f170747384af443853eb49e33a19c6e78d60c4a377d7",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Shell Sort.md": "046f377c9fbbb90f6ef8227c2e47a7c9e422cb00400f68ec58f5f994f95fcb65",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md": "fd442e92b0b2686d226907295bc49675db2feb1ee787d581487772a34ab00991",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Stooge Sort.md": "dbc395874bf7fddb5eac4e15d1a2368557a807e0960f8ace77232972e2aa136a",
+          "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Tim Sort.md": "a2283142febaa59a554d9e78f4c51f49a7413b973493c5254615672338574237",
+          "Vault/Home/Computer Science/Big O Notation.md": "9d62e10caedf139d104ae63662a67921e7d79452f341fc8d7c602740013b386b",
+          "Vault/Home/Computer Science/Computer Science.md": "f0fd5b39cf52ea29505c50cc5cb48fa3f291536f5f945326c7da2a0cf6180366",
+          "Vault/Home/Computer Science/Data Structures/Composite Structures/Composite Structures.md": "c48afce0d15ba83846302e03f4ffaf97065a7a57ef47178c5e4478ef86e4f353",
+          "Vault/Home/Computer Science/Data Structures/Composite Structures/LRU Cache.md": "5ef060dfd2b783ece03efa9c3e831ed39f8972eea0db4ae7187222140bf8aba4",
+          "Vault/Home/Computer Science/Data Structures/Data Structures.md": "267c3c0866b2c926c95f53aff4cf01dc7aa18c8ce40e1ff6a827661e03d05091",
+          "Vault/Home/Computer Science/Data Structures/Geohash.md": "fb4a86d8df3bff5b66b5dc7f6b6f979963357c0c413edcd4e7cb8f722db0e545",
+          "Vault/Home/Computer Science/Data Structures/Graph Structures/Disjoint Set.md": "93beb12ec774d16acf3ddc926dd5e4f2e4e88dcdd9e472049c89b2b3ef8060cd",
+          "Vault/Home/Computer Science/Data Structures/Graph Structures/Graph Structures.md": "f0a45b2c29ba8293026c2bd725ce5085998d23332dcd77863c5dfad33fa0397a",
+          "Vault/Home/Computer Science/Data Structures/Graph Structures/Graph.md": "c28b705587856a40087463b220811660a7b59307efc8d6a607752ad8a05317a2",
+          "Vault/Home/Computer Science/Data Structures/Graph Structures/Union-Find.md": "be74fbc733d69aa20cf1bda6c41d071914870a09145ea91d41dc70e313a5d5a9",
+          "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Bloom Filter.md": "5b385e8fa148d648daebff6d7d45d1bea8606160efc8663577805af1591416eb",
+          "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Collision Resolution.md": "f11d164865ba211356a0e66a37bb54be9e058bfcd7e93923bf9450c595d4a321",
+          "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Hash Set.md": "9953880306305b7ab01bf40372c479c4b503cac49fba53ddc33457af201b6bfe",
+          "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Hash-based Structures.md": "3dfcde25d4b2c609e3abaca7f8e7804f24d6180312831645bf6b6c31c31fbd74",
+          "Vault/Home/Computer Science/Data Structures/Hash-based Structures/HashMap.md": "9e6cdf1f1841adc50e581665fa3fcb0586636d88444026aa0f561e7cecafd2ce",
+          "Vault/Home/Computer Science/Data Structures/Linear Structures/Arrays.md": "29629811c24cc35831a8189dcdff9e531138c40c45a1a8f65c343bcb61c565b9",
+          "Vault/Home/Computer Science/Data Structures/Linear Structures/Circular Buffer.md": "4ee03493156036320917d34751dd9936cbd0919faea4e031c021a84504d14ebd",
+          "Vault/Home/Computer Science/Data Structures/Linear Structures/Deque.md": "7a8d40b58383036766272944b1735359eca5c5aa79f23399d94c212baa62fb9b",
+          "Vault/Home/Computer Science/Data Structures/Linear Structures/Dynamic Array.md": "bf99c504918dd47aee8e22059b48fcca4fb744f415b218833d92abde54136f0e",
+          "Vault/Home/Computer Science/Data Structures/Linear Structures/Linear Structures.md": "ed4c46a275ec4583f89bf854d4816cf0329e314c4dd3195ef3cb919fb6690a88",
+          "Vault/Home/Computer Science/Data Structures/Linear Structures/LinkedList.md": "a0d265fb87a6700af61e41cc36c535994182834ecc2607a23274a5f538b3c5b3",
+          "Vault/Home/Computer Science/Data Structures/Linear Structures/Queue.md": "57acf88c2d3db623a70aa2a24711c834627ab34491776da00bb2ef857dbf1c71",
+          "Vault/Home/Computer Science/Data Structures/Linear Structures/Span.md": "4d70ffc2a3b87907063b8149eb273ba7b5807706edb4ac7e40d161616f9c299a",
+          "Vault/Home/Computer Science/Data Structures/Linear Structures/Stack.md": "d1f9b287e406b5ec501b70f50bc75df3101bc62d2743a098ce535cb88da18911",
+          "Vault/Home/Computer Science/Data Structures/Trees/AVL Tree.md": "ac96fb5d31539e40fe9fead6c1d35496d88687ddf9803379bb539bca4e7e0e45",
+          "Vault/Home/Computer Science/Data Structures/Trees/B+ Tree.md": "84217d51ce3776cbafe33f2ac0ec05f56f2d14365679ee55ca106bb10e2fc107",
+          "Vault/Home/Computer Science/Data Structures/Trees/B-tree.md": "45ea1660fa0492ed360a83c477905fad7ec9c1a7daaec24544c73b4f75b632ac",
+          "Vault/Home/Computer Science/Data Structures/Trees/Binary Search Tree.md": "dbae3fc7f5474bf9ed7bf4a16a53e251c3cf00f1beab74d9ca9b34c095797f36",
+          "Vault/Home/Computer Science/Data Structures/Trees/Fenwick Tree.md": "a7a050ad9e42755a3dd5cf61fb42a65c56157286bef772394c92fdf2a4394e13",
+          "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Binomial Queues.md": "13c91287e483ab2bbf3e5d9f4eb61cfb3684a4735518b686be7c60af8b6ac96f",
+          "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Fibonacci Heaps.md": "e23d26a826d32345e22ed6bbbbc77b4f2bab3da473330f68343b35a6e27d3674",
+          "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Heap-like.md": "077e612e15b56b0980d5ffea9f71a1ffa64be3a79a551edee35271bca40ae764",
+          "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Heap.md": "259eddd3b9fcabbd847611e72ffe39eefc4be143c9420335bd2e54f04ec3ecd9",
+          "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Leftist Heaps.md": "caf6ba13cb6427e33c8d6e2fd46d3fbcca4b5ec3367243cf8f6f454a3e1115b1",
+          "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Skew Heaps.md": "13ce14c1791563b02f51be828dbc6a194bd5a28f9616601afe749f2bbb5a45a1",
+          "Vault/Home/Computer Science/Data Structures/Trees/Quadtree.md": "16bfa6547b1255e1045889bcad5e08f574f11aae4278f3d635905ace09e56994",
+          "Vault/Home/Computer Science/Data Structures/Trees/Red-Black Tree.md": "c080f1de0222141697976a7a25ba10bc0784aef7edb50b7f205d68d5f52d86e3",
+          "Vault/Home/Computer Science/Data Structures/Trees/Segment Tree.md": "12f10453d746fd412268aa8cb07d26166f1aedc287d142e7ebb1c1ce608791c2",
+          "Vault/Home/Computer Science/Data Structures/Trees/Splay Tree.md": "e70ae30630f05b8dd8fbac64a29329a31c90946a3306990e7a2d6679d7ee0959",
+          "Vault/Home/Computer Science/Data Structures/Trees/Ternary Search Tree.md": "e9622d0f76bc31eedbf9c4fa75cb66c497bee7d0663dcae4c0d00120bfa1cef8",
+          "Vault/Home/Computer Science/Data Structures/Trees/Trees.md": "d0291ae589e3e372ceab2db0a5e3bcab92665b8ca8c788caa340a628431613f3",
+          "Vault/Home/Computer Science/Data Structures/Trees/Trie.md": "c2c5c516efe070bcd55955d91f85fb8ea40c40239cf80225981a3bab01c2ef0b",
+          "Vault/Home/Computer Science/Endianness.md": "bb8357d1c9d1d89a0f5e64149b8ed911b1f08a544dc6ab16fb02ee43171cd40b",
+          "Vault/Home/Computer Science/Memory Hierarchy.md": "e36504228c688b0992af1f3abd893e2af4bebcb033d9de5ccbff8fdd505359f3"
+        }
+      },
+      "export_required": true,
+      "automatic_export": true,
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-08T22:19:50.758851Z",
+      "phase": "pr_updated",
+      "updated_at": "2026-11-08T22:28:50Z",
+      "evidence": {
+        "commit_sha": "9627085ff5bb7d4c65d0c35e2d52e1d8941ee59c",
+        "branch_sha": "9627085ff5bb7d4c65d0c35e2d52e1d8941ee59c",
+        "pr_number": 218,
+        "created": true,
+        "export_head": "9627085ff5bb7d4c65d0c35e2d52e1d8941ee59c",
+        "export_request": {
+          "version": 1,
+          "op_id": "b10487f268d742ba",
+          "pr_number": 218,
+          "branch": "notes/automated-computer-science-445ddaa5-g2",
+          "expected_head": "9627085ff5bb7d4c65d0c35e2d52e1d8941ee59c",
+          "topic_id": "computer-science-445ddaa5",
+          "generation": 2,
+          "prepared_source_version": 1
+        },
+        "export_attempts": 1,
+        "export_last_dispatch_at": "2026-11-08T22:28:49Z",
+        "reason": "Same-workflow Syncer export queued"
+      }
     }
   },
   "finalized_note_records": {
