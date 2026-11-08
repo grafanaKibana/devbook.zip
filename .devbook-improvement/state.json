@@ -8252,13 +8252,14 @@
     "version": 1,
     "id": "b10487f268d742babc49b59ab87ef167",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-08T22:17:21.273772Z",
-    "elapsed_seconds": 110.4495474,
+    "elapsed_seconds": 113.7607316,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md"
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md",
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -8334,10 +8335,83 @@
           },
           "model_calls": 2
         }
+      },
+      {
+        "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md",
+                "outcome": "keep",
+                "reason": "I audited the whole note. I recomputed the four-vertex example by hand. The final matrix is correct, including 1→0 = 5 via 1→2→3→0, 0→3 = 6 at k=2, and dist[1][3] = 15 at k=0 then 3 at k=2. The recurrence, the base case D^(-1), and the argument for why k is the outermost loop are all sound. The in-place update claim holds when no negative cycle passes through k. The negative-cycle section is accurate: the diagonal is a witness, and affected pairs are those that can reach the witness and then leave it. The overflow discussion and the checked-addition and null-sentinel C# code are consistent with the prose and with the Mermaid diagram. The complexity block (Θ(n³) time, Θ(n²) space) is correct. The two references are relevant primary and canonical sources. There are no cards, and none are needed. The prose is direct and keeps its mechanisms, so I found no concrete defect worth an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md",
+                "verdict": "CLEAN",
+                "summary": "Independent whole-note audit found no concrete error. The recurrence, loop-order argument, worked example, negative-cycle handling, overflow discussion, code and complexity are accurate and consistent. The keep is justified and no edit is needed.",
+                "page_type": "Concept — authorable prose with a protected steptrace, complexity block, mermaid diagram and C# code. Questions are absent and optional. References are present.",
+                "current_text_evidence": [
+                  {
+                    "quote": "`dist[1][3]` first drops to `15` through vertex `0` at `k = 0`, then to `3` at `k = 2` via `1→2→3`.",
+                    "line_start": 58,
+                    "reason": "I recomputed all four stages by hand. After k=0 dist[1][3]=15, and after k=2 it is 3. The final matrix in the note matches my result."
+                  },
+                  {
+                    "quote": "That decomposition is why `k` is the outermost loop.",
+                    "line_start": 40,
+                    "reason": "The note correctly explains that the stage-k reads must see the completed previous stage. It gives the concrete failure mode of reordering the loops."
+                  },
+                  {
+                    "quote": "It is a witness, not proof that `w` itself lies on a simple negative cycle.",
+                    "line_start": 203,
+                    "reason": "This is the precise negative-cycle condition. A negative diagonal entry means a negative closed walk exists. Affected pairs are those that can reach the witness and leave it."
+                  },
+                  {
+                    "quote": "`checked` turns a violated numeric bound into an `OverflowException` instead of a false shortest path.",
+                    "line_start": 199,
+                    "reason": "The null-sentinel and checked-addition design matches the overflow prose and avoids the int.MaxValue wraparound problem."
+                  },
+                  {
+                    "quote": "- [Robert W. Floyd, *Algorithm 97: Shortest Path*](https://doi.org/10.1145/367766.368168)",
+                    "line_start": 211,
+                    "reason": "The reference is a relevant primary source, formatted as a bare descriptive link. The second reference, cp-algorithms, is a canonical implementation source."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one algorithm, and its recurrence, loop order, negative cycles and overflow are tightly coupled.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is accurate and clear, and I found no concrete rule violation. The proposal makes no edits and has no feedback decisions. The keep is supported by my independent recomputation of the example and review of the full prose.",
+            "change_checks": []
+          },
+          "model_calls": 4
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T22:19:11.722775Z",
+    "checkpoint_at": "2026-11-08T22:19:15.033960Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
