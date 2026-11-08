@@ -6393,6 +6393,76 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md": {
+      "content_hash": "d9eecd2071422c9e7129bff2c28e14c56ed9dba1ea30cd4e6f7787d916b9cc4b",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "d9eecd2071422c9e7129bff2c28e14c56ed9dba1ea30cd4e6f7787d916b9cc4b",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md",
+          "verdict": "CLEAN",
+          "summary": "Independent read of the whole note found it accurate, compact and well ordered. The definition, the Eulerian contrast, the worked walkthrough, the necessary-but-insufficient checks and the TSP comparison are all correct. No edit is warranted.",
+          "page_type": "Concept — typed frontmatter, optional Questions absent (allowed), References present as bare link bullets; steptrace and complexity blocks are protected tab content.",
+          "current_text_evidence": [
+            {
+              "quote": "An Eulerian cycle asks a different question: it uses every edge exactly once and has a direct degree-based characterization.",
+              "line_start": 14,
+              "reason": "Correct contrast with Hamiltonian cycle (connected, all degrees even), so the opening separates the two problems."
+            },
+            {
+              "quote": "the branch `A-C-B` cannot continue to `D` because `B-D` is absent, so it backtracks to `C` and tries `D`.",
+              "line_start": 26,
+              "reason": "Checked edge by edge on the A-B-C-D-A plus A-C graph. The dead ends and the final A-B-C-D closed by D-A are correct."
+            },
+            {
+              "quote": "A solution is accepted only at length `n` and only if the final vertex is adjacent to the start.",
+              "line_start": 28,
+              "reason": "Gives the acceptance condition that distinguishes a cycle from a Hamiltonian path."
+            },
+            {
+              "quote": "\"formula\": \"O(n!)\",",
+              "line_start": 76,
+              "reason": "Factorial worst case for permutation backtracking. Auxiliary space O(n) for the recursion path is also sound."
+            },
+            {
+              "quote": "Passing them does not prove that a Hamiltonian cycle exists.",
+              "line_start": 108,
+              "reason": "The degree and articulation-point checks are valid necessary conditions and are correctly labelled as insufficient."
+            },
+            {
+              "quote": "A graph may even have an Eulerian cycle and no Hamiltonian cycle",
+              "line_start": 110,
+              "reason": "True, for example the bowtie graph. This is a useful pitfall."
+            },
+            {
+              "quote": "Traveling Salesman adds weights and asks which such cycle is cheapest.",
+              "line_start": 114,
+              "reason": "Accurate and brief comparison with the neighbouring problem."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: one coherent topic (Hamiltonian cycle with its backtracking, checks and comparison). Splitting would not make any part independently more useful.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -8309,7 +8379,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-08T22:17:21.273772Z",
-    "elapsed_seconds": 340.37480910000016,
+    "elapsed_seconds": 343.89622480000014,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
@@ -9793,7 +9863,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T22:23:01.648038Z",
+    "checkpoint_at": "2026-11-08T22:23:05.169454Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -15825,6 +15895,101 @@
       ],
       "source_hashes": {
         "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md": "537e1d20b4286336eb139cfb1e50625657eaa454bd1a5e7349de3ba8615a3351"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "4e3c15274b7fbd4b0369e15a04ef48c18ec19f38d3dd33e1d7a0836b611377d8": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md",
+            "verdict": "CLEAN",
+            "summary": "Independent read of the whole note found it accurate, compact and well ordered. The definition, the Eulerian contrast, the worked walkthrough, the necessary-but-insufficient checks and the TSP comparison are all correct. No edit is warranted.",
+            "page_type": "Concept — typed frontmatter, optional Questions absent (allowed), References present as bare link bullets; steptrace and complexity blocks are protected tab content.",
+            "current_text_evidence": [
+              {
+                "quote": "An Eulerian cycle asks a different question: it uses every edge exactly once and has a direct degree-based characterization.",
+                "line_start": 14,
+                "reason": "Correct contrast with Hamiltonian cycle (connected, all degrees even), so the opening separates the two problems."
+              },
+              {
+                "quote": "the branch `A-C-B` cannot continue to `D` because `B-D` is absent, so it backtracks to `C` and tries `D`.",
+                "line_start": 26,
+                "reason": "Checked edge by edge on the A-B-C-D-A plus A-C graph. The dead ends and the final A-B-C-D closed by D-A are correct."
+              },
+              {
+                "quote": "A solution is accepted only at length `n` and only if the final vertex is adjacent to the start.",
+                "line_start": 28,
+                "reason": "Gives the acceptance condition that distinguishes a cycle from a Hamiltonian path."
+              },
+              {
+                "quote": "\"formula\": \"O(n!)\",",
+                "line_start": 77,
+                "reason": "Factorial worst case for permutation backtracking. Auxiliary space O(n) for the recursion path is also sound."
+              },
+              {
+                "quote": "Passing them does not prove that a Hamiltonian cycle exists.",
+                "line_start": 110,
+                "reason": "The degree and articulation-point checks are valid necessary conditions and are correctly labelled as insufficient."
+              },
+              {
+                "quote": "A graph may even have an Eulerian cycle and no Hamiltonian cycle",
+                "line_start": 112,
+                "reason": "True, for example the bowtie graph. This is a useful pitfall."
+              },
+              {
+                "quote": "Traveling Salesman adds weights and asks which such cycle is cheapest.",
+                "line_start": 116,
+                "reason": "Accurate and brief comparison with the neighbouring problem."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: one coherent topic (Hamiltonian cycle with its backtracking, checks and comparison). Splitting would not make any part independently more useful.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "Whole-note audit found no factual, clarity or rule defects, and the keep is justified with current-text evidence. There are no edits, feedback decisions or sources to check.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md",
+          "citation_index": 3,
+          "reported_line_start": 77,
+          "resolved_line_start": 76
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md",
+          "citation_index": 4,
+          "reported_line_start": 110,
+          "resolved_line_start": 108
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md",
+          "citation_index": 5,
+          "reported_line_start": 112,
+          "resolved_line_start": 110
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md",
+          "citation_index": 6,
+          "reported_line_start": 116,
+          "resolved_line_start": 114
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md": "d9eecd2071422c9e7129bff2c28e14c56ed9dba1ea30cd4e6f7787d916b9cc4b"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -30726,211 +30891,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "b10487f268d742babc49b59ab87ef167",
-    "topic_id": "computer-science-445ddaa5",
-    "batch": {
-      "topic": "Computer Science",
-      "topic_id": "computer-science-445ddaa5",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md",
-          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Visits every graph vertex exactly once and returns to the start. Deciding existence is NP-complete.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-07-11T16:12:59.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-12T14:27:20.404Z\"\n---\n\nA Hamiltonian cycle visits every **vertex** exactly once and returns to its start. An Eulerian cycle asks a different question: it uses every edge exactly once and has a direct degree-based characterization. No polynomial-time test is known for Hamiltonian-cycle existence in general graphs. The decision problem is NP-complete.\n\nFor a graph with `n` vertices, a candidate cycle is a permutation whose consecutive vertices are adjacent, including the last and first. Backtracking explores these permutations and abandons a partial path as soon as an edge is missing or a vertex repeats.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"hamiltonian-cycle\"}\n```\n\nFor the graph with cycle edges `A-B-C-D-A` plus diagonal `A-C`, start with `A` and mark it used. Choosing `C` first leaves candidates `B` and `D`; the branch `A-C-B` cannot continue to `D` because `B-D` is absent, so it backtracks to `C` and tries `D`. The branch `A-C-D` then cannot reach unused `B`. Returning to the root and choosing `B` produces `A-B-C-D`, and `D-A` closes the cycle.\n\nThe maintained invariant is compact: the path contains distinct vertices, and every consecutive pair is an edge. A solution is accepted only at length `n` and only if the final vertex is adjacent to the start.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Hamiltonian Cycle complexity\",\n  \"variables\": {\n    \"inputSize\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of vertices in the input graph\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Best\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Time\",\n              \"formula\": \"O(n)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Estimate\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Time\",\n              \"formula\": \"distribution-dependent; exponential in general\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Worst\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Time\",\n              \"formula\": \"O(n!)\",\n              \"curveId\": \"factorial\"\n            }\n          ]\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"All executions\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# Necessary Checks and False Shortcuts\n\nEvery vertex in a Hamiltonian graph has degree at least two. Such a graph also has no articulation point because removing one vertex from the cycle leaves a path through every remaining vertex. These checks reject some impossible inputs quickly. Passing them does not prove that a Hamiltonian cycle exists.\n\nConnectivity is too weak as well. It promises a path between each pair of vertices, not one cycle through every vertex. A graph may even have an Eulerian cycle and no Hamiltonian cycle because covering edges says nothing decisive about covering vertices once.\n\n# Comparison\n\nHamiltonian cycle asks whether any cycle visits every vertex once. Traveling Salesman adds weights and asks which such cycle is cheapest. Eulerian cycle remains a separate, tractable edge-coverage problem.\n\n# References\n\n- [Reducibility Among Combinatorial Problems](https://doi.org/10.1007/978-1-4684-2001-2_9)\n- [Hamiltonian Graphs](https://mathworld.wolfram.com/HamiltonianGraph.html)\n",
-          "hash": "d9eecd2071422c9e7129bff2c28e14c56ed9dba1ea30cd4e6f7787d916b9cc4b",
-          "topic": "Computer Science",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md",
-          "outcome": "keep",
-          "reason": "I audited the whole note against its current text and standard graph theory. The Hamiltonian/Eulerian distinction and the NP-completeness claim are correct (Karp 1972, cited in References). The A-B-C-D-A plus A-C walkthrough checks out edge by edge: A-C-B dead-ends because B-D is absent, A-C-D cannot reach B, and A-B-C-D closes through D-A. The degree-at-least-two and no-articulation-point conditions are valid necessary checks. The warnings about connectivity and Eulerian graphs are accurate, since a bowtie graph is Eulerian but not Hamiltonian. The O(n!) worst case and O(n) auxiliary space are sound for backtracking. The prose is concise and has no repetition. It has no Questions section or cards, and none is required. The references are real primary or authoritative sources with bare link bullets. No native violations are listed."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md": "d9eecd2071422c9e7129bff2c28e14c56ed9dba1ea30cd4e6f7787d916b9cc4b"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-08T22:22:39.161091Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md",
-            "verdict": "CLEAN",
-            "summary": "Independent read of the whole note found it accurate, compact and well ordered. The definition, the Eulerian contrast, the worked walkthrough, the necessary-but-insufficient checks and the TSP comparison are all correct. No edit is warranted.",
-            "page_type": "Concept — typed frontmatter, optional Questions absent (allowed), References present as bare link bullets; steptrace and complexity blocks are protected tab content.",
-            "current_text_evidence": [
-              {
-                "quote": "An Eulerian cycle asks a different question: it uses every edge exactly once and has a direct degree-based characterization.",
-                "line_start": 14,
-                "reason": "Correct contrast with Hamiltonian cycle (connected, all degrees even), so the opening separates the two problems."
-              },
-              {
-                "quote": "the branch `A-C-B` cannot continue to `D` because `B-D` is absent, so it backtracks to `C` and tries `D`.",
-                "line_start": 26,
-                "reason": "Checked edge by edge on the A-B-C-D-A plus A-C graph. The dead ends and the final A-B-C-D closed by D-A are correct."
-              },
-              {
-                "quote": "A solution is accepted only at length `n` and only if the final vertex is adjacent to the start.",
-                "line_start": 28,
-                "reason": "Gives the acceptance condition that distinguishes a cycle from a Hamiltonian path."
-              },
-              {
-                "quote": "\"formula\": \"O(n!)\",",
-                "line_start": 77,
-                "reason": "Factorial worst case for permutation backtracking. Auxiliary space O(n) for the recursion path is also sound."
-              },
-              {
-                "quote": "Passing them does not prove that a Hamiltonian cycle exists.",
-                "line_start": 110,
-                "reason": "The degree and articulation-point checks are valid necessary conditions and are correctly labelled as insufficient."
-              },
-              {
-                "quote": "A graph may even have an Eulerian cycle and no Hamiltonian cycle",
-                "line_start": 112,
-                "reason": "True, for example the bowtie graph. This is a useful pitfall."
-              },
-              {
-                "quote": "Traveling Salesman adds weights and asks which such cycle is cheapest.",
-                "line_start": 116,
-                "reason": "Accurate and brief comparison with the neighbouring problem."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: one coherent topic (Hamiltonian cycle with its backtracking, checks and comparison). Splitting would not make any part independently more useful.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "Whole-note audit found no factual, clarity or rule defects, and the keep is justified with current-text evidence. There are no edits, feedback decisions or sources to check.",
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md",
-          "citation_index": 3,
-          "reported_line_start": 77,
-          "resolved_line_start": 76
-        },
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md",
-          "citation_index": 4,
-          "reported_line_start": 110,
-          "resolved_line_start": 108
-        },
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md",
-          "citation_index": 5,
-          "reported_line_start": 112,
-          "resolved_line_start": 110
-        },
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md",
-          "citation_index": 6,
-          "reported_line_start": 116,
-          "resolved_line_start": 114
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md": "d9eecd2071422c9e7129bff2c28e14c56ed9dba1ea30cd4e6f7787d916b9cc4b"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md",
-          "verdict": "CLEAN",
-          "summary": "Independent read of the whole note found it accurate, compact and well ordered. The definition, the Eulerian contrast, the worked walkthrough, the necessary-but-insufficient checks and the TSP comparison are all correct. No edit is warranted.",
-          "page_type": "Concept — typed frontmatter, optional Questions absent (allowed), References present as bare link bullets; steptrace and complexity blocks are protected tab content.",
-          "current_text_evidence": [
-            {
-              "quote": "An Eulerian cycle asks a different question: it uses every edge exactly once and has a direct degree-based characterization.",
-              "line_start": 14,
-              "reason": "Correct contrast with Hamiltonian cycle (connected, all degrees even), so the opening separates the two problems."
-            },
-            {
-              "quote": "the branch `A-C-B` cannot continue to `D` because `B-D` is absent, so it backtracks to `C` and tries `D`.",
-              "line_start": 26,
-              "reason": "Checked edge by edge on the A-B-C-D-A plus A-C graph. The dead ends and the final A-B-C-D closed by D-A are correct."
-            },
-            {
-              "quote": "A solution is accepted only at length `n` and only if the final vertex is adjacent to the start.",
-              "line_start": 28,
-              "reason": "Gives the acceptance condition that distinguishes a cycle from a Hamiltonian path."
-            },
-            {
-              "quote": "\"formula\": \"O(n!)\",",
-              "line_start": 76,
-              "reason": "Factorial worst case for permutation backtracking. Auxiliary space O(n) for the recursion path is also sound."
-            },
-            {
-              "quote": "Passing them does not prove that a Hamiltonian cycle exists.",
-              "line_start": 108,
-              "reason": "The degree and articulation-point checks are valid necessary conditions and are correctly labelled as insufficient."
-            },
-            {
-              "quote": "A graph may even have an Eulerian cycle and no Hamiltonian cycle",
-              "line_start": 110,
-              "reason": "True, for example the bowtie graph. This is a useful pitfall."
-            },
-            {
-              "quote": "Traveling Salesman adds weights and asks which such cycle is cheapest.",
-              "line_start": 114,
-              "reason": "Accurate and brief comparison with the neighbouring problem."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: one coherent topic (Hamiltonian cycle with its backtracking, checks and comparison). Splitting would not make any part independently more useful.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "Whole-note audit found no factual, clarity or rule defects, and the keep is justified with current-text evidence. There are no edits, feedback decisions or sources to check.",
-      "change_checks": []
     }
   }
 }
