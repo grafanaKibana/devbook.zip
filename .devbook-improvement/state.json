@@ -5549,6 +5549,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Cloud/Cloud.md": {
+      "content_hash": "b72f0295d3dd641e980b360d09145a16b35a331dd2f2cc72975c3d4bda4a2234",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "b72f0295d3dd641e980b360d09145a16b35a331dd2f2cc72975c3d4bda4a2234",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Cloud/Cloud.md",
+          "verdict": "CLEAN",
+          "summary": "The folder note states the operating idea (cloud moves the operating boundary rather than removing it), lists the retained responsibilities, gives decision-oriented architecture questions, and ties cloud behavior to concrete code-level failure and cost mechanisms. The prose is accurate, direct and impersonal, so edits would only churn the text.",
+          "page_type": "FolderNote — keeps tags: [FolderNote], the protected Datacore folder-map block, valid frontmatter with an allowed status, and optional Questions/References. Only a References section is present.",
+          "current_text_evidence": [
+            {
+              "quote": "It moves an application's operating boundary; it does not remove it.",
+              "line_start": 18,
+              "reason": "The opening states the core idea and its boundary immediately, with a concrete managed-database example."
+            },
+            {
+              "quote": "**Economics:** which code paths generate compute, requests, storage, transfer, and observability volume.",
+              "line_start": 33,
+              "reason": "The ownership list is concrete and covers behavior, data, configuration, resilience and cost without padding."
+            },
+            {
+              "quote": "Which provider-specific behaviors are worth accepting, and what would make migration necessary?",
+              "line_start": 45,
+              "reason": "The architecture questions support engineering judgment and name the condition that changes the decision."
+            },
+            {
+              "quote": "APIs throttle, queues redeliver, functions retry, credentials expire, and regional dependencies become unavailable.",
+              "line_start": 51,
+              "reason": "The note names specific failure mechanisms and the code-level responses they require, which keeps the machine visible."
+            },
+            {
+              "quote": "Chatty service boundaries multiply request and transfer charges.",
+              "line_start": 53,
+              "reason": "The note links cost and recovery to design. Wikilinks to sibling notes carry stated reasons rather than a bare Links section."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note is a compact hub with one coherent theme (retained responsibility on managed infrastructure). Provider, service-model, cost and recovery detail already lives in sibling notes.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -6966,7 +7026,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-08T06:19:50.150495Z",
-    "elapsed_seconds": 98.7313347,
+    "elapsed_seconds": 102.7879066,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
@@ -7044,7 +7104,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T06:21:28.881488Z",
+    "checkpoint_at": "2026-11-08T06:21:32.938059Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
@@ -26182,106 +26242,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "56e8c2737af74831bbd5ff5d77b67fd5",
-    "topic_id": "cloud-b977b950",
-    "batch": {
-      "topic": "Cloud",
-      "topic_id": "cloud-b977b950",
-      "notes": [
-        {
-          "path": "Vault/Home/Cloud/Cloud.md",
-          "content": "---\nicon: cloudy\norder: 90\ncolor: \"#3b82f6\"\ntopic: [Cloud]\nsubtopic: []\nsummary: \"Using managed infrastructure without losing sight of the application responsibilities that remain.\"\ntags: [FolderNote]\npublish: true\nstatus: Creation\npriority: High\nlevel: [\"2\"]\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.344Z\"\n---\n\nCloud computing turns compute, storage, networking, and higher-level platforms into services that can be provisioned on demand. It moves an application's operating boundary; it does not remove it. A managed database can eliminate host maintenance while leaving schema design, access control, consistency, recovery, service limits, and cost with the application team.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# What the Application Team Still Owns\n\nThe exact split changes by service model, but several responsibilities remain with the system regardless of provider:\n\n- **Application behavior:** correctness, authorization, input validation, idempotency, and safe retries.\n- **Data:** classification, access policy, retention, consistency, migration, backup requirements, and restore validation.\n- **Service configuration:** region, capacity, scaling limits, network exposure, encryption settings, and dependency timeouts.\n- **Resilience:** failure handling, recovery objectives, degraded modes, and dependency fallbacks.\n- **Economics:** which code paths generate compute, requests, storage, transfer, and observability volume.\n\n[[IaaS, PaaS, SaaS, CaaS]] shows how this boundary moves as the provider manages more of the stack.\n\n# Architecture Questions Before Product Names\n\nStart from the workload contract:\n\n1. What kind of execution is required: request-driven service, event handler, batch job, container, or VM-bound process?\n2. What data model, consistency, transaction scope, retention, and query patterns must the system support?\n3. Which latency, throughput, availability, recovery point, and recovery time targets are real requirements?\n4. Which identity, residency, compliance, and network boundaries are fixed by the organization?\n5. Which provider-specific behaviors are worth accepting, and what would make migration necessary?\n\n[[Providers]] introduces AWS, Azure, and Google Cloud without treating similarly named products as equivalent. Product documentation must still confirm regional support, quotas, lifecycle, failure semantics, and price before a service becomes an architecture assumption.\n\n# Cloud Behavior Appears in Code\n\nCloud failures are ordinary distributed-system failures. APIs throttle, queues redeliver, functions retry, credentials expire, and regional dependencies become unavailable. The application therefore needs bounded retries, backpressure, idempotent side effects, observable dependency calls, and explicit timeout behavior. Managed services reduce infrastructure work but cannot infer these application semantics.\n\nCost and recovery also shape code. Chatty service boundaries multiply request and transfer charges. Unbounded telemetry or retention grows with traffic. A recovery design may require replayable events, compatible schemas, and writes that can be retried safely. [[Cloud Cost Management]] develops the cost side; [[Disaster Recovery]] connects RPO and RTO targets to application design.\n\n# References\n\n- [NIST SP 800-145: The NIST Definition of Cloud Computing](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-145.pdf)\n",
-          "hash": "b72f0295d3dd641e980b360d09145a16b35a331dd2f2cc72975c3d4bda4a2234",
-          "topic": "Cloud",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Cloud/Cloud.md",
-          "outcome": "keep",
-          "reason": "Audited the whole folder note. The opening defines cloud computing and the key boundary (operating responsibility shifts but remains). The ownership list covers application behavior, data, configuration, resilience and economics. The architecture questions are decision-oriented and the code-behavior section names concrete failure mechanisms: throttling, redelivery, retries, expiring credentials, idempotency and cost multiplication. This agrees with NIST SP 800-145 and standard shared-responsibility guidance. The Datacore map block is intact. Frontmatter is valid and the status is allowed. The single reference is an authoritative primary source. No Qards are present, and none are required. Wikilinks point to sibling topics with stated reasons. The voice is impersonal and direct, with no padding, so an edit would only churn the text."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Cloud/Cloud.md": "b72f0295d3dd641e980b360d09145a16b35a331dd2f2cc72975c3d4bda4a2234"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Cloud/Cloud.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-08T06:21:11.646643Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "Independent whole-note audit found no accuracy, clarity, structure or rules problems. The keep is justified and no edits were proposed.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/Cloud/Cloud.md",
-          "verdict": "CLEAN",
-          "summary": "The folder note states the operating idea (cloud moves the operating boundary rather than removing it), lists the retained responsibilities, gives decision-oriented architecture questions, and ties cloud behavior to concrete code-level failure and cost mechanisms. The prose is accurate, direct and impersonal, so edits would only churn the text.",
-          "page_type": "FolderNote — keeps tags: [FolderNote], the protected Datacore folder-map block, valid frontmatter with an allowed status, and optional Questions/References. Only a References section is present.",
-          "current_text_evidence": [
-            {
-              "quote": "It moves an application's operating boundary; it does not remove it.",
-              "line_start": 18,
-              "reason": "The opening states the core idea and its boundary immediately, with a concrete managed-database example."
-            },
-            {
-              "quote": "**Economics:** which code paths generate compute, requests, storage, transfer, and observability volume.",
-              "line_start": 33,
-              "reason": "The ownership list is concrete and covers behavior, data, configuration, resilience and cost without padding."
-            },
-            {
-              "quote": "Which provider-specific behaviors are worth accepting, and what would make migration necessary?",
-              "line_start": 45,
-              "reason": "The architecture questions support engineering judgment and name the condition that changes the decision."
-            },
-            {
-              "quote": "APIs throttle, queues redeliver, functions retry, credentials expire, and regional dependencies become unavailable.",
-              "line_start": 51,
-              "reason": "The note names specific failure mechanisms and the code-level responses they require, which keeps the machine visible."
-            },
-            {
-              "quote": "Chatty service boundaries multiply request and transfer charges.",
-              "line_start": 53,
-              "reason": "The note links cost and recovery to design. Wikilinks to sibling notes carry stated reasons rather than a bare Links section."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note is a compact hub with one coherent theme (retained responsibility on managed infrastructure). Provider, service-model, cost and recovery detail already lives in sibling notes.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
     }
   }
 }
