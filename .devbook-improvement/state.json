@@ -8307,15 +8307,16 @@
     "version": 1,
     "id": "b10487f268d742babc49b59ab87ef167",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-08T22:17:21.273772Z",
-    "elapsed_seconds": 282.4409970000001,
+    "elapsed_seconds": 287.0316516000001,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md",
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md"
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search.md"
     ],
     "accepted_records": [
       {
@@ -9721,10 +9722,78 @@
             "prepared_at": "2026-11-08T22:19:50.758851Z"
           }
         }
+      },
+      {
+        "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note. The opening states the mechanism: the frontier is keyed by h(n) alone, and g(n) is dropped. The Visualization tab matches the C# code: the key is h(v), edge cost is used only to report the path cost, and the visited set is marked at enqueue. The A* relationship (f=g+h with g=0 gives Greedy) is correct. The failure modes are accurate: a low-h path can be long, a concave obstacle traps the search, and a visited set bounds revisits on finite graphs but not on infinite ones. The Mermaid control flow agrees with the code. The complexity entries (best O(b·m), worst O(b^m) in the tree-search model with branching factor b and depth m) follow the standard textbook treatment. The prose is direct and avoids padding. There are no cards, and none are needed. The references are relevant: Doran and Michie's Graph Traverser paper and Amit Patel's heuristics page. No known violations are unresolved, and no defect warrants an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search.md",
+                "verdict": "CLEAN",
+                "summary": "Independent whole-note audit found no accuracy, clarity or rules defect. The mechanism (frontier keyed by h alone, no g), the 12 versus 8 comparison with A*, the f=g+h with g=0 relationship, the failure modes, the code, the diagram and the complexity entries are consistent and correct. A keep is justified.",
+                "page_type": "Concept — no required sections; Questions are absent and optional; References present as bare descriptive links; code fences carry language identifiers; protected steptrace and complexity blocks intact.",
+                "current_text_evidence": [
+                  {
+                    "quote": "It orders the frontier only by `h(n)`, the estimated distance remaining, and expands whichever node currently looks closest to the target.",
+                    "line_start": 14,
+                    "reason": "The opening states the operating idea quickly and precisely, and it matches the code, where the priority key is heuristic(v)."
+                  },
+                  {
+                    "quote": "Greedy knows both routes point toward the same goal but never charges itself for the four extra steps already taken.",
+                    "line_start": 26,
+                    "reason": "Cost 12 versus cost 8 gives exactly four extra steps, so the comparison with A* is arithmetically and conceptually sound."
+                  },
+                  {
+                    "quote": "Setting `g` to zero collapses `f` to `h`, which is precisely Greedy Best-First",
+                    "line_start": 32,
+                    "reason": "This is the correct family relationship between A* and Greedy, and it works as a recall anchor."
+                  },
+                  {
+                    "quote": "The only property this maintains is that the next node expanded is the one the heuristic currently rates closest to the goal.",
+                    "line_start": 30,
+                    "reason": "The invariant is stated plainly, followed by the open-map versus obstacle contrast. The explanation order moves from mechanism to consequence."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one algorithm. The visualization, complexity, failure modes and implementation all serve the same idea and are not independently useful topics.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is accurate, clearly ordered and free of concrete rule violations. There are no edits or owner feedback to check, and the keep is supported by current-text evidence.",
+            "change_checks": []
+          },
+          "model_calls": 8
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T22:22:03.714225Z",
+    "checkpoint_at": "2026-11-08T22:22:08.304880Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
