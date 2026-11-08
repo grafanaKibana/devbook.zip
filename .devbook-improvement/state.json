@@ -17900,10 +17900,11 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-08T22:19:50.758851Z",
-    "phase": "commit_created",
-    "updated_at": "2026-11-08T22:28:32Z",
+    "phase": "branch_updated",
+    "updated_at": "2026-11-08T22:28:37Z",
     "evidence": {
-      "commit_sha": "9627085ff5bb7d4c65d0c35e2d52e1d8941ee59c"
+      "commit_sha": "9627085ff5bb7d4c65d0c35e2d52e1d8941ee59c",
+      "branch_sha": "9627085ff5bb7d4c65d0c35e2d52e1d8941ee59c"
     }
   },
   "export_operations": {
