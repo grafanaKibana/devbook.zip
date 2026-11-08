@@ -7623,10 +7623,10 @@
   "focused_workload": {
     "version": 1,
     "id": "a3c3eac724bf4b6c8037306f6a4e6530",
-    "status": "active",
-    "phase": "selecting",
+    "status": "sealed",
+    "phase": "sealed",
     "started_at": "2026-11-08T13:40:02.820509Z",
-    "elapsed_seconds": 706.7619940999997,
+    "elapsed_seconds": 710.8069728999997,
     "calls_reserved": 20,
     "responses_received": 20,
     "attempted_paths": [
@@ -9620,7 +9620,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T13:51:49.582018Z",
+    "checkpoint_at": "2026-11-08T13:51:53.626996Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -10344,7 +10344,9 @@
         "check": "npm --prefix Web run test -- custom/transformers/publishing.test.ts",
         "result": "passed"
       }
-    ]
+    ],
+    "stop_reason": "call_limit",
+    "sealed_at": "2026-11-08T13:51:53.626997Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
