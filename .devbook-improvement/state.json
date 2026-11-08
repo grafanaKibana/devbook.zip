@@ -8432,11 +8432,11 @@
     "version": 1,
     "id": "b10487f268d742babc49b59ab87ef167",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-08T22:17:21.273772Z",
-    "elapsed_seconds": 423.54459570000023,
+    "elapsed_seconds": 435.1115729000003,
     "calls_reserved": 13,
-    "responses_received": 12,
+    "responses_received": 13,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md",
@@ -10071,7 +10071,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T22:24:24.817826Z",
+    "checkpoint_at": "2026-11-08T22:24:36.384803Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -31100,5 +31100,54 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "b10487f268d742babc49b59ab87ef167",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Finds the greatest s-to-t throughput in a capacitated network by repeatedly augmenting paths in a residual graph.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-07-10T06:24:36.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-10T08:56:49.582Z\"\n---\n\nA directed network carries a divisible resource such as water or bandwidth from a source `s` to a sink `t`. Every edge `u → v` has a **capacity** that bounds what it can carry. A valid flow stays within those capacities, and every vertex other than `s` and `t` sends out exactly what it receives. The **maximum-flow** problem asks for the greatest total rate leaving `s` and reaching `t`.\n\nPushing flow along any `s → t` path with spare capacity looks reasonable, but a pure [[Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy]] choice can stop below the optimum. An early path may saturate an edge that the best solution routes around, leaving no forward path that can correct the choice.\n\nThe **residual graph** makes that choice reversible. An edge carrying flow `f` out of capacity `c` contributes a forward arc with residual `c − f`, the room left, and a backward arc with residual `f`, the amount that can be retracted. Traversing a backward arc cancels earlier flow and routes it elsewhere. The algorithm repeatedly finds an augmenting `s → t` path in the residual graph and pushes its bottleneck capacity. When no such path remains, the flow value equals the capacity of the minimum `s`-`t` cut.\n\nThe transition worth animating is a backward arc in the residual graph retracting an earlier, suboptimal augmenting path.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"maximum-flow\"}\n```\n\nTake the unit-capacity network `s→a, s→b, a→b, a→t, b→t`; its maximum flow is 2, since only `s→a` and `s→b` leave the source. A greedy first augmentation along `s → a → b → t` saturates all three of its edges and reports flow 1. Every remaining forward path is now blocked — `s→a` and `b→t` are full — so a forward-only algorithm stops one unit short.\n\nThe residual graph reopens the choice. Sending one unit `a → b` created a backward arc `b → a` with residual 1. The path `s → b → a → t` uses that backward arc: `b → a` retracts the earlier `a → b` unit and reroutes it, so `a → b` returns to zero while `s→a→t` and `s→b→t` each carry one unit. Flow reaches 2. The backward arc is the entire reason a locally-committed, wrong routing decision can be undone; forward-only residuals leave no legal move to reach that state, which is exactly why greedy-without-residuals returns a value below the maximum.\n\nAn `s`-`t` **cut** splits the vertices into `S` (containing `s`) and `T` (containing `t`); its capacity is the total capacity of the original edges crossing `S → T`. Any flow value is bounded by any cut capacity, because everything reaching `t` must cross the partition. The **max-flow min-cut theorem** sharpens that to equality: the maximum flow equals the minimum cut capacity.\n\nThe theorem also names the cut. When no augmenting path remains, let `S` be the vertices still reachable from `s` in the final residual graph; `t ∉ S`, or a path would exist. Every original edge from `S` to `T` is saturated — an unsaturated one would keep a forward residual arc and extend reachability — and no flow crosses back from `T` to `S`, so the cut capacity equals the flow value. Reachability in the residual graph is therefore a checkable optimality certificate: it both proves the flow is maximal and reads off the bottleneck edges. The cut side `S` comes from the *residual* reachable set, but the reported edges are the *original* forward edges out of `S`.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Maximum Flow complexity\",\n  \"variables\": {\n    \"edgeCount\": {\n      \"symbol\": \"m\",\n      \"description\": \"number of edges\"\n    },\n    \"flowValue\": {\n      \"symbol\": \"f\",\n      \"description\": \"integral maximum-flow value\"\n    },\n    \"vertexCount\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of vertices\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Ford–Fulkerson (any augmenting path)\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Time\",\n              \"formula\": \"O(m·f) for integral capacities\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Edmonds–Karp (BFS shortest path)\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Time\",\n              \"formula\": \"O(n·m²)\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Dinic (level graph + blocking flow)\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Time\",\n              \"formula\": \"O(n²·m)\"\n            }\n          ]\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Ford–Fulkerson (any augmenting path)\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n + m)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Edmonds–Karp (BFS shortest path)\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n + m)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Dinic (level graph + blocking flow)\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n + m)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}\n```\n\nThe chart describes adjacency-list implementations. The drawer's capacity-matrix Edmonds–Karp scans `V²` cells per BFS and stores a `V × V` residual matrix, changing its bounds to `O(V³E)` time and `O(V²)` auxiliary space. It returns the maximum-flow value only; opposite-direction capacity and reverse cancellation share residual cells, so it does not reconstruct flow per original antiparallel edge.\n\n%% endtabs %%\n\n# Where the Guarantees Break\n\nThe residual mechanism exposes two sharp boundaries.\n\n**Irrational capacities with adversarial path choice.** Plain Ford–Fulkerson may choose augmenting paths with ever-smaller bottlenecks whose sum converges below the true maximum. The loop never terminates. This comes from the interaction between path selection and irrational capacities.\n\n**Omitting the backward arcs.** A forward-only residual graph cannot undo earlier flow. On the `s→a→b→t` network above, dropping the paired reverse arcs leaves the algorithm stalled at flow 1 because `s → b → a → t` never appears. The result looks valid and is silently suboptimal. A common implementation guard stores paired edges consecutively, making the reverse of edge `i` available as `i XOR 1`. Adding flow to one arc then subtracts it from its partner.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Augmenting-path loop\n>\n> ```mermaid\n> flowchart TD\n>   A[Zero flow; residual = capacities] --> B{Augmenting path s→t in residual?}\n>   B -->|No| C[Return flow; min cut = edges out of s-reachable set]\n>   B -->|Yes| D[Bottleneck = min residual on the path]\n>   D --> E[Add bottleneck to forward arcs, subtract on reverse arcs]\n>   E --> B\n> ```\n\n> [!EXAMPLE]- Capacity-matrix Edmonds–Karp in C#\n>\n> ```csharp\n> public static long MaxFlow(long[,] capacity, int source, int sink)\n> {\n>     if (source == sink)\n>     {\n>         throw new ArgumentException(\"Source and sink must differ.\");\n>     }\n>\n>     int n = capacity.GetLength(0);\n>     var residual = (long[,])capacity.Clone();\n>     long maxFlow = 0;\n>\n>     while (true)\n>     {\n>         // BFS for a shortest augmenting path; parent[v] is v's predecessor.\n>         var parent = new int[n];\n>         Array.Fill(parent, -1);\n>         parent[source] = source;\n>         var queue = new Queue<int>();\n>         queue.Enqueue(source);\n>\n>         while (queue.Count > 0 && parent[sink] == -1)\n>         {\n>             int u = queue.Dequeue();\n>             for (int v = 0; v < n; v++)\n>             {\n>                 if (parent[v] == -1 && residual[u, v] > 0)\n>                 {\n>                     parent[v] = u;\n>                     queue.Enqueue(v);\n>                 }\n>             }\n>         }\n>\n>         if (parent[sink] == -1)\n>         {\n>             break; // No augmenting path: the flow is maximal.\n>         }\n>\n>         long bottleneck = long.MaxValue;\n>         for (int v = sink; v != source; v = parent[v])\n>         {\n>             bottleneck = Math.Min(bottleneck, residual[parent[v], v]);\n>         }\n>\n>         for (int v = sink; v != source; v = parent[v])\n>         {\n>             int u = parent[v];\n>             residual[u, v] -= bottleneck; // forward arc down\n>             residual[v, u] = checked(residual[v, u] + bottleneck); // reverse arc up\n>         }\n>\n>         maxFlow = checked(maxFlow + bottleneck);\n>     }\n>\n>     return maxFlow;\n> }\n> ```\n> This compact matrix variant accepts `capacity[u, v]` and returns only the maximum-flow value. One opposite-direction residual entry combines cancellation capacity with any original antiparallel capacity. Reconstructing flow for each original edge therefore requires paired edge objects.\n\n# Comparison\n\nEdmonds–Karp is the simplest fixed path-selection baseline. It chooses augmenting paths with [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS|BFS]], while plain Ford–Fulkerson may use [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS|DFS]] or another rule. Dinic keeps the residual-path model and batches augmentations. Its extra machinery pays off on larger networks and matching workloads. Ford–Fulkerson is the model to reason from, not the default implementation, because arbitrary path selection can fail to terminate on irrational capacities.\n\n# References\n\n- [Maximal Flow Through a Network](https://doi.org/10.4153/CJM-1956-045-5)\n- [Maximum flow: Ford–Fulkerson and Edmonds–Karp (cp-algorithms)](https://cp-algorithms.com/graph/edmonds_karp.html)\n",
+          "hash": "39a2218ec050410f01974d0be830067653425fdf618c761e944aff200c01b1a3",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note. The worked example is correct: with unit capacities on s→a, s→b, a→b, a→t and b→t, the greedy path s→a→b→t blocks all forward paths, and the backward arc b→a lets s→b→a→t reach the maximum of 2. The min-cut argument is sound: S is the residual-reachable set, forward edges out of S are saturated, and no flow crosses back. The complexity entries are standard: Ford–Fulkerson O(m·f), Edmonds–Karp O(nm²), Dinic O(n²m), and O(V³E) for the matrix variant, which scans V² cells per BFS across O(VE) augmentations. The non-termination caveat for irrational capacities, the i XOR 1 paired-edge idiom and the C# code (including its stated limits on antiparallel edges) are accurate. There are no known violations and no cards. The prose explains the mechanism in a sound order, and the references are relevant. I found no defect worth an edit."
+        }
+      ],
+      "feedback": [],
+      "decisions": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow.md": "39a2218ec050410f01974d0be830067653425fdf618c761e944aff200c01b1a3"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-08T22:24:36.384794Z"
   }
 }
