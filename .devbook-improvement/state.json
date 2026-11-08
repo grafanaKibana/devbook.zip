@@ -8252,9 +8252,9 @@
     "version": 1,
     "id": "b10487f268d742babc49b59ab87ef167",
     "status": "active",
-    "phase": "validation_reserved",
+    "phase": "validation_completed",
     "started_at": "2026-11-08T22:17:21.273772Z",
-    "elapsed_seconds": 173.16398490000003,
+    "elapsed_seconds": 216.98422880000004,
     "calls_reserved": 6,
     "responses_received": 6,
     "attempted_paths": [
@@ -8411,7 +8411,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T22:20:14.437214Z",
+    "checkpoint_at": "2026-11-08T22:20:58.257456Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
