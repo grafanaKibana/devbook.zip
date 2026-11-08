@@ -7444,10 +7444,10 @@
     "version": 1,
     "id": "a3c3eac724bf4b6c8037306f6a4e6530",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "review_reserved",
     "started_at": "2026-11-08T13:40:02.820509Z",
-    "elapsed_seconds": 539.5618764,
-    "calls_reserved": 15,
+    "elapsed_seconds": 543.4290833,
+    "calls_reserved": 16,
     "responses_received": 15,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Algorithms.md",
@@ -9218,7 +9218,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T13:49:02.381898Z",
+    "checkpoint_at": "2026-11-08T13:49:06.249105Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -9243,7 +9243,7 @@
       "pr": null
     },
     "base_sha": "67caf2e374f53e8772b86b8ea0f881d74e784fa1",
-    "reservation_deadline": "2026-11-08T14:03:46.752388Z",
+    "reservation_deadline": "2026-11-08T14:04:05.893034Z",
     "last_request": {
       "topic": "computer-science-445ddaa5",
       "generation": 1,
