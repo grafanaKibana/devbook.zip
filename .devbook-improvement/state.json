@@ -7149,11 +7149,11 @@
     "version": 1,
     "id": "56e8c2737af74831bbd5ff5d77b67fd5",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-08T06:19:50.150495Z",
-    "elapsed_seconds": 231.38089199999993,
+    "elapsed_seconds": 240.09730209999995,
     "calls_reserved": 9,
-    "responses_received": 8,
+    "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/Cloud/Cloud Cost Management.md",
       "Vault/Home/Cloud/Cloud.md",
@@ -7456,7 +7456,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T06:23:41.531045Z",
+    "checkpoint_at": "2026-11-08T06:23:50.247455Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
@@ -26669,5 +26669,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "56e8c2737af74831bbd5ff5d77b67fd5",
+    "topic_id": "cloud-b977b950",
+    "batch": {
+      "topic": "Cloud",
+      "topic_id": "cloud-b977b950",
+      "notes": [
+        {
+          "path": "Vault/Home/Cloud/Providers.md",
+          "content": "---\ntopic: [Cloud]\nsubtopic: []\nsummary: \"A developer-oriented introduction to AWS, Azure, and Google Cloud and the constraints that should choose between them.\"\nlevel: [\"2\"]\npriority: Medium\nstatus: Creation\npublish: true\ncreated: \"2026-08-16T07:07:52.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-08-20T20:41:15.510Z\"\n---\n\nAWS, Microsoft Azure, and Google Cloud expose the same broad capability families: compute, storage, databases, messaging, identity, networking, observability, analytics, and AI. They are not interchangeable implementations. Each provider has different APIs, identity conventions, regions, quotas, pricing meters, consistency guarantees, and failure behavior.\n\n# Quick Orientation\n\n| Provider | Developer entry point | Architecture guidance | .NET integration |\n| --- | --- | --- | --- |\n| AWS | Service APIs grouped across compute, storage, data, integration, and AI | AWS Well-Architected Framework and service decision guides | AWS SDK for .NET packages and the AWS credential provider chain |\n| Microsoft Azure | Services integrated with Microsoft Entra identity and the wider Microsoft platform | Azure Architecture Center and Azure Well-Architected Framework | Azure SDK for .NET packages, `DefaultAzureCredential`, and managed identities |\n| Google Cloud | Managed compute, data, container, analytics, and AI services | Google Cloud Well-Architected Framework | Google Cloud .NET client libraries and Application Default Credentials |\n\nA familiar ecosystem is useful, but it is not sufficient. The exact managed-service contract still needs to fit the workload.\n\n# Representative Capability Map\n\n| Capability | AWS | Azure | Google Cloud |\n| --- | --- | --- | --- |\n| Managed web or container application | App Runner, ECS with Fargate | App Service, Container Apps | Cloud Run |\n| Event-driven functions | Lambda | Functions | Cloud Run functions |\n| Object storage | S3 | Blob Storage | Cloud Storage |\n| Managed relational database | RDS, Aurora | Azure SQL, Azure Database for PostgreSQL | Cloud SQL, AlloyDB |\n| Managed messaging | SQS, SNS, EventBridge | Service Bus, Event Grid, Event Hubs | Pub/Sub |\n| Foundation-model platform | Bedrock | Azure OpenAI, Microsoft Foundry | Vertex AI |\n\nThe table translates categories, not guarantees. A queue is not defined only by being a queue: delivery, ordering, replay, transaction, and dead-letter behavior decide whether it fits. The same caution applies to databases, functions, identity, and AI services.\n\n# How to Choose\n\n1. **Honor fixed constraints first.** Organization identity, compliance, data residency, procurement, and existing network boundaries can remove options before technical comparison begins.\n2. **Compare the critical managed services.** Select by the transaction, consistency, scaling, integration, and recovery contracts the application actually needs.\n3. **Include developer workflow.** SDK quality, local debugging, authentication, deployment feedback, observability, and team experience affect delivery and incident diagnosis.\n4. **Model the complete cost.** Include steady capacity, requests, data retention, transfer, observability, support, and the recovery posture required by the system.\n5. **Name provider dependencies.** Identity, database semantics, messaging behavior, and control-plane configuration usually create more lock-in than the application executable.\n\nDo not build a lowest-common-denominator cloud abstraction without a real multi-provider requirement. Keep business logic independent of provider SDKs where a normal application boundary already exists, but let infrastructure adapters use the selected provider directly. Add another provider only when an explicit availability, regulatory, acquisition, or migration requirement justifies the extra system.\n\n# References\n\n- [AWS Well-Architected Framework](https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html)\n- [Azure Architecture Center](https://learn.microsoft.com/en-us/azure/architecture/)\n- [Google Cloud Well-Architected Framework](https://cloud.google.com/architecture/framework)\n",
+          "hash": "927ecb74aaa888998cd20e09947db12c68c740f80b7474b9e7d69265b24a6789",
+          "topic": "Cloud",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Cloud/Providers.md",
+          "outcome": "keep",
+          "reason": "Read the whole note: the opening, both comparison tables, the five-step selection list, the closing lock-in and abstraction guidance, and the three references. The opening makes the main point that capability families match across providers but implementations do not. The Quick Orientation table correctly pairs each provider with its architecture guidance and .NET integration: AWS credential provider chain, DefaultAzureCredential with managed identities, and Google Application Default Credentials. The capability map lists real service names for each provider, including Cloud Run functions and Microsoft Foundry, and states that it translates categories, not guarantees. The selection steps put fixed constraints first and then cover services, workflow, cost and lock-in, with a clear boundary on multi-cloud abstraction. The note has no Questions section, which is optional. The references are three official, topic-specific bare links. The known_violations list is empty and no cards are flagged. I found no factual error or clarity defect, and I did not re-fetch the sources. Edits would be churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Cloud/Providers.md": "927ecb74aaa888998cd20e09947db12c68c740f80b7474b9e7d69265b24a6789"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Cloud/Providers.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-08T06:23:50.247445Z"
   }
 }
