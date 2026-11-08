@@ -6578,6 +6578,56 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md": {
+      "content_hash": "a87194c58bf9ac47fa3b31a9c5424b6bd5731959cfe34ac2da5508e8c0f1e010",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "a87194c58bf9ac47fa3b31a9c5424b6bd5731959cfe34ac2da5508e8c0f1e010",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md",
+          "verdict": "CLEAN",
+          "summary": "I read the whole note independently. The Prim walk-through, cut property, exchange argument, complexity bounds, edge cases and C# code are accurate. The explanation order is sound: definition, idea, proof, algorithms, complexity, where the definition bends, code, comparison. No concrete defect justifies an edit.",
+          "page_type": "Concept. Authorable prose with protected tab, steptrace, complexity, mermaid and csharp fences. Questions are absent, which is optional. There is one reference.",
+          "current_text_evidence": [
+            {
+              "quote": "The run ends with five edges totaling 13.",
+              "line_start": 30,
+              "reason": "Rechecked on the graph: Prim takes A-C 2, B-C 1, B-D 5, D-E 2 and E-F 3, which sum to 13. A-B is correctly skipped."
+            },
+            {
+              "quote": "so it contains another crossing edge `f` with `weight(f) ≥ weight(e)`",
+              "line_start": 32,
+              "reason": "The exchange argument is valid because e is the lightest crossing edge, so it supports the cut property."
+            },
+            {
+              "quote": "The resulting `A`-to-`C` tree path also costs 6, even though the discarded direct edge costs 4.",
+              "line_start": 171,
+              "reason": "The triangle example correctly separates MST from shortest paths."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: MST, the cut property, Prim, Kruskal and their edge cases form one coherent topic. Kruskal and Borůvka already have their own notes.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -8494,7 +8544,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-08T22:17:21.273772Z",
-    "elapsed_seconds": 524.3471584000002,
+    "elapsed_seconds": 528.6676966000002,
     "calls_reserved": 16,
     "responses_received": 16,
     "attempted_paths": [
@@ -10206,7 +10256,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T22:26:05.620390Z",
+    "checkpoint_at": "2026-11-08T22:26:09.940928Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -16333,6 +16383,75 @@
       ],
       "source_hashes": {
         "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md": "d9eecd2071422c9e7129bff2c28e14c56ed9dba1ea30cd4e6f7787d916b9cc4b"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "9212de3dfc5c4e4dd26013faa11bf3aaff3bf5b59c889af20ba5a152331ba376": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md",
+            "verdict": "CLEAN",
+            "summary": "I read the whole note independently. The Prim walk-through, cut property, exchange argument, complexity bounds, edge cases and C# code are accurate. The explanation order is sound: definition, idea, proof, algorithms, complexity, where the definition bends, code, comparison. No concrete defect justifies an edit.",
+            "page_type": "Concept. Authorable prose with protected tab, steptrace, complexity, mermaid and csharp fences. Questions are absent, which is optional. There is one reference.",
+            "current_text_evidence": [
+              {
+                "quote": "The run ends with five edges totaling 13.",
+                "line_start": 23,
+                "reason": "Rechecked on the graph: Prim takes A-C 2, B-C 1, B-D 5, D-E 2 and E-F 3, which sum to 13. A-B is correctly skipped."
+              },
+              {
+                "quote": "so it contains another crossing edge `f` with `weight(f) ≥ weight(e)`",
+                "line_start": 25,
+                "reason": "The exchange argument is valid because e is the lightest crossing edge, so it supports the cut property."
+              },
+              {
+                "quote": "The resulting `A`-to-`C` tree path also costs 6, even though the discarded direct edge costs 4.",
+                "line_start": 59,
+                "reason": "The triangle example correctly separates MST from shortest paths."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: MST, the cut property, Prim, Kruskal and their edge cases form one coherent topic. Kruskal and Borůvka already have their own notes.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The single note is accurate and clear, with no known violations and no concrete defect. The keep is justified and no edits were proposed.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md",
+          "citation_index": 0,
+          "reported_line_start": 23,
+          "resolved_line_start": 30
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md",
+          "citation_index": 1,
+          "reported_line_start": 25,
+          "resolved_line_start": 32
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md",
+          "citation_index": 2,
+          "reported_line_start": 59,
+          "resolved_line_start": 171
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md": "a87194c58bf9ac47fa3b31a9c5424b6bd5731959cfe34ac2da5508e8c0f1e010"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -31234,165 +31353,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "b10487f268d742babc49b59ab87ef167",
-    "topic_id": "computer-science-445ddaa5",
-    "batch": {
-      "topic": "Computer Science",
-      "topic_id": "computer-science-445ddaa5",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md",
-          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"The cheapest cycle-free edge set connecting every vertex of a weighted undirected graph, built greedily by Kruskal's or Prim's.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-06-20T05:33:50.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.334Z\"\n---\n\nConnecting a set of sites with the least total cable means reaching every site without paying for a redundant loop. A spanning tree does exactly that: it touches all `V` vertices, contains no cycle, and has `V − 1` edges. A *minimum* spanning tree (MST) is the spanning tree with the smallest total edge weight.\n\nPrim's and Kruskal's are [[Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy]] constructions. Each accepts an edge that is safe at that moment and never revisits the choice.\n\nThe cut property is what makes those local choices trustworthy: it certifies that each chosen edge belongs to some MST. Both algorithms require a connected, undirected graph. Under that condition, repeatedly taking the cheapest safe edge produces a globally minimum tree.\n\n**Core condition:** connected, undirected, weighted graph → repeatedly accept a cut-certified safe edge without closing a cycle → `V − 1` edges of minimum total weight. Prim chooses the lightest edge crossing out of its growing tree. Kruskal chooses the lightest edge joining two current components.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"prim\",\"start\":\"A\",\"nodes\":[{\"id\":\"A\"},{\"id\":\"B\"},{\"id\":\"C\"},{\"id\":\"D\"},{\"id\":\"E\"},{\"id\":\"F\"}],\"edges\":[{\"from\":\"A\",\"to\":\"B\",\"weight\":4},{\"from\":\"A\",\"to\":\"C\",\"weight\":2},{\"from\":\"B\",\"to\":\"C\",\"weight\":1},{\"from\":\"B\",\"to\":\"D\",\"weight\":5},{\"from\":\"C\",\"to\":\"D\",\"weight\":8},{\"from\":\"C\",\"to\":\"E\",\"weight\":10},{\"from\":\"D\",\"to\":\"E\",\"weight\":2},{\"from\":\"D\",\"to\":\"F\",\"weight\":6},{\"from\":\"E\",\"to\":\"F\",\"weight\":3}]}\n```\n\nEvery step splits the vertices into two groups — those already in the green tree and those still outside — and adds the single minimum-weight edge crossing that boundary. From `{A}` the crossing edges are `A–C` (2) and `A–B` (4), so `C` joins first. From `{A, C}` the frontier now includes `B–C` (1), lighter than the still-available `A–B` (4); the algorithm takes `B–C` and pulls in `B`. That is the whole idea: the cheapest edge leaving the current tree, wherever it sits, is the one added, and the cut property proves it belongs to some MST, so the pick never has to be undone. Once `A`, `B`, and `C` are all inside, the edge `A–B` (4) lies entirely within the tree, crosses no boundary, and is skipped — adding it would close a cycle. The run ends with five edges totaling 13.\n\nA *cut* partitions the vertices into two non-empty groups; an edge *crosses* the cut when its endpoints fall on opposite sides. The cut property states: for any cut, the minimum-weight edge crossing it belongs to some MST. The reason is an exchange argument — suppose a minimum tree `T` omits the lightest crossing edge `e`. Adding `e` to `T` closes exactly one cycle, and that cycle must leave and re-enter the cut, so it contains another crossing edge `f` with `weight(f) ≥ weight(e)`. Replacing `f` with `e` yields a spanning tree no heavier than `T`, so a minimum one can always include `e`.\n\nBoth algorithms are this property applied to a different cut each step:\n\n- **Prim's** keeps one growing tree and uses the cut between in-tree and out-of-tree vertices. A [[Home/Computer Science/Data Structures/Trees/Heap-like/Heap|min-priority queue]] returns the next crossing edge.\n- **Kruskal's** scans edges by weight and uses a [[Home/Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]]—the [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] structure—to reject edges that would close a cycle.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Minimum Spanning Tree complexity\",\n  \"variables\": {\n    \"edgeCount\": {\n      \"symbol\": \"m\",\n      \"description\": \"number of edges\"\n    },\n    \"vertexCount\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of vertices\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Prim, binary heap\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Time\",\n              \"formula\": \"O(m log n)\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Prim, Fibonacci heap\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Time\",\n              \"formula\": \"O(m + n log n)\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Prim, array (dense)\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Time\",\n              \"formula\": \"O(n²)\",\n              \"curveId\": \"quadratic\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Kruskal\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Time\",\n              \"formula\": \"O(m log m)\",\n              \"curveId\": \"n-log-n\"\n            }\n          ]\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Prim, binary heap\",\n          \"bounds\": [\n            {\n              \"kind\": \"text\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n) eager / O(m) lazy\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Prim, Fibonacci heap\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Prim, array (dense)\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Kruskal\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# When the Definition Bends\n\nThe construction assumes one connected component. A disconnected graph has no MST. Prim's reaches only the start vertex's component, while Kruskal's exhausts the edge list and returns a minimum spanning *forest*. In both cases, fewer than `V − 1` selected edges exposes the disconnected input.\n\nEqual weights can produce more than one MST. Kruskal's sort order or Prim's priority-queue tie-break decides which tied edge enters, so two runs may return different edge sets with the same minimum total weight.\n\nAn MST minimizes the tree's total weight, not the distance between a particular pair of vertices. In a triangle with `A–B = 3`, `B–C = 3`, and `A–C = 4`, the MST keeps the first two edges for a total of 6. The resulting `A`-to-`C` tree path also costs 6, even though the discarded direct edge costs 4. Pairwise shortest paths are [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]]'s output over the full graph, not a property of the MST.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Shared greedy decision\n>\n> ```mermaid\n> flowchart TD\n>   A[\"Next cheapest edge crossing the cut\"] --> B{\"Endpoints in different sets?\"}\n>   B -->|Yes| C[\"Add edge, merge the sets\"]\n>   B -->|No| D[\"Skip: would close a cycle\"]\n>   C --> E{\"V-1 edges chosen?\"}\n>   D --> E\n>   E -->|No| A\n>   E -->|Yes| F[\"MST complete\"]\n> ```\n\n> [!EXAMPLE]- C# implementations\n>\n> ```csharp\n> // Kruskal: sort edges, keep each that joins two components.\n> public static List<(int u, int v, int w)> Kruskal(int n, List<(int u, int v, int w)> edges)\n> {\n>     edges.Sort((a, b) => a.w.CompareTo(b.w));\n>     var dsu = new DisjointSet(n);            // union-find over vertex ids\n>     var mst = new List<(int, int, int)>();\n>     foreach (var (u, v, w) in edges)\n>     {\n>         if (dsu.Union(u, v))                 // false when u, v already share a root\n>             mst.Add((u, v, w));\n>         if (mst.Count == n - 1) break;       // spanning tree complete\n>     }\n>     return mst;                              // fewer than n-1 edges ⇒ graph was disconnected\n> }\n>\n> // Prim: grow from vertex 0 with a lazy min-priority queue.\n> public static long PrimWeight(int n, List<(int to, long w)>[] adj)\n> {\n>     if (n == 0 || adj.Length != n)\n>     {\n>         throw new ArgumentException(\"The graph must contain exactly n vertices.\", nameof(adj));\n>     }\n>\n>     var inTree = new bool[n];\n>     var pq = new PriorityQueue<int, long>(); // vertex, key = cheapest known edge into the tree\n>     pq.Enqueue(0, 0);\n>     var total = 0L;\n>     var visited = 0;\n>     while (pq.TryDequeue(out var u, out var w))\n>     {\n>         if (inTree[u]) continue;             // stale entry from a lazy push\n>         inTree[u] = true;\n>         visited++;\n>         total = checked(total + w);\n>         foreach (var (v, weight) in adj[u])\n>             if (!inTree[v]) pq.Enqueue(v, weight);\n>     }\n>\n>     if (visited != n)\n>     {\n>         throw new InvalidOperationException(\"A disconnected graph has no minimum spanning tree.\");\n>     }\n>\n>     return total;\n> }\n> ```\n> `.NET`'s `PriorityQueue` has no decrease-key, so Prim pushes duplicate entries and discards already-in-tree vertices on dequeue — the same lazy-deletion pattern as [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]]. `DisjointSet` is the [[Home/Computer Science/Data Structures/Graph Structures/Union-Find|union-find]] forest with path compression and union by rank.\n\n# Comparison\n\nAll three produce a minimum-weight tree. The useful distinction is how the graph is represented and where the work runs. Prim fits an adjacency structure, especially for a dense graph, because it grows a frontier without sorting every edge. [[Home/Computer Science/Algorithms/Graph Algorithms/Kruskal's Algorithm|Kruskal]] fits a sparse edge list: sort the edges once, then use union-find for cycle checks. [[Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm|Borůvka]] selects the cheapest outgoing edge from every component in the same round, which suits parallel or distributed execution. On one core, that contraction machinery rarely beats Prim or Kruskal.\n\n# References\n\n- [Minimum Spanning Trees](https://algs4.cs.princeton.edu/43mst/)\n",
-          "hash": "a87194c58bf9ac47fa3b31a9c5424b6bd5731959cfe34ac2da5508e8c0f1e010",
-          "topic": "Computer Science",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md",
-          "outcome": "keep",
-          "reason": "I read the whole note and checked its claims. The Prim walk-through is correct. From A, the algorithm takes A–C (2), B–C (1), B–D (5), D–E (2) and E–F (3), which is five edges with total 13. It also correctly skips A–B (4) as cycle-closing. The cut property and its exchange argument are stated correctly. The complexity entries match the standard bounds: Prim O(m log n) with a binary heap, O(m + n log n) with a Fibonacci heap, O(n²) with an array, and Kruskal O(m log m). Lazy Prim space is O(m). The triangle example, with a 6 versus 4 path, correctly separates an MST from shortest paths. The disconnected-graph and tie-handling sections are accurate. The C# code is consistent with the prose, using lazy deletion for Prim and a union-find check for Kruskal. The comparison section gives a usable decision rule. The prose is direct and there is no redundancy worth removing. The note has no Qard cards, which is acceptable because the optional section is absent. The single reference is relevant, and there are no known violations. No edit is warranted."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md": "a87194c58bf9ac47fa3b31a9c5424b6bd5731959cfe34ac2da5508e8c0f1e010"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-08T22:25:42.216209Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md",
-            "verdict": "CLEAN",
-            "summary": "I read the whole note independently. The Prim walk-through, cut property, exchange argument, complexity bounds, edge cases and C# code are accurate. The explanation order is sound: definition, idea, proof, algorithms, complexity, where the definition bends, code, comparison. No concrete defect justifies an edit.",
-            "page_type": "Concept. Authorable prose with protected tab, steptrace, complexity, mermaid and csharp fences. Questions are absent, which is optional. There is one reference.",
-            "current_text_evidence": [
-              {
-                "quote": "The run ends with five edges totaling 13.",
-                "line_start": 23,
-                "reason": "Rechecked on the graph: Prim takes A-C 2, B-C 1, B-D 5, D-E 2 and E-F 3, which sum to 13. A-B is correctly skipped."
-              },
-              {
-                "quote": "so it contains another crossing edge `f` with `weight(f) ≥ weight(e)`",
-                "line_start": 25,
-                "reason": "The exchange argument is valid because e is the lightest crossing edge, so it supports the cut property."
-              },
-              {
-                "quote": "The resulting `A`-to-`C` tree path also costs 6, even though the discarded direct edge costs 4.",
-                "line_start": 59,
-                "reason": "The triangle example correctly separates MST from shortest paths."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: MST, the cut property, Prim, Kruskal and their edge cases form one coherent topic. Kruskal and Borůvka already have their own notes.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The single note is accurate and clear, with no known violations and no concrete defect. The keep is justified and no edits were proposed.",
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md",
-          "citation_index": 0,
-          "reported_line_start": 23,
-          "resolved_line_start": 30
-        },
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md",
-          "citation_index": 1,
-          "reported_line_start": 25,
-          "resolved_line_start": 32
-        },
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md",
-          "citation_index": 2,
-          "reported_line_start": 59,
-          "resolved_line_start": 171
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md": "a87194c58bf9ac47fa3b31a9c5424b6bd5731959cfe34ac2da5508e8c0f1e010"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md",
-          "verdict": "CLEAN",
-          "summary": "I read the whole note independently. The Prim walk-through, cut property, exchange argument, complexity bounds, edge cases and C# code are accurate. The explanation order is sound: definition, idea, proof, algorithms, complexity, where the definition bends, code, comparison. No concrete defect justifies an edit.",
-          "page_type": "Concept. Authorable prose with protected tab, steptrace, complexity, mermaid and csharp fences. Questions are absent, which is optional. There is one reference.",
-          "current_text_evidence": [
-            {
-              "quote": "The run ends with five edges totaling 13.",
-              "line_start": 30,
-              "reason": "Rechecked on the graph: Prim takes A-C 2, B-C 1, B-D 5, D-E 2 and E-F 3, which sum to 13. A-B is correctly skipped."
-            },
-            {
-              "quote": "so it contains another crossing edge `f` with `weight(f) ≥ weight(e)`",
-              "line_start": 32,
-              "reason": "The exchange argument is valid because e is the lightest crossing edge, so it supports the cut property."
-            },
-            {
-              "quote": "The resulting `A`-to-`C` tree path also costs 6, even though the discarded direct edge costs 4.",
-              "line_start": 171,
-              "reason": "The triangle example correctly separates MST from shortest paths."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: MST, the cut property, Prim, Kruskal and their edge cases form one coherent topic. Kruskal and Borůvka already have their own notes.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The single note is accurate and clear, with no known violations and no concrete defect. The keep is justified and no edits were proposed.",
-      "change_checks": []
     }
   }
 }
