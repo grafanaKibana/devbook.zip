@@ -8602,11 +8602,11 @@
     "version": 1,
     "id": "b10487f268d742babc49b59ab87ef167",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-08T22:17:21.273772Z",
-    "elapsed_seconds": 613.9393576000007,
+    "elapsed_seconds": 624.2022535000007,
     "calls_reserved": 19,
-    "responses_received": 18,
+    "responses_received": 19,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md",
@@ -10454,7 +10454,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T22:27:35.212591Z",
+    "checkpoint_at": "2026-11-08T22:27:45.475486Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -31552,5 +31552,53 @@
       },
       "feedback_snapshot": []
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "b10487f268d742babc49b59ab87ef167",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Finds strongly connected components in one DFS using discovery indices, low links, and an active-vertex stack.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-07-26T20:18:51.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-26T19:27:00.411Z\"\n---\n\n[[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly connected components]] partition a digraph into maximal mutually reachable regions. Tarjan's algorithm finds that partition in one DFS by recording each vertex's discovery time, the earliest reachable vertex still on the active stack, and whether it still belongs to a component under construction.\n\nThe component boundary appears when a vertex cannot reach any earlier active vertex. That vertex is an SCC root, and popping the stack down to it emits the complete component. [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly Connected Components]] compares Tarjan with the two-pass and path-based alternatives. This note follows Tarjan's active-stack invariant and implementation.\n\n# Low-Link State\n\n- `disc[v]` is the discovery index assigned when DFS first enters `v`.\n- `low[v]` is the smallest discovery index reachable from `v` through DFS-tree edges plus at most one edge to a vertex still on the stack.\n- `onStack[v]` distinguishes an active vertex from one already assigned to a completed component.\n\nOn entry, set `disc[v] = low[v] = time++`, then push `v`. For an edge `v → w`, recurse if `w` is unvisited and fold `low[w]` into `low[v]` on return. If `w` is already visited and still active, fold `disc[w]` into `low[v]`. Once every outgoing edge has been processed, `low[v] == disc[v]` identifies an SCC root.\n\nOn `A→B, B→C, C→A, C→D, D→E, E→D`:\n\n```text\nvisit A  disc=0 low=0   stack=[A]\n visit B disc=1 low=1   stack=[A,B]\n  visit C disc=2 low=2  stack=[A,B,C]\n   edge C→A: low[C]=0\n   visit D disc=3 low=3 stack=[A,B,C,D]\n    visit E disc=4 low=4 stack=[A,B,C,D,E]\n     edge E→D: low[E]=3\n   D done: low[D]=disc[D]=3 -> pop {E,D}\n  back in C: low[C]=min(0, low[D]=3)=0\n back in B: low[B]=min(1, low[C]=0)=0\nback in A: low[A]=min(0, low[B]=0)=0\nA done: low[A]=disc[A]=0 -> pop {C,B,A}\n```\n\nThe components leave in reverse topological order of the condensation: `{D, E}` before `{A, B, C}`.\n\n# C# Implementation\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> public sealed class Tarjan\n> {\n>     private readonly List<int>[] _adjacency;\n>     private readonly int[] _disc;\n>     private readonly int[] _low;\n>     private readonly bool[] _onStack;\n>     private readonly Stack<int> _stack = new();\n>     private readonly List<List<int>> _components = new();\n>     private int _time;\n>\n>     public Tarjan(List<int>[] adjacency)\n>     {\n>         _adjacency = adjacency;\n>         _disc = new int[adjacency.Length];\n>         _low = new int[adjacency.Length];\n>         _onStack = new bool[adjacency.Length];\n>         Array.Fill(_disc, -1);\n>     }\n>\n>     public List<List<int>> Components()\n>     {\n>         for (var v = 0; v < _adjacency.Length; v++)\n>         {\n>             if (_disc[v] == -1)\n>             {\n>                 StrongConnect(v);\n>             }\n>         }\n>\n>         return _components;\n>     }\n>\n>     private void StrongConnect(int v)\n>     {\n>         _disc[v] = _low[v] = _time++;\n>         _stack.Push(v);\n>         _onStack[v] = true;\n>\n>         foreach (var w in _adjacency[v])\n>         {\n>             if (_disc[w] == -1)\n>             {\n>                 StrongConnect(w);\n>                 _low[v] = Math.Min(_low[v], _low[w]);\n>             }\n>             else if (_onStack[w])\n>             {\n>                 _low[v] = Math.Min(_low[v], _disc[w]);\n>             }\n>         }\n>\n>         if (_low[v] != _disc[v])\n>         {\n>             return;\n>         }\n>\n>         var component = new List<int>();\n>         int w;\n>         do\n>         {\n>             w = _stack.Pop();\n>             _onStack[w] = false;\n>             component.Add(w);\n>         }\n>         while (w != v);\n>\n>         _components.Add(component);\n>     }\n> }\n> ```\n\n# The Guard That Keeps Components Separate\n\nThe non-tree update must ignore vertices already removed from the stack. An edge to one of them enters a finished component. It cannot provide a return path for the active DFS subtree. Letting that vertex lower `low[v]` can hide a valid root and merge separate SCCs.\n\nFor an edge to an active, already-visited vertex, Tarjan's definition uses `disc[w]`. A guarded `low[w]` variant still finds the same SCC roots, but the stored values no longer match Tarjan's formal low-link definition. Removing the `onStack` guard breaks the component boundary.\n\nThis is related to the discovery/low-value pattern in [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges|articulation points and bridges]], but the directed edge classification, active stack, and update rules are different.\n\n# References\n\n- [Depth-First Search and Linear Graph Algorithms](https://epubs.siam.org/doi/10.1137/0201010)\n",
+          "hash": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note. The disc, low and onStack definitions match Tarjan's formulation. The worked trace (A→B, B→C, C→A, C→D, D→E, E→D) is correct: low[C] drops to 0 through the active edge to A, and {E,D} is popped before {C,B,A}. The reverse-topological emission order is right. The C# code follows the same rules: it uses disc[w] for active non-tree edges, guards on _onStack, and pops to v. The section on the onStack guard correctly says that dropping the guard merges SCCs, and that a low[w] variant finds the same roots but departs from the formal definition. The contrast with articulation points is accurate. The SIAM reference is the original Tarjan 1972 paper. The prose is direct and well ordered, and there are no flagged cards or known violations. The optional Questions section is not needed, so no edit would add real value."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-08T22:27:45.475477Z"
   }
 }
