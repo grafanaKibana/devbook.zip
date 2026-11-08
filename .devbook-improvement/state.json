@@ -5494,6 +5494,61 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Cloud/Cloud Cost Management.md": {
+      "content_hash": "3ed4abe214cef181fb8c33d8af4073c5a99ad0e5330c94b1b43775fca9f48bc2",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "3ed4abe214cef181fb8c33d8af4073c5a99ad0e5330c94b1b43775fca9f48bc2",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Cloud/Cloud Cost Management.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate, compact and self-contained. It ties cost to application behavior, gives a unit-cost formula with guardrails, and lists design responses that state their conditions. No concrete defect was found, so keeping it unchanged avoids cosmetic churn.",
+          "page_type": "Concept — optional Questions are absent. References hold a single relevant bare link. Frontmatter is typed and status is Ready to Repeat. The wikilink is Disaster Recovery. The one code fence has a language (text).",
+          "current_text_evidence": [
+            {
+              "quote": "If an image pipeline costs more because it processes more images, the total alone cannot distinguish growth from waste.",
+              "line_start": 16,
+              "reason": "A concrete example motivates the unit-cost idea. It is whiteboard-style and clear."
+            },
+            {
+              "quote": "Track attempted jobs beside successful jobs. Otherwise a system can appear cheaper by rejecting hard work early",
+              "line_start": 40,
+              "reason": "This names the failure mode of the metric and the guardrails. The mechanism and its limits stay visible."
+            },
+            {
+              "quote": "Prices change by service, region, tier, and date.",
+              "line_start": 28,
+              "reason": "This version-sensitivity caveat is correct. It avoids stale pricing claims."
+            },
+            {
+              "quote": "Recovery capacity is intentional cost, not waste.",
+              "line_start": 49,
+              "reason": "The sentence states the exception to cost cutting. It links to the Disaster Recovery note in prose that explains why the link matters."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the topic is one coherent explanation (cost surfaces, unit economics, design responses) and is short enough to stay together.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -6911,14 +6966,14 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-08T06:19:50.150495Z",
-    "elapsed_seconds": 45.5776349,
+    "elapsed_seconds": 48.9717912,
     "calls_reserved": 2,
     "responses_received": 2,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T06:20:35.727790Z",
+    "checkpoint_at": "2026-11-08T06:20:39.121945Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
@@ -11691,6 +11746,80 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md": "1157e7a00fb7b7373e394ad3ab78b94114325815f428cab8140edd57da51b9c8"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "1e12b36ce2decae41f0ec684bdd26353f233c86c3c983810efe00589ea344f11": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/Cloud/Cloud Cost Management.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate, compact and self-contained. It ties cost to application behavior, gives a unit-cost formula with guardrails, and lists design responses that state their conditions. No concrete defect was found, so keeping it unchanged avoids cosmetic churn.",
+            "page_type": "Concept — optional Questions are absent. References hold a single relevant bare link. Frontmatter is typed and status is Ready to Repeat. The wikilink is Disaster Recovery. The one code fence has a language (text).",
+            "current_text_evidence": [
+              {
+                "quote": "If an image pipeline costs more because it processes more images, the total alone cannot distinguish growth from waste.",
+                "line_start": 14,
+                "reason": "A concrete example motivates the unit-cost idea. It is whiteboard-style and clear."
+              },
+              {
+                "quote": "Track attempted jobs beside successful jobs. Otherwise a system can appear cheaper by rejecting hard work early",
+                "line_start": 43,
+                "reason": "This names the failure mode of the metric and the guardrails. The mechanism and its limits stay visible."
+              },
+              {
+                "quote": "Prices change by service, region, tier, and date.",
+                "line_start": 28,
+                "reason": "This version-sensitivity caveat is correct. It avoids stale pricing claims."
+              },
+              {
+                "quote": "Recovery capacity is intentional cost, not waste.",
+                "line_start": 55,
+                "reason": "The sentence states the exception to cost cutting. It links to the Disaster Recovery note in prose that explains why the link matters."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the topic is one coherent explanation (cost surfaces, unit economics, design responses) and is short enough to stay together.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The whole note was read independently. It is accurate, well ordered and free of known violations, with no concrete defect. The keep is justified and no edits were proposed.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Cloud/Cloud Cost Management.md",
+          "citation_index": 0,
+          "reported_line_start": 14,
+          "resolved_line_start": 16
+        },
+        {
+          "path": "Vault/Home/Cloud/Cloud Cost Management.md",
+          "citation_index": 1,
+          "reported_line_start": 43,
+          "resolved_line_start": 40
+        },
+        {
+          "path": "Vault/Home/Cloud/Cloud Cost Management.md",
+          "citation_index": 3,
+          "reported_line_start": 55,
+          "resolved_line_start": 49
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Cloud/Cloud Cost Management.md": "3ed4abe214cef181fb8c33d8af4073c5a99ad0e5330c94b1b43775fca9f48bc2"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -25982,175 +26111,6 @@
         "change_checks": []
       },
       "feedback_snapshot": []
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "56e8c2737af74831bbd5ff5d77b67fd5",
-    "topic_id": "cloud-b977b950",
-    "batch": {
-      "topic": "Cloud",
-      "topic_id": "cloud-b977b950",
-      "notes": [
-        {
-          "path": "Vault/Home/Cloud/Cloud Cost Management.md",
-          "content": "---\ntopic: [Cloud]\nsubtopic: []\nsummary: \"Designing application behavior so cloud cost stays attributable, measurable, and proportional to useful work.\"\nlevel: [\"2\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-07-18T07:07:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-16T07:10:34.187Z\"\n---\n\nCloud cost is partly an application behavior. A request can consume compute time, database operations, queue deliveries, object storage, network transfer, and telemetry. The monthly bill shows the total; architecture explains why the work happened.\n\nA useful measure connects spend to successful output. If an image pipeline costs more because it processes more images, the total alone cannot distinguish growth from waste. Cost per 1,000 successful images can.\n\n# Cost Surfaces Developers Influence\n\n| Application behavior | Cost it can create | Design question |\n| --- | --- | --- |\n| Request fan-out and retries | API calls, queue operations, database reads/writes, and compute duration | Is work duplicated, retried without bounds, or repeated instead of cached or batched? |\n| Data shape and retention | Primary storage, replicas, indexes, backups, logs, and retrieval charges | Which copies are required, and when can derived or temporary data expire? |\n| Service boundaries | Cross-zone, cross-region, gateway, and internet transfer | Does this boundary need a network call, and can the payload or call frequency shrink? |\n| Capacity model | Always-on instances, reserved throughput, minimum replicas, or scale-to-zero startup cost | Is demand steady, bursty, latency-sensitive, or schedulable? |\n| Observability | Log, metric, trace, indexing, and retention volume | Which signals support a decision, and which fields or sampling rates only add volume? |\n\nPrices change by service, region, tier, and date. Architecture records should link to the current pricing page and state the workload assumptions rather than copy a price as if it were permanent.\n\n# Unit Economics\n\nChoose one denominator that represents useful work and keep its quality definition stable:\n\n```text\ncost_per_1_000_successful_jobs =\n  (compute + storage + requests + network + observability + allocated_shared_cost)\n  / successful_jobs * 1_000\n```\n\nTrack attempted jobs beside successful jobs. Otherwise a system can appear cheaper by rejecting hard work early or counting degraded output as success. Latency, error rate, and recovery requirements remain guardrails: lowering cost by violating them is not an optimization.\n\n# Design Responses\n\n- Cache only when freshness and authorization allow it; include tenant or access scope in the key.\n- Batch operations when added latency and partial-failure behavior remain acceptable.\n- Use asynchronous work to absorb bursts, then bound retries and dead-letter handling so failures do not multiply cost indefinitely.\n- Expire temporary data, incomplete uploads, verbose logs, and derived artifacts according to explicit retention rules.\n- Match the compute model to demand. Serverless can reduce idle capacity, while a steady workload may be cheaper and more predictable on reserved or continuously running capacity.\n- Preserve redundancy required by [[Disaster Recovery]]. Recovery capacity is intentional cost, not waste.\n\n# References\n\n- [FinOps Framework: Unit Economics](https://www.finops.org/framework/capabilities/unit-economics/)\n",
-          "hash": "3ed4abe214cef181fb8c33d8af4073c5a99ad0e5330c94b1b43775fca9f48bc2",
-          "topic": "Cloud",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Cloud/Cloud Cost Management.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its text. The opening ties cost to application behavior and gives a concrete unit-cost example. The cost-surface table maps behaviors to charges and design questions accurately. The unit-economics formula pairs a stable denominator with attempted-vs-successful tracking and guardrails. The design responses state conditions and tradeoffs, such as cache scope, batching latency, bounded retries, serverless vs steady workloads, and DR redundancy. The pricing caveat is correct and not version-specific. The only reference, the FinOps unit economics page, is relevant. There are no cards, no known violations, and no unclear terminology, so edits would be cosmetic churn."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Cloud/Cloud Cost Management.md": "3ed4abe214cef181fb8c33d8af4073c5a99ad0e5330c94b1b43775fca9f48bc2"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Cloud/Cloud Cost Management.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-08T06:20:20.459930Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/Cloud/Cloud Cost Management.md",
-            "verdict": "CLEAN",
-            "summary": "The note is accurate, compact and self-contained. It ties cost to application behavior, gives a unit-cost formula with guardrails, and lists design responses that state their conditions. No concrete defect was found, so keeping it unchanged avoids cosmetic churn.",
-            "page_type": "Concept — optional Questions are absent. References hold a single relevant bare link. Frontmatter is typed and status is Ready to Repeat. The wikilink is Disaster Recovery. The one code fence has a language (text).",
-            "current_text_evidence": [
-              {
-                "quote": "If an image pipeline costs more because it processes more images, the total alone cannot distinguish growth from waste.",
-                "line_start": 14,
-                "reason": "A concrete example motivates the unit-cost idea. It is whiteboard-style and clear."
-              },
-              {
-                "quote": "Track attempted jobs beside successful jobs. Otherwise a system can appear cheaper by rejecting hard work early",
-                "line_start": 43,
-                "reason": "This names the failure mode of the metric and the guardrails. The mechanism and its limits stay visible."
-              },
-              {
-                "quote": "Prices change by service, region, tier, and date.",
-                "line_start": 28,
-                "reason": "This version-sensitivity caveat is correct. It avoids stale pricing claims."
-              },
-              {
-                "quote": "Recovery capacity is intentional cost, not waste.",
-                "line_start": 55,
-                "reason": "The sentence states the exception to cost cutting. It links to the Disaster Recovery note in prose that explains why the link matters."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the topic is one coherent explanation (cost surfaces, unit economics, design responses) and is short enough to stay together.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The whole note was read independently. It is accurate, well ordered and free of known violations, with no concrete defect. The keep is justified and no edits were proposed.",
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/Cloud/Cloud Cost Management.md",
-          "citation_index": 0,
-          "reported_line_start": 14,
-          "resolved_line_start": 16
-        },
-        {
-          "path": "Vault/Home/Cloud/Cloud Cost Management.md",
-          "citation_index": 1,
-          "reported_line_start": 43,
-          "resolved_line_start": 40
-        },
-        {
-          "path": "Vault/Home/Cloud/Cloud Cost Management.md",
-          "citation_index": 3,
-          "reported_line_start": 55,
-          "resolved_line_start": 49
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/Cloud/Cloud Cost Management.md": "3ed4abe214cef181fb8c33d8af4073c5a99ad0e5330c94b1b43775fca9f48bc2"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/Cloud/Cloud Cost Management.md",
-          "verdict": "CLEAN",
-          "summary": "The note is accurate, compact and self-contained. It ties cost to application behavior, gives a unit-cost formula with guardrails, and lists design responses that state their conditions. No concrete defect was found, so keeping it unchanged avoids cosmetic churn.",
-          "page_type": "Concept — optional Questions are absent. References hold a single relevant bare link. Frontmatter is typed and status is Ready to Repeat. The wikilink is Disaster Recovery. The one code fence has a language (text).",
-          "current_text_evidence": [
-            {
-              "quote": "If an image pipeline costs more because it processes more images, the total alone cannot distinguish growth from waste.",
-              "line_start": 16,
-              "reason": "A concrete example motivates the unit-cost idea. It is whiteboard-style and clear."
-            },
-            {
-              "quote": "Track attempted jobs beside successful jobs. Otherwise a system can appear cheaper by rejecting hard work early",
-              "line_start": 40,
-              "reason": "This names the failure mode of the metric and the guardrails. The mechanism and its limits stay visible."
-            },
-            {
-              "quote": "Prices change by service, region, tier, and date.",
-              "line_start": 28,
-              "reason": "This version-sensitivity caveat is correct. It avoids stale pricing claims."
-            },
-            {
-              "quote": "Recovery capacity is intentional cost, not waste.",
-              "line_start": 49,
-              "reason": "The sentence states the exception to cost cutting. It links to the Disaster Recovery note in prose that explains why the link matters."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the topic is one coherent explanation (cost surfaces, unit economics, design responses) and is short enough to stay together.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The whole note was read independently. It is accurate, well ordered and free of known violations, with no concrete defect. The keep is justified and no edits were proposed.",
-      "change_checks": []
     }
   }
 }
