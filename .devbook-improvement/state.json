@@ -7149,16 +7149,17 @@
     "version": 1,
     "id": "56e8c2737af74831bbd5ff5d77b67fd5",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-08T06:19:50.150495Z",
-    "elapsed_seconds": 313.03413559999996,
+    "elapsed_seconds": 316.9412546,
     "calls_reserved": 11,
     "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/Cloud/Cloud Cost Management.md",
       "Vault/Home/Cloud/Cloud.md",
       "Vault/Home/Cloud/Disaster Recovery.md",
-      "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md"
+      "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+      "Vault/Home/Cloud/Providers.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -7453,10 +7454,21 @@
           },
           "model_calls": 8
         }
+      },
+      {
+        "path": "Vault/Home/Cloud/Providers.md",
+        "outcome": "proposal_blocked",
+        "reason": "source URL missing from owning note: https://docs.aws.amazon.com/apprunner/latest/dg/apprunner-availability-change.html",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "source URL missing from owning note: https://docs.aws.amazon.com/apprunner/latest/dg/apprunner-availability-change.html",
+          "model_calls": 11
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T06:25:03.184289Z",
+    "checkpoint_at": "2026-11-08T06:25:07.091410Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
