@@ -7140,7 +7140,11 @@
   "rejections": [],
   "retired_ids": {},
   "cooldown": null,
-  "lease": null,
+  "lease": {
+    "owner": "42485905141:1",
+    "acquired_at": "2026-11-08T13:39:54Z",
+    "expires_at": "2026-11-08T14:19:54Z"
+  },
   "focused_workload": {
     "version": 1,
     "id": "56e8c2737af74831bbd5ff5d77b67fd5",
