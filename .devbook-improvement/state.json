@@ -7266,7 +7266,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-08T13:40:02.820509Z",
-    "elapsed_seconds": 187.25908850000002,
+    "elapsed_seconds": 190.8450912,
     "calls_reserved": 6,
     "responses_received": 6,
     "attempted_paths": [
@@ -7418,7 +7418,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T13:43:10.079107Z",
+    "checkpoint_at": "2026-11-08T13:43:13.665109Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -24793,6 +24793,157 @@
         "reason": "source URL missing from owning note: https://docs.aws.amazon.com/apprunner/latest/dg/apprunner-availability-change.html"
       },
       "failed_at": "2026-11-08T06:25:03.184017Z"
+    },
+    "computer-science-445ddaa5": {
+      "workload_id": "a3c3eac724bf4b6c8037306f6a4e6530",
+      "topic_id": "computer-science-445ddaa5",
+      "batch": {
+        "topic": "Computer Science",
+        "topic_id": "computer-science-445ddaa5",
+        "notes": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
+            "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"A single DFS finds all cut vertices and cut edges, the points whose removal disconnects an undirected graph.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Creation\npublish: true\ncreated: \"2026-07-10T06:24:36.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-10T05:56:46.785Z\"\n---\n\nIn an undirected network, a router or cable is a single point of failure when removing it leaves some pair of nodes unable to reach each other.\n\nA single depth-first traversal finds all of them at once. As DFS explores an undirected graph, it builds a tree whose only non-tree edges are back edges to ancestors. Undirectedness forbids cross edges. Each back edge is an alternate route that survives removing the tree edge or vertex above it. Recording how far back each subtree can escape turns \"does removing this disconnect anything?\" into a local numeric comparison at every edge.\n\nAn **articulation point** (cut vertex) is a vertex whose deletion raises the number of connected components. A **bridge** (cut edge) is the edge analogue. The same DFS reports both.\n\nThe decisive transition is a DFS tree annotated with `disc`/`low`, where each child's `low` is compared against its parent's `disc`.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"articulation-points-and-bridges\"}\n```\n\nDFS runs from any unvisited vertex and repeats until every component is covered. Two integers are stored per vertex:\n\n- `disc[v]` — discovery time, a counter incremented the first time DFS reaches `v`. It orders vertices by when the tree first touched them, so an ancestor always has a smaller `disc` than its descendants.\n- `low[v]` — the smallest `disc` reachable from `v`'s subtree using any number of tree edges plus at most one back edge. It starts at `disc[v]`, then absorbs `low[c]` for each tree child `c` and `disc[w]` for each back edge `v → w` to an ancestor `w`.\n\n`low[v]` answers a single question: how far back up the tree can `v`'s subtree escape without passing through the edge that entered it? Comparing that escape height against a parent's `disc` is the whole algorithm.\n\n- **Non-root cut vertex.** A non-root `u` with a tree child `v` where `low[v] >= disc[u]` is an articulation point. The inequality says nothing in `v`'s subtree reaches strictly above `u`, so every route out of that subtree passes through `u`; deleting `u` strands it.\n- **Root cut vertex.** The DFS root has no ancestor, so `low[v] >= disc[root]` holds trivially for its first child. The root is an articulation point only when it has two or more tree children — the only path between two of its subtrees runs through it.\n- **Bridge.** A tree edge `(u, v)` is a bridge when `low[v] > disc[u]` — strict. Equality (`low[v] == disc[u]`) means a back edge from `v`'s subtree lands exactly on `u`: that route bypasses the edge `(u, v)`, so the edge is not a bridge, but it still forces traffic through the vertex `u`, so `u` stays a cut vertex. The single `>` versus `>=` is the entire distinction between cut edges and cut vertices.\n\nWorked example: a triangle `0-1-2` with a tail `2-3-4`. DFS from `0` discovers `0, 1, 2` around the cycle; the edge `2-0` is a back edge, so `low` across the triangle collapses to `0` and none of `0, 1, 2` is cut inside it. The tail carries no back edge, so `low[3] = 3 > disc[2] = 2` and `low[4] = 4 > disc[3] = 3`: edges `2-3` and `3-4` are bridges, and vertices `2` and `3` are cut vertices — each is the sole link to what hangs below it. Removing any of them raises the connected-component count, which is the property each rule certifies locally.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Articulation Points and Bridges complexity\",\n  \"variables\": {\n    \"edgeCount\": {\n      \"symbol\": \"m\",\n      \"description\": \"number of edges\"\n    },\n    \"vertexCount\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of vertices\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Time\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Bound\",\n              \"formula\": \"O(n + m)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Auxiliary space\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Bound\",\n              \"formula\": \"O(n)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# Boundaries\n\n**Directed graphs.** The rules assume the DFS tree holds only tree and back edges. Undirectedness guarantees that every non-tree edge points to an ancestor, and a back edge is a genuine two-way alternate route. On a directed graph DFS also produces cross and forward edges, and a back edge no longer implies a return path, so `low[v]` stops measuring a real escape route and both tests silently report wrong cuts. Directed connectivity is a different decomposition, [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]].\n\n**The root special case.** Applying the non-root rule `low[v] >= disc[u]` to the DFS root marks it as a cut vertex the moment it has any child, because `low[v] >= disc[root]` is vacuously true. Nothing sits above the root. Rooting a path `0-1-2` at `0` flags `0` even though deleting it leaves `1-2` connected. The root must instead be tested by child count (two or more). The bridge rule needs no exception: `low[v] > disc[root]` handles the root correctly, since a first child with no back edge genuinely sits below a bridge.\n\n**`>=` versus `>`.** Reusing one threshold for both objects mislabels edges. In two triangles sharing a single vertex `2` (`0-1-2-0` and `2-3-4-2`), the child edge entering the second triangle produces `low[child] == disc[2]`. The non-strict test `>=` correctly flags `2` as a cut vertex because deleting it separates the triangles. The strict test `>` leaves every edge un-bridged, since each edge lies on a cycle. Swapping the operators would either miss the cut vertex or invent a bridge that does not exist.\n\n**Parallel edges (multigraphs).** The usual guard skips the parent by vertex: `if (v == parent) continue;`. With two edges between `u` and `v` it discards both, so `v`'s subtree appears to have no route up and `(u, v)` is reported as a bridge. But the duplicate edge is itself the route keeping them connected. The escape exists in the graph but not in `low[v]`, because the second edge was never examined. Skipping only the specific parent edge by its id leaves the duplicate as a back edge that lowers `low[v]` and cancels the false bridge.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- DFS tree of the triangle-with-tail example\n>\n> ```mermaid\n> flowchart TD\n>   N0[\"0 (disc 0, low 0)\"] --> N1[\"1 (disc 1, low 0)\"]\n>   N1 --> N2[\"2 (disc 2, low 0)\"]\n>   N2 --> N3[\"3 (disc 3, low 3)\"]\n>   N3 --> N4[\"4 (disc 4, low 4)\"]\n>   N2 -. back .-> N0\n> ```\n> Tree edges point downward. The dashed back edge `2→0` pulls `low` to `0` across the triangle, so `0-1-2` has no internal cut. The tail carries no back edge, so `low[3] > disc[2]` and `low[4] > disc[3]` make `2-3` and `3-4` bridges and `2`, `3` cut vertices.\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> public sealed class CutFinder\n> {\n>     private readonly List<(int to, int id)>[] _adj;\n>     private readonly int[] _disc, _low;\n>     private int _timer;\n>\n>     public HashSet<int> ArticulationPoints { get; } = new();\n>     public List<(int u, int v)> Bridges { get; } = new();\n>\n>     public CutFinder(List<(int to, int id)>[] adj)\n>     {\n>         _adj = adj;\n>         _disc = new int[adj.Length];\n>         _low = new int[adj.Length];\n>         Array.Fill(_disc, -1);              // -1 marks unvisited\n>     }\n>\n>     public void Run()\n>     {\n>         for (int s = 0; s < _adj.Length; s++)\n>             if (_disc[s] == -1)\n>                 Dfs(s, parentEdge: -1, isRoot: true);\n>     }\n>\n>     private void Dfs(int u, int parentEdge, bool isRoot)\n>     {\n>         _disc[u] = _low[u] = _timer++;\n>         int children = 0;\n>\n>         foreach (var (v, id) in _adj[u])\n>         {\n>             if (id == parentEdge) continue;          // skip the edge we arrived on, once\n>             if (_disc[v] == -1)                       // tree edge\n>             {\n>                 children++;\n>                 Dfs(v, id, isRoot: false);\n>                 _low[u] = Math.Min(_low[u], _low[v]);\n>                 if (!isRoot && _low[v] >= _disc[u])   // articulation rule (non-root)\n>                     ArticulationPoints.Add(u);\n>                 if (_low[v] > _disc[u])               // bridge rule (strict)\n>                     Bridges.Add((u, v));\n>             }\n>             else                                      // back edge\n>             {\n>                 _low[u] = Math.Min(_low[u], _disc[v]);\n>             }\n>         }\n>\n>         if (isRoot && children >= 2)                  // articulation rule (root)\n>             ArticulationPoints.Add(u);\n>     }\n> }\n> ```\n> Adjacency stores an edge id per neighbor so the parent *edge*, rather than the parent vertex, is skipped. This keeps parallel edges correct.\n\n# Relations\n\nCut vertices and bridges are the boundary markers of two connectivity decompositions, and both reuse the same low-link DFS.\n\n| Decomposition | Maximal blocks | Boundary object | DFS relation |\n| --- | --- | --- | --- |\n| Biconnected components | maximal blocks with no internal articulation point. Blocks with at least three vertices are 2-vertex-connected; a bridge may appear as a two-vertex block in the full block-cut decomposition | articulation points. A cut vertex belongs to several blocks at once | yes, with an auxiliary edge stack |\n| 2-edge-connected components | subgraphs with no bridge | bridges join adjacent components | yes |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly connected components]] | mutually reachable sets in a **directed** graph | — | related low-link DFS, with an active-vertex stack and different update rule |\n\nThe directed reachability question is a separate decomposition, [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|strongly connected components]], built on a related low-link idea. Tarjan's SCC traversal must track which vertices remain on an active stack and must ignore edges into already-finished components when lowering `low`. The cut-vertex implementation cannot be reused by merely directing its edges. For undirected reliability analysis, this one DFS identifies every node or link that is a single point of failure.\n\n# References\n\n- [Algorithm 447: Efficient Algorithms for Graph Manipulation](https://doi.org/10.1145/362248.362272)\n- [Finding bridges (cp-algorithms)](https://cp-algorithms.com/graph/bridge-searching.html)\n",
+            "hash": "2bfb5875b1f6c49f21faa11ec4052a6afbc44847f50baee5306ab1b4caeef209",
+            "topic": "Computer Science",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
+            "outcome": "keep",
+            "reason": "I read the whole note and checked its claims by hand-tracing the examples and comparing the rules with the standard low-link treatment. The definitions of disc and low are correct. So are the non-root cut-vertex test (low[v] >= disc[u]), the root rule (two or more tree children) and the strict bridge test (low[v] > disc[u]). The triangle-with-tail trace is correct: edges 2-3 and 3-4 are bridges, and vertices 2 and 3 are cut vertices. The path 0-1-2 rooted at 0 does show the root special case. The two triangles sharing vertex 2 do show the difference between >= and >, because low[child] equals disc[2]. The parallel-edge explanation is right, and the C# code skips the parent by edge id and applies both rules correctly. The directed-graph caveat and the SCC comparison are sound, and the complexity of O(n+m) time and O(n) space is correct. The Hopcroft–Tarjan reference (Algorithm 447) is a real primary source. The note has no cards, so there is no card risk. The only repetition is the SCC link that appears twice, which is minor polish and does not justify an edit. known_violations is empty."
+          }
+        ],
+        "feedback": []
+      },
+      "source_hashes": {
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md": "2bfb5875b1f6c49f21faa11ec4052a6afbc44847f50baee5306ab1b4caeef209"
+      },
+      "feedback_keys": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-08T13:42:46.876342Z",
+      "completed_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep disposition missed a factual error. The Bridge bullet says equality low[v] == disc[u] always keeps u a cut vertex, but that fails when u is the DFS root. Because of this, the note stays unresolved.",
+        "notes": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is mostly accurate and well organized. One claim in the Bridge bullet is wrong for a root u: equality low[v]==disc[u] does not make u a cut vertex. The note also contradicts itself, since the Root cut vertex bullet and the Boundaries section say the root needs two or more children. The keep disposition's claim that every rule was verified is therefore unfounded.",
+            "page_type": "Concept — no cards. References are present. Frontmatter is typed. The steptrace and complexity blocks are protected.",
+            "current_text_evidence": [
+              {
+                "quote": "but it still forces traffic through the vertex `u`, so `u` stays a cut vertex",
+                "line_start": 39,
+                "reason": "This is true only for a non-root u. A triangle rooted at 0 gives low[1]==disc[0] while 0 is not a cut vertex. It also contradicts the root rule at line 38."
+              },
+              {
+                "quote": "The root is an articulation point only when it has two or more tree children",
+                "line_start": 38,
+                "reason": "This correct rule shows that the equality claim in the Bridge bullet needs a non-root qualifier."
+              },
+              {
+                "quote": "The single `>` versus `>=` is the entire distinction between cut edges and cut vertices.",
+                "line_start": 39,
+                "reason": "This overstates the difference, because the root is tested by child count rather than by the >= comparison."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the cut-vertex and bridge rules share one low-link DFS and are most useful together.",
+            "findings": [
+              {
+                "severity": "High",
+                "dimension": "Accuracy",
+                "location": "Visualization tab, Bridge bullet (line 39)",
+                "evidence": "\"it still forces traffic through the vertex `u`, so `u` stays a cut vertex\"",
+                "effect": "A reader would conclude that equality always marks u as an articulation point. That is false when u is the DFS root with a single child, such as a triangle rooted at 0. The claim also conflicts with the root rule in the same list.",
+                "fix": "Qualify the claim: for a non-root u, equality still makes u a cut vertex. Add that a root is a cut vertex only with two or more tree children. Soften \"the entire distinction\" to \"for non-root vertices\"."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "blocked_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep disposition missed a factual error. The Bridge bullet says equality low[v] == disc[u] always keeps u a cut vertex, but that fails when u is the DFS root. Because of this, the note stays unresolved.",
+        "notes": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is mostly accurate and well organized. One claim in the Bridge bullet is wrong for a root u: equality low[v]==disc[u] does not make u a cut vertex. The note also contradicts itself, since the Root cut vertex bullet and the Boundaries section say the root needs two or more children. The keep disposition's claim that every rule was verified is therefore unfounded.",
+            "page_type": "Concept — no cards. References are present. Frontmatter is typed. The steptrace and complexity blocks are protected.",
+            "current_text_evidence": [
+              {
+                "quote": "but it still forces traffic through the vertex `u`, so `u` stays a cut vertex",
+                "line_start": 39,
+                "reason": "This is true only for a non-root u. A triangle rooted at 0 gives low[1]==disc[0] while 0 is not a cut vertex. It also contradicts the root rule at line 38."
+              },
+              {
+                "quote": "The root is an articulation point only when it has two or more tree children",
+                "line_start": 38,
+                "reason": "This correct rule shows that the equality claim in the Bridge bullet needs a non-root qualifier."
+              },
+              {
+                "quote": "The single `>` versus `>=` is the entire distinction between cut edges and cut vertices.",
+                "line_start": 39,
+                "reason": "This overstates the difference, because the root is tested by child count rather than by the >= comparison."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the cut-vertex and bridge rules share one low-link DFS and are most useful together.",
+            "findings": [
+              {
+                "severity": "High",
+                "dimension": "Accuracy",
+                "location": "Visualization tab, Bridge bullet (line 39)",
+                "evidence": "\"it still forces traffic through the vertex `u`, so `u` stays a cut vertex\"",
+                "effect": "A reader would conclude that equality always marks u as an articulation point. That is false when u is the DFS root with a single child, such as a triangle rooted at 0. The claim also conflicts with the root rule in the same list.",
+                "fix": "Qualify the claim: for a non-root u, equality still makes u a cut vertex. Add that a root is a cut vertex only with two or more tree children. Soften \"the entire distinction\" to \"for non-root vertices\"."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "feedback_snapshot": []
     }
   },
   "parked_review_repairs": {},
@@ -27547,7 +27698,7 @@
     },
     "prepared_source_version": 1,
     "prepared_at": "2026-11-08T13:42:46.876342Z",
-    "completed_review": {
+    "blocked_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The keep disposition missed a factual error. The Bridge bullet says equality low[v] == disc[u] always keeps u a cut vertex, but that fails when u is the DFS root. Because of this, the note stays unresolved.",
       "notes": [
@@ -27597,6 +27748,72 @@
         }
       ],
       "change_checks": []
-    }
+    },
+    "repair_previous_proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
+          "outcome": "keep",
+          "reason": "I read the whole note and checked its claims by hand-tracing the examples and comparing the rules with the standard low-link treatment. The definitions of disc and low are correct. So are the non-root cut-vertex test (low[v] >= disc[u]), the root rule (two or more tree children) and the strict bridge test (low[v] > disc[u]). The triangle-with-tail trace is correct: edges 2-3 and 3-4 are bridges, and vertices 2 and 3 are cut vertices. The path 0-1-2 rooted at 0 does show the root special case. The two triangles sharing vertex 2 do show the difference between >= and >, because low[child] equals disc[2]. The parallel-edge explanation is right, and the C# code skips the parent by edge id and applies both rules correctly. The directed-graph caveat and the SCC comparison are sound, and the complexity of O(n+m) time and O(n) space is correct. The Hopcroft–Tarjan reference (Algorithm 447) is a real primary source. The note has no cards, so there is no card risk. The only repetition is the SCC link that appears twice, which is minor polish and does not justify an edit. known_violations is empty."
+        }
+      ],
+      "feedback": []
+    },
+    "repair_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The keep disposition missed a factual error. The Bridge bullet says equality low[v] == disc[u] always keeps u a cut vertex, but that fails when u is the DFS root. Because of this, the note stays unresolved.",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The note is mostly accurate and well organized. One claim in the Bridge bullet is wrong for a root u: equality low[v]==disc[u] does not make u a cut vertex. The note also contradicts itself, since the Root cut vertex bullet and the Boundaries section say the root needs two or more children. The keep disposition's claim that every rule was verified is therefore unfounded.",
+          "page_type": "Concept — no cards. References are present. Frontmatter is typed. The steptrace and complexity blocks are protected.",
+          "current_text_evidence": [
+            {
+              "quote": "but it still forces traffic through the vertex `u`, so `u` stays a cut vertex",
+              "line_start": 39,
+              "reason": "This is true only for a non-root u. A triangle rooted at 0 gives low[1]==disc[0] while 0 is not a cut vertex. It also contradicts the root rule at line 38."
+            },
+            {
+              "quote": "The root is an articulation point only when it has two or more tree children",
+              "line_start": 38,
+              "reason": "This correct rule shows that the equality claim in the Bridge bullet needs a non-root qualifier."
+            },
+            {
+              "quote": "The single `>` versus `>=` is the entire distinction between cut edges and cut vertices.",
+              "line_start": 39,
+              "reason": "This overstates the difference, because the root is tested by child count rather than by the >= comparison."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the cut-vertex and bridge rules share one low-link DFS and are most useful together.",
+          "findings": [
+            {
+              "severity": "High",
+              "dimension": "Accuracy",
+              "location": "Visualization tab, Bridge bullet (line 39)",
+              "evidence": "\"it still forces traffic through the vertex `u`, so `u` stays a cut vertex\"",
+              "effect": "A reader would conclude that equality always marks u as an articulation point. That is false when u is the DFS root with a single child, such as a triangle rooted at 0. The claim also conflicts with the root rule in the same list.",
+              "fix": "Qualify the claim: for a non-root u, equality still makes u a cut vertex. Add that a root is a cut vertex only with two or more tree children. Soften \"the entire distinction\" to \"for non-root vertices\"."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "FAIL",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    },
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "review_repair_key": "f690c51574dbba5870684849f2f773fa7ae10b17395464e0260a7ba8dfdba67d",
+    "author_repair_pending": true
   }
 }
