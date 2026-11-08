@@ -7264,11 +7264,11 @@
     "version": 1,
     "id": "a3c3eac724bf4b6c8037306f6a4e6530",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-08T13:40:02.820509Z",
-    "elapsed_seconds": 215.88117130000003,
+    "elapsed_seconds": 229.16202720000007,
     "calls_reserved": 7,
-    "responses_received": 6,
+    "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Algorithms.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search.md"
@@ -7418,7 +7418,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-08T13:43:38.701189Z",
+    "checkpoint_at": "2026-11-08T13:43:51.982044Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -27678,12 +27678,30 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
+          "expected_hash": "2bfb5875b1f6c49f21faa11ec4052a6afbc44847f50baee5306ab1b4caeef209",
+          "before": "so the edge is not a bridge, but it still forces traffic through the vertex `u`, so `u` stays a cut vertex. The single `>` versus `>=` is the entire distinction between cut edges and cut vertices.",
+          "after": "so the edge is not a bridge, but the route still ends at `u`, so for a non-root `u` the subtree remains cut off when `u` is deleted and `u` stays a cut vertex. A root `u` is the exception: it is a cut vertex only with two or more tree children. For non-root vertices, the single `>` versus `>=` is the entire distinction between cut edges and cut vertices.",
+          "reason": "Qualifies the equality case so it no longer contradicts the root rule stated above.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Equality low[v]==disc[u] means no bridge but a non-root u is a cut vertex",
+            "A root is a cut vertex only with two or more tree children"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The Bridge bullet claims equality always leaves u a cut vertex, which is false for a DFS root with a single child and contradicts the Root cut vertex bullet.",
+          "reader_benefit": "The >= versus > distinction is stated with its correct non-root condition and no longer conflicts with the root rule."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
-          "outcome": "keep",
-          "reason": "I read the whole note and checked its claims by hand-tracing the examples and comparing the rules with the standard low-link treatment. The definitions of disc and low are correct. So are the non-root cut-vertex test (low[v] >= disc[u]), the root rule (two or more tree children) and the strict bridge test (low[v] > disc[u]). The triangle-with-tail trace is correct: edges 2-3 and 3-4 are bridges, and vertices 2 and 3 are cut vertices. The path 0-1-2 rooted at 0 does show the root special case. The two triangles sharing vertex 2 do show the difference between >= and >, because low[child] equals disc[2]. The parallel-edge explanation is right, and the C# code skips the parent by edge id and applies both rules correctly. The directed-graph caveat and the SCC comparison are sound, and the complexity of O(n+m) time and O(n) space is correct. The Hopcroft–Tarjan reference (Algorithm 447) is a real primary source. The note has no cards, so there is no card risk. The only repetition is the SCC link that appears twice, which is minor polish and does not justify an edit. known_violations is empty."
+          "outcome": "changed",
+          "reason": "The whole note was re-audited. The disc/low definitions, root rule, strict bridge test, worked examples, parallel-edge handling, C# code, SCC comparison and O(n+m) complexity are correct. The one defect is the Bridge bullet, which said equality always keeps u a cut vertex and called >/>= the entire distinction. That is false for a root with one child. The edit adds the non-root qualifier and the root exception, so the note is now self-consistent."
         }
       ],
       "feedback": []
@@ -27698,8 +27716,10 @@
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-08T13:42:46.876342Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-08T13:43:51.982030Z",
+    "review_repair_key": "f690c51574dbba5870684849f2f773fa7ae10b17395464e0260a7ba8dfdba67d",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The keep disposition missed a factual error. The Bridge bullet says equality low[v] == disc[u] always keeps u a cut vertex, but that fails when u is the DFS root. Because of this, the note stays unresolved.",
       "notes": [
@@ -27762,60 +27782,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The keep disposition missed a factual error. The Bridge bullet says equality low[v] == disc[u] always keeps u a cut vertex, but that fails when u is the DFS root. Because of this, the note stays unresolved.",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The note is mostly accurate and well organized. One claim in the Bridge bullet is wrong for a root u: equality low[v]==disc[u] does not make u a cut vertex. The note also contradicts itself, since the Root cut vertex bullet and the Boundaries section say the root needs two or more children. The keep disposition's claim that every rule was verified is therefore unfounded.",
-          "page_type": "Concept — no cards. References are present. Frontmatter is typed. The steptrace and complexity blocks are protected.",
-          "current_text_evidence": [
-            {
-              "quote": "but it still forces traffic through the vertex `u`, so `u` stays a cut vertex",
-              "line_start": 39,
-              "reason": "This is true only for a non-root u. A triangle rooted at 0 gives low[1]==disc[0] while 0 is not a cut vertex. It also contradicts the root rule at line 38."
-            },
-            {
-              "quote": "The root is an articulation point only when it has two or more tree children",
-              "line_start": 38,
-              "reason": "This correct rule shows that the equality claim in the Bridge bullet needs a non-root qualifier."
-            },
-            {
-              "quote": "The single `>` versus `>=` is the entire distinction between cut edges and cut vertices.",
-              "line_start": 39,
-              "reason": "This overstates the difference, because the root is tested by child count rather than by the >= comparison."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the cut-vertex and bridge rules share one low-link DFS and are most useful together.",
-          "findings": [
-            {
-              "severity": "High",
-              "dimension": "Accuracy",
-              "location": "Visualization tab, Bridge bullet (line 39)",
-              "evidence": "\"it still forces traffic through the vertex `u`, so `u` stays a cut vertex\"",
-              "effect": "A reader would conclude that equality always marks u as an articulation point. That is false when u is the DFS root with a single child, such as a triangle rooted at 0. The claim also conflicts with the root rule in the same list.",
-              "fix": "Qualify the claim: for a non-root u, equality still makes u a cut vertex. Add that a root is a cut vertex only with two or more tree children. Soften \"the entire distinction\" to \"for non-root vertices\"."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "FAIL",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "f690c51574dbba5870684849f2f773fa7ae10b17395464e0260a7ba8dfdba67d",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
