@@ -9681,7 +9681,7 @@
     "status": "active",
     "phase": "author_completed",
     "started_at": "2026-11-09T22:32:13.455810Z",
-    "elapsed_seconds": 677.9304521000004,
+    "elapsed_seconds": 682.2301707000004,
     "calls_reserved": 18,
     "responses_received": 18,
     "attempted_paths": [
@@ -10142,7 +10142,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-09T22:43:31.385758Z",
+    "checkpoint_at": "2026-11-09T22:43:35.685477Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -26800,15 +26800,39 @@
       },
       "proposal": {
         "version": 1,
-        "edits": [],
+        "edits": [
+          {
+            "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+            "expected_hash": "256cc68982d02d203c314f707546008871c6028321be41e3b500c682e2929d13",
+            "before": "Azure Cosmos DB (SQL API).",
+            "after": "Azure Cosmos DB for NoSQL.",
+            "reason": "Replaces the retired API name with Microsoft's current name.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "Cosmos DB's document API is called Azure Cosmos DB for NoSQL"
+            ],
+            "sources": [
+              {
+                "url": "https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/",
+                "claim": "Microsoft documentation names the document-oriented API 'Azure Cosmos DB for NoSQL'.",
+                "version": "not version-specific"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The Document examples bullet uses the outdated 'SQL API' name, which can suggest a relational model in a note that classifies NoSQL families.",
+            "reader_benefit": "The reader sees the current product name and is not misled about the data model."
+          }
+        ],
         "dispositions": [
           {
             "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
-            "outcome": "keep",
-            "reason": "Audited the whole note against its current text. The opening defines the four families and says that scaling, schema flexibility and eventual consistency are associations, not guarantees. Each family section states its data model, examples, best fit and a modeling rule with the condition that changes it. Document aggregate boundaries, key-value products adding indexes, and wide-column partition/clustering design with LSM trade-offs all match standard documentation. The graph section's traversal-versus-SQL boundary is accurate. The comparison table matches the sections. The Discord Cassandra-to-ScyllaDB example matches the cited Discord blog. The pitfalls and tradeoffs sections add real judgment and link out to the sibling notes. No cards are in this note, and there are no known violations. I found no factual error, gap or redundancy that justifies an edit."
+            "outcome": "changed",
+            "reason": "Audited the whole note. The family sections, comparison table, pitfalls, tradeoffs and the Discord example are accurate and consistent. The only defect was the outdated 'SQL API' Cosmos DB name, which is now corrected to 'Azure Cosmos DB for NoSQL'."
           }
         ],
-        "feedback": []
+        "feedback": [],
+        "decisions": []
       },
       "source_hashes": {
         "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md": "256cc68982d02d203c314f707546008871c6028321be41e3b500c682e2929d13"
@@ -26820,8 +26844,10 @@
         "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md": ""
       },
       "prepared_source_version": 1,
-      "prepared_at": "2026-11-09T22:42:16.813354Z",
-      "completed_review": {
+      "prepared_at": "2026-11-09T22:43:31.385740Z",
+      "review_repair_key": "edfe3dd9cb5a96d66490df3314eee47290e219fc460d88aef59fc8996fefabff",
+      "repair_reserved": true,
+      "repair_review": {
         "verdict": "CHANGES REQUIRED",
         "overall_reason": "The keep is not justified. The Document section uses an outdated product name, \"Azure Cosmos DB (SQL API)\". Microsoft renamed it \"Azure Cosmos DB for NoSQL\". In a note about NoSQL families, the old name is also confusing, because \"SQL API\" suggests a relational model. The rest of the note is sound.",
         "notes": [
@@ -26867,53 +26893,25 @@
         ],
         "change_checks": []
       },
+      "repair_previous_proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+            "outcome": "keep",
+            "reason": "Audited the whole note against its current text. The opening defines the four families and says that scaling, schema flexibility and eventual consistency are associations, not guarantees. Each family section states its data model, examples, best fit and a modeling rule with the condition that changes it. Document aggregate boundaries, key-value products adding indexes, and wide-column partition/clustering design with LSM trade-offs all match standard documentation. The graph section's traversal-versus-SQL boundary is accurate. The comparison table matches the sections. The Discord Cassandra-to-ScyllaDB example matches the cited Discord blog. The pitfalls and tradeoffs sections add real judgment and link out to the sibling notes. No cards are in this note, and there are no known violations. I found no factual error, gap or redundancy that justifies an edit."
+          }
+        ],
+        "feedback": []
+      },
+      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "feedback_snapshot": [],
       "blocked_review": {
-        "verdict": "CHANGES REQUIRED",
-        "overall_reason": "The keep is not justified. The Document section uses an outdated product name, \"Azure Cosmos DB (SQL API)\". Microsoft renamed it \"Azure Cosmos DB for NoSQL\". In a note about NoSQL families, the old name is also confusing, because \"SQL API\" suggests a relational model. The rest of the note is sound.",
-        "notes": [
-          {
-            "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
-            "verdict": "CHANGES REQUIRED",
-            "summary": "The note is well structured and technically careful overall, but it keeps an outdated Cosmos DB API name. That is a concrete terminology and accuracy defect, and the keep disposition missed it.",
-            "page_type": "Concept — no required Questions section. References are present and bare. Frontmatter is typed and the status is valid.",
-            "current_text_evidence": [
-              {
-                "quote": "Azure Cosmos DB (SQL API)",
-                "line_start": 24,
-                "reason": "The product is now named Azure Cosmos DB for NoSQL (formerly the SQL API). The old name is outdated, and in a NoSQL taxonomy note it can mislead the reader."
-              },
-              {
-                "quote": "Discord later moved from Cassandra to ScyllaDB after dealing with hot partitions",
-                "line_start": 49,
-                "reason": "This matches the cited Discord blog, so it is a strong passage. It is not a defect."
-              }
-            ],
-            "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: the four families, the comparison table and the pitfalls form one coherent topic. The time-series material is already delegated to its own note.",
-            "findings": [
-              {
-                "severity": "Medium",
-                "dimension": "Accuracy/terminology",
-                "location": "## Document, Examples bullet (line 24)",
-                "evidence": "Azure Cosmos DB (SQL API)",
-                "effect": "The name is outdated. Microsoft now calls it Azure Cosmos DB for NoSQL. The reader may take 'SQL API' for a relational model in a note that classifies NoSQL families.",
-                "fix": "Replace it with 'Azure Cosmos DB for NoSQL'."
-              }
-            ],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "FAIL",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "change_checks": []
+        "stage": "deterministic_application",
+        "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/"
       },
-      "feedback_snapshot": []
+      "failed_at": "2026-11-09T22:43:35.685084Z"
     }
   },
   "parked_review_repairs": {},
@@ -29949,6 +29947,286 @@
         "reason": "card edit must replace one complete active Qard block including adjacent metadata"
       },
       "failed_at": "2026-11-09T22:35:31.020683Z"
+    },
+    "4135e83669888c26c132f77bc43acff5de67adfefbc0b355c0bb46404d8ec548": {
+      "workload_id": "12a9481bc2214861b8af83cb2602a851",
+      "topic_id": "data-persistence-4ea34db4",
+      "batch": {
+        "topic": "Data Persistence",
+        "topic_id": "data-persistence-4ea34db4",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+            "content": "---\ntopic: [Data Persistence]\nsubtopic: [NoSQL]\nsummary: \"The four NoSQL families (document, key-value, wide-column, graph) and their access patterns.\"\nlevel: [\"3\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-06-20T08:45:59.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.381Z\"\n---\n\nThe four common NoSQL families are **document**, **key-value**, **wide-column**, and **graph**. They differ in the data they keep together and the queries they make cheap. Horizontal scaling, flexible schema, and [[Replication|eventual consistency]] are common associations under [[CAP theorem|CAP]], but none is a shared guarantee. [[Home/Data Persistence/NoSQL/NoSQL|NoSQL]] explains when a specialized model is worth adding at all.\n\nSearch and time-series engines sit beside these families as specialized models. A product may expose several models at once, so classification is a starting point. The workload still decides.\n\n# The Four Families\n\n## Document\n\nDocument stores persist structured records, commonly JSON or BSON, with nested fields and collections. The document is usually the natural aggregate and atomic update boundary. Related data that changes together can stay in one document. References remain useful when an embedded collection would grow without bound or when another aggregate owns the fact. Query operators, schema validation, joins, and multi-document transaction support vary by engine.\n\n- **Examples**: MongoDB, Couchbase, Azure Cosmos DB (SQL API).\n- **Best fit**: catalogs, profiles, and other aggregates whose nested shape evolves together.\n- **Model rule**: embed data owned by the aggregate. Reference data with an independent lifecycle or unbounded growth.\n\n```json\n{ \"_id\": \"u42\", \"name\": \"Ada\", \"addresses\": [ { \"city\": \"London\", \"primary\": true } ],\n  \"orders\": [ { \"id\": \"o1\", \"total\": 99.50 } ] }\n```\n\n## Key-Value\n\nA key-value store addresses a value through a unique key. The narrow contract makes direct lookup easy to scale and reason about. Some products treat the value as opaque. Others add typed structures, conditional writes, secondary indexes, or range queries. Those additions belong to the product contract rather than the base model.\n\n- **Examples**: [[Redis]], DynamoDB, Memcached, etcd.\n- **Best fit**: caching ([[Home/Data Persistence/Caching|Caching]]), session state, idempotency records, and direct entity lookup.\n- **Model rule**: design keys from the required lookups, distribution, and atomicity boundary. A value-based query needs a supported secondary access path or another model.\n\n## Wide-Column\n\nWide-column stores group rows by partition key and order data within a partition using clustering keys or an equivalent layout. They work well when a small set of high-volume queries can be encoded into that key design. Cassandra, ScyllaDB, HBase, and Bigtable use log-structured storage ideas such as memtables and immutable table files, trading cheap buffered writes for compaction and read-amplification costs described in [[LSM-Tree]].\n\n- **Examples**: Cassandra, ScyllaDB, HBase, Bigtable.\n- **Best fit**: event histories, telemetry, and other write-heavy workloads queried by a known partition and ordered range.\n- **Model rule**: start from the partition-local queries. Duplicate a read shape only when its write and repair costs are acceptable, much like [[Sharding|sharding's]] key discipline.\n\nDiscord's message store shows the boundary at production scale. Messages are read by channel and time, so the key keeps that path local. Discord later moved from Cassandra to ScyllaDB after dealing with hot partitions, garbage collection, and repair work. The engine changed. The need for a deliberate partition shape did not.\n\n![[Data Persistence/Data Persistence-NoSQL Database Types-18120000.png|theme-aware]]\n\n## Graph\n\nGraph stores represent nodes and edges directly. This fits variable-depth traversal, where each step discovers the next relationships to follow. Performance still depends on selectivity, indexes, locality, and how many edges the query visits.\n\n- **Examples**: Neo4j, Amazon Neptune, JanusGraph.\n- **Best fit**: fraud paths, dependency graphs, knowledge graphs, and recommendation queries driven by relationships.\n- **Boundary with SQL**: deep or unpredictable traversal needs repeated joins and intermediate results in a relational model. A graph engine can make adjacency expansion more direct. SQL often remains simpler for fixed-depth joins, set-based aggregates, and strong relational constraints.\n\n# Comparison\n\n| Family | Read by | Strength | Weak at | Typical store |\n|---|---|---|---|---|\n| **Document** | Document key + supported indexes | Aggregate-shaped records | Unbounded documents, cross-aggregate coordination | MongoDB |\n| **Key-Value** | Primary key and product-specific indexes | Direct lookup with a narrow contract | Ad-hoc queries over value contents | Redis, DynamoDB |\n| **Wide-Column** | Partition + clustering key | Write throughput at scale | Ad-hoc queries, cross-partition joins | Cassandra |\n| **Graph** | Traversal from a node | Deep relationship queries | Bulk aggregate scans | Neo4j |\n\n# Time-Series Workloads\n\nA time-series workload is append-heavy and reads ordered ranges by series and time. The important boundary is not “contains timestamps”. It is whether cardinality, compression, retention, and time-window aggregation have become the dominant storage costs. [[Time-Series Databases]] follows that workload through series cardinality, partitioning, rollups, and late data.\n\n# Pitfalls\n\n- **Flexible schema still has a contract.** Validation may live in the database, the application, or both. Without versioning and migration rules, old and new shapes leak into every reader.\n- **Relational habits can fight the selected model.** A normalized document design creates extra lookups. A wide-column design that ignores required queries creates scans. Model around the operations the engine can execute predictably.\n- **Consistency labels hide operation-level choices.** Read-your-writes, conditional updates, transactions, and behavior during a partition must be checked separately under the [[CAP theorem|CAP / PACELC]] boundary.\n- **Partition keys can concentrate load.** A tenant, timestamp prefix, or popular entity can send too much traffic to one partition, reproducing the hot-key problem in [[Sharding]].\n- **Every additional store has an operating cost.** Polyglot persistence adds another backup, monitoring surface, failure mode, and data-repair path. Add a model only when its access-pattern advantage pays for that cost.\n\n# Tradeoffs\n\nStay relational when changing queries, multi-row transactions, and relational constraints dominate. Choose another model when a measured access pattern has become expensive or awkward in that design. [[Replication]] and [[Home/Data Persistence/Caching|caching]] may buy enough headroom without adding another source of truth.\n\nDistributed SQL systems such as CockroachDB, Spanner, and Vitess are another option when relational semantics must survive horizontal partitioning. Their transaction, latency, topology, and compatibility costs still need to be evaluated directly.\n\n# References\n\n- [DynamoDB single-table design](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-general-nosql-design.html)\n- [How Discord stores trillions of messages](https://discord.com/blog/how-discord-stores-trillions-of-messages)\n",
+            "hash": "256cc68982d02d203c314f707546008871c6028321be41e3b500c682e2929d13",
+            "topic": "Data Persistence",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [
+          {
+            "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+            "expected_hash": "256cc68982d02d203c314f707546008871c6028321be41e3b500c682e2929d13",
+            "before": "Azure Cosmos DB (SQL API).",
+            "after": "Azure Cosmos DB for NoSQL.",
+            "reason": "Replaces the retired API name with Microsoft's current name.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "Cosmos DB's document API is called Azure Cosmos DB for NoSQL"
+            ],
+            "sources": [
+              {
+                "url": "https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/",
+                "claim": "Microsoft documentation names the document-oriented API 'Azure Cosmos DB for NoSQL'.",
+                "version": "not version-specific"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The Document examples bullet uses the outdated 'SQL API' name, which can suggest a relational model in a note that classifies NoSQL families.",
+            "reader_benefit": "The reader sees the current product name and is not misled about the data model."
+          }
+        ],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+            "outcome": "changed",
+            "reason": "Audited the whole note. The family sections, comparison table, pitfalls, tradeoffs and the Discord example are accurate and consistent. The only defect was the outdated 'SQL API' Cosmos DB name, which is now corrected to 'Azure Cosmos DB for NoSQL'."
+          }
+        ],
+        "feedback": [],
+        "decisions": []
+      },
+      "source_hashes": {
+        "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md": "256cc68982d02d203c314f707546008871c6028321be41e3b500c682e2929d13"
+      },
+      "feedback_keys": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-09T22:43:31.385740Z",
+      "review_repair_key": "edfe3dd9cb5a96d66490df3314eee47290e219fc460d88aef59fc8996fefabff",
+      "repair_reserved": true,
+      "repair_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep is not justified. The Document section uses an outdated product name, \"Azure Cosmos DB (SQL API)\". Microsoft renamed it \"Azure Cosmos DB for NoSQL\". In a note about NoSQL families, the old name is also confusing, because \"SQL API\" suggests a relational model. The rest of the note is sound.",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is well structured and technically careful overall, but it keeps an outdated Cosmos DB API name. That is a concrete terminology and accuracy defect, and the keep disposition missed it.",
+            "page_type": "Concept — no required Questions section. References are present and bare. Frontmatter is typed and the status is valid.",
+            "current_text_evidence": [
+              {
+                "quote": "Azure Cosmos DB (SQL API)",
+                "line_start": 24,
+                "reason": "The product is now named Azure Cosmos DB for NoSQL (formerly the SQL API). The old name is outdated, and in a NoSQL taxonomy note it can mislead the reader."
+              },
+              {
+                "quote": "Discord later moved from Cassandra to ScyllaDB after dealing with hot partitions",
+                "line_start": 49,
+                "reason": "This matches the cited Discord blog, so it is a strong passage. It is not a defect."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the four families, the comparison table and the pitfalls form one coherent topic. The time-series material is already delegated to its own note.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy/terminology",
+                "location": "## Document, Examples bullet (line 24)",
+                "evidence": "Azure Cosmos DB (SQL API)",
+                "effect": "The name is outdated. Microsoft now calls it Azure Cosmos DB for NoSQL. The reader may take 'SQL API' for a relational model in a note that classifies NoSQL families.",
+                "fix": "Replace it with 'Azure Cosmos DB for NoSQL'."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "repair_previous_proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+            "outcome": "keep",
+            "reason": "Audited the whole note against its current text. The opening defines the four families and says that scaling, schema flexibility and eventual consistency are associations, not guarantees. Each family section states its data model, examples, best fit and a modeling rule with the condition that changes it. Document aggregate boundaries, key-value products adding indexes, and wide-column partition/clustering design with LSM trade-offs all match standard documentation. The graph section's traversal-versus-SQL boundary is accurate. The comparison table matches the sections. The Discord Cassandra-to-ScyllaDB example matches the cited Discord blog. The pitfalls and tradeoffs sections add real judgment and link out to the sibling notes. No cards are in this note, and there are no known violations. I found no factual error, gap or redundancy that justifies an edit."
+          }
+        ],
+        "feedback": []
+      },
+      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "feedback_snapshot": [],
+      "blocked_review": {
+        "stage": "deterministic_application",
+        "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/"
+      },
+      "failed_at": "2026-11-09T22:43:35.685084Z"
+    },
+    "adbc8db063acacf8cfaa06b79d7fd83246508e3ee05c831a326e343bea85f6e9": {
+      "workload_id": "12a9481bc2214861b8af83cb2602a851",
+      "topic_id": "data-persistence-4ea34db4",
+      "batch": {
+        "topic": "Data Persistence",
+        "topic_id": "data-persistence-4ea34db4",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+            "content": "---\ntopic: [Data Persistence]\nsubtopic: [NoSQL]\nsummary: \"The four NoSQL families (document, key-value, wide-column, graph) and their access patterns.\"\nlevel: [\"3\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-06-20T08:45:59.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.381Z\"\n---\n\nThe four common NoSQL families are **document**, **key-value**, **wide-column**, and **graph**. They differ in the data they keep together and the queries they make cheap. Horizontal scaling, flexible schema, and [[Replication|eventual consistency]] are common associations under [[CAP theorem|CAP]], but none is a shared guarantee. [[Home/Data Persistence/NoSQL/NoSQL|NoSQL]] explains when a specialized model is worth adding at all.\n\nSearch and time-series engines sit beside these families as specialized models. A product may expose several models at once, so classification is a starting point. The workload still decides.\n\n# The Four Families\n\n## Document\n\nDocument stores persist structured records, commonly JSON or BSON, with nested fields and collections. The document is usually the natural aggregate and atomic update boundary. Related data that changes together can stay in one document. References remain useful when an embedded collection would grow without bound or when another aggregate owns the fact. Query operators, schema validation, joins, and multi-document transaction support vary by engine.\n\n- **Examples**: MongoDB, Couchbase, Azure Cosmos DB (SQL API).\n- **Best fit**: catalogs, profiles, and other aggregates whose nested shape evolves together.\n- **Model rule**: embed data owned by the aggregate. Reference data with an independent lifecycle or unbounded growth.\n\n```json\n{ \"_id\": \"u42\", \"name\": \"Ada\", \"addresses\": [ { \"city\": \"London\", \"primary\": true } ],\n  \"orders\": [ { \"id\": \"o1\", \"total\": 99.50 } ] }\n```\n\n## Key-Value\n\nA key-value store addresses a value through a unique key. The narrow contract makes direct lookup easy to scale and reason about. Some products treat the value as opaque. Others add typed structures, conditional writes, secondary indexes, or range queries. Those additions belong to the product contract rather than the base model.\n\n- **Examples**: [[Redis]], DynamoDB, Memcached, etcd.\n- **Best fit**: caching ([[Home/Data Persistence/Caching|Caching]]), session state, idempotency records, and direct entity lookup.\n- **Model rule**: design keys from the required lookups, distribution, and atomicity boundary. A value-based query needs a supported secondary access path or another model.\n\n## Wide-Column\n\nWide-column stores group rows by partition key and order data within a partition using clustering keys or an equivalent layout. They work well when a small set of high-volume queries can be encoded into that key design. Cassandra, ScyllaDB, HBase, and Bigtable use log-structured storage ideas such as memtables and immutable table files, trading cheap buffered writes for compaction and read-amplification costs described in [[LSM-Tree]].\n\n- **Examples**: Cassandra, ScyllaDB, HBase, Bigtable.\n- **Best fit**: event histories, telemetry, and other write-heavy workloads queried by a known partition and ordered range.\n- **Model rule**: start from the partition-local queries. Duplicate a read shape only when its write and repair costs are acceptable, much like [[Sharding|sharding's]] key discipline.\n\nDiscord's message store shows the boundary at production scale. Messages are read by channel and time, so the key keeps that path local. Discord later moved from Cassandra to ScyllaDB after dealing with hot partitions, garbage collection, and repair work. The engine changed. The need for a deliberate partition shape did not.\n\n![[Data Persistence/Data Persistence-NoSQL Database Types-18120000.png|theme-aware]]\n\n## Graph\n\nGraph stores represent nodes and edges directly. This fits variable-depth traversal, where each step discovers the next relationships to follow. Performance still depends on selectivity, indexes, locality, and how many edges the query visits.\n\n- **Examples**: Neo4j, Amazon Neptune, JanusGraph.\n- **Best fit**: fraud paths, dependency graphs, knowledge graphs, and recommendation queries driven by relationships.\n- **Boundary with SQL**: deep or unpredictable traversal needs repeated joins and intermediate results in a relational model. A graph engine can make adjacency expansion more direct. SQL often remains simpler for fixed-depth joins, set-based aggregates, and strong relational constraints.\n\n# Comparison\n\n| Family | Read by | Strength | Weak at | Typical store |\n|---|---|---|---|---|\n| **Document** | Document key + supported indexes | Aggregate-shaped records | Unbounded documents, cross-aggregate coordination | MongoDB |\n| **Key-Value** | Primary key and product-specific indexes | Direct lookup with a narrow contract | Ad-hoc queries over value contents | Redis, DynamoDB |\n| **Wide-Column** | Partition + clustering key | Write throughput at scale | Ad-hoc queries, cross-partition joins | Cassandra |\n| **Graph** | Traversal from a node | Deep relationship queries | Bulk aggregate scans | Neo4j |\n\n# Time-Series Workloads\n\nA time-series workload is append-heavy and reads ordered ranges by series and time. The important boundary is not “contains timestamps”. It is whether cardinality, compression, retention, and time-window aggregation have become the dominant storage costs. [[Time-Series Databases]] follows that workload through series cardinality, partitioning, rollups, and late data.\n\n# Pitfalls\n\n- **Flexible schema still has a contract.** Validation may live in the database, the application, or both. Without versioning and migration rules, old and new shapes leak into every reader.\n- **Relational habits can fight the selected model.** A normalized document design creates extra lookups. A wide-column design that ignores required queries creates scans. Model around the operations the engine can execute predictably.\n- **Consistency labels hide operation-level choices.** Read-your-writes, conditional updates, transactions, and behavior during a partition must be checked separately under the [[CAP theorem|CAP / PACELC]] boundary.\n- **Partition keys can concentrate load.** A tenant, timestamp prefix, or popular entity can send too much traffic to one partition, reproducing the hot-key problem in [[Sharding]].\n- **Every additional store has an operating cost.** Polyglot persistence adds another backup, monitoring surface, failure mode, and data-repair path. Add a model only when its access-pattern advantage pays for that cost.\n\n# Tradeoffs\n\nStay relational when changing queries, multi-row transactions, and relational constraints dominate. Choose another model when a measured access pattern has become expensive or awkward in that design. [[Replication]] and [[Home/Data Persistence/Caching|caching]] may buy enough headroom without adding another source of truth.\n\nDistributed SQL systems such as CockroachDB, Spanner, and Vitess are another option when relational semantics must survive horizontal partitioning. Their transaction, latency, topology, and compatibility costs still need to be evaluated directly.\n\n# References\n\n- [DynamoDB single-table design](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-general-nosql-design.html)\n- [How Discord stores trillions of messages](https://discord.com/blog/how-discord-stores-trillions-of-messages)\n",
+            "hash": "256cc68982d02d203c314f707546008871c6028321be41e3b500c682e2929d13",
+            "topic": "Data Persistence",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+            "outcome": "keep",
+            "reason": "Audited the whole note against its current text. The opening defines the four families and says that scaling, schema flexibility and eventual consistency are associations, not guarantees. Each family section states its data model, examples, best fit and a modeling rule with the condition that changes it. Document aggregate boundaries, key-value products adding indexes, and wide-column partition/clustering design with LSM trade-offs all match standard documentation. The graph section's traversal-versus-SQL boundary is accurate. The comparison table matches the sections. The Discord Cassandra-to-ScyllaDB example matches the cited Discord blog. The pitfalls and tradeoffs sections add real judgment and link out to the sibling notes. No cards are in this note, and there are no known violations. I found no factual error, gap or redundancy that justifies an edit."
+          }
+        ],
+        "feedback": []
+      },
+      "source_hashes": {
+        "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md": "256cc68982d02d203c314f707546008871c6028321be41e3b500c682e2929d13"
+      },
+      "feedback_keys": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-09T22:42:16.813354Z",
+      "completed_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep is not justified. The Document section uses an outdated product name, \"Azure Cosmos DB (SQL API)\". Microsoft renamed it \"Azure Cosmos DB for NoSQL\". In a note about NoSQL families, the old name is also confusing, because \"SQL API\" suggests a relational model. The rest of the note is sound.",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is well structured and technically careful overall, but it keeps an outdated Cosmos DB API name. That is a concrete terminology and accuracy defect, and the keep disposition missed it.",
+            "page_type": "Concept — no required Questions section. References are present and bare. Frontmatter is typed and the status is valid.",
+            "current_text_evidence": [
+              {
+                "quote": "Azure Cosmos DB (SQL API)",
+                "line_start": 24,
+                "reason": "The product is now named Azure Cosmos DB for NoSQL (formerly the SQL API). The old name is outdated, and in a NoSQL taxonomy note it can mislead the reader."
+              },
+              {
+                "quote": "Discord later moved from Cassandra to ScyllaDB after dealing with hot partitions",
+                "line_start": 49,
+                "reason": "This matches the cited Discord blog, so it is a strong passage. It is not a defect."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the four families, the comparison table and the pitfalls form one coherent topic. The time-series material is already delegated to its own note.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy/terminology",
+                "location": "## Document, Examples bullet (line 24)",
+                "evidence": "Azure Cosmos DB (SQL API)",
+                "effect": "The name is outdated. Microsoft now calls it Azure Cosmos DB for NoSQL. The reader may take 'SQL API' for a relational model in a note that classifies NoSQL families.",
+                "fix": "Replace it with 'Azure Cosmos DB for NoSQL'."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "blocked_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep is not justified. The Document section uses an outdated product name, \"Azure Cosmos DB (SQL API)\". Microsoft renamed it \"Azure Cosmos DB for NoSQL\". In a note about NoSQL families, the old name is also confusing, because \"SQL API\" suggests a relational model. The rest of the note is sound.",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is well structured and technically careful overall, but it keeps an outdated Cosmos DB API name. That is a concrete terminology and accuracy defect, and the keep disposition missed it.",
+            "page_type": "Concept — no required Questions section. References are present and bare. Frontmatter is typed and the status is valid.",
+            "current_text_evidence": [
+              {
+                "quote": "Azure Cosmos DB (SQL API)",
+                "line_start": 24,
+                "reason": "The product is now named Azure Cosmos DB for NoSQL (formerly the SQL API). The old name is outdated, and in a NoSQL taxonomy note it can mislead the reader."
+              },
+              {
+                "quote": "Discord later moved from Cassandra to ScyllaDB after dealing with hot partitions",
+                "line_start": 49,
+                "reason": "This matches the cited Discord blog, so it is a strong passage. It is not a defect."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the four families, the comparison table and the pitfalls form one coherent topic. The time-series material is already delegated to its own note.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy/terminology",
+                "location": "## Document, Examples bullet (line 24)",
+                "evidence": "Azure Cosmos DB (SQL API)",
+                "effect": "The name is outdated. Microsoft now calls it Azure Cosmos DB for NoSQL. The reader may take 'SQL API' for a relational model in a note that classifies NoSQL families.",
+                "fix": "Replace it with 'Azure Cosmos DB for NoSQL'."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "feedback_snapshot": []
     }
   },
   "completed_review_holds": {
@@ -30450,138 +30728,5 @@
       "review_repair_key": "5e37f1977082945be5d1b9effaf24d2debf9e0720d0b7739596285e4a78de00b",
       "author_repair_pending": true
     }
-  },
-  "pending_author_proposal": {
-    "workload_id": "12a9481bc2214861b8af83cb2602a851",
-    "topic_id": "data-persistence-4ea34db4",
-    "batch": {
-      "topic": "Data Persistence",
-      "topic_id": "data-persistence-4ea34db4",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
-          "content": "---\ntopic: [Data Persistence]\nsubtopic: [NoSQL]\nsummary: \"The four NoSQL families (document, key-value, wide-column, graph) and their access patterns.\"\nlevel: [\"3\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-06-20T08:45:59.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.381Z\"\n---\n\nThe four common NoSQL families are **document**, **key-value**, **wide-column**, and **graph**. They differ in the data they keep together and the queries they make cheap. Horizontal scaling, flexible schema, and [[Replication|eventual consistency]] are common associations under [[CAP theorem|CAP]], but none is a shared guarantee. [[Home/Data Persistence/NoSQL/NoSQL|NoSQL]] explains when a specialized model is worth adding at all.\n\nSearch and time-series engines sit beside these families as specialized models. A product may expose several models at once, so classification is a starting point. The workload still decides.\n\n# The Four Families\n\n## Document\n\nDocument stores persist structured records, commonly JSON or BSON, with nested fields and collections. The document is usually the natural aggregate and atomic update boundary. Related data that changes together can stay in one document. References remain useful when an embedded collection would grow without bound or when another aggregate owns the fact. Query operators, schema validation, joins, and multi-document transaction support vary by engine.\n\n- **Examples**: MongoDB, Couchbase, Azure Cosmos DB (SQL API).\n- **Best fit**: catalogs, profiles, and other aggregates whose nested shape evolves together.\n- **Model rule**: embed data owned by the aggregate. Reference data with an independent lifecycle or unbounded growth.\n\n```json\n{ \"_id\": \"u42\", \"name\": \"Ada\", \"addresses\": [ { \"city\": \"London\", \"primary\": true } ],\n  \"orders\": [ { \"id\": \"o1\", \"total\": 99.50 } ] }\n```\n\n## Key-Value\n\nA key-value store addresses a value through a unique key. The narrow contract makes direct lookup easy to scale and reason about. Some products treat the value as opaque. Others add typed structures, conditional writes, secondary indexes, or range queries. Those additions belong to the product contract rather than the base model.\n\n- **Examples**: [[Redis]], DynamoDB, Memcached, etcd.\n- **Best fit**: caching ([[Home/Data Persistence/Caching|Caching]]), session state, idempotency records, and direct entity lookup.\n- **Model rule**: design keys from the required lookups, distribution, and atomicity boundary. A value-based query needs a supported secondary access path or another model.\n\n## Wide-Column\n\nWide-column stores group rows by partition key and order data within a partition using clustering keys or an equivalent layout. They work well when a small set of high-volume queries can be encoded into that key design. Cassandra, ScyllaDB, HBase, and Bigtable use log-structured storage ideas such as memtables and immutable table files, trading cheap buffered writes for compaction and read-amplification costs described in [[LSM-Tree]].\n\n- **Examples**: Cassandra, ScyllaDB, HBase, Bigtable.\n- **Best fit**: event histories, telemetry, and other write-heavy workloads queried by a known partition and ordered range.\n- **Model rule**: start from the partition-local queries. Duplicate a read shape only when its write and repair costs are acceptable, much like [[Sharding|sharding's]] key discipline.\n\nDiscord's message store shows the boundary at production scale. Messages are read by channel and time, so the key keeps that path local. Discord later moved from Cassandra to ScyllaDB after dealing with hot partitions, garbage collection, and repair work. The engine changed. The need for a deliberate partition shape did not.\n\n![[Data Persistence/Data Persistence-NoSQL Database Types-18120000.png|theme-aware]]\n\n## Graph\n\nGraph stores represent nodes and edges directly. This fits variable-depth traversal, where each step discovers the next relationships to follow. Performance still depends on selectivity, indexes, locality, and how many edges the query visits.\n\n- **Examples**: Neo4j, Amazon Neptune, JanusGraph.\n- **Best fit**: fraud paths, dependency graphs, knowledge graphs, and recommendation queries driven by relationships.\n- **Boundary with SQL**: deep or unpredictable traversal needs repeated joins and intermediate results in a relational model. A graph engine can make adjacency expansion more direct. SQL often remains simpler for fixed-depth joins, set-based aggregates, and strong relational constraints.\n\n# Comparison\n\n| Family | Read by | Strength | Weak at | Typical store |\n|---|---|---|---|---|\n| **Document** | Document key + supported indexes | Aggregate-shaped records | Unbounded documents, cross-aggregate coordination | MongoDB |\n| **Key-Value** | Primary key and product-specific indexes | Direct lookup with a narrow contract | Ad-hoc queries over value contents | Redis, DynamoDB |\n| **Wide-Column** | Partition + clustering key | Write throughput at scale | Ad-hoc queries, cross-partition joins | Cassandra |\n| **Graph** | Traversal from a node | Deep relationship queries | Bulk aggregate scans | Neo4j |\n\n# Time-Series Workloads\n\nA time-series workload is append-heavy and reads ordered ranges by series and time. The important boundary is not “contains timestamps”. It is whether cardinality, compression, retention, and time-window aggregation have become the dominant storage costs. [[Time-Series Databases]] follows that workload through series cardinality, partitioning, rollups, and late data.\n\n# Pitfalls\n\n- **Flexible schema still has a contract.** Validation may live in the database, the application, or both. Without versioning and migration rules, old and new shapes leak into every reader.\n- **Relational habits can fight the selected model.** A normalized document design creates extra lookups. A wide-column design that ignores required queries creates scans. Model around the operations the engine can execute predictably.\n- **Consistency labels hide operation-level choices.** Read-your-writes, conditional updates, transactions, and behavior during a partition must be checked separately under the [[CAP theorem|CAP / PACELC]] boundary.\n- **Partition keys can concentrate load.** A tenant, timestamp prefix, or popular entity can send too much traffic to one partition, reproducing the hot-key problem in [[Sharding]].\n- **Every additional store has an operating cost.** Polyglot persistence adds another backup, monitoring surface, failure mode, and data-repair path. Add a model only when its access-pattern advantage pays for that cost.\n\n# Tradeoffs\n\nStay relational when changing queries, multi-row transactions, and relational constraints dominate. Choose another model when a measured access pattern has become expensive or awkward in that design. [[Replication]] and [[Home/Data Persistence/Caching|caching]] may buy enough headroom without adding another source of truth.\n\nDistributed SQL systems such as CockroachDB, Spanner, and Vitess are another option when relational semantics must survive horizontal partitioning. Their transaction, latency, topology, and compatibility costs still need to be evaluated directly.\n\n# References\n\n- [DynamoDB single-table design](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-general-nosql-design.html)\n- [How Discord stores trillions of messages](https://discord.com/blog/how-discord-stores-trillions-of-messages)\n",
-          "hash": "256cc68982d02d203c314f707546008871c6028321be41e3b500c682e2929d13",
-          "topic": "Data Persistence",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [
-        {
-          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
-          "expected_hash": "256cc68982d02d203c314f707546008871c6028321be41e3b500c682e2929d13",
-          "before": "Azure Cosmos DB (SQL API).",
-          "after": "Azure Cosmos DB for NoSQL.",
-          "reason": "Replaces the retired API name with Microsoft's current name.",
-          "kind": "note",
-          "learning_target": "same",
-          "essential_meanings": [
-            "Cosmos DB's document API is called Azure Cosmos DB for NoSQL"
-          ],
-          "sources": [
-            {
-              "url": "https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/",
-              "claim": "Microsoft documentation names the document-oriented API 'Azure Cosmos DB for NoSQL'.",
-              "version": "not version-specific"
-            }
-          ],
-          "feedback_keys": [],
-          "problem": "The Document examples bullet uses the outdated 'SQL API' name, which can suggest a relational model in a note that classifies NoSQL families.",
-          "reader_benefit": "The reader sees the current product name and is not misled about the data model."
-        }
-      ],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
-          "outcome": "changed",
-          "reason": "Audited the whole note. The family sections, comparison table, pitfalls, tradeoffs and the Discord example are accurate and consistent. The only defect was the outdated 'SQL API' Cosmos DB name, which is now corrected to 'Azure Cosmos DB for NoSQL'."
-        }
-      ],
-      "feedback": [],
-      "decisions": []
-    },
-    "source_hashes": {
-      "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md": "256cc68982d02d203c314f707546008871c6028321be41e3b500c682e2929d13"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-09T22:43:31.385740Z",
-    "review_repair_key": "edfe3dd9cb5a96d66490df3314eee47290e219fc460d88aef59fc8996fefabff",
-    "repair_reserved": true,
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The keep is not justified. The Document section uses an outdated product name, \"Azure Cosmos DB (SQL API)\". Microsoft renamed it \"Azure Cosmos DB for NoSQL\". In a note about NoSQL families, the old name is also confusing, because \"SQL API\" suggests a relational model. The rest of the note is sound.",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The note is well structured and technically careful overall, but it keeps an outdated Cosmos DB API name. That is a concrete terminology and accuracy defect, and the keep disposition missed it.",
-          "page_type": "Concept — no required Questions section. References are present and bare. Frontmatter is typed and the status is valid.",
-          "current_text_evidence": [
-            {
-              "quote": "Azure Cosmos DB (SQL API)",
-              "line_start": 24,
-              "reason": "The product is now named Azure Cosmos DB for NoSQL (formerly the SQL API). The old name is outdated, and in a NoSQL taxonomy note it can mislead the reader."
-            },
-            {
-              "quote": "Discord later moved from Cassandra to ScyllaDB after dealing with hot partitions",
-              "line_start": 49,
-              "reason": "This matches the cited Discord blog, so it is a strong passage. It is not a defect."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the four families, the comparison table and the pitfalls form one coherent topic. The time-series material is already delegated to its own note.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Accuracy/terminology",
-              "location": "## Document, Examples bullet (line 24)",
-              "evidence": "Azure Cosmos DB (SQL API)",
-              "effect": "The name is outdated. Microsoft now calls it Azure Cosmos DB for NoSQL. The reader may take 'SQL API' for a relational model in a note that classifies NoSQL families.",
-              "fix": "Replace it with 'Azure Cosmos DB for NoSQL'."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "FAIL",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "repair_previous_proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its current text. The opening defines the four families and says that scaling, schema flexibility and eventual consistency are associations, not guarantees. Each family section states its data model, examples, best fit and a modeling rule with the condition that changes it. Document aggregate boundaries, key-value products adding indexes, and wide-column partition/clustering design with LSM trade-offs all match standard documentation. The graph section's traversal-versus-SQL boundary is accurate. The comparison table matches the sections. The Discord Cassandra-to-ScyllaDB example matches the cited Discord blog. The pitfalls and tradeoffs sections add real judgment and link out to the sibling notes. No cards are in this note, and there are no known violations. I found no factual error, gap or redundancy that justifies an edit."
-        }
-      ],
-      "feedback": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
