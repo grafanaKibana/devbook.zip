@@ -9444,14 +9444,15 @@
     "version": 1,
     "id": "12a9481bc2214861b8af83cb2602a851",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-09T22:32:13.455810Z",
-    "elapsed_seconds": 277.7010068000001,
+    "elapsed_seconds": 281.95494980000007,
     "calls_reserved": 7,
     "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/Data Persistence/ACID.md",
-      "Vault/Home/Data Persistence/Caching.md"
+      "Vault/Home/Data Persistence/Caching.md",
+      "Vault/Home/Data Persistence/Connection Pooling.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -9538,10 +9539,83 @@
           "reason": "card edit must replace one complete active Qard block including adjacent metadata",
           "model_calls": 5
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+                "outcome": "keep",
+                "reason": "I read the whole note and found no verified defect. The opening gives the cost of a physical connection and the purpose of a pool. The borrow, wait and return flow is correct and matches the Mermaid diagram. The pool-separation claims for SqlClient and Npgsql, the Npgsql default pooling and its keywords (Maximum Pool Size, Minimum Pool Size, Connection Lifetime), and the positional $1 parameter are all consistent with the provider documentation. The HikariCP formula is quoted correctly and labelled a heuristic. The 50 × 100 = 5,000 sessions arithmetic is right. The PgBouncer transaction-mode caveats (SET, LISTEN, session advisory locks, SQL PREPARE, and max_prepared_statements for protocol-level plans) are accurate. The RDS Proxy and Azure SQL distinction is sound. The code fence has a language identifier. Both Qards test separate tasks: when a larger pool hurts, and what open and dispose do. Their answers are mechanism-focused and cite primary sources. Repetition between the prose and the cards is tolerable because it supports recall, so rewording would be churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+                "verdict": "CLEAN",
+                "summary": "Independent whole-note read found no concrete factual, structural, or question-quality defect. The note moves from the cost of a physical connection to the borrow/wait/return mechanism, a short example, sizing, pitfalls, server-side poolers and tradeoffs. Rewording would be churn.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present; Qard IDs protected; no generated-navigation or special-page rules apply.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Opening a physical database connection can require a socket, a security handshake, authentication, and server-side session setup.",
+                    "line_start": 17,
+                    "reason": "The opening states the cost that pooling avoids and the application's remaining responsibility, so the topic can be re-entered quickly."
+                  },
+                  {
+                    "quote": "Once the pool is full, another caller waits until a connection returns or the connection timeout expires.",
+                    "line_start": 24,
+                    "reason": "The mechanism is stated with its exhaustion condition and matches the Mermaid diagram and the Qard answer."
+                  },
+                  {
+                    "quote": "It is a heuristic, not a per-instance entitlement.",
+                    "line_start": 61,
+                    "reason": "The HikariCP formula is correctly labelled as a heuristic. The 50 × 100 = 5,000 sessions arithmetic is correct and drives the fleet-wide budget decision."
+                  },
+                  {
+                    "quote": "Transaction pooling reduces server-session occupancy, but session-scoped state such as `SET`, `LISTEN`, session advisory locks, and SQL `PREPARE` does not follow a client between transactions.",
+                    "line_start": 76,
+                    "reason": "The PgBouncer transaction-mode caveat is accurate and carries the exception that changes the engineering decision."
+                  },
+                  {
+                    "quote": "> [!qard]- When can a larger connection pool make performance worse?",
+                    "line_start": 92,
+                    "reason": "The card is a single bounded recall task, its answer explains the mechanism with the per-pool, fragmentation and per-instance conditions, and the answer side cites primary sources."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: pooling mechanics, sizing, pitfalls and server-side poolers form one coherent topic. Each part depends on the others and has no independent standalone use.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The unchanged note is accurate, well ordered and self-contained. Both Qards test separate recall tasks with intact IDs. The code fences have language identifiers, the References are bare links, and no concrete violations remain.",
+            "change_checks": []
+          },
+          "model_calls": 7
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-09T22:36:51.156309Z",
+    "checkpoint_at": "2026-11-09T22:36:55.410252Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
