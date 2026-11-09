@@ -9679,10 +9679,10 @@
     "version": 1,
     "id": "12a9481bc2214861b8af83cb2602a851",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "review_reserved",
     "started_at": "2026-11-09T22:32:13.455810Z",
-    "elapsed_seconds": 725.7583630000003,
-    "calls_reserved": 19,
+    "elapsed_seconds": 730.0552625000003,
+    "calls_reserved": 20,
     "responses_received": 19,
     "attempted_paths": [
       "Vault/Home/Data Persistence/ACID.md",
@@ -10154,7 +10154,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-09T22:44:19.213670Z",
+    "checkpoint_at": "2026-11-09T22:44:23.510570Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -10179,7 +10179,7 @@
       "pr": null
     },
     "base_sha": "fba0b54bbf3ab5a6699ba2a017e2f2e23fe559ba",
-    "reservation_deadline": "2026-11-09T22:59:07.946985Z"
+    "reservation_deadline": "2026-11-09T22:59:23.124040Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
