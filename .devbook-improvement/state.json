@@ -9679,9 +9679,9 @@
     "version": 1,
     "id": "12a9481bc2214861b8af83cb2602a851",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-09T22:32:13.455810Z",
-    "elapsed_seconds": 682.2301707000004,
+    "elapsed_seconds": 686.5305790000003,
     "calls_reserved": 18,
     "responses_received": 18,
     "attempted_paths": [
@@ -9691,7 +9691,8 @@
       "Vault/Home/Data Persistence/Data Persistence.md",
       "Vault/Home/Data Persistence/Erasure Coding.md",
       "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md",
-      "Vault/Home/Data Persistence/NoSQL/LSM-Tree.md"
+      "Vault/Home/Data Persistence/NoSQL/LSM-Tree.md",
+      "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -10139,10 +10140,21 @@
           },
           "model_calls": 15
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+        "outcome": "proposal_blocked",
+        "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/",
+          "model_calls": 18
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-09T22:43:35.685477Z",
+    "checkpoint_at": "2026-11-09T22:43:39.985886Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
