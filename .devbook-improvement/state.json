@@ -9324,16 +9324,16 @@
     "version": 1,
     "id": "12a9481bc2214861b8af83cb2602a851",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-09T22:32:13.455810Z",
-    "elapsed_seconds": 48.90102290000001,
+    "elapsed_seconds": 68.70200320000001,
     "calls_reserved": 2,
-    "responses_received": 1,
+    "responses_received": 2,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-09T22:33:02.356326Z",
+    "checkpoint_at": "2026-11-09T22:33:22.157306Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -28902,6 +28902,125 @@
       "Vault/Home/Data Persistence/ACID.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-09T22:32:58.180073Z"
+    "prepared_at": "2026-11-09T22:32:58.180073Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/ACID.md",
+            "verdict": "CLEAN",
+            "summary": "I read the whole note independently. It is accurate on the SQL-standard isolation table and on the PostgreSQL and SQL Server specifics, and its explanation order is sound. The four cards each test one gradeable task. I found no concrete defect or essential learning gap, so keeping the note unchanged is justified and an edit would only add churn.",
+            "page_type": "Concept — typed frontmatter, optional Questions and References present. Voice is impersonal and declarative. Wikilinks use full paths with aliases, and fenced code blocks have language identifiers.",
+            "current_text_evidence": [
+              {
+                "quote": "These guarantees stop at the participating database and the isolation and durability settings it uses.",
+                "line_start": 19,
+                "reason": "The opening states the scope limit and the boundary that matters most for engineering judgment."
+              },
+              {
+                "quote": "The table gives the SQL standard's minimum guarantees. Engines may provide more.",
+                "line_start": 67,
+                "reason": "The isolation table is correctly labelled as a minimum. The engine-specific caveats that follow it (PostgreSQL maps Read Uncommitted to Read Committed; SQL Server Read Committed uses locks or row versions) are accurate."
+              },
+              {
+                "quote": "Recovery then requires retrying the **whole** transaction, including every read and decision.",
+                "line_start": 85,
+                "reason": "The write-skew explanation includes the mechanism, the SQLSTATE 40001 abort, and the correct whole-transaction retry rule."
+              },
+              {
+                "quote": "Durability is a configured contract.",
+                "line_start": 91,
+                "reason": "The durability section separates group commit, synchronous_commit=off and replication, which is accurate and avoids conflating them."
+              },
+              {
+                "quote": "Atomicity does not make the transfer request safe to repeat.",
+                "line_start": 44,
+                "reason": "The atomicity section covers the idempotency boundary. The failure-trace table before it keeps the machine visible."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the isolation, durability and distributed-transaction material all elaborates one concept, ACID transaction guarantees and their limits. Each part is dependent on the others and is not independently separable.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The note is accurate and coherent, with no known violations. Its cards are single-task or dependent explanations that keep their IDs and carry primary-source links. The keep disposition is supported by current-text evidence.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Data Persistence/ACID.md",
+          "citation_index": 3,
+          "reported_line_start": 91,
+          "resolved_line_start": 92
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Data Persistence/ACID.md": "5fa8f910180b71263fc93fd7c5c6a19bd5ea06f72f5c3547745b6b1d8f83dc81"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/Data Persistence/ACID.md",
+          "verdict": "CLEAN",
+          "summary": "I read the whole note independently. It is accurate on the SQL-standard isolation table and on the PostgreSQL and SQL Server specifics, and its explanation order is sound. The four cards each test one gradeable task. I found no concrete defect or essential learning gap, so keeping the note unchanged is justified and an edit would only add churn.",
+          "page_type": "Concept — typed frontmatter, optional Questions and References present. Voice is impersonal and declarative. Wikilinks use full paths with aliases, and fenced code blocks have language identifiers.",
+          "current_text_evidence": [
+            {
+              "quote": "These guarantees stop at the participating database and the isolation and durability settings it uses.",
+              "line_start": 19,
+              "reason": "The opening states the scope limit and the boundary that matters most for engineering judgment."
+            },
+            {
+              "quote": "The table gives the SQL standard's minimum guarantees. Engines may provide more.",
+              "line_start": 67,
+              "reason": "The isolation table is correctly labelled as a minimum. The engine-specific caveats that follow it (PostgreSQL maps Read Uncommitted to Read Committed; SQL Server Read Committed uses locks or row versions) are accurate."
+            },
+            {
+              "quote": "Recovery then requires retrying the **whole** transaction, including every read and decision.",
+              "line_start": 85,
+              "reason": "The write-skew explanation includes the mechanism, the SQLSTATE 40001 abort, and the correct whole-transaction retry rule."
+            },
+            {
+              "quote": "Durability is a configured contract.",
+              "line_start": 92,
+              "reason": "The durability section separates group commit, synchronous_commit=off and replication, which is accurate and avoids conflating them."
+            },
+            {
+              "quote": "Atomicity does not make the transfer request safe to repeat.",
+              "line_start": 44,
+              "reason": "The atomicity section covers the idempotency boundary. The failure-trace table before it keeps the machine visible."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the isolation, durability and distributed-transaction material all elaborates one concept, ACID transaction guarantees and their limits. Each part is dependent on the others and is not independently separable.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The note is accurate and coherent, with no known violations. Its cards are single-task or dependent explanations that keep their IDs and carry primary-source links. The keep disposition is supported by current-text evidence.",
+      "change_checks": []
+    }
   }
 }
