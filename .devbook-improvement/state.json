@@ -9384,13 +9384,14 @@
     "version": 1,
     "id": "12a9481bc2214861b8af83cb2602a851",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-09T22:32:13.455810Z",
-    "elapsed_seconds": 197.56616290000002,
+    "elapsed_seconds": 201.70421070000003,
     "calls_reserved": 5,
     "responses_received": 5,
     "attempted_paths": [
-      "Vault/Home/Data Persistence/ACID.md"
+      "Vault/Home/Data Persistence/ACID.md",
+      "Vault/Home/Data Persistence/Caching.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -9466,10 +9467,21 @@
           },
           "model_calls": 2
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/Caching.md",
+        "outcome": "proposal_blocked",
+        "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+          "model_calls": 5
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-09T22:35:31.021465Z",
+    "checkpoint_at": "2026-11-09T22:35:35.159514Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
