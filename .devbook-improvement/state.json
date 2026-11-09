@@ -9384,16 +9384,92 @@
     "version": 1,
     "id": "12a9481bc2214861b8af83cb2602a851",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-09T22:32:13.455810Z",
-    "elapsed_seconds": 72.50430870000001,
+    "elapsed_seconds": 76.67203520000001,
     "calls_reserved": 2,
     "responses_received": 2,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/Data Persistence/ACID.md"
+    ],
     "accepted_records": [],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/Data Persistence/ACID.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/ACID.md",
+                "outcome": "keep",
+                "reason": "I read the whole note against the current text and my knowledge of the PostgreSQL and SQL Server documentation. The opening defines a transaction and states the scope limits. Atomicity has a failure-trace table and an idempotency caveat. Consistency is separated from the CAP \"C\". The isolation table is correctly labelled as the SQL standard minimum. The PostgreSQL specifics are accurate: Read Uncommitted maps to Read Committed, Repeatable Read prevents phantoms but allows serialization anomalies, Serializable aborts with SQLSTATE 40001, and Read Committed takes a snapshot per statement. The write-skew walk-through, the whole-transaction retry rule and the durability section (WAL, group commit, synchronous_commit=off) are correct. The 2PC, saga, deadlock, pitfall and tradeoff sections agree with each other and use consistent terms. The four cards each test one gradeable task, carry primary-source links and match the prose. No known violations exist, and no defect or learning gap was found, so an edit would only add churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/ACID.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole note independently. It is accurate on the SQL-standard isolation table and on the PostgreSQL and SQL Server specifics, and its explanation order is sound. The four cards each test one gradeable task. I found no concrete defect or essential learning gap, so keeping the note unchanged is justified and an edit would only add churn.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present. Voice is impersonal and declarative. Wikilinks use full paths with aliases, and fenced code blocks have language identifiers.",
+                "current_text_evidence": [
+                  {
+                    "quote": "These guarantees stop at the participating database and the isolation and durability settings it uses.",
+                    "line_start": 19,
+                    "reason": "The opening states the scope limit and the boundary that matters most for engineering judgment."
+                  },
+                  {
+                    "quote": "The table gives the SQL standard's minimum guarantees. Engines may provide more.",
+                    "line_start": 67,
+                    "reason": "The isolation table is correctly labelled as a minimum. The engine-specific caveats that follow it (PostgreSQL maps Read Uncommitted to Read Committed; SQL Server Read Committed uses locks or row versions) are accurate."
+                  },
+                  {
+                    "quote": "Recovery then requires retrying the **whole** transaction, including every read and decision.",
+                    "line_start": 85,
+                    "reason": "The write-skew explanation includes the mechanism, the SQLSTATE 40001 abort, and the correct whole-transaction retry rule."
+                  },
+                  {
+                    "quote": "Durability is a configured contract.",
+                    "line_start": 92,
+                    "reason": "The durability section separates group commit, synchronous_commit=off and replication, which is accurate and avoids conflating them."
+                  },
+                  {
+                    "quote": "Atomicity does not make the transfer request safe to repeat.",
+                    "line_start": 44,
+                    "reason": "The atomicity section covers the idempotency boundary. The failure-trace table before it keeps the machine visible."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the isolation, durability and distributed-transaction material all elaborates one concept, ACID transaction guarantees and their limits. Each part is dependent on the others and is not independently separable.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is accurate and coherent, with no known violations. Its cards are single-task or dependent explanations that keep their IDs and carry primary-source links. The keep disposition is supported by current-text evidence.",
+            "change_checks": []
+          },
+          "model_calls": 2
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-09T22:33:25.959612Z",
+    "checkpoint_at": "2026-11-09T22:33:30.127341Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
