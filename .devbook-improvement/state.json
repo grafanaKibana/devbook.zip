@@ -9384,11 +9384,11 @@
     "version": 1,
     "id": "12a9481bc2214861b8af83cb2602a851",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-09T22:32:13.455810Z",
-    "elapsed_seconds": 118.90853270000001,
+    "elapsed_seconds": 138.59242830000002,
     "calls_reserved": 4,
-    "responses_received": 3,
+    "responses_received": 4,
     "attempted_paths": [
       "Vault/Home/Data Persistence/ACID.md"
     ],
@@ -9469,7 +9469,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-09T22:34:12.363835Z",
+    "checkpoint_at": "2026-11-09T22:34:32.047730Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -29105,6 +29105,129 @@
       "Vault/Home/Data Persistence/Caching.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-09T22:34:08.069568Z"
+    "prepared_at": "2026-11-09T22:34:08.069568Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep disposition missed a concrete code error. The HybridCache snippet passes `token: ct`, but the documented parameter is `cancellationToken`, so the snippet does not compile. The rest of the note checked out against the Microsoft HybridCache documentation.",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/Caching.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is strong overall. Prose, tables and the stale-while-revalidate design are sound, and the HybridCache per-process coalescing and tag/L1 caveats match the docs. The HybridCache example uses a nonexistent named argument (`token: ct`), which is a concrete accuracy defect the keep disposition missed.",
+            "page_type": "Concept — no Questions or References sections; all code fences have language identifiers; the Mermaid blocks and the wikilink are fine.",
+            "current_text_evidence": [
+              {
+                "quote": "token: ct);",
+                "line_start": 97,
+                "reason": "HybridCache.GetOrCreateAsync names its last parameter `cancellationToken`. Microsoft's docs use `cancellationToken: token`, so `token: ct` is a compile error."
+              },
+              {
+                "quote": "A `HybridCache` instance ensures",
+                "line_start": 1,
+                "reason": "Not in the note. The docs confirm the note's per-process stampede protection and its 'Built-in within the current server' wording, which are accurate."
+              },
+              {
+                "quote": "Other servers' L1 caches need fan-out",
+                "line_start": 233,
+                "reason": "Matches the docs note that key and tag invalidation affects the current server and the secondary store, but not other servers' in-memory caches."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the topic is coherent (caching patterns, invalidation, failure modes, and the tooling that implements them), and its sections cross-reference each other.",
+            "findings": [
+              {
+                "severity": "High",
+                "dimension": "Accuracy",
+                "location": "Cache Patterns, HybridCache snippet (`GetOrCreateAsync(... token: ct)`)",
+                "evidence": "The snippet calls `cache.GetOrCreateAsync($\"user-name:{userId}\", async cancel => ..., token: ct)`. The documented signature uses the named parameter `cancellationToken`, and Microsoft's example is `cancellationToken: token`.",
+                "effect": "The published example does not compile and teaches a wrong API shape.",
+                "fix": "Change `token: ct` to `cancellationToken: ct`."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Data Persistence/Caching.md",
+          "citation_index": 0,
+          "reported_line_start": 97,
+          "resolved_line_start": 99
+        },
+        {
+          "path": "Vault/Home/Data Persistence/Caching.md",
+          "citation_index": 2,
+          "reported_line_start": 233,
+          "resolved_line_start": 270
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Data Persistence/Caching.md": "c749fc67010772e4e02b2c4d22c2e0e32a759818f0541e43797c0de530235dbb"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The keep disposition missed a concrete code error. The HybridCache snippet passes `token: ct`, but the documented parameter is `cancellationToken`, so the snippet does not compile. The rest of the note checked out against the Microsoft HybridCache documentation.",
+      "notes": [
+        {
+          "path": "Vault/Home/Data Persistence/Caching.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The note is strong overall. Prose, tables and the stale-while-revalidate design are sound, and the HybridCache per-process coalescing and tag/L1 caveats match the docs. The HybridCache example uses a nonexistent named argument (`token: ct`), which is a concrete accuracy defect the keep disposition missed.",
+          "page_type": "Concept — no Questions or References sections; all code fences have language identifiers; the Mermaid blocks and the wikilink are fine.",
+          "current_text_evidence": [
+            {
+              "quote": "token: ct);",
+              "line_start": 99,
+              "reason": "HybridCache.GetOrCreateAsync names its last parameter `cancellationToken`. Microsoft's docs use `cancellationToken: token`, so `token: ct` is a compile error."
+            },
+            {
+              "quote": "A `HybridCache` instance ensures",
+              "line_start": 1,
+              "reason": "Not in the note. The docs confirm the note's per-process stampede protection and its 'Built-in within the current server' wording, which are accurate."
+            },
+            {
+              "quote": "Other servers' L1 caches need fan-out",
+              "line_start": 270,
+              "reason": "Matches the docs note that key and tag invalidation affects the current server and the secondary store, but not other servers' in-memory caches."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the topic is coherent (caching patterns, invalidation, failure modes, and the tooling that implements them), and its sections cross-reference each other.",
+          "findings": [
+            {
+              "severity": "High",
+              "dimension": "Accuracy",
+              "location": "Cache Patterns, HybridCache snippet (`GetOrCreateAsync(... token: ct)`)",
+              "evidence": "The snippet calls `cache.GetOrCreateAsync($\"user-name:{userId}\", async cancel => ..., token: ct)`. The documented signature uses the named parameter `cancellationToken`, and Microsoft's example is `cancellationToken: token`.",
+              "effect": "The published example does not compile and teaches a wrong API shape.",
+              "fix": "Change `token: ct` to `cancellationToken: ct`."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "FAIL",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
