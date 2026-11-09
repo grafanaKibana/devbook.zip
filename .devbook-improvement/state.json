@@ -8956,17 +8956,19 @@
   "focused_workload": {
     "version": 1,
     "id": "027f0c8397234e0ea810f1153dc05640",
-    "status": "active",
-    "phase": "selecting",
+    "status": "sealed",
+    "phase": "sealed",
     "started_at": "2026-11-09T06:52:45.088091Z",
-    "elapsed_seconds": 9.5671146,
+    "elapsed_seconds": 13.8452825,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-09T06:52:54.654574Z"
+    "checkpoint_at": "2026-11-09T06:52:58.932743Z",
+    "stop_reason": "awaiting_export",
+    "sealed_at": "2026-11-09T06:52:58.932760Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
