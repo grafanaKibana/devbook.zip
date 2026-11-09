@@ -9681,7 +9681,7 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-09T22:32:13.455810Z",
-    "elapsed_seconds": 571.0271360000005,
+    "elapsed_seconds": 575.2124627000005,
     "calls_reserved": 15,
     "responses_received": 15,
     "attempted_paths": [
@@ -10142,7 +10142,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-09T22:41:44.482442Z",
+    "checkpoint_at": "2026-11-09T22:41:48.667768Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
