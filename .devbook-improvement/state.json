@@ -8959,14 +8959,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-09T06:52:45.088091Z",
-    "elapsed_seconds": 4.929130500000001,
+    "elapsed_seconds": 9.5671146,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-09T06:52:50.016592Z"
+    "checkpoint_at": "2026-11-09T06:52:54.654574Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -15564,8 +15564,8 @@
           "generation": 2,
           "prepared_source_version": 1
         },
-        "export_attempts": 1,
-        "export_last_dispatch_at": "2026-11-08T22:28:49Z",
+        "export_attempts": 2,
+        "export_last_dispatch_at": "2026-11-09T06:52:54Z",
         "reason": "Same-workflow Syncer export queued"
       }
     }
