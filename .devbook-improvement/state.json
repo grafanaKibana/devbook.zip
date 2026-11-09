@@ -9679,11 +9679,11 @@
     "version": 1,
     "id": "12a9481bc2214861b8af83cb2602a851",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-09T22:32:13.455810Z",
-    "elapsed_seconds": 714.7741748000003,
+    "elapsed_seconds": 725.7583630000003,
     "calls_reserved": 19,
-    "responses_received": 18,
+    "responses_received": 19,
     "attempted_paths": [
       "Vault/Home/Data Persistence/ACID.md",
       "Vault/Home/Data Persistence/Caching.md",
@@ -10154,7 +10154,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-09T22:44:08.229482Z",
+    "checkpoint_at": "2026-11-09T22:44:19.213670Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -30740,5 +30740,53 @@
       "review_repair_key": "5e37f1977082945be5d1b9effaf24d2debf9e0720d0b7739596285e4a78de00b",
       "author_repair_pending": true
     }
+  },
+  "pending_author_proposal": {
+    "workload_id": "12a9481bc2214861b8af83cb2602a851",
+    "topic_id": "data-persistence-4ea34db4",
+    "batch": {
+      "topic": "Data Persistence",
+      "topic_id": "data-persistence-4ea34db4",
+      "notes": [
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+          "content": "---\ntopic: [Data Persistence]\nsubtopic: [NoSQL]\nsummary: \"A family of non-relational and specialized data models chosen around concrete access, consistency, and scaling requirements.\"\nlevel: [\"4\"]\nstatus: Creation\ntags: [FolderNote]\n\npublish: true\npriority: High\nqard-deck: \"Data Persistence\"\nqard-topic: \"NoSQL/NoSQL\"\nflashcard_uid: \"96ca4645\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.351Z\"\n---\n\nNoSQL names a loose group of data stores rather than one database model. It covers key-value, document, wide-column, and graph stores, while search and time-series engines are often grouped beside them. Product boundaries overlap. A document store may enforce schemas, a key-value service may expose secondary indexes, and either may support transactions within a documented scope.\n\nA specialized store earns its place when one access pattern dominates the workload: point lookup by key, aggregate-shaped documents, relationship traversal, text relevance, or sustained time-window ingestion. A relational database remains the safer default when constraints, multi-entity transactions, and changing query combinations matter more. The useful decision is always about a concrete engine and its consistency, partitioning, query, and recovery contracts.\n\n```mermaid\nflowchart TD\n  A[Start from required queries and invariants] --> B{Constraints and multi-entity transactions dominate}\n  B -->|Yes| C[Relational baseline]\n  B -->|No or complementary workload| D{Dominant access pattern}\n  D -->|Point lookup| E[Key-value]\n  D -->|Aggregate document| F[Document]\n  D -->|Wide partition or high-rate series| G[Wide-column or time-series]\n  D -->|Relationship traversal| H[Graph]\n  D -->|Text relevance| I[Search index]\n```\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# How It Works\n\nEach family makes a different operation cheap. Key-value stores center the primary key. Document stores keep an aggregate together. Wide-column stores organize known queries around partition and clustering keys. Graph stores make relationships part of the stored model. Some products expose more than one of these interfaces, so the product name alone says little about the workload fit.\n\nDistributed stores make different [[CAP theorem]] choices for each operation. Cassandra can keep serving selected requests through a partition when the chosen consistency level can still be met. A leader-based replica set may instead reject writes when it cannot establish the required authority. Neither behavior follows from the word “NoSQL.” Relational systems can also be distributed, while non-relational systems can provide strong reads or transactions within bounded scopes.\n\nData is often shaped around known reads because keeping related values in one partition avoids remote joins or fan-out. That can reduce read work substantially. It also duplicates state, moves coordination into the write path, and creates a repair problem when one copy is missed.\n\n# Tradeoffs\n\n| Dimension | Common relational default | Common NoSQL patterns |\n| --- | --- | --- |\n| Consistency | ACID transactions across rows and tables within the engine's scope | Engine-specific: strong, causal, eventual, or tunable. Transaction scope varies |\n| Schema | Database-enforced table and constraint schema | Flexible, application-enforced, or database-enforced depending on engine |\n| Relationships | General joins and foreign keys are normal | Embedded, denormalized, traversed, or joined where the engine supports it |\n| Scaling | Scale-up, replicas, partitioning, or distributed SQL | Some engines are built around partitioned scale-out. Others are single-node or leader-bound |\n| Strong fit | Integrity-heavy transactions and evolving query combinations | Stable specialized access patterns whose measured benefit pays the modeling cost |\n\n# Questions\n\n<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->\n> [!qard]- When is a non-relational store a poor fit for a service?\n> A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.\n>\n> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. An engine whose transactions are limited to one document or partition provides that atomicity only when both accounts lie inside one such scope. Under a partition-scoped transaction, two separate account documents in the same partition can still commit together. When the accounts fall outside every atomic scope the engine supports, such as in different partitions, the application must coordinate the transfer itself.\n> - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.\n> - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.\n> \n> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models) · [Azure Cosmos DB: Database transactions and optimistic concurrency](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)\n\n# References\n\n- [Understand data store models](https://learn.microsoft.com/azure/architecture/guide/technology-choices/data-store-overview)\n",
+          "hash": "95f1c3a556a2df0712f9cbf9fe944172b7f50ea901b1d6ede3fe1b84f48ade90",
+          "topic": "Data Persistence",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+          "outcome": "keep",
+          "reason": "I read the whole note and found no defect that justifies an edit. The opening says NoSQL is a loose family with overlapping product boundaries, and it names the dominant-access-pattern criterion for choosing a store. The Mermaid decision flow matches that criterion and keeps the relational baseline as the default. The How It Works section ties each family to the operation it makes cheap. Its CAP section correctly treats consistency as engine- and operation-specific rather than a property of the NoSQL label. It also states the denormalization cost, which is duplicated state and repair. The tradeoff table is hedged appropriately (engine-specific, depends on scope). It is consistent with the Microsoft data-store-models guidance and with Cosmos DB's documented transaction scoping to a logical partition. The single Qard tests one gradeable task, with a dependent explanation of the transfer example and the scope condition. The question is self-contained and does not reveal its answer. The answer is accurate, and its sources are on the answer side. Protected metadata, the qard-id, the datacore block and the References bullet are all intact. No known violations are open. Rewording the slightly redundant partition-scope sentence in the card would be cosmetic churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Data Persistence/NoSQL/NoSQL.md": "95f1c3a556a2df0712f9cbf9fe944172b7f50ea901b1d6ede3fe1b84f48ade90"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Data Persistence/NoSQL/NoSQL.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-09T22:44:19.213661Z"
   }
 }
