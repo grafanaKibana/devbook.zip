@@ -9679,11 +9679,11 @@
     "version": 1,
     "id": "12a9481bc2214861b8af83cb2602a851",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-09T22:32:13.455810Z",
-    "elapsed_seconds": 662.0585009000004,
+    "elapsed_seconds": 677.9304521000004,
     "calls_reserved": 18,
-    "responses_received": 17,
+    "responses_received": 18,
     "attempted_paths": [
       "Vault/Home/Data Persistence/ACID.md",
       "Vault/Home/Data Persistence/Caching.md",
@@ -10142,7 +10142,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-09T22:43:15.513808Z",
+    "checkpoint_at": "2026-11-09T22:43:31.385758Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -30477,15 +30477,39 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+          "expected_hash": "256cc68982d02d203c314f707546008871c6028321be41e3b500c682e2929d13",
+          "before": "Azure Cosmos DB (SQL API).",
+          "after": "Azure Cosmos DB for NoSQL.",
+          "reason": "Replaces the retired API name with Microsoft's current name.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Cosmos DB's document API is called Azure Cosmos DB for NoSQL"
+          ],
+          "sources": [
+            {
+              "url": "https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/",
+              "claim": "Microsoft documentation names the document-oriented API 'Azure Cosmos DB for NoSQL'.",
+              "version": "not version-specific"
+            }
+          ],
+          "feedback_keys": [],
+          "problem": "The Document examples bullet uses the outdated 'SQL API' name, which can suggest a relational model in a note that classifies NoSQL families.",
+          "reader_benefit": "The reader sees the current product name and is not misled about the data model."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its current text. The opening defines the four families and says that scaling, schema flexibility and eventual consistency are associations, not guarantees. Each family section states its data model, examples, best fit and a modeling rule with the condition that changes it. Document aggregate boundaries, key-value products adding indexes, and wide-column partition/clustering design with LSM trade-offs all match standard documentation. The graph section's traversal-versus-SQL boundary is accurate. The comparison table matches the sections. The Discord Cassandra-to-ScyllaDB example matches the cited Discord blog. The pitfalls and tradeoffs sections add real judgment and link out to the sibling notes. No cards are in this note, and there are no known violations. I found no factual error, gap or redundancy that justifies an edit."
+          "outcome": "changed",
+          "reason": "Audited the whole note. The family sections, comparison table, pitfalls, tradeoffs and the Discord example are accurate and consistent. The only defect was the outdated 'SQL API' Cosmos DB name, which is now corrected to 'Azure Cosmos DB for NoSQL'."
         }
       ],
-      "feedback": []
+      "feedback": [],
+      "decisions": []
     },
     "source_hashes": {
       "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md": "256cc68982d02d203c314f707546008871c6028321be41e3b500c682e2929d13"
@@ -30497,8 +30521,10 @@
       "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-09T22:42:16.813354Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-09T22:43:31.385740Z",
+    "review_repair_key": "edfe3dd9cb5a96d66490df3314eee47290e219fc460d88aef59fc8996fefabff",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The keep is not justified. The Document section uses an outdated product name, \"Azure Cosmos DB (SQL API)\". Microsoft renamed it \"Azure Cosmos DB for NoSQL\". In a note about NoSQL families, the old name is also confusing, because \"SQL API\" suggests a relational model. The rest of the note is sound.",
       "notes": [
@@ -30556,55 +30582,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The keep is not justified. The Document section uses an outdated product name, \"Azure Cosmos DB (SQL API)\". Microsoft renamed it \"Azure Cosmos DB for NoSQL\". In a note about NoSQL families, the old name is also confusing, because \"SQL API\" suggests a relational model. The rest of the note is sound.",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The note is well structured and technically careful overall, but it keeps an outdated Cosmos DB API name. That is a concrete terminology and accuracy defect, and the keep disposition missed it.",
-          "page_type": "Concept — no required Questions section. References are present and bare. Frontmatter is typed and the status is valid.",
-          "current_text_evidence": [
-            {
-              "quote": "Azure Cosmos DB (SQL API)",
-              "line_start": 24,
-              "reason": "The product is now named Azure Cosmos DB for NoSQL (formerly the SQL API). The old name is outdated, and in a NoSQL taxonomy note it can mislead the reader."
-            },
-            {
-              "quote": "Discord later moved from Cassandra to ScyllaDB after dealing with hot partitions",
-              "line_start": 49,
-              "reason": "This matches the cited Discord blog, so it is a strong passage. It is not a defect."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the four families, the comparison table and the pitfalls form one coherent topic. The time-series material is already delegated to its own note.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Accuracy/terminology",
-              "location": "## Document, Examples bullet (line 24)",
-              "evidence": "Azure Cosmos DB (SQL API)",
-              "effect": "The name is outdated. Microsoft now calls it Azure Cosmos DB for NoSQL. The reader may take 'SQL API' for a relational model in a note that classifies NoSQL families.",
-              "fix": "Replace it with 'Azure Cosmos DB for NoSQL'."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "FAIL",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "edfe3dd9cb5a96d66490df3314eee47290e219fc460d88aef59fc8996fefabff",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
