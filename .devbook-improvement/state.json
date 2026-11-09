@@ -9679,11 +9679,11 @@
     "version": 1,
     "id": "12a9481bc2214861b8af83cb2602a851",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-09T22:32:13.455810Z",
-    "elapsed_seconds": 730.0552625000003,
+    "elapsed_seconds": 746.5844053000002,
     "calls_reserved": 20,
-    "responses_received": 19,
+    "responses_received": 20,
     "attempted_paths": [
       "Vault/Home/Data Persistence/ACID.md",
       "Vault/Home/Data Persistence/Caching.md",
@@ -10154,7 +10154,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-09T22:44:23.510570Z",
+    "checkpoint_at": "2026-11-09T22:44:40.039713Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -30787,6 +30787,183 @@
       "Vault/Home/Data Persistence/NoSQL/NoSQL.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-09T22:44:19.213661Z"
+    "prepared_at": "2026-11-09T22:44:19.213661Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "No edits were proposed. My own full read of the note found no High or Medium defect, so keeping it unchanged is justified.",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate, hedged where products differ, and ordered from definition to selection criterion to mechanism to tradeoffs. Its one Qard is a single dependent explanation. Keeping the note is justified.",
+            "page_type": "FolderNote — Datacore folder-map block and the qard-id comment are protected. Questions and References are optional, and both are present and valid.",
+            "current_text_evidence": [
+              {
+                "quote": "NoSQL names a loose group of data stores rather than one database model.",
+                "line_start": 17,
+                "reason": "The opening states the operating idea and the boundary, which is that the term is a loose family and product boundaries overlap."
+              },
+              {
+                "quote": "The useful decision is always about a concrete engine and its consistency, partitioning, query, and recovery contracts.",
+                "line_start": 19,
+                "reason": "This sentence gives the engineering-judgment rule, and the Mermaid flow that follows it matches that rule."
+              },
+              {
+                "quote": "Neither behavior follows from the word “NoSQL.”",
+                "line_start": 40,
+                "reason": "The CAP paragraph avoids a false generalization. It treats consistency as engine- and operation-specific, and it uses a concrete Cassandra versus leader-based replica set contrast."
+              },
+              {
+                "quote": "It also duplicates state, moves coordination into the write path, and creates a repair problem when one copy is missed.",
+                "line_start": 42,
+                "reason": "The denormalization benefit is paired with its cost, so the mechanism stays visible."
+              },
+              {
+                "quote": "Some engines are built around partitioned scale-out. Others are single-node or leader-bound",
+                "line_start": 50,
+                "reason": "The tradeoff table hedges per engine and does not overclaim."
+              },
+              {
+                "quote": "When the accounts fall outside every atomic scope the engine supports, such as in different partitions, the application must coordinate the transfer itself.",
+                "line_start": 60,
+                "reason": "The card answer states the transaction-scope condition and its consequence. The preceding sentence is slightly redundant, but it is not misleading."
+              },
+              {
+                "quote": "<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->",
+                "line_start": 57,
+                "reason": "The protected Qard identity is intact."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note is a compact overview of the NoSQL families, and the decision flow, mechanism and tradeoffs depend on one another. Per-engine topics belong in child notes, which the folder map already handles.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": [],
+        "decision_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+          "citation_index": 0,
+          "reported_line_start": 17,
+          "resolved_line_start": 19
+        },
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+          "citation_index": 1,
+          "reported_line_start": 19,
+          "resolved_line_start": 21
+        },
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+          "citation_index": 2,
+          "reported_line_start": 40,
+          "resolved_line_start": 44
+        },
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+          "citation_index": 3,
+          "reported_line_start": 42,
+          "resolved_line_start": 46
+        },
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+          "citation_index": 4,
+          "reported_line_start": 50,
+          "resolved_line_start": 55
+        },
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+          "citation_index": 5,
+          "reported_line_start": 60,
+          "resolved_line_start": 64
+        },
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+          "citation_index": 6,
+          "reported_line_start": 57,
+          "resolved_line_start": 60
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Data Persistence/NoSQL/NoSQL.md": "95f1c3a556a2df0712f9cbf9fe944172b7f50ea901b1d6ede3fe1b84f48ade90"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "No edits were proposed. My own full read of the note found no High or Medium defect, so keeping it unchanged is justified.",
+      "notes": [
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate, hedged where products differ, and ordered from definition to selection criterion to mechanism to tradeoffs. Its one Qard is a single dependent explanation. Keeping the note is justified.",
+          "page_type": "FolderNote — Datacore folder-map block and the qard-id comment are protected. Questions and References are optional, and both are present and valid.",
+          "current_text_evidence": [
+            {
+              "quote": "NoSQL names a loose group of data stores rather than one database model.",
+              "line_start": 19,
+              "reason": "The opening states the operating idea and the boundary, which is that the term is a loose family and product boundaries overlap."
+            },
+            {
+              "quote": "The useful decision is always about a concrete engine and its consistency, partitioning, query, and recovery contracts.",
+              "line_start": 21,
+              "reason": "This sentence gives the engineering-judgment rule, and the Mermaid flow that follows it matches that rule."
+            },
+            {
+              "quote": "Neither behavior follows from the word “NoSQL.”",
+              "line_start": 44,
+              "reason": "The CAP paragraph avoids a false generalization. It treats consistency as engine- and operation-specific, and it uses a concrete Cassandra versus leader-based replica set contrast."
+            },
+            {
+              "quote": "It also duplicates state, moves coordination into the write path, and creates a repair problem when one copy is missed.",
+              "line_start": 46,
+              "reason": "The denormalization benefit is paired with its cost, so the mechanism stays visible."
+            },
+            {
+              "quote": "Some engines are built around partitioned scale-out. Others are single-node or leader-bound",
+              "line_start": 55,
+              "reason": "The tradeoff table hedges per engine and does not overclaim."
+            },
+            {
+              "quote": "When the accounts fall outside every atomic scope the engine supports, such as in different partitions, the application must coordinate the transfer itself.",
+              "line_start": 64,
+              "reason": "The card answer states the transaction-scope condition and its consequence. The preceding sentence is slightly redundant, but it is not misleading."
+            },
+            {
+              "quote": "<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->",
+              "line_start": 60,
+              "reason": "The protected Qard identity is intact."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note is a compact overview of the NoSQL families, and the decision flow, mechanism and tradeoffs depend on one another. Per-engine topics belong in child notes, which the folder map already handles.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": [],
+      "decision_checks": []
+    }
   }
 }
