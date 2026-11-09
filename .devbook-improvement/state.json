@@ -9748,10 +9748,10 @@
   "focused_workload": {
     "version": 1,
     "id": "12a9481bc2214861b8af83cb2602a851",
-    "status": "active",
-    "phase": "selecting",
+    "status": "sealed",
+    "phase": "sealed",
     "started_at": "2026-11-09T22:32:13.455810Z",
-    "elapsed_seconds": 755.4494038000001,
+    "elapsed_seconds": 759.9029518000001,
     "calls_reserved": 20,
     "responses_received": 20,
     "attempted_paths": [
@@ -10309,7 +10309,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-09T22:44:48.904711Z",
+    "checkpoint_at": "2026-11-09T22:44:53.358258Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -10334,7 +10334,9 @@
       "pr": null
     },
     "base_sha": "fba0b54bbf3ab5a6699ba2a017e2f2e23fe559ba",
-    "reservation_deadline": "2026-11-09T22:59:23.124040Z"
+    "reservation_deadline": "2026-11-09T22:59:23.124040Z",
+    "stop_reason": "call_limit",
+    "sealed_at": "2026-11-09T22:44:53.358259Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
