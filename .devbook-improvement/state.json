@@ -9989,15 +9989,16 @@
     "version": 1,
     "id": "270542e03ba04146b22c78499257f60e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-10T07:30:50.865899Z",
-    "elapsed_seconds": 247.37455999999995,
+    "elapsed_seconds": 250.84370719999995,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/Data Persistence/NoSQL/Redis.md",
       "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
-      "Vault/Home/Data Persistence/Object Storage.md"
+      "Vault/Home/Data Persistence/Object Storage.md",
+      "Vault/Home/Data Persistence/ORMs/Entity Framework.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -10219,10 +10220,83 @@
           },
           "model_calls": 6
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+                "outcome": "keep",
+                "reason": "I audited the whole note against the current text and EF Core behavior. The tracking rules are accurate: entity queries track by default, and projections that nest entities still track them. The snapshot-detection explanation is accurate. SaveChanges is transactional by default. The concurrency-token predicate and DbUpdateConcurrencyException are described correctly, along with their limit for unvalidated predicates. The execution-strategy caveat for manual transactions, ExecuteUpdate/ExecuteDelete bypassing the tracker, the cartesian-explosion arithmetic with split-query tradeoffs, and DbContext scoped/pooled lifetime are all sound. Global query filter caveats are sound. Each card tests one gradeable task, and the cards cite Microsoft docs. Frontmatter, code fence languages and the single References link are valid. Known violations are empty. The prose is direct and the explanation order works, so changes would be cosmetic."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note was read in full and has no concrete accuracy, clarity, question-quality or rules defect. The keep is justified, and no edits were proposed.",
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+                "verdict": "CLEAN",
+                "summary": "The note explains EF Core accurately: tracking, snapshot detection, transactions, optimistic concurrency, migrations, performance patterns and pitfalls, each with its conditions and limits. The prose is direct and ordered from concepts to performance to pitfalls. The cards are bounded and cite Microsoft documentation. Changes would be cosmetic.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present; qard IDs are protected metadata; no FolderNote or dashboard rules apply.",
+                "current_text_evidence": [
+                  {
+                    "quote": "A projection is untracked only when its result contains no entity instances.",
+                    "line_start": 47,
+                    "reason": "This states the tracking boundary for projections correctly. Entities nested in a projection are still tracked unless the query is no-tracking."
+                  },
+                  {
+                    "quote": "If the row no longer has the original token, the command affects zero rows and `SaveChanges` throws `DbUpdateConcurrencyException`.",
+                    "line_start": 86,
+                    "reason": "This describes the optimistic-concurrency mechanism accurately. The note also states the limit for unvalidated predicates."
+                  },
+                  {
+                    "quote": "the complete transactional unit must run through the configured execution strategy so a retry can recreate it safely",
+                    "line_start": 88,
+                    "reason": "This is the correct caveat for manual transactions combined with retrying execution strategies."
+                  },
+                  {
+                    "quote": "Nested includes do not create the same sibling cross product, though they can still duplicate principal columns.",
+                    "line_start": 192,
+                    "reason": "This is accurate and precise. It is paired with the AsSplitQuery trade-off and the consistency gap."
+                  },
+                  {
+                    "quote": "> [!qard]- How does EF Core detect that another writer changed a row between reading it and saving an update?",
+                    "line_start": 244,
+                    "reason": "This card is one coherent mechanism-and-limit explanation, not bundled independent tasks. It retains its original ID comment."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: DbContext, tracking, concurrency, migrations and query performance form one coherent EF Core topic. The N+1 material is already compact and could stand on its own, but separating it would add no recall benefit.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 8
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T07:34:58.239967Z",
+    "checkpoint_at": "2026-11-10T07:35:01.709114Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
