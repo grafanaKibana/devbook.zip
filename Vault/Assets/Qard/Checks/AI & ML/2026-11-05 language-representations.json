@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "createdAt": 1793898034566,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "language-representations",
+  "title": "Map language inputs to token, feature, or learned representations and choose rules, sparse methods, or pretrained models for the task and language boundary",
+  "goal": "explain",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "long",
+      "prompt": "A search system receives “the parcel vanished” and must find reports saying “my package never arrived.” Explain how token IDs, sparse word features, and learned dense representations represent these texts differently, and why that difference matters for matching them.",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Explains that token IDs identify units from the model's tokenizer; their numerical values do not themselves measure meaning or similarity.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that sparse word features record vocabulary items using counts or weights.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that learned dense representations can encode semantic relationships and place paraphrases near each other.",
+          "marks": 1
+        },
+        {
+          "point": "Connects the example's limited word overlap to a weakness of lexical matching, while noting that semantic matching depends on the model's quality.",
+          "marks": 1
+        }
+      ],
+      "model": "Token IDs identify the units produced by a particular tokenizer, often subwords. Nearby ID numbers do not imply similar meanings. Sparse word features give vocabulary items counts or weights, so these two texts share little matching evidence despite describing similar events. Learned dense representations can capture relationships between expressions such as “parcel” and “package,” allowing semantic search to retrieve the second text. That advantage depends on whether the model represents these expressions well.",
+      "source": {
+        "path": "Home/AI & ML/Machine Learning/Natural Language Processing.md",
+        "heading": "Tokenization"
+      },
+      "objective": "language-representations",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "long",
+      "prompt": "One service extracts references that always follow `CASE-` plus six digits. Another routes thousands of labelled support messages using fairly consistent vocabulary. A third handles requests expressed through varied paraphrases. Explain why rules, a sparse-feature classifier, and a pretrained language model are reasonable starting points for these respective tasks. What would justify paying the pretrained model's extra cost?",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Explains that an explicit, stable reference format suits predictable, auditable rules.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that labelled examples and consistent vocabulary let a classifier learn useful category associations from sparse features.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that pretrained representations can generalize across varied expressions beyond exact keyword overlap.",
+          "marks": 1
+        },
+        {
+          "point": "States that measured improvements on representative inputs must justify added inference cost, latency, or operational burden.",
+          "marks": 1
+        }
+      ],
+      "model": "A rule can directly express the reference format, making extraction cheap and easy to audit. The routing task has labels and recurring vocabulary, so a classifier using weighted word features may separate categories efficiently. Varied paraphrases make keyword coverage harder to maintain; a pretrained model can reuse learned language relationships. Its extra cost is justified when evaluation on realistic requests shows a useful quality improvement large enough to meet the service's cost and latency limits.",
+      "source": {
+        "path": "Home/AI & ML/Machine Learning/Natural Language Processing.md",
+        "heading": "NLP Approach Selection"
+      },
+      "objective": "language-representations",
+      "goal": "explain"
+    },
+    {
+      "id": "c3",
+      "type": "long",
+      "prompt": "A classifier works well on English messages. Its model advertises multilingual support, so the team proposes accepting Ukrainian and mixed Ukrainian–English messages with the same quality targets and token budget. Explain why neither assumption follows from multilingual support, and how the team should establish those boundaries.",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Explains that differences in training coverage can produce unequal task quality across languages.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that token counts depend on the deployed tokenizer and language, so an English-derived budget may not transfer.",
+          "marks": 1
+        },
+        {
+          "point": "Requires task evaluation on representative Ukrainian and mixed-language messages rather than relying only on English results.",
+          "marks": 1
+        },
+        {
+          "point": "Requires measuring actual token counts on representative inputs, including long examples, to check cost and truncation.",
+          "marks": 1
+        }
+      ],
+      "model": "Multilingual support means the model covers several languages; it does not establish equal classification quality. Uneven training coverage can weaken Ukrainian or mixed-language performance. Tokenization also varies by language, so similar-length messages can consume different numbers of tokens. The team should measure classification quality separately on representative Ukrainian and mixed-language examples. It should also count tokens with the deployed model's tokenizer, including long messages, and check whether cost and truncation remain within the intended limits.",
+      "source": {
+        "path": "Home/AI & ML/Machine Learning/Natural Language Processing.md",
+        "heading": "Pitfalls"
+      },
+      "objective": "language-representations",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}
