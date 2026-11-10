@@ -27479,7 +27479,7 @@
       "prepared_source_version": 1,
       "prepared_at": "2026-11-10T20:02:08.429414Z",
       "phase": "pr_updated",
-      "updated_at": "2026-11-10T20:17:54Z",
+      "updated_at": "2026-11-10T20:18:05Z",
       "evidence": {
         "commit_sha": "cc358e7b73ddb21263569bc18b5e41ccefe387b0",
         "branch_sha": "cc358e7b73ddb21263569bc18b5e41ccefe387b0",
@@ -27504,7 +27504,11 @@
         "export_tree_sha": "e505ab807fea2c1101eaf661b81ccc3c9ccebdd6",
         "export_commit_attempted_at": "2026-11-10T20:17:32Z",
         "export_commit_sha": "2622a9fe4ccaf679c934f3cc7330526c68c1bb15",
-        "export_ref_update_attempted_at": "2026-11-10T20:17:44Z"
+        "export_ref_update_attempted_at": "2026-11-10T20:17:44Z",
+        "validation_head": "2622a9fe4ccaf679c934f3cc7330526c68c1bb15",
+        "validation_attempts": 1,
+        "validation_last_dispatch_at": "2026-11-10T20:18:04Z",
+        "export_validation_dispatch_attempted_at": "2026-11-10T20:18:04Z"
       }
     }
   },
