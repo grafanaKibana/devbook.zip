@@ -10151,15 +10151,16 @@
     "version": 1,
     "id": "d9820c0a869a4376b0c4be62174ca4b9",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 296.04413750000003,
+    "elapsed_seconds": 300.7233186,
     "calls_reserved": 7,
     "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md",
-      "Vault/Home/Computer Science/Algorithms/Paradigms/Backtracking.md"
+      "Vault/Home/Computer Science/Algorithms/Paradigms/Backtracking.md",
+      "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md"
     ],
     "accepted_records": [
       {
@@ -11508,10 +11509,83 @@
           },
           "model_calls": 5
         }
+      },
+      {
+        "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note. The opening counts are correct: 2^40 subsets, and 14!/2 symmetric TSP tours with a fixed start. The optimism rule is stated correctly for both maximisation and minimisation, and the pruning argument (bound ≤ incumbent implies every completion ≤ incumbent) is sound. The A* admissibility analogy and the LP-relaxation bound for knapsack are accurate. The complexity tab is consistent: O(b^n·c) time, O(n) depth-first space, up to O(b^n) best-first space, and the TSP factorial caveat. The failure-mode section gives a concrete example of a false optimality certificate and of a bound too loose to prune. The C# code sorts by exact Int128 ratio and rounds the fractional remainder up, so the bound stays optimistic. Overflow is checked, and the prune and incumbent updates are correct. The mermaid diagram matches the algorithm. The note has no cards, no known violations, and one valid primary reference (Land and Doig 1960). The prose is direct and non-repetitive, so no edit is warranted."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md",
+                "verdict": "CLEAN",
+                "summary": "Independent whole-note audit found no accuracy, clarity, ordering or rule defects. The opening arithmetic, optimism argument, A* analogy, complexity tab, failure-mode examples and C# code are correct and well explained, so no edit is warranted.",
+                "page_type": "Concept — authorable prose; no Questions section (optional); References holds one primary source (Land and Doig 1960); code fences carry language identifiers.",
+                "current_text_evidence": [
+                  {
+                    "quote": "A 0/1 knapsack with 40 items has `2^40` candidate subsets.",
+                    "line_start": 14,
+                    "reason": "Concrete, correct opening that introduces the problem scale; 14!/2 for symmetric TSP with a fixed start is also correct."
+                  },
+                  {
+                    "quote": "So if `bound ≤ incumbent`, then *every* completion is `≤ incumbent`",
+                    "line_start": 37,
+                    "reason": "States the pruning correctness argument precisely, with the minimisation reversal noted; the mechanism and condition are recoverable."
+                  },
+                  {
+                    "quote": "TSP does not have a constant branching factor",
+                    "line_start": 107,
+                    "reason": "Complexity caveat preserves a real exception to the b-ary model and is consistent with the O(b^n·c) and depth-first O(n) / best-first O(b^n) space claims."
+                  },
+                  {
+                    "quote": "The certificate is false.",
+                    "line_start": 113,
+                    "reason": "The 90 vs bound 78 vs incumbent 80 example gives a concrete failure mode of a non-optimistic bound; the next paragraph contrasts it with a valid-but-loose bound, giving a clear decision between validity and tightness."
+                  },
+                  {
+                    "quote": "Round the fractional remainder upward so the integer bound stays optimistic.",
+                    "line_start": 154,
+                    "reason": "The code rounds the LP remainder up using Int128 and checked arithmetic, so pruning with Bound <= best is sound; the explanation beneath it matches the code."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one coherent paradigm; the visualization, complexity, failure modes and implementation all serve the same bound-and-prune idea.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The complete note was independently read and found accurate, clear and rule-compliant. The keep disposition is justified, and no edits or sources need checking.",
+            "change_checks": []
+          },
+          "model_calls": 7
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T19:58:16.982613Z",
+    "checkpoint_at": "2026-11-10T19:58:21.661794Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
