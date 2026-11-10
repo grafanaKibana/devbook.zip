@@ -9929,11 +9929,11 @@
     "version": 1,
     "id": "270542e03ba04146b22c78499257f60e",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-10T07:30:50.865899Z",
-    "elapsed_seconds": 227.44180559999995,
+    "elapsed_seconds": 243.88404309999996,
     "calls_reserved": 8,
-    "responses_received": 7,
+    "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/Data Persistence/NoSQL/Redis.md",
       "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
@@ -10162,7 +10162,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T07:34:38.307212Z",
+    "checkpoint_at": "2026-11-10T07:34:54.749450Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -28166,6 +28166,149 @@
       "Vault/Home/Data Persistence/ORMs/Entity Framework.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-10T07:34:34.581500Z"
+    "prepared_at": "2026-11-10T07:34:34.581500Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The note was read in full and has no concrete accuracy, clarity, question-quality or rules defect. The keep is justified, and no edits were proposed.",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains EF Core accurately: tracking, snapshot detection, transactions, optimistic concurrency, migrations, performance patterns and pitfalls, each with its conditions and limits. The prose is direct and ordered from concepts to performance to pitfalls. The cards are bounded and cite Microsoft documentation. Changes would be cosmetic.",
+            "page_type": "Concept — typed frontmatter, optional Questions and References present; qard IDs are protected metadata; no FolderNote or dashboard rules apply.",
+            "current_text_evidence": [
+              {
+                "quote": "A projection is untracked only when its result contains no entity instances.",
+                "line_start": 22,
+                "reason": "This states the tracking boundary for projections correctly. Entities nested in a projection are still tracked unless the query is no-tracking."
+              },
+              {
+                "quote": "If the row no longer has the original token, the command affects zero rows and `SaveChanges` throws `DbUpdateConcurrencyException`.",
+                "line_start": 65,
+                "reason": "This describes the optimistic-concurrency mechanism accurately. The note also states the limit for unvalidated predicates."
+              },
+              {
+                "quote": "the complete transactional unit must run through the configured execution strategy so a retry can recreate it safely",
+                "line_start": 67,
+                "reason": "This is the correct caveat for manual transactions combined with retrying execution strategies."
+              },
+              {
+                "quote": "Nested includes do not create the same sibling cross product, though they can still duplicate principal columns.",
+                "line_start": 161,
+                "reason": "This is accurate and precise. It is paired with the AsSplitQuery trade-off and the consistency gap."
+              },
+              {
+                "quote": "> [!qard]- How does EF Core detect that another writer changed a row between reading it and saving an update?",
+                "line_start": 193,
+                "reason": "This card is one coherent mechanism-and-limit explanation, not bundled independent tasks. It retains its original ID comment."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: DbContext, tracking, concurrency, migrations and query performance form one coherent EF Core topic. The N+1 material is already compact and could stand on its own, but separating it would add no recall benefit.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+          "citation_index": 0,
+          "reported_line_start": 22,
+          "resolved_line_start": 47
+        },
+        {
+          "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+          "citation_index": 1,
+          "reported_line_start": 65,
+          "resolved_line_start": 86
+        },
+        {
+          "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+          "citation_index": 2,
+          "reported_line_start": 67,
+          "resolved_line_start": 88
+        },
+        {
+          "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+          "citation_index": 3,
+          "reported_line_start": 161,
+          "resolved_line_start": 192
+        },
+        {
+          "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+          "citation_index": 4,
+          "reported_line_start": 193,
+          "resolved_line_start": 244
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Data Persistence/ORMs/Entity Framework.md": "ab7613a68cd443669493a018c32b6de8780c2ca46a7e065684e02229293c6d76"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The note was read in full and has no concrete accuracy, clarity, question-quality or rules defect. The keep is justified, and no edits were proposed.",
+      "notes": [
+        {
+          "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+          "verdict": "CLEAN",
+          "summary": "The note explains EF Core accurately: tracking, snapshot detection, transactions, optimistic concurrency, migrations, performance patterns and pitfalls, each with its conditions and limits. The prose is direct and ordered from concepts to performance to pitfalls. The cards are bounded and cite Microsoft documentation. Changes would be cosmetic.",
+          "page_type": "Concept — typed frontmatter, optional Questions and References present; qard IDs are protected metadata; no FolderNote or dashboard rules apply.",
+          "current_text_evidence": [
+            {
+              "quote": "A projection is untracked only when its result contains no entity instances.",
+              "line_start": 47,
+              "reason": "This states the tracking boundary for projections correctly. Entities nested in a projection are still tracked unless the query is no-tracking."
+            },
+            {
+              "quote": "If the row no longer has the original token, the command affects zero rows and `SaveChanges` throws `DbUpdateConcurrencyException`.",
+              "line_start": 86,
+              "reason": "This describes the optimistic-concurrency mechanism accurately. The note also states the limit for unvalidated predicates."
+            },
+            {
+              "quote": "the complete transactional unit must run through the configured execution strategy so a retry can recreate it safely",
+              "line_start": 88,
+              "reason": "This is the correct caveat for manual transactions combined with retrying execution strategies."
+            },
+            {
+              "quote": "Nested includes do not create the same sibling cross product, though they can still duplicate principal columns.",
+              "line_start": 192,
+              "reason": "This is accurate and precise. It is paired with the AsSplitQuery trade-off and the consistency gap."
+            },
+            {
+              "quote": "> [!qard]- How does EF Core detect that another writer changed a row between reading it and saving an update?",
+              "line_start": 244,
+              "reason": "This card is one coherent mechanism-and-limit explanation, not bundled independent tasks. It retains its original ID comment."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: DbContext, tracking, concurrency, migrations and query performance form one coherent EF Core topic. The N+1 material is already compact and could stand on its own, but separating it would add no recall benefit.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
