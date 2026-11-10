@@ -7624,9 +7624,8 @@
       "last_terminal_status": "merged"
     },
     "computer-science-445ddaa5": {
-      "generation": 2,
-      "last_terminal_status": "merged",
-      "open_pr_key": "computer-science-445ddaa5:2"
+      "generation": 3,
+      "last_terminal_status": "merged"
     }
   },
   "prs": {
@@ -7828,14 +7827,14 @@
           "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
-          "updated_at": "2026-11-08T18:42:50Z",
-          "pushed_at": "2026-11-10T07:41:41Z",
+          "updated_at": "2026-11-10T13:01:04Z",
+          "pushed_at": "2026-11-10T19:53:32Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 249098,
+          "size": 232655,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -7849,7 +7848,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 10,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -7865,7 +7864,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 10,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -7963,14 +7962,14 @@
           "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
-          "updated_at": "2026-11-08T18:42:50Z",
-          "pushed_at": "2026-11-10T07:41:41Z",
+          "updated_at": "2026-11-10T13:01:04Z",
+          "pushed_at": "2026-11-10T19:53:32Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 249098,
+          "size": 232655,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -7984,7 +7983,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 10,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -8000,7 +7999,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 10,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -8267,14 +8266,14 @@
           "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
-          "updated_at": "2026-11-08T18:42:50Z",
-          "pushed_at": "2026-11-10T07:41:41Z",
+          "updated_at": "2026-11-10T13:01:04Z",
+          "pushed_at": "2026-11-10T19:53:32Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 249098,
+          "size": 232655,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -8288,7 +8287,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 10,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -8304,7 +8303,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 10,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -8402,14 +8401,14 @@
           "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
-          "updated_at": "2026-11-08T18:42:50Z",
-          "pushed_at": "2026-11-10T07:41:41Z",
+          "updated_at": "2026-11-10T13:01:04Z",
+          "pushed_at": "2026-11-10T19:53:32Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 249098,
+          "size": 232655,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -8423,7 +8422,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 10,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -8439,7 +8438,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 10,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -8715,14 +8714,14 @@
           "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
-          "updated_at": "2026-11-08T18:42:50Z",
-          "pushed_at": "2026-11-10T07:41:41Z",
+          "updated_at": "2026-11-10T13:01:04Z",
+          "pushed_at": "2026-11-10T19:53:32Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 249098,
+          "size": 232655,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -8736,7 +8735,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 10,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -8752,7 +8751,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 10,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -8850,14 +8849,14 @@
           "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
-          "updated_at": "2026-11-08T18:42:50Z",
-          "pushed_at": "2026-11-10T07:41:41Z",
+          "updated_at": "2026-11-10T13:01:04Z",
+          "pushed_at": "2026-11-10T19:53:32Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 249098,
+          "size": 232655,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -8871,7 +8870,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 10,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -8887,7 +8886,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 10,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -9210,14 +9209,14 @@
           "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
-          "updated_at": "2026-11-08T18:42:50Z",
-          "pushed_at": "2026-11-10T07:41:41Z",
+          "updated_at": "2026-11-10T13:01:04Z",
+          "pushed_at": "2026-11-10T19:53:32Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 249098,
+          "size": 232655,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -9231,7 +9230,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 10,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -9247,7 +9246,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 10,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -9345,14 +9344,14 @@
           "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
-          "updated_at": "2026-11-08T18:42:50Z",
-          "pushed_at": "2026-11-10T07:41:41Z",
+          "updated_at": "2026-11-10T13:01:04Z",
+          "pushed_at": "2026-11-10T19:53:32Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 249098,
+          "size": 232655,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -9366,7 +9365,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 10,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -9382,7 +9381,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 10,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -9436,235 +9435,12 @@
       "generation": 2,
       "number": 218,
       "branch": "notes/automated-computer-science-445ddaa5-g2",
-      "status": "open",
-      "frozen": false,
+      "status": "merged",
+      "frozen": true,
       "head_sha": "83f402a70c59956d0d2ad6996dfc56d83b3c9df4",
       "export_required": false,
       "export_operation_id": "b10487f268d742ba",
       "automatic_export": true,
-      "proposal_records": [
-        {
-          "record_id": "aaf5f9e588714a7f25da7005cbff7c7167973b808499a5ad323475efa8bedfbd",
-          "workload_id": "b10487f268d742babc49b59ab87ef167",
-          "batch": {
-            "topic": "Computer Science",
-            "topic_id": "computer-science-445ddaa5",
-            "notes": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"4\"]\nstatus: Creation\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.334Z\"\n---\n\nGraph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Diagram\n\n```mermaid\nflowchart TD\n  A[Graph problem] --> B{Need reachability or levels}\n  B -->|Yes| C[DFS BFS]\n  B -->|No| D{Need minimum path cost}\n  D -->|Yes with non negative weights| E{Have a heuristic to the target}\n  E -->|Yes| E1[A Star Search]\n  E -->|No| E2[Dijkstra]\n  D -->|Can have negative edges| F[Bellman Ford]\n  D -->|Need all pairs shortest paths| G[Floyd Warshall]\n  A --> H{Need structure not distance}\n  H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]\n  H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]\n  H -->|Single points of failure| K[Articulation Points and Bridges]\n  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Throughput through a capacitated network| L[Maximum Flow]\n```\n\n# Algorithm Selection\n\n## Shortest Path\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|DFS]] | Traversal, cycle detection, finish-order primitives | O(V + E) | General graphs. Topological order still requires a DAG |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra\\|Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search\\|A* Search]] | Point-to-point shortest path | O((V + E) log E) with a consistent heuristic and lazy heap. Reopenings make runtime re-expansion-dependent | Non-negative weights. Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search\\|Greedy Best-First Search]] | Fast point-to-point path, not necessarily optimal | O((V + E) log E) with a lazy heap | Heuristic only. Sacrifices optimality for speed |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search\\|Bidirectional Search]] | Point-to-point shortest path | About O(b^(d/2)) rather than O(b^d) in the ideal state-space model | Target known. Backward search must be available |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford\\|Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges. Detects reachable negative cycles |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall\\|Floyd-Warshall]] | All-pairs shortest path | Θ(V³) time, Θ(V²) space | Small or dense graphs. Detects negative cycles |\n\n## Structure and Connectivity\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\\|Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort\\|Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\\|Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Connected Components\\|Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges\\|Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow\\|Maximum Flow]] | Max s–t throughput. Min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |\n\n> [!NOTE]\n> Not every graph problem admits a polynomial-time algorithm. [[Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle|Hamiltonian Cycle]] asks for a cycle that visits every vertex exactly once and is **NP-complete**. No polynomial-time algorithm is known. Exact methods take exponential time in the worst case.\n\n# References\n\n- [Graph algorithms](https://algs4.cs.princeton.edu/40graphs/)\n",
-                "hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
-                "topic": "Computer Science",
-                "violations": [],
-                "needs_fixing_ids": [],
-                "repair_input_hash": "",
-                "selection_reason": "new"
-              }
-            ],
-            "feedback": [],
-            "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-            "review_process": "focused-whole-note-v1",
-            "pr": null
-          },
-          "proposal": {
-            "version": 1,
-            "edits": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "expected_hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
-                "before": "  H -->|Clusters in an undirected graph| M[Connected Components]\n",
-                "after": "  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n",
-                "reason": "Adds the Topological Sort note, listed in the selection table, to the decision diagram so every structure-oriented outcome has a route.",
-                "kind": "note",
-                "learning_target": "same",
-                "essential_meanings": [
-                  "Topological Sort is the choice for dependency ordering in a directed acyclic graph"
-                ],
-                "sources": [],
-                "feedback_keys": [],
-                "problem": "The decision diagram omits Topological Sort although the structure tables list it as a distinct answer to a dependency-order requirement.",
-                "reader_benefit": "The diagram now covers dependency ordering, so it matches the tables below it."
-              }
-            ],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "outcome": "changed",
-                "reason": "Audited the opening, diagram, both tables, the NP-complete note and the reference. The complexities (BFS/DFS O(V+E), Dijkstra O((V+E) log V), Bellman-Ford O(VE), Floyd-Warshall Θ(V³), Edmonds-Karp O(VE²)), the A* consistency caveat and the Hamiltonian cycle claim are standard and correct. The one gap was that the diagram had no Topological Sort route, though the tables list it. The edit adds that route and leaves the rest unchanged."
-              }
-            ],
-            "feedback": []
-          },
-          "result": {
-            "sources": {
-              "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"4\"]\nstatus: Creation\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-08T22:19:50.758Z\"\npublished: \"2026-07-08T13:14:17.334Z\"\n---\n\nGraph algorithms turn edges into answers about reachability, dependency order, path cost, connectivity, or capacity. The required output comes first. Direction, weight semantics, and input density then narrow the valid choices. Breadth-first search finds a minimum-hop route, while Dijkstra minimizes total weight and becomes invalid as soon as an edge can be negative.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Diagram\n\n```mermaid\nflowchart TD\n  A[Graph problem] --> B{Need reachability or levels}\n  B -->|Yes| C[DFS BFS]\n  B -->|No| D{Need minimum path cost}\n  D -->|Yes with non negative weights| E{Have a heuristic to the target}\n  E -->|Yes| E1[A Star Search]\n  E -->|No| E2[Dijkstra]\n  D -->|Can have negative edges| F[Bellman Ford]\n  D -->|Need all pairs shortest paths| G[Floyd Warshall]\n  A --> H{Need structure not distance}\n  H -->|Cheapest way to connect every node| I[Minimum Spanning Tree]\n  H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]\n  H -->|Single points of failure| K[Articulation Points and Bridges]\n  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n  H -->|Throughput through a capacitated network| L[Maximum Flow]\n```\n\n# Algorithm Selection\n\n## Shortest Path\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|BFS]] | Reachability, shortest path by edge count | O(V + E) | Unweighted graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS\\|DFS]] | Traversal, cycle detection, finish-order primitives | O(V + E) | General graphs. Topological order still requires a DAG |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra\\|Dijkstra]] | Single-source shortest path | O((V + E) log V) | Non-negative weights |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search\\|A* Search]] | Point-to-point shortest path | O((V + E) log E) with a consistent heuristic and lazy heap. Reopenings make runtime re-expansion-dependent | Non-negative weights. Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search\\|Greedy Best-First Search]] | Fast point-to-point path, not necessarily optimal | O((V + E) log E) with a lazy heap | Heuristic only. Sacrifices optimality for speed |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search\\|Bidirectional Search]] | Point-to-point shortest path | About O(b^(d/2)) rather than O(b^d) in the ideal state-space model | Target known. Backward search must be available |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford\\|Bellman-Ford]] | Single-source shortest path | O(V·E) | Handles negative edges. Detects reachable negative cycles |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall\\|Floyd-Warshall]] | All-pairs shortest path | Θ(V³) time, Θ(V²) space | Small or dense graphs. Detects negative cycles |\n\n## Structure and Connectivity\n\n| Algorithm | Solves | Time | Constraint |\n| --- | --- | --- | --- |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree\\|Minimum Spanning Tree]] | Cheapest edge set connecting all vertices | O(E log V) | Connected, undirected, weighted |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort\\|Topological Sort]] | Linear order respecting dependencies | O(V + E) | Directed acyclic graph |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components\\|Strongly Connected Components]] | Maximal mutually-reachable vertex sets | O(V + E) | Directed graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Connected Components\\|Connected Components]] | Maximal connected vertex sets | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges\\|Articulation Points and Bridges]] | Cut vertices and cut edges | O(V + E) | Undirected graphs |\n| [[Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow\\|Maximum Flow]] | Max s–t throughput. Min cut | O(V·E²) (Edmonds–Karp) | Capacitated network |\n\n> [!NOTE]\n> Not every graph problem admits a polynomial-time algorithm. [[Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle|Hamiltonian Cycle]] asks for a cycle that visits every vertex exactly once and is **NP-complete**. No polynomial-time algorithm is known. Exact methods take exponential time in the worst case.\n\n# References\n\n- [Graph algorithms](https://algs4.cs.princeton.edu/40graphs/)\n"
-            },
-            "edits": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "expected_hash": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877",
-                "before": "  H -->|Clusters in an undirected graph| M[Connected Components]\n",
-                "after": "  H -->|Clusters in an undirected graph| M[Connected Components]\n  H -->|Dependency order in a DAG| N[Topological Sort]\n",
-                "reason": "Adds the Topological Sort note, listed in the selection table, to the decision diagram so every structure-oriented outcome has a route.",
-                "kind": "note",
-                "learning_target": "same",
-                "essential_meanings": [
-                  "Topological Sort is the choice for dependency ordering in a directed acyclic graph"
-                ],
-                "sources": [],
-                "feedback_keys": [],
-                "problem": "The decision diagram omits Topological Sort although the structure tables list it as a distinct answer to a dependency-order requirement.",
-                "reader_benefit": "The diagram now covers dependency ordering, so it matches the tables below it."
-              }
-            ],
-            "retired_ids": [],
-            "lineage": [],
-            "fingerprints": [
-              "30adda22600ad8750397ecbbfb9ef9b6a30416e17a44afcf12e6867bbed4c6a6"
-            ]
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "verdict": "CLEAN",
-                "summary": "The whole folder note was read. The single edit closes a real gap: the decision diagram had no route to Topological Sort, although the tables list it. The edit is small, accurate and consistent with the rest of the note.",
-                "page_type": "FolderNote — keeps tags: [FolderNote] and the Datacore folder-map block. No Questions section, which is optional. One reference, which is a real and relevant primary source.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The required output comes first. Direction, weight semantics, and input density then narrow the valid choices.",
-                    "line_start": 15,
-                    "reason": "The opening states the selection logic and the BFS versus Dijkstra boundary directly, so no change is needed."
-                  },
-                  {
-                    "quote": "H -->|Dependency order in a DAG| N[Topological Sort]",
-                    "line_start": 39,
-                    "reason": "The new diagram route makes the diagram agree with the structure table. The DAG condition is stated correctly."
-                  },
-                  {
-                    "quote": "| Linear order respecting dependencies | O(V + E) | Directed acyclic graph |",
-                    "line_start": 63,
-                    "reason": "The table row confirms Topological Sort is a distinct outcome, so the diagram gap was real. Complexity and constraint are correct."
-                  },
-                  {
-                    "quote": "Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings",
-                    "line_start": 52,
-                    "reason": "The A* caveat is accurate. The Dijkstra, Bellman-Ford, Floyd-Warshall and Edmonds-Karp complexities are also standard and correct."
-                  }
-                ],
-                "target_resolution": "RESOLVED",
-                "split_suggestion": "No split: the note is a compact hub whose diagram and tables serve one purpose, choosing a graph algorithm. The per-algorithm notes already exist.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The note is accurate and clear. The one edit fixes a real diagram omission without changing meaning, and frontmatter and fences are intact.",
-            "change_checks": [
-              {
-                "edit_index": 0,
-                "verdict": "WORTHWHILE",
-                "reason": "Topological Sort was in the selection table but missing from the decision diagram. The added route covers that gap with the correct DAG condition and does not change any other content."
-              }
-            ]
-          },
-          "decisions": [],
-          "review_evidence": {
-            "raw_review": {
-              "verdict": "CLEAN",
-              "notes": [
-                {
-                  "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                  "verdict": "CLEAN",
-                  "summary": "The whole folder note was read. The single edit closes a real gap: the decision diagram had no route to Topological Sort, although the tables list it. The edit is small, accurate and consistent with the rest of the note.",
-                  "page_type": "FolderNote — keeps tags: [FolderNote] and the Datacore folder-map block. No Questions section, which is optional. One reference, which is a real and relevant primary source.",
-                  "current_text_evidence": [
-                    {
-                      "quote": "The required output comes first. Direction, weight semantics, and input density then narrow the valid choices.",
-                      "line_start": 15,
-                      "reason": "The opening states the selection logic and the BFS versus Dijkstra boundary directly, so no change is needed."
-                    },
-                    {
-                      "quote": "H -->|Dependency order in a DAG| N[Topological Sort]",
-                      "line_start": 39,
-                      "reason": "The new diagram route makes the diagram agree with the structure table. The DAG condition is stated correctly."
-                    },
-                    {
-                      "quote": "| Linear order respecting dependencies | O(V + E) | Directed acyclic graph |",
-                      "line_start": 64,
-                      "reason": "The table row confirms Topological Sort is a distinct outcome, so the diagram gap was real. Complexity and constraint are correct."
-                    },
-                    {
-                      "quote": "Consistency permits close-once optimality, while an admissible but inconsistent heuristic requires reopenings",
-                      "line_start": 53,
-                      "reason": "The A* caveat is accurate. The Dijkstra, Bellman-Ford, Floyd-Warshall and Edmonds-Karp complexities are also standard and correct."
-                    }
-                  ],
-                  "target_resolution": "RESOLVED",
-                  "split_suggestion": "No split: the note is a compact hub whose diagram and tables serve one purpose, choosing a graph algorithm. The per-algorithm notes already exist.",
-                  "findings": [],
-                  "source_checks": [],
-                  "rejection_equivalence": [],
-                  "quality": {
-                    "accuracy": "PASS",
-                    "clarity": "PASS",
-                    "question_quality": "NOT APPLICABLE",
-                    "identity_safety": "NOT APPLICABLE",
-                    "rules_compliance": "PASS"
-                  }
-                }
-              ],
-              "overall_reason": "The note is accurate and clear. The one edit fixes a real diagram omission without changing meaning, and frontmatter and fences are intact.",
-              "change_checks": [
-                {
-                  "edit_index": 0,
-                  "verdict": "WORTHWHILE",
-                  "reason": "Topological Sort was in the selection table but missing from the decision diagram. The added route covers that gap with the correct DAG condition and does not change any other content."
-                }
-              ]
-            },
-            "bindings": [
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "citation_index": 2,
-                "reported_line_start": 64,
-                "resolved_line_start": 63
-              },
-              {
-                "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md",
-                "citation_index": 3,
-                "reported_line_start": 53,
-                "resolved_line_start": 52
-              }
-            ],
-            "source_hashes": {
-              "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "ea680c126da74e3cb0f890a926c2f52ae7eaebc437b6f7d1e7f098af5021b270"
-            },
-            "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-          },
-          "source_hashes": {
-            "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": "70c4d2b2524daefb1133e359fbaf63f58aa7eadadf2175dabd5fa99e6f689877"
-          },
-          "prepared_source_version": 1,
-          "prepared_at": "2026-11-08T22:19:50.758851Z",
-          "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-          "calls_reserved": 6,
-          "elapsed_seconds": 221.44617210000004,
-          "accepted_at": "2026-11-08T22:21:02.719976Z",
-          "phase": "accepted"
-        }
-      ],
       "base_note_hashes": {
         "Vault/Home/Computer Science/Algorithms/Algorithms.md": "5163fe3a84feec771d86cedc762044b7c206fa4b6d0708e765612a6cb30488dd",
         "Vault/Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search.md": "2ae5db4bf03be72d4c8c79a0819cd8299000f3009868ab2d817900add3736b84",
@@ -9794,7 +9570,7 @@
       "diff_url": "https://github.com/grafanaKibana/devbook.zip/pull/218.diff",
       "patch_url": "https://github.com/grafanaKibana/devbook.zip/pull/218.patch",
       "issue_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/218",
-      "state": "open",
+      "state": "closed",
       "locked": false,
       "title": "notes: improve Computer Science",
       "user": {
@@ -9820,16 +9596,16 @@
       },
       "body": "<!-- devbook-improvement:start topic=computer-science-445ddaa5 -->\n## 1. Note improvements\n\nReviewed 9 notes in Computer Science; improved 1. Calls: 20; elapsed: 652 seconds; stop: repair_pending.\n\n- [`Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-computer-science-445ddaa5-g2/Vault/Home/Computer%20Science/Algorithms/Graph%20Algorithms/Graph%20Algorithms.md) — The decision diagram omits Topological Sort although the structure tables list it as a distinct answer to a dependency-order requirement. Adds the Topological Sort note, listed in the selection table, to the decision diagram so every structure-oriented outcome has a route. The diagram now covers dependency ordering, so it matches the tables below it.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz export: verified in `83f402a70c59956d0d2ad6996dfc56d83b3c9df4`; required checks and full-vault validation passed on that exact head.\n<!-- devbook-improvement:end -->\n\n<!-- devbook-improvement:topic=computer-science-445ddaa5;generation=2 -->\n",
       "created_at": "2026-11-08T22:28:44Z",
-      "updated_at": "2026-11-09T07:05:19Z",
-      "closed_at": null,
-      "merged_at": null,
-      "merge_commit_sha": "547f9550474ec5a5e83f6c6464c3cf47a3fab08c",
+      "updated_at": "2026-11-10T13:01:56Z",
+      "closed_at": "2026-11-10T13:00:58Z",
+      "merged_at": "2026-11-10T13:00:58Z",
+      "merge_commit_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
       "assignees": [],
       "requested_reviewers": [],
       "requested_teams": [],
       "labels": [],
       "milestone": null,
-      "draft": true,
+      "draft": false,
       "commits_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/218/commits",
       "review_comments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/218/comments",
       "review_comment_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/comments{/number}",
@@ -9928,14 +9704,14 @@
           "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
-          "updated_at": "2026-11-08T18:42:50Z",
-          "pushed_at": "2026-11-10T07:41:41Z",
+          "updated_at": "2026-11-10T13:01:04Z",
+          "pushed_at": "2026-11-10T19:53:32Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 249098,
+          "size": 232655,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -9949,7 +9725,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 10,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -9965,7 +9741,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 10,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -10063,14 +9839,14 @@
           "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
-          "updated_at": "2026-11-08T18:42:50Z",
-          "pushed_at": "2026-11-10T07:41:41Z",
+          "updated_at": "2026-11-10T13:01:04Z",
+          "pushed_at": "2026-11-10T19:53:32Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 249098,
+          "size": 232655,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -10084,7 +9860,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 10,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -10100,7 +9876,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 10,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -10141,7 +9917,18 @@
       "pause_reason": null,
       "changed_paths": [
         "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md"
-      ]
+      ],
+      "terminal_audit": {
+        "status": "merged",
+        "record_count": 1,
+        "records": [
+          {
+            "batch_hash": "f9154f3f1a9c5808270c29b7a4157c7f81ef9313f0833920d44ad6905a2a1670",
+            "proposal_hash": "090d735f2f813f304845db4222c3fb352301cc7ab914ca682f9aeb28389f4ca1",
+            "result_hash": "a245e665e08b456839ba5fa654705be34089a0acddd942de95f4ac6dee542f8a"
+          }
+        ]
+      }
     }
   },
   "feedback": {
@@ -10241,14 +10028,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 8.1155951,
+    "elapsed_seconds": 15.604571700000001,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T19:53:29.054099Z"
+    "checkpoint_at": "2026-11-10T19:53:36.543046Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -29390,171 +29177,170 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {
-    "03450330ebc6a9cf9c837e89b781eb71d51ca9b1e3fc794fa26634ec03383c7d": {
-      "workload_id": "b10487f268d742babc49b59ab87ef167",
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "b10487f268d742babc49b59ab87ef167",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
       "topic_id": "computer-science-445ddaa5",
-      "batch": {
-        "topic": "Computer Science",
-        "topic_id": "computer-science-445ddaa5",
-        "notes": [
-          {
-            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
-            "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Finds strongly connected components in one DFS using discovery indices, low links, and an active-vertex stack.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-07-26T20:18:51.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-26T19:27:00.411Z\"\n---\n\n[[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly connected components]] partition a digraph into maximal mutually reachable regions. Tarjan's algorithm finds that partition in one DFS by recording each vertex's discovery time, the earliest reachable vertex still on the active stack, and whether it still belongs to a component under construction.\n\nThe component boundary appears when a vertex cannot reach any earlier active vertex. That vertex is an SCC root, and popping the stack down to it emits the complete component. [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly Connected Components]] compares Tarjan with the two-pass and path-based alternatives. This note follows Tarjan's active-stack invariant and implementation.\n\n# Low-Link State\n\n- `disc[v]` is the discovery index assigned when DFS first enters `v`.\n- `low[v]` is the smallest discovery index reachable from `v` through DFS-tree edges plus at most one edge to a vertex still on the stack.\n- `onStack[v]` distinguishes an active vertex from one already assigned to a completed component.\n\nOn entry, set `disc[v] = low[v] = time++`, then push `v`. For an edge `v → w`, recurse if `w` is unvisited and fold `low[w]` into `low[v]` on return. If `w` is already visited and still active, fold `disc[w]` into `low[v]`. Once every outgoing edge has been processed, `low[v] == disc[v]` identifies an SCC root.\n\nOn `A→B, B→C, C→A, C→D, D→E, E→D`:\n\n```text\nvisit A  disc=0 low=0   stack=[A]\n visit B disc=1 low=1   stack=[A,B]\n  visit C disc=2 low=2  stack=[A,B,C]\n   edge C→A: low[C]=0\n   visit D disc=3 low=3 stack=[A,B,C,D]\n    visit E disc=4 low=4 stack=[A,B,C,D,E]\n     edge E→D: low[E]=3\n   D done: low[D]=disc[D]=3 -> pop {E,D}\n  back in C: low[C]=min(0, low[D]=3)=0\n back in B: low[B]=min(1, low[C]=0)=0\nback in A: low[A]=min(0, low[B]=0)=0\nA done: low[A]=disc[A]=0 -> pop {C,B,A}\n```\n\nThe components leave in reverse topological order of the condensation: `{D, E}` before `{A, B, C}`.\n\n# C# Implementation\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> public sealed class Tarjan\n> {\n>     private readonly List<int>[] _adjacency;\n>     private readonly int[] _disc;\n>     private readonly int[] _low;\n>     private readonly bool[] _onStack;\n>     private readonly Stack<int> _stack = new();\n>     private readonly List<List<int>> _components = new();\n>     private int _time;\n>\n>     public Tarjan(List<int>[] adjacency)\n>     {\n>         _adjacency = adjacency;\n>         _disc = new int[adjacency.Length];\n>         _low = new int[adjacency.Length];\n>         _onStack = new bool[adjacency.Length];\n>         Array.Fill(_disc, -1);\n>     }\n>\n>     public List<List<int>> Components()\n>     {\n>         for (var v = 0; v < _adjacency.Length; v++)\n>         {\n>             if (_disc[v] == -1)\n>             {\n>                 StrongConnect(v);\n>             }\n>         }\n>\n>         return _components;\n>     }\n>\n>     private void StrongConnect(int v)\n>     {\n>         _disc[v] = _low[v] = _time++;\n>         _stack.Push(v);\n>         _onStack[v] = true;\n>\n>         foreach (var w in _adjacency[v])\n>         {\n>             if (_disc[w] == -1)\n>             {\n>                 StrongConnect(w);\n>                 _low[v] = Math.Min(_low[v], _low[w]);\n>             }\n>             else if (_onStack[w])\n>             {\n>                 _low[v] = Math.Min(_low[v], _disc[w]);\n>             }\n>         }\n>\n>         if (_low[v] != _disc[v])\n>         {\n>             return;\n>         }\n>\n>         var component = new List<int>();\n>         int w;\n>         do\n>         {\n>             w = _stack.Pop();\n>             _onStack[w] = false;\n>             component.Add(w);\n>         }\n>         while (w != v);\n>\n>         _components.Add(component);\n>     }\n> }\n> ```\n\n# The Guard That Keeps Components Separate\n\nThe non-tree update must ignore vertices already removed from the stack. An edge to one of them enters a finished component. It cannot provide a return path for the active DFS subtree. Letting that vertex lower `low[v]` can hide a valid root and merge separate SCCs.\n\nFor an edge to an active, already-visited vertex, Tarjan's definition uses `disc[w]`. A guarded `low[w]` variant still finds the same SCC roots, but the stored values no longer match Tarjan's formal low-link definition. Removing the `onStack` guard breaks the component boundary.\n\nThis is related to the discovery/low-value pattern in [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges|articulation points and bridges]], but the directed edge classification, active stack, and update rules are different.\n\n# References\n\n- [Depth-First Search and Linear Graph Algorithms](https://epubs.siam.org/doi/10.1137/0201010)\n",
-            "hash": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f",
-            "topic": "Computer Science",
-            "violations": [],
-            "needs_fixing_ids": [],
-            "repair_input_hash": "",
-            "selection_reason": "new"
-          }
-        ],
-        "feedback": [],
-        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-        "review_process": "focused-whole-note-v1",
-        "pr": null
-      },
-      "proposal": {
-        "version": 1,
-        "edits": [],
-        "dispositions": [
-          {
-            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
-            "outcome": "keep",
-            "reason": "Audited the whole note. The disc, low and onStack definitions match Tarjan's formulation. The worked trace (A→B, B→C, C→A, C→D, D→E, E→D) is correct: low[C] drops to 0 through the active edge to A, and {E,D} is popped before {C,B,A}. The reverse-topological emission order is right. The C# code follows the same rules: it uses disc[w] for active non-tree edges, guards on _onStack, and pops to v. The section on the onStack guard correctly says that dropping the guard merges SCCs, and that a low[w] variant finds the same roots but departs from the formal definition. The contrast with articulation points is accurate. The SIAM reference is the original Tarjan 1972 paper. The prose is direct and well ordered, and there are no flagged cards or known violations. The optional Questions section is not needed, so no edit would add real value."
-          }
-        ],
-        "feedback": []
-      },
-      "source_hashes": {
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f"
-      },
-      "feedback_keys": [],
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Finds strongly connected components in one DFS using discovery indices, low links, and an active-vertex stack.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-07-26T20:18:51.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-26T19:27:00.411Z\"\n---\n\n[[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly connected components]] partition a digraph into maximal mutually reachable regions. Tarjan's algorithm finds that partition in one DFS by recording each vertex's discovery time, the earliest reachable vertex still on the active stack, and whether it still belongs to a component under construction.\n\nThe component boundary appears when a vertex cannot reach any earlier active vertex. That vertex is an SCC root, and popping the stack down to it emits the complete component. [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly Connected Components]] compares Tarjan with the two-pass and path-based alternatives. This note follows Tarjan's active-stack invariant and implementation.\n\n# Low-Link State\n\n- `disc[v]` is the discovery index assigned when DFS first enters `v`.\n- `low[v]` is the smallest discovery index reachable from `v` through DFS-tree edges plus at most one edge to a vertex still on the stack.\n- `onStack[v]` distinguishes an active vertex from one already assigned to a completed component.\n\nOn entry, set `disc[v] = low[v] = time++`, then push `v`. For an edge `v → w`, recurse if `w` is unvisited and fold `low[w]` into `low[v]` on return. If `w` is already visited and still active, fold `disc[w]` into `low[v]`. Once every outgoing edge has been processed, `low[v] == disc[v]` identifies an SCC root.\n\nOn `A→B, B→C, C→A, C→D, D→E, E→D`:\n\n```text\nvisit A  disc=0 low=0   stack=[A]\n visit B disc=1 low=1   stack=[A,B]\n  visit C disc=2 low=2  stack=[A,B,C]\n   edge C→A: low[C]=0\n   visit D disc=3 low=3 stack=[A,B,C,D]\n    visit E disc=4 low=4 stack=[A,B,C,D,E]\n     edge E→D: low[E]=3\n   D done: low[D]=disc[D]=3 -> pop {E,D}\n  back in C: low[C]=min(0, low[D]=3)=0\n back in B: low[B]=min(1, low[C]=0)=0\nback in A: low[A]=min(0, low[B]=0)=0\nA done: low[A]=disc[A]=0 -> pop {C,B,A}\n```\n\nThe components leave in reverse topological order of the condensation: `{D, E}` before `{A, B, C}`.\n\n# C# Implementation\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> public sealed class Tarjan\n> {\n>     private readonly List<int>[] _adjacency;\n>     private readonly int[] _disc;\n>     private readonly int[] _low;\n>     private readonly bool[] _onStack;\n>     private readonly Stack<int> _stack = new();\n>     private readonly List<List<int>> _components = new();\n>     private int _time;\n>\n>     public Tarjan(List<int>[] adjacency)\n>     {\n>         _adjacency = adjacency;\n>         _disc = new int[adjacency.Length];\n>         _low = new int[adjacency.Length];\n>         _onStack = new bool[adjacency.Length];\n>         Array.Fill(_disc, -1);\n>     }\n>\n>     public List<List<int>> Components()\n>     {\n>         for (var v = 0; v < _adjacency.Length; v++)\n>         {\n>             if (_disc[v] == -1)\n>             {\n>                 StrongConnect(v);\n>             }\n>         }\n>\n>         return _components;\n>     }\n>\n>     private void StrongConnect(int v)\n>     {\n>         _disc[v] = _low[v] = _time++;\n>         _stack.Push(v);\n>         _onStack[v] = true;\n>\n>         foreach (var w in _adjacency[v])\n>         {\n>             if (_disc[w] == -1)\n>             {\n>                 StrongConnect(w);\n>                 _low[v] = Math.Min(_low[v], _low[w]);\n>             }\n>             else if (_onStack[w])\n>             {\n>                 _low[v] = Math.Min(_low[v], _disc[w]);\n>             }\n>         }\n>\n>         if (_low[v] != _disc[v])\n>         {\n>             return;\n>         }\n>\n>         var component = new List<int>();\n>         int w;\n>         do\n>         {\n>             w = _stack.Pop();\n>             _onStack[w] = false;\n>             component.Add(w);\n>         }\n>         while (w != v);\n>\n>         _components.Add(component);\n>     }\n> }\n> ```\n\n# The Guard That Keeps Components Separate\n\nThe non-tree update must ignore vertices already removed from the stack. An edge to one of them enters a finished component. It cannot provide a return path for the active DFS subtree. Letting that vertex lower `low[v]` can hide a valid root and merge separate SCCs.\n\nFor an edge to an active, already-visited vertex, Tarjan's definition uses `disc[w]`. A guarded `low[w]` variant still finds the same SCC roots, but the stored values no longer match Tarjan's formal low-link definition. Removing the `onStack` guard breaks the component boundary.\n\nThis is related to the discovery/low-value pattern in [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges|articulation points and bridges]], but the directed edge classification, active stack, and update rules are different.\n\n# References\n\n- [Depth-First Search and Linear Graph Algorithms](https://epubs.siam.org/doi/10.1137/0201010)\n",
+          "hash": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "repair_inputs": {
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": ""
-      },
-      "prepared_source_version": 1,
-      "prepared_at": "2026-11-08T22:27:45.475477Z",
-      "blocked_review": {
-        "verdict": "CHANGES REQUIRED",
-        "overall_reason": "The keep is not justified. The C# implementation declares `w` twice in one method scope, so it does not compile. The disposition said the code follows the same rules but did not catch this.",
-        "notes": [
-          {
-            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
-            "verdict": "CHANGES REQUIRED",
-            "summary": "The prose, trace and guard explanation are accurate and well ordered. The C# example has a compile error, which is a concrete accuracy defect in a note marked publish: true.",
-            "page_type": "Concept — no required sections; Questions are absent, which is allowed. The reference is a single primary source.",
-            "current_text_evidence": [
-              {
-                "quote": "On entry, set `disc[v] = low[v] = time++`, then push `v`.",
-                "line_start": 24,
-                "reason": "The prose and trace correctly describe the disc/low/onStack rules and the emission order."
-              },
-              {
-                "quote": "foreach (var w in _adjacency[v])",
-                "line_start": 88,
-                "reason": "The foreach declares `w` in a nested scope."
-              },
-              {
-                "quote": "int w;",
-                "line_start": 107,
-                "reason": "`int w;` is declared later in the enclosing method block. The enclosing declaration space includes the earlier foreach, so C# reports CS0136 and the code does not compile."
-              }
-            ],
-            "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: the note covers one algorithm, and the guard section depends on the same update rules.",
-            "findings": [
-              {
-                "severity": "High",
-                "dimension": "Accuracy",
-                "location": "`# C# Implementation`, StrongConnect: `foreach (var w ...)` and later `int w;`",
-                "evidence": "`foreach (var w in _adjacency[v])` and `int w;` in the same method scope. `int w;` is declared later in the enclosing block, so it conflicts with the foreach variable.",
-                "effect": "The published reference implementation fails to compile with CS0136. A reader copying it gets an error.",
-                "fix": "Rename one variable, for example the foreach variable to `next` and the pop variable to `member`, or use `int popped;` in the pop loop. Keep the logic unchanged."
-              }
-            ],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "FAIL",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note. The disc, low and onStack definitions match Tarjan's formulation. The worked trace (A→B, B→C, C→A, C→D, D→E, E→D) is correct: low[C] drops to 0 through the active edge to A, and {E,D} is popped before {C,B,A}. The reverse-topological emission order is right. The C# code follows the same rules: it uses disc[w] for active non-tree edges, guards on _onStack, and pops to v. The section on the onStack guard correctly says that dropping the guard merges SCCs, and that a low[w] variant finds the same roots but departs from the formal definition. The contrast with articulation points is accurate. The SIAM reference is the original Tarjan 1972 paper. The prose is direct and well ordered, and there are no flagged cards or known violations. The optional Questions section is not needed, so no edit would add real value."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-08T22:27:45.475477Z",
+    "blocked_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The keep is not justified. The C# implementation declares `w` twice in one method scope, so it does not compile. The disposition said the code follows the same rules but did not catch this.",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The prose, trace and guard explanation are accurate and well ordered. The C# example has a compile error, which is a concrete accuracy defect in a note marked publish: true.",
+          "page_type": "Concept — no required sections; Questions are absent, which is allowed. The reference is a single primary source.",
+          "current_text_evidence": [
+            {
+              "quote": "On entry, set `disc[v] = low[v] = time++`, then push `v`.",
+              "line_start": 24,
+              "reason": "The prose and trace correctly describe the disc/low/onStack rules and the emission order."
+            },
+            {
+              "quote": "foreach (var w in _adjacency[v])",
+              "line_start": 88,
+              "reason": "The foreach declares `w` in a nested scope."
+            },
+            {
+              "quote": "int w;",
+              "line_start": 107,
+              "reason": "`int w;` is declared later in the enclosing method block. The enclosing declaration space includes the earlier foreach, so C# reports CS0136 and the code does not compile."
             }
-          }
-        ],
-        "change_checks": []
-      },
-      "repair_previous_proposal": {
-        "version": 1,
-        "edits": [],
-        "dispositions": [
-          {
-            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
-            "outcome": "keep",
-            "reason": "Audited the whole note. The disc, low and onStack definitions match Tarjan's formulation. The worked trace (A→B, B→C, C→A, C→D, D→E, E→D) is correct: low[C] drops to 0 through the active edge to A, and {E,D} is popped before {C,B,A}. The reverse-topological emission order is right. The C# code follows the same rules: it uses disc[w] for active non-tree edges, guards on _onStack, and pops to v. The section on the onStack guard correctly says that dropping the guard merges SCCs, and that a low[w] variant finds the same roots but departs from the formal definition. The contrast with articulation points is accurate. The SIAM reference is the original Tarjan 1972 paper. The prose is direct and well ordered, and there are no flagged cards or known violations. The optional Questions section is not needed, so no edit would add real value."
-          }
-        ],
-        "feedback": []
-      },
-      "repair_review": {
-        "verdict": "CHANGES REQUIRED",
-        "overall_reason": "The keep is not justified. The C# implementation declares `w` twice in one method scope, so it does not compile. The disposition said the code follows the same rules but did not catch this.",
-        "notes": [
-          {
-            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
-            "verdict": "CHANGES REQUIRED",
-            "summary": "The prose, trace and guard explanation are accurate and well ordered. The C# example has a compile error, which is a concrete accuracy defect in a note marked publish: true.",
-            "page_type": "Concept — no required sections; Questions are absent, which is allowed. The reference is a single primary source.",
-            "current_text_evidence": [
-              {
-                "quote": "On entry, set `disc[v] = low[v] = time++`, then push `v`.",
-                "line_start": 24,
-                "reason": "The prose and trace correctly describe the disc/low/onStack rules and the emission order."
-              },
-              {
-                "quote": "foreach (var w in _adjacency[v])",
-                "line_start": 88,
-                "reason": "The foreach declares `w` in a nested scope."
-              },
-              {
-                "quote": "int w;",
-                "line_start": 107,
-                "reason": "`int w;` is declared later in the enclosing method block. The enclosing declaration space includes the earlier foreach, so C# reports CS0136 and the code does not compile."
-              }
-            ],
-            "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: the note covers one algorithm, and the guard section depends on the same update rules.",
-            "findings": [
-              {
-                "severity": "High",
-                "dimension": "Accuracy",
-                "location": "`# C# Implementation`, StrongConnect: `foreach (var w ...)` and later `int w;`",
-                "evidence": "`foreach (var w in _adjacency[v])` and `int w;` in the same method scope. `int w;` is declared later in the enclosing block, so it conflicts with the foreach variable.",
-                "effect": "The published reference implementation fails to compile with CS0136. A reader copying it gets an error.",
-                "fix": "Rename one variable, for example the foreach variable to `next` and the pop variable to `member`, or use `int popped;` in the pop loop. Keep the logic unchanged."
-              }
-            ],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "FAIL",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the note covers one algorithm, and the guard section depends on the same update rules.",
+          "findings": [
+            {
+              "severity": "High",
+              "dimension": "Accuracy",
+              "location": "`# C# Implementation`, StrongConnect: `foreach (var w ...)` and later `int w;`",
+              "evidence": "`foreach (var w in _adjacency[v])` and `int w;` in the same method scope. `int w;` is declared later in the enclosing block, so it conflicts with the foreach variable.",
+              "effect": "The published reference implementation fails to compile with CS0136. A reader copying it gets an error.",
+              "fix": "Rename one variable, for example the foreach variable to `next` and the pop variable to `member`, or use `int popped;` in the pop loop. Keep the logic unchanged."
             }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "FAIL",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
           }
-        ],
-        "change_checks": []
-      },
-      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_repair_key": "5e37f1977082945be5d1b9effaf24d2debf9e0720d0b7739596285e4a78de00b",
-      "author_repair_pending": true
-    }
+        }
+      ],
+      "change_checks": []
+    },
+    "repair_previous_proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note. The disc, low and onStack definitions match Tarjan's formulation. The worked trace (A→B, B→C, C→A, C→D, D→E, E→D) is correct: low[C] drops to 0 through the active edge to A, and {E,D} is popped before {C,B,A}. The reverse-topological emission order is right. The C# code follows the same rules: it uses disc[w] for active non-tree edges, guards on _onStack, and pops to v. The section on the onStack guard correctly says that dropping the guard merges SCCs, and that a low[w] variant finds the same roots but departs from the formal definition. The contrast with articulation points is accurate. The SIAM reference is the original Tarjan 1972 paper. The prose is direct and well ordered, and there are no flagged cards or known violations. The optional Questions section is not needed, so no edit would add real value."
+        }
+      ],
+      "feedback": []
+    },
+    "repair_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The keep is not justified. The C# implementation declares `w` twice in one method scope, so it does not compile. The disposition said the code follows the same rules but did not catch this.",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The prose, trace and guard explanation are accurate and well ordered. The C# example has a compile error, which is a concrete accuracy defect in a note marked publish: true.",
+          "page_type": "Concept — no required sections; Questions are absent, which is allowed. The reference is a single primary source.",
+          "current_text_evidence": [
+            {
+              "quote": "On entry, set `disc[v] = low[v] = time++`, then push `v`.",
+              "line_start": 24,
+              "reason": "The prose and trace correctly describe the disc/low/onStack rules and the emission order."
+            },
+            {
+              "quote": "foreach (var w in _adjacency[v])",
+              "line_start": 88,
+              "reason": "The foreach declares `w` in a nested scope."
+            },
+            {
+              "quote": "int w;",
+              "line_start": 107,
+              "reason": "`int w;` is declared later in the enclosing method block. The enclosing declaration space includes the earlier foreach, so C# reports CS0136 and the code does not compile."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the note covers one algorithm, and the guard section depends on the same update rules.",
+          "findings": [
+            {
+              "severity": "High",
+              "dimension": "Accuracy",
+              "location": "`# C# Implementation`, StrongConnect: `foreach (var w ...)` and later `int w;`",
+              "evidence": "`foreach (var w in _adjacency[v])` and `int w;` in the same method scope. `int w;` is declared later in the enclosing block, so it conflicts with the foreach variable.",
+              "effect": "The published reference implementation fails to compile with CS0136. A reader copying it gets an error.",
+              "fix": "Rename one variable, for example the foreach variable to `next` and the pop variable to `member`, or use `int popped;` in the pop loop. Keep the logic unchanged."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "FAIL",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    },
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "review_repair_key": "5e37f1977082945be5d1b9effaf24d2debf9e0720d0b7739596285e4a78de00b",
+    "author_repair_pending": true
   }
 }
