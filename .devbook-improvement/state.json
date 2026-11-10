@@ -10237,661 +10237,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "270542e03ba04146b22c78499257f60e",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-10T07:30:50.865899Z",
-    "elapsed_seconds": 663.3364927999999,
-    "calls_reserved": 19,
-    "responses_received": 19,
-    "attempted_paths": [
-      "Vault/Home/Data Persistence/NoSQL/Redis.md",
-      "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
-      "Vault/Home/Data Persistence/Object Storage.md",
-      "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
-      "Vault/Home/Data Persistence/ORMs/ORMs.md",
-      "Vault/Home/Data Persistence/SQL/Database Locks.md",
-      "Vault/Home/Data Persistence/SQL/Indexes.md",
-      "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md",
-      "Vault/Home/Data Persistence/SQL/Replication.md"
-    ],
+    "id": "d9820c0a869a4376b0c4be62174ca4b9",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-10T19:53:20.939058Z",
+    "elapsed_seconds": 0.0014508,
+    "calls_reserved": 0,
+    "responses_received": 0,
+    "attempted_paths": [],
     "accepted_records": [],
-    "outcomes": [
-      {
-        "path": "Vault/Home/Data Persistence/NoSQL/Redis.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Data Persistence/NoSQL/Redis.md",
-                "outcome": "keep",
-                "reason": "I read the whole note and found no factual or teaching defect that needs an edit. Persistence section: RDB, AOF and RDB+AOF match Redis behavior. That covers the appendfsync always/everysec/no policies, AOF being appended after the in-memory apply, and the Redis 7 multipart AOF with a base file, incremental files and a manifest. It also covers fork and copy-on-write cost, and the latency metrics listed. Topology section: replication is asynchronous, and WAIT does not give strong consistency. Sentinel uses a quorum to mark the primary objectively down and a majority of Sentinel processes to authorize failover. Cluster uses 16,384 slots, MOVED/ASK redirections, the same-slot rule for multi-key operations, hash tags and the hot-slot risk. The workload table, the Redis command example and the pitfalls follow from these mechanisms and name the conditions that change each decision. The prose already states failure contracts: authority, acknowledgement meaning, loss window and fencing. There are no cards, no known violations, no open proposals and no owner feedback. The only possible refinements are stylistic, such as the wording 'Fastest recovery is an origin rebuild' in the None row. Changing them would be churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/NoSQL/Redis.md",
-                "verdict": "CLEAN",
-                "summary": "The note was read in full and the keep is justified. Its opening frames Redis around authority, acknowledgement meaning, loss window and unavailability. The workload table, persistence modes, topology and pitfalls are accurate and ordered from use case to durability to availability. I found no concrete error or learning gap, and edits would be churn.",
-                "page_type": "Concept — typed frontmatter, optional Questions absent (allowed), References has one bare link, and the one fenced block has a language identifier. No generated navigation or special-page rules apply.",
-                "current_text_evidence": [
-                  {
-                    "quote": "A checkout idempotency key is different: losing it can repeat a payment.",
-                    "line_start": 16,
-                    "reason": "A concrete example of the authoritative-versus-disposable boundary. It makes the note's operating idea recoverable early."
-                  },
-                  {
-                    "quote": "Each command is atomic by itself. The sequence does not create a transaction with an external database",
-                    "line_start": 37,
-                    "reason": "States the atomicity limit precisely, and it matches Redis behavior."
-                  },
-                  {
-                    "quote": "`appendfsync always` waits for each flush, `everysec` commonly accepts roughly one second of crash loss",
-                    "line_start": 55,
-                    "reason": "The AOF fsync policies and their loss windows are stated accurately. The Redis 7 multipart AOF description in the same paragraph is also correct."
-                  },
-                  {
-                    "quote": "Background does not mean free. `BGSAVE` and AOF rewrite fork a child.",
-                    "line_start": 57,
-                    "reason": "Explains the fork and copy-on-write cost mechanism and names the metrics to monitor, so the machine stays visible."
-                  },
-                  {
-                    "quote": "A configured quorum is needed to agree that the primary is objectively down, while failover authorization also requires a majority",
-                    "line_start": 71,
-                    "reason": "Gets the Sentinel quorum versus majority distinction right. This is a common point of error."
-                  },
-                  {
-                    "quote": "Hash tags such as `cart:{u42}` and `inventory:{u42}` deliberately colocate keys, which can also create a hot slot.",
-                    "line_start": 73,
-                    "reason": "Gives the cluster same-slot condition together with its cost."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the topic is one coherent Redis operating model. Structures, persistence and topology depend on each other through the loss-window contract.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The complete note is accurate, well ordered and compliant with the contract. It has no known violations, no cards, no feedback and no edits. The keep disposition is justified by current-text evidence, so the note is CLEAN and JUSTIFIED UNCHANGED.",
-            "change_checks": []
-          },
-          "model_calls": 2
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note. The opening defines a TSDB and states when it is worth using, with the PostgreSQL partitioning boundary. The Prometheus series definition (metric name plus full label set) matches the data model docs. The sample line's millisecond timestamp is valid. The bounded versus unbounded label contrast explains cardinality growth. The decision table covers series key, time partitioning, retention by whole-chunk drop, rollups and late data, each with its failure mode. The rollup arithmetic checks out: 10,000/s × 86,400 s × 15 days ≈ 12.96 billion, so about 13 billion. The tradeoff (write amplification, plus repair of late samples) is stated. The note has no cards, and no violations are known. The references are relevant primary sources. The prose is direct and compact, so no change is warranted."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
-                "verdict": "CLEAN",
-                "summary": "Independent whole-note audit found no defects. The opening gives the TSDB-versus-PostgreSQL decision boundary. The cardinality section, decision table and rollup arithmetic are accurate and compact, so leaving the note unchanged is justified.",
-                "page_type": "Concept — authorable prose; Questions and References are optional. References are present and relevant. The single code fence has a language identifier (text), and the image embed is a valid asset link.",
-                "current_text_evidence": [
-                  {
-                    "quote": "A timestamp column alone is not enough. PostgreSQL with time partitioning may handle a moderate workload cleanly.",
-                    "line_start": 14,
-                    "reason": "The opening states the operating idea and the boundary that changes the engineering decision, without padding."
-                  },
-                  {
-                    "quote": "In Prometheus, a series is the metric name plus its complete label set:",
-                    "line_start": 18,
-                    "reason": "This matches the Prometheus data model. The sample line that follows makes the definition concrete, and an optional millisecond timestamp is valid in the exposition format."
-                  },
-                  {
-                    "quote": "An unbounded label such as `user_id` can create a series per user",
-                    "line_start": 24,
-                    "reason": "The bounded versus unbounded contrast explains the cardinality failure mechanism and its effect on index and memory."
-                  },
-                  {
-                    "quote": "| Retention | Drop whole expired chunks or partitions | Row-by-row expiry amplifies writes and compaction |",
-                    "line_start": 32,
-                    "reason": "The table pairs each storage decision with the failure that follows when it is wrong. That is useful for engineering judgment."
-                  },
-                  {
-                    "quote": "At 10,000 samples per second, 15 days of raw retention contains about 13 billion samples.",
-                    "line_start": 42,
-                    "reason": "10,000 × 86,400 × 15 ≈ 12.96 billion, so the figure is correct. The paragraph names both the saving and the costs (write amplification and a repair rule for late data)."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note is a single coherent topic (series, cardinality, storage decisions, rollups) of modest length, and the parts depend on each other.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The note is accurate, compact and complete for its scope. It has no cards, no known violations and no proposed edits, and the keep is justified by the current-text evidence.",
-            "change_checks": []
-          },
-          "model_calls": 4
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/Object Storage.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Data Persistence/Object Storage.md",
-                "outcome": "keep",
-                "reason": "I read the whole note against the S3 documentation and found no defect worth an edit. The opening defines the key/bucket/whole-object contract. The flat-key explanation correctly says that renaming a prefix means copying and deleting objects. Per-key atomicity is stated with its limit: it does not extend across keys, so the note names a manifest-pointer protocol. The consistency paragraph is accurate and appropriately scoped. S3 has given strong read-after-write consistency since December 2020, and the note says replication, caches and events still add delay. The multipart example's arithmetic is correct (8 GiB = 128 × 64 MiB). Its cleanup claims are also correct: initiated uploads are not auto-expired, parts are billed until completion or abort, and a lifecycle rule can abort them. The lifecycle and use-case table gives a decision condition for each row. The note has no cards and no known violations. It has one relevant primary reference, and the voice is direct and whiteboard-like. More text or cards would be padding."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/Object Storage.md",
-                "verdict": "CLEAN",
-                "summary": "Whole-note audit found accurate, well-ordered content. It runs from the key and bucket contract through per-key atomicity and consistency, a multipart example, and lifecycle and use-case decisions. The S3 claims about strong consistency, multipart cleanup and per-key atomicity match known S3 behavior. No concrete defect justifies an edit.",
-                "page_type": "Concept — frontmatter is typed. Questions are optional and absent. References has one bare descriptive link. No code fences. No standalone Links section.",
-                "current_text_evidence": [
-                  {
-                    "quote": "That guarantee stops at the key boundary.",
-                    "line_start": 20,
-                    "reason": "States the limit of atomicity, then gives the manifest-pointer protocol for multi-key publishing. This is a mechanism with its boundary."
-                  },
-                  {
-                    "quote": "The old rule that every object store is eventually consistent is too broad.",
-                    "line_start": 22,
-                    "reason": "Corrects a stale belief. The claim is scoped to S3 and to the provider and API, and it names the remaining delays from replication, caches and events."
-                  },
-                  {
-                    "quote": "S3 does not automatically expire an initiated upload, and its uploaded parts incur storage charges until completion or abort.",
-                    "line_start": 34,
-                    "reason": "Accurate and operationally useful. It is paired with the lifecycle abort rule, and the 8 GiB = 128 × 64 MiB arithmetic is correct."
-                  },
-                  {
-                    "quote": "Durable bytes that take hours to restore do not satisfy a 15-minute recovery-time objective.",
-                    "line_start": 38,
-                    "reason": "Concrete engineering judgment about durability versus restore latency. The table that follows gives a flip condition for every use case."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note is one coherent topic. Keys, consistency, multipart writes and lifecycle tiers all explain the object-store contract, and they are not independently separable.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The keep is justified. The note is accurate, direct and complete for its scope. It has no known violations, no cards to fail, and a single relevant primary reference. Added text would be padding.",
-            "change_checks": []
-          },
-          "model_calls": 6
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
-                "outcome": "keep",
-                "reason": "I audited the whole note against the current text and EF Core behavior. The tracking rules are accurate: entity queries track by default, and projections that nest entities still track them. The snapshot-detection explanation is accurate. SaveChanges is transactional by default. The concurrency-token predicate and DbUpdateConcurrencyException are described correctly, along with their limit for unvalidated predicates. The execution-strategy caveat for manual transactions, ExecuteUpdate/ExecuteDelete bypassing the tracker, the cartesian-explosion arithmetic with split-query tradeoffs, and DbContext scoped/pooled lifetime are all sound. Global query filter caveats are sound. Each card tests one gradeable task, and the cards cite Microsoft docs. Frontmatter, code fence languages and the single References link are valid. Known violations are empty. The prose is direct and the explanation order works, so changes would be cosmetic."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The note was read in full and has no concrete accuracy, clarity, question-quality or rules defect. The keep is justified, and no edits were proposed.",
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
-                "verdict": "CLEAN",
-                "summary": "The note explains EF Core accurately: tracking, snapshot detection, transactions, optimistic concurrency, migrations, performance patterns and pitfalls, each with its conditions and limits. The prose is direct and ordered from concepts to performance to pitfalls. The cards are bounded and cite Microsoft documentation. Changes would be cosmetic.",
-                "page_type": "Concept — typed frontmatter, optional Questions and References present; qard IDs are protected metadata; no FolderNote or dashboard rules apply.",
-                "current_text_evidence": [
-                  {
-                    "quote": "A projection is untracked only when its result contains no entity instances.",
-                    "line_start": 47,
-                    "reason": "This states the tracking boundary for projections correctly. Entities nested in a projection are still tracked unless the query is no-tracking."
-                  },
-                  {
-                    "quote": "If the row no longer has the original token, the command affects zero rows and `SaveChanges` throws `DbUpdateConcurrencyException`.",
-                    "line_start": 86,
-                    "reason": "This describes the optimistic-concurrency mechanism accurately. The note also states the limit for unvalidated predicates."
-                  },
-                  {
-                    "quote": "the complete transactional unit must run through the configured execution strategy so a retry can recreate it safely",
-                    "line_start": 88,
-                    "reason": "This is the correct caveat for manual transactions combined with retrying execution strategies."
-                  },
-                  {
-                    "quote": "Nested includes do not create the same sibling cross product, though they can still duplicate principal columns.",
-                    "line_start": 192,
-                    "reason": "This is accurate and precise. It is paired with the AsSplitQuery trade-off and the consistency gap."
-                  },
-                  {
-                    "quote": "> [!qard]- How does EF Core detect that another writer changed a row between reading it and saving an update?",
-                    "line_start": 244,
-                    "reason": "This card is one coherent mechanism-and-limit explanation, not bundled independent tasks. It retains its original ID comment."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: DbContext, tracking, concurrency, migrations and query performance form one coherent EF Core topic. The N+1 material is already compact and could stand on its own, but separating it would add no recall benefit.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 8
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/ORMs/ORMs.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Data Persistence/ORMs/ORMs.md",
-                "outcome": "keep",
-                "reason": "I read the whole note and found no defect that justifies an edit. The intro correctly says an ORM removes repetitive data-access code but not the database's query, transaction and schema rules. Its second paragraph names the concrete risks: unsupported translation and row multiplication from sibling collection Includes. Both cards test one task each, with sources on the answer side. Raw-SQL card: `FromSql` parameterizes interpolated values from EF Core 7.0 (earlier versions use `FromSqlInterpolated`), `FromSqlRaw` with concatenation is an injection risk, and identifiers cannot be parameters, so they need an allow-list. Sibling-collection card: the 10 × 10 = 100 row arithmetic is correct. The split-query figure of about 1 + 10 + 10 rows is also correct, as is the consistency caveat. The caveat that a serializable or snapshot transaction gives a consistent view matches EF's single-vs-split documentation. Projection shrinks rows without reducing their count. The Martin Fowler Data Mapper reference is topic-relevant. The folder map block and the frontmatter are intact. The note has no known violations, and the text is clear and consistent, so any change would be cosmetic."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The unchanged note is accurate, clear and compliant. Both cards test one dependent task each, with primary sources on the answer side and intact IDs. No concrete defect justifies an edit.",
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/ORMs/ORMs.md",
-                "verdict": "CLEAN",
-                "summary": "The folder note gives a compact, accurate definition of an ORM and its leaky-abstraction limits. Two cards cover raw-SQL tradeoffs and cartesian explosion with correct mechanisms, conditions and arithmetic. No edit is warranted.",
-                "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx folder map. Questions and References are optional and are present and useful.",
-                "current_text_evidence": [
-                  {
-                    "quote": "It does not remove the database's query, transaction, and schema rules.",
-                    "line_start": 18,
-                    "reason": "The intro states the operating idea and its boundary directly and impersonally."
-                  },
-                  {
-                    "quote": "One LINQ expression may become a selective query, an unsupported translation, or a row-multiplying join.",
-                    "line_start": 20,
-                    "reason": "The second paragraph names concrete failure modes that the cards then develop, without repeating them."
-                  },
-                  {
-                    "quote": "`FromSql` turns interpolated values into parameters (EF Core 7.0 and later; earlier versions use `FromSqlInterpolated`)",
-                    "line_start": 35,
-                    "reason": "The version-specific condition is stated correctly. FromSqlRaw with concatenation is correctly flagged as an injection risk."
-                  },
-                  {
-                    "quote": "returns 10 × 10 = 100 rows for that blog",
-                    "line_start": 45,
-                    "reason": "The arithmetic is correct. The split-query figure of 1 + 10 + 10 rows is also correct."
-                  },
-                  {
-                    "quote": "Running them in a serializable or snapshot transaction gives one consistent view",
-                    "line_start": 49,
-                    "reason": "The consistency caveat matches the EF Core single-vs-split documentation. The projection point is also correct: rows get smaller but the count is unchanged."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note is a short hub for one topic (ORM leakiness), and the two cards are cohesive follow-ups.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 10
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/SQL/Database Locks.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Data Persistence/SQL/Database Locks.md",
-                "outcome": "keep",
-                "reason": "I read the whole note and found no verified defect. I checked it against my knowledge of the SQL Server and PostgreSQL documentation. I did not run web searches in this pass. The S/U/X compatibility matrix is correct: U is compatible with S, and U conflicts with U and X. The explanation of why U prevents the S→X upgrade deadlock is sound, and the conditions under which optimized locking or RCSI avoids U locks are stated. The escalation threshold of roughly 5,000 locks, HoBT-level escalation with LOCK_ESCALATION=AUTO, and PostgreSQL's lack of row-to-table escalation are all accurate. PostgreSQL stores row-lock ownership in tuple metadata, and the shared lock table is sized by max_locks_per_transaction. The deadlock handling is correct: SQL Server error 1205 and PostgreSQL aborting the transaction. The optimistic-concurrency walkthrough is correct, including the zero-rows-affected conflict, the ETag/If-Match flow, and 412 versus 409 with the RFC 9110 nuance. The locks-vs-MVCC and latch-vs-lock distinctions are accurate. The note flows from mechanism to granularity to schedule to escalation to optimistic control to blocking versus deadlock. It has no repetition worth trimming. It contains no cards, so there are no question-quality issues. The three references are real primary sources. Rewriting accurate, well-ordered prose would only add churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The single note has no flagged defects and the keep is justified. I read the full note and found no factual error, ordering problem, repetition worth cutting, or contract violation. It has no cards, and the references are real primary sources. No edits were proposed, so there are no change checks.",
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/SQL/Database Locks.md",
-                "verdict": "CLEAN",
-                "summary": "The note moves from a definition and three distinctions (locks vs MVCC, pessimistic vs optimistic, engine vs in-process locks) to lock modes, granularity, a worked schedule, escalation, latch vs lock, optimistic concurrency and blocking vs deadlock. Mechanisms, engine-specific conditions and exceptions are preserved and accurate. A rewrite would add churn without benefit.",
-                "page_type": "Concept — authorable prose; typed frontmatter retained; no cards; References are bare descriptive links; every fenced block has a language (sql).",
-                "current_text_evidence": [
-                  {
-                    "quote": "| **S** | ✓ | ✓ | ✗ |",
-                    "line_start": 36,
-                    "reason": "The S/U/X compatibility matrix is correct: U is compatible with S, and U conflicts with U and X. It supports the explanation of the upgrade-deadlock prevention."
-                  },
-                  {
-                    "quote": "With optimized locking, RCSI, and default `READ COMMITTED`, SQL Server can qualify rows from the latest committed version without U locks",
-                    "line_start": 30,
-                    "reason": "The version-specific exception to U-lock behavior is stated, so the conventional-path claim is not overgeneralized."
-                  },
-                  {
-                    "quote": "PostgreSQL does not escalate row locks into table locks.",
-                    "line_start": 74,
-                    "reason": "Accurate engine contrast with SQL Server escalation. It correctly points to max_locks_per_transaction for shared lock-table capacity."
-                  },
-                  {
-                    "quote": "Zero affected rows is a conflict result, not a successful no-op.",
-                    "line_start": 94,
-                    "reason": "The optimistic-concurrency walkthrough states the key outcome precisely. The 412/409/RFC 9110 nuance that follows is correct."
-                  },
-                  {
-                    "quote": "Monitor blocker age and transaction age, not only waiter count.",
-                    "line_start": 128,
-                    "reason": "Blocking is separated from deadlock with an operational judgment. The deadlock paragraph names the engine-specific behaviors correctly, including SQL Server error 1205 and PostgreSQL's aborted-transaction state."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: locks, granularity, escalation and optimistic control share one concurrency-control story. The optimistic section is the most separable part, but it stays tied to the lock comparison it depends on.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 12
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
-                "outcome": "keep",
-                "reason": "I audited the whole note against the current text and the SQL Server and PostgreSQL index documentation. The structure inventory table is accurate. It correctly says an LSM tree is not a PostgreSQL index method, that BRIN depends on physical correlation, and that GiST candidates may need a recheck. The B+ tree section correctly describes SQL Server leaf contents: clustered leaves hold the rows, and a heap's nonclustered indexes locate rows by RID. It also correctly limits those claims to SQL Server rather than PostgreSQL. The `(TenantId, CreatedAt)` and `(TenantId, Status, CreatedAt DESC)` examples fit the leading-key rule. The SARGability, INCLUDE, and filtered-index conditions are stated correctly, including the point that parameterization can stop the optimizer from proving the filter implication. The columnstore section is correct on rowgroups, delta stores, tuple mover, delete-plus-insert updates, segment elimination, and batch mode. In the maintenance section, REORGANIZE does not update statistics, REBUILD does, and UPDATE STATISTICS does not repair density. The fill-factor guidance is conditioned on measurement. The prose is direct, and the plan-first decision sequence is coherent. The Tradeoffs section repeats the statistics and rebuild point, but it works as a short summary. Removing it would be cosmetic churn. The note has no Qard cards, which is acceptable because Questions is optional. It has two relevant primary references, and no known violations were reported. No edit is warranted."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note audit found no factual, structural or voice defect. The keep is justified and no edits were proposed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate, conditioned on engine and measurement, and ordered from overview to structure inventory to B+ tree, rowstore, columnstore, maintenance and decision flow. Its engine-specific claims are scoped to SQL Server or PostgreSQL as appropriate. No concrete defect justifies an edit.",
-                "page_type": "Concept — frontmatter intact, no Qard cards (Questions optional), two relevant primary references as bare link bullets, all code fences carry a language.",
-                "current_text_evidence": [
-                  {
-                    "quote": "It is a storage organization, not a PostgreSQL index method",
-                    "line_start": 27,
-                    "reason": "Correctly bounds LSM against PostgreSQL's index methods."
-                  },
-                  {
-                    "quote": "SQL Server leaf-layout and key-lookup claims therefore do not transfer automatically to another engine.",
-                    "line_start": 40,
-                    "reason": "Scopes the clustered-leaf and RID claims to SQL Server and not to PostgreSQL."
-                  },
-                  {
-                    "quote": "parameterization can prevent the optimizer from proving that implication",
-                    "line_start": 83,
-                    "reason": "States the filtered-index matching condition accurately."
-                  },
-                  {
-                    "quote": "| `REORGANIZE` | Incrementally compacts and orders leaf pages | Does not refresh statistics |",
-                    "line_start": 122,
-                    "reason": "Maintenance operation semantics are correct and separate statistics from physical repair."
-                  },
-                  {
-                    "quote": "Small inserts first land in delta stores, background tuple movement compresses closed rowgroups",
-                    "line_start": 107,
-                    "reason": "Columnstore mechanism is correct, with its maintenance cost explained."
-                  },
-                  {
-                    "quote": "Maintenance repairs a measured problem.",
-                    "line_start": 111,
-                    "reason": "Direct, decided whiteboard voice with no universal-threshold myth."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: structures, rowstore design, columnstore and maintenance are all parts of one operator-driven index-selection decision, and each section is compact.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 14
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md",
-                "outcome": "keep",
-                "reason": "I read the whole note and checked it against the standard dependency theory in Codd, Fagin and Date. The 1NF to BCNF definitions are correct, including the 2NF non-prime attribute condition and the 3NF/BCNF superkey-or-prime distinction. The worked examples follow from their stated assumptions. The Make/Model/Discount example has a partial dependency. The Model→Store→Phone example is a transitive dependency. In the parking example every attribute is prime, so 3NF allows Rate→Spot while BCNF forbids it. The 4NF pizza example and the 5NF supplier example both state the independence rule that justifies the decomposition. The DKNF caveat about infinite versus finite domains matches Fagin's result. The 6NF temporal tables are internally consistent. The denormalization, pitfalls and tradeoff sections give conditions and mechanisms rather than slogans, and they correctly avoid treating join count as a defect. The four Qards each test one gradeable task, match the note's text, and cite sources on the answer side. No known violations are recorded. I found no factual error, gap or redundancy that an edit would improve."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The whole note was audited independently and no concrete error, gap or rule violation remains. No edits were proposed, so no change checks apply, and the keep is justified by current-text evidence.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md",
-                "verdict": "CLEAN",
-                "summary": "The note's definitions from 1NF through BCNF are correct, and each worked example states the assumptions it needs. The 4NF/5NF independence conditions, the DKNF finite-domain caveat, and the denormalization conditions and tradeoffs carry mechanisms and limits rather than slogans. The four Qards each test one gradeable task with answer-side sources. No edit is warranted.",
-                "page_type": "Concept: SQL normalization and denormalization. Concept rules apply. Questions and References are optional and are present and well formed. Qard IDs are protected.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Third Normal Form (3NF) and Boyce-Codd Normal Form (BCNF) cover most ordinary OLTP dependencies.",
-                    "line_start": 20,
-                    "reason": "The opening states the operating idea and the stopping boundary, so the topic is recoverable quickly."
-                  },
-                  {
-                    "quote": "Every attribute is prime, so `Rate → Parking spot number` is permitted by 3NF.",
-                    "line_start": 129,
-                    "reason": "The 3NF-versus-BCNF distinction is correct: all attributes are prime, so 3NF permits the dependency and BCNF forbids it. The example states its candidate-key assumptions."
-                  },
-                  {
-                    "quote": "The business rule is essential. If a supplier may offer a product to only selected customers",
-                    "line_start": 179,
-                    "reason": "The 5NF example states the condition under which decomposition is lossless and gives the counterexample, which preserves the exception."
-                  },
-                  {
-                    "quote": "with finite domains, domain constraints can imply a join dependency that the candidate keys alone do not",
-                    "line_start": 187,
-                    "reason": "The DKNF caveat about infinite versus finite domains is accurate and gives the condition under which DKNF implies 5NF."
-                  },
-                  {
-                    "quote": "Position and home address change on different timelines, so the combined relation repeats one history",
-                    "line_start": 203,
-                    "reason": "The 6NF temporal example explains why decomposition helps, and the tables are internally consistent."
-                  },
-                  {
-                    "quote": "Denormalization is justified by a measured query whose latency or resource cost cannot be met through [[Indexes]]",
-                    "line_start": 223,
-                    "reason": "This gives a decision condition rather than a slogan, and the wikilink is relevant."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: normal forms and denormalization are one coherent decision topic, where dependency theory sets the baseline and denormalization is the measured exception. Splitting would separate the justification from the thing being justified.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 16
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-        "outcome": "proposal_blocked",
-        "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait-for.html",
-        "result": {
-          "status": "proposal_blocked",
-          "stage": "deterministic_application",
-          "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait-for.html",
-          "model_calls": 19
-        }
-      }
-    ],
+    "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T07:41:54.201905Z",
-    "topic": "Data Persistence",
-    "topic_id": "data-persistence-4ea34db4",
-    "current_batch": {
-      "topic": "Data Persistence",
-      "topic_id": "data-persistence-4ea34db4",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/SQL/Sharding.md",
-          "content": "---\ntopic: [Data Persistence]\nsubtopic: [SQL]\nsummary: \"Horizontal partitioning strategies, workload fit, and the operational threshold for splitting rows across database instances.\"\nlevel: [\"4\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Data Persistence\"\nqard-topic: \"SQL/Sharding\"\nflashcard_uid: \"7f93ffe2\"\ncreated: \"2026-02-28T20:52:28.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.355Z\"\n---\n\nSharding is horizontal partitioning across distinct storage and ownership domains, commonly separate database instances or clusters. Each shard owns a non-overlapping subset of rows. Unlike table partitioning inside one server, sharding can distribute storage, writes, backups, and failure domains across machines.\n\nScale-driven sharding belongs after query and index repair, vertical scaling, read replicas, caching, and in-engine partitioning have failed to remove a measured write or storage ceiling. Sharding can also serve a hard isolation, locality, or data-placement requirement, but those cases still inherit the same routing and cross-shard costs. The simpler alternatives preserve cross-table queries and transaction boundaries with less operational machinery.\n\nThe shard key is the long-lived decision. It must distribute load, appear in routed operations, keep atomic data together, and remain stable enough that ownership moves are exceptional. A complete design also needs a versioned ownership map, a fenced migration protocol, and explicit behavior for fan-out queries, distributed workflows, and global constraints.\n\n# Strategy Overview\n\n| Strategy | Ownership rule | Strong fit | Rebalancing boundary |\n|---|---|---|---|\n| Range | Ordered boundaries such as tenant IDs `1..9999` | Range scans, geographic or lifecycle placement | Split or move selected ranges. Sequential keys can heat the newest range |\n| Modulo hash | `hash(key) % N` | Fixed shard count and equality routing | Changing `N` remaps most keys |\n| Consistent-hash ring | First ownership token clockwise from the key hash | Elastic key-value ownership | Move reassigned token ranges. Virtual nodes smooth uneven arcs |\n| Virtual buckets | `hash(key) % B`, then bucket-to-shard map | Controlled SQL moves with stable logical buckets | Move selected buckets without changing key-to-bucket calculation |\n| Directory | Service maps a key or tenant to its shard | Irregular tenants and explicit placement | Update the map while migrating that tenant or range |\n| Geographic | Region or jurisdiction determines placement | Data residency and lower regional latency | Uneven regional load. Global queries still fan out |\n\nThe strategy defines ownership. An application, proxy, coordinator, or database-native layer performs routing. For example, `tenant_id = 42` can map to logical bucket 2 while a versioned map places that bucket on shard C. The query still carries `tenant_id = 42`, allowing the destination to enforce its ownership boundary.\n\n![[Data Persistence/Data Persistence-Sharding-18120000.png|theme-aware]]\n\nConsistent hashing limits movement compared with changing a modulo divisor. If `N` equal-capacity nodes own balanced shares and one equal node is added, the new node's expected final share—and therefore the expected movement—is about `1 / (N + 1)` of keys. Sparse or uneven tokens can move much more or less. Virtual nodes reduce that variance. The arithmetic says nothing about safe cutover.\n\n# Vertical and Horizontal Partitioning\n\nVertical partitioning splits columns, tables, or business functions. Horizontal sharding splits rows by key. They solve different contention.\n\n| Dimension | Vertical partitioning | Horizontal sharding |\n|---|---|---|\n| Ownership unit | Related columns or tables, such as profile versus billing | Rows sharing a shard key, such as one tenant |\n| Routing input | Requested feature or data domain | Shard-key value on every routed operation |\n| Write scaling | Isolates independent write domains. One hot table can remain | Distributes writes only when keys and load are balanced |\n| Transactions | Local inside one functional database. Remote across functions | Local inside one shard. Coordinated across shard keys |\n| Constraints | Cross-database foreign keys may disappear | Global uniqueness and foreign keys require separate design |\n| Rebalancing | Move a table/domain and its callers | Move ranges, tokens, or buckets plus their rows |\n\nVertical scaling adds CPU, memory, or I/O to one server. Replication copies the same ownership domain. Neither is vertical partitioning, and neither distributes writes across independent row owners.\n\n# Figma's Escalation Path\n\nFigma first separated PostgreSQL tables by product area, reducing contention between independent workloads. Large tables later exceeded one instance, so the team added horizontal sharding, a database proxy, and hash-derived shard keys. Functional decomposition reduced coupling and bought time. Sharding addressed the remaining per-table ceiling.\n\n![[Data Persistence/Data Persistence-Sharding-18120000-1.png|theme-aware]]\n\nThe picture is an escalation map, not proof that partitioning alone creates 100× headroom. Capacity came from decomposition, routing, migration tooling, and operational controls together.\n\n# Routing and Ownership Maps\n\nShard routing turns a key into the one current owner allowed to serve the operation. This example uses 4,096 logical buckets:\n\n```text\nbucket = hash(tenant_id) % 4096\nmap[v17][bucket 730] = shard-c\n```\n\nEvery routed operation carries the shard key. The router computes bucket 730, reads map version 17, connects to shard C, and still includes `tenant_id` in the query. A fenced design rejects a write when the destination no longer owns that bucket or the caller's map version is stale. An old application instance therefore cannot keep writing to the previous owner after cutover.\n\nThe map may be cached outside the synchronous request path only if stale versions fail closed and refresh. A directory uses the same contract without hashing: `tenant 42 → shard C` is an explicit ownership entry.\n\n| Routing location | Advantage | Boundary to own |\n| --- | --- | --- |\n| Application | Full query and consistency context, no extra hop | Every client must refresh maps and implement identical fencing |\n| Proxy or coordinator | Central topology and connection management | Query routing does not imply migration or distributed transactions |\n| Database-native | One logical endpoint | Routing, movement, and transaction costs move into the engine contract |\n\n# Rebalancing Protocol\n\nMoving bucket 730 from shard C to shard E is an ownership state machine:\n\n1. Publish a migration record with source, destination, map version, and rollback boundary.\n2. Copy a consistent snapshot while C remains the writer.\n3. Stream later changes until E reaches the required source position.\n4. Fence writes on C, drain in-flight work, apply the final delta, then atomically publish a map version that makes E the sole writer.\n5. Reads, writes, counts, and lag are verified while the old copy remains available for a bounded rollback window.\n6. Remove the old copy only after no supported router version can address it.\n\nUncoordinated dual writes create two authorities and two retry paths. A single writer plus change capture, or an engine's documented online-resharding protocol, keeps the cutover boundary explicit. Copy bandwidth and concurrency remain bounded so movement cannot exhaust the serving workload. Rollback is another fenced ownership transition, not a DNS switch back to a stale copy.\n\nModulo hashing with `N` in the divisor remaps most buckets when `N` changes. Stable virtual buckets keep `hash(key) % B` fixed and move selected bucket-map entries instead. Balanced consistent hashing still needs the same copy, catch-up, fencing, and verification protocol. Limited movement is not safe movement by itself.\n\n# Cross-Shard Operations\n\nCross-shard work starts when one operation cannot be routed to one owner. A coordinator must fan out reads, coordinate commits, or enforce a global constraint outside any shard.\n\nFor a request for the newest 100 orders across 32 shards, each shard can return its local top 100 and a coordinator can merge the 3,200 candidates. The operation needs a deadline, per-shard concurrency limit, deterministic tie-breaker, and an explicit partial-result policy. Pagination needs per-shard progress. A single global offset becomes increasingly expensive. A global secondary index can narrow candidates, but it is another distributed data product with lag and repair obligations.\n\n## Transactions and Workflows\n\n- **Distributed commit** gives one atomic decision only when every participant and coordinator support durable prepare and recovery. It adds coordination latency and can leave prepared work waiting during failures.\n- **Saga or workflow** commits local steps and compensates when a later step fails. Intermediate states remain visible. Compensation is business-specific and may not fully reverse an external effect. Retries need stable operation identities.\n- **Ownership redesign** co-locates the invariant or reserves inventory/funds through one authority. This is usually the simplest hot-path design.\n\nA cross-shard value transfer cannot be two unrelated updates. It needs either a documented distributed transaction or a durable transfer workflow with one operation ID, balanced ledger entries, retry-safe steps, and reconciliation.\n\n## Global Constraints\n\nA local unique index proves uniqueness only inside one shard. Global uniqueness needs a reservation authority, disjoint ranges, or globally unique identifiers when semantic uniqueness is unnecessary. Foreign keys across independent shard databases likewise need co-location, an owning service, or asynchronous repair.\n\nShard requests are retry-safe only when the operation is idempotent or deduplicated. Durable operation state records which participants committed, bounds fan-out concurrency, labels partial results, and supports reconciliation after process failure.\n\n# Tradeoffs\n\n| Dimension | Sharding | Simpler alternative |\n|---|---|---|\n| Write and storage scale | Distributed across balanced owners | Vertical scale or partitioning remains one ownership domain |\n| Read scale | Per-shard reads scale. Global reads fan out | Replicas scale reads without partitioning ownership |\n| Transactions and constraints | Cheap within one shard, coordinated or redesigned across shards | One database preserves native cross-row semantics |\n| Operations | Map versioning, migrations, per-shard backups, skew monitoring | One topology is easier to deploy and recover |\n| Reversal | Data and callers must be recombined | Scaling down a replica or cache is usually simpler |\n\n# Pitfalls\n\n- **Hot shard.** Range boundaries or uneven tenant sizes concentrate CPU and storage. Per-shard load exposes this skew. Fleet averages hide it.\n- **Hot key.** One celebrity or enterprise tenant can exceed one shard even under a balanced hash. That entity needs a deliberate sub-shard or dedicated placement strategy.\n- **Missing shard key.** A common query without the routing key becomes a scatter query. Real query shapes must support the chosen key.\n- **Modulo resharding.** Changing `hash(key) % N` moves most keys. Stable bucket indirection or balanced consistent hashing avoids tying ownership directly to the current node count.\n- **Operational multiplication.** Schema changes, backups, restore tests, and incidents scale with shard count. Automation is part of the design, not cleanup after the topology expands.\n\n# Questions\n\n<!-- qard-id: c63ffce5-ccfa-41d5-a62c-fb60c7bbb4db -->\n> [!qard]- What evidence justifies sharding a database?\n> Sharding is justified by measured evidence that one database primary cannot handle the workload's write throughput or storage, after cheaper options have failed to remove that limit. A hard requirement, such as isolating tenants or keeping data in particular locations, can justify it earlier.\n>\n> For scale-driven sharding, the relevant ceiling is write throughput or storage, because each cheaper option addresses a different limit:\n>\n> - **Query and index repair:** removes wasted work, which may be the actual bottleneck.\n> - **Vertical scaling:** adds CPU, memory or I/O to the same server.\n> - **Read replicas:** add read capacity, but in a single-primary setup every write still goes to one server.\n> - **Caching:** serves repeated reads without reaching the database.\n> - **Partitioning inside one database:** splits a table into partitions that stay within one database and one transaction domain, so it does not spread work across independent servers.\n> \n> The bar is high because sharding adds lasting costs:\n>\n> - Queries that need data from several shards must fan out and merge results.\n> - Transactions and constraints that span shards need extra coordination.\n> - Data must be moved when shards are rebalanced.\n> \n> [Microsoft: Sharding pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding)\n\n<!-- qard-id: 3c8d484d-3a0c-4e2e-9e4f-29a7d608fe68 -->\n> [!qard]- What makes a shard key viable for a workload?\n> A shard key is viable when four conditions hold:\n>\n> - The workload's common operations include it.\n> - It spreads both data and traffic evenly.\n> - Data that must change atomically shares the same key value.\n> - Its values rarely change.\n>\n> | Property | Why it matters | Failure when it is missing |\n> |---|---|---|\n> | Present in common operations | The router can send each operation to the one shard that owns the key. | Common queries without the key must fan out to every shard and merge the results. |\n> | Even spread of data and load | Each shard gets a similar share of storage and requests. | Hot shards: skewed values, sequential ranges or one very large tenant overload a single shard even when total cluster capacity is sufficient. |\n> | Keeps atomic changes together | Rows that must change in one transaction live on one shard, so a local transaction is enough. | Those changes need cross-shard coordination or a multi-step workflow. |\n> | Stable values | Rows avoid moves caused by a change to their own key value. Ownership can still move when the key-to-shard mapping or shard topology changes, such as during rebalancing. | A changed key value can map to a different shard. When it does, the row must migrate across shards instead of being updated in place. |\n>\n> For example, `tenant_id` can fit a multi-tenant service well: most requests carry it, a tenant's data usually changes together, and it does not change. It still fails if one tenant outgrows a single shard.\n>\n> [Microsoft: Sharding pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding)\n\n> [!qard]- How do lookup, range and hash sharding strategies differ?\n> All three strategies map a shard key to the shard that owns the data. They differ in what decides that mapping, which in turn decides load balance, range-query efficiency and how hard rebalancing is.\n>\n> | Aspect | Lookup (directory) | Range | Hash |\n> |---|---|---|---|\n> | How a key is mapped | A stored map records which shard owns each key, tenant or virtual shard. | Contiguous key ranges belong to shards, such as customer IDs `1–9999` on one shard. | A hash of the key determines the shard, so no map has to be stored. |\n> | Load balance | Placement is explicit, so large tenants can be placed deliberately. | Can be uneven. Sequential keys, such as timestamps or increasing IDs, send new writes to the newest range and create a hotspot. | Usually spreads data and load evenly, although one very hot key still lands on a single shard. |\n> | Range queries | No inherent locality; it depends on how the map groups keys. | Efficient, because neighboring keys sit on the same shard. | Neighboring keys scatter, so a range query fans out to many shards. |\n> | Rebalancing | Data is moved and its map entries are updated. With keys mapped to virtual shards, a virtual shard can move between physical servers without changing application code. | Moving or splitting a range moves its data. Rebalancing may not fix load that concentrates on adjacent keys. | Difficult. With a simple `hash(key) % N`, changing the number of shards changes the owner of most keys. |\n> | Routing overhead | A map lookup on every routed request. | A comparison of the key against stored range boundaries. | Computing the hash. |\n>\n> [Microsoft: Sharding pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding)\n\n# References\n\n- [Sharding pattern](https://learn.microsoft.com/azure/architecture/patterns/sharding)\n- [Vitess resharding](https://vitess.io/docs/user-guides/configuration-advanced/resharding/)\n- [PostgreSQL table partitioning](https://www.postgresql.org/docs/current/ddl-partitioning.html)\n- [How Figma's databases team lived to tell the scale](https://www.figma.com/blog/how-figmas-databases-team-lived-to-tell-the-scale/)\n",
-          "hash": "47cf16f9e32ef22f80ab0f60726d7e6f311c5dc2faf7fb90dd8b68a54100b79b",
-          "topic": "Data Persistence",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "base_sha": "fba0b54bbf3ab5a6699ba2a017e2f2e23fe559ba",
-    "reservation_deadline": "2026-11-10T07:55:58.829163Z",
-    "stop_reason": "call_limit",
-    "sealed_at": "2026-11-10T07:41:54.201908Z"
+    "checkpoint_at": "2026-11-10T19:53:20.940147Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -21316,6 +20673,664 @@
       "reservation_deadline": "2026-11-09T22:59:23.124040Z",
       "stop_reason": "call_limit",
       "sealed_at": "2026-11-09T22:44:53.358259Z"
+    },
+    "270542e03ba04146b22c78499257f60e": {
+      "version": 1,
+      "id": "270542e03ba04146b22c78499257f60e",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-10T07:30:50.865899Z",
+      "elapsed_seconds": 663.3364927999999,
+      "calls_reserved": 19,
+      "responses_received": 19,
+      "attempted_paths": [
+        "Vault/Home/Data Persistence/NoSQL/Redis.md",
+        "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
+        "Vault/Home/Data Persistence/Object Storage.md",
+        "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+        "Vault/Home/Data Persistence/ORMs/ORMs.md",
+        "Vault/Home/Data Persistence/SQL/Database Locks.md",
+        "Vault/Home/Data Persistence/SQL/Indexes.md",
+        "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md",
+        "Vault/Home/Data Persistence/SQL/Replication.md"
+      ],
+      "accepted_records": [],
+      "outcomes": [
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/Redis.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Data Persistence/NoSQL/Redis.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note and found no factual or teaching defect that needs an edit. Persistence section: RDB, AOF and RDB+AOF match Redis behavior. That covers the appendfsync always/everysec/no policies, AOF being appended after the in-memory apply, and the Redis 7 multipart AOF with a base file, incremental files and a manifest. It also covers fork and copy-on-write cost, and the latency metrics listed. Topology section: replication is asynchronous, and WAIT does not give strong consistency. Sentinel uses a quorum to mark the primary objectively down and a majority of Sentinel processes to authorize failover. Cluster uses 16,384 slots, MOVED/ASK redirections, the same-slot rule for multi-key operations, hash tags and the hot-slot risk. The workload table, the Redis command example and the pitfalls follow from these mechanisms and name the conditions that change each decision. The prose already states failure contracts: authority, acknowledgement meaning, loss window and fencing. There are no cards, no known violations, no open proposals and no owner feedback. The only possible refinements are stylistic, such as the wording 'Fastest recovery is an origin rebuild' in the None row. Changing them would be churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/Data Persistence/NoSQL/Redis.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note was read in full and the keep is justified. Its opening frames Redis around authority, acknowledgement meaning, loss window and unavailability. The workload table, persistence modes, topology and pitfalls are accurate and ordered from use case to durability to availability. I found no concrete error or learning gap, and edits would be churn.",
+                  "page_type": "Concept — typed frontmatter, optional Questions absent (allowed), References has one bare link, and the one fenced block has a language identifier. No generated navigation or special-page rules apply.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "A checkout idempotency key is different: losing it can repeat a payment.",
+                      "line_start": 16,
+                      "reason": "A concrete example of the authoritative-versus-disposable boundary. It makes the note's operating idea recoverable early."
+                    },
+                    {
+                      "quote": "Each command is atomic by itself. The sequence does not create a transaction with an external database",
+                      "line_start": 37,
+                      "reason": "States the atomicity limit precisely, and it matches Redis behavior."
+                    },
+                    {
+                      "quote": "`appendfsync always` waits for each flush, `everysec` commonly accepts roughly one second of crash loss",
+                      "line_start": 55,
+                      "reason": "The AOF fsync policies and their loss windows are stated accurately. The Redis 7 multipart AOF description in the same paragraph is also correct."
+                    },
+                    {
+                      "quote": "Background does not mean free. `BGSAVE` and AOF rewrite fork a child.",
+                      "line_start": 57,
+                      "reason": "Explains the fork and copy-on-write cost mechanism and names the metrics to monitor, so the machine stays visible."
+                    },
+                    {
+                      "quote": "A configured quorum is needed to agree that the primary is objectively down, while failover authorization also requires a majority",
+                      "line_start": 71,
+                      "reason": "Gets the Sentinel quorum versus majority distinction right. This is a common point of error."
+                    },
+                    {
+                      "quote": "Hash tags such as `cart:{u42}` and `inventory:{u42}` deliberately colocate keys, which can also create a hot slot.",
+                      "line_start": 73,
+                      "reason": "Gives the cluster same-slot condition together with its cost."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the topic is one coherent Redis operating model. Structures, persistence and topology depend on each other through the loss-window contract.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The complete note is accurate, well ordered and compliant with the contract. It has no known violations, no cards, no feedback and no edits. The keep disposition is justified by current-text evidence, so the note is CLEAN and JUSTIFIED UNCHANGED.",
+              "change_checks": []
+            },
+            "model_calls": 2
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note. The opening defines a TSDB and states when it is worth using, with the PostgreSQL partitioning boundary. The Prometheus series definition (metric name plus full label set) matches the data model docs. The sample line's millisecond timestamp is valid. The bounded versus unbounded label contrast explains cardinality growth. The decision table covers series key, time partitioning, retention by whole-chunk drop, rollups and late data, each with its failure mode. The rollup arithmetic checks out: 10,000/s × 86,400 s × 15 days ≈ 12.96 billion, so about 13 billion. The tradeoff (write amplification, plus repair of late samples) is stated. The note has no cards, and no violations are known. The references are relevant primary sources. The prose is direct and compact, so no change is warranted."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
+                  "verdict": "CLEAN",
+                  "summary": "Independent whole-note audit found no defects. The opening gives the TSDB-versus-PostgreSQL decision boundary. The cardinality section, decision table and rollup arithmetic are accurate and compact, so leaving the note unchanged is justified.",
+                  "page_type": "Concept — authorable prose; Questions and References are optional. References are present and relevant. The single code fence has a language identifier (text), and the image embed is a valid asset link.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "A timestamp column alone is not enough. PostgreSQL with time partitioning may handle a moderate workload cleanly.",
+                      "line_start": 14,
+                      "reason": "The opening states the operating idea and the boundary that changes the engineering decision, without padding."
+                    },
+                    {
+                      "quote": "In Prometheus, a series is the metric name plus its complete label set:",
+                      "line_start": 18,
+                      "reason": "This matches the Prometheus data model. The sample line that follows makes the definition concrete, and an optional millisecond timestamp is valid in the exposition format."
+                    },
+                    {
+                      "quote": "An unbounded label such as `user_id` can create a series per user",
+                      "line_start": 24,
+                      "reason": "The bounded versus unbounded contrast explains the cardinality failure mechanism and its effect on index and memory."
+                    },
+                    {
+                      "quote": "| Retention | Drop whole expired chunks or partitions | Row-by-row expiry amplifies writes and compaction |",
+                      "line_start": 32,
+                      "reason": "The table pairs each storage decision with the failure that follows when it is wrong. That is useful for engineering judgment."
+                    },
+                    {
+                      "quote": "At 10,000 samples per second, 15 days of raw retention contains about 13 billion samples.",
+                      "line_start": 42,
+                      "reason": "10,000 × 86,400 × 15 ≈ 12.96 billion, so the figure is correct. The paragraph names both the saving and the costs (write amplification and a repair rule for late data)."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note is a single coherent topic (series, cardinality, storage decisions, rollups) of modest length, and the parts depend on each other.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The note is accurate, compact and complete for its scope. It has no cards, no known violations and no proposed edits, and the keep is justified by the current-text evidence.",
+              "change_checks": []
+            },
+            "model_calls": 4
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/Object Storage.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Data Persistence/Object Storage.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note against the S3 documentation and found no defect worth an edit. The opening defines the key/bucket/whole-object contract. The flat-key explanation correctly says that renaming a prefix means copying and deleting objects. Per-key atomicity is stated with its limit: it does not extend across keys, so the note names a manifest-pointer protocol. The consistency paragraph is accurate and appropriately scoped. S3 has given strong read-after-write consistency since December 2020, and the note says replication, caches and events still add delay. The multipart example's arithmetic is correct (8 GiB = 128 × 64 MiB). Its cleanup claims are also correct: initiated uploads are not auto-expired, parts are billed until completion or abort, and a lifecycle rule can abort them. The lifecycle and use-case table gives a decision condition for each row. The note has no cards and no known violations. It has one relevant primary reference, and the voice is direct and whiteboard-like. More text or cards would be padding."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/Data Persistence/Object Storage.md",
+                  "verdict": "CLEAN",
+                  "summary": "Whole-note audit found accurate, well-ordered content. It runs from the key and bucket contract through per-key atomicity and consistency, a multipart example, and lifecycle and use-case decisions. The S3 claims about strong consistency, multipart cleanup and per-key atomicity match known S3 behavior. No concrete defect justifies an edit.",
+                  "page_type": "Concept — frontmatter is typed. Questions are optional and absent. References has one bare descriptive link. No code fences. No standalone Links section.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "That guarantee stops at the key boundary.",
+                      "line_start": 20,
+                      "reason": "States the limit of atomicity, then gives the manifest-pointer protocol for multi-key publishing. This is a mechanism with its boundary."
+                    },
+                    {
+                      "quote": "The old rule that every object store is eventually consistent is too broad.",
+                      "line_start": 22,
+                      "reason": "Corrects a stale belief. The claim is scoped to S3 and to the provider and API, and it names the remaining delays from replication, caches and events."
+                    },
+                    {
+                      "quote": "S3 does not automatically expire an initiated upload, and its uploaded parts incur storage charges until completion or abort.",
+                      "line_start": 34,
+                      "reason": "Accurate and operationally useful. It is paired with the lifecycle abort rule, and the 8 GiB = 128 × 64 MiB arithmetic is correct."
+                    },
+                    {
+                      "quote": "Durable bytes that take hours to restore do not satisfy a 15-minute recovery-time objective.",
+                      "line_start": 38,
+                      "reason": "Concrete engineering judgment about durability versus restore latency. The table that follows gives a flip condition for every use case."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note is one coherent topic. Keys, consistency, multipart writes and lifecycle tiers all explain the object-store contract, and they are not independently separable.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The keep is justified. The note is accurate, direct and complete for its scope. It has no known violations, no cards to fail, and a single relevant primary reference. Added text would be padding.",
+              "change_checks": []
+            },
+            "model_calls": 6
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+                  "outcome": "keep",
+                  "reason": "I audited the whole note against the current text and EF Core behavior. The tracking rules are accurate: entity queries track by default, and projections that nest entities still track them. The snapshot-detection explanation is accurate. SaveChanges is transactional by default. The concurrency-token predicate and DbUpdateConcurrencyException are described correctly, along with their limit for unvalidated predicates. The execution-strategy caveat for manual transactions, ExecuteUpdate/ExecuteDelete bypassing the tracker, the cartesian-explosion arithmetic with split-query tradeoffs, and DbContext scoped/pooled lifetime are all sound. Global query filter caveats are sound. Each card tests one gradeable task, and the cards cite Microsoft docs. Frontmatter, code fence languages and the single References link are valid. Known violations are empty. The prose is direct and the explanation order works, so changes would be cosmetic."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The note was read in full and has no concrete accuracy, clarity, question-quality or rules defect. The keep is justified, and no edits were proposed.",
+              "notes": [
+                {
+                  "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains EF Core accurately: tracking, snapshot detection, transactions, optimistic concurrency, migrations, performance patterns and pitfalls, each with its conditions and limits. The prose is direct and ordered from concepts to performance to pitfalls. The cards are bounded and cite Microsoft documentation. Changes would be cosmetic.",
+                  "page_type": "Concept — typed frontmatter, optional Questions and References present; qard IDs are protected metadata; no FolderNote or dashboard rules apply.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "A projection is untracked only when its result contains no entity instances.",
+                      "line_start": 47,
+                      "reason": "This states the tracking boundary for projections correctly. Entities nested in a projection are still tracked unless the query is no-tracking."
+                    },
+                    {
+                      "quote": "If the row no longer has the original token, the command affects zero rows and `SaveChanges` throws `DbUpdateConcurrencyException`.",
+                      "line_start": 86,
+                      "reason": "This describes the optimistic-concurrency mechanism accurately. The note also states the limit for unvalidated predicates."
+                    },
+                    {
+                      "quote": "the complete transactional unit must run through the configured execution strategy so a retry can recreate it safely",
+                      "line_start": 88,
+                      "reason": "This is the correct caveat for manual transactions combined with retrying execution strategies."
+                    },
+                    {
+                      "quote": "Nested includes do not create the same sibling cross product, though they can still duplicate principal columns.",
+                      "line_start": 192,
+                      "reason": "This is accurate and precise. It is paired with the AsSplitQuery trade-off and the consistency gap."
+                    },
+                    {
+                      "quote": "> [!qard]- How does EF Core detect that another writer changed a row between reading it and saving an update?",
+                      "line_start": 244,
+                      "reason": "This card is one coherent mechanism-and-limit explanation, not bundled independent tasks. It retains its original ID comment."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: DbContext, tracking, concurrency, migrations and query performance form one coherent EF Core topic. The N+1 material is already compact and could stand on its own, but separating it would add no recall benefit.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 8
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/ORMs/ORMs.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Data Persistence/ORMs/ORMs.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note and found no defect that justifies an edit. The intro correctly says an ORM removes repetitive data-access code but not the database's query, transaction and schema rules. Its second paragraph names the concrete risks: unsupported translation and row multiplication from sibling collection Includes. Both cards test one task each, with sources on the answer side. Raw-SQL card: `FromSql` parameterizes interpolated values from EF Core 7.0 (earlier versions use `FromSqlInterpolated`), `FromSqlRaw` with concatenation is an injection risk, and identifiers cannot be parameters, so they need an allow-list. Sibling-collection card: the 10 × 10 = 100 row arithmetic is correct. The split-query figure of about 1 + 10 + 10 rows is also correct, as is the consistency caveat. The caveat that a serializable or snapshot transaction gives a consistent view matches EF's single-vs-split documentation. Projection shrinks rows without reducing their count. The Martin Fowler Data Mapper reference is topic-relevant. The folder map block and the frontmatter are intact. The note has no known violations, and the text is clear and consistent, so any change would be cosmetic."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The unchanged note is accurate, clear and compliant. Both cards test one dependent task each, with primary sources on the answer side and intact IDs. No concrete defect justifies an edit.",
+              "notes": [
+                {
+                  "path": "Vault/Home/Data Persistence/ORMs/ORMs.md",
+                  "verdict": "CLEAN",
+                  "summary": "The folder note gives a compact, accurate definition of an ORM and its leaky-abstraction limits. Two cards cover raw-SQL tradeoffs and cartesian explosion with correct mechanisms, conditions and arithmetic. No edit is warranted.",
+                  "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx folder map. Questions and References are optional and are present and useful.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "It does not remove the database's query, transaction, and schema rules.",
+                      "line_start": 18,
+                      "reason": "The intro states the operating idea and its boundary directly and impersonally."
+                    },
+                    {
+                      "quote": "One LINQ expression may become a selective query, an unsupported translation, or a row-multiplying join.",
+                      "line_start": 20,
+                      "reason": "The second paragraph names concrete failure modes that the cards then develop, without repeating them."
+                    },
+                    {
+                      "quote": "`FromSql` turns interpolated values into parameters (EF Core 7.0 and later; earlier versions use `FromSqlInterpolated`)",
+                      "line_start": 35,
+                      "reason": "The version-specific condition is stated correctly. FromSqlRaw with concatenation is correctly flagged as an injection risk."
+                    },
+                    {
+                      "quote": "returns 10 × 10 = 100 rows for that blog",
+                      "line_start": 45,
+                      "reason": "The arithmetic is correct. The split-query figure of 1 + 10 + 10 rows is also correct."
+                    },
+                    {
+                      "quote": "Running them in a serializable or snapshot transaction gives one consistent view",
+                      "line_start": 49,
+                      "reason": "The consistency caveat matches the EF Core single-vs-split documentation. The projection point is also correct: rows get smaller but the count is unchanged."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note is a short hub for one topic (ORM leakiness), and the two cards are cohesive follow-ups.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 10
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Database Locks.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Data Persistence/SQL/Database Locks.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note and found no verified defect. I checked it against my knowledge of the SQL Server and PostgreSQL documentation. I did not run web searches in this pass. The S/U/X compatibility matrix is correct: U is compatible with S, and U conflicts with U and X. The explanation of why U prevents the S→X upgrade deadlock is sound, and the conditions under which optimized locking or RCSI avoids U locks are stated. The escalation threshold of roughly 5,000 locks, HoBT-level escalation with LOCK_ESCALATION=AUTO, and PostgreSQL's lack of row-to-table escalation are all accurate. PostgreSQL stores row-lock ownership in tuple metadata, and the shared lock table is sized by max_locks_per_transaction. The deadlock handling is correct: SQL Server error 1205 and PostgreSQL aborting the transaction. The optimistic-concurrency walkthrough is correct, including the zero-rows-affected conflict, the ETag/If-Match flow, and 412 versus 409 with the RFC 9110 nuance. The locks-vs-MVCC and latch-vs-lock distinctions are accurate. The note flows from mechanism to granularity to schedule to escalation to optimistic control to blocking versus deadlock. It has no repetition worth trimming. It contains no cards, so there are no question-quality issues. The three references are real primary sources. Rewriting accurate, well-ordered prose would only add churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The single note has no flagged defects and the keep is justified. I read the full note and found no factual error, ordering problem, repetition worth cutting, or contract violation. It has no cards, and the references are real primary sources. No edits were proposed, so there are no change checks.",
+              "notes": [
+                {
+                  "path": "Vault/Home/Data Persistence/SQL/Database Locks.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note moves from a definition and three distinctions (locks vs MVCC, pessimistic vs optimistic, engine vs in-process locks) to lock modes, granularity, a worked schedule, escalation, latch vs lock, optimistic concurrency and blocking vs deadlock. Mechanisms, engine-specific conditions and exceptions are preserved and accurate. A rewrite would add churn without benefit.",
+                  "page_type": "Concept — authorable prose; typed frontmatter retained; no cards; References are bare descriptive links; every fenced block has a language (sql).",
+                  "current_text_evidence": [
+                    {
+                      "quote": "| **S** | ✓ | ✓ | ✗ |",
+                      "line_start": 36,
+                      "reason": "The S/U/X compatibility matrix is correct: U is compatible with S, and U conflicts with U and X. It supports the explanation of the upgrade-deadlock prevention."
+                    },
+                    {
+                      "quote": "With optimized locking, RCSI, and default `READ COMMITTED`, SQL Server can qualify rows from the latest committed version without U locks",
+                      "line_start": 30,
+                      "reason": "The version-specific exception to U-lock behavior is stated, so the conventional-path claim is not overgeneralized."
+                    },
+                    {
+                      "quote": "PostgreSQL does not escalate row locks into table locks.",
+                      "line_start": 74,
+                      "reason": "Accurate engine contrast with SQL Server escalation. It correctly points to max_locks_per_transaction for shared lock-table capacity."
+                    },
+                    {
+                      "quote": "Zero affected rows is a conflict result, not a successful no-op.",
+                      "line_start": 94,
+                      "reason": "The optimistic-concurrency walkthrough states the key outcome precisely. The 412/409/RFC 9110 nuance that follows is correct."
+                    },
+                    {
+                      "quote": "Monitor blocker age and transaction age, not only waiter count.",
+                      "line_start": 128,
+                      "reason": "Blocking is separated from deadlock with an operational judgment. The deadlock paragraph names the engine-specific behaviors correctly, including SQL Server error 1205 and PostgreSQL's aborted-transaction state."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: locks, granularity, escalation and optimistic control share one concurrency-control story. The optimistic section is the most separable part, but it stays tied to the lock comparison it depends on.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 12
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
+                  "outcome": "keep",
+                  "reason": "I audited the whole note against the current text and the SQL Server and PostgreSQL index documentation. The structure inventory table is accurate. It correctly says an LSM tree is not a PostgreSQL index method, that BRIN depends on physical correlation, and that GiST candidates may need a recheck. The B+ tree section correctly describes SQL Server leaf contents: clustered leaves hold the rows, and a heap's nonclustered indexes locate rows by RID. It also correctly limits those claims to SQL Server rather than PostgreSQL. The `(TenantId, CreatedAt)` and `(TenantId, Status, CreatedAt DESC)` examples fit the leading-key rule. The SARGability, INCLUDE, and filtered-index conditions are stated correctly, including the point that parameterization can stop the optimizer from proving the filter implication. The columnstore section is correct on rowgroups, delta stores, tuple mover, delete-plus-insert updates, segment elimination, and batch mode. In the maintenance section, REORGANIZE does not update statistics, REBUILD does, and UPDATE STATISTICS does not repair density. The fill-factor guidance is conditioned on measurement. The prose is direct, and the plan-first decision sequence is coherent. The Tradeoffs section repeats the statistics and rebuild point, but it works as a short summary. Removing it would be cosmetic churn. The note has no Qard cards, which is acceptable because Questions is optional. It has two relevant primary references, and no known violations were reported. No edit is warranted."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note audit found no factual, structural or voice defect. The keep is justified and no edits were proposed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate, conditioned on engine and measurement, and ordered from overview to structure inventory to B+ tree, rowstore, columnstore, maintenance and decision flow. Its engine-specific claims are scoped to SQL Server or PostgreSQL as appropriate. No concrete defect justifies an edit.",
+                  "page_type": "Concept — frontmatter intact, no Qard cards (Questions optional), two relevant primary references as bare link bullets, all code fences carry a language.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "It is a storage organization, not a PostgreSQL index method",
+                      "line_start": 27,
+                      "reason": "Correctly bounds LSM against PostgreSQL's index methods."
+                    },
+                    {
+                      "quote": "SQL Server leaf-layout and key-lookup claims therefore do not transfer automatically to another engine.",
+                      "line_start": 40,
+                      "reason": "Scopes the clustered-leaf and RID claims to SQL Server and not to PostgreSQL."
+                    },
+                    {
+                      "quote": "parameterization can prevent the optimizer from proving that implication",
+                      "line_start": 83,
+                      "reason": "States the filtered-index matching condition accurately."
+                    },
+                    {
+                      "quote": "| `REORGANIZE` | Incrementally compacts and orders leaf pages | Does not refresh statistics |",
+                      "line_start": 122,
+                      "reason": "Maintenance operation semantics are correct and separate statistics from physical repair."
+                    },
+                    {
+                      "quote": "Small inserts first land in delta stores, background tuple movement compresses closed rowgroups",
+                      "line_start": 107,
+                      "reason": "Columnstore mechanism is correct, with its maintenance cost explained."
+                    },
+                    {
+                      "quote": "Maintenance repairs a measured problem.",
+                      "line_start": 111,
+                      "reason": "Direct, decided whiteboard voice with no universal-threshold myth."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: structures, rowstore design, columnstore and maintenance are all parts of one operator-driven index-selection decision, and each section is compact.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 14
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note and checked it against the standard dependency theory in Codd, Fagin and Date. The 1NF to BCNF definitions are correct, including the 2NF non-prime attribute condition and the 3NF/BCNF superkey-or-prime distinction. The worked examples follow from their stated assumptions. The Make/Model/Discount example has a partial dependency. The Model→Store→Phone example is a transitive dependency. In the parking example every attribute is prime, so 3NF allows Rate→Spot while BCNF forbids it. The 4NF pizza example and the 5NF supplier example both state the independence rule that justifies the decomposition. The DKNF caveat about infinite versus finite domains matches Fagin's result. The 6NF temporal tables are internally consistent. The denormalization, pitfalls and tradeoff sections give conditions and mechanisms rather than slogans, and they correctly avoid treating join count as a defect. The four Qards each test one gradeable task, match the note's text, and cite sources on the answer side. No known violations are recorded. I found no factual error, gap or redundancy that an edit would improve."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The whole note was audited independently and no concrete error, gap or rule violation remains. No edits were proposed, so no change checks apply, and the keep is justified by current-text evidence.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note's definitions from 1NF through BCNF are correct, and each worked example states the assumptions it needs. The 4NF/5NF independence conditions, the DKNF finite-domain caveat, and the denormalization conditions and tradeoffs carry mechanisms and limits rather than slogans. The four Qards each test one gradeable task with answer-side sources. No edit is warranted.",
+                  "page_type": "Concept: SQL normalization and denormalization. Concept rules apply. Questions and References are optional and are present and well formed. Qard IDs are protected.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Third Normal Form (3NF) and Boyce-Codd Normal Form (BCNF) cover most ordinary OLTP dependencies.",
+                      "line_start": 20,
+                      "reason": "The opening states the operating idea and the stopping boundary, so the topic is recoverable quickly."
+                    },
+                    {
+                      "quote": "Every attribute is prime, so `Rate → Parking spot number` is permitted by 3NF.",
+                      "line_start": 129,
+                      "reason": "The 3NF-versus-BCNF distinction is correct: all attributes are prime, so 3NF permits the dependency and BCNF forbids it. The example states its candidate-key assumptions."
+                    },
+                    {
+                      "quote": "The business rule is essential. If a supplier may offer a product to only selected customers",
+                      "line_start": 179,
+                      "reason": "The 5NF example states the condition under which decomposition is lossless and gives the counterexample, which preserves the exception."
+                    },
+                    {
+                      "quote": "with finite domains, domain constraints can imply a join dependency that the candidate keys alone do not",
+                      "line_start": 187,
+                      "reason": "The DKNF caveat about infinite versus finite domains is accurate and gives the condition under which DKNF implies 5NF."
+                    },
+                    {
+                      "quote": "Position and home address change on different timelines, so the combined relation repeats one history",
+                      "line_start": 203,
+                      "reason": "The 6NF temporal example explains why decomposition helps, and the tables are internally consistent."
+                    },
+                    {
+                      "quote": "Denormalization is justified by a measured query whose latency or resource cost cannot be met through [[Indexes]]",
+                      "line_start": 223,
+                      "reason": "This gives a decision condition rather than a slogan, and the wikilink is relevant."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: normal forms and denormalization are one coherent decision topic, where dependency theory sets the baseline and denormalization is the measured exception. Splitting would separate the justification from the thing being justified.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 16
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+          "outcome": "proposal_blocked",
+          "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait-for.html",
+          "result": {
+            "status": "proposal_blocked",
+            "stage": "deterministic_application",
+            "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait-for.html",
+            "model_calls": 19
+          }
+        }
+      ],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-10T07:41:54.201905Z",
+      "topic": "Data Persistence",
+      "topic_id": "data-persistence-4ea34db4",
+      "current_batch": {
+        "topic": "Data Persistence",
+        "topic_id": "data-persistence-4ea34db4",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Sharding.md",
+            "content": "---\ntopic: [Data Persistence]\nsubtopic: [SQL]\nsummary: \"Horizontal partitioning strategies, workload fit, and the operational threshold for splitting rows across database instances.\"\nlevel: [\"4\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Data Persistence\"\nqard-topic: \"SQL/Sharding\"\nflashcard_uid: \"7f93ffe2\"\ncreated: \"2026-02-28T20:52:28.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.355Z\"\n---\n\nSharding is horizontal partitioning across distinct storage and ownership domains, commonly separate database instances or clusters. Each shard owns a non-overlapping subset of rows. Unlike table partitioning inside one server, sharding can distribute storage, writes, backups, and failure domains across machines.\n\nScale-driven sharding belongs after query and index repair, vertical scaling, read replicas, caching, and in-engine partitioning have failed to remove a measured write or storage ceiling. Sharding can also serve a hard isolation, locality, or data-placement requirement, but those cases still inherit the same routing and cross-shard costs. The simpler alternatives preserve cross-table queries and transaction boundaries with less operational machinery.\n\nThe shard key is the long-lived decision. It must distribute load, appear in routed operations, keep atomic data together, and remain stable enough that ownership moves are exceptional. A complete design also needs a versioned ownership map, a fenced migration protocol, and explicit behavior for fan-out queries, distributed workflows, and global constraints.\n\n# Strategy Overview\n\n| Strategy | Ownership rule | Strong fit | Rebalancing boundary |\n|---|---|---|---|\n| Range | Ordered boundaries such as tenant IDs `1..9999` | Range scans, geographic or lifecycle placement | Split or move selected ranges. Sequential keys can heat the newest range |\n| Modulo hash | `hash(key) % N` | Fixed shard count and equality routing | Changing `N` remaps most keys |\n| Consistent-hash ring | First ownership token clockwise from the key hash | Elastic key-value ownership | Move reassigned token ranges. Virtual nodes smooth uneven arcs |\n| Virtual buckets | `hash(key) % B`, then bucket-to-shard map | Controlled SQL moves with stable logical buckets | Move selected buckets without changing key-to-bucket calculation |\n| Directory | Service maps a key or tenant to its shard | Irregular tenants and explicit placement | Update the map while migrating that tenant or range |\n| Geographic | Region or jurisdiction determines placement | Data residency and lower regional latency | Uneven regional load. Global queries still fan out |\n\nThe strategy defines ownership. An application, proxy, coordinator, or database-native layer performs routing. For example, `tenant_id = 42` can map to logical bucket 2 while a versioned map places that bucket on shard C. The query still carries `tenant_id = 42`, allowing the destination to enforce its ownership boundary.\n\n![[Data Persistence/Data Persistence-Sharding-18120000.png|theme-aware]]\n\nConsistent hashing limits movement compared with changing a modulo divisor. If `N` equal-capacity nodes own balanced shares and one equal node is added, the new node's expected final share—and therefore the expected movement—is about `1 / (N + 1)` of keys. Sparse or uneven tokens can move much more or less. Virtual nodes reduce that variance. The arithmetic says nothing about safe cutover.\n\n# Vertical and Horizontal Partitioning\n\nVertical partitioning splits columns, tables, or business functions. Horizontal sharding splits rows by key. They solve different contention.\n\n| Dimension | Vertical partitioning | Horizontal sharding |\n|---|---|---|\n| Ownership unit | Related columns or tables, such as profile versus billing | Rows sharing a shard key, such as one tenant |\n| Routing input | Requested feature or data domain | Shard-key value on every routed operation |\n| Write scaling | Isolates independent write domains. One hot table can remain | Distributes writes only when keys and load are balanced |\n| Transactions | Local inside one functional database. Remote across functions | Local inside one shard. Coordinated across shard keys |\n| Constraints | Cross-database foreign keys may disappear | Global uniqueness and foreign keys require separate design |\n| Rebalancing | Move a table/domain and its callers | Move ranges, tokens, or buckets plus their rows |\n\nVertical scaling adds CPU, memory, or I/O to one server. Replication copies the same ownership domain. Neither is vertical partitioning, and neither distributes writes across independent row owners.\n\n# Figma's Escalation Path\n\nFigma first separated PostgreSQL tables by product area, reducing contention between independent workloads. Large tables later exceeded one instance, so the team added horizontal sharding, a database proxy, and hash-derived shard keys. Functional decomposition reduced coupling and bought time. Sharding addressed the remaining per-table ceiling.\n\n![[Data Persistence/Data Persistence-Sharding-18120000-1.png|theme-aware]]\n\nThe picture is an escalation map, not proof that partitioning alone creates 100× headroom. Capacity came from decomposition, routing, migration tooling, and operational controls together.\n\n# Routing and Ownership Maps\n\nShard routing turns a key into the one current owner allowed to serve the operation. This example uses 4,096 logical buckets:\n\n```text\nbucket = hash(tenant_id) % 4096\nmap[v17][bucket 730] = shard-c\n```\n\nEvery routed operation carries the shard key. The router computes bucket 730, reads map version 17, connects to shard C, and still includes `tenant_id` in the query. A fenced design rejects a write when the destination no longer owns that bucket or the caller's map version is stale. An old application instance therefore cannot keep writing to the previous owner after cutover.\n\nThe map may be cached outside the synchronous request path only if stale versions fail closed and refresh. A directory uses the same contract without hashing: `tenant 42 → shard C` is an explicit ownership entry.\n\n| Routing location | Advantage | Boundary to own |\n| --- | --- | --- |\n| Application | Full query and consistency context, no extra hop | Every client must refresh maps and implement identical fencing |\n| Proxy or coordinator | Central topology and connection management | Query routing does not imply migration or distributed transactions |\n| Database-native | One logical endpoint | Routing, movement, and transaction costs move into the engine contract |\n\n# Rebalancing Protocol\n\nMoving bucket 730 from shard C to shard E is an ownership state machine:\n\n1. Publish a migration record with source, destination, map version, and rollback boundary.\n2. Copy a consistent snapshot while C remains the writer.\n3. Stream later changes until E reaches the required source position.\n4. Fence writes on C, drain in-flight work, apply the final delta, then atomically publish a map version that makes E the sole writer.\n5. Reads, writes, counts, and lag are verified while the old copy remains available for a bounded rollback window.\n6. Remove the old copy only after no supported router version can address it.\n\nUncoordinated dual writes create two authorities and two retry paths. A single writer plus change capture, or an engine's documented online-resharding protocol, keeps the cutover boundary explicit. Copy bandwidth and concurrency remain bounded so movement cannot exhaust the serving workload. Rollback is another fenced ownership transition, not a DNS switch back to a stale copy.\n\nModulo hashing with `N` in the divisor remaps most buckets when `N` changes. Stable virtual buckets keep `hash(key) % B` fixed and move selected bucket-map entries instead. Balanced consistent hashing still needs the same copy, catch-up, fencing, and verification protocol. Limited movement is not safe movement by itself.\n\n# Cross-Shard Operations\n\nCross-shard work starts when one operation cannot be routed to one owner. A coordinator must fan out reads, coordinate commits, or enforce a global constraint outside any shard.\n\nFor a request for the newest 100 orders across 32 shards, each shard can return its local top 100 and a coordinator can merge the 3,200 candidates. The operation needs a deadline, per-shard concurrency limit, deterministic tie-breaker, and an explicit partial-result policy. Pagination needs per-shard progress. A single global offset becomes increasingly expensive. A global secondary index can narrow candidates, but it is another distributed data product with lag and repair obligations.\n\n## Transactions and Workflows\n\n- **Distributed commit** gives one atomic decision only when every participant and coordinator support durable prepare and recovery. It adds coordination latency and can leave prepared work waiting during failures.\n- **Saga or workflow** commits local steps and compensates when a later step fails. Intermediate states remain visible. Compensation is business-specific and may not fully reverse an external effect. Retries need stable operation identities.\n- **Ownership redesign** co-locates the invariant or reserves inventory/funds through one authority. This is usually the simplest hot-path design.\n\nA cross-shard value transfer cannot be two unrelated updates. It needs either a documented distributed transaction or a durable transfer workflow with one operation ID, balanced ledger entries, retry-safe steps, and reconciliation.\n\n## Global Constraints\n\nA local unique index proves uniqueness only inside one shard. Global uniqueness needs a reservation authority, disjoint ranges, or globally unique identifiers when semantic uniqueness is unnecessary. Foreign keys across independent shard databases likewise need co-location, an owning service, or asynchronous repair.\n\nShard requests are retry-safe only when the operation is idempotent or deduplicated. Durable operation state records which participants committed, bounds fan-out concurrency, labels partial results, and supports reconciliation after process failure.\n\n# Tradeoffs\n\n| Dimension | Sharding | Simpler alternative |\n|---|---|---|\n| Write and storage scale | Distributed across balanced owners | Vertical scale or partitioning remains one ownership domain |\n| Read scale | Per-shard reads scale. Global reads fan out | Replicas scale reads without partitioning ownership |\n| Transactions and constraints | Cheap within one shard, coordinated or redesigned across shards | One database preserves native cross-row semantics |\n| Operations | Map versioning, migrations, per-shard backups, skew monitoring | One topology is easier to deploy and recover |\n| Reversal | Data and callers must be recombined | Scaling down a replica or cache is usually simpler |\n\n# Pitfalls\n\n- **Hot shard.** Range boundaries or uneven tenant sizes concentrate CPU and storage. Per-shard load exposes this skew. Fleet averages hide it.\n- **Hot key.** One celebrity or enterprise tenant can exceed one shard even under a balanced hash. That entity needs a deliberate sub-shard or dedicated placement strategy.\n- **Missing shard key.** A common query without the routing key becomes a scatter query. Real query shapes must support the chosen key.\n- **Modulo resharding.** Changing `hash(key) % N` moves most keys. Stable bucket indirection or balanced consistent hashing avoids tying ownership directly to the current node count.\n- **Operational multiplication.** Schema changes, backups, restore tests, and incidents scale with shard count. Automation is part of the design, not cleanup after the topology expands.\n\n# Questions\n\n<!-- qard-id: c63ffce5-ccfa-41d5-a62c-fb60c7bbb4db -->\n> [!qard]- What evidence justifies sharding a database?\n> Sharding is justified by measured evidence that one database primary cannot handle the workload's write throughput or storage, after cheaper options have failed to remove that limit. A hard requirement, such as isolating tenants or keeping data in particular locations, can justify it earlier.\n>\n> For scale-driven sharding, the relevant ceiling is write throughput or storage, because each cheaper option addresses a different limit:\n>\n> - **Query and index repair:** removes wasted work, which may be the actual bottleneck.\n> - **Vertical scaling:** adds CPU, memory or I/O to the same server.\n> - **Read replicas:** add read capacity, but in a single-primary setup every write still goes to one server.\n> - **Caching:** serves repeated reads without reaching the database.\n> - **Partitioning inside one database:** splits a table into partitions that stay within one database and one transaction domain, so it does not spread work across independent servers.\n> \n> The bar is high because sharding adds lasting costs:\n>\n> - Queries that need data from several shards must fan out and merge results.\n> - Transactions and constraints that span shards need extra coordination.\n> - Data must be moved when shards are rebalanced.\n> \n> [Microsoft: Sharding pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding)\n\n<!-- qard-id: 3c8d484d-3a0c-4e2e-9e4f-29a7d608fe68 -->\n> [!qard]- What makes a shard key viable for a workload?\n> A shard key is viable when four conditions hold:\n>\n> - The workload's common operations include it.\n> - It spreads both data and traffic evenly.\n> - Data that must change atomically shares the same key value.\n> - Its values rarely change.\n>\n> | Property | Why it matters | Failure when it is missing |\n> |---|---|---|\n> | Present in common operations | The router can send each operation to the one shard that owns the key. | Common queries without the key must fan out to every shard and merge the results. |\n> | Even spread of data and load | Each shard gets a similar share of storage and requests. | Hot shards: skewed values, sequential ranges or one very large tenant overload a single shard even when total cluster capacity is sufficient. |\n> | Keeps atomic changes together | Rows that must change in one transaction live on one shard, so a local transaction is enough. | Those changes need cross-shard coordination or a multi-step workflow. |\n> | Stable values | Rows avoid moves caused by a change to their own key value. Ownership can still move when the key-to-shard mapping or shard topology changes, such as during rebalancing. | A changed key value can map to a different shard. When it does, the row must migrate across shards instead of being updated in place. |\n>\n> For example, `tenant_id` can fit a multi-tenant service well: most requests carry it, a tenant's data usually changes together, and it does not change. It still fails if one tenant outgrows a single shard.\n>\n> [Microsoft: Sharding pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding)\n\n> [!qard]- How do lookup, range and hash sharding strategies differ?\n> All three strategies map a shard key to the shard that owns the data. They differ in what decides that mapping, which in turn decides load balance, range-query efficiency and how hard rebalancing is.\n>\n> | Aspect | Lookup (directory) | Range | Hash |\n> |---|---|---|---|\n> | How a key is mapped | A stored map records which shard owns each key, tenant or virtual shard. | Contiguous key ranges belong to shards, such as customer IDs `1–9999` on one shard. | A hash of the key determines the shard, so no map has to be stored. |\n> | Load balance | Placement is explicit, so large tenants can be placed deliberately. | Can be uneven. Sequential keys, such as timestamps or increasing IDs, send new writes to the newest range and create a hotspot. | Usually spreads data and load evenly, although one very hot key still lands on a single shard. |\n> | Range queries | No inherent locality; it depends on how the map groups keys. | Efficient, because neighboring keys sit on the same shard. | Neighboring keys scatter, so a range query fans out to many shards. |\n> | Rebalancing | Data is moved and its map entries are updated. With keys mapped to virtual shards, a virtual shard can move between physical servers without changing application code. | Moving or splitting a range moves its data. Rebalancing may not fix load that concentrates on adjacent keys. | Difficult. With a simple `hash(key) % N`, changing the number of shards changes the owner of most keys. |\n> | Routing overhead | A map lookup on every routed request. | A comparison of the key against stored range boundaries. | Computing the hash. |\n>\n> [Microsoft: Sharding pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding)\n\n# References\n\n- [Sharding pattern](https://learn.microsoft.com/azure/architecture/patterns/sharding)\n- [Vitess resharding](https://vitess.io/docs/user-guides/configuration-advanced/resharding/)\n- [PostgreSQL table partitioning](https://www.postgresql.org/docs/current/ddl-partitioning.html)\n- [How Figma's databases team lived to tell the scale](https://www.figma.com/blog/how-figmas-databases-team-lived-to-tell-the-scale/)\n",
+            "hash": "47cf16f9e32ef22f80ab0f60726d7e6f311c5dc2faf7fb90dd8b68a54100b79b",
+            "topic": "Data Persistence",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "base_sha": "fba0b54bbf3ab5a6699ba2a017e2f2e23fe559ba",
+      "reservation_deadline": "2026-11-10T07:55:58.829163Z",
+      "stop_reason": "call_limit",
+      "sealed_at": "2026-11-10T07:41:54.201908Z"
     }
   },
   "feedback_workloads": {
