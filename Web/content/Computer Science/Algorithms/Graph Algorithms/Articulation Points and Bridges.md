@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-10T13:12:49.329Z
 published: 2026-07-10T05:56:46.785Z
 topic:
   - Computer Science
@@ -39,7 +39,7 @@ DFS runs from any unvisited vertex and repeats until every component is covered.
 
 - **Non-root cut vertex.** A non-root `u` with a tree child `v` where `low[v] >= disc[u]` is an articulation point. The inequality says nothing in `v`'s subtree reaches strictly above `u`, so every route out of that subtree passes through `u`; deleting `u` strands it.
 - **Root cut vertex.** The DFS root has no ancestor, so `low[v] >= disc[root]` holds trivially for its first child. The root is an articulation point only when it has two or more tree children — the only path between two of its subtrees runs through it.
-- **Bridge.** A tree edge `(u, v)` is a bridge when `low[v] > disc[u]` — strict. Equality (`low[v] == disc[u]`) means a back edge from `v`'s subtree lands exactly on `u`: that route bypasses the edge `(u, v)`, so the edge is not a bridge, but it still forces traffic through the vertex `u`, so `u` stays a cut vertex. The single `>` versus `>=` is the entire distinction between cut edges and cut vertices.
+- **Bridge.** A tree edge `(u, v)` is a bridge when `low[v] > disc[u]` — strict. Equality (`low[v] == disc[u]`) means a back edge from `v`'s subtree lands exactly on `u`: that route bypasses the edge `(u, v)`, so the edge is not a bridge, but the route still ends at `u`, so for a non-root `u` the subtree remains cut off when `u` is deleted and `u` stays a cut vertex. A root `u` is the exception: it is a cut vertex only with two or more tree children. For non-root vertices, the single `>` versus `>=` is the entire distinction between cut edges and cut vertices.
 
 Worked example: a triangle `0-1-2` with a tail `2-3-4`. DFS from `0` discovers `0, 1, 2` around the cycle; the edge `2-0` is a back edge, so `low` across the triangle collapses to `0` and none of `0, 1, 2` is cut inside it. The tail carries no back edge, so `low[3] = 3 > disc[2] = 2` and `low[4] = 4 > disc[3] = 3`: edges `2-3` and `3-4` are bridges, and vertices `2` and `3` are cut vertices — each is the sole link to what hangs below it. Removing any of them raises the connected-component count, which is the property each rule certifies locally.
 

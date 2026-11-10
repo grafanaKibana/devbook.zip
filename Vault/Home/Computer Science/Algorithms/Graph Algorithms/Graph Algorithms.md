@@ -8,7 +8,7 @@ level: ["4"]
 status: Creation
 priority: High
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-10T13:12:49.329Z"
 published: "2026-07-08T13:14:17.334Z"
 ---
 
@@ -36,6 +36,7 @@ flowchart TD
   H -->|Mutually reachable groups in a digraph| J[Strongly Connected Components]
   H -->|Single points of failure| K[Articulation Points and Bridges]
   H -->|Clusters in an undirected graph| M[Connected Components]
+  H -->|Dependency order in a DAG| N[Topological Sort]
   H -->|Throughput through a capacitated network| L[Maximum Flow]
 ```
 
