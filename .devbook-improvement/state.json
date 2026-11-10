@@ -7362,6 +7362,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Data Persistence/ORMs/ORMs.md": {
+      "content_hash": "b3c1bc532156a0a197ea9929891d7dce2625295e442463a6e0db7844862ecaf5",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "b3c1bc532156a0a197ea9929891d7dce2625295e442463a6e0db7844862ecaf5",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Data Persistence/ORMs/ORMs.md",
+          "verdict": "CLEAN",
+          "summary": "The folder note gives a compact, accurate definition of an ORM and its leaky-abstraction limits. Two cards cover raw-SQL tradeoffs and cartesian explosion with correct mechanisms, conditions and arithmetic. No edit is warranted.",
+          "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx folder map. Questions and References are optional and are present and useful.",
+          "current_text_evidence": [
+            {
+              "quote": "It does not remove the database's query, transaction, and schema rules.",
+              "line_start": 18,
+              "reason": "The intro states the operating idea and its boundary directly and impersonally."
+            },
+            {
+              "quote": "One LINQ expression may become a selective query, an unsupported translation, or a row-multiplying join.",
+              "line_start": 20,
+              "reason": "The second paragraph names concrete failure modes that the cards then develop, without repeating them."
+            },
+            {
+              "quote": "`FromSql` turns interpolated values into parameters (EF Core 7.0 and later; earlier versions use `FromSqlInterpolated`)",
+              "line_start": 35,
+              "reason": "The version-specific condition is stated correctly. FromSqlRaw with concatenation is correctly flagged as an injection risk."
+            },
+            {
+              "quote": "returns 10 × 10 = 100 rows for that blog",
+              "line_start": 45,
+              "reason": "The arithmetic is correct. The split-query figure of 1 + 10 + 10 rows is also correct."
+            },
+            {
+              "quote": "Running them in a serializable or snapshot transaction gives one consistent view",
+              "line_start": 49,
+              "reason": "The consistency caveat matches the EF Core single-vs-split documentation. The projection point is also correct: rows get smaller but the count is unchanged."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note is a short hub for one topic (ORM leakiness), and the two cards are cohesive follow-ups.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -9991,7 +10051,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-10T07:30:50.865899Z",
-    "elapsed_seconds": 302.61851129999985,
+    "elapsed_seconds": 305.83918949999986,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
@@ -10296,7 +10356,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T07:35:53.483919Z",
+    "checkpoint_at": "2026-11-10T07:35:56.704597Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -28343,106 +28403,6 @@
       "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_repair_key": "5e37f1977082945be5d1b9effaf24d2debf9e0720d0b7739596285e4a78de00b",
       "author_repair_pending": true
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "270542e03ba04146b22c78499257f60e",
-    "topic_id": "data-persistence-4ea34db4",
-    "batch": {
-      "topic": "Data Persistence",
-      "topic_id": "data-persistence-4ea34db4",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/ORMs/ORMs.md",
-          "content": "---\ntopic: [Data Persistence]\nsubtopic: [ORMs]\nsummary: \"Mappers that translate object graphs and LINQ into SQL, a leaky abstraction to understand.\"\ntags: [FolderNote]\npublish: true\npriority: High\nlevel: [\"4\"]\nstatus: Creation\nqard-deck: \"Data Persistence\"\nqard-topic: \"ORMs/ORMs\"\nflashcard_uid: \"e49dfe63\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.352Z\"\n---\n\nAn Object-Relational Mapper connects an object model to a relational database. It translates queries, materializes rows as objects, tracks changes, and turns those changes into SQL. This removes repetitive data-access code. It does not remove the database's query, transaction, and schema rules.\n\nThe SQL and round trips that EF Core generates reveal the actual database work. One LINQ expression may become a selective query, an unsupported translation, or a row-multiplying join. Loading two sibling collections in one query can multiply their rows before materialization. The application still owns query plans, indexes, transaction scope, and migration safety.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Questions\n\n<!-- qard-id: d86af7cc-5d66-4a64-a922-47d16ca7ce63 -->\n> [!qard]- When is raw SQL a better boundary than an ORM query?\n> Raw SQL is a better boundary when a query needs something the ORM cannot express, such as a provider-specific database feature. It is also a better boundary when the SQL the ORM generates has a measured performance problem that cannot be fixed predictably through the ORM. Raw SQL is not automatically faster. The reason to use it is a missing capability or a measured plan problem.\n>\n> Moving a query into SQL text brings its own obligations:\n>\n> - **Data values:** values are passed as database parameters, never concatenated into the SQL text. In EF Core, `FromSql` turns interpolated values into parameters (EF Core 7.0 and later; earlier versions use `FromSqlInterpolated`). A `FromSqlRaw` string built by concatenating values reintroduces SQL injection risk.\n> - **Identifiers and SQL fragments:** databases do not accept column names, table names or other parts of the SQL structure as parameters. Any dynamic piece is checked against an allow-list of known values before it enters the SQL text.\n> - **Provider dependence:** the SQL is written for one database engine, so its tests run against that same engine.\n> \n> [EF Core: SQL queries](https://learn.microsoft.com/en-us/ef/core/querying/sql-queries)\n\n<!-- qard-id: 254a62e1-7311-4a83-8029-4ff00d16f442 -->\n> [!qard]- Why can eager-loading sibling collections be expensive?\n> Loading two collections of the same parent in one SQL query joins both of them to the parent. Each parent row is then repeated for every combination of its matching children, so the row count multiplies instead of adding up. EF Core's documentation calls this a cartesian explosion.\n>\n> For example, `Include(b => b.Posts).Include(b => b.Contributors)` for one blog with 10 posts and 10 contributors returns 10 × 10 = 100 rows for that blog. Each row repeats the blog's columns together with one post and one contributor. The database, the network and EF Core all process the extra rows.\n>\n> Two mitigations trade this cost for others:\n>\n> - **Split query** (`AsSplitQuery()`): EF Core loads the blogs and each collection with separate SQL commands, returning about 1 + 10 + 10 rows. The cost is extra round trips. The commands also run at different moments, so an update between them can produce a combined result that never existed at a single point in time. Running them in a serializable or snapshot transaction gives one consistent view, at the cost of that isolation level's own overhead.\n> - **Projection:** selecting only the needed columns makes each duplicated row smaller. It does not reduce the number of rows the join produces.\n> \n> [EF Core: Single vs. split queries](https://learn.microsoft.com/en-us/ef/core/querying/single-split-queries)\n\n# References\n\n- [Data Mapper](https://martinfowler.com/eaaCatalog/dataMapper.html)\n",
-          "hash": "b3c1bc532156a0a197ea9929891d7dce2625295e442463a6e0db7844862ecaf5",
-          "topic": "Data Persistence",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Data Persistence/ORMs/ORMs.md",
-          "outcome": "keep",
-          "reason": "I read the whole note and found no defect that justifies an edit. The intro correctly says an ORM removes repetitive data-access code but not the database's query, transaction and schema rules. Its second paragraph names the concrete risks: unsupported translation and row multiplication from sibling collection Includes. Both cards test one task each, with sources on the answer side. Raw-SQL card: `FromSql` parameterizes interpolated values from EF Core 7.0 (earlier versions use `FromSqlInterpolated`), `FromSqlRaw` with concatenation is an injection risk, and identifiers cannot be parameters, so they need an allow-list. Sibling-collection card: the 10 × 10 = 100 row arithmetic is correct. The split-query figure of about 1 + 10 + 10 rows is also correct, as is the consistency caveat. The caveat that a serializable or snapshot transaction gives a consistent view matches EF's single-vs-split documentation. Projection shrinks rows without reducing their count. The Martin Fowler Data Mapper reference is topic-relevant. The folder map block and the frontmatter are intact. The note has no known violations, and the text is clear and consistent, so any change would be cosmetic."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Data Persistence/ORMs/ORMs.md": "b3c1bc532156a0a197ea9929891d7dce2625295e442463a6e0db7844862ecaf5"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Data Persistence/ORMs/ORMs.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-10T07:35:35.552434Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "The unchanged note is accurate, clear and compliant. Both cards test one dependent task each, with primary sources on the answer side and intact IDs. No concrete defect justifies an edit.",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/ORMs/ORMs.md",
-          "verdict": "CLEAN",
-          "summary": "The folder note gives a compact, accurate definition of an ORM and its leaky-abstraction limits. Two cards cover raw-SQL tradeoffs and cartesian explosion with correct mechanisms, conditions and arithmetic. No edit is warranted.",
-          "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx folder map. Questions and References are optional and are present and useful.",
-          "current_text_evidence": [
-            {
-              "quote": "It does not remove the database's query, transaction, and schema rules.",
-              "line_start": 18,
-              "reason": "The intro states the operating idea and its boundary directly and impersonally."
-            },
-            {
-              "quote": "One LINQ expression may become a selective query, an unsupported translation, or a row-multiplying join.",
-              "line_start": 20,
-              "reason": "The second paragraph names concrete failure modes that the cards then develop, without repeating them."
-            },
-            {
-              "quote": "`FromSql` turns interpolated values into parameters (EF Core 7.0 and later; earlier versions use `FromSqlInterpolated`)",
-              "line_start": 35,
-              "reason": "The version-specific condition is stated correctly. FromSqlRaw with concatenation is correctly flagged as an injection risk."
-            },
-            {
-              "quote": "returns 10 × 10 = 100 rows for that blog",
-              "line_start": 45,
-              "reason": "The arithmetic is correct. The split-query figure of 1 + 10 + 10 rows is also correct."
-            },
-            {
-              "quote": "Running them in a serializable or snapshot transaction gives one consistent view",
-              "line_start": 49,
-              "reason": "The consistency caveat matches the EF Core single-vs-split documentation. The projection point is also correct: rows get smaller but the count is unchanged."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note is a short hub for one topic (ORM leakiness), and the two cards are cohesive follow-ups.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
     }
   }
 }
