@@ -10271,9 +10271,9 @@
     "version": 1,
     "id": "d9820c0a869a4376b0c4be62174ca4b9",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 736.1533542000002,
+    "elapsed_seconds": 740.3339476000002,
     "calls_reserved": 17,
     "responses_received": 17,
     "attempted_paths": [
@@ -10283,7 +10283,8 @@
       "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md",
       "Vault/Home/Computer Science/Algorithms/Paradigms/Divide and Conquer.md",
       "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
-      "Vault/Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms.md"
+      "Vault/Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms.md",
+      "Vault/Home/Computer Science/Algorithms/Paradigms/Memoization.md"
     ],
     "accepted_records": [
       {
@@ -14836,10 +14837,83 @@
           },
           "model_calls": 15
         }
+      },
+      {
+        "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Memoization.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Memoization.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and known facts. The opening figure is right: naive fib(50) makes about 40.7 billion calls (2·F(51)−1) against 51 distinct arguments. The C# sample is correct, since F(92) is the largest Fibonacci number that fits in long and negative n never reaches a base case. The purity and complete-key conditions, the cache-growth, stack-depth and concurrency caveats (ConcurrentDictionary.GetOrAdd can run its factory more than once, and Lazy<T> with ExecutionAndPublication fixes that), and the complexity table all hold. Each card tests one task with mechanism-level answers and an accurate knapsack example. The note cites MIT 6.006 and Microsoft Learn, and has no known violations. The prose is direct and non-repetitive, so any edit would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no factual, structural or question-quality defects. The keep is justified and no edits are proposed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Memoization.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate, ordered from motivating example to mechanism, correctness conditions, costs, code and comparison. Cards are mechanism-level and each tests one coherent task. No edit is warranted.",
+                "page_type": "Concept — typed frontmatter, optional Questions/References present and valid; Qard IDs and tabs/steptrace/complexity blocks protected.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Naive recursive `fib(50)` makes over 40 billion calls even though the recurrence has only 51 argument values",
+                    "line_start": 17,
+                    "reason": "Opening figure is correct (2·F(51)−1 ≈ 40.7 billion calls vs 51 distinct arguments) and motivates the mechanism immediately."
+                  },
+                  {
+                    "quote": "Memoization only *pays* when calls repeat.",
+                    "line_start": 21,
+                    "reason": "States the key boundary (no repeated states, no benefit) early, supporting engineering judgment."
+                  },
+                  {
+                    "quote": "The key must capture *every* input that affects the result and must not change while stored.",
+                    "line_start": 38,
+                    "reason": "Correctness conditions (valid results, complete stable key, equality semantics) are explained with failure modes."
+                  },
+                  {
+                    "quote": "`ConcurrentDictionary.GetOrAdd` protects the store but can invoke its value factory more than once for the same key.",
+                    "line_start": 101,
+                    "reason": "Accurate concurrency caveat with the correct Lazy<T> ExecutionAndPublication remedy."
+                  },
+                  {
+                    "quote": "Its input contract is `0 <= n <= 92`",
+                    "line_start": 148,
+                    "reason": "Correct: F(92) is the largest Fibonacci value fitting in long and negative n never reaches a base case."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: memoization, its correctness conditions, costs and the DP relationship form one coherent topic; DP is linked to its own note.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 17
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T20:05:37.091836Z",
+    "checkpoint_at": "2026-11-10T20:05:41.272430Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
