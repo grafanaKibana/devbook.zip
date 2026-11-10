@@ -27479,7 +27479,7 @@
       "prepared_source_version": 1,
       "prepared_at": "2026-11-10T20:02:08.429414Z",
       "phase": "pr_updated",
-      "updated_at": "2026-11-10T20:07:52Z",
+      "updated_at": "2026-11-10T20:17:24Z",
       "evidence": {
         "commit_sha": "cc358e7b73ddb21263569bc18b5e41ccefe387b0",
         "branch_sha": "cc358e7b73ddb21263569bc18b5e41ccefe387b0",
@@ -27498,7 +27498,9 @@
         },
         "export_attempts": 1,
         "export_last_dispatch_at": "2026-11-10T20:07:52Z",
-        "reason": "Same-workflow Syncer export queued"
+        "reason": "Same-workflow Syncer export queued",
+        "export_artifact_hash": "2e6b943b1bd59cb717975a7674ca41dac35834d781a85f50ae705b9c1421f93b",
+        "export_phase": "prepared"
       }
     }
   },
