@@ -10151,9 +10151,9 @@
     "version": 1,
     "id": "d9820c0a869a4376b0c4be62174ca4b9",
     "status": "active",
-    "phase": "validation_reserved",
+    "phase": "validation_completed",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 556.2932396000002,
+    "elapsed_seconds": 593.8184264000002,
     "calls_reserved": 13,
     "responses_received": 13,
     "attempted_paths": [
@@ -12482,7 +12482,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T20:02:37.231717Z",
+    "checkpoint_at": "2026-11-10T20:03:14.756906Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
