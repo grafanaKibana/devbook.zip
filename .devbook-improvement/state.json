@@ -10153,7 +10153,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 468.2196571000002,
+    "elapsed_seconds": 473.2639593000002,
     "calls_reserved": 11,
     "responses_received": 11,
     "attempted_paths": [
@@ -12482,7 +12482,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T20:01:09.158135Z",
+    "checkpoint_at": "2026-11-10T20:01:14.202437Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -27812,9 +27812,9 @@
         "topic_id": "computer-science-445ddaa5",
         "notes": [
           {
-            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
-            "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Finds strongly connected components in one DFS using discovery indices, low links, and an active-vertex stack.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-07-26T20:18:51.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-26T19:27:00.411Z\"\n---\n\n[[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly connected components]] partition a digraph into maximal mutually reachable regions. Tarjan's algorithm finds that partition in one DFS by recording each vertex's discovery time, the earliest reachable vertex still on the active stack, and whether it still belongs to a component under construction.\n\nThe component boundary appears when a vertex cannot reach any earlier active vertex. That vertex is an SCC root, and popping the stack down to it emits the complete component. [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly Connected Components]] compares Tarjan with the two-pass and path-based alternatives. This note follows Tarjan's active-stack invariant and implementation.\n\n# Low-Link State\n\n- `disc[v]` is the discovery index assigned when DFS first enters `v`.\n- `low[v]` is the smallest discovery index reachable from `v` through DFS-tree edges plus at most one edge to a vertex still on the stack.\n- `onStack[v]` distinguishes an active vertex from one already assigned to a completed component.\n\nOn entry, set `disc[v] = low[v] = time++`, then push `v`. For an edge `v → w`, recurse if `w` is unvisited and fold `low[w]` into `low[v]` on return. If `w` is already visited and still active, fold `disc[w]` into `low[v]`. Once every outgoing edge has been processed, `low[v] == disc[v]` identifies an SCC root.\n\nOn `A→B, B→C, C→A, C→D, D→E, E→D`:\n\n```text\nvisit A  disc=0 low=0   stack=[A]\n visit B disc=1 low=1   stack=[A,B]\n  visit C disc=2 low=2  stack=[A,B,C]\n   edge C→A: low[C]=0\n   visit D disc=3 low=3 stack=[A,B,C,D]\n    visit E disc=4 low=4 stack=[A,B,C,D,E]\n     edge E→D: low[E]=3\n   D done: low[D]=disc[D]=3 -> pop {E,D}\n  back in C: low[C]=min(0, low[D]=3)=0\n back in B: low[B]=min(1, low[C]=0)=0\nback in A: low[A]=min(0, low[B]=0)=0\nA done: low[A]=disc[A]=0 -> pop {C,B,A}\n```\n\nThe components leave in reverse topological order of the condensation: `{D, E}` before `{A, B, C}`.\n\n# C# Implementation\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> public sealed class Tarjan\n> {\n>     private readonly List<int>[] _adjacency;\n>     private readonly int[] _disc;\n>     private readonly int[] _low;\n>     private readonly bool[] _onStack;\n>     private readonly Stack<int> _stack = new();\n>     private readonly List<List<int>> _components = new();\n>     private int _time;\n>\n>     public Tarjan(List<int>[] adjacency)\n>     {\n>         _adjacency = adjacency;\n>         _disc = new int[adjacency.Length];\n>         _low = new int[adjacency.Length];\n>         _onStack = new bool[adjacency.Length];\n>         Array.Fill(_disc, -1);\n>     }\n>\n>     public List<List<int>> Components()\n>     {\n>         for (var v = 0; v < _adjacency.Length; v++)\n>         {\n>             if (_disc[v] == -1)\n>             {\n>                 StrongConnect(v);\n>             }\n>         }\n>\n>         return _components;\n>     }\n>\n>     private void StrongConnect(int v)\n>     {\n>         _disc[v] = _low[v] = _time++;\n>         _stack.Push(v);\n>         _onStack[v] = true;\n>\n>         foreach (var w in _adjacency[v])\n>         {\n>             if (_disc[w] == -1)\n>             {\n>                 StrongConnect(w);\n>                 _low[v] = Math.Min(_low[v], _low[w]);\n>             }\n>             else if (_onStack[w])\n>             {\n>                 _low[v] = Math.Min(_low[v], _disc[w]);\n>             }\n>         }\n>\n>         if (_low[v] != _disc[v])\n>         {\n>             return;\n>         }\n>\n>         var component = new List<int>();\n>         int w;\n>         do\n>         {\n>             w = _stack.Pop();\n>             _onStack[w] = false;\n>             component.Add(w);\n>         }\n>         while (w != v);\n>\n>         _components.Add(component);\n>     }\n> }\n> ```\n\n# The Guard That Keeps Components Separate\n\nThe non-tree update must ignore vertices already removed from the stack. An edge to one of them enters a finished component. It cannot provide a return path for the active DFS subtree. Letting that vertex lower `low[v]` can hide a valid root and merge separate SCCs.\n\nFor an edge to an active, already-visited vertex, Tarjan's definition uses `disc[w]`. A guarded `low[w]` variant still finds the same SCC roots, but the stored values no longer match Tarjan's formal low-link definition. Removing the `onStack` guard breaks the component boundary.\n\nThis is related to the discovery/low-value pattern in [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges|articulation points and bridges]], but the directed edge classification, active stack, and update rules are different.\n\n# References\n\n- [Depth-First Search and Linear Graph Algorithms](https://epubs.siam.org/doi/10.1137/0201010)\n",
-            "hash": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f",
+            "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+            "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Defines finite acyclic states and recurrences, solves each state in dependency order, and reuses stored results.\"\nlevel: [\"4\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Computer Science\"\nqard-topic: \"Algorithms/Paradigms/Dynamic Programming\"\nflashcard_uid: \"fa8b80ea\"\ncreated: \"2026-06-20T05:33:50.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.336Z\"\n---\n\nIn finite one-pass dynamic programming, a dependency graph becomes a set of stored answers. Each state is solved after the states it depends on, written once, and then reused by later transitions.\n\nThe formulation starts with a state definition, base cases, and a recurrence over already-solved states. In the finite one-pass cases covered here, dependencies form an acyclic order. Recursion follows that order lazily. Iteration writes it out as loops. Optimization DP usually relies on **optimal substructure**, assembling an optimum from smaller optima. Counting and decision problems use the same machinery without optimizing. Repeated states make storage worthwhile, though repetition affects efficiency rather than correctness. Other DP methods, including value iteration, may revisit mutually dependent estimates until they converge.\n\n**Core shape for finite one-pass DP:** state + base cases + recurrence + acyclic dependency order → each reached state solved once → `(number of distinct states) × (transition work per state)` time.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n%% tabs %%\n\n%% tab: Greedy %%\n\n```steptrace\n{\"algorithm\":\"coin-change-greedy\"}\n```\n\nLargest usable coin first: exact change, but 6 coins instead of 3.\n\n%% tab: Naive Recursion %%\n\n```steptrace\n{\"algorithm\":\"coin-change-naive\"}\n```\n\nTry every first coin. Repeated remainders rebuild the same work.\n\n%% tab: Memoization %%\n\n```steptrace\n{\"algorithm\":\"coin-change-memoization\"}\n```\n\nKeep recursion, but save each answered remainder beside the counter.\n\n%% tab: Tabulation %%\n\n```steptrace\n{\"algorithm\":\"coin-change-tabulation\"}\n```\n\nBuild exact change from 0¢ upward on a visual amount board.\n\n%% tab: Memoization (Raw) %%\n\n```steptrace\n{\"algorithm\":\"coin-change-top-down\"}\n```\n\nThe raw view shows the canonical recursion tree, cache hits, and stored returns.\n\n%% endtabs %%\n\nBoth examples become DP only after the state discards irrelevant history. Coin change keeps the remaining amount because every denomination remains reusable; finite coin stock would also require the remaining counts. Grid path keeps the current coordinate. Two calls with the same state have the same future choices and therefore the same answer, regardless of how they arrived there.\n\n- **Top-down (memoisation)** follows the recurrence from the target. The first visit to an amount or coordinate computes it; later visits return the saved answer. It may skip unreachable states, but it pays call-stack cost. [[Home/Computer Science/Algorithms/Paradigms/Memoization|Memoization]] develops that reuse mechanism independently of DP.\n- **Bottom-up (tabulation)** starts from known answers and fills every state its target may depend on. Coin change advances from `0¢` to `30¢`; grid path moves backward from the dispatch door. The loops make dependency order explicit and avoid recursion.\n\nThe recurrence then names the dependencies. Coin change reads `best[amount - coin]` for every usable denomination and keeps the minimum plus one. Grid path reads the right and down suffix costs and adds the current tile. The animations differ because those state spaces differ—a one-dimensional amount board versus a two-dimensional matrix—but the storage rule is the same.\n\nA cashier must return exactly `30¢` using real `1¢`, `10¢`, `25¢`, and `50¢` denominations. The example assumes enough of each coin that stock is not a constraint. Taking the largest usable coin first returns `25 + 1 + 1 + 1 + 1 + 1`, while `10 + 10 + 10` uses half as many coins. The five tabs keep that counterexample fixed while changing the solving strategy and level of abstraction.\n\nThe simplified Memoization and Tabulation tabs keep the cashier model visible. Memoization (Raw) exposes the transferable recursion tree beneath the counter: each node is a remaining amount, and a cache hit closes a repeated subtree. The exact approaches compute `30¢ → 3 coins`; they differ in which states are visited first and whether control lives in the call stack or a loop.\n\n> [!ABSTRACT]- Coin-change state flow\n>\n> ```mermaid\n> flowchart LR\n>   A[\"best(30¢)\"] -->|\"use 1¢\"| B[\"best(29¢) + 1\"]\n>   A -->|\"use 10¢\"| C[\"best(20¢) + 1\"]\n>   A -->|\"use 25¢\"| D[\"best(5¢) + 1\"]\n>   C --> E[\"best(10¢) + 2\"]\n>   E --> F[\"best(0¢) + 3\"]\n>   B --> G[\"other valid continuations\"]\n>   D --> H[\"five 1¢ transitions\"]\n>   F --> I[\"minimum: 3 coins\"]\n>   G --> I\n>   H --> I\n> ```\n\n> [!EXAMPLE]- Coin change, top-down and bottom-up (C#)\n>\n> ```csharp\n> static int FewestCoinsTopDown(int amount, int[] coins)\n> {\n>     ArgumentNullException.ThrowIfNull(coins);\n>     ArgumentOutOfRangeException.ThrowIfNegative(amount);\n>     if (amount == int.MaxValue)\n>         throw new ArgumentOutOfRangeException(nameof(amount), \"amount + 1 must fit in Int32.\");\n>     if (coins.Any(coin => coin <= 0))\n>         throw new ArgumentException(\"Coin denominations must be positive.\", nameof(coins));\n>\n>     var memo = new Dictionary<int, int> { [0] = 0 };\n>     var answer = Solve(amount);\n>     return answer > amount ? -1 : answer;\n>\n>     int Solve(int remaining)\n>     {\n>         if (memo.TryGetValue(remaining, out var cached)) return cached;\n>\n>         var best = amount + 1;\n>         foreach (var coin in coins)\n>         {\n>             if (coin > remaining) continue;\n>             var suffix = Solve(remaining - coin);\n>             if (suffix <= amount)\n>                 best = Math.Min(best, suffix + 1);\n>         }\n>\n>         memo[remaining] = best;\n>         return best;\n>     }\n> }\n> ```\n>\n> ```csharp\n> static int FewestCoinsBottomUp(int amount, int[] coins)\n> {\n>     ArgumentNullException.ThrowIfNull(coins);\n>     ArgumentOutOfRangeException.ThrowIfNegative(amount);\n>     if (amount == int.MaxValue)\n>         throw new ArgumentOutOfRangeException(nameof(amount), \"amount + 1 must fit in Int32.\");\n>     if (coins.Any(coin => coin <= 0))\n>         throw new ArgumentException(\"Coin denominations must be positive.\", nameof(coins));\n>\n>     var dp = Enumerable.Repeat(amount + 1, amount + 1).ToArray();\n>     dp[0] = 0;\n>\n>     for (var remaining = 1; remaining <= amount; remaining++)\n>         foreach (var coin in coins)\n>             if (coin <= remaining)\n>             {\n>                 var suffix = dp[remaining - coin];\n>                 if (suffix <= amount)\n>                     dp[remaining] = Math.Min(dp[remaining], suffix + 1);\n>             }\n>\n>     return dp[amount] > amount ? -1 : dp[amount];\n> }\n> ```\n> `FewestCoinsTopDown(30, [1, 10, 25, 50])` and the bottom-up version both return `3`. The contract requires `0 <= amount < int.MaxValue` and strictly positive denominations; those constraints keep dependencies acyclic and the sentinel arithmetic valid.\n\nA warehouse robot may move only right or down from the loading bay to the dispatch door. Choosing the cheaper immediate tile and breaking ties to the right walks into an expensive corridor and costs `21`; the best complete route costs `10`. Naive recursion eventually finds it, but different route prefixes repeatedly reach the same coordinate.\n\n%% tabs %%\n\n%% tab: Greedy %%\n\n```steptrace\n{\"algorithm\":\"grid-path-greedy\"}\n```\n\nChoose the cheaper next tile, breaking ties right. Later costs trap the route.\n\n%% tab: Naive Recursion %%\n\n```steptrace\n{\"algorithm\":\"grid-path-naive\"}\n```\n\nExplore every right/down route and revisit the same coordinates.\n\n%% tab: Memoization %%\n\n```steptrace\n{\"algorithm\":\"grid-path-memoization\"}\n```\n\nWrite solved remaining costs into the warehouse map and reuse repeated tiles.\n\n%% tab: Tabulation %%\n\n```steptrace\n{\"algorithm\":\"grid-path-tabulation\"}\n```\n\nFill the warehouse map backward from the dispatch door and reveal the route.\n\n%% tab: Memoization (Raw) %%\n\n```steptrace\n{\"algorithm\":\"grid-path-top-down\"}\n```\n\nThe raw view shows the canonical coordinate recursion tree and cache hits.\n\n%% endtabs %%\n\nHere the state is a coordinate rather than an amount. `best(R2C2)` means “the minimum remaining cost from this tile,” independent of how the robot arrived. The four simplified tabs use one warehouse matrix with integrated context, while Memoization (Raw) exposes the canonical recursion tree. Memoization stops repeated calls to a saved coordinate; tabulation makes the dependency order spatial by reading the already-solved tiles to the right and below.\n\n> [!ABSTRACT]- Grid-path state flow\n>\n> ```mermaid\n> flowchart LR\n>   A[\"best(R1C1)\"] -->|right| B[\"best(R1C2)\"]\n>   A -->|down| C[\"best(R2C1)\"]\n>   B -->|down| D[\"best(R2C2)\"]\n>   C -->|right| D\n>   D --> E[\"minimum of right and down\"]\n>   E --> F[\"dispatch door\"]\n> ```\n> `R2C2` is one state even though two route prefixes reach it. Memoization computes its suffix once; tabulation fills it once before either predecessor reads it.\n\n> [!EXAMPLE]- Grid path, top-down and bottom-up (C#)\n>\n> ```csharp\n> static long CheapestPathTopDown(int[,] cost)\n> {\n>     ArgumentNullException.ThrowIfNull(cost);\n>     var rows = cost.GetLength(0);\n>     var columns = cost.GetLength(1);\n>     if (rows == 0 || columns == 0)\n>         throw new ArgumentException(\"The cost grid must be nonempty.\", nameof(cost));\n>     var memo = new long?[rows, columns];\n>\n>     return Solve(0, 0);\n>\n>     long Solve(int row, int column)\n>     {\n>         if (row == rows - 1 && column == columns - 1) return cost[row, column];\n>         if (memo[row, column] is long cached) return cached;\n>\n>         long suffix = row == rows - 1\n>             ? Solve(row, column + 1)\n>             : column == columns - 1\n>                 ? Solve(row + 1, column)\n>                 : Math.Min(Solve(row + 1, column), Solve(row, column + 1));\n>         var answer = checked((long)cost[row, column] + suffix);\n>         memo[row, column] = answer;\n>         return answer;\n>     }\n> }\n> ```\n>\n> ```csharp\n> static long CheapestPathBottomUp(int[,] cost)\n> {\n>     ArgumentNullException.ThrowIfNull(cost);\n>     var rows = cost.GetLength(0);\n>     var columns = cost.GetLength(1);\n>     if (rows == 0 || columns == 0)\n>         throw new ArgumentException(\"The cost grid must be nonempty.\", nameof(cost));\n>     var dp = new long[rows, columns];\n>\n>     for (var row = rows - 1; row >= 0; row--)\n>     for (var column = columns - 1; column >= 0; column--)\n>     {\n>         if (row == rows - 1 && column == columns - 1)\n>         {\n>             dp[row, column] = cost[row, column];\n>             continue;\n>         }\n>\n>         long suffix = row == rows - 1\n>             ? dp[row, column + 1]\n>             : column == columns - 1\n>                 ? dp[row + 1, column]\n>                 : Math.Min(dp[row + 1, column], dp[row, column + 1]);\n>         dp[row, column] = checked((long)cost[row, column] + suffix);\n>     }\n>\n>     return dp[0, 0];\n> }\n> ```\n> Both versions require a nonempty grid and return the same checked `long` route cost. Explicit edge transitions prevent an out-of-grid sentinel from winning against a large valid suffix. The visualization keeps the full table so it can also highlight the chosen route.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Dynamic Programming complexity\",\n  \"variables\": {\n    \"optionCount\": {\n      \"symbol\": \"m\",\n      \"description\": \"number of coin denominations considered at each state\"\n    },\n    \"targetSize\": {\n      \"symbol\": \"n\",\n      \"description\": \"target amount in the coin-change comparison\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (recurse every coin choice)\",\n          \"formula\": \"O(m^n)\",\n          \"curveFrom\": \"exponential\",\n          \"curveTo\": \"unbounded\"\n        },\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Dynamic programming\",\n          \"formula\": \"O(n·m)\",\n          \"curveFrom\": \"linear\",\n          \"curveTo\": \"quadratic\"\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (recurse every coin choice)\",\n          \"formula\": \"O(n)\",\n          \"curveId\": \"linear\"\n        },\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Dynamic programming\",\n          \"formula\": \"O(n)\",\n          \"curveId\": \"linear\"\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# Boundaries\n\nA DP formulation is only as sound as its state definition and recurrence. Reuse and table shape decide whether it is practical.\n\n- **The state omits necessary history.** A coordinate is sufficient because movement is restricted to right and down and the remaining tile costs depend only on position. Fuel, keys, or visited-tile restrictions would also have to become part of the state.\n- **The dependency order is cyclic.** Right/down movement forms a DAG. Unrestricted movement can introduce cycles, so one recursive or tabulated pass no longer works. The problem needs a graph shortest-path algorithm or another convergence rule.\n- **A state may be unreachable.** Coin change without a `1¢` denomination can leave some amounts impossible. Its sentinel must pass through the recurrence without overflowing, and the public result must distinguish “no solution” from a large valid answer.\n- **No states repeat.** A memo with no cache hits adds overhead. This is the usual [[Home/Computer Science/Algorithms/Paradigms/Divide and Conquer|divide-and-conquer]] regime: merge sort has a valid recurrence, but every subarray state is unique.\n\nOptimization DP still needs a valid composition rule. For the same US-coin drawer, the largest-coin rule returns `25 + 1 + 1 + 1 + 1 + 1` for `30¢`. The recurrence compares every allowed predecessor and finds `10 + 10 + 10`. The [[Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy algorithms]] note explains why that local rule fails and when it is safe.\n\n# Questions\n\n<!-- qard-id: 96195e4d-ddca-4379-b065-484eedb7a520 -->\n> [!qard]- What changes between memoization and tabulation if the recurrence is the same?\n> Memoization and tabulation evaluate the same recurrence and store one result per state. They differ in how the evaluation order is determined and which states get computed.\n>\n> - **Memoization (top-down):** starts from the requested state, recursively follows its dependencies and caches each result the first time it is computed.\n> - **Tabulation (bottom-up):** loops fill the stored results in an order where every dependency is already available.\n>\n> | Aspect | Memoization (top-down) | Tabulation (bottom-up) |\n> |---|---|---|\n> | Evaluation order | Recursion from the target discovers dependencies as it goes, so no order has to be written down. The dependencies must still be acyclic. | The loops must visit states in an order that solves every dependency before any state that reads it. |\n> | States computed | Only states reachable from the target are computed, so unneeded states are skipped. | Every state in the planned table is computed, including states the target never reads. |\n> | Control cost | Each call costs a function call and a cache check. Recursion depth follows the longest dependency chain, so very deep chains can overflow the call stack. | Plain loops avoid recursive calls and their stack-depth limit. |\n>\n> When both compute the same set of states with equivalent work per state, their asymptotic time is identical: the number of states times the work per state.\n>\n> Coin change with a `30¢` target shows the two orders. Memoization starts at `best(30)` and recurses into the smaller remaining amounts it needs. Tabulation fills `best[0]` through `best[30]` in increasing order, which works because each amount reads only smaller amounts.\n>\n> [MIT 6.006: Dynamic Programming](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/28461a74f81101874a13d9679a40584d_MIT6_006S20_lec16.pdf) · [MIT 6.006: Memoization](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/ea1cb4a29625017bdbcaf2dfd61b179e_MIT6_006F11_lec19_orig.pdf)\n\n# References\n\n- [Richard Bellman, \"The Theory of Dynamic Programming\" (1954)](https://www.ams.org/bull/1954-60-06/S0002-9904-1954-09848-8/S0002-9904-1954-09848-8.pdf)\n- [MIT 6.006 Dynamic Programming lecture notes, Spring 2020](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/pages/lecture-notes/)\n",
+            "hash": "1e4111756d04701fff53a49358eae8e0689efd63f765392a2b601cf67d529861",
             "topic": "Computer Science",
             "violations": [],
             "needs_fixing_ids": [],
@@ -27830,123 +27830,235 @@
       },
       "proposal": {
         "version": 1,
-        "edits": [
-          {
-            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
-            "expected_hash": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f",
-            "before": ">         int w;\n>         do\n>         {\n>             w = _stack.Pop();\n>             _onStack[w] = false;\n>             component.Add(w);\n>         }\n>         while (w != v);",
-            "after": ">         int member;\n>         do\n>         {\n>             member = _stack.Pop();\n>             _onStack[member] = false;\n>             component.Add(member);\n>         }\n>         while (member != v);",
-            "reason": "Renames the pop-loop variable so it no longer collides with the foreach variable `w` in the same method; the logic is unchanged.",
-            "kind": "note",
-            "learning_target": "same",
-            "essential_meanings": [
-              "The pop loop removes vertices from the stack until the root v is reached, clearing onStack for each",
-              "The code compiles without a variable-name conflict"
-            ],
-            "sources": [
-              {
-                "url": "https://learn.microsoft.com/en-us/dotnet/csharp/misc/cs0136",
-                "claim": "CS0136: a local variable cannot be declared in a nested scope when the same name is declared later in the enclosing scope.",
-                "version": "C# language reference, not version-specific"
-              }
-            ],
-            "feedback_keys": [],
-            "problem": "The C# example declares `w` in the foreach and again as `int w;` in the enclosing method block, which is error CS0136, so the published code does not compile.",
-            "reader_benefit": "The reference implementation compiles as written and the pop loop's role is clearer."
-          }
-        ],
+        "edits": [],
         "dispositions": [
           {
-            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
-            "outcome": "changed",
-            "reason": "The prose, trace, low-link definitions and guard explanation were checked and are accurate. The review's finding is valid: the foreach variable `w` and the later `int w;` in the same method scope produce CS0136. Renaming the pop variable to `member` fixes the compile error without changing the algorithm."
+            "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+            "outcome": "keep",
+            "reason": "Audited the whole note against its text. The opening defines finite acyclic one-pass DP, states the optimal-substructure condition and says repetition affects efficiency, not correctness. The coin-change counterexample is correct: greedy gives 25+1×5 = 6 coins and 10+10+10 = 3 coins. The grid-path costs of 21 and 10 are consistent with the visualizations as described. Both C# examples validate their inputs, keep the sentinel arithmetic safe, and handle the edges of the grid explicitly. The complexity block (O(n·m) time, O(n) space) matches the coin-change DP. The Boundaries section covers missing state, cyclic dependencies, unreachable states and the no-repeat case, and links to the correct sibling notes. The single Qard tests one focused comparison with a correct answer and sources, and no violations are flagged. The note is accurate and coherent, so no edit is warranted."
           }
         ],
         "feedback": []
       },
       "source_hashes": {
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f"
+        "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md": "1e4111756d04701fff53a49358eae8e0689efd63f765392a2b601cf67d529861"
       },
       "feedback_keys": [],
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "repair_inputs": {
-        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": ""
+        "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md": ""
       },
       "prepared_source_version": 1,
-      "prepared_at": "2026-11-10T19:54:02.751301Z",
-      "review_repair_key": "5e37f1977082945be5d1b9effaf24d2debf9e0720d0b7739596285e4a78de00b",
-      "repair_reserved": true,
-      "repair_review": {
+      "prepared_at": "2026-11-10T20:00:43.144366Z",
+      "review_evidence": {
+        "raw_review": {
+          "verdict": "CHANGES REQUIRED",
+          "overall_reason": "Facts check out, but the explanation order has a real reader-facing flaw: grid path is referenced before it is introduced. The keep disposition leaves it unfixed, so the target is unresolved.",
+          "notes": [
+            {
+              "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+              "verdict": "CHANGES REQUIRED",
+              "summary": "The technical content is accurate (greedy 6 coins vs 3, O(n·m) time, O(n) space, correct C# guards). However, the prose after the coin-change tabs discusses 'both examples', grid path and the dispatch door before the warehouse example is introduced. It also mixes 'memoisation' with 'Memoization'. These are unfixed clarity defects, and the keep does not address them.",
+              "page_type": "Concept — typed frontmatter, optional Questions/References present, Qard ID protected; no generated navigation or datacore blocks.",
+              "current_text_evidence": [
+                {
+                  "quote": "Both examples become DP only after the state discards irrelevant history.",
+                  "line_start": 71,
+                  "reason": "Refers to two examples and to grid path before the grid-path example is introduced later, so first-read order is confusing."
+                },
+                {
+                  "quote": "grid path moves backward from the dispatch door",
+                  "line_start": 74,
+                  "reason": "The dispatch door and grid path are unexplained at this point; the context arrives only in the later warehouse paragraph."
+                },
+                {
+                  "quote": "**Top-down (memoisation)** follows the recurrence from the target.",
+                  "line_start": 73,
+                  "reason": "British spelling conflicts with 'Memoization' used in the tab names, the linked note and the Qard."
+                },
+                {
+                  "quote": "What changes between memoization and tabulation if the recurrence is the same?",
+                  "line_start": 233,
+                  "reason": "The Qard is a single focused comparison with a correct answer and sources. It needs no change and keeps its ID."
+                }
+              ],
+              "target_resolution": "UNRESOLVED",
+              "split_suggestion": "No split: coin change and grid path are two examples of one DP idea, and the Boundaries section ties them together. Separate notes would fragment it.",
+              "findings": [
+                {
+                  "severity": "Medium",
+                  "dimension": "Clarity / explanation order",
+                  "location": "Paragraph after the coin-change tabs and the Top-down/Bottom-up bullets (lines 71-74)",
+                  "evidence": "'Both examples', 'Grid path keeps the current coordinate' and 'dispatch door' appear before the warehouse grid problem is described.",
+                  "effect": "A reader meets undefined references on first read, so the topic is harder to re-enter.",
+                  "fix": "Make the paragraph coin-change-only at that point and move the grid-path comparisons to after the warehouse example. Alternatively, introduce the grid problem first."
+                },
+                {
+                  "severity": "Medium",
+                  "dimension": "Terminology",
+                  "location": "Line 73",
+                  "evidence": "'memoisation' versus 'Memoization' elsewhere.",
+                  "effect": "Inconsistent term spelling within one note.",
+                  "fix": "Use 'memoization' consistently."
+                }
+              ],
+              "source_checks": [],
+              "rejection_equivalence": [],
+              "quality": {
+                "accuracy": "PASS",
+                "clarity": "FAIL",
+                "question_quality": "PASS",
+                "identity_safety": "PASS",
+                "rules_compliance": "PASS"
+              }
+            }
+          ],
+          "change_checks": []
+        },
+        "bindings": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+            "citation_index": 3,
+            "reported_line_start": 233,
+            "resolved_line_start": 357
+          }
+        ],
+        "source_hashes": {
+          "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md": "1e4111756d04701fff53a49358eae8e0689efd63f765392a2b601cf67d529861"
+        },
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+      },
+      "completed_review": {
         "verdict": "CHANGES REQUIRED",
-        "overall_reason": "The keep is not justified. The C# implementation declares `w` twice in one method scope, so it does not compile. The disposition said the code follows the same rules but did not catch this.",
+        "overall_reason": "Facts check out, but the explanation order has a real reader-facing flaw: grid path is referenced before it is introduced. The keep disposition leaves it unfixed, so the target is unresolved.",
         "notes": [
           {
-            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+            "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
             "verdict": "CHANGES REQUIRED",
-            "summary": "The prose, trace and guard explanation are accurate and well ordered. The C# example has a compile error, which is a concrete accuracy defect in a note marked publish: true.",
-            "page_type": "Concept — no required sections; Questions are absent, which is allowed. The reference is a single primary source.",
+            "summary": "The technical content is accurate (greedy 6 coins vs 3, O(n·m) time, O(n) space, correct C# guards). However, the prose after the coin-change tabs discusses 'both examples', grid path and the dispatch door before the warehouse example is introduced. It also mixes 'memoisation' with 'Memoization'. These are unfixed clarity defects, and the keep does not address them.",
+            "page_type": "Concept — typed frontmatter, optional Questions/References present, Qard ID protected; no generated navigation or datacore blocks.",
             "current_text_evidence": [
               {
-                "quote": "On entry, set `disc[v] = low[v] = time++`, then push `v`.",
-                "line_start": 24,
-                "reason": "The prose and trace correctly describe the disc/low/onStack rules and the emission order."
+                "quote": "Both examples become DP only after the state discards irrelevant history.",
+                "line_start": 71,
+                "reason": "Refers to two examples and to grid path before the grid-path example is introduced later, so first-read order is confusing."
               },
               {
-                "quote": "foreach (var w in _adjacency[v])",
-                "line_start": 88,
-                "reason": "The foreach declares `w` in a nested scope."
+                "quote": "grid path moves backward from the dispatch door",
+                "line_start": 74,
+                "reason": "The dispatch door and grid path are unexplained at this point; the context arrives only in the later warehouse paragraph."
               },
               {
-                "quote": "int w;",
-                "line_start": 107,
-                "reason": "`int w;` is declared later in the enclosing method block. The enclosing declaration space includes the earlier foreach, so C# reports CS0136 and the code does not compile."
+                "quote": "**Top-down (memoisation)** follows the recurrence from the target.",
+                "line_start": 73,
+                "reason": "British spelling conflicts with 'Memoization' used in the tab names, the linked note and the Qard."
+              },
+              {
+                "quote": "What changes between memoization and tabulation if the recurrence is the same?",
+                "line_start": 357,
+                "reason": "The Qard is a single focused comparison with a correct answer and sources. It needs no change and keeps its ID."
               }
             ],
             "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: the note covers one algorithm, and the guard section depends on the same update rules.",
+            "split_suggestion": "No split: coin change and grid path are two examples of one DP idea, and the Boundaries section ties them together. Separate notes would fragment it.",
             "findings": [
               {
-                "severity": "High",
-                "dimension": "Accuracy",
-                "location": "`# C# Implementation`, StrongConnect: `foreach (var w ...)` and later `int w;`",
-                "evidence": "`foreach (var w in _adjacency[v])` and `int w;` in the same method scope. `int w;` is declared later in the enclosing block, so it conflicts with the foreach variable.",
-                "effect": "The published reference implementation fails to compile with CS0136. A reader copying it gets an error.",
-                "fix": "Rename one variable, for example the foreach variable to `next` and the pop variable to `member`, or use `int popped;` in the pop loop. Keep the logic unchanged."
+                "severity": "Medium",
+                "dimension": "Clarity / explanation order",
+                "location": "Paragraph after the coin-change tabs and the Top-down/Bottom-up bullets (lines 71-74)",
+                "evidence": "'Both examples', 'Grid path keeps the current coordinate' and 'dispatch door' appear before the warehouse grid problem is described.",
+                "effect": "A reader meets undefined references on first read, so the topic is harder to re-enter.",
+                "fix": "Make the paragraph coin-change-only at that point and move the grid-path comparisons to after the warehouse example. Alternatively, introduce the grid problem first."
+              },
+              {
+                "severity": "Medium",
+                "dimension": "Terminology",
+                "location": "Line 73",
+                "evidence": "'memoisation' versus 'Memoization' elsewhere.",
+                "effect": "Inconsistent term spelling within one note.",
+                "fix": "Use 'memoization' consistently."
               }
             ],
             "source_checks": [],
             "rejection_equivalence": [],
             "quality": {
-              "accuracy": "FAIL",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
               "rules_compliance": "PASS"
             }
           }
         ],
         "change_checks": []
       },
-      "repair_previous_proposal": {
-        "version": 1,
-        "edits": [],
-        "dispositions": [
+      "blocked_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "Facts check out, but the explanation order has a real reader-facing flaw: grid path is referenced before it is introduced. The keep disposition leaves it unfixed, so the target is unresolved.",
+        "notes": [
           {
-            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
-            "outcome": "keep",
-            "reason": "Audited the whole note. The disc, low and onStack definitions match Tarjan's formulation. The worked trace (A→B, B→C, C→A, C→D, D→E, E→D) is correct: low[C] drops to 0 through the active edge to A, and {E,D} is popped before {C,B,A}. The reverse-topological emission order is right. The C# code follows the same rules: it uses disc[w] for active non-tree edges, guards on _onStack, and pops to v. The section on the onStack guard correctly says that dropping the guard merges SCCs, and that a low[w] variant finds the same roots but departs from the formal definition. The contrast with articulation points is accurate. The SIAM reference is the original Tarjan 1972 paper. The prose is direct and well ordered, and there are no flagged cards or known violations. The optional Questions section is not needed, so no edit would add real value."
+            "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The technical content is accurate (greedy 6 coins vs 3, O(n·m) time, O(n) space, correct C# guards). However, the prose after the coin-change tabs discusses 'both examples', grid path and the dispatch door before the warehouse example is introduced. It also mixes 'memoisation' with 'Memoization'. These are unfixed clarity defects, and the keep does not address them.",
+            "page_type": "Concept — typed frontmatter, optional Questions/References present, Qard ID protected; no generated navigation or datacore blocks.",
+            "current_text_evidence": [
+              {
+                "quote": "Both examples become DP only after the state discards irrelevant history.",
+                "line_start": 71,
+                "reason": "Refers to two examples and to grid path before the grid-path example is introduced later, so first-read order is confusing."
+              },
+              {
+                "quote": "grid path moves backward from the dispatch door",
+                "line_start": 74,
+                "reason": "The dispatch door and grid path are unexplained at this point; the context arrives only in the later warehouse paragraph."
+              },
+              {
+                "quote": "**Top-down (memoisation)** follows the recurrence from the target.",
+                "line_start": 73,
+                "reason": "British spelling conflicts with 'Memoization' used in the tab names, the linked note and the Qard."
+              },
+              {
+                "quote": "What changes between memoization and tabulation if the recurrence is the same?",
+                "line_start": 357,
+                "reason": "The Qard is a single focused comparison with a correct answer and sources. It needs no change and keeps its ID."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: coin change and grid path are two examples of one DP idea, and the Boundaries section ties them together. Separate notes would fragment it.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Clarity / explanation order",
+                "location": "Paragraph after the coin-change tabs and the Top-down/Bottom-up bullets (lines 71-74)",
+                "evidence": "'Both examples', 'Grid path keeps the current coordinate' and 'dispatch door' appear before the warehouse grid problem is described.",
+                "effect": "A reader meets undefined references on first read, so the topic is harder to re-enter.",
+                "fix": "Make the paragraph coin-change-only at that point and move the grid-path comparisons to after the warehouse example. Alternatively, introduce the grid problem first."
+              },
+              {
+                "severity": "Medium",
+                "dimension": "Terminology",
+                "location": "Line 73",
+                "evidence": "'memoisation' versus 'Memoization' elsewhere.",
+                "effect": "Inconsistent term spelling within one note.",
+                "fix": "Use 'memoization' consistently."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
           }
         ],
-        "feedback": []
+        "change_checks": []
       },
-      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "feedback_snapshot": [],
-      "blocked_review": {
-        "stage": "deterministic_application",
-        "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/dotnet/csharp/misc/cs0136"
-      },
-      "failed_at": "2026-11-10T19:54:06.227657Z"
+      "feedback_snapshot": []
     },
     "data-persistence-4ea34db4": {
       "workload_id": "270542e03ba04146b22c78499257f60e",
@@ -32252,6 +32364,150 @@
         "change_checks": []
       },
       "feedback_snapshot": []
+    },
+    "63561eba985d33b32f786d3c55ead26271dcbfcde667753c91c4247942dc45c5": {
+      "workload_id": "d9820c0a869a4376b0c4be62174ca4b9",
+      "topic_id": "computer-science-445ddaa5",
+      "batch": {
+        "topic": "Computer Science",
+        "topic_id": "computer-science-445ddaa5",
+        "notes": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+            "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Finds strongly connected components in one DFS using discovery indices, low links, and an active-vertex stack.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-07-26T20:18:51.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-26T19:27:00.411Z\"\n---\n\n[[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly connected components]] partition a digraph into maximal mutually reachable regions. Tarjan's algorithm finds that partition in one DFS by recording each vertex's discovery time, the earliest reachable vertex still on the active stack, and whether it still belongs to a component under construction.\n\nThe component boundary appears when a vertex cannot reach any earlier active vertex. That vertex is an SCC root, and popping the stack down to it emits the complete component. [[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly Connected Components]] compares Tarjan with the two-pass and path-based alternatives. This note follows Tarjan's active-stack invariant and implementation.\n\n# Low-Link State\n\n- `disc[v]` is the discovery index assigned when DFS first enters `v`.\n- `low[v]` is the smallest discovery index reachable from `v` through DFS-tree edges plus at most one edge to a vertex still on the stack.\n- `onStack[v]` distinguishes an active vertex from one already assigned to a completed component.\n\nOn entry, set `disc[v] = low[v] = time++`, then push `v`. For an edge `v → w`, recurse if `w` is unvisited and fold `low[w]` into `low[v]` on return. If `w` is already visited and still active, fold `disc[w]` into `low[v]`. Once every outgoing edge has been processed, `low[v] == disc[v]` identifies an SCC root.\n\nOn `A→B, B→C, C→A, C→D, D→E, E→D`:\n\n```text\nvisit A  disc=0 low=0   stack=[A]\n visit B disc=1 low=1   stack=[A,B]\n  visit C disc=2 low=2  stack=[A,B,C]\n   edge C→A: low[C]=0\n   visit D disc=3 low=3 stack=[A,B,C,D]\n    visit E disc=4 low=4 stack=[A,B,C,D,E]\n     edge E→D: low[E]=3\n   D done: low[D]=disc[D]=3 -> pop {E,D}\n  back in C: low[C]=min(0, low[D]=3)=0\n back in B: low[B]=min(1, low[C]=0)=0\nback in A: low[A]=min(0, low[B]=0)=0\nA done: low[A]=disc[A]=0 -> pop {C,B,A}\n```\n\nThe components leave in reverse topological order of the condensation: `{D, E}` before `{A, B, C}`.\n\n# C# Implementation\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> public sealed class Tarjan\n> {\n>     private readonly List<int>[] _adjacency;\n>     private readonly int[] _disc;\n>     private readonly int[] _low;\n>     private readonly bool[] _onStack;\n>     private readonly Stack<int> _stack = new();\n>     private readonly List<List<int>> _components = new();\n>     private int _time;\n>\n>     public Tarjan(List<int>[] adjacency)\n>     {\n>         _adjacency = adjacency;\n>         _disc = new int[adjacency.Length];\n>         _low = new int[adjacency.Length];\n>         _onStack = new bool[adjacency.Length];\n>         Array.Fill(_disc, -1);\n>     }\n>\n>     public List<List<int>> Components()\n>     {\n>         for (var v = 0; v < _adjacency.Length; v++)\n>         {\n>             if (_disc[v] == -1)\n>             {\n>                 StrongConnect(v);\n>             }\n>         }\n>\n>         return _components;\n>     }\n>\n>     private void StrongConnect(int v)\n>     {\n>         _disc[v] = _low[v] = _time++;\n>         _stack.Push(v);\n>         _onStack[v] = true;\n>\n>         foreach (var w in _adjacency[v])\n>         {\n>             if (_disc[w] == -1)\n>             {\n>                 StrongConnect(w);\n>                 _low[v] = Math.Min(_low[v], _low[w]);\n>             }\n>             else if (_onStack[w])\n>             {\n>                 _low[v] = Math.Min(_low[v], _disc[w]);\n>             }\n>         }\n>\n>         if (_low[v] != _disc[v])\n>         {\n>             return;\n>         }\n>\n>         var component = new List<int>();\n>         int w;\n>         do\n>         {\n>             w = _stack.Pop();\n>             _onStack[w] = false;\n>             component.Add(w);\n>         }\n>         while (w != v);\n>\n>         _components.Add(component);\n>     }\n> }\n> ```\n\n# The Guard That Keeps Components Separate\n\nThe non-tree update must ignore vertices already removed from the stack. An edge to one of them enters a finished component. It cannot provide a return path for the active DFS subtree. Letting that vertex lower `low[v]` can hide a valid root and merge separate SCCs.\n\nFor an edge to an active, already-visited vertex, Tarjan's definition uses `disc[w]`. A guarded `low[w]` variant still finds the same SCC roots, but the stored values no longer match Tarjan's formal low-link definition. Removing the `onStack` guard breaks the component boundary.\n\nThis is related to the discovery/low-value pattern in [[Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges|articulation points and bridges]], but the directed edge classification, active stack, and update rules are different.\n\n# References\n\n- [Depth-First Search and Linear Graph Algorithms](https://epubs.siam.org/doi/10.1137/0201010)\n",
+            "hash": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f",
+            "topic": "Computer Science",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+            "expected_hash": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f",
+            "before": ">         int w;\n>         do\n>         {\n>             w = _stack.Pop();\n>             _onStack[w] = false;\n>             component.Add(w);\n>         }\n>         while (w != v);",
+            "after": ">         int member;\n>         do\n>         {\n>             member = _stack.Pop();\n>             _onStack[member] = false;\n>             component.Add(member);\n>         }\n>         while (member != v);",
+            "reason": "Renames the pop-loop variable so it no longer collides with the foreach variable `w` in the same method; the logic is unchanged.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "The pop loop removes vertices from the stack until the root v is reached, clearing onStack for each",
+              "The code compiles without a variable-name conflict"
+            ],
+            "sources": [
+              {
+                "url": "https://learn.microsoft.com/en-us/dotnet/csharp/misc/cs0136",
+                "claim": "CS0136: a local variable cannot be declared in a nested scope when the same name is declared later in the enclosing scope.",
+                "version": "C# language reference, not version-specific"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The C# example declares `w` in the foreach and again as `int w;` in the enclosing method block, which is error CS0136, so the published code does not compile.",
+            "reader_benefit": "The reference implementation compiles as written and the pop loop's role is clearer."
+          }
+        ],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+            "outcome": "changed",
+            "reason": "The prose, trace, low-link definitions and guard explanation were checked and are accurate. The review's finding is valid: the foreach variable `w` and the later `int w;` in the same method scope produce CS0136. Renaming the pop variable to `member` fixes the compile error without changing the algorithm."
+          }
+        ],
+        "feedback": []
+      },
+      "source_hashes": {
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f"
+      },
+      "feedback_keys": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-10T19:54:02.751301Z",
+      "review_repair_key": "5e37f1977082945be5d1b9effaf24d2debf9e0720d0b7739596285e4a78de00b",
+      "repair_reserved": true,
+      "repair_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep is not justified. The C# implementation declares `w` twice in one method scope, so it does not compile. The disposition said the code follows the same rules but did not catch this.",
+        "notes": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The prose, trace and guard explanation are accurate and well ordered. The C# example has a compile error, which is a concrete accuracy defect in a note marked publish: true.",
+            "page_type": "Concept — no required sections; Questions are absent, which is allowed. The reference is a single primary source.",
+            "current_text_evidence": [
+              {
+                "quote": "On entry, set `disc[v] = low[v] = time++`, then push `v`.",
+                "line_start": 24,
+                "reason": "The prose and trace correctly describe the disc/low/onStack rules and the emission order."
+              },
+              {
+                "quote": "foreach (var w in _adjacency[v])",
+                "line_start": 88,
+                "reason": "The foreach declares `w` in a nested scope."
+              },
+              {
+                "quote": "int w;",
+                "line_start": 107,
+                "reason": "`int w;` is declared later in the enclosing method block. The enclosing declaration space includes the earlier foreach, so C# reports CS0136 and the code does not compile."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the note covers one algorithm, and the guard section depends on the same update rules.",
+            "findings": [
+              {
+                "severity": "High",
+                "dimension": "Accuracy",
+                "location": "`# C# Implementation`, StrongConnect: `foreach (var w ...)` and later `int w;`",
+                "evidence": "`foreach (var w in _adjacency[v])` and `int w;` in the same method scope. `int w;` is declared later in the enclosing block, so it conflicts with the foreach variable.",
+                "effect": "The published reference implementation fails to compile with CS0136. A reader copying it gets an error.",
+                "fix": "Rename one variable, for example the foreach variable to `next` and the pop variable to `member`, or use `int popped;` in the pop loop. Keep the logic unchanged."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "repair_previous_proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+            "outcome": "keep",
+            "reason": "Audited the whole note. The disc, low and onStack definitions match Tarjan's formulation. The worked trace (A→B, B→C, C→A, C→D, D→E, E→D) is correct: low[C] drops to 0 through the active edge to A, and {E,D} is popped before {C,B,A}. The reverse-topological emission order is right. The C# code follows the same rules: it uses disc[w] for active non-tree edges, guards on _onStack, and pops to v. The section on the onStack guard correctly says that dropping the guard merges SCCs, and that a low[w] variant finds the same roots but departs from the formal definition. The contrast with articulation points is accurate. The SIAM reference is the original Tarjan 1972 paper. The prose is direct and well ordered, and there are no flagged cards or known violations. The optional Questions section is not needed, so no edit would add real value."
+          }
+        ],
+        "feedback": []
+      },
+      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "feedback_snapshot": [],
+      "blocked_review": {
+        "stage": "deterministic_application",
+        "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/dotnet/csharp/misc/cs0136"
+      },
+      "failed_at": "2026-11-10T19:54:06.227657Z"
     }
   },
   "completed_review_holds": {
@@ -32635,86 +32891,7 @@
     },
     "prepared_source_version": 1,
     "prepared_at": "2026-11-10T20:00:43.144366Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CHANGES REQUIRED",
-        "overall_reason": "Facts check out, but the explanation order has a real reader-facing flaw: grid path is referenced before it is introduced. The keep disposition leaves it unfixed, so the target is unresolved.",
-        "notes": [
-          {
-            "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
-            "verdict": "CHANGES REQUIRED",
-            "summary": "The technical content is accurate (greedy 6 coins vs 3, O(n·m) time, O(n) space, correct C# guards). However, the prose after the coin-change tabs discusses 'both examples', grid path and the dispatch door before the warehouse example is introduced. It also mixes 'memoisation' with 'Memoization'. These are unfixed clarity defects, and the keep does not address them.",
-            "page_type": "Concept — typed frontmatter, optional Questions/References present, Qard ID protected; no generated navigation or datacore blocks.",
-            "current_text_evidence": [
-              {
-                "quote": "Both examples become DP only after the state discards irrelevant history.",
-                "line_start": 71,
-                "reason": "Refers to two examples and to grid path before the grid-path example is introduced later, so first-read order is confusing."
-              },
-              {
-                "quote": "grid path moves backward from the dispatch door",
-                "line_start": 74,
-                "reason": "The dispatch door and grid path are unexplained at this point; the context arrives only in the later warehouse paragraph."
-              },
-              {
-                "quote": "**Top-down (memoisation)** follows the recurrence from the target.",
-                "line_start": 73,
-                "reason": "British spelling conflicts with 'Memoization' used in the tab names, the linked note and the Qard."
-              },
-              {
-                "quote": "What changes between memoization and tabulation if the recurrence is the same?",
-                "line_start": 233,
-                "reason": "The Qard is a single focused comparison with a correct answer and sources. It needs no change and keeps its ID."
-              }
-            ],
-            "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: coin change and grid path are two examples of one DP idea, and the Boundaries section ties them together. Separate notes would fragment it.",
-            "findings": [
-              {
-                "severity": "Medium",
-                "dimension": "Clarity / explanation order",
-                "location": "Paragraph after the coin-change tabs and the Top-down/Bottom-up bullets (lines 71-74)",
-                "evidence": "'Both examples', 'Grid path keeps the current coordinate' and 'dispatch door' appear before the warehouse grid problem is described.",
-                "effect": "A reader meets undefined references on first read, so the topic is harder to re-enter.",
-                "fix": "Make the paragraph coin-change-only at that point and move the grid-path comparisons to after the warehouse example. Alternatively, introduce the grid problem first."
-              },
-              {
-                "severity": "Medium",
-                "dimension": "Terminology",
-                "location": "Line 73",
-                "evidence": "'memoisation' versus 'Memoization' elsewhere.",
-                "effect": "Inconsistent term spelling within one note.",
-                "fix": "Use 'memoization' consistently."
-              }
-            ],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "FAIL",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
-          "citation_index": 3,
-          "reported_line_start": 233,
-          "resolved_line_start": 357
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md": "1e4111756d04701fff53a49358eae8e0689efd63f765392a2b601cf67d529861"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
+    "blocked_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "Facts check out, but the explanation order has a real reader-facing flaw: grid path is referenced before it is introduced. The keep disposition leaves it unfixed, so the target is unresolved.",
       "notes": [
@@ -32777,6 +32954,85 @@
         }
       ],
       "change_checks": []
-    }
+    },
+    "repair_previous_proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against its text. The opening defines finite acyclic one-pass DP, states the optimal-substructure condition and says repetition affects efficiency, not correctness. The coin-change counterexample is correct: greedy gives 25+1×5 = 6 coins and 10+10+10 = 3 coins. The grid-path costs of 21 and 10 are consistent with the visualizations as described. Both C# examples validate their inputs, keep the sentinel arithmetic safe, and handle the edges of the grid explicitly. The complexity block (O(n·m) time, O(n) space) matches the coin-change DP. The Boundaries section covers missing state, cyclic dependencies, unreachable states and the no-repeat case, and links to the correct sibling notes. The single Qard tests one focused comparison with a correct answer and sources, and no violations are flagged. The note is accurate and coherent, so no edit is warranted."
+        }
+      ],
+      "feedback": []
+    },
+    "repair_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "Facts check out, but the explanation order has a real reader-facing flaw: grid path is referenced before it is introduced. The keep disposition leaves it unfixed, so the target is unresolved.",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The technical content is accurate (greedy 6 coins vs 3, O(n·m) time, O(n) space, correct C# guards). However, the prose after the coin-change tabs discusses 'both examples', grid path and the dispatch door before the warehouse example is introduced. It also mixes 'memoisation' with 'Memoization'. These are unfixed clarity defects, and the keep does not address them.",
+          "page_type": "Concept — typed frontmatter, optional Questions/References present, Qard ID protected; no generated navigation or datacore blocks.",
+          "current_text_evidence": [
+            {
+              "quote": "Both examples become DP only after the state discards irrelevant history.",
+              "line_start": 71,
+              "reason": "Refers to two examples and to grid path before the grid-path example is introduced later, so first-read order is confusing."
+            },
+            {
+              "quote": "grid path moves backward from the dispatch door",
+              "line_start": 74,
+              "reason": "The dispatch door and grid path are unexplained at this point; the context arrives only in the later warehouse paragraph."
+            },
+            {
+              "quote": "**Top-down (memoisation)** follows the recurrence from the target.",
+              "line_start": 73,
+              "reason": "British spelling conflicts with 'Memoization' used in the tab names, the linked note and the Qard."
+            },
+            {
+              "quote": "What changes between memoization and tabulation if the recurrence is the same?",
+              "line_start": 357,
+              "reason": "The Qard is a single focused comparison with a correct answer and sources. It needs no change and keeps its ID."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: coin change and grid path are two examples of one DP idea, and the Boundaries section ties them together. Separate notes would fragment it.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Clarity / explanation order",
+              "location": "Paragraph after the coin-change tabs and the Top-down/Bottom-up bullets (lines 71-74)",
+              "evidence": "'Both examples', 'Grid path keeps the current coordinate' and 'dispatch door' appear before the warehouse grid problem is described.",
+              "effect": "A reader meets undefined references on first read, so the topic is harder to re-enter.",
+              "fix": "Make the paragraph coin-change-only at that point and move the grid-path comparisons to after the warehouse example. Alternatively, introduce the grid problem first."
+            },
+            {
+              "severity": "Medium",
+              "dimension": "Terminology",
+              "location": "Line 73",
+              "evidence": "'memoisation' versus 'Memoization' elsewhere.",
+              "effect": "Inconsistent term spelling within one note.",
+              "fix": "Use 'memoization' consistently."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "FAIL",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    },
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "review_repair_key": "83b3f450424a9b7aa23ae73f27857da5987383365c58f1b7a9d16ab2c84663a7",
+    "author_repair_pending": true
   }
 }
