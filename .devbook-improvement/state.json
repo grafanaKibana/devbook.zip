@@ -10026,11 +10026,11 @@
     "version": 1,
     "id": "d9820c0a869a4376b0c4be62174ca4b9",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 88.3884333,
+    "elapsed_seconds": 107.3054858,
     "calls_reserved": 3,
-    "responses_received": 2,
+    "responses_received": 3,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md"
     ],
@@ -10049,7 +10049,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T19:54:49.326923Z",
+    "checkpoint_at": "2026-11-10T19:55:08.243964Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -29569,6 +29569,133 @@
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-10T19:54:45.243765Z"
+    "prepared_at": "2026-11-10T19:54:45.243765Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The note is accurate and well ordered. The single edit fixes a real capitalization slip without altering meaning.",
+        "notes": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md",
+            "verdict": "CLEAN",
+            "summary": "The complete note was read. The DAG condition, the Kahn and DFS reverse-postorder arguments, cycle detection, non-uniqueness, the complexity entries, the C# code and the SCC condensation remarks are correct. The only defect was a stray capital in the comparison table, and the edit fixes it with no loss of meaning.",
+            "page_type": "Concept — no Questions section, which is optional; the References are real primary and secondary sources; code fences have language identifiers.",
+            "current_text_evidence": [
+              {
+                "quote": "A cycle `a → b → … → a` eventually requires `a` to precede itself.",
+                "line_start": 16,
+                "reason": "The note states the acyclicity condition with its mechanism and without padding."
+              },
+              {
+                "quote": "Kahn's emits fewer than `V` vertices because every vertex trapped in a cycle keeps an incoming edge",
+                "line_start": 119,
+                "reason": "The cycle-detection mechanism is accurate and explicit."
+              },
+              {
+                "quote": "Priority queue yields a canonical (e.g. lexicographically smallest) order",
+                "line_start": 173,
+                "reason": "The corrected table cell now has consistent lowercase and keeps its meaning."
+              },
+              {
+                "quote": "Tarjan's emits components in reverse topological order as it unwinds.",
+                "line_start": 176,
+                "reason": "This SCC remark is factually correct and ties the note to a related topic."
+              }
+            ],
+            "target_resolution": "RESOLVED",
+            "split_suggestion": "No split: topological sort with its two constructions, failure modes and comparison is one coherent topic.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": [
+          {
+            "edit_index": 0,
+            "verdict": "WORTHWHILE",
+            "reason": "The proofreading fix removes a mid-parenthetical capital in the comparison table. It is accurate and minimal, and it changes no meaning or metadata."
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md",
+          "citation_index": 2,
+          "reported_line_start": 173,
+          "resolved_line_start": 174
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md",
+          "citation_index": 3,
+          "reported_line_start": 176,
+          "resolved_line_start": 179
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md": "d650674b38ce4db1a4434d7054f265e9c9bee36af1c526a28d828748007bb0da"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The note is accurate and well ordered. The single edit fixes a real capitalization slip without altering meaning.",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md",
+          "verdict": "CLEAN",
+          "summary": "The complete note was read. The DAG condition, the Kahn and DFS reverse-postorder arguments, cycle detection, non-uniqueness, the complexity entries, the C# code and the SCC condensation remarks are correct. The only defect was a stray capital in the comparison table, and the edit fixes it with no loss of meaning.",
+          "page_type": "Concept — no Questions section, which is optional; the References are real primary and secondary sources; code fences have language identifiers.",
+          "current_text_evidence": [
+            {
+              "quote": "A cycle `a → b → … → a` eventually requires `a` to precede itself.",
+              "line_start": 16,
+              "reason": "The note states the acyclicity condition with its mechanism and without padding."
+            },
+            {
+              "quote": "Kahn's emits fewer than `V` vertices because every vertex trapped in a cycle keeps an incoming edge",
+              "line_start": 119,
+              "reason": "The cycle-detection mechanism is accurate and explicit."
+            },
+            {
+              "quote": "Priority queue yields a canonical (e.g. lexicographically smallest) order",
+              "line_start": 174,
+              "reason": "The corrected table cell now has consistent lowercase and keeps its meaning."
+            },
+            {
+              "quote": "Tarjan's emits components in reverse topological order as it unwinds.",
+              "line_start": 179,
+              "reason": "This SCC remark is factually correct and ties the note to a related topic."
+            }
+          ],
+          "target_resolution": "RESOLVED",
+          "split_suggestion": "No split: topological sort with its two constructions, failure modes and comparison is one coherent topic.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": [
+        {
+          "edit_index": 0,
+          "verdict": "WORTHWHILE",
+          "reason": "The proofreading fix removes a mid-parenthetical capital in the comparison table. It is accurate and minimal, and it changes no meaning or metadata."
+        }
+      ]
+    }
   }
 }
