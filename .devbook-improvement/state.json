@@ -10239,9 +10239,9 @@
     "version": 1,
     "id": "270542e03ba04146b22c78499257f60e",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-10T07:30:50.865899Z",
-    "elapsed_seconds": 637.9325207999998,
+    "elapsed_seconds": 640.8653564999998,
     "calls_reserved": 19,
     "responses_received": 19,
     "attempted_paths": [
@@ -10252,7 +10252,8 @@
       "Vault/Home/Data Persistence/ORMs/ORMs.md",
       "Vault/Home/Data Persistence/SQL/Database Locks.md",
       "Vault/Home/Data Persistence/SQL/Indexes.md",
-      "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md"
+      "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md",
+      "Vault/Home/Data Persistence/SQL/Replication.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -10849,10 +10850,21 @@
           },
           "model_calls": 16
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+        "outcome": "proposal_blocked",
+        "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait-for.html",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait-for.html",
+          "model_calls": 19
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T07:41:28.797933Z",
+    "checkpoint_at": "2026-11-10T07:41:31.730769Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
