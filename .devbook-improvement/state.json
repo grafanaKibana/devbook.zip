@@ -7482,6 +7482,71 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Data Persistence/SQL/Indexes.md": {
+      "content_hash": "490821140c8b958c0ec4b295fe20b44614225dbc991702825fb3b82c9e5bf155",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "490821140c8b958c0ec4b295fe20b44614225dbc991702825fb3b82c9e5bf155",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate, conditioned on engine and measurement, and ordered from overview to structure inventory to B+ tree, rowstore, columnstore, maintenance and decision flow. Its engine-specific claims are scoped to SQL Server or PostgreSQL as appropriate. No concrete defect justifies an edit.",
+          "page_type": "Concept — frontmatter intact, no Qard cards (Questions optional), two relevant primary references as bare link bullets, all code fences carry a language.",
+          "current_text_evidence": [
+            {
+              "quote": "It is a storage organization, not a PostgreSQL index method",
+              "line_start": 27,
+              "reason": "Correctly bounds LSM against PostgreSQL's index methods."
+            },
+            {
+              "quote": "SQL Server leaf-layout and key-lookup claims therefore do not transfer automatically to another engine.",
+              "line_start": 40,
+              "reason": "Scopes the clustered-leaf and RID claims to SQL Server and not to PostgreSQL."
+            },
+            {
+              "quote": "parameterization can prevent the optimizer from proving that implication",
+              "line_start": 83,
+              "reason": "States the filtered-index matching condition accurately."
+            },
+            {
+              "quote": "| `REORGANIZE` | Incrementally compacts and orders leaf pages | Does not refresh statistics |",
+              "line_start": 122,
+              "reason": "Maintenance operation semantics are correct and separate statistics from physical repair."
+            },
+            {
+              "quote": "Small inserts first land in delta stores, background tuple movement compresses closed rowgroups",
+              "line_start": 107,
+              "reason": "Columnstore mechanism is correct, with its maintenance cost explained."
+            },
+            {
+              "quote": "Maintenance repairs a measured problem.",
+              "line_start": 111,
+              "reason": "Direct, decided whiteboard voice with no universal-threshold myth."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: structures, rowstore design, columnstore and maintenance are all parts of one operator-driven index-selection decision, and each section is compact.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -10111,7 +10176,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-10T07:30:50.865899Z",
-    "elapsed_seconds": 435.7068501999998,
+    "elapsed_seconds": 438.4695058999998,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -10564,7 +10629,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T07:38:06.572260Z",
+    "checkpoint_at": "2026-11-10T07:38:09.334915Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -16611,6 +16676,78 @@
       ],
       "source_hashes": {
         "Vault/Home/Data Persistence/ORMs/Entity Framework.md": "ab7613a68cd443669493a018c32b6de8780c2ca46a7e065684e02229293c6d76"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "9fbb64b024223a631ede96221213d105497d44deddd28084e2885a3909e43333": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Independent whole-note audit found no factual, structural or voice defect. The keep is justified and no edits were proposed.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate, conditioned on engine and measurement, and ordered from overview to structure inventory to B+ tree, rowstore, columnstore, maintenance and decision flow. Its engine-specific claims are scoped to SQL Server or PostgreSQL as appropriate. No concrete defect justifies an edit.",
+            "page_type": "Concept — frontmatter intact, no Qard cards (Questions optional), two relevant primary references as bare link bullets, all code fences carry a language.",
+            "current_text_evidence": [
+              {
+                "quote": "It is a storage organization, not a PostgreSQL index method",
+                "line_start": 27,
+                "reason": "Correctly bounds LSM against PostgreSQL's index methods."
+              },
+              {
+                "quote": "SQL Server leaf-layout and key-lookup claims therefore do not transfer automatically to another engine.",
+                "line_start": 40,
+                "reason": "Scopes the clustered-leaf and RID claims to SQL Server and not to PostgreSQL."
+              },
+              {
+                "quote": "parameterization can prevent the optimizer from proving that implication",
+                "line_start": 83,
+                "reason": "States the filtered-index matching condition accurately."
+              },
+              {
+                "quote": "| `REORGANIZE` | Incrementally compacts and orders leaf pages | Does not refresh statistics |",
+                "line_start": 121,
+                "reason": "Maintenance operation semantics are correct and separate statistics from physical repair."
+              },
+              {
+                "quote": "Small inserts first land in delta stores, background tuple movement compresses closed rowgroups",
+                "line_start": 107,
+                "reason": "Columnstore mechanism is correct, with its maintenance cost explained."
+              },
+              {
+                "quote": "Maintenance repairs a measured problem.",
+                "line_start": 111,
+                "reason": "Direct, decided whiteboard voice with no universal-threshold myth."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: structures, rowstore design, columnstore and maintenance are all parts of one operator-driven index-selection decision, and each section is compact.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
+          "citation_index": 3,
+          "reported_line_start": 121,
+          "resolved_line_start": 122
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Data Persistence/SQL/Indexes.md": "490821140c8b958c0ec4b295fe20b44614225dbc991702825fb3b82c9e5bf155"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -28611,183 +28748,6 @@
       "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_repair_key": "5e37f1977082945be5d1b9effaf24d2debf9e0720d0b7739596285e4a78de00b",
       "author_repair_pending": true
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "270542e03ba04146b22c78499257f60e",
-    "topic_id": "data-persistence-4ea34db4",
-    "batch": {
-      "topic": "Data Persistence",
-      "topic_id": "data-persistence-4ea34db4",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
-          "content": "---\ntopic: [Data Persistence]\nsubtopic: [SQL]\nsummary: \"Index structures across database engines and the operators, storage layouts, and mutation costs each structure serves.\"\npublish: true\nlevel: [\"4\"]\npriority: High\nstatus: Ready to Repeat\ncreated: \"2026-02-10T16:03:55.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.352Z\"\n---\n\nAn index trades storage and write work for a cheaper access path. It can locate or order data without scanning every base row, but “add an index” is still incomplete advice: B+ trees, hash tables, inverted indexes, spatial trees, block summaries, LSM-based layouts, and columnstores accelerate different operators and impose different costs.\n\nThe measured query plan supplies the starting point. Equality probes, ordered ranges, text terms, containment, nearest-neighbor search, and large analytical scans do not share one best structure. Rowstore favors selective navigation and ordering. Columnstore compresses columns for broad analytical work. Statistics or physical maintenance matter only after the plan identifies the failing boundary.\n\n# Structure Inventory\n\n| Structure | Physical idea | Strong query fit | Cost or boundary |\n|---|---|---|---|\n| B-tree / B+ tree | Balanced, ordered pages | Equality, ranges, prefix order, ordered scans | Page splits and write amplification across every maintained index |\n| Hash | Key-to-bucket mapping | Equality probes when the engine and workload support it | No useful key ordering or range scan. Collisions and resizing still cost work |\n| Inverted index / GIN | Term or element to posting list | Full text, arrays, document containment | Larger posting structures and expensive updates |\n| GiST / SP-GiST | Extensible spatial or partitioned search tree | Geometry, nearest neighbor, ranges, tries | Behavior depends on the operator class. Candidates may require recheck |\n| BRIN | Summary per consecutive heap-page range | Very large tables correlated with physical order | Weak pruning when row order is uncorrelated with the indexed value |\n| LSM tree | Buffer, flush, and compact sorted runs | Sustained writes with point/range reads through run indexes and filters | Compaction and read amplification. It is a storage organization, not a PostgreSQL index method |\n| Columnstore | Compressed values grouped by column | Large scans and aggregates over a subset of columns | Point updates and single-row OLTP access |\n\n![[Data Persistence/Data Persistence-Indexes-18120000.jpg|theme-aware]]\n\nThe image is a vocabulary map, not a universal engine diagram. A Bloom filter answers probable membership rather than locating a row. An LSM tree combines several structures, while spatial and inverted indexes expose engine-specific operators.\n\n# B+ Tree Boundary\n\nConventional SQL Server disk-based clustered and nonclustered rowstore indexes use B+ trees. Root and intermediate pages contain separator keys and child-page pointers. Leaf pages contain the table rows for a clustered index, or nonclustered keys plus row locators and included values for a nonclustered index. A heap has no clustered key order. Its nonclustered indexes locate base rows by RID.\n\nAn index on `(TenantId, CreatedAt)` is ordered first by tenant and then by time within each tenant. It can seek an equality tenant and scan a time range without sorting the entire table. It is not an efficient general index for `CreatedAt` across all tenants because the leading key is missing.\n\nPostgreSQL also defaults to B-tree for equality and ordering operators, but its heap and index implementation differs from SQL Server's clustered-rowstore model. SQL Server leaf-layout and key-lookup claims therefore do not transfer automatically to another engine.\n\n# Rowstore Indexes\n\nRowstore design translates a recurring query shape into an ordered B+ tree. Key columns control navigation and order, included columns cover output from the nonclustered leaf, and a filter limits which rows enter the index. The useful design is the smallest one that supports the required predicates and ordering while earning its write cost.\n\n```sql\nSELECT OrderNumber, Total, CreatedAt\nFROM Orders\nWHERE TenantId = @tenantId\n  AND Status = @status\n  AND CreatedAt >= @from\nORDER BY CreatedAt DESC;\n\nCREATE INDEX IX_Orders_Tenant_Status_CreatedAt\n    ON Orders (TenantId, Status, CreatedAt DESC)\n    INCLUDE (OrderNumber, Total);\n```\n\nThe equality predicates establish a tenant/status prefix, `CreatedAt` bounds the range and supplies output order, and the included values cover the projection without widening upper tree levels. The index cannot efficiently serve a general `Status` query because that query omits the leading tenant key.\n\n## SARGability and Key Order\n\nSARGability means the optimizer can turn a predicate into a search argument. `CreatedAt >= @from` normally supplies a range. `YEAR(CreatedAt) = @year` usually does not unless the expression is rewritten as a date interval or exposed through an indexable computed column.\n\n- Columns that bound a seek or preserve required order belong in the key.\n- Equality predicates usually precede the first range predicate.\n- “Most selective first” is not universal. Reusable query prefixes, tenant or partition boundaries, and required ordering can matter more. Estimates and actual plans settle the choice.\n- A `GROUP BY`, `ORDER BY`, or join column belongs in the key only when its position supplies useful navigation or order.\n\n## Covering and Filtered Indexes\n\nA nonclustered index covers a query when all required values can be returned from the index. `INCLUDE` fits output or residual values whose order does not help a seek, join, grouping, or sort. Included values still widen leaf rows, consume cache, and add write work.\n\nA filtered index stores only rows satisfying a stable predicate:\n\n```sql\nCREATE INDEX IX_Orders_Open_CreatedAt\n    ON Orders (TenantId, CreatedAt DESC)\n    INCLUDE (OrderNumber, Total)\n    WHERE Status = 'Open';\n```\n\nThis works when open orders are a small, frequently queried subset. The query predicate must imply the filter, and parameterization can prevent the optimizer from proving that implication. Actual and estimated rows, logical reads, lookups, sorts, write rate, size, and overlap with existing prefixes determine whether the index stays.\n\n# Columnstore Indexes\n\nA SQL Server columnstore stores each column separately in compressed rowgroups and can execute eligible operators in batches. Broad queries that scan millions of rows but project a few columns read less data. Point lookups, narrow seeks, and frequent single-row changes usually favor rowstore, although columnstore supports transactional changes and mixed operational-analytics designs.\n\n```sql\nCREATE CLUSTERED COLUMNSTORE INDEX CCI_SalesFact\nON dbo.SalesFact;\n\nSELECT ProductCategory, SUM(Revenue)\nFROM dbo.SalesFact\nWHERE OrderDate >= '2026-01-01'\nGROUP BY ProductCategory;\n```\n\nA clustered columnstore is the table's primary storage. A nonclustered columnstore is an analytical copy over a rowstore table. Segment metadata can eliminate rowgroups whose value ranges cannot satisfy a predicate, and batch mode moves groups of values through eligible operators.\n\n| Workload | Better default | Reason |\n| --- | --- | --- |\n| Warehouse fact table with large scans | Clustered columnstore | Compression, segment elimination, and batch aggregates |\n| OLTP table with occasional analytics | Rowstore plus selective nonclustered columnstore | Preserves the point-write path while adding an analytical copy |\n| Primary-key lookup and small update | Rowstore B+ tree | Direct seek and cheaper single-row maintenance |\n\nSmall inserts first land in delta stores, background tuple movement compresses closed rowgroups, and updates become delete-plus-insert work. Columnstore pays off when the measured analytical savings exceed those maintenance costs.\n\n# Index Maintenance\n\nMaintenance repairs a measured problem. It does not follow a universal fragmentation threshold. Page density, logical fragmentation, statistics quality, query shape, storage, and the operation's own cost all matter.\n\nLogical fragmentation measures whether leaf pages follow key order. Page density measures how full those pages are. On SSD and cloud storage, sparse pages can matter more than out-of-order reads because a range scan must read more pages. A rebuild may appear to fix a plan only because it refreshed statistics. Test that hypothesis first:\n\n```sql\nUPDATE STATISTICS dbo.Orders IX_Orders_Tenant_Status_CreatedAt\nWITH FULLSCAN;\n```\n\n| Operation | What it changes | Cost or limit |\n| --- | --- | --- |\n| `REORGANIZE` | Incrementally compacts and orders leaf pages | Does not refresh statistics |\n| `REBUILD` | Recreates the index and refreshes its statistics | Log, CPU, I/O, locking, and online-operation limits |\n| `UPDATE STATISTICS` | Refreshes cardinality distribution | Does not repair page density or ordering |\n\nFill factor reserves free space during build or rebuild. A lower value is justified only when measured page splits on non-sequential inserts outweigh the permanent cost of reading and caching more pages. The decision sequence is: capture the slow plan and reads, compare estimates with actuals, refresh relevant statistics, measure density and fragmentation for the used partition, then reorganize or rebuild only when the expected read benefit exceeds log, blocking, CPU, and I/O cost.\n\n# Choose by Operator\n\nThe right index is the narrowest structure that supports the dominant operator and produces a net workload benefit:\n\n1. The baseline captures the actual plan, row estimates, logical reads, elapsed time, and write rate.\n2. The expensive operator is identified: scan, lookup, sort, text match, containment, or aggregation.\n3. The candidate structure must support that operator in the target engine.\n4. Reads and writes are measured again. An index that speeds one query but doubles write cost or duplicates an existing prefix may be a net loss.\n\nLow cardinality alone does not disqualify an index. A filtered index on a rare status, a covering ordered scan, or a bitmap-capable plan can still be useful. Conversely, a high-cardinality column is not automatically useful when queries do not filter, join, or order by it. Distribution, correlation, result size, and the surrounding plan determine whether the optimizer prefers the index.\n\n# Tradeoffs\n\n- Every secondary index consumes storage and makes inserts, deletes, and indexed-column updates maintain another structure.\n- A narrow index may require base-row lookups. A wide covering index reduces lookups but increases leaf size, cache pressure, and write cost.\n- Statistics and physical condition affect plan choice. A rebuild can appear to fix a query because it refreshed statistics, so the cause needs evidence before maintenance becomes scheduled work.\n- Specialized structures narrow the supported operator set. The advantage is worthwhile only when the workload repeatedly uses that operator.\n\n# References\n\n- [SQL Server index architecture and design guide](https://learn.microsoft.com/sql/relational-databases/sql-server-index-design-guide?view=sql-server-ver17)\n- [PostgreSQL index types](https://www.postgresql.org/docs/current/indexes-types.html)\n",
-          "hash": "490821140c8b958c0ec4b295fe20b44614225dbc991702825fb3b82c9e5bf155",
-          "topic": "Data Persistence",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
-          "outcome": "keep",
-          "reason": "I audited the whole note against the current text and the SQL Server and PostgreSQL index documentation. The structure inventory table is accurate. It correctly says an LSM tree is not a PostgreSQL index method, that BRIN depends on physical correlation, and that GiST candidates may need a recheck. The B+ tree section correctly describes SQL Server leaf contents: clustered leaves hold the rows, and a heap's nonclustered indexes locate rows by RID. It also correctly limits those claims to SQL Server rather than PostgreSQL. The `(TenantId, CreatedAt)` and `(TenantId, Status, CreatedAt DESC)` examples fit the leading-key rule. The SARGability, INCLUDE, and filtered-index conditions are stated correctly, including the point that parameterization can stop the optimizer from proving the filter implication. The columnstore section is correct on rowgroups, delta stores, tuple mover, delete-plus-insert updates, segment elimination, and batch mode. In the maintenance section, REORGANIZE does not update statistics, REBUILD does, and UPDATE STATISTICS does not repair density. The fill-factor guidance is conditioned on measurement. The prose is direct, and the plan-first decision sequence is coherent. The Tradeoffs section repeats the statistics and rebuild point, but it works as a short summary. Removing it would be cosmetic churn. The note has no Qard cards, which is acceptable because Questions is optional. It has two relevant primary references, and no known violations were reported. No edit is warranted."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Data Persistence/SQL/Indexes.md": "490821140c8b958c0ec4b295fe20b44614225dbc991702825fb3b82c9e5bf155"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Data Persistence/SQL/Indexes.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-10T07:37:45.252360Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "Independent whole-note audit found no factual, structural or voice defect. The keep is justified and no edits were proposed.",
-        "change_checks": [],
-        "notes": [
-          {
-            "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
-            "verdict": "CLEAN",
-            "summary": "The note is accurate, conditioned on engine and measurement, and ordered from overview to structure inventory to B+ tree, rowstore, columnstore, maintenance and decision flow. Its engine-specific claims are scoped to SQL Server or PostgreSQL as appropriate. No concrete defect justifies an edit.",
-            "page_type": "Concept — frontmatter intact, no Qard cards (Questions optional), two relevant primary references as bare link bullets, all code fences carry a language.",
-            "current_text_evidence": [
-              {
-                "quote": "It is a storage organization, not a PostgreSQL index method",
-                "line_start": 27,
-                "reason": "Correctly bounds LSM against PostgreSQL's index methods."
-              },
-              {
-                "quote": "SQL Server leaf-layout and key-lookup claims therefore do not transfer automatically to another engine.",
-                "line_start": 40,
-                "reason": "Scopes the clustered-leaf and RID claims to SQL Server and not to PostgreSQL."
-              },
-              {
-                "quote": "parameterization can prevent the optimizer from proving that implication",
-                "line_start": 83,
-                "reason": "States the filtered-index matching condition accurately."
-              },
-              {
-                "quote": "| `REORGANIZE` | Incrementally compacts and orders leaf pages | Does not refresh statistics |",
-                "line_start": 121,
-                "reason": "Maintenance operation semantics are correct and separate statistics from physical repair."
-              },
-              {
-                "quote": "Small inserts first land in delta stores, background tuple movement compresses closed rowgroups",
-                "line_start": 107,
-                "reason": "Columnstore mechanism is correct, with its maintenance cost explained."
-              },
-              {
-                "quote": "Maintenance repairs a measured problem.",
-                "line_start": 111,
-                "reason": "Direct, decided whiteboard voice with no universal-threshold myth."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: structures, rowstore design, columnstore and maintenance are all parts of one operator-driven index-selection decision, and each section is compact.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ]
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
-          "citation_index": 3,
-          "reported_line_start": 121,
-          "resolved_line_start": 122
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/Data Persistence/SQL/Indexes.md": "490821140c8b958c0ec4b295fe20b44614225dbc991702825fb3b82c9e5bf155"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "Independent whole-note audit found no factual, structural or voice defect. The keep is justified and no edits were proposed.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
-          "verdict": "CLEAN",
-          "summary": "The note is accurate, conditioned on engine and measurement, and ordered from overview to structure inventory to B+ tree, rowstore, columnstore, maintenance and decision flow. Its engine-specific claims are scoped to SQL Server or PostgreSQL as appropriate. No concrete defect justifies an edit.",
-          "page_type": "Concept — frontmatter intact, no Qard cards (Questions optional), two relevant primary references as bare link bullets, all code fences carry a language.",
-          "current_text_evidence": [
-            {
-              "quote": "It is a storage organization, not a PostgreSQL index method",
-              "line_start": 27,
-              "reason": "Correctly bounds LSM against PostgreSQL's index methods."
-            },
-            {
-              "quote": "SQL Server leaf-layout and key-lookup claims therefore do not transfer automatically to another engine.",
-              "line_start": 40,
-              "reason": "Scopes the clustered-leaf and RID claims to SQL Server and not to PostgreSQL."
-            },
-            {
-              "quote": "parameterization can prevent the optimizer from proving that implication",
-              "line_start": 83,
-              "reason": "States the filtered-index matching condition accurately."
-            },
-            {
-              "quote": "| `REORGANIZE` | Incrementally compacts and orders leaf pages | Does not refresh statistics |",
-              "line_start": 122,
-              "reason": "Maintenance operation semantics are correct and separate statistics from physical repair."
-            },
-            {
-              "quote": "Small inserts first land in delta stores, background tuple movement compresses closed rowgroups",
-              "line_start": 107,
-              "reason": "Columnstore mechanism is correct, with its maintenance cost explained."
-            },
-            {
-              "quote": "Maintenance repairs a measured problem.",
-              "line_start": 111,
-              "reason": "Direct, decided whiteboard voice with no universal-threshold myth."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: structures, rowstore design, columnstore and maintenance are all parts of one operator-driven index-selection decision, and each section is compact.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
     }
   }
 }
