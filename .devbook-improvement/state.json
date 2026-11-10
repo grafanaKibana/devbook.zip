@@ -10174,9 +10174,9 @@
     "version": 1,
     "id": "270542e03ba04146b22c78499257f60e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-10T07:30:50.865899Z",
-    "elapsed_seconds": 438.4695058999998,
+    "elapsed_seconds": 441.5360215999998,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -10185,7 +10185,8 @@
       "Vault/Home/Data Persistence/Object Storage.md",
       "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
       "Vault/Home/Data Persistence/ORMs/ORMs.md",
-      "Vault/Home/Data Persistence/SQL/Database Locks.md"
+      "Vault/Home/Data Persistence/SQL/Database Locks.md",
+      "Vault/Home/Data Persistence/SQL/Indexes.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -10626,10 +10627,88 @@
           },
           "model_calls": 12
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
+                "outcome": "keep",
+                "reason": "I audited the whole note against the current text and the SQL Server and PostgreSQL index documentation. The structure inventory table is accurate. It correctly says an LSM tree is not a PostgreSQL index method, that BRIN depends on physical correlation, and that GiST candidates may need a recheck. The B+ tree section correctly describes SQL Server leaf contents: clustered leaves hold the rows, and a heap's nonclustered indexes locate rows by RID. It also correctly limits those claims to SQL Server rather than PostgreSQL. The `(TenantId, CreatedAt)` and `(TenantId, Status, CreatedAt DESC)` examples fit the leading-key rule. The SARGability, INCLUDE, and filtered-index conditions are stated correctly, including the point that parameterization can stop the optimizer from proving the filter implication. The columnstore section is correct on rowgroups, delta stores, tuple mover, delete-plus-insert updates, segment elimination, and batch mode. In the maintenance section, REORGANIZE does not update statistics, REBUILD does, and UPDATE STATISTICS does not repair density. The fill-factor guidance is conditioned on measurement. The prose is direct, and the plan-first decision sequence is coherent. The Tradeoffs section repeats the statistics and rebuild point, but it works as a short summary. Removing it would be cosmetic churn. The note has no Qard cards, which is acceptable because Questions is optional. It has two relevant primary references, and no known violations were reported. No edit is warranted."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no factual, structural or voice defect. The keep is justified and no edits were proposed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/SQL/Indexes.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate, conditioned on engine and measurement, and ordered from overview to structure inventory to B+ tree, rowstore, columnstore, maintenance and decision flow. Its engine-specific claims are scoped to SQL Server or PostgreSQL as appropriate. No concrete defect justifies an edit.",
+                "page_type": "Concept — frontmatter intact, no Qard cards (Questions optional), two relevant primary references as bare link bullets, all code fences carry a language.",
+                "current_text_evidence": [
+                  {
+                    "quote": "It is a storage organization, not a PostgreSQL index method",
+                    "line_start": 27,
+                    "reason": "Correctly bounds LSM against PostgreSQL's index methods."
+                  },
+                  {
+                    "quote": "SQL Server leaf-layout and key-lookup claims therefore do not transfer automatically to another engine.",
+                    "line_start": 40,
+                    "reason": "Scopes the clustered-leaf and RID claims to SQL Server and not to PostgreSQL."
+                  },
+                  {
+                    "quote": "parameterization can prevent the optimizer from proving that implication",
+                    "line_start": 83,
+                    "reason": "States the filtered-index matching condition accurately."
+                  },
+                  {
+                    "quote": "| `REORGANIZE` | Incrementally compacts and orders leaf pages | Does not refresh statistics |",
+                    "line_start": 122,
+                    "reason": "Maintenance operation semantics are correct and separate statistics from physical repair."
+                  },
+                  {
+                    "quote": "Small inserts first land in delta stores, background tuple movement compresses closed rowgroups",
+                    "line_start": 107,
+                    "reason": "Columnstore mechanism is correct, with its maintenance cost explained."
+                  },
+                  {
+                    "quote": "Maintenance repairs a measured problem.",
+                    "line_start": 111,
+                    "reason": "Direct, decided whiteboard voice with no universal-threshold myth."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: structures, rowstore design, columnstore and maintenance are all parts of one operator-driven index-selection decision, and each section is compact.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 14
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T07:38:09.334915Z",
+    "checkpoint_at": "2026-11-10T07:38:12.401432Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
