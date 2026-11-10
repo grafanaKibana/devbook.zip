@@ -27479,7 +27479,7 @@
       "prepared_source_version": 1,
       "prepared_at": "2026-11-10T20:02:08.429414Z",
       "phase": "pr_updated",
-      "updated_at": "2026-11-10T20:18:12Z",
+      "updated_at": "2026-11-10T20:19:28Z",
       "evidence": {
         "commit_sha": "cc358e7b73ddb21263569bc18b5e41ccefe387b0",
         "branch_sha": "cc358e7b73ddb21263569bc18b5e41ccefe387b0",
@@ -27509,7 +27509,13 @@
         "validation_attempts": 1,
         "validation_last_dispatch_at": "2026-11-10T20:18:04Z",
         "export_validation_dispatch_attempted_at": "2026-11-10T20:18:04Z",
-        "export_checks_dispatched_at": "2026-11-10T20:18:12Z"
+        "export_checks_dispatched_at": "2026-11-10T20:18:12Z",
+        "export_checks": {
+          "pr-title": "success",
+          "major-approval": "success"
+        },
+        "export_vault_validation": "success",
+        "export_check_status": "success"
       }
     }
   },
