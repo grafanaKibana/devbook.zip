@@ -11237,7 +11237,7 @@
   "focused_workload": {
     "version": 1,
     "id": "d9820c0a869a4376b0c4be62174ca4b9",
-    "status": "sealed",
+    "status": "published",
     "phase": "sealed",
     "started_at": "2026-11-10T19:53:20.939058Z",
     "elapsed_seconds": 824.9483440999998,
