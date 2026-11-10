@@ -7187,6 +7187,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md": {
+      "content_hash": "09377f62ac4e8b3ed7f99a7b65d76ad1f48df703383636071f7d0ae87b5b9291",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "09377f62ac4e8b3ed7f99a7b65d76ad1f48df703383636071f7d0ae87b5b9291",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
+          "verdict": "CLEAN",
+          "summary": "Independent whole-note audit found no defects. The opening gives the TSDB-versus-PostgreSQL decision boundary. The cardinality section, decision table and rollup arithmetic are accurate and compact, so leaving the note unchanged is justified.",
+          "page_type": "Concept — authorable prose; Questions and References are optional. References are present and relevant. The single code fence has a language identifier (text), and the image embed is a valid asset link.",
+          "current_text_evidence": [
+            {
+              "quote": "A timestamp column alone is not enough. PostgreSQL with time partitioning may handle a moderate workload cleanly.",
+              "line_start": 14,
+              "reason": "The opening states the operating idea and the boundary that changes the engineering decision, without padding."
+            },
+            {
+              "quote": "In Prometheus, a series is the metric name plus its complete label set:",
+              "line_start": 18,
+              "reason": "This matches the Prometheus data model. The sample line that follows makes the definition concrete, and an optional millisecond timestamp is valid in the exposition format."
+            },
+            {
+              "quote": "An unbounded label such as `user_id` can create a series per user",
+              "line_start": 24,
+              "reason": "The bounded versus unbounded contrast explains the cardinality failure mechanism and its effect on index and memory."
+            },
+            {
+              "quote": "| Retention | Drop whole expired chunks or partitions | Row-by-row expiry amplifies writes and compaction |",
+              "line_start": 32,
+              "reason": "The table pairs each storage decision with the failure that follows when it is wrong. That is useful for engineering judgment."
+            },
+            {
+              "quote": "At 10,000 samples per second, 15 days of raw retention contains about 13 billion samples.",
+              "line_start": 42,
+              "reason": "10,000 × 86,400 × 15 ≈ 12.96 billion, so the figure is correct. The paragraph names both the saving and the costs (write amplification and a repair rule for late data)."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note is a single coherent topic (series, cardinality, storage decisions, rollups) of modest length, and the parts depend on each other.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -9816,7 +9876,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-10T07:30:50.865899Z",
-    "elapsed_seconds": 120.75159589999998,
+    "elapsed_seconds": 123.54052759999999,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
@@ -9904,7 +9964,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T07:32:51.617003Z",
+    "checkpoint_at": "2026-11-10T07:32:54.405935Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -27780,106 +27840,6 @@
       "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_repair_key": "5e37f1977082945be5d1b9effaf24d2debf9e0720d0b7739596285e4a78de00b",
       "author_repair_pending": true
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "270542e03ba04146b22c78499257f60e",
-    "topic_id": "data-persistence-4ea34db4",
-    "batch": {
-      "topic": "Data Persistence",
-      "topic_id": "data-persistence-4ea34db4",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
-          "content": "---\ntopic: [Data Persistence]\nsubtopic: [NoSQL]\nsummary: \"Storage engines for append-heavy series, time-range scans, retention, and rollups.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Creation\npublish: true\ncreated: \"2026-07-18T07:07:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-16T14:47:47.203Z\"\n---\n\nA time-series database organizes timestamped observations for ordered range reads and time-window calculations. It earns its place when ingest rate, retention, compression, or repeated window queries dominate storage cost. A timestamp column alone is not enough. PostgreSQL with time partitioning may handle a moderate workload cleanly. A specialized engine becomes useful when series indexing, compressed chunks, and rollups are the limiting work.\n\n# Series and Cardinality\n\nIn Prometheus, a series is the metric name plus its complete label set:\n\n```text\nhttp_request_duration_seconds_count{service=\"checkout\",method=\"POST\",status=\"200\"} 8431 1721044800000\n```\n\nChanging one label value creates another series. Bounded labels such as `service` and `status` make useful dimensions. An unbounded label such as `user_id` can create a series per user, growing the index and active-series memory until ingestion or queries become too expensive.\n\n# Storage Decisions\n\n| Decision | Engine behavior | Failure mode when wrong |\n|---|---|---|\n| Series key | Index a stable metric name and bounded labels | Unbounded labels exhaust memory and index space |\n| Time partition | Keep chunks or partitions ordered by time | Range reads and retention deletion scatter across storage |\n| Retention | Drop whole expired chunks or partitions | Row-by-row expiry amplifies writes and compaction |\n| Rollups | Persist lower-resolution aggregates | Long dashboards repeatedly scan raw samples |\n| Late data | Define an allowed lateness window | Old samples rewrite sealed chunks or disappear from aggregates |\n\n![[Data Persistence/Data Persistence-Time-Series Databases-18120000.jpg|theme-aware]]\n\nThe diagram is a workload selector. A metrics system does not automatically need a dedicated TSDB. Measured series cardinality, ingest rate, retention volume, and query windows decide.\n\n# Rollups Cap Repeated Scans\n\nAt 10,000 samples per second, 15 days of raw retention contains about 13 billion samples. Recomputing every 5-minute rate from that raw history makes each dashboard revisit the same data. Time-partitioned raw chunks plus a persisted 5-minute rollup bound the query input, and expired raw data can leave as a whole partition. That saves read work but adds write amplification and a repair rule for samples that arrive after a rollup was built.\n\n# References\n\n- [Prometheus data model](https://prometheus.io/docs/concepts/data_model/)\n- [PostgreSQL table partitioning](https://www.postgresql.org/docs/current/ddl-partitioning.html)\n",
-          "hash": "09377f62ac4e8b3ed7f99a7b65d76ad1f48df703383636071f7d0ae87b5b9291",
-          "topic": "Data Persistence",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note. The opening defines a TSDB and states when it is worth using, with the PostgreSQL partitioning boundary. The Prometheus series definition (metric name plus full label set) matches the data model docs. The sample line's millisecond timestamp is valid. The bounded versus unbounded label contrast explains cardinality growth. The decision table covers series key, time partitioning, retention by whole-chunk drop, rollups and late data, each with its failure mode. The rollup arithmetic checks out: 10,000/s × 86,400 s × 15 days ≈ 12.96 billion, so about 13 billion. The tradeoff (write amplification, plus repair of late samples) is stated. The note has no cards, and no violations are known. The references are relevant primary sources. The prose is direct and compact, so no change is warranted."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md": "09377f62ac4e8b3ed7f99a7b65d76ad1f48df703383636071f7d0ae87b5b9291"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-10T07:32:30.352390Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
-          "verdict": "CLEAN",
-          "summary": "Independent whole-note audit found no defects. The opening gives the TSDB-versus-PostgreSQL decision boundary. The cardinality section, decision table and rollup arithmetic are accurate and compact, so leaving the note unchanged is justified.",
-          "page_type": "Concept — authorable prose; Questions and References are optional. References are present and relevant. The single code fence has a language identifier (text), and the image embed is a valid asset link.",
-          "current_text_evidence": [
-            {
-              "quote": "A timestamp column alone is not enough. PostgreSQL with time partitioning may handle a moderate workload cleanly.",
-              "line_start": 14,
-              "reason": "The opening states the operating idea and the boundary that changes the engineering decision, without padding."
-            },
-            {
-              "quote": "In Prometheus, a series is the metric name plus its complete label set:",
-              "line_start": 18,
-              "reason": "This matches the Prometheus data model. The sample line that follows makes the definition concrete, and an optional millisecond timestamp is valid in the exposition format."
-            },
-            {
-              "quote": "An unbounded label such as `user_id` can create a series per user",
-              "line_start": 24,
-              "reason": "The bounded versus unbounded contrast explains the cardinality failure mechanism and its effect on index and memory."
-            },
-            {
-              "quote": "| Retention | Drop whole expired chunks or partitions | Row-by-row expiry amplifies writes and compaction |",
-              "line_start": 32,
-              "reason": "The table pairs each storage decision with the failure that follows when it is wrong. That is useful for engineering judgment."
-            },
-            {
-              "quote": "At 10,000 samples per second, 15 days of raw retention contains about 13 billion samples.",
-              "line_start": 42,
-              "reason": "10,000 × 86,400 × 15 ≈ 12.96 billion, so the figure is correct. The paragraph names both the saving and the costs (write amplification and a repair rule for late data)."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note is a single coherent topic (series, cardinality, storage decisions, rollups) of modest length, and the parts depend on each other.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The note is accurate, compact and complete for its scope. It has no cards, no known violations and no proposed edits, and the keep is justified by the current-text evidence.",
-      "change_checks": []
     }
   }
 }
