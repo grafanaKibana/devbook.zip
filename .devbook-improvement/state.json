@@ -10151,11 +10151,11 @@
     "version": 1,
     "id": "d9820c0a869a4376b0c4be62174ca4b9",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 500.4925007000002,
+    "elapsed_seconds": 527.4909576000002,
     "calls_reserved": 12,
-    "responses_received": 11,
+    "responses_received": 12,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md",
@@ -12482,7 +12482,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T20:01:41.430980Z",
+    "checkpoint_at": "2026-11-10T20:02:08.429436Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -32871,12 +32871,96 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+          "expected_hash": "1e4111756d04701fff53a49358eae8e0689efd63f765392a2b601cf67d529861",
+          "before": "Both examples become DP only after the state discards irrelevant history. Coin change keeps the remaining amount because every denomination remains reusable; finite coin stock would also require the remaining counts. Grid path keeps the current coordinate. Two calls",
+          "after": "Coin change becomes DP only after the state discards irrelevant history. It keeps the remaining amount because every denomination remains reusable; finite coin stock would also require the remaining counts. Two calls",
+          "reason": "Limits the paragraph to the example the reader has just seen; the grid-path state is explained where that example is introduced.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "State must discard irrelevant history",
+            "Coin change state is the remaining amount",
+            "Same state implies same future and answer"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The paragraph after the coin-change tabs refers to 'both examples' and grid path before the grid example is introduced.",
+          "reader_benefit": "First-read order no longer depends on undefined later material."
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+          "expected_hash": "1e4111756d04701fff53a49358eae8e0689efd63f765392a2b601cf67d529861",
+          "before": "- **Top-down (memoisation)** follows the recurrence from the target. The first visit to an amount or coordinate computes it;",
+          "after": "- **Top-down (memoization)** follows the recurrence from the target. The first visit to a state computes it;",
+          "reason": "Unifies the spelling with the tab names, linked note and Qard, and removes the coordinate reference that precedes the grid example.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Top-down computes a state on first visit and reuses it"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "British 'memoisation' conflicts with 'Memoization' elsewhere in the note.",
+          "reader_benefit": "Consistent terminology."
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+          "expected_hash": "1e4111756d04701fff53a49358eae8e0689efd63f765392a2b601cf67d529861",
+          "before": "Coin change advances from `0¢` to `30¢`; grid path moves backward from the dispatch door. The loops",
+          "after": "Coin change advances from `0¢` to `30¢`; the grid example below fills backward from its destination. The loops",
+          "reason": "Replaces an unexplained dispatch-door reference with a forward pointer.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Bottom-up fills states in dependency order using loops"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The dispatch door is mentioned before the warehouse problem is described.",
+          "reader_benefit": "No undefined reference on first read."
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+          "expected_hash": "1e4111756d04701fff53a49358eae8e0689efd63f765392a2b601cf67d529861",
+          "before": "keeps the minimum plus one. Grid path reads the right and down suffix costs and adds the current tile. The animations differ because those state spaces differ—a one-dimensional amount board versus a two-dimensional matrix—but the storage rule is the same.",
+          "after": "keeps the minimum plus one.",
+          "reason": "Moves the grid-path recurrence to the grid section.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Coin change recurrence is min over coins of best[amount-coin] plus one"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "Grid-path recurrence is described before the grid problem exists.",
+          "reader_benefit": "Explanation order follows the examples."
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+          "expected_hash": "1e4111756d04701fff53a49358eae8e0689efd63f765392a2b601cf67d529861",
+          "before": "Here the state is a coordinate rather than an amount. `best(R2C2)`",
+          "after": "Here the state is a coordinate rather than an amount, so the table is two-dimensional instead of a one-dimensional amount board, but the storage rule is the same. The recurrence adds the current tile to the cheaper of the right and down suffix costs. `best(R2C2)`",
+          "reason": "Introduces the grid recurrence and the comparison with coin change where the grid example is explained.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Grid state is a coordinate",
+            "Recurrence is tile cost plus min of right and down suffixes"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "Grid-path state and recurrence were only mentioned earlier, out of order.",
+          "reader_benefit": "The grid recurrence appears after the grid problem."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its text. The opening defines finite acyclic one-pass DP, states the optimal-substructure condition and says repetition affects efficiency, not correctness. The coin-change counterexample is correct: greedy gives 25+1×5 = 6 coins and 10+10+10 = 3 coins. The grid-path costs of 21 and 10 are consistent with the visualizations as described. Both C# examples validate their inputs, keep the sentinel arithmetic safe, and handle the edges of the grid explicitly. The complexity block (O(n·m) time, O(n) space) matches the coin-change DP. The Boundaries section covers missing state, cyclic dependencies, unreachable states and the no-repeat case, and links to the correct sibling notes. The single Qard tests one focused comparison with a correct answer and sources, and no violations are flagged. The note is accurate and coherent, so no edit is warranted."
+          "outcome": "changed",
+          "reason": "Facts (greedy 6 vs 3 coins, 21 vs 10 grid costs, O(n·m) time, guards in the C# examples) were already correct. The fix reorders the explanation so grid path is discussed only after its example. It also unifies 'memoization' spelling. The Qard is unchanged."
         }
       ],
       "feedback": []
@@ -32891,8 +32975,10 @@
       "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-10T20:00:43.144366Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-10T20:02:08.429414Z",
+    "review_repair_key": "83b3f450424a9b7aa23ae73f27857da5987383365c58f1b7a9d16ab2c84663a7",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "Facts check out, but the explanation order has a real reader-facing flaw: grid path is referenced before it is introduced. The keep disposition leaves it unfixed, so the target is unresolved.",
       "notes": [
@@ -32968,73 +33054,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "Facts check out, but the explanation order has a real reader-facing flaw: grid path is referenced before it is introduced. The keep disposition leaves it unfixed, so the target is unresolved.",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The technical content is accurate (greedy 6 coins vs 3, O(n·m) time, O(n) space, correct C# guards). However, the prose after the coin-change tabs discusses 'both examples', grid path and the dispatch door before the warehouse example is introduced. It also mixes 'memoisation' with 'Memoization'. These are unfixed clarity defects, and the keep does not address them.",
-          "page_type": "Concept — typed frontmatter, optional Questions/References present, Qard ID protected; no generated navigation or datacore blocks.",
-          "current_text_evidence": [
-            {
-              "quote": "Both examples become DP only after the state discards irrelevant history.",
-              "line_start": 71,
-              "reason": "Refers to two examples and to grid path before the grid-path example is introduced later, so first-read order is confusing."
-            },
-            {
-              "quote": "grid path moves backward from the dispatch door",
-              "line_start": 74,
-              "reason": "The dispatch door and grid path are unexplained at this point; the context arrives only in the later warehouse paragraph."
-            },
-            {
-              "quote": "**Top-down (memoisation)** follows the recurrence from the target.",
-              "line_start": 73,
-              "reason": "British spelling conflicts with 'Memoization' used in the tab names, the linked note and the Qard."
-            },
-            {
-              "quote": "What changes between memoization and tabulation if the recurrence is the same?",
-              "line_start": 357,
-              "reason": "The Qard is a single focused comparison with a correct answer and sources. It needs no change and keeps its ID."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: coin change and grid path are two examples of one DP idea, and the Boundaries section ties them together. Separate notes would fragment it.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Clarity / explanation order",
-              "location": "Paragraph after the coin-change tabs and the Top-down/Bottom-up bullets (lines 71-74)",
-              "evidence": "'Both examples', 'Grid path keeps the current coordinate' and 'dispatch door' appear before the warehouse grid problem is described.",
-              "effect": "A reader meets undefined references on first read, so the topic is harder to re-enter.",
-              "fix": "Make the paragraph coin-change-only at that point and move the grid-path comparisons to after the warehouse example. Alternatively, introduce the grid problem first."
-            },
-            {
-              "severity": "Medium",
-              "dimension": "Terminology",
-              "location": "Line 73",
-              "evidence": "'memoisation' versus 'Memoization' elsewhere.",
-              "effect": "Inconsistent term spelling within one note.",
-              "fix": "Use 'memoization' consistently."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "FAIL",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "83b3f450424a9b7aa23ae73f27857da5987383365c58f1b7a9d16ab2c84663a7",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
