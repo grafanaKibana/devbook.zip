@@ -10239,11 +10239,11 @@
     "version": 1,
     "id": "270542e03ba04146b22c78499257f60e",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-10T07:30:50.865899Z",
-    "elapsed_seconds": 608.2204812999997,
+    "elapsed_seconds": 634.9435062999997,
     "calls_reserved": 19,
-    "responses_received": 18,
+    "responses_received": 19,
     "attempted_paths": [
       "Vault/Home/Data Persistence/NoSQL/Redis.md",
       "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
@@ -10852,7 +10852,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T07:40:59.085894Z",
+    "checkpoint_at": "2026-11-10T07:41:25.808918Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -29250,12 +29250,37 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+          "expected_hash": "d60c3aa0dcb9a3bca7fbff379344e8baf7f29e162645aeea1b969841f249f153",
+          "before": "PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare `pg_last_wal_replay_lsn()` (or an equivalent replay-position signal) with the required commit LSN.",
+          "after": "In PostgreSQL before version 19, application or custom database logic must poll and compare `pg_last_wal_replay_lsn()` (or an equivalent replay-position signal) with the required commit LSN. PostgreSQL 19 adds a top-level `WAIT FOR LSN '...' WITH (MODE 'standby_replay', TIMEOUT ...)` command that blocks a standby session until replay reaches the LSN. It compares numeric LSNs only and does not check timelines.",
+          "reason": "Replace the version-insensitive claim that PostgreSQL has no built-in wait with a version-conditioned statement.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Before PostgreSQL 19, waiting for replay requires polling pg_last_wal_replay_lsn",
+            "PostgreSQL 19 provides WAIT FOR LSN with standby_replay mode and timeout",
+            "WAIT FOR compares LSNs numerically without timeline checks"
+          ],
+          "sources": [
+            {
+              "url": "https://www.postgresql.org/docs/19/sql-wait-for.html",
+              "claim": "PostgreSQL 19 WAIT FOR LSN waits for standby replay (default mode standby_replay), supports TIMEOUT, and must run as a top-level command.",
+              "version": "PostgreSQL 19"
+            }
+          ],
+          "feedback_keys": [],
+          "problem": "The read-your-writes paragraph says PostgreSQL has no built-in LSN wait, which is outdated for PostgreSQL 19.",
+          "reader_benefit": "Readers get the correct version-dependent options for read-after-write routing on PostgreSQL standbys."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its text: the three replication models (single-leader with SQL Server AG cluster types WSFC, Pacemaker EXTERNAL and NONE; multi-leader conflict policies; Dynamo-style quorums with the DynamoDB MREC/MRSC distinction) are accurate and carefully scoped. The lag anomalies, position-token routing, timeline caveat after failover, CAP/PACELC framing and the pitfalls (slot retention with max_slot_wal_keep_size, fencing vs quorum) follow from the primary documentation of PostgreSQL, SQL Server and DynamoDB. The note has no cards, so there are no question defects, and no known violations are reported. The explanation order is coherent, repetition is tolerable for the topic, and the references are real, topic-specific bare links. An edit would be cosmetic churn."
+          "outcome": "changed",
+          "reason": "Whole-note audit found the models, lag anomalies, token routing, failover, CAP and pitfall sections sound. The one defect was the version-sensitive claim that PostgreSQL has no built-in LSN wait. It now distinguishes pre-19 polling from the PostgreSQL 19 WAIT FOR LSN command."
         }
       ],
       "feedback": []
@@ -29270,8 +29295,10 @@
       "Vault/Home/Data Persistence/SQL/Replication.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-10T07:39:57.064336Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-10T07:41:25.808901Z",
+    "review_repair_key": "c675c96f98da5edb7cc804c12cc3cd6f20fbcab721b505e84145c37ed1a6e821",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The keep disposition misses a version-sensitive factual gap. The note says PostgreSQL has no built-in way to wait for an LSN and that applications must poll. PostgreSQL 19 documents a built-in WAIT FOR LSN command, so the sentence is outdated or misleading for current versions.",
       "notes": [
@@ -29341,67 +29368,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The keep disposition misses a version-sensitive factual gap. The note says PostgreSQL has no built-in way to wait for an LSN and that applications must poll. PostgreSQL 19 documents a built-in WAIT FOR LSN command, so the sentence is outdated or misleading for current versions.",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The note is otherwise well scoped and accurate, but the read-your-writes paragraph says PostgreSQL has no built-in LSN wait and that application logic must poll. PostgreSQL 19 documents WAIT FOR LSN, which waits for standby replay and defaults to standby_replay mode. The note needs a version-conditioned correction.",
-          "page_type": "Concept — no cards; optional Questions section absent; References present as bare links.",
-          "current_text_evidence": [
-            {
-              "quote": "PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare `pg_last_wal_replay_lsn()`",
-              "line_start": 60,
-              "reason": "This statement is version-sensitive. PostgreSQL 19 documents a built-in WAIT FOR LSN command, so the 'must poll' claim is no longer true for current versions."
-            },
-            {
-              "quote": "A PostgreSQL position from an old timeline may not be directly comparable after promotion.",
-              "line_start": 105,
-              "reason": "This caveat is accurate. The PG19 WAIT FOR documentation also warns that it compares only numeric LSNs and does not check timelines."
-            },
-            {
-              "quote": "Treat the result as unknown. Resolve by idempotency key or reconciliation",
-              "line_start": 114,
-              "reason": "The failure table is sound and decision-oriented."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: replication models, lag, routing, failover and CAP form one coherent topic, and the sections depend on each other.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Accuracy",
-              "location": "# Replication Lag, item 1 Read-your-writes",
-              "evidence": "PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare `pg_last_wal_replay_lsn()`.",
-              "effect": "The note presents polling as the only PostgreSQL option. PostgreSQL 19 documents `WAIT FOR LSN '...' WITH (MODE 'standby_replay', TIMEOUT ...)`, a top-level command that waits for standby replay. A reader on a current version is misled.",
-              "fix": "Qualify the claim by version. Before PostgreSQL 19, poll `pg_last_wal_replay_lsn()`. From PostgreSQL 19, use `WAIT FOR LSN`, with its timeout. It must run at top level, and it compares only numeric LSNs without checking timelines. Cite the PostgreSQL 19 WAIT FOR reference."
-            }
-          ],
-          "source_checks": [
-            {
-              "url": "https://www.postgresql.org/docs/19/sql-wait-for.html",
-              "claim": "PostgreSQL 19 provides a WAIT FOR LSN command that waits for standby replay.",
-              "result": "SUPPORTED",
-              "reason": "Search results from the official docs describe the syntax, modes, timeout, and that it is top-level only and does not check timelines."
-            }
-          ],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "FAIL",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "c675c96f98da5edb7cc804c12cc3cd6f20fbcab721b505e84145c37ed1a6e821",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
