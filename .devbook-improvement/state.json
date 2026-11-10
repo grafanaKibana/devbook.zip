@@ -10091,14 +10091,15 @@
     "version": 1,
     "id": "d9820c0a869a4376b0c4be62174ca4b9",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 231.59619519999998,
+    "elapsed_seconds": 235.85008079999997,
     "calls_reserved": 5,
     "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md"
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md",
+      "Vault/Home/Computer Science/Algorithms/Paradigms/Backtracking.md"
     ],
     "accepted_records": [
       {
@@ -11369,10 +11370,88 @@
             "prepared_at": "2026-11-10T19:54:45.243765Z"
           }
         }
+      },
+      {
+        "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Backtracking.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Backtracking.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against the current text. The opening numbers check out: C(64,8)=4,426,165,368, 8^8 and 8!=40,320, and the 92 solutions. The 4-queens walkthrough is also right: a start in column 0 dead-ends, and (1,3,0,2) is a valid solution. The prefix-test, undo and buffer-copy explanations are accurate. The pruning section correctly says depth-first traversal alone saves no work. The complexity block (O(n^n) naive, O(n!) with pruning, O(n) space) is a reasonable upper-bound framing. The C# permutation example is correct and does copy the candidate at the leaf. Both cards each test one gradeable task, are self-contained and have accurate answers with sources. There are no known violations, and there is no clear defect or learning gap that would justify an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no factual, structural or question-quality defect. The keep is justified and no edits were proposed.",
+            "notes": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Backtracking.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate, well ordered (motivating numbers, mechanism, complexity, failure modes, code, cards) and needs no edit. The figures, the 4-queens walkthrough, the undo and copy explanations and both cards check out on independent reading.",
+                "page_type": "Concept — typed frontmatter and Qard IDs preserved; optional Questions and References present and useful; code fences carry language identifiers.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The eight-queens problem has 4,426,165,368 ways to place eight pieces on 64 squares, but only 92 valid arrangements.",
+                    "line_start": 17,
+                    "reason": "C(64,8)=4,426,165,368 and the 92 solutions are correct, and the concrete numbers give a fast, memorable motivation."
+                  },
+                  {
+                    "quote": "Rejecting shared columns narrows the search to `8! = 40,320` permutations, and diagonal checks cut it further.",
+                    "line_start": 19,
+                    "reason": "8^8 and 8! are correct, and the sentence shows how each stronger prefix test shrinks the search."
+                  },
+                  {
+                    "quote": "only the column-1 start extends to the arrangement `(1, 3, 0, 2)`",
+                    "line_start": 29,
+                    "reason": "For 4-queens, a first queen in column 0 has no solution and (1,3,0,2) is valid, so the walkthrough is accurate."
+                  },
+                  {
+                    "quote": "Depth-first traversal alone saves no work.",
+                    "line_start": 99,
+                    "reason": "This states the key limit correctly: pruning needs a prefix-level test, and without one every complete candidate is still visited."
+                  },
+                  {
+                    "quote": "Appending the live buffer as a solution stores a reference that later choices overwrite.",
+                    "line_start": 103,
+                    "reason": "This is a real pitfall that the C# example handles by copying the candidate at the leaf."
+                  },
+                  {
+                    "quote": "In backtracking with shared mutable state, why undo each choice before trying the next?",
+                    "line_start": 176,
+                    "reason": "The card is a bounded, self-contained, single dependent explanation. Its worked permutation example and the copied/immutable alternative are accurate, and it cites answer-side sources."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one coherent paradigm (prefix-pruned search with undo), and the visualization, complexity, pitfalls and code all support that single idea.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 5
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T19:57:12.534671Z",
+    "checkpoint_at": "2026-11-10T19:57:16.788775Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
