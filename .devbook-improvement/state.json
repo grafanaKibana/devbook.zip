@@ -10151,11 +10151,11 @@
     "version": 1,
     "id": "d9820c0a869a4376b0c4be62174ca4b9",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 446.42963410000016,
+    "elapsed_seconds": 468.2196571000002,
     "calls_reserved": 11,
-    "responses_received": 10,
+    "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md",
@@ -12482,7 +12482,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T20:00:47.368112Z",
+    "checkpoint_at": "2026-11-10T20:01:09.158135Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -32634,6 +32634,149 @@
       "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-10T20:00:43.144366Z"
+    "prepared_at": "2026-11-10T20:00:43.144366Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "Facts check out, but the explanation order has a real reader-facing flaw: grid path is referenced before it is introduced. The keep disposition leaves it unfixed, so the target is unresolved.",
+        "notes": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The technical content is accurate (greedy 6 coins vs 3, O(n·m) time, O(n) space, correct C# guards). However, the prose after the coin-change tabs discusses 'both examples', grid path and the dispatch door before the warehouse example is introduced. It also mixes 'memoisation' with 'Memoization'. These are unfixed clarity defects, and the keep does not address them.",
+            "page_type": "Concept — typed frontmatter, optional Questions/References present, Qard ID protected; no generated navigation or datacore blocks.",
+            "current_text_evidence": [
+              {
+                "quote": "Both examples become DP only after the state discards irrelevant history.",
+                "line_start": 71,
+                "reason": "Refers to two examples and to grid path before the grid-path example is introduced later, so first-read order is confusing."
+              },
+              {
+                "quote": "grid path moves backward from the dispatch door",
+                "line_start": 74,
+                "reason": "The dispatch door and grid path are unexplained at this point; the context arrives only in the later warehouse paragraph."
+              },
+              {
+                "quote": "**Top-down (memoisation)** follows the recurrence from the target.",
+                "line_start": 73,
+                "reason": "British spelling conflicts with 'Memoization' used in the tab names, the linked note and the Qard."
+              },
+              {
+                "quote": "What changes between memoization and tabulation if the recurrence is the same?",
+                "line_start": 233,
+                "reason": "The Qard is a single focused comparison with a correct answer and sources. It needs no change and keeps its ID."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: coin change and grid path are two examples of one DP idea, and the Boundaries section ties them together. Separate notes would fragment it.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Clarity / explanation order",
+                "location": "Paragraph after the coin-change tabs and the Top-down/Bottom-up bullets (lines 71-74)",
+                "evidence": "'Both examples', 'Grid path keeps the current coordinate' and 'dispatch door' appear before the warehouse grid problem is described.",
+                "effect": "A reader meets undefined references on first read, so the topic is harder to re-enter.",
+                "fix": "Make the paragraph coin-change-only at that point and move the grid-path comparisons to after the warehouse example. Alternatively, introduce the grid problem first."
+              },
+              {
+                "severity": "Medium",
+                "dimension": "Terminology",
+                "location": "Line 73",
+                "evidence": "'memoisation' versus 'Memoization' elsewhere.",
+                "effect": "Inconsistent term spelling within one note.",
+                "fix": "Use 'memoization' consistently."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+          "citation_index": 3,
+          "reported_line_start": 233,
+          "resolved_line_start": 357
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md": "1e4111756d04701fff53a49358eae8e0689efd63f765392a2b601cf67d529861"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "Facts check out, but the explanation order has a real reader-facing flaw: grid path is referenced before it is introduced. The keep disposition leaves it unfixed, so the target is unresolved.",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The technical content is accurate (greedy 6 coins vs 3, O(n·m) time, O(n) space, correct C# guards). However, the prose after the coin-change tabs discusses 'both examples', grid path and the dispatch door before the warehouse example is introduced. It also mixes 'memoisation' with 'Memoization'. These are unfixed clarity defects, and the keep does not address them.",
+          "page_type": "Concept — typed frontmatter, optional Questions/References present, Qard ID protected; no generated navigation or datacore blocks.",
+          "current_text_evidence": [
+            {
+              "quote": "Both examples become DP only after the state discards irrelevant history.",
+              "line_start": 71,
+              "reason": "Refers to two examples and to grid path before the grid-path example is introduced later, so first-read order is confusing."
+            },
+            {
+              "quote": "grid path moves backward from the dispatch door",
+              "line_start": 74,
+              "reason": "The dispatch door and grid path are unexplained at this point; the context arrives only in the later warehouse paragraph."
+            },
+            {
+              "quote": "**Top-down (memoisation)** follows the recurrence from the target.",
+              "line_start": 73,
+              "reason": "British spelling conflicts with 'Memoization' used in the tab names, the linked note and the Qard."
+            },
+            {
+              "quote": "What changes between memoization and tabulation if the recurrence is the same?",
+              "line_start": 357,
+              "reason": "The Qard is a single focused comparison with a correct answer and sources. It needs no change and keeps its ID."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: coin change and grid path are two examples of one DP idea, and the Boundaries section ties them together. Separate notes would fragment it.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Clarity / explanation order",
+              "location": "Paragraph after the coin-change tabs and the Top-down/Bottom-up bullets (lines 71-74)",
+              "evidence": "'Both examples', 'Grid path keeps the current coordinate' and 'dispatch door' appear before the warehouse grid problem is described.",
+              "effect": "A reader meets undefined references on first read, so the topic is harder to re-enter.",
+              "fix": "Make the paragraph coin-change-only at that point and move the grid-path comparisons to after the warehouse example. Alternatively, introduce the grid problem first."
+            },
+            {
+              "severity": "Medium",
+              "dimension": "Terminology",
+              "location": "Line 73",
+              "evidence": "'memoisation' versus 'Memoization' elsewhere.",
+              "effect": "Inconsistent term spelling within one note.",
+              "fix": "Use 'memoization' consistently."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "FAIL",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
