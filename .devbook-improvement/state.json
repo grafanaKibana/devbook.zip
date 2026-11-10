@@ -9814,10 +9814,10 @@
     "version": 1,
     "id": "270542e03ba04146b22c78499257f60e",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "review_reserved",
     "started_at": "2026-11-10T07:30:50.865899Z",
-    "elapsed_seconds": 99.4870026,
-    "calls_reserved": 3,
+    "elapsed_seconds": 103.530503,
+    "calls_reserved": 4,
     "responses_received": 3,
     "attempted_paths": [
       "Vault/Home/Data Persistence/NoSQL/Redis.md"
@@ -9904,7 +9904,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T07:32:30.352420Z",
+    "checkpoint_at": "2026-11-10T07:32:34.395910Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -9929,7 +9929,7 @@
       "pr": null
     },
     "base_sha": "fba0b54bbf3ab5a6699ba2a017e2f2e23fe559ba",
-    "reservation_deadline": "2026-11-10T07:47:19.950558Z"
+    "reservation_deadline": "2026-11-10T07:47:34.135167Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
