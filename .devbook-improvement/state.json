@@ -10331,9 +10331,9 @@
     "version": 1,
     "id": "d9820c0a869a4376b0c4be62174ca4b9",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 796.4495393,
+    "elapsed_seconds": 801.1472100999999,
     "calls_reserved": 19,
     "responses_received": 19,
     "attempted_paths": [
@@ -10344,7 +10344,8 @@
       "Vault/Home/Computer Science/Algorithms/Paradigms/Divide and Conquer.md",
       "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
       "Vault/Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms.md",
-      "Vault/Home/Computer Science/Algorithms/Paradigms/Memoization.md"
+      "Vault/Home/Computer Science/Algorithms/Paradigms/Memoization.md",
+      "Vault/Home/Computer Science/Algorithms/Paradigms/Paradigms.md"
     ],
     "accepted_records": [
       {
@@ -14970,10 +14971,83 @@
           },
           "model_calls": 17
         }
+      },
+      {
+        "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Paradigms.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Paradigms.md",
+                "outcome": "keep",
+                "reason": "Audited the whole hub note against standard algorithm-design knowledge. The opening gives the operating idea with concrete examples (merge sort, Dijkstra, memoized Fibonacci) and the proof obligations (exchange argument, optimal substructure). The table is accurate. D&C needs disjoint subproblems and a combine step. DP needs overlap, and optimal substructure for optimization. Greedy needs a greedy-choice property proved by exchange, stays-ahead or cut arguments. Backtracking prunes infeasible partial candidates. Branch and bound prunes by an optimistic bound. The memoization tip, the A* admissibility link, and the contrast with patterns are correct. The datacorejsx fence has a language identifier, there is no Questions section, and the single reference is a real topic-specific page. No factual or editorial defect needs repair, and the note has no known violations or flagged cards."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Paradigms.md",
+                "verdict": "CLEAN",
+                "summary": "The hub note opens with the operating idea and concrete examples. Its comparison table and distinction paragraph state accurate conditions: disjoint subproblems, overlap, optimal substructure, greedy-choice proofs, and infeasibility versus optimistic-bound pruning. No factual, structural or voice defect needs repair, so keeping it unchanged is justified.",
+                "page_type": "FolderNote — hub with a protected datacorejsx folder map. Questions and References are optional. The single reference is a real topic-specific page, and the fence has a language identifier.",
+                "current_text_evidence": [
+                  {
+                    "quote": "a greedy choice needs an exchange argument, while an optimization DP needs optimal substructure",
+                    "line_start": 16,
+                    "reason": "The opening states the operating idea and the proof obligation for each paradigm, with concrete examples (merge sort, Dijkstra, memoized Fibonacci). It is easy to re-enter."
+                  },
+                  {
+                    "quote": "Greedy-choice property with a problem-specific proof such as exchange, stays-ahead, or cut reasoning",
+                    "line_start": 29,
+                    "reason": "The table row gives an accurate, decision-relevant condition rather than a bare label. The other rows are equally precise on disjointness, overlap, and admissible bounds."
+                  },
+                  {
+                    "quote": "Backtracking rejects an infeasible partial candidate, while branch-and-bound rejects a subtree whose optimistic bound cannot beat the current best solution.",
+                    "line_start": 36,
+                    "reason": "This states the correct mechanism difference between the two pruning approaches. The A* admissibility link is also sound."
+                  },
+                  {
+                    "quote": "adding [[Memoization|memoisation]] turns the search into dynamic programming",
+                    "line_start": 34,
+                    "reason": "The tip correctly bridges backtracking, memoization and greedy replacement. The spelling variant sits only in alias text and is trivial."
+                  },
+                  {
+                    "quote": "which are concrete coding idioms rather than design philosophies",
+                    "line_start": 38,
+                    "reason": "The note states its boundary against the Patterns sibling. The prose is impersonal and declarative, with no padding."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note is a compact hub, and the paradigm comparison is one coherent topic. Each paradigm already has its own linked note.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note was read in full and is accurate, clear and compliant. It has no known violations and no Questions section. The keep disposition is justified, and there are no edits to check.",
+            "change_checks": []
+          },
+          "model_calls": 19
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T20:06:37.388022Z",
+    "checkpoint_at": "2026-11-10T20:06:42.085693Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
