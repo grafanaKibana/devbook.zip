@@ -10026,10 +10026,10 @@
     "version": 1,
     "id": "d9820c0a869a4376b0c4be62174ca4b9",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 67.34956770000001,
-    "calls_reserved": 1,
+    "elapsed_seconds": 71.9209665,
+    "calls_reserved": 2,
     "responses_received": 1,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md"
@@ -10049,7 +10049,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T19:54:28.288045Z",
+    "checkpoint_at": "2026-11-10T19:54:32.859445Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -10074,7 +10074,7 @@
       "pr": null
     },
     "base_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
-    "reservation_deadline": "2026-11-10T20:08:48.446853Z"
+    "reservation_deadline": "2026-11-10T20:09:32.534707Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
