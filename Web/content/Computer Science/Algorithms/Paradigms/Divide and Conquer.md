@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-10T19:58:58.102Z
 published: 2026-07-10T05:57:23.418Z
 topic:
   - Computer Science
@@ -99,7 +99,7 @@ The live stack follows the longest branch. Balanced shrinkage keeps it shallow; 
 
 # Boundaries and Implementation Costs
 
-Overlapping subproblems are repeated states reached from more than one branch. In naive Fibonacci, both `fib(n-1)` and `fib(n-2)` reach `fib(n-3)`, so plain recursion solves the same state again. Memoisation helps because the state repeats, not because calls share storage. Merge sort's range states are unique. Caching them adds overhead without removing work.
+Overlapping subproblems are repeated states reached from more than one branch. In naive Fibonacci, both `fib(n-1)` and `fib(n-2)` reach `fib(n-3)`, so plain recursion solves the same state again. Memoization helps because the state repeats, not because calls share storage. Merge sort's range states are unique. Caching them adds overhead without removing work.
 
 A small-range cutoff addresses call overhead. Once a partition is tiny, another recursive split can cost more than a tight [[Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|insertion-sort]] loop. [[Computer Science/Algorithms/Sorting Algorithms/Introsort|Introsort]] also tracks recursion depth and falls back to heapsort when quicksort exhausts that budget. These are separate controls: the cutoff speeds up small partitions, while the depth guard limits adversarial partition chains.
 
