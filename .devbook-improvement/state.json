@@ -10026,16 +10026,30 @@
     "version": 1,
     "id": "d9820c0a869a4376b0c4be62174ca4b9",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 45.289914,
+    "elapsed_seconds": 49.7223618,
     "calls_reserved": 1,
     "responses_received": 1,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md"
+    ],
     "accepted_records": [],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+        "outcome": "proposal_blocked",
+        "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/dotnet/csharp/misc/cs0136",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/dotnet/csharp/misc/cs0136",
+          "model_calls": 1
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T19:54:06.228388Z",
+    "checkpoint_at": "2026-11-10T19:54:10.660839Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
