@@ -10026,16 +10026,16 @@
     "version": 1,
     "id": "d9820c0a869a4376b0c4be62174ca4b9",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 27.8555396,
+    "elapsed_seconds": 41.8128539,
     "calls_reserved": 1,
-    "responses_received": 0,
+    "responses_received": 1,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T19:53:48.794017Z",
+    "checkpoint_at": "2026-11-10T19:54:02.751327Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -29205,7 +29205,7 @@
   },
   "parked_author_proposals": {},
   "pending_author_proposal": {
-    "workload_id": "b10487f268d742babc49b59ab87ef167",
+    "workload_id": "d9820c0a869a4376b0c4be62174ca4b9",
     "topic_id": "computer-science-445ddaa5",
     "batch": {
       "topic": "Computer Science",
@@ -29230,12 +29230,36 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+          "expected_hash": "2481a730cd08f4d9fc4bbc9ea272fde435a7481ecdd196f61ae33c506cca244f",
+          "before": ">         int w;\n>         do\n>         {\n>             w = _stack.Pop();\n>             _onStack[w] = false;\n>             component.Add(w);\n>         }\n>         while (w != v);",
+          "after": ">         int member;\n>         do\n>         {\n>             member = _stack.Pop();\n>             _onStack[member] = false;\n>             component.Add(member);\n>         }\n>         while (member != v);",
+          "reason": "Renames the pop-loop variable so it no longer collides with the foreach variable `w` in the same method; the logic is unchanged.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "The pop loop removes vertices from the stack until the root v is reached, clearing onStack for each",
+            "The code compiles without a variable-name conflict"
+          ],
+          "sources": [
+            {
+              "url": "https://learn.microsoft.com/en-us/dotnet/csharp/misc/cs0136",
+              "claim": "CS0136: a local variable cannot be declared in a nested scope when the same name is declared later in the enclosing scope.",
+              "version": "C# language reference, not version-specific"
+            }
+          ],
+          "feedback_keys": [],
+          "problem": "The C# example declares `w` in the foreach and again as `int w;` in the enclosing method block, which is error CS0136, so the published code does not compile.",
+          "reader_benefit": "The reference implementation compiles as written and the pop loop's role is clearer."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note. The disc, low and onStack definitions match Tarjan's formulation. The worked trace (A→B, B→C, C→A, C→D, D→E, E→D) is correct: low[C] drops to 0 through the active edge to A, and {E,D} is popped before {C,B,A}. The reverse-topological emission order is right. The C# code follows the same rules: it uses disc[w] for active non-tree edges, guards on _onStack, and pops to v. The section on the onStack guard correctly says that dropping the guard merges SCCs, and that a low[w] variant finds the same roots but departs from the formal definition. The contrast with articulation points is accurate. The SIAM reference is the original Tarjan 1972 paper. The prose is direct and well ordered, and there are no flagged cards or known violations. The optional Questions section is not needed, so no edit would add real value."
+          "outcome": "changed",
+          "reason": "The prose, trace, low-link definitions and guard explanation were checked and are accurate. The review's finding is valid: the foreach variable `w` and the later `int w;` in the same method scope produce CS0136. Renaming the pop variable to `member` fixes the compile error without changing the algorithm."
         }
       ],
       "feedback": []
@@ -29250,8 +29274,10 @@
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-08T22:27:45.475477Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-10T19:54:02.751301Z",
+    "review_repair_key": "5e37f1977082945be5d1b9effaf24d2debf9e0720d0b7739596285e4a78de00b",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The keep is not justified. The C# implementation declares `w` twice in one method scope, so it does not compile. The disposition said the code follows the same rules but did not catch this.",
       "notes": [
@@ -29314,60 +29340,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The keep is not justified. The C# implementation declares `w` twice in one method scope, so it does not compile. The disposition said the code follows the same rules but did not catch this.",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The prose, trace and guard explanation are accurate and well ordered. The C# example has a compile error, which is a concrete accuracy defect in a note marked publish: true.",
-          "page_type": "Concept — no required sections; Questions are absent, which is allowed. The reference is a single primary source.",
-          "current_text_evidence": [
-            {
-              "quote": "On entry, set `disc[v] = low[v] = time++`, then push `v`.",
-              "line_start": 24,
-              "reason": "The prose and trace correctly describe the disc/low/onStack rules and the emission order."
-            },
-            {
-              "quote": "foreach (var w in _adjacency[v])",
-              "line_start": 88,
-              "reason": "The foreach declares `w` in a nested scope."
-            },
-            {
-              "quote": "int w;",
-              "line_start": 107,
-              "reason": "`int w;` is declared later in the enclosing method block. The enclosing declaration space includes the earlier foreach, so C# reports CS0136 and the code does not compile."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the note covers one algorithm, and the guard section depends on the same update rules.",
-          "findings": [
-            {
-              "severity": "High",
-              "dimension": "Accuracy",
-              "location": "`# C# Implementation`, StrongConnect: `foreach (var w ...)` and later `int w;`",
-              "evidence": "`foreach (var w in _adjacency[v])` and `int w;` in the same method scope. `int w;` is declared later in the enclosing block, so it conflicts with the foreach variable.",
-              "effect": "The published reference implementation fails to compile with CS0136. A reader copying it gets an error.",
-              "fix": "Rename one variable, for example the foreach variable to `next` and the pop variable to `member`, or use `int popped;` in the pop loop. Keep the logic unchanged."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "FAIL",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "5e37f1977082945be5d1b9effaf24d2debf9e0720d0b7739596285e4a78de00b",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
