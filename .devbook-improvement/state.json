@@ -10211,9 +10211,9 @@
     "version": 1,
     "id": "d9820c0a869a4376b0c4be62174ca4b9",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 667.1302538000003,
+    "elapsed_seconds": 671.3686132000004,
     "calls_reserved": 15,
     "responses_received": 15,
     "attempted_paths": [
@@ -10222,7 +10222,8 @@
       "Vault/Home/Computer Science/Algorithms/Paradigms/Backtracking.md",
       "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md",
       "Vault/Home/Computer Science/Algorithms/Paradigms/Divide and Conquer.md",
-      "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md"
+      "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md",
+      "Vault/Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms.md"
     ],
     "accepted_records": [
       {
@@ -14702,10 +14703,83 @@
             "prepared_at": "2026-11-10T20:02:08.429414Z"
           }
         }
+      },
+      {
+        "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note. The activity-selection description matches the C# code: it sorts by finish time, accepts when start >= lastEnd, and lastEnd starts at int.MinValue. The visualization walk-through is consistent with the sorted order [1,4],[3,5],[0,6],[5,7],[8,9], giving three meetings. The coin example {1,3,4} for 6 is correct: greedy gives 4+1+1, optimal gives 3+3, and 4 is in no optimal solution. The knapsack numbers check out: greedy takes 60 and 100 for 160, and optimal takes 100 and 120 for 220. The fractional-knapsack boundary is stated correctly. The Rado–Edmonds matroid statement is accurate. The complexity entries are plausible: sort-then-scan is O(n log n), and exhaustive subset testing is O(2^n·n). The note has no cards and known_violations is empty. The prose is direct and ordered from motivating example to condition, proof technique, failure cases and code. It repeats little, and the references are relevant. No defect justifies an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note is accurate and well ordered. It has no cards and no concrete rule violations. The keep disposition is justified and no edits are proposed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole note independently. The examples, numbers, theorem statement, complexity entries and C# code are correct and consistent. The order runs from a motivating example through the exactness condition, proof tools and failure cases to code. No defect justifies an edit.",
+                "page_type": "Concept — frontmatter is typed and status is Ready to Repeat. The mermaid and csharp fences have language identifiers. The steptrace and complexity blocks are protected. There is no Questions section, which is optional. References are two relevant primary sources.",
+                "current_text_evidence": [
+                  {
+                    "quote": "sort the meetings by finish time, then walk the list once, accepting each meeting whose start is at or after the last accepted finish",
+                    "line_start": 14,
+                    "reason": "The opening gives a concrete example that matches the C# code (start >= lastEnd after sorting by end)."
+                  },
+                  {
+                    "quote": "The first commitment, `[1, 4]`, rejects `[3, 5]` and `[0, 6]`.",
+                    "line_start": 30,
+                    "reason": "The walk-through is correct. Sorted by finish time the order is [1,4],[3,5],[0,6],[5,7],[8,9], and the accepted set is three meetings."
+                  },
+                  {
+                    "quote": "the standard weight-ordered greedy algorithm succeeds for every weight assignment exactly when the system is a matroid",
+                    "line_start": 93,
+                    "reason": "This is the correct Rado–Edmonds characterization, and the note adds the limit that it does not validate an arbitrary local rule."
+                  },
+                  {
+                    "quote": "Coin change with denominations `{1, 3, 4}` making `6` exposes the failure directly.",
+                    "line_start": 99,
+                    "reason": "The counterexample is correct: greedy gives 4+1+1, the optimum is 3+3, and 4 is in no optimal solution. It also notes that canonical coin systems such as {1,5,10,25} do work."
+                  },
+                  {
+                    "quote": "The optimal packing takes the second and third items for value `220`",
+                    "line_start": 101,
+                    "reason": "The knapsack numbers are correct. Greedy by ratio gives 160, the optimum is 220, and the fractional case is correctly contrasted."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the topic is coherent. The proof conditions, failure cases and implementation support one greedy-paradigm idea, and length alone is not a reason to split.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 15
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T20:04:28.068735Z",
+    "checkpoint_at": "2026-11-10T20:04:32.307094Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
