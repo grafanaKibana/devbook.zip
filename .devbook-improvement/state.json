@@ -7677,6 +7677,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md": {
+      "content_hash": "c1718904068141d95d8e53cf74adcf148bce2182906bc4b4446ba06871063da6",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "c1718904068141d95d8e53cf74adcf148bce2182906bc4b4446ba06871063da6",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md",
+          "verdict": "CLEAN",
+          "summary": "Independent whole-note audit found no accuracy, clarity, ordering or rule defects. The opening arithmetic, optimism argument, A* analogy, complexity tab, failure-mode examples and C# code are correct and well explained, so no edit is warranted.",
+          "page_type": "Concept — authorable prose; no Questions section (optional); References holds one primary source (Land and Doig 1960); code fences carry language identifiers.",
+          "current_text_evidence": [
+            {
+              "quote": "A 0/1 knapsack with 40 items has `2^40` candidate subsets.",
+              "line_start": 14,
+              "reason": "Concrete, correct opening that introduces the problem scale; 14!/2 for symmetric TSP with a fixed start is also correct."
+            },
+            {
+              "quote": "So if `bound ≤ incumbent`, then *every* completion is `≤ incumbent`",
+              "line_start": 37,
+              "reason": "States the pruning correctness argument precisely, with the minimisation reversal noted; the mechanism and condition are recoverable."
+            },
+            {
+              "quote": "TSP does not have a constant branching factor",
+              "line_start": 107,
+              "reason": "Complexity caveat preserves a real exception to the b-ary model and is consistent with the O(b^n·c) and depth-first O(n) / best-first O(b^n) space claims."
+            },
+            {
+              "quote": "The certificate is false.",
+              "line_start": 113,
+              "reason": "The 90 vs bound 78 vs incumbent 80 example gives a concrete failure mode of a non-optimistic bound; the next paragraph contrasts it with a valid-but-loose bound, giving a clear decision between validity and tightness."
+            },
+            {
+              "quote": "Round the fractional remainder upward so the integer bound stays optimistic.",
+              "line_start": 154,
+              "reason": "The code rounds the LP remainder up using Int128 and checked arithmetic, so pruning with Bound <= best is sound; the explanation beneath it matches the code."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note covers one coherent paradigm; the visualization, complexity, failure modes and implementation all serve the same bound-and-prune idea.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -10093,7 +10153,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 292.2984849,
+    "elapsed_seconds": 296.04413750000003,
     "calls_reserved": 7,
     "responses_received": 7,
     "attempted_paths": [
@@ -11451,7 +11511,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T19:58:13.236960Z",
+    "checkpoint_at": "2026-11-10T19:58:16.982613Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -18296,6 +18356,73 @@
       ],
       "source_hashes": {
         "Vault/Home/Computer Science/Algorithms/Paradigms/Backtracking.md": "18efb18d07b562e6c1e9c88016f30556792e525842bebfc6658b1305354af823"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "3c46bbaa488771a8c1d271c4a9e7fc2fa92b75c43b570509a540268946bf109c": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md",
+            "verdict": "CLEAN",
+            "summary": "Independent whole-note audit found no accuracy, clarity, ordering or rule defects. The opening arithmetic, optimism argument, A* analogy, complexity tab, failure-mode examples and C# code are correct and well explained, so no edit is warranted.",
+            "page_type": "Concept — authorable prose; no Questions section (optional); References holds one primary source (Land and Doig 1960); code fences carry language identifiers.",
+            "current_text_evidence": [
+              {
+                "quote": "A 0/1 knapsack with 40 items has `2^40` candidate subsets.",
+                "line_start": 14,
+                "reason": "Concrete, correct opening that introduces the problem scale; 14!/2 for symmetric TSP with a fixed start is also correct."
+              },
+              {
+                "quote": "So if `bound ≤ incumbent`, then *every* completion is `≤ incumbent`",
+                "line_start": 37,
+                "reason": "States the pruning correctness argument precisely, with the minimisation reversal noted; the mechanism and condition are recoverable."
+              },
+              {
+                "quote": "TSP does not have a constant branching factor",
+                "line_start": 107,
+                "reason": "Complexity caveat preserves a real exception to the b-ary model and is consistent with the O(b^n·c) and depth-first O(n) / best-first O(b^n) space claims."
+              },
+              {
+                "quote": "The certificate is false.",
+                "line_start": 113,
+                "reason": "The 90 vs bound 78 vs incumbent 80 example gives a concrete failure mode of a non-optimistic bound; the next paragraph contrasts it with a valid-but-loose bound, giving a clear decision between validity and tightness."
+              },
+              {
+                "quote": "Round the fractional remainder upward so the integer bound stays optimistic.",
+                "line_start": 143,
+                "reason": "The code rounds the LP remainder up using Int128 and checked arithmetic, so pruning with Bound <= best is sound; the explanation beneath it matches the code."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note covers one coherent paradigm; the visualization, complexity, failure modes and implementation all serve the same bound-and-prune idea.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The complete note was independently read and found accurate, clear and rule-compliant. The keep disposition is justified, and no edits or sources need checking.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md",
+          "citation_index": 4,
+          "reported_line_start": 143,
+          "resolved_line_start": 154
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md": "c1718904068141d95d8e53cf74adcf148bce2182906bc4b4446ba06871063da6"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -31633,172 +31760,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "d9820c0a869a4376b0c4be62174ca4b9",
-    "topic_id": "computer-science-445ddaa5",
-    "batch": {
-      "topic": "Computer Science",
-      "topic_id": "computer-science-445ddaa5",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md",
-          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"A search paradigm for optimisation that prunes any branch whose optimistic bound cannot beat the best solution so far.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Creation\npublish: true\ncreated: \"2026-07-10T06:24:36.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-10T07:51:27.036Z\"\n---\n\nA 0/1 knapsack with 40 items has `2^40` candidate subsets. A symmetric travelling-salesman tour over 15 cities still has `14!/2` orderings after fixing the start and treating reversals as equivalent. Branch-and-bound explores these decision trees while attaching an optimistic bound to each partial candidate. Once a subtree cannot beat the best complete solution found so far, the search discards it.\n\nThe bound must be *optimistic*. In a maximisation problem it cannot fall below the true best achievable in the subtree. In minimisation it cannot rise above the true best. A pessimistic error can discard the optimum. At the other extreme, a loose bound that never loses to the incumbent leaves plain exponential enumeration.\n\n**Core condition:** an optimisation objective + a cheap optimistic bound from a relaxation → prune any subtree whose bound cannot beat the best complete solution so far (the incumbent) → exact search that can touch only a fraction of an exponential tree.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"branch-and-bound\"}\n```\n\nThe step that carries the whole idea is a single bound comparison that erases a subtree before it is expanded.\n\nBranch-and-bound turns on four moving parts:\n\n- **Branch** — split the problem at a decision point into disjoint subproblems (item *i* is in the knapsack vs out), so the partial configurations form a search tree.\n- **Bound** — at each node, compute an optimistic estimate of the best objective any completion below it could reach. For maximisation this is an *upper* bound; for minimisation a *lower* one.\n- **Incumbent** — the best complete solution seen so far, and the yardstick every bound is measured against.\n- **Prune / select** — if a node's bound is no better than the incumbent, discard its whole subtree; otherwise expand it and pick the next live node to visit.\n\nThe correctness of the discard rests on the optimism of the bound. For maximisation, \"optimistic\" means the bound is `≥` the true best of every completion in the subtree. So if `bound ≤ incumbent`, then *every* completion is `≤ incumbent`, and none of them can improve the answer — the subtree can be removed unexplored without risking the optimum. Minimisation reverses the inequality.\n\nThis is the same optimism requirement as [[Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search|A* Search]]'s admissibility condition: a guided tree search stays correct only while its estimate errs in the optimistic direction and never lies pessimistically. Branch-and-bound is that same idea applied to the decision tree of an optimisation problem, with the bounding function playing the role of the heuristic. For maximisation 0/1 knapsack, an LP relaxation is a safe upper bound: its optimal fractional solution can only meet or exceed the integer optimum, so ignoring integrality never under-shoots.\n\nEvery live (unpruned, unexpanded) node is a candidate to visit next, and the order changes how fast a strong incumbent appears — which in turn changes how much gets pruned.\n\nBest-first keeps live nodes in a priority queue ordered by bound. Depth-first follows one branch to a complete candidate before returning to siblings, using the same choose-and-undo discipline as [[Home/Computer Science/Algorithms/Paradigms/Backtracking|backtracking]], which often produces an incumbent earlier.\n\nA good early incumbent raises the bar every later bound must clear, so more subtrees fall on a single comparison. Solvers exploit this by seeding the incumbent with a fast heuristic — often a [[Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms|greedy]] solution — before the exact search starts.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Branch and Bound complexity\",\n  \"variables\": {\n    \"branchingFactor\": {\n      \"symbol\": \"b\",\n      \"description\": \"maximum children per expanded node\"\n    },\n    \"boundCost\": {\n      \"symbol\": \"c\",\n      \"description\": \"cost of evaluating the bound at one expanded node\"\n    },\n    \"inputSize\": {\n      \"symbol\": \"n\",\n      \"description\": \"maximum decision-tree depth\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (enumerate every assignment)\",\n          \"formula\": \"O(b^n)\",\n          \"curveFrom\": \"exponential\",\n          \"curveTo\": \"unbounded\"\n        },\n        {\n          \"kind\": \"text\",\n          \"label\": \"Branch and bound\",\n          \"formula\": \"O(b^n · c)\"\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (enumerate every assignment)\",\n          \"formula\": \"O(n)\",\n          \"curveId\": \"linear\"\n        },\n        {\n          \"kind\": \"text\",\n          \"label\": \"Branch and bound\",\n          \"formula\": \"O(n) depth-first; up to O(b^n) best-first\"\n        }\n      ]\n    }\n  }\n}\n```\n\nBest-first can retain every live node and exhaust memory on a hard instance. Depth-first retains only the current search path, trading that smaller frontier for less global control over which bound is explored next.\n\nThe general `b`-ary model expands `1 + b + ... + b^n = Θ(b^n)` nodes when pruning fails. Binary 0/1 knapsack specializes that model to two take-or-skip branches per item, giving `O(2^n · c)` time. TSP does not have a constant branching factor: the number of remaining-city choices shrinks by one per level, so exhaustive search can remain factorial. `c` isolates the per-node cost of evaluating the relaxation from the branching factor `b`.\n\n%% endtabs %%\n\n# When the Bound Stops Helping\n\nA **non-optimistic bound can return the wrong answer without warning.** Suppose a maximisation subtree contains a solution worth 90, its bound reports 78, and the incumbent is 80. The search prunes the subtree and returns 80 as *proven optimal*. The certificate is false. Bounds therefore come from relaxations that provably upper-bound maximisation or lower-bound minimisation, even when a safe bound is looser.\n\nA **bound too loose to discriminate degenerates to brute force.** Assuming every remaining item can be taken at full value with no weight limit is optimistic and valid. It also beats the incumbent at nearly every node, so almost nothing is pruned from the `2ⁿ` tree. Validity protects the answer. Tightness controls practical runtime and must be weighed against the cost of computing the bound.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Control flow\n>\n> ```mermaid\n> flowchart TD\n>   A[Pop a live node from the frontier] --> B[Compute its optimistic bound]\n>   B --> C{Bound beats the incumbent}\n>   C -->|No| D[Discard the subtree]\n>   C -->|Yes| E{Node is a complete solution}\n>   E -->|Yes| F[Replace incumbent if better]\n>   E -->|No| G[Branch into child subproblems, push to frontier]\n>   D --> H{Frontier empty}\n>   F --> H\n>   G --> H\n>   H -->|No| A\n>   H -->|Yes| I[Return incumbent as proven optimum]\n> ```\n\n> [!EXAMPLE]- C# implementation — 0/1 knapsack with an LP-relaxation bound\n>\n> ```csharp\n> public sealed record Item(int Value, int Weight);\n>\n> public static long Knapsack(Item[] items, int capacity)\n> {\n>     ArgumentNullException.ThrowIfNull(items);\n>     ArgumentOutOfRangeException.ThrowIfNegative(capacity);\n>     if (items.Any(i => i.Weight <= 0 || i.Value < 0))\n>         throw new ArgumentException(\"Weights must be positive and values nonnegative.\", nameof(items));\n>\n>     // Exact cross-products avoid rounding the value-to-weight ordering.\n>     var order = items.ToArray();\n>     Array.Sort(order, static (a, b) =>\n>         ((Int128)b.Value * a.Weight).CompareTo((Int128)a.Value * b.Weight));\n>     long best = 0;\n>\n>     // Round the fractional remainder upward so the integer bound stays optimistic.\n>     long Bound(int index, long weight, long value)\n>     {\n>         long bound = value;\n>         long room = (long)capacity - weight;\n>         for (int i = index; i < order.Length && room > 0; i++)\n>         {\n>             if (order[i].Weight <= room)\n>             {\n>                 room -= order[i].Weight;\n>                 bound = checked(bound + order[i].Value);\n>                 continue;\n>             }\n>\n>             Int128 numerator = (Int128)room * order[i].Value;\n>             long fractionalCeiling = (long)((numerator + order[i].Weight - 1) / order[i].Weight);\n>             return checked(bound + fractionalCeiling);\n>         }\n>         return bound;\n>     }\n>\n>     void Explore(int index, long weight, long value)\n>     {\n>         if (weight > capacity) return;                    // infeasible: constraint prune\n>         if (value > best) best = value;                   // a feasible completion; update incumbent\n>         if (index == order.Length) return;\n>         if (Bound(index, weight, value) <= best) return;  // optimistic bound loses -> prune subtree\n>\n>         Explore(index + 1,\n>             checked(weight + order[index].Weight),\n>             checked(value + order[index].Value));                                  // take\n>         Explore(index + 1, weight, value);                                            // skip\n>     }\n>\n>     Explore(0, 0, 0);\n>     return best;\n> }\n> ```\n> The guards require a nonnegative `int` capacity, positive `int` weights, and nonnegative `int` values. Cumulative totals use checked `long` arithmetic. Exact `Int128` cross-products order ratios without floating-point drift, and the fractional remainder is rounded upward, so `Bound(...) <= best` proves that the subtree cannot improve the answer.\n\n# References\n\n- [An Automatic Method of Solving Discrete Programming Problems](https://doi.org/10.2307/1910129)\n",
-          "hash": "c1718904068141d95d8e53cf74adcf148bce2182906bc4b4446ba06871063da6",
-          "topic": "Computer Science",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note. The opening counts are correct: 2^40 subsets, and 14!/2 symmetric TSP tours with a fixed start. The optimism rule is stated correctly for both maximisation and minimisation, and the pruning argument (bound ≤ incumbent implies every completion ≤ incumbent) is sound. The A* admissibility analogy and the LP-relaxation bound for knapsack are accurate. The complexity tab is consistent: O(b^n·c) time, O(n) depth-first space, up to O(b^n) best-first space, and the TSP factorial caveat. The failure-mode section gives a concrete example of a false optimality certificate and of a bound too loose to prune. The C# code sorts by exact Int128 ratio and rounds the fractional remainder up, so the bound stays optimistic. Overflow is checked, and the prune and incumbent updates are correct. The mermaid diagram matches the algorithm. The note has no cards, no known violations, and one valid primary reference (Land and Doig 1960). The prose is direct and non-repetitive, so no edit is warranted."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md": "c1718904068141d95d8e53cf74adcf148bce2182906bc4b4446ba06871063da6"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-10T19:57:50.370504Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md",
-            "verdict": "CLEAN",
-            "summary": "Independent whole-note audit found no accuracy, clarity, ordering or rule defects. The opening arithmetic, optimism argument, A* analogy, complexity tab, failure-mode examples and C# code are correct and well explained, so no edit is warranted.",
-            "page_type": "Concept — authorable prose; no Questions section (optional); References holds one primary source (Land and Doig 1960); code fences carry language identifiers.",
-            "current_text_evidence": [
-              {
-                "quote": "A 0/1 knapsack with 40 items has `2^40` candidate subsets.",
-                "line_start": 14,
-                "reason": "Concrete, correct opening that introduces the problem scale; 14!/2 for symmetric TSP with a fixed start is also correct."
-              },
-              {
-                "quote": "So if `bound ≤ incumbent`, then *every* completion is `≤ incumbent`",
-                "line_start": 37,
-                "reason": "States the pruning correctness argument precisely, with the minimisation reversal noted; the mechanism and condition are recoverable."
-              },
-              {
-                "quote": "TSP does not have a constant branching factor",
-                "line_start": 107,
-                "reason": "Complexity caveat preserves a real exception to the b-ary model and is consistent with the O(b^n·c) and depth-first O(n) / best-first O(b^n) space claims."
-              },
-              {
-                "quote": "The certificate is false.",
-                "line_start": 113,
-                "reason": "The 90 vs bound 78 vs incumbent 80 example gives a concrete failure mode of a non-optimistic bound; the next paragraph contrasts it with a valid-but-loose bound, giving a clear decision between validity and tightness."
-              },
-              {
-                "quote": "Round the fractional remainder upward so the integer bound stays optimistic.",
-                "line_start": 143,
-                "reason": "The code rounds the LP remainder up using Int128 and checked arithmetic, so pruning with Bound <= best is sound; the explanation beneath it matches the code."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the note covers one coherent paradigm; the visualization, complexity, failure modes and implementation all serve the same bound-and-prune idea.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The complete note was independently read and found accurate, clear and rule-compliant. The keep disposition is justified, and no edits or sources need checking.",
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md",
-          "citation_index": 4,
-          "reported_line_start": 143,
-          "resolved_line_start": 154
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md": "c1718904068141d95d8e53cf74adcf148bce2182906bc4b4446ba06871063da6"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md",
-          "verdict": "CLEAN",
-          "summary": "Independent whole-note audit found no accuracy, clarity, ordering or rule defects. The opening arithmetic, optimism argument, A* analogy, complexity tab, failure-mode examples and C# code are correct and well explained, so no edit is warranted.",
-          "page_type": "Concept — authorable prose; no Questions section (optional); References holds one primary source (Land and Doig 1960); code fences carry language identifiers.",
-          "current_text_evidence": [
-            {
-              "quote": "A 0/1 knapsack with 40 items has `2^40` candidate subsets.",
-              "line_start": 14,
-              "reason": "Concrete, correct opening that introduces the problem scale; 14!/2 for symmetric TSP with a fixed start is also correct."
-            },
-            {
-              "quote": "So if `bound ≤ incumbent`, then *every* completion is `≤ incumbent`",
-              "line_start": 37,
-              "reason": "States the pruning correctness argument precisely, with the minimisation reversal noted; the mechanism and condition are recoverable."
-            },
-            {
-              "quote": "TSP does not have a constant branching factor",
-              "line_start": 107,
-              "reason": "Complexity caveat preserves a real exception to the b-ary model and is consistent with the O(b^n·c) and depth-first O(n) / best-first O(b^n) space claims."
-            },
-            {
-              "quote": "The certificate is false.",
-              "line_start": 113,
-              "reason": "The 90 vs bound 78 vs incumbent 80 example gives a concrete failure mode of a non-optimistic bound; the next paragraph contrasts it with a valid-but-loose bound, giving a clear decision between validity and tightness."
-            },
-            {
-              "quote": "Round the fractional remainder upward so the integer bound stays optimistic.",
-              "line_start": 154,
-              "reason": "The code rounds the LP remainder up using Int128 and checked arithmetic, so pruning with Bound <= best is sound; the explanation beneath it matches the code."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note covers one coherent paradigm; the visualization, complexity, failure modes and implementation all serve the same bound-and-prune idea.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The complete note was independently read and found accurate, clear and rule-compliant. The keep disposition is justified, and no edits or sources need checking.",
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
