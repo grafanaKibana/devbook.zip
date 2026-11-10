@@ -10026,11 +10026,11 @@
     "version": 1,
     "id": "d9820c0a869a4376b0c4be62174ca4b9",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 71.9209665,
+    "elapsed_seconds": 84.30531690000001,
     "calls_reserved": 2,
-    "responses_received": 1,
+    "responses_received": 2,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md"
     ],
@@ -10049,7 +10049,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T19:54:32.859445Z",
+    "checkpoint_at": "2026-11-10T19:54:45.243792Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -29505,5 +29505,70 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "d9820c0a869a4376b0c4be62174ca4b9",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Linear ordering of a DAG's vertices that places every edge's source before its target, sequencing dependencies first.\"\nlevel: [\"4\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-06-20T05:33:50.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.335Z\"\n---\n\nA build system needs an order that respects every dependency. Model each prerequisite as an edge `u → v`, meaning `u` must be built before `v`. A topological sort produces a linear vertex order in which every edge points forward, so `u` appears before `v` for each such edge.\n\nThe order exists only when the dependency graph is acyclic. A cycle `a → b → … → a` eventually requires `a` to precede itself. Both standard constructions detect that contradiction while attempting to build the order: a directed graph is topologically sortable exactly when it is a DAG.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"topological-sort\",\"directed\":true,\"nodes\":[{\"id\":\"A\"},{\"id\":\"B\"},{\"id\":\"C\"},{\"id\":\"D\"},{\"id\":\"E\"},{\"id\":\"F\"},{\"id\":\"G\"}],\"edges\":[{\"from\":\"A\",\"to\":\"B\"},{\"from\":\"A\",\"to\":\"C\"},{\"from\":\"B\",\"to\":\"D\"},{\"from\":\"B\",\"to\":\"E\"},{\"from\":\"C\",\"to\":\"D\"},{\"from\":\"C\",\"to\":\"E\"},{\"from\":\"D\",\"to\":\"F\"},{\"from\":\"E\",\"to\":\"F\"},{\"from\":\"F\",\"to\":\"G\"}]}\n```\n\nA vertex with in-degree 0 has no unmet dependency — every edge into it would come from a vertex already emitted, and there are none left — so it is safe to place next. Emitting it removes its outgoing edges, which decrements the in-degree of each successor. A successor whose count reaches 0 has just had its last prerequisite satisfied and becomes eligible in turn. The frontier of ready vertices is therefore not fixed; it refills as earlier vertices leave. Here only `A` starts at in-degree 0; emitting it drops both `B` and `C` to 0, so the frontier now holds two vertices at once. Either may go next, and that fork is exactly where distinct valid orders diverge.\n\nBoth standard algorithms enforce the same invariant: no edge ends up pointing backward. One realizes it by placing a vertex only after every predecessor is placed; the other by placing a vertex ahead of every vertex reachable from it, since it finishes only after all of them. Either direction produces the same guarantee, that for each `u → v` the vertex `u` precedes `v`.\n\n**Kahn's algorithm** works from in-degrees. Compute each vertex's in-degree, seed a queue with every in-degree-0 vertex, then repeatedly dequeue one, append it to the order, and decrement each successor's in-degree, enqueuing any that reach 0. A vertex enters the queue exactly when its last incoming edge is removed, so it is emitted strictly after all of its predecessors. The queue is just the current set of ready vertices; nothing about the traversal is recursive.\n\n**DFS-based** works from finish times. Run [[Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS|depth-first search]]; when a vertex's recursion finishes — all of its descendants fully explored and already emitted — prepend it to the order (equivalently, push it on a stack and reverse at the end, which is reverse postorder). A vertex finishes after every vertex reachable from it, so prepending on finish puts it ahead of all those descendants in the final order.\n\nThe two are valid because they realize the invariant from opposite ends. Kahn's cannot emit `v` until every `u` with `u → v` has already left the queue, so `u` precedes `v`. DFS finishes `v` before `u` whenever `u → v`, so `u`'s larger finish time places it earlier in reverse-finish order. Neither can produce a backward-pointing edge.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Topological Sort complexity\",\n  \"variables\": {\n    \"edgeCount\": {\n      \"symbol\": \"m\",\n      \"description\": \"number of edges\"\n    },\n    \"vertexCount\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of vertices\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Kahn's (in-degree queue)\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Time\",\n              \"formula\": \"Θ(n + m)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"DFS (reverse postorder)\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Time\",\n              \"formula\": \"Θ(n + m)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"operations\",\n      \"entries\": [\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"Kahn's (in-degree queue)\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        },\n        {\n          \"kind\": \"operation\",\n          \"operation\": \"DFS (reverse postorder)\",\n          \"bounds\": [\n            {\n              \"kind\": \"curve\",\n              \"role\": \"Auxiliary space\",\n              \"formula\": \"O(n)\",\n              \"curveId\": \"linear\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# Where the Order Fails or Splits\n\nBoth constructions expose a cycle instead of returning a partial order as if it were valid. Kahn's emits fewer than `V` vertices because every vertex trapped in a cycle keeps an incoming edge and never reaches in-degree 0. DFS detects a back edge to a vertex still open on the recursion stack. The emitted count or DFS color state is therefore part of the result, not an optional check.\n\nThe order is usually not unique. Whenever several vertices have in-degree 0 at once, as `B` and `C` do above, any of them may be chosen next. A fixed tie-break is needed when downstream work expects a reproducible order.\n\nDirection carries the dependency meaning. An undirected edge says nothing about which endpoint comes first, so topological sort is defined only for directed input. A cycle in that directed graph leaves no valid order, and both constructions detect it.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Kahn's control flow\n>\n> ```mermaid\n> flowchart TD\n>   A[Compute in-degree of every vertex] --> B[Enqueue all in-degree-0 vertices]\n>   B --> C{Queue non-empty}\n>   C -->|Yes| E[Dequeue u, append to order]\n>   E --> F[Decrement in-degree of each successor]\n>   F --> G[Enqueue successors that reached 0]\n>   G --> C\n>   C -->|No| D{Emitted V vertices}\n>   D -->|Yes| H[Return order]\n>   D -->|No| I[Cycle remains: no valid order]\n> ```\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> public static List<int>? TopoSort(int n, List<int>[] adj)\n> {\n>     var inDeg = new int[n];\n>     foreach (var edges in adj)\n>         foreach (var v in edges) inDeg[v]++;\n>\n>     var queue = new Queue<int>();\n>     for (int i = 0; i < n; i++)\n>         if (inDeg[i] == 0) queue.Enqueue(i);   // no dependencies\n>\n>     var order = new List<int>();\n>     while (queue.Count > 0)\n>     {\n>         int u = queue.Dequeue();\n>         order.Add(u);\n>         foreach (var v in adj[u])\n>             if (--inDeg[v] == 0) queue.Enqueue(v);\n>     }\n>\n>     return order.Count == n ? order : null;     // null ⇒ a cycle exists\n> }\n> ```\n>\n> Swapping the `Queue<int>` for a `PriorityQueue<int, int>` keyed on the vertex label produces the lexicographically smallest order without changing the cycle check.\n\n# Comparison\n\n| Approach | Traversal | Order produced | Cycle signal | Tie-break control |\n| --- | --- | --- | --- | --- |\n| Kahn's | BFS over the in-degree-0 frontier, iterative | Emission order | Fewer than `V` vertices emitted | Priority queue yields a canonical (e.g. Lexicographically smallest) order |\n| DFS-based | Recursive depth-first | Reverse postorder (decreasing finish time) | Back edge to a vertex on the recursion stack | Fixed by traversal order. No natural tie-break |\n\nKahn's fits iterative schedulers. Its queue makes the ready frontier explicit, the emitted-count check detects cycles, and a priority queue gives deterministic tie-breaking without recursion. DFS reverse postorder is shorter when a recursive traversal already exists and finish times will be reused.\n\n[[Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components|Strongly Connected Components]] connect the two ideas. Kosaraju's algorithm uses DFS finish times, while Tarjan's emits components in reverse topological order as it unwinds. Contracting every SCC in a general digraph produces a DAG, so the condensation remains topologically sortable even when the original graph is cyclic. Path computations on that DAG can follow the order directly instead of using [[Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]].\n\n# References\n\n- [Topological sorting of large networks (Kahn, 1962)](https://dl.acm.org/doi/10.1145/368996.369025)\n- [Topological sort (cp-algorithms)](https://cp-algorithms.com/graph/topological-sort.html)\n",
+          "hash": "f483d1a0be190e494ef34d38154b09718caec4ff0a44a4b9ed8679181eefe5fd",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md",
+          "expected_hash": "f483d1a0be190e494ef34d38154b09718caec4ff0a44a4b9ed8679181eefe5fd",
+          "before": "(e.g. Lexicographically smallest)",
+          "after": "(e.g. lexicographically smallest)",
+          "reason": "Fixes a stray mid-sentence capital in the comparison table.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "priority queue yields a canonical order such as lexicographically smallest"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The comparison table capitalizes 'Lexicographically' mid-parenthetical, a proofreading slip.",
+          "reader_benefit": "Cleaner, consistent table text."
+        }
+      ],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md",
+          "outcome": "changed",
+          "reason": "Audited the whole note: the DAG condition, Kahn's and DFS reverse-postorder arguments, cycle detection, non-uniqueness, the Θ(n+m) and O(n) complexity entries, the C# code, and the SCC and condensation remarks (Tarjan emits components in reverse topological order) are all correct and well ordered. Only a capitalization typo in the comparison table needed fixing."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md": "f483d1a0be190e494ef34d38154b09718caec4ff0a44a4b9ed8679181eefe5fd"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-10T19:54:45.243765Z"
+  }
 }
