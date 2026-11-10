@@ -7547,6 +7547,71 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md": {
+      "content_hash": "2b7031672ccf821428b8aac577d601f8c4f4f466260b14abafa6cba260bde5c7",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "2b7031672ccf821428b8aac577d601f8c4f4f466260b14abafa6cba260bde5c7",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md",
+          "verdict": "CLEAN",
+          "summary": "The note's definitions from 1NF through BCNF are correct, and each worked example states the assumptions it needs. The 4NF/5NF independence conditions, the DKNF finite-domain caveat, and the denormalization conditions and tradeoffs carry mechanisms and limits rather than slogans. The four Qards each test one gradeable task with answer-side sources. No edit is warranted.",
+          "page_type": "Concept: SQL normalization and denormalization. Concept rules apply. Questions and References are optional and are present and well formed. Qard IDs are protected.",
+          "current_text_evidence": [
+            {
+              "quote": "Third Normal Form (3NF) and Boyce-Codd Normal Form (BCNF) cover most ordinary OLTP dependencies.",
+              "line_start": 20,
+              "reason": "The opening states the operating idea and the stopping boundary, so the topic is recoverable quickly."
+            },
+            {
+              "quote": "Every attribute is prime, so `Rate → Parking spot number` is permitted by 3NF.",
+              "line_start": 129,
+              "reason": "The 3NF-versus-BCNF distinction is correct: all attributes are prime, so 3NF permits the dependency and BCNF forbids it. The example states its candidate-key assumptions."
+            },
+            {
+              "quote": "The business rule is essential. If a supplier may offer a product to only selected customers",
+              "line_start": 179,
+              "reason": "The 5NF example states the condition under which decomposition is lossless and gives the counterexample, which preserves the exception."
+            },
+            {
+              "quote": "with finite domains, domain constraints can imply a join dependency that the candidate keys alone do not",
+              "line_start": 187,
+              "reason": "The DKNF caveat about infinite versus finite domains is accurate and gives the condition under which DKNF implies 5NF."
+            },
+            {
+              "quote": "Position and home address change on different timelines, so the combined relation repeats one history",
+              "line_start": 203,
+              "reason": "The 6NF temporal example explains why decomposition helps, and the tables are internally consistent."
+            },
+            {
+              "quote": "Denormalization is justified by a measured query whose latency or resource cost cannot be met through [[Indexes]]",
+              "line_start": 223,
+              "reason": "This gives a decision condition rather than a slogan, and the wikilink is relevant."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: normal forms and denormalization are one coherent decision topic, where dependency theory sets the baseline and denormalization is the measured exception. Splitting would separate the justification from the thing being justified.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -10176,7 +10241,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-10T07:30:50.865899Z",
-    "elapsed_seconds": 508.9394633999998,
+    "elapsed_seconds": 512.8490849999998,
     "calls_reserved": 16,
     "responses_received": 16,
     "attempted_paths": [
@@ -10708,7 +10773,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T07:39:19.804874Z",
+    "checkpoint_at": "2026-11-10T07:39:23.714495Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -28827,111 +28892,6 @@
       "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_repair_key": "5e37f1977082945be5d1b9effaf24d2debf9e0720d0b7739596285e4a78de00b",
       "author_repair_pending": true
-    }
-  },
-  "pending_author_proposal": {
-    "workload_id": "270542e03ba04146b22c78499257f60e",
-    "topic_id": "data-persistence-4ea34db4",
-    "batch": {
-      "topic": "Data Persistence",
-      "topic_id": "data-persistence-4ea34db4",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md",
-          "content": "---\ntopic: [Data Persistence]\nsubtopic: [SQL]\nsummary: \"Structuring a relational schema to remove redundancy, trading read performance for fewer anomalies.\"\nlevel: [\"4\"]\npriority: High\nstatus: Done\n\npublish: true\nqard-deck: \"Data Persistence\"\nqard-topic: \"SQL/Normalization Denormalization\"\nflashcard_uid: \"ab5a8eb2\"\ncreated: \"2026-02-10T16:03:55.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:14:17.353Z\"\n---\n\nNormalization uses functional, multivalued, and join dependencies to separate facts that have different keys. The goal is not to remove every repeated value. It is to prevent insertion, update, and deletion anomalies by giving each fact one authoritative dependency boundary. If a customer's current address is one fact, changing it should not require finding every order row that happened to repeat it.\n\nThird Normal Form (3NF) and Boyce-Codd Normal Form (BCNF) cover most ordinary OLTP dependencies. Fourth and Fifth Normal Form address independent multivalued facts and join dependencies. Sixth Normal Form is mainly useful in specialized temporal designs. The stopping point is determined by the actual dependencies and workload. Join count alone is not a reason to denormalize, and a read-heavy system does not automatically benefit from duplicated state.\n\n# First Normal Form\n\nA relation is in 1NF when each tuple has one value for each attribute and repeating groups are represented as rows rather than numbered columns or packed lists. “Atomic” is relative to the declared domain: a timestamp may be one value even though it has components. The design question is whether the database can apply the intended key, constraint, and query semantics to the value.\n\nThe following \"Cars\" table stores several models in one value:\n\n| Make | Models |\n| --- | --- |\n| Audi | A4, S5, RS6, TT |\n| Infiniti | Q50 |\n\nThe Audi row packs four independent model values into one string, so the database cannot constrain or join an individual model as a row. 1NF represents each make-model fact as its own row:\n\n| Make | Models |\n| --- | --- |\n| Audi | A4 |\n| Audi | S5 |\n| Audi | RS6 |\n| Audi | TT |\n| Infiniti | Q50 |\n\n# Second Normal Form\n\nA relation is in 2NF when it is in 1NF and every non-prime attribute is fully functionally dependent on every candidate key. A partial dependency exists when a non-prime attribute depends on only part of a composite candidate key. Relations whose candidate keys are all single attributes satisfy this condition automatically.\n\nIn the following table, every model row repeats its make's discount:\n\n| Make | Model | Price | Discount |\n| --- | --- | --- | --- |\n| Audi | S5 | 5500000 | 5% |\n| Audi | RS6 | 6000000 | 5% |\n| Audi | TT | 2500000 | 5% |\n| Infiniti | Q50 | 5000000 | 10% |\n\nAssuming `{Make, Model}` identifies a row, `Price` depends on the full key while `Discount` depends only on `Make`. Repeating the make-level discount in every model row creates a partial dependency. The decomposition separates model prices from make discounts:\n\n| Make | Model | Price |\n| --- | --- | --- |\n| Audi | S5 | 5500000 |\n| Audi | RS6 | 6000000 |\n| Audi | TT | 2500000 |\n| Infiniti | Q50 | 5000000 |\n\n| Make | Discount |\n| --- | --- |\n| Audi | 5% |\n| Infiniti | 10% |\n\n# Third Normal Form\n\nA relation is in 3NF when, for every non-trivial functional dependency `X → A`, either `X` is a superkey or `A` is a prime attribute belonging to some candidate key. A common practical violation is a non-key fact that depends on another non-key fact instead of on a key.\n\n## What Are Transitive Functional Dependencies?\n\nA transitive dependency appears when a key determines one non-key attribute, which in turn determines another. The second fact has a different determinant and should usually have its own relation.\n\nThe following table stores each model's store and that store's phone number:\n\n| Model | Store | Phone |\n| --- | --- | --- |\n| BMW | Real Auto | 87-33-98 |\n| Audi | Real Auto | 87-33-98 |\n| Nissan | Next Auto | 94-54-12 |\n\nThe table is in 2NF but not in 3NF.\n\nIn this example, `Model` is the candidate key. A store has a phone number, so the phone depends on `Store`, not directly on the car model.\n\nThe dependencies are `Model → Store`, `Store → Phone`, and therefore `Model → Phone`. Because `Store` is not a superkey and `Phone` is not prime, `Store → Phone` violates 3NF.\n\nDecomposing the original relation produces two relations in 3NF:\n\n| Store | Phone |\n| --- | --- |\n| Real Auto | 87-33-98 |\n| Next Auto | 94-54-12 |\n\n| Model | Store |\n| --- | --- |\n| BMW | Real Auto |\n| Audi | Real Auto |\n| Nissan | Next Auto |\n\n# Boyce-Codd Normal Form (BCNF)\n\nBCNF strengthens 3NF: for every non-trivial functional dependency `X → Y`, `X` must be a superkey. The difference from 3NF appears in schemas with overlapping candidate keys, where 3NF may allow a dependency whose right side is prime even though its determinant is not a superkey.\n\nThe following relation represents parking reservations for one day:\n\n| Parking spot number | Start time | End time | Rate |\n| --- | --- | --- | --- |\n| 1 | 09:30 | 10:30 | Economy |\n| 1 | 11:00 | 12:00 | Economy |\n| 1 | 14:00 | 15:30 | Standard |\n| 2 | 10:00 | 12:00 | Premium B |\n| 2 | 12:00 | 14:00 | Premium B |\n| 2 | 15:00 | 18:00 | Premium A |\n\nThe rate has a unique name and depends on the chosen parking spot and whether discounts apply, specifically:\n\n- \"Economy\": parking spot 1 for discount-eligible customers\n- \"Standard\": parking spot 1 for non-eligible customers\n- \"Premium A\": parking spot 2 for discount-eligible customers\n- \"Premium B\": parking spot 2 for non-eligible customers.\n\nUnder the example's assumptions that times identify one reservation per spot or rate, the candidate keys are `{Parking spot number, Start time}`, `{Parking spot number, End time}`, `{Rate, Start time}`, and `{Rate, End time}`.\n\nEvery attribute is prime, so `Rate → Parking spot number` is permitted by 3NF. `Rate` is not a superkey, however, so the same dependency violates BCNF.\n\nThe anomaly is concrete: the table can assign the `Economy` rate to parking spot 2 even though the rate determines parking spot 1.\n\nThe decomposition separates the rate-to-spot fact from the reservation and makes discount eligibility explicit. Under the stated dependencies, both resulting relations satisfy BCNF:\n\n**Rates**\n\n| Rate | Parking spot number | Has discounts |\n| --- | --- | --- |\n| Economy | 1 | true |\n| Standard | 1 | false |\n| Premium A | 2 | true |\n| Premium B | 2 | false |\n\n**Reservations**\n\n| Rate | Start time | End time |\n| --- | --- | --- |\n| Economy | 09:30 | 10:30 |\n| Economy | 11:00 | 12:00 |\n| Standard | 14:00 | 15:30 |\n| Premium B | 10:00 | 12:00 |\n| Premium B | 12:00 | 14:00 |\n| Premium A | 15:00 | 18:00 |\n\n# Fourth Normal Form\n\nA relation is in 4NF when every non-trivial multivalued dependency `X ↠ Y` has a superkey on its left side. A multivalued dependency says that, for one `X`, the set of `Y` values is independent of the remaining attributes.\n\nIn this example, restaurants make different kinds of pizza, and each restaurant's delivery service operates only in certain areas of the city. The candidate key for the combined relation is `{Restaurant, Pizza type, Delivery area}`.\n\nThe relation is not in 4NF because two independent sets are multiplied together:\n\n{Restaurant} ↠ {Pizza type}\n\n{Restaurant} ↠ {Delivery area}\n\nAdding one pizza type requires a row for every delivery area. Missing one row falsely states that the pizza is unavailable in that area, even though pizza choice and delivery coverage are independent facts.\n\nThe anomaly disappears when the independent facts move into `{Restaurant, Pizza type}` and `{Restaurant, Delivery area}` relations.\n\nAn attribute such as delivery-inclusive price may genuinely depend on the full `{Restaurant, Pizza type, Delivery area}` key. That fact cannot be placed in either binary projection without changing its meaning. The dependency model must therefore decide whether pizza availability and delivery coverage are truly independent before decomposition. 4NF is not a mechanical instruction to discard facts that require the full key.\n\n# Fifth Normal Form\n\nA relation is in 5NF (also called PJ/NF, Projection-Join Normal Form) if it is in 4NF and every join dependency is implied by its candidate keys. In other words, the relation cannot be losslessly decomposed into smaller projections unless those projections are defined by candidate keys.\n\nThe classic example uses Supplier, Product, and Customer. Under the example's business rule, a valid ternary fact exists exactly when the supplier offers the product, serves the customer, and the customer buys the product. The ternary relation is then the lossless join of `SupplierProduct`, `SupplierCustomer`, and `ProductCustomer`. That join dependency is not derived from one candidate key, so the original relation violates 5NF and can be decomposed into those three projections.\n\nThe business rule is essential. If a supplier may offer a product to only selected customers, joining the three pairwise relations invents spurious triples and the decomposition is not lossless. Fifth Normal Form applies when the full fact is implied by lower-arity facts. It does not assume that every ternary relation should be split.\n\n# Domain-key Normal Form\n\nA relation is in Domain-key Normal Form (DKNF) when every constraint follows solely from its domains and keys.\n\nA domain constraint restricts an attribute to the values and operations of its declared domain. A key constraint identifies tuples uniquely.\n\nDKNF removes the need for separate cross-attribute rules, but many business constraints cannot be expressed as domains or keys. It is therefore an ideal end state rather than a routine decomposition target. When every attribute domain is infinite, a relation in DKNF is necessarily in 5NF; with finite domains, domain constraints can imply a join dependency that the candidate keys alone do not, so the implication can fail.\n\n# Sixth Normal Form\n\nA relation is in 6NF when it has no non-trivial lossless join decomposition: it cannot be split further without losing information. Every 6NF relation is also in 5NF.\n\nMaximal decomposition is rarely useful for an ordinary current-state schema. It becomes valuable in temporal models because independently changing attributes can have independent validity intervals. Temporal relational theory defines unpacking and packing operators, including temporal joins, to align those intervals before recombination. These are theoretical operators rather than standard SQL syntax.\n\n**Employees**\n\n| Emp No. | Time | Position | Home address |\n| --- | --- | --- | --- |\n| 6575 | 01-01-2000:10-02-2003 | mechanic | Lenin St, 10 |\n| 6575 | 11-02-2003:15-06-2006 | mechanic | Soviet St, 22 |\n| 6575 | 16-06-2006:05-03-2009 | foreman | Soviet St, 22 |\n\nPosition and home address change on different timelines, so the combined relation repeats one history whenever the other changes. Separate temporal relations let each fact record only its own change points.\n\n**Employee positions**\n\n| Emp No. | Time | Position |\n| --- | --- | --- |\n| 6575 | 01-01-2000:15-06-2006 | mechanic |\n| 6575 | 16-06-2006:05-03-2009 | foreman |\n\n**Home addresses**\n\n| Emp No. | Time | Home address |\n| --- | --- | --- |\n| 6575 | 01-01-2000:10-02-2003 | Lenin St, 10 |\n| 6575 | 11-02-2003:05-03-2009 | Soviet St, 22 |\n\n# Denormalization\n\nDenormalization deliberately stores a derived or duplicated fact in the shape a read path needs. It trades read-time work for write-time maintenance. The normalized source remains authoritative unless the design explicitly gives the denormalized representation its own ownership contract.\n\nDenormalization is justified by a measured query whose latency or resource cost cannot be met through [[Indexes]], plan correction, partitioning, or an acceptable cache. Read frequency alone is insufficient. The gain must exceed the cost of maintaining and reconciling the duplicate.\n\nCommon forms include:\n\n- copying a related value into a read model.\n- storing a precomputed aggregate.\n- maintaining a materialized view that can be rebuilt from source data.\n- flattening a hierarchy into a columnar or analytical projection.\n\n**Concrete example:** instead of computing total order value on every request with a JOIN + SUM, a denormalized design stores it directly:\n\n```sql\n-- Normalized: computed at read time\nSELECT c.Name, SUM(o.Amount)\nFROM Customers c\nJOIN Orders o ON o.CustomerId = c.Id\nGROUP BY c.Id, c.Name;\n\n-- Denormalized: pre-stored on the Customers table\nSELECT Name, TotalOrderAmount FROM Customers;\n```\n\nThe second query removes aggregation from the read path, but every order change must update `TotalOrderAmount` under a defined consistency policy. A same-database transaction can maintain both synchronously. An asynchronous projection needs lag semantics, idempotent updates, and reconciliation. The duplicated value is safe only when ownership and repair are explicit.\n\n# Pitfalls\n\n**Decomposition without a dependency** — splitting attributes merely because they can live in separate tables adds joins without removing an anomaly. Keys and dependencies determine the decomposition, and critical plans are then measured with realistic cardinalities. A multi-table query is not inherently slow, and join count is not a reliable threshold. Poor estimates, missing indexes, wide rows, and unnecessary fan-out are the mechanisms to diagnose.\n\n**Under-normalizing and silent data corruption** — storing the same fact in multiple places creates update anomalies that are invisible until they cause business impact. For example, an e-commerce system stores `product_price` on both `Products` and `OrderLineItems`. A price-update path changes `Products` but leaves pending carts stale. A finalized order-line price is a historical fact, while a pending cart may still depend on the current-price policy. Those facts need separate names and ownership. A `PriceHistory` table with effective dates can preserve the distinction, with the applicable price selected when the order is finalized.\n\n**Premature denormalization** — storing `TotalOrderAmount` before proving the aggregate is costly adds another row to every order-write transaction. Concurrent orders for one customer can then contend on that summary row. The plan and workload establish first whether the aggregate is actually costly. A suitable index, materialized view, cache, or scheduled analytical projection may meet the read contract with a cheaper write path.\n\n**Treating migration cost as a normal-form property** — foreign keys, large indexes, backfills, and application coupling can make a schema change expensive, but decomposition does not automatically require cascading DDL. Each migration plan rests on the engine's current behavior. For example, modern PostgreSQL can add a column with a non-volatile constant default without rewriting every row, while volatile defaults and later backfills have different costs. Lock and rewrite behavior is measured on the deployed version rather than assumed from an old rule.\n\n# Tradeoffs\n\n| Decision | Option A | Option B | When to Choose A | When to Choose B |\n| --- | --- | --- | --- | --- |\n| **Stop at 3NF vs BCNF** | A dependency-preserving 3NF synthesis is always available, and 3NF permits a prime attribute on the right of a non-superkey dependency | BCNF requires every determinant to be a superkey | A BCNF decomposition would lose enforceable dependencies needed by the design | Overlapping candidate keys create a demonstrated update anomaly and the decomposition is lossless |\n| **Normalize vs denormalize a read** | Keep one authoritative dependency boundary | Store a redundant column or materialized projection | Integrity and flexible queries dominate, or the normalized plan meets the objective | A named read path misses its objective and the duplicate has an owner, update policy, and reconciliation path |\n| **Precompute vs aggregate on demand** | Maintain a stored aggregate | Run `JOIN + SUM` from source facts | The aggregate is frequent and bounded write contention is acceptable | Fresh source truth matters more, or updates make the summary row a hotspot |\n| **4NF/5NF decomposition** | Separate independent multivalued or join-dependent facts | Retain the relation | The business dependencies prove a lossless decomposition | The full tuple carries information that the projections cannot reconstruct |\n\nAn OLTP design starts by writing down candidate keys and functional dependencies, then decomposes toward 3NF or BCNF while preserving a lossless join and the constraints the database must enforce. Denormalization is justified only for a named, measured read path. Every duplicate needs an authoritative source, freshness contract, complete update path, failure behavior, and reconciliation query.\n\n# Questions\n\n<!-- qard-id: 490485e5-5ecc-4738-8ff1-c06c00b82234 -->\n> [!qard]- What problem does normalization solve in a relational schema?\n> Normalization prevents insertion, update and deletion anomalies. These arise when one fact is stored redundantly in rows that exist for other reasons. Normalization decomposes tables according to their dependencies, so each fact is stored once, with the key that actually determines it.\n>\n> For example, an `Orders` table that is the only place storing customer addresses repeats a customer's address on every order row. It has all three anomalies:\n>\n> - **Update anomaly:** changing the address means updating every order row for that customer. Missing one row leaves two contradictory addresses.\n> - **Insertion anomaly:** a new customer's address cannot be recorded until the customer places an order.\n> - **Deletion anomaly:** deleting a customer's last order also deletes the only record of the address.\n> \n> Storing the address in a `Customers` table keyed by customer ID, with each order referring to that ID, removes all three. The goal is not to remove every repeated value: the customer ID repeated on each order is a reference, not a duplicated fact. The address an order was shipped to is a different, historical fact, and it belongs on the order.\n>\n> A valid decomposition is lossless: joining the smaller tables reproduces exactly the original rows, without losing any or inventing new ones. The constraints the business needs must also remain enforceable after the split.\n>\n> [Codd: Further Normalization of the Data Base Relational Model](https://apollo.inf.upol.cz/~urbanec/teaching/2021/data2/files/codd2.pdf)\n\n<!-- qard-id: 0655df3d-3076-45b4-b318-fe908c8ee76d -->\n> [!qard]- When does a relational schema need 4NF or 5NF rather than stopping at BCNF?\n> A schema needs 4NF or 5NF when redundancy remains that no functional dependency explains. 3NF and BCNF are built on functional dependencies, where one set of attributes determines a single value of another attribute. Fourth and fifth normal form handle two other kinds of dependency.\n>\n> | Aspect | 4NF | 5NF (project-join normal form) |\n> |---|---|---|\n> | Dependency removed | A multivalued dependency: one value determines a set of values that is independent of the table's other attributes. | A join dependency: the full fact is exactly the join of three or more smaller projections, and this is not implied by the candidate keys. |\n> | Example | A `{Restaurant, PizzaType, DeliveryArea}` table where `Restaurant ↠ PizzaType` and `Restaurant ↠ DeliveryArea` are independent. Every pizza type repeats for every area. Adding one type needs one row per area, and a missing row falsely says the pizza is unavailable there. | A `{Supplier, Product, Customer}` table under the rule that a supplier supplies a product to a customer exactly when the supplier offers the product, serves the customer, and the customer buys the product. |\n> | Decomposition | `{Restaurant, PizzaType}` and `{Restaurant, DeliveryArea}`. | `SupplierProduct`, `SupplierCustomer` and `ProductCustomer`. |\n>\n> Both decompositions are valid only when the dependency really holds in the domain. If pizza availability differs by delivery area, the two sets are not independent, and the three-column table is the correct fact. If a supplier offers a product only to some of its customers, joining the three pairwise tables produces combinations that never existed, so the decomposition loses information. The design follows from the dependencies that actually hold, not from a target normal-form number.\n>\n> [Codd: Further Normalization of the Data Base Relational Model](https://apollo.inf.upol.cz/~urbanec/teaching/2021/data2/files/codd2.pdf) · [Fagin: Multivalued Dependencies and a New Normal Form for Relational Databases](https://www.comp.nus.edu.sg/~lingtw/papers/fagin.pdf) · [Fagin: Project-Join Normal Form](https://citeseerx.ist.psu.edu/document?doi=4735fc168eb72ef96817384aa5d40d5b6016d713&repid=rep1&type=pdf)\n\n<!-- qard-id: 61f5acfa-1113-408f-9deb-acd3b5e6b958 -->\n> [!qard]- What conditions justify denormalizing a table?\n> Denormalization is justified when three conditions hold:\n>\n> - A specific read path has a measured latency or resource problem.\n> - Cheaper fixes, such as an index or a corrected query plan, do not meet its target.\n> - Keeping a stored copy up to date costs less than recomputing the result on every read.\n>\n> High read volume alone does not justify it.\n>\n> [PostgreSQL: Materialized views](https://www.postgresql.org/docs/current/rules-materializedviews.html)\n\n> [!qard]- What consistency risks does denormalization introduce?\n> The same fact now lives in two places, and every change must reach both:\n>\n> - **Drift:** a write path that updates the source but misses the copy leaves them silently inconsistent.\n> - **Staleness:** a copy updated asynchronously or on a schedule serves old data between updates. A PostgreSQL materialized view, for example, changes only when `REFRESH MATERIALIZED VIEW` runs.\n> - **Write cost and contention:** each source change also updates the copy. A stored `TotalOrderAmount` on `Customers` adds an update to every order write, and concurrent orders for the same customer contend on that one row.\n>\n> A safe design therefore names four things:\n>\n> - the authoritative source;\n> - the acceptable freshness;\n> - how the copy is updated, either in the same transaction or by an asynchronous projection;\n> - a reconciliation check that detects and repairs drift.\n>\n> [PostgreSQL: Materialized views](https://www.postgresql.org/docs/current/rules-materializedviews.html)\n\n<!-- qard-id: 5b6ce553-cc6a-41a8-a22d-da5fc5fb740c -->\n> [!qard]- How do 2NF and 3NF differ?\n> 2NF removes facts that depend on only part of a composite key. 3NF also removes facts that depend on another non-key attribute instead of on a key. Every relation in 3NF is also in 2NF.\n>\n> A *non-prime* attribute is one that is not part of any candidate key.\n>\n> | Aspect | 2NF | 3NF |\n> |---|---|---|\n> | Problem removed | Partial dependency: a non-prime attribute depends on only part of a composite candidate key. | Transitive dependency: a non-prime attribute depends on another non-key attribute, which in turn depends on the key. |\n> | Formal condition | The relation is in 1NF, and every non-prime attribute depends on the whole of every candidate key. | For every nontrivial functional dependency `X → A`, `X` is a superkey or `A` is prime. |\n> | When it can be violated | For a table already in 1NF, only when a candidate key has several attributes; such a table whose candidate keys are all single attributes is automatically in 2NF. | Also when the key is a single attribute. |\n> | Example violation | Key `{Make, Model}`: `Discount` depends only on `Make`, so the same discount repeats on every model row for that make. | Key `Model`: `Model → Store` and `Store → Phone`, so each store's phone number repeats on every model row for that store. |\n> | Fix | A separate `{Make, Discount}` table holds each make's discount. | A separate `{Store, Phone}` table holds each store's phone number. |\n>\n> Each fix is a lossless decomposition: joining the new tables on the shared attribute reproduces the original rows exactly. Whether every original dependency can still be enforced within a single table is a separate design concern.\n>\n> [Codd: Further Normalization of the Data Base Relational Model](https://apollo.inf.upol.cz/~urbanec/teaching/2021/data2/files/codd2.pdf)\n\n# References\n\n- [Further Normalization of the Data Base Relational Model](https://apollo.inf.upol.cz/~urbanec/teaching/2021/data2/files/codd2.pdf)\n",
-          "hash": "2b7031672ccf821428b8aac577d601f8c4f4f466260b14abafa6cba260bde5c7",
-          "topic": "Data Persistence",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md",
-          "outcome": "keep",
-          "reason": "I read the whole note and checked it against the standard dependency theory in Codd, Fagin and Date. The 1NF to BCNF definitions are correct, including the 2NF non-prime attribute condition and the 3NF/BCNF superkey-or-prime distinction. The worked examples follow from their stated assumptions. The Make/Model/Discount example has a partial dependency. The Model→Store→Phone example is a transitive dependency. In the parking example every attribute is prime, so 3NF allows Rate→Spot while BCNF forbids it. The 4NF pizza example and the 5NF supplier example both state the independence rule that justifies the decomposition. The DKNF caveat about infinite versus finite domains matches Fagin's result. The 6NF temporal tables are internally consistent. The denormalization, pitfalls and tradeoff sections give conditions and mechanisms rather than slogans, and they correctly avoid treating join count as a defect. The four Qards each test one gradeable task, match the note's text, and cite sources on the answer side. No known violations are recorded. I found no factual error, gap or redundancy that an edit would improve."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md": "2b7031672ccf821428b8aac577d601f8c4f4f466260b14abafa6cba260bde5c7"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-10T07:38:49.222652Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "The whole note was audited independently and no concrete error, gap or rule violation remains. No edits were proposed, so no change checks apply, and the keep is justified by current-text evidence.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md",
-          "verdict": "CLEAN",
-          "summary": "The note's definitions from 1NF through BCNF are correct, and each worked example states the assumptions it needs. The 4NF/5NF independence conditions, the DKNF finite-domain caveat, and the denormalization conditions and tradeoffs carry mechanisms and limits rather than slogans. The four Qards each test one gradeable task with answer-side sources. No edit is warranted.",
-          "page_type": "Concept: SQL normalization and denormalization. Concept rules apply. Questions and References are optional and are present and well formed. Qard IDs are protected.",
-          "current_text_evidence": [
-            {
-              "quote": "Third Normal Form (3NF) and Boyce-Codd Normal Form (BCNF) cover most ordinary OLTP dependencies.",
-              "line_start": 20,
-              "reason": "The opening states the operating idea and the stopping boundary, so the topic is recoverable quickly."
-            },
-            {
-              "quote": "Every attribute is prime, so `Rate → Parking spot number` is permitted by 3NF.",
-              "line_start": 129,
-              "reason": "The 3NF-versus-BCNF distinction is correct: all attributes are prime, so 3NF permits the dependency and BCNF forbids it. The example states its candidate-key assumptions."
-            },
-            {
-              "quote": "The business rule is essential. If a supplier may offer a product to only selected customers",
-              "line_start": 179,
-              "reason": "The 5NF example states the condition under which decomposition is lossless and gives the counterexample, which preserves the exception."
-            },
-            {
-              "quote": "with finite domains, domain constraints can imply a join dependency that the candidate keys alone do not",
-              "line_start": 187,
-              "reason": "The DKNF caveat about infinite versus finite domains is accurate and gives the condition under which DKNF implies 5NF."
-            },
-            {
-              "quote": "Position and home address change on different timelines, so the combined relation repeats one history",
-              "line_start": 203,
-              "reason": "The 6NF temporal example explains why decomposition helps, and the tables are internally consistent."
-            },
-            {
-              "quote": "Denormalization is justified by a measured query whose latency or resource cost cannot be met through [[Indexes]]",
-              "line_start": 223,
-              "reason": "This gives a decision condition rather than a slogan, and the wikilink is relevant."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: normal forms and denormalization are one coherent decision topic, where dependency theory sets the baseline and denormalization is the measured exception. Splitting would separate the justification from the thing being justified.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
     }
   }
 }
