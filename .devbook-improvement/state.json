@@ -10151,11 +10151,11 @@
     "version": 1,
     "id": "d9820c0a869a4376b0c4be62174ca4b9",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-10T19:53:20.939058Z",
-    "elapsed_seconds": 325.22841650000004,
+    "elapsed_seconds": 337.1644815,
     "calls_reserved": 8,
-    "responses_received": 7,
+    "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md",
@@ -11585,7 +11585,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T19:58:46.166893Z",
+    "checkpoint_at": "2026-11-10T19:58:58.102957Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -31834,5 +31834,70 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "d9820c0a869a4376b0c4be62174ca4b9",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Divide and Conquer.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Breaks a problem into smaller independent instances, solves them recursively, and combines the answers.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Creation\npublish: true\ncreated: \"2026-07-10T06:24:36.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-10T05:57:23.418Z\"\n---\n\nSorting a million elements and multiplying two large integers can both be split into smaller instances, solved recursively, and assembled from the partial answers. Divide-and-conquer names that shape. Binary search follows only one side of the split, the close variant usually called decrease-and-conquer.\n\nSubproblems are **independent** when each can be solved without another subproblem's result. They need not occupy separate storage: two calls may read the same immutable input or work on different regions of one array. The dependency graph matters here, not the memory layout. A state reached from multiple branches is an overlapping subproblem instead. [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic programming]] caches those repeated states and reasons over the resulting dependency graph.\n\n**Core shape:** divide into independent subproblems → recurse to a base case → combine their results.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{ \"algorithm\": \"divide-and-conquer\" }\n```\n\nEach recursive node divides one problem into independent subproblems, reaches direct base cases, then carries partial answers upward for combination. [[Home/Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge sort]] is one concrete use of that recursion-tree shape.\n\nThe paradigm is three steps and a stopping rule:\n\n1. **Divide** — produce smaller instances. Their sizes may be equal, unequal, or input-dependent.\n2. **Conquer** — solve each instance recursively until a base case or implementation cutoff is reached.\n3. **Combine** — after the required sub-results are available, assemble the answer for the parent instance.\n\nWhich step carries the work varies. [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary search]] follows only one half, so it is often classified more specifically as decrease-and-conquer.\n\nLogical independence permits parallel execution but does not make it automatic. Calls that share mutable data still need ownership rules or synchronization, the combine step must wait for every result it consumes, and task-scheduling overhead can exceed the work saved on small inputs. Whether a divide-and-conquer implementation is race-free or faster in parallel depends on its data access, synchronization, grain size, and runtime.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Divide and Conquer complexity\",\n  \"variables\": {\n    \"inputSize\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of elements in the array being sorted\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (compare every pair)\",\n          \"formula\": \"O(n^2)\",\n          \"curveId\": \"quadratic\"\n        },\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Divide and conquer (merge sort)\",\n          \"formula\": \"O(n log n)\",\n          \"curveId\": \"n-log-n\"\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (compare every pair)\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        },\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Divide and conquer (merge sort)\",\n          \"formula\": \"O(n)\",\n          \"curveId\": \"linear\"\n        }\n      ]\n    }\n  }\n}\n```\n\nA common balanced special case creates a fixed number `a` of equal-size subproblems `n/b`, giving `T(n) = a·T(n/b) + f(n)`. The Master Theorem applies to that recurrence, not to divide-and-conquer universally. Unequal or input-dependent splits need a recursion-tree or substitution argument; fixed unequal fractions fit Akra–Bazzi, while randomized partitions need an expected recurrence.\n\nThe live stack follows the longest branch. Balanced shrinkage keeps it shallow; a chain of bad [[Home/Computer Science/Algorithms/Sorting Algorithms/Quick Sort|quicksort]] pivots can overflow the call stack. Merge-style combining may also require a separate output buffer.\n\n%% endtabs %%\n\n# Boundaries and Implementation Costs\n\nOverlapping subproblems are repeated states reached from more than one branch. In naive Fibonacci, both `fib(n-1)` and `fib(n-2)` reach `fib(n-3)`, so plain recursion solves the same state again. Memoisation helps because the state repeats, not because calls share storage. Merge sort's range states are unique. Caching them adds overhead without removing work.\n\nA small-range cutoff addresses call overhead. Once a partition is tiny, another recursive split can cost more than a tight [[Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort|insertion-sort]] loop. [[Home/Computer Science/Algorithms/Sorting Algorithms/Introsort|Introsort]] also tracks recursion depth and falls back to heapsort when quicksort exhausts that budget. These are separate controls: the cutoff speeds up small partitions, while the depth guard limits adversarial partition chains.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Recursion structure\n>\n> ```mermaid\n> flowchart TD\n>   A[Problem of size n] --> B{Size below cutoff}\n>   B -->|Yes| C[Solve base case directly]\n>   B -->|No| D[Divide into smaller independent subproblems]\n>   D --> E[Conquer each subproblem recursively]\n>   E --> F[Synchronize required results]\n>   F --> G[Combine sub-answers]\n>   G --> H[Answer for size n]\n> ```\n\n> [!EXAMPLE]- Generic skeleton in C#\n>\n> ```csharp\n> static TResult DivideAndConquer(Problem p)\n> {\n>     if (p.Size <= Cutoff)\n>     {\n>         return SolveDirectly(p);\n>     }\n>\n>     var parts = Divide(p);\n>     var answers = new TResult[parts.Length];\n>     for (var i = 0; i < parts.Length; i++)\n>     {\n>         answers[i] = DivideAndConquer(parts[i]);\n>     }\n>\n>     return Combine(answers);\n> }\n> ```\n>\n> The loop expresses logical independence only. Concurrent execution still needs race-free data access and a wait for every result consumed by `Combine`. It pays off only when each subproblem is large enough to cover scheduling and synchronization costs.\n\n# References\n\n- [Bentley, Haken, and Saxe, “A General Method for Solving Divide-and-Conquer Recurrences” (1980)](https://doi.org/10.1145/1008861.1008865)\n- [Akra and Bazzi, “On the Solution of Linear Recurrence Equations” (1998)](https://doi.org/10.1023/A:1018373005182)\n",
+          "hash": "1e0903dbf937ff52293a4e1200782e3a678956accb2842737f845be30fa6a42f",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Divide and Conquer.md",
+          "expected_hash": "1e0903dbf937ff52293a4e1200782e3a678956accb2842737f845be30fa6a42f",
+          "before": "Memoisation helps because the state repeats",
+          "after": "Memoization helps because the state repeats",
+          "reason": "Aligns spelling with the vault's Memoization note and the rest of the algorithm notes.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "memoization helps because states repeat, not because calls share storage"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The note spells 'Memoisation' while the sibling Memoization note and the vault use the American spelling, which makes search and terminology inconsistent.",
+          "reader_benefit": "Consistent terminology across linked notes."
+        }
+      ],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Paradigms/Divide and Conquer.md",
+          "outcome": "changed",
+          "reason": "Audited the whole note: independence definition, three-step shape, decrease-and-conquer remark, Master Theorem/Akra–Bazzi scope, stack-depth and cutoff/introsort explanations, complexity comparison and references are accurate and well scoped. Only terminology inconsistency (Memoisation vs the vault's Memoization) needed correction."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Paradigms/Divide and Conquer.md": "1e0903dbf937ff52293a4e1200782e3a678956accb2842737f845be30fa6a42f"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Paradigms/Divide and Conquer.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-10T19:58:58.102946Z"
+  }
 }
