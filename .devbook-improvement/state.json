@@ -10109,9 +10109,9 @@
     "version": 1,
     "id": "270542e03ba04146b22c78499257f60e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-10T07:30:50.865899Z",
-    "elapsed_seconds": 371.09086069999984,
+    "elapsed_seconds": 374.61336029999984,
     "calls_reserved": 12,
     "responses_received": 12,
     "attempted_paths": [
@@ -10119,7 +10119,8 @@
       "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
       "Vault/Home/Data Persistence/Object Storage.md",
       "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
-      "Vault/Home/Data Persistence/ORMs/ORMs.md"
+      "Vault/Home/Data Persistence/ORMs/ORMs.md",
+      "Vault/Home/Data Persistence/SQL/Database Locks.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -10487,10 +10488,83 @@
           },
           "model_calls": 10
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/SQL/Database Locks.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/SQL/Database Locks.md",
+                "outcome": "keep",
+                "reason": "I read the whole note and found no verified defect. I checked it against my knowledge of the SQL Server and PostgreSQL documentation. I did not run web searches in this pass. The S/U/X compatibility matrix is correct: U is compatible with S, and U conflicts with U and X. The explanation of why U prevents the S→X upgrade deadlock is sound, and the conditions under which optimized locking or RCSI avoids U locks are stated. The escalation threshold of roughly 5,000 locks, HoBT-level escalation with LOCK_ESCALATION=AUTO, and PostgreSQL's lack of row-to-table escalation are all accurate. PostgreSQL stores row-lock ownership in tuple metadata, and the shared lock table is sized by max_locks_per_transaction. The deadlock handling is correct: SQL Server error 1205 and PostgreSQL aborting the transaction. The optimistic-concurrency walkthrough is correct, including the zero-rows-affected conflict, the ETag/If-Match flow, and 412 versus 409 with the RFC 9110 nuance. The locks-vs-MVCC and latch-vs-lock distinctions are accurate. The note flows from mechanism to granularity to schedule to escalation to optimistic control to blocking versus deadlock. It has no repetition worth trimming. It contains no cards, so there are no question-quality issues. The three references are real primary sources. Rewriting accurate, well-ordered prose would only add churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The single note has no flagged defects and the keep is justified. I read the full note and found no factual error, ordering problem, repetition worth cutting, or contract violation. It has no cards, and the references are real primary sources. No edits were proposed, so there are no change checks.",
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/SQL/Database Locks.md",
+                "verdict": "CLEAN",
+                "summary": "The note moves from a definition and three distinctions (locks vs MVCC, pessimistic vs optimistic, engine vs in-process locks) to lock modes, granularity, a worked schedule, escalation, latch vs lock, optimistic concurrency and blocking vs deadlock. Mechanisms, engine-specific conditions and exceptions are preserved and accurate. A rewrite would add churn without benefit.",
+                "page_type": "Concept — authorable prose; typed frontmatter retained; no cards; References are bare descriptive links; every fenced block has a language (sql).",
+                "current_text_evidence": [
+                  {
+                    "quote": "| **S** | ✓ | ✓ | ✗ |",
+                    "line_start": 36,
+                    "reason": "The S/U/X compatibility matrix is correct: U is compatible with S, and U conflicts with U and X. It supports the explanation of the upgrade-deadlock prevention."
+                  },
+                  {
+                    "quote": "With optimized locking, RCSI, and default `READ COMMITTED`, SQL Server can qualify rows from the latest committed version without U locks",
+                    "line_start": 30,
+                    "reason": "The version-specific exception to U-lock behavior is stated, so the conventional-path claim is not overgeneralized."
+                  },
+                  {
+                    "quote": "PostgreSQL does not escalate row locks into table locks.",
+                    "line_start": 74,
+                    "reason": "Accurate engine contrast with SQL Server escalation. It correctly points to max_locks_per_transaction for shared lock-table capacity."
+                  },
+                  {
+                    "quote": "Zero affected rows is a conflict result, not a successful no-op.",
+                    "line_start": 94,
+                    "reason": "The optimistic-concurrency walkthrough states the key outcome precisely. The 412/409/RFC 9110 nuance that follows is correct."
+                  },
+                  {
+                    "quote": "Monitor blocker age and transaction age, not only waiter count.",
+                    "line_start": 128,
+                    "reason": "Blocking is separated from deadlock with an operational judgment. The deadlock paragraph names the engine-specific behaviors correctly, including SQL Server error 1205 and PostgreSQL's aborted-transaction state."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: locks, granularity, escalation and optimistic control share one concurrency-control story. The optimistic section is the most separable part, but it stays tied to the lock comparison it depends on.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 12
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-10T07:37:01.956270Z",
+    "checkpoint_at": "2026-11-10T07:37:05.478770Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
