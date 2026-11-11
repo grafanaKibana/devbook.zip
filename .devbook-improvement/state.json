@@ -12105,9 +12105,9 @@
     "version": 1,
     "id": "dbc8c57dd5974251a623c83b7bde80ab",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-11T19:44:27.204881Z",
-    "elapsed_seconds": 531.5363843000003,
+    "elapsed_seconds": 535.9769255000003,
     "calls_reserved": 15,
     "responses_received": 15,
     "attempted_paths": [
@@ -12116,7 +12116,8 @@
       "Vault/Home/DevOps/DevOps.md",
       "Vault/Home/DevOps/Docker.md",
       "Vault/Home/DevOps/Infrastructure as Code.md",
-      "Vault/Home/DevOps/Kubernetes.md"
+      "Vault/Home/DevOps/Kubernetes.md",
+      "Vault/Home/DevOps/Observability.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -12495,10 +12496,80 @@
           },
           "model_calls": 13
         }
+      },
+      {
+        "path": "Vault/Home/DevOps/Observability.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/DevOps/Observability.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and the cited primary sources. The opening defines observability and states the instrumentation boundary. The signal table agrees with the Metrics, Logs and Traces sections. Counter, gauge and histogram definitions are accurate. Label cardinality guidance matches Prometheus practice. The JSON log example is consistent with its explanation. W3C traceparent propagation and the head versus tail sampling distinction are correct. The pipeline and collector responsibilities, and the .NET mapping (ILogger, Meter, ActivitySource, OTLP), are accurate. The durable-record caveat for audit data is a sound boundary. Both Qard cards test a single focused task and have sources on the answer side. Their content is consistent with the note body, and the cardinality card does not duplicate the signal-comparison card. The note has no known violations, no flagged cards, and the prose is direct and non-repetitive. No defect was found, so any edit would be churn."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found the note accurate, coherent and well ordered, with two focused Qard cards. No concrete defect was found, so keeping it unchanged is justified.",
+            "notes": [
+              {
+                "path": "Vault/Home/DevOps/Observability.md",
+                "verdict": "CLEAN",
+                "summary": "The note opens with a clear definition, a signal comparison table, per-signal mechanisms, correlation, the collection pipeline, alert quality and a .NET instrumentation mapping. Facts are correct and the prose is direct and non-repetitive. The two Qard cards each test one task and stay consistent with the body.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present; Qard IDs are protected metadata; code fences have language identifiers (json, text).",
+                "current_text_evidence": [
+                  {
+                    "quote": "A **counter** records a cumulative total such as requests or failures.",
+                    "line_start": 31,
+                    "reason": "Counter, gauge and histogram definitions are correct and concise."
+                  },
+                  {
+                    "quote": "Request IDs, user IDs, raw URLs, and container IDs are unbounded",
+                    "line_start": 35,
+                    "reason": "Cardinality guidance matches Prometheus practice and names where those identifiers belong instead."
+                  },
+                  {
+                    "quote": "Uniform sampling can discard rare failures before their outcome is known; tail sampling can retain errors and slow traces after observing the result.",
+                    "line_start": 59,
+                    "reason": "Correctly contrasts head-style and tail sampling and states the cost of each."
+                  },
+                  {
+                    "quote": "Audit, security, financial, or regulatory records are different",
+                    "line_start": 81,
+                    "reason": "States the exception that keeps best-effort telemetry from being used for durable records."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note is one coherent topic, and the signals, correlation, pipeline and instrumentation sections depend on each other.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": [],
+            "decision_checks": []
+          },
+          "model_calls": 15
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T19:53:18.740755Z",
+    "checkpoint_at": "2026-11-11T19:53:23.181296Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
