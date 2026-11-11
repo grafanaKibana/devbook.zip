@@ -11810,11 +11810,11 @@
     "version": 1,
     "id": "dbc8c57dd5974251a623c83b7bde80ab",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-11T19:44:27.204881Z",
-    "elapsed_seconds": 169.85321349999998,
+    "elapsed_seconds": 196.41420779999999,
     "calls_reserved": 5,
-    "responses_received": 4,
+    "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/DevOps/CI CD tools.md"
     ],
@@ -11895,7 +11895,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T19:47:17.057581Z",
+    "checkpoint_at": "2026-11-11T19:47:43.618574Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
@@ -28367,12 +28367,63 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
+          "expected_hash": "399c186970817594c19c2ec731fd0ec5619881c3dab5badd5fc152ea7ae3b512",
+          "before": "> Kubernetes Deployments offer the first two directly as the `Recreate` and `RollingUpdate` strategies. For rolling updates, `maxUnavailable` limits how many desired Pods may be unavailable, and `maxSurge` allows temporary extra Pods. These settings and the replica count shape how much the old and new versions overlap.\n>\n> Rolling, blue-green and canary commonly involve a period in which old and new versions run at the same time. Whenever they coexist, shared schemas, messages and data must work for both. If the new version writes data the old one cannot read, moving traffic back does not restore the previous system.\n>\n> [Kubernetes: Deployment strategy](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy) · [AWS: Deployment methods](https://docs.aws.amazon.com/whitepapers/latest/practicing-continuous-integration-continuous-delivery/deployment-methods.html)\n",
+          "after": "> [AWS: Deployment methods](https://docs.aws.amazon.com/whitepapers/latest/practicing-continuous-integration-continuous-delivery/deployment-methods.html)\n",
+          "reason": "Remove the Kubernetes-field and data-compatibility paragraphs, which are separate recall tasks already taught in the body, so the card tests only the strategy comparison.",
+          "kind": "rewrite",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Recreate, rolling, blue-green and canary differ in replacement mechanism, exposure, cost and reversal"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The overview card bundles the strategy comparison with Kubernetes field semantics and a compatibility rule, making it ungradeable as one task and duplicating the body and card 2.",
+          "reader_benefit": "The card now tests one comparison and can be graded cleanly."
+        },
+        {
+          "path": "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
+          "expected_hash": "399c186970817594c19c2ec731fd0ec5619881c3dab5badd5fc152ea7ae3b512",
+          "before": "> Neither strategy removes compatibility requirements. While both versions exist, shared schemas, messages and external side effects must work for both. If the new version writes data the old one cannot read, moving traffic back does not restore the previous system.\n>\n> [AWS: Deployment methods](https://docs.aws.amazon.com/whitepapers/latest/practicing-continuous-integration-continuous-delivery/deployment-methods.html) · [Google SRE Workbook: Canarying releases](https://sre.google/workbook/canarying-releases/#dependencies_and_isolation)\n\n> [!qard]- What operational costs",
+          "after": "> [AWS: Deployment methods](https://docs.aws.amazon.com/whitepapers/latest/practicing-continuous-integration-continuous-delivery/deployment-methods.html) · [Google SRE Workbook: Canarying releases](https://sre.google/workbook/canarying-releases/#dependencies_and_isolation)\n\n> [!qard]- What operational costs",
+          "reason": "Drop the compatibility paragraph repeated from the body and the former card 1, keeping the card on the fit decision and evidence requirements.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Canary fits when representative traffic can be isolated and measured",
+            "Blue-green fits when a full candidate must be tested before cutover"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The compatibility paragraph duplicates the body and another card, diluting the fit-decision task.",
+          "reader_benefit": "Less repetition and a tighter answer."
+        },
+        {
+          "path": "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
+          "expected_hash": "399c186970817594c19c2ec731fd0ec5619881c3dab5badd5fc152ea7ae3b512",
+          "before": "> | Aspect | Canary | Blue-green |\n> |---|---|---|\n> | How the release proceeds | A small cohort gets the new version first, and exposure expands only while its health evidence stays acceptable. | The candidate runs and is tested beside the live environment, then traffic moves to it. |\n> | Direct exposure to the new version | Only the current cohort's requests run the new version until the next expansion step, so a missed defect directly reaches only that cohort. | With a single switch, all requests are routed to the new version at once, so a missed defect can affect any request that exercises the defective code path. |\n> | Main cost |",
+          "after": "> | Aspect | Canary | Blue-green |\n> |---|---|---|\n> | Main cost |",
+          "reason": "Remove table rows on release flow and exposure, which restate other cards, leaving only the cost and reversal contrast the question asks about.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Canary costs routing and per-version telemetry",
+            "Blue-green costs near-duplicate capacity and a switch-back path"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The cost card restates exposure and release-flow content from card 1 and card 2.",
+          "reader_benefit": "The card isolates the cost contrast."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its text and the Kubernetes Deployment and AWS deployment-methods docs. The opening, the separation of replacement from exposure, the strategy table, and the Recreate/RollingUpdate YAML are accurate. The maxUnavailable and maxSurge descriptions match the Kubernetes semantics, and the note correctly says they do not guarantee successful requests. The canary evidence, blue-green cost and data-compatibility caveats are consistent across prose and cards. The three Qards are each gradeable, and each carries answer-side sources. The comparison card keeps a single focused task. The References section has two non-duplicated, authoritative bare links, and the code fences carry language tags. No factual error or editorial defect was found, so the note is left as is."
+          "outcome": "changed",
+          "reason": "Body prose, YAML and references were audited and are accurate against the Kubernetes and AWS docs, so they are untouched. The cards were refined: card 1 now tests only the comparison, card 2 drops the repeated compatibility paragraph, and card 3 keeps only cost and reversal. Each card is one gradeable task with less duplication."
         }
       ],
       "feedback": []
@@ -28387,8 +28438,10 @@
       "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-11T19:46:16.982163Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-11T19:47:43.618543Z",
+    "review_repair_key": "7fa3f3c726a7a8396762e16ec3078acae1fb46db65313403d41602659f130b5d",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The prose is accurate, but the keep leaves Qard question-quality problems unresolved: the overview card bundles independent recall tasks, and the cards duplicate each other and the body.",
       "notes": [
@@ -28469,78 +28522,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The prose is accurate, but the keep leaves Qard question-quality problems unresolved: the overview card bundles independent recall tasks, and the cards duplicate each other and the body.",
-      "notes": [
-        {
-          "path": "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The body is factually sound and well ordered. The first Qard bundles the strategy comparison with Kubernetes field semantics and a separate data-compatibility rule. Cards 1 and 2 repeat the same rollback-compatibility paragraph, and card 3 largely restates the table in card 1 and the body.",
-          "page_type": "FolderNote — hub with a protected datacorejsx card map; Questions and References are optional but present and therefore must meet quality rules.",
-          "current_text_evidence": [
-            {
-              "quote": "A deployment strategy decides how a new artifact replaces the old one",
-              "line_start": 18,
-              "reason": "The opening states the operating idea and the trade-off quickly."
-            },
-            {
-              "quote": "Neither field guarantees successful requests; readiness, graceful shutdown, remaining capacity, and version compatibility still decide that.",
-              "line_start": 67,
-              "reason": "The note correctly bounds what the Kubernetes rolling fields guarantee."
-            },
-            {
-              "quote": "Kubernetes Deployments offer the first two directly as the `Recreate` and `RollingUpdate` strategies.",
-              "line_start": 97,
-              "reason": "This paragraph in the answer to 'How do the main deployment strategies differ?' is a separate recall task about Kubernetes config, not part of the comparison."
-            },
-            {
-              "quote": "Rolling, blue-green and canary commonly involve a period in which old and new versions run at the same time.",
-              "line_start": 99,
-              "reason": "This data-compatibility paragraph is a third independent topic, and card 2 repeats it almost verbatim."
-            },
-            {
-              "quote": "Neither strategy removes compatibility requirements.",
-              "line_start": 111,
-              "reason": "This repeats the compatibility paragraph from card 1 and the same point in the body, which is redundant."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the topic is one coherent folder note. The Kubernetes policy fields could become a separate ID-less card, and the compatibility paragraph could be removed from the overview card.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Question quality",
-              "location": "First Qard, 'How do the main deployment strategies differ?'",
-              "evidence": "The answer covers the strategy comparison, then the Kubernetes maxUnavailable/maxSurge semantics, then the data-compatibility rule for rollback.",
-              "effect": "Three independently gradeable tasks sit in one card, so it cannot be graded cleanly. The card also repeats the body and card 2.",
-              "fix": "Keep the existing ID on the comparison task with the table. Move the Kubernetes fields to a separate ID-less card, and drop or relocate the compatibility paragraph."
-            },
-            {
-              "severity": "Medium",
-              "dimension": "Duplication",
-              "location": "Cards 2 and 3",
-              "evidence": "Both cards end with the same AWS and SRE sources. Card 3's table restates the cost and reversal columns from card 1 and the body table, and card 2 repeats the compatibility paragraph.",
-              "effect": "Overlapping recall targets add no new learning and make the card set repetitive.",
-              "fix": "Narrow card 2 to the fit decision and evidence requirements, and make card 3 only the cost contrast without re-explaining exposure."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "FAIL",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "7fa3f3c726a7a8396762e16ec3078acae1fb46db65313403d41602659f130b5d",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
