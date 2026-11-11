@@ -8249,6 +8249,61 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/DevOps/Infrastructure as Code.md": {
+      "content_hash": "8b29e035ea2d906ccc17a7f12d421724acb3dda1e9506a5dd4295d4da6ce7c93",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "8b29e035ea2d906ccc17a7f12d421724acb3dda1e9506a5dd4295d4da6ce7c93",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/DevOps/Infrastructure as Code.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate and compact. It covers the plan/apply loop, state, drift, single-controller ownership and engineering limits. It needs no edit.",
+          "page_type": "Concept — optional Questions are absent, which is allowed. References are bare descriptive links, the code fences have language identifiers, and there is no Links section.",
+          "current_text_evidence": [
+            {
+              "quote": "When approval must bind to exact operations, apply the saved reviewed plan rather than recomputing it after the gate.",
+              "line_start": 40,
+              "reason": "States the correct mechanism that ties approval to exact operations, which is a condition that changes the engineering decision."
+            },
+            {
+              "quote": "Refresh and plan can expose drift only for fields the provider reads and manages.",
+              "line_start": 48,
+              "reason": "Bounds the drift claim accurately and names the exceptions: ignored attributes, provider defaults and external systems."
+            },
+            {
+              "quote": "Two reconcilers managing the same value can repeatedly overwrite each other.",
+              "line_start": 52,
+              "reason": "Gives a concrete failure mode that motivates the single-controller rule, in direct whiteboard voice."
+            },
+            {
+              "quote": "Recreating a database resource does not restore its data.",
+              "line_start": 62,
+              "reason": "Gives a precise limit on what IaC covers, separating resource recreation from data recovery."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the sections (plan/apply loop, state and drift, controller ownership, engineering boundaries) are interdependent facets of one concept and are compact.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -11932,7 +11987,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-11T19:44:27.204881Z",
-    "elapsed_seconds": 393.91037820000014,
+    "elapsed_seconds": 397.87314960000015,
     "calls_reserved": 11,
     "responses_received": 11,
     "attempted_paths": [
@@ -12175,7 +12230,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T19:51:01.114747Z",
+    "checkpoint_at": "2026-11-11T19:51:05.077519Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
@@ -29065,100 +29120,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "dbc8c57dd5974251a623c83b7bde80ab",
-    "topic_id": "devops-e491b463",
-    "batch": {
-      "topic": "DevOps",
-      "topic_id": "devops-e491b463",
-      "notes": [
-        {
-          "path": "Vault/Home/DevOps/Infrastructure as Code.md",
-          "content": "---\ntopic: [DevOps]\nsubtopic: []\nsummary: \"Provisioning infrastructure through version-controlled files, making environments repeatable and auditable.\"\nlevel: [\"3\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-06-20T19:32:24.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.509Z\"\n---\n\nInfrastructure as Code (IaC) records intended infrastructure in version-controlled definitions. A tool compares that desired state with observed resources, proposes create, update, replace, or delete operations, then applies the approved change. The definition makes intent reviewable; provider behavior, credentials, quotas, existing data, and regional capacity still affect the result.\n\n# Desired State and the Plan/Apply Loop\n\nDeclarative IaC describes the end state. The tool computes the path from the current state. Imperative automation specifies the steps itself. Both can be repeatable, but declarative tools make the proposed difference an explicit artifact for review.\n\nThis Terraform fragment is for field recognition, not production use:\n\n```hcl\nresource \"aws_s3_bucket\" \"assets\" {\n  bucket = \"myapp-assets-prod\"\n\n  tags = {\n    Environment = \"prod\"\n  }\n}\n```\n\n`resource` declares both a provider type and a local address. `bucket` affects the remote object's identity. `tags` are managed fields, so an out-of-band change may appear as drift and be reverted on the next apply. A plan can reveal replacement or deletion, but it does not make those actions safe automatically.\n\nThe common loop is:\n\n```text\nconfiguration + inputs + observed resources -> plan -> review -> apply -> new observed state\n```\n\nWhen approval must bind to exact operations, apply the saved reviewed plan rather than recomputing it after the gate.\n\n# State and Drift\n\nTerraform-style tools keep **state** that maps configuration addresses to remote objects and records attributes needed to calculate future changes. State is operational data, not source code. It may contain sensitive values and belongs in a protected remote backend with access control, encryption, versioning, and locking.\n\nProvider-native systems such as ARM or CloudFormation keep equivalent deployment state on the provider side rather than in an operator-managed state file.\n\n**Drift** is a difference between declared and observed infrastructure. Refresh and plan can expose drift only for fields the provider reads and manages. Apply can reconcile those fields. Ignored attributes, provider defaults, and external systems remain outside that guarantee. Emergency console changes should be reflected in code before the next reconciliation undoes them or leaves the repository misleading.\n\n# One Authoritative Controller\n\nInfrastructure tools overlap. Terraform can bootstrap machine configuration; Kubernetes controllers can provision cloud resources; configuration-management tools can create infrastructure. The critical question is which controller owns each resource or field. Two reconcilers managing the same value can repeatedly overwrite each other.\n\nSplit ownership by lifecycle and failure impact. Networks, shared data services, application deployments, and runtime configuration often change at different rates and need different permissions. The split should reduce the scope of a destructive plan, not create modules merely for structure.\n\n# Engineering Boundaries\n\n- Review replacements and deletes, not only textual diffs.\n- Promote provider and module versions deliberately; changed defaults can change a plan.\n- Keep state and secrets out of Git.\n- Authenticate CI with short-lived workload identity where the platform supports it.\n- Treat data backup and recovery as separate from resource recreation. Recreating a database resource does not restore its data.\n\n# References\n\n- [Terraform documentation](https://developer.hashicorp.com/terraform/intro)\n- [OpenGitOps principles](https://opengitops.dev/)\n",
-          "hash": "8b29e035ea2d906ccc17a7f12d421724acb3dda1e9506a5dd4295d4da6ce7c93",
-          "topic": "DevOps",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/DevOps/Infrastructure as Code.md",
-          "outcome": "keep",
-          "reason": "I audited the whole note against its current text and the Terraform and OpenGitOps concepts it cites. The opening defines IaC as a loop of desired state, comparison with observed resources, a proposed plan and an approved apply. The Terraform fragment is explained field by field: the resource address, the identity-affecting `bucket` and the managed `tags` that can drift. The plan/apply loop is shown, and applying a saved reviewed plan is the correct way to bind approval to exact operations. The state section correctly treats state as sensitive operational data that needs a protected remote backend with locking. It also correctly notes that ARM and CloudFormation keep deployment state on the provider side. The drift claim is properly bounded to fields the provider reads and manages. The single-controller and lifecycle-split guidance gives a clear decision rule. The engineering boundaries cover replacements and deletes, provider version pinning, short-lived workload identity and the difference between recreating a database resource and restoring its data. The note has no Qard cards, and none is needed to make the topic recoverable. The two references are authoritative bare links with no annotations. No known violations are listed. I found no factual errors, missing prerequisites, repetition or voice problems, so an edit would be cosmetic churn."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/DevOps/Infrastructure as Code.md": "8b29e035ea2d906ccc17a7f12d421724acb3dda1e9506a5dd4295d4da6ce7c93"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/DevOps/Infrastructure as Code.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-11T19:50:42.858743Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "Independent full-note audit found no factual, structural, voice or reference defects. The keep is justified and no edits are proposed.",
-      "notes": [
-        {
-          "path": "Vault/Home/DevOps/Infrastructure as Code.md",
-          "verdict": "CLEAN",
-          "summary": "The note is accurate and compact. It covers the plan/apply loop, state, drift, single-controller ownership and engineering limits. It needs no edit.",
-          "page_type": "Concept — optional Questions are absent, which is allowed. References are bare descriptive links, the code fences have language identifiers, and there is no Links section.",
-          "current_text_evidence": [
-            {
-              "quote": "When approval must bind to exact operations, apply the saved reviewed plan rather than recomputing it after the gate.",
-              "line_start": 40,
-              "reason": "States the correct mechanism that ties approval to exact operations, which is a condition that changes the engineering decision."
-            },
-            {
-              "quote": "Refresh and plan can expose drift only for fields the provider reads and manages.",
-              "line_start": 48,
-              "reason": "Bounds the drift claim accurately and names the exceptions: ignored attributes, provider defaults and external systems."
-            },
-            {
-              "quote": "Two reconcilers managing the same value can repeatedly overwrite each other.",
-              "line_start": 52,
-              "reason": "Gives a concrete failure mode that motivates the single-controller rule, in direct whiteboard voice."
-            },
-            {
-              "quote": "Recreating a database resource does not restore its data.",
-              "line_start": 62,
-              "reason": "Gives a precise limit on what IaC covers, separating resource recreation from data recovery."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the sections (plan/apply loop, state and drift, controller ownership, engineering boundaries) are interdependent facets of one concept and are compact.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
