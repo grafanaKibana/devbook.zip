@@ -11269,14 +11269,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-11T06:46:39.927000Z",
-    "elapsed_seconds": 7.4978256000000005,
+    "elapsed_seconds": 11.837126600000001,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T06:46:47.424284Z"
+    "checkpoint_at": "2026-11-11T06:46:51.763585Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
