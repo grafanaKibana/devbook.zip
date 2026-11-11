@@ -11690,10 +11690,10 @@
     "version": 1,
     "id": "25f0f1a695d74b58a7e6b6c1c14dcb27",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-11T06:46:39.927000Z",
-    "elapsed_seconds": 109.8895355,
-    "calls_reserved": 2,
+    "elapsed_seconds": 116.5472158,
+    "calls_reserved": 3,
     "responses_received": 2,
     "attempted_paths": [
       "Vault/Home/Data Persistence/SQL/Sharding.md"
@@ -11780,7 +11780,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T06:48:29.815998Z",
+    "checkpoint_at": "2026-11-11T06:48:36.473681Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -11805,7 +11805,7 @@
       "pr": null
     },
     "base_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
-    "reservation_deadline": "2026-11-11T07:02:31.355101Z"
+    "reservation_deadline": "2026-11-11T07:03:33.685420Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
