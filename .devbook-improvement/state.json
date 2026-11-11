@@ -11625,16 +11625,16 @@
     "version": 1,
     "id": "25f0f1a695d74b58a7e6b6c1c14dcb27",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-11T06:46:39.927000Z",
-    "elapsed_seconds": 51.8182939,
+    "elapsed_seconds": 70.7610938,
     "calls_reserved": 2,
-    "responses_received": 1,
+    "responses_received": 2,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T06:47:31.744755Z",
+    "checkpoint_at": "2026-11-11T06:47:50.687555Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -27475,6 +27475,141 @@
       "Vault/Home/Data Persistence/SQL/Sharding.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-11T06:47:27.550580Z"
+    "prepared_at": "2026-11-11T06:47:27.550580Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Whole-note audit found no accurate-content, structure, question-quality or reference defect, so the keep disposition is justified and no edits are proposed.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Sharding.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate and well ordered: it moves from definition and when to shard, through strategies, routing, rebalancing and cross-shard costs, to pitfalls. The three cards each test one gradeable task and keep their IDs. No edit is justified.",
+            "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied by the text fence, impersonal whiteboard voice.",
+            "current_text_evidence": [
+              {
+                "quote": "Scale-driven sharding belongs after query and index repair, vertical scaling, read replicas, caching, and in-engine partitioning have failed to remove a measured write or storage ceiling.",
+                "line_start": 19,
+                "reason": "States the decision condition and the exception (isolation or locality requirements) up front, so the topic is quickly recoverable."
+              },
+              {
+                "quote": "the new node's expected final share—and therefore the expected movement—is about `1 / (N + 1)` of keys.",
+                "line_start": 38,
+                "reason": "The consistent-hashing arithmetic is correct and is explicitly caveated for sparse tokens and for safe cutover."
+              },
+              {
+                "quote": "A fenced design rejects a write when the destination no longer owns that bucket or the caller's map version is stale.",
+                "line_start": 72,
+                "reason": "Gives the concrete mechanism that prevents stale writers after cutover, which makes the routing example self-contained."
+              },
+              {
+                "quote": "Uncoordinated dual writes create two authorities and two retry paths.",
+                "line_start": 93,
+                "reason": "The rebalancing section explains the failure the numbered protocol avoids, rather than only listing steps."
+              },
+              {
+                "quote": "A local unique index proves uniqueness only inside one shard.",
+                "line_start": 116,
+                "reason": "The global-constraint section names the limit and the alternatives, so the engineering decision is clear."
+              },
+              {
+                "quote": "What makes a shard key viable for a workload?",
+                "line_start": 151,
+                "reason": "The card is bounded and answerable. Its four conditions follow from the prose and are answered with a failure column, and it keeps its original ID."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: strategies, routing, rebalancing and cross-shard costs all serve one decision about sharding, and the 150-line note stays coherent. Separating the pieces would force readers to re-link them.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Sharding.md",
+          "citation_index": 4,
+          "reported_line_start": 116,
+          "resolved_line_start": 113
+        },
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Sharding.md",
+          "citation_index": 5,
+          "reported_line_start": 151,
+          "resolved_line_start": 158
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Data Persistence/SQL/Sharding.md": "47cf16f9e32ef22f80ab0f60726d7e6f311c5dc2faf7fb90dd8b68a54100b79b"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "Whole-note audit found no accurate-content, structure, question-quality or reference defect, so the keep disposition is justified and no edits are proposed.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Sharding.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate and well ordered: it moves from definition and when to shard, through strategies, routing, rebalancing and cross-shard costs, to pitfalls. The three cards each test one gradeable task and keep their IDs. No edit is justified.",
+          "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied by the text fence, impersonal whiteboard voice.",
+          "current_text_evidence": [
+            {
+              "quote": "Scale-driven sharding belongs after query and index repair, vertical scaling, read replicas, caching, and in-engine partitioning have failed to remove a measured write or storage ceiling.",
+              "line_start": 19,
+              "reason": "States the decision condition and the exception (isolation or locality requirements) up front, so the topic is quickly recoverable."
+            },
+            {
+              "quote": "the new node's expected final share—and therefore the expected movement—is about `1 / (N + 1)` of keys.",
+              "line_start": 38,
+              "reason": "The consistent-hashing arithmetic is correct and is explicitly caveated for sparse tokens and for safe cutover."
+            },
+            {
+              "quote": "A fenced design rejects a write when the destination no longer owns that bucket or the caller's map version is stale.",
+              "line_start": 72,
+              "reason": "Gives the concrete mechanism that prevents stale writers after cutover, which makes the routing example self-contained."
+            },
+            {
+              "quote": "Uncoordinated dual writes create two authorities and two retry paths.",
+              "line_start": 93,
+              "reason": "The rebalancing section explains the failure the numbered protocol avoids, rather than only listing steps."
+            },
+            {
+              "quote": "A local unique index proves uniqueness only inside one shard.",
+              "line_start": 113,
+              "reason": "The global-constraint section names the limit and the alternatives, so the engineering decision is clear."
+            },
+            {
+              "quote": "What makes a shard key viable for a workload?",
+              "line_start": 158,
+              "reason": "The card is bounded and answerable. Its four conditions follow from the prose and are answered with a failure column, and it keeps its original ID."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: strategies, routing, rebalancing and cross-shard costs all serve one decision about sharding, and the 150-line note stays coherent. Separating the pieces would force readers to re-link them.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
