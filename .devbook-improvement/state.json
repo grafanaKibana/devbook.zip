@@ -11810,11 +11810,11 @@
     "version": 1,
     "id": "dbc8c57dd5974251a623c83b7bde80ab",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-11T19:44:27.204881Z",
-    "elapsed_seconds": 233.56499189999994,
+    "elapsed_seconds": 241.64101579999993,
     "calls_reserved": 6,
-    "responses_received": 5,
+    "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/DevOps/CI CD tools.md",
       "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md"
@@ -11907,7 +11907,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T19:48:20.769373Z",
+    "checkpoint_at": "2026-11-11T19:48:28.845382Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
@@ -28730,5 +28730,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "dbc8c57dd5974251a623c83b7bde80ab",
+    "topic_id": "devops-e491b463",
+    "batch": {
+      "topic": "DevOps",
+      "topic_id": "devops-e491b463",
+      "notes": [
+        {
+          "path": "Vault/Home/DevOps/DevOps.md",
+          "content": "---\nicon: skull\norder: 100\ncolor: \"#6366f1\"\ntopic: [DevOps]\nsubtopic: []\nsummary: \"Automation, observability, and delivery practices that move changes to production safely.\"\ntags: [FolderNote]\npublish: true\npriority: High\nlevel: [\"4\"]\nstatus: Done\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.344Z\"\n---\n\nDevOps shortens the path from a code change to production without giving up control of risk. Automation removes avoidable variation, observability exposes what the change did, and service ownership keeps production feedback with the team that can act on it. A healthy delivery system makes the normal path repeatable and the recovery path routine.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# DevOps, SRE, and Platform Engineering\n\nDevOps is a way of working: the team that changes a service also sees and owns its behavior in production. SRE makes reliability measurable through service-level objectives (SLOs) and error budgets, then uses engineering to reduce operational toil. Platform engineering builds a supported internal product that gives application teams a safer self-service path through repeated infrastructure and delivery work.\n\nThese models change support, not accountability. Application teams remain responsible for service behavior. SRE supplies reliability policy and expertise. A platform supplies reusable paths such as deployment templates, environments, and observability defaults. SRE fits when reliability needs an explicit budget; a platform earns its cost when several teams will adopt the same path.\n\n# Twelve-Factor Application and Deployment Contract\n\nThe deployment contract separates three things:\n\n- **Build** produces an immutable package or image from source.\n- **Release** combines that artifact with environment configuration and secret references.\n- **Run** starts disposable processes that can shut down gracefully and keep durable state in attached services.\n\nThis shape comes from the Twelve-Factor model and remains useful with containers and orchestration. It does not define Kubernetes, supply-chain security, or telemetry. Those are separate decisions. The practical test is whether the running artifact, its configuration, its dependencies, and its previous recoverable version can be identified without rebuilding it.\n\n# Security as Delivery Evidence\n\nSecurity checks belong at the boundary where they can still prevent or contain harm: threat analysis during design, secret and dependency checks before merge, provenance and artifact scanning during build, authorization testing before release, signature or policy checks during deployment, and detection after release.\n\nA gate needs evidence and a named response. Severity alone is not enough; exploitability, reachability, asset importance, compensating controls, ownership, and expiry decide whether a finding blocks release. A signature proves artifact identity and integrity, not that the code is safe.\n\n# References\n\n- [DORA software delivery performance metrics](https://dora.dev/guides/dora-metrics/)\n- [Site Reliability Engineering](https://sre.google/sre-book/table-of-contents/)\n- [The Twelve-Factor App](https://12factor.net/)\n- [CNCF Platforms White Paper](https://tag-app-delivery.cncf.io/whitepapers/platforms/)\n- [NIST Secure Software Development Framework](https://csrc.nist.gov/pubs/sp/800/218/final)\n",
+          "hash": "95456843b9c7a8fd7e997d81b94c4579c7e989a8dd445f82ed11bec48c857e7c",
+          "topic": "DevOps",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/DevOps/DevOps.md",
+          "outcome": "keep",
+          "reason": "Audited the whole folder note against its text and the Twelve-Factor, SRE, DORA, CNCF platforms and NIST SSDF sources it lists. The opening states the operating idea. The DevOps/SRE/platform section keeps ownership with application teams and gives a decision condition for each model. The build/release/run section matches Twelve-Factor and states what it does not cover. The security section places checks by stage and correctly says a signature proves identity and integrity, not safety. The datacorejsx block is protected and has a language identifier. References are bare descriptive links from authoritative providers. The note has no Qards, so there are none to check, and no known violations. No factual error or reader-facing weakness was found, so edits would be churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/DevOps/DevOps.md": "95456843b9c7a8fd7e997d81b94c4579c7e989a8dd445f82ed11bec48c857e7c"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/DevOps/DevOps.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-11T19:48:28.845371Z"
+  }
 }
