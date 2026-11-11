@@ -11750,16 +11750,16 @@
     "version": 1,
     "id": "dbc8c57dd5974251a623c83b7bde80ab",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-11T19:44:27.204881Z",
-    "elapsed_seconds": 33.0313015,
+    "elapsed_seconds": 41.5352481,
     "calls_reserved": 1,
-    "responses_received": 0,
+    "responses_received": 1,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T19:45:00.235671Z",
+    "checkpoint_at": "2026-11-11T19:45:08.739614Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
@@ -27914,5 +27914,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "dbc8c57dd5974251a623c83b7bde80ab",
+    "topic_id": "devops-e491b463",
+    "batch": {
+      "topic": "DevOps",
+      "topic_id": "devops-e491b463",
+      "notes": [
+        {
+          "path": "Vault/Home/DevOps/CI CD tools.md",
+          "content": "---\ntopic: [DevOps]\nsubtopic: []\nsummary: \"Pipelines that automate the path from commit to production, compared across major tools.\"\nlevel: [\"3\"]\npriority: High\nstatus: Ready to Repeat\n\npublish: true\nqard-deck: \"DevOps\"\nqard-topic: \"CI CD tools\"\nflashcard_uid: \"26290128\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.423Z\"\n---\n\nCI/CD turns a source change into a traceable release decision. Continuous integration (CI) combines small changes frequently and verifies them while the context is fresh. Continuous delivery keeps a verified artifact releasable. Continuous deployment releases qualifying changes without a routine human approval.\n\n# One Artifact Through the Pipeline\n\nA commit should produce one immutable package or image. Every later stage promotes that exact artifact rather than rebuilding it. If CI verifies `checkout-api@sha256:8f31…`, production should run that digest. Rebuilding after approval can produce different bytes, so the evidence chain holds only if the rebuilt artifact is verified to match the approved digest.\n\n```text\ncommit -> build artifact -> verify artifact -> deploy artifact -> expose artifact\n             same digest       same digest       same digest\n```\n\nDelivery and deployment differ at the last production decision. Continuous delivery leaves that decision to a person or business process. Continuous deployment makes it from automated evidence. Both can enforce tests, security policy, environment checks, and [[Home/DevOps/Deployment Strategies/Deployment Strategies|progressive exposure]].\n\n# Stages and Gates\n\n| Stage | Produces or proves | Typical gate | Failure consequence |\n| --- | --- | --- | --- |\n| Build | Versioned package or image | Reproducible build and artifact identity | Nothing is promoted |\n| Verify | Test, security, and policy evidence for that artifact | Required evidence passes | Fix the change or record an explicit exception |\n| Deploy | Running instances in one environment | Startup, readiness, and smoke evidence | Remove the candidate from traffic |\n| Release | User exposure to the healthy candidate | Service and business guardrails | Shift traffic back or disable the feature |\n\nBuild checks describe the artifact. Deployment checks describe that artifact in a particular environment. A pipeline should make the running version, previous recoverable version, responsible environment, and gate result visible.\n\n# Reading a Workflow File\n\nThis simplified GitHub Actions workflow is for field recognition, not production use:\n\n```yaml\nname: verify-and-deploy\non:\n  push:\n    branches: [main]\n\njobs:\n  verify:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@<reviewed-immutable-ref>\n      - run: ./build.sh\n      - run: ./test.sh\n\n  deploy:\n    runs-on: ubuntu-latest\n    needs: verify\n    environment: production\n    steps:\n      - run: ./deploy.sh registry.example/checkout@sha256:8f31...\n```\n\n`on` selects the repository event. `jobs` separates independently scheduled work. `runs-on` selects an execution environment for each job that runs steps. `uses` invokes reusable action code; the placeholder represents a current reviewed immutable ref. `steps` run in order within a job. `needs: verify` prevents deployment before verification completes. `environment: production` can attach host-level protection and secrets outside the YAML. The digest makes the deployed artifact explicit.\n\nRepository workflow files are not the whole control plane. GitHub Actions can attach policy to repositories and environments. Azure Pipelines can attach checks to environments, service connections, and agent pools. Jenkins keeps more policy in an organization-operated controller and plugin estate. The important architectural questions are where release policy lives, which identities may deploy, what runners can reach, and who operates them.\n\n# Questions\n\n<!-- qard-id: 3ea361b7-f5fa-47ca-8da8-ea9adb1a360d -->\n> [!qard]- What separates continuous delivery from continuous deployment?\n> They differ only in the final step to production. Continuous delivery keeps every change that passes the pipeline releasable, but a separate authorized decision releases it. Continuous deployment has no routine approval step: each change that passes all required gates is released to production automatically.\n>\n> Both build on continuous integration, in which small changes are merged frequently and each one is built and verified automatically.\n>\n> | Aspect | Continuous delivery | Continuous deployment |\n> |---|---|---|\n> | Production release decision | A person or business process approves the release of an already verified artifact. | The pipeline releases the artifact as soon as the required gates pass. |\n> | Release timing | Verified changes can wait, so a release can follow business timing such as a planned launch. | Each qualifying change reaches production shortly after it is verified, without waiting for an approver. |\n> | Role of automated gates | They show that an artifact is ready to release; the approval adds the decision to release it. | They make the whole release decision, so their evidence must be trustworthy enough to stand in for an approver. |\n>\n> The gates are broader than tests. They can include security and policy checks, environment checks, and health checks during a progressive rollout.\n>\n> [AWS: Continuous integration and continuous delivery/deployment](https://docs.aws.amazon.com/whitepapers/latest/practicing-continuous-integration-continuous-delivery/what-is-continuous-integration-and-continuous-deliverydeployment.html)\n\n# References\n\n- [GitHub Actions documentation](https://docs.github.com/en/actions)\n- [Azure Pipelines documentation](https://learn.microsoft.com/en-us/azure/devops/pipelines/)\n- [Jenkins documentation](https://www.jenkins.io/doc/)\n- [Continuous Integration](https://martinfowler.com/articles/continuousIntegration.html)\n- [SLSA provenance](https://slsa.dev/spec/v1.2/provenance)\n",
+          "hash": "48f7ba546f0e4551a90226a2f5c67e983f1e8d93ddc27fe20cda36df01e3b6b5",
+          "topic": "DevOps",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/DevOps/CI CD tools.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against its text. The opening defines CI, continuous delivery and continuous deployment accurately. The single-artifact section correctly stresses promoting one digest. The stage/gate table separates build evidence from environment evidence. The GitHub Actions snippet is valid: `on`, `jobs`, `runs-on`, `uses`, `needs` and `environment` are explained correctly, and `environment: production` is correctly described as attaching protection and secrets outside the YAML. The platform paragraph (GitHub environments, Azure Pipelines checks, Jenkins controller and plugins) matches current vendor documentation. The one card tests a single comparison, has a complete answer with an AWS source, and agrees with the prose. The References are topic-specific bare links. There are no known violations, no needs-fixing flags and no open feedback. The prose is direct and has no meaningful repetition, so any edit would be cosmetic churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/DevOps/CI CD tools.md": "48f7ba546f0e4551a90226a2f5c67e983f1e8d93ddc27fe20cda36df01e3b6b5"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/DevOps/CI CD tools.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-11T19:45:08.739583Z"
+  }
 }
