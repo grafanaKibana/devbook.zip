@@ -11810,13 +11810,14 @@
     "version": 1,
     "id": "dbc8c57dd5974251a623c83b7bde80ab",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-11T19:44:27.204881Z",
-    "elapsed_seconds": 200.05671859999998,
+    "elapsed_seconds": 204.21296259999997,
     "calls_reserved": 5,
     "responses_received": 5,
     "attempted_paths": [
-      "Vault/Home/DevOps/CI CD tools.md"
+      "Vault/Home/DevOps/CI CD tools.md",
+      "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -11892,10 +11893,21 @@
           },
           "model_calls": 2
         }
+      },
+      {
+        "path": "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
+        "outcome": "proposal_blocked",
+        "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+          "model_calls": 5
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T19:47:47.261085Z",
+    "checkpoint_at": "2026-11-11T19:47:51.417330Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
