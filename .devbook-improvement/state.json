@@ -11812,7 +11812,7 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-11T19:44:27.204881Z",
-    "elapsed_seconds": 73.5171628,
+    "elapsed_seconds": 78.04176269999999,
     "calls_reserved": 2,
     "responses_received": 2,
     "attempted_paths": [
@@ -11895,7 +11895,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T19:45:40.721535Z",
+    "checkpoint_at": "2026-11-11T19:45:45.246134Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
