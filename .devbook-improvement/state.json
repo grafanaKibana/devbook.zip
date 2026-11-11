@@ -12165,11 +12165,11 @@
     "version": 1,
     "id": "dbc8c57dd5974251a623c83b7bde80ab",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-11T19:44:27.204881Z",
-    "elapsed_seconds": 633.9987040000003,
+    "elapsed_seconds": 646.5895919000003,
     "calls_reserved": 18,
-    "responses_received": 17,
+    "responses_received": 18,
     "attempted_paths": [
       "Vault/Home/DevOps/CI CD tools.md",
       "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
@@ -12704,7 +12704,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T19:55:01.203076Z",
+    "checkpoint_at": "2026-11-11T19:55:13.793963Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
@@ -29666,5 +29666,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "dbc8c57dd5974251a623c83b7bde80ab",
+    "topic_id": "devops-e491b463",
+    "batch": {
+      "topic": "DevOps",
+      "topic_id": "devops-e491b463",
+      "notes": [
+        {
+          "path": "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md",
+          "content": "---\ntopic: [DevOps]\nsubtopic: [Version Control Systems]\nsummary: \"Tracks file changes over time, enabling collaboration, branching, merging, and reverting.\"\nlevel: [\"4\"]\npriority: High\ntags: [FolderNote]\n\npublish: true\nstatus: Ready to Repeat\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.511Z\"\n---\n\nA version control system (VCS) records versions of tracked files so a team can compare, branch, merge, and restore repository history. Git is distributed: a normal clone contains a local object database and refs, so most history operations do not depend on the hosting service.\n\nGit's recovery boundary is explicit. A committed snapshot is durable while it remains reachable or recoverable from local records. An untracked file or an edit Git never captured cannot be reconstructed from Git history.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Working Tree, Index, Repository, and Remote\n\nGit moves snapshots through distinct states:\n\n```text\nworking tree --git add--> index --git commit--> local commit graph\nremote-tracking refs <--git fetch-- remote refs\nlocal refs --git push-------------------------> remote refs\n```\n\nThe **working tree** contains checked-out files. The **index** is the proposed next snapshot. A **commit** stores a snapshot and parent links in the local object database. A **branch** is a movable ref to a commit. A **remote-tracking ref** is the last fetched view of a remote ref.\n\n`fetch` downloads objects and updates remote-tracking refs without integrating them into the current branch. `pull` fetches and then merges or rebases according to configuration. `restore` changes working-tree or index content. `reset` can move a ref and replace index or working-tree state, so its mode matters. A published mistake is usually reversed with a new `revert` commit so shared commit identities remain valid.\n\n# Git and Hosting Platforms\n\nGit defines objects, commits, refs, remotes, and transfer protocols. GitHub, GitLab, and Azure DevOps host repositories and add identity, permissions, pull requests, protected branches, issues, automation, and policy.\n\nA repository can move between hosts without changing its commit graph. Host-side rules, issues, workflow history, permissions, and secrets do not move with it automatically. The hosting decision is therefore about governance, integrations, compliance, and operating cost rather than Git semantics.\n\n# Repository Strategy\n\n| Boundary | Monorepo | Multiple repositories |\n| --- | --- | --- |\n| Cross-component change | One atomic commit and review | Coordinated versions and rollout |\n| Dependency policy | One graph can enforce consistency | Each repository owns its cadence |\n| Access control | Requires reliable path ownership | Repository boundary is explicit |\n| CI | Needs affected-component execution at scale | Smaller pipelines; integration moves downstream |\n| Release | Shared source can still release independently | Independent by default |\n\nA monorepo fits when atomic cross-component changes and shared dependency policy justify build-graph and ownership tooling. Multiple repositories fit when access isolation and independent lifecycles dominate. The deciding evidence is cross-repository coordination, CI fan-out, release coupling, and access boundaries—not repository count alone.\n\n# Semantic Versioning and the Release Contract\n\nSemantic Versioning only works after a project defines its public API. `MAJOR.MINOR.PATCH` means incompatible API change, backward-compatible functionality, and backward-compatible fix. Prerelease identifiers sort below the corresponding normal version; build metadata does not affect precedence.\n\nThe version number is a claim, not proof. API diffs, consumer tests, migration checks, and deprecation policy establish whether a change is compatible. Commit-message or PR-title conventions may automate version selection, but those are repository policy layered on SemVer.\n\n# References\n\n- [Pro Git book](https://git-scm.com/book/en/v2)\n- [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html)\n- [GitHub pull request documentation](https://docs.github.com/en/pull-requests)\n",
+          "hash": "57d2f2036412dbb9980fdababa6eeb3ae253395e59be4e9ee4866ec848e29022",
+          "topic": "DevOps",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md",
+          "outcome": "keep",
+          "reason": "I audited the whole note against its current text and the Git and SemVer 2.0.0 specifications, which I know well and did not re-fetch. The note introduces the topic in two compact paragraphs, then moves through four sections: working tree, index, repository and remote states; Git versus hosting platforms; monorepo versus multiple repositories; and SemVer. The state-flow diagram correctly shows add moving changes to the index and commit moving them to the local graph. Fetch updates only remote-tracking refs. Pull is fetch plus merge or rebase. Reset can move a ref and change the index or working tree depending on mode. Revert is the right way to undo a published commit. The hosting section correctly says that host-side rules, issues, permissions and secrets do not travel with a repository. The monorepo table gives decision conditions rather than a slogan. The SemVer section says versioning needs a defined public API. It states that prerelease versions sort below the normal version and that build metadata is ignored for precedence, both matching SemVer 2.0.0. The note has no Qard cards and no known violations. The references are three canonical, bare links, and the code fence has a language identifier. The prose is direct and has no padding or repetition. No factual error or prerequisite gap needs repair, and edits would be cosmetic."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md": "57d2f2036412dbb9980fdababa6eeb3ae253395e59be4e9ee4866ec848e29022"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-11T19:55:13.793952Z"
+  }
 }
