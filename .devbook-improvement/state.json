@@ -11690,16 +11690,97 @@
     "version": 1,
     "id": "25f0f1a695d74b58a7e6b6c1c14dcb27",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-11T06:46:39.927000Z",
-    "elapsed_seconds": 75.0069877,
+    "elapsed_seconds": 80.40489079999999,
     "calls_reserved": 2,
     "responses_received": 2,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/Data Persistence/SQL/Sharding.md"
+    ],
     "accepted_records": [],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/Data Persistence/SQL/Sharding.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/SQL/Sharding.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and the cited sources (Microsoft Sharding pattern, Vitess resharding, Figma). The opening separates sharding from in-engine partitioning and states when sharding is warranted. The strategy table matches the Azure pattern's lookup, range and hash strategies. The consistent-hashing arithmetic (about 1/(N+1) of keys move when an equal node is added) is correct and carries its own caveats. The routing example and the fenced rebalancing protocol are coherent, and the cross-shard sections give the conditions under which distributed commit, sagas and global constraints apply. The three cards each test a single task and agree with the prose. No native violations are reported. No factual or editorial defect was found, so edits would only add churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Whole-note audit found no accurate-content, structure, question-quality or reference defect, so the keep disposition is justified and no edits are proposed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/SQL/Sharding.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate and well ordered: it moves from definition and when to shard, through strategies, routing, rebalancing and cross-shard costs, to pitfalls. The three cards each test one gradeable task and keep their IDs. No edit is justified.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied by the text fence, impersonal whiteboard voice.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Scale-driven sharding belongs after query and index repair, vertical scaling, read replicas, caching, and in-engine partitioning have failed to remove a measured write or storage ceiling.",
+                    "line_start": 19,
+                    "reason": "States the decision condition and the exception (isolation or locality requirements) up front, so the topic is quickly recoverable."
+                  },
+                  {
+                    "quote": "the new node's expected final share—and therefore the expected movement—is about `1 / (N + 1)` of keys.",
+                    "line_start": 38,
+                    "reason": "The consistent-hashing arithmetic is correct and is explicitly caveated for sparse tokens and for safe cutover."
+                  },
+                  {
+                    "quote": "A fenced design rejects a write when the destination no longer owns that bucket or the caller's map version is stale.",
+                    "line_start": 72,
+                    "reason": "Gives the concrete mechanism that prevents stale writers after cutover, which makes the routing example self-contained."
+                  },
+                  {
+                    "quote": "Uncoordinated dual writes create two authorities and two retry paths.",
+                    "line_start": 93,
+                    "reason": "The rebalancing section explains the failure the numbered protocol avoids, rather than only listing steps."
+                  },
+                  {
+                    "quote": "A local unique index proves uniqueness only inside one shard.",
+                    "line_start": 113,
+                    "reason": "The global-constraint section names the limit and the alternatives, so the engineering decision is clear."
+                  },
+                  {
+                    "quote": "What makes a shard key viable for a workload?",
+                    "line_start": 158,
+                    "reason": "The card is bounded and answerable. Its four conditions follow from the prose and are answered with a failure column, and it keeps its original ID."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: strategies, routing, rebalancing and cross-shard costs all serve one decision about sharding, and the 150-line note stays coherent. Separating the pieces would force readers to re-link them.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 2
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T06:47:54.933448Z",
+    "checkpoint_at": "2026-11-11T06:48:00.331366Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
