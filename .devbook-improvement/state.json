@@ -11690,11 +11690,11 @@
     "version": 1,
     "id": "25f0f1a695d74b58a7e6b6c1c14dcb27",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-11T06:46:39.927000Z",
-    "elapsed_seconds": 133.8455384,
+    "elapsed_seconds": 154.1902809,
     "calls_reserved": 4,
-    "responses_received": 3,
+    "responses_received": 4,
     "attempted_paths": [
       "Vault/Home/Data Persistence/SQL/Sharding.md"
     ],
@@ -11780,7 +11780,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T06:48:53.771999Z",
+    "checkpoint_at": "2026-11-11T06:49:14.116741Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -27699,6 +27699,143 @@
       "Vault/Home/Data Persistence/SQL/SQL.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-11T06:48:49.427291Z"
+    "prepared_at": "2026-11-11T06:48:49.427291Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/SQL.md",
+            "verdict": "CLEAN",
+            "summary": "Complete audit of the folder note found no factual, terminology, ordering or card-quality defect; the keep is justified. The prose separates logical semantics from physical plans, the join example is consistent, and the cards are bounded with primary sources.",
+            "page_type": "FolderNote — hub note with FolderNote tag and protected datacorejsx map; Questions and References optional but present and valid.",
+            "current_text_evidence": [
+              {
+                "quote": "SQL has declarative semantics and a separate physical plan.",
+                "line_start": 31,
+                "reason": "Separates logical clause order from optimizer execution, which prevents the common misreading of evaluation order as execution order."
+              },
+              {
+                "quote": "The result remains correct. The chosen work is wrong for the actual row counts.",
+                "line_start": 48,
+                "reason": "Cardinality misestimates are explained as a cost problem rather than a correctness problem; mechanism and limit are clear."
+              },
+              {
+                "quote": "Putting `o.total >= 50` in `ON` preserves Lin as an unmatched left row.",
+                "line_start": 68,
+                "reason": "Worked LEFT JOIN example is internally consistent with the shown output and NULL three-valued logic."
+              },
+              {
+                "quote": "No physical join is universally fastest.",
+                "line_start": 78,
+                "reason": "The join table is correctly hedged with conditions (memory, ordering, estimates) that change the decision."
+              },
+              {
+                "quote": "The `READ_COMMITTED_SNAPSHOT` database option changes how `READ COMMITTED` reads behave, but it is not a separate isolation level.",
+                "line_start": 186,
+                "reason": "Card answers state the version-specific SQL Server boundary accurately and point to Microsoft primary documentation."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note is a coherent SQL hub; locks, replication, sharding and normalization already live in sibling notes and are linked from prose.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "No proposed edits; independent whole-note review found accurate content, sound ordering, gradeable cards with retained IDs and no concrete rule violations, so the unchanged note is justified.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Data Persistence/SQL/SQL.md",
+          "citation_index": 1,
+          "reported_line_start": 48,
+          "resolved_line_start": 49
+        },
+        {
+          "path": "Vault/Home/Data Persistence/SQL/SQL.md",
+          "citation_index": 2,
+          "reported_line_start": 68,
+          "resolved_line_start": 69
+        },
+        {
+          "path": "Vault/Home/Data Persistence/SQL/SQL.md",
+          "citation_index": 3,
+          "reported_line_start": 78,
+          "resolved_line_start": 79
+        },
+        {
+          "path": "Vault/Home/Data Persistence/SQL/SQL.md",
+          "citation_index": 4,
+          "reported_line_start": 186,
+          "resolved_line_start": 210
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Data Persistence/SQL/SQL.md": "e6e4c66a6a402f598e4a22f42996c0d3d15ce5a2523e99a99fec2202017cc3f6"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/Data Persistence/SQL/SQL.md",
+          "verdict": "CLEAN",
+          "summary": "Complete audit of the folder note found no factual, terminology, ordering or card-quality defect; the keep is justified. The prose separates logical semantics from physical plans, the join example is consistent, and the cards are bounded with primary sources.",
+          "page_type": "FolderNote — hub note with FolderNote tag and protected datacorejsx map; Questions and References optional but present and valid.",
+          "current_text_evidence": [
+            {
+              "quote": "SQL has declarative semantics and a separate physical plan.",
+              "line_start": 31,
+              "reason": "Separates logical clause order from optimizer execution, which prevents the common misreading of evaluation order as execution order."
+            },
+            {
+              "quote": "The result remains correct. The chosen work is wrong for the actual row counts.",
+              "line_start": 49,
+              "reason": "Cardinality misestimates are explained as a cost problem rather than a correctness problem; mechanism and limit are clear."
+            },
+            {
+              "quote": "Putting `o.total >= 50` in `ON` preserves Lin as an unmatched left row.",
+              "line_start": 69,
+              "reason": "Worked LEFT JOIN example is internally consistent with the shown output and NULL three-valued logic."
+            },
+            {
+              "quote": "No physical join is universally fastest.",
+              "line_start": 79,
+              "reason": "The join table is correctly hedged with conditions (memory, ordering, estimates) that change the decision."
+            },
+            {
+              "quote": "The `READ_COMMITTED_SNAPSHOT` database option changes how `READ COMMITTED` reads behave, but it is not a separate isolation level.",
+              "line_start": 210,
+              "reason": "Card answers state the version-specific SQL Server boundary accurately and point to Microsoft primary documentation."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note is a coherent SQL hub; locks, replication, sharding and normalization already live in sibling notes and are linked from prose.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "No proposed edits; independent whole-note review found accurate content, sound ordering, gradeable cards with retained IDs and no concrete rule violations, so the unchanged note is justified.",
+      "change_checks": []
+    }
   }
 }
