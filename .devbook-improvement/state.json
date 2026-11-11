@@ -12165,10 +12165,10 @@
     "version": 1,
     "id": "dbc8c57dd5974251a623c83b7bde80ab",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-11T19:44:27.204881Z",
-    "elapsed_seconds": 629.2646173000003,
-    "calls_reserved": 17,
+    "elapsed_seconds": 633.9987040000003,
+    "calls_reserved": 18,
     "responses_received": 17,
     "attempted_paths": [
       "Vault/Home/DevOps/CI CD tools.md",
@@ -12704,7 +12704,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T19:54:56.468989Z",
+    "checkpoint_at": "2026-11-11T19:55:01.203076Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
@@ -12729,7 +12729,7 @@
       "pr": null
     },
     "base_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
-    "reservation_deadline": "2026-11-11T20:09:05.578391Z"
+    "reservation_deadline": "2026-11-11T20:10:00.833237Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
