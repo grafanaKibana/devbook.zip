@@ -11750,13 +11750,14 @@
     "version": 1,
     "id": "25f0f1a695d74b58a7e6b6c1c14dcb27",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-11T06:46:39.927000Z",
-    "elapsed_seconds": 158.7687985,
+    "elapsed_seconds": 163.0966076,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
-      "Vault/Home/Data Persistence/SQL/Sharding.md"
+      "Vault/Home/Data Persistence/SQL/Sharding.md",
+      "Vault/Home/Data Persistence/SQL/SQL.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -11837,10 +11838,83 @@
           },
           "model_calls": 2
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/SQL/SQL.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/SQL/SQL.md",
+                "outcome": "keep",
+                "reason": "I read the whole note against its current text. The opening states the relational model and the declarative query/optimizer split and names when a relational database fits. The logical clause order is accurate and is correctly separated from physical execution. The alias remarks match the dialects: PostgreSQL accepts an output name in GROUP BY, SQL Server does not. The worked LEFT JOIN example is internally consistent: Ada gets two rows, Lin gets NULL, and the ON versus WHERE placement behaves as described, because NULL >= 50 is unknown. The physical-join table is correctly hedged and says no operator is universally fastest. The cardinality-misestimate paragraph correctly says the result stays correct while the work is wrong. The cards are bounded and gradeable, and each carries a primary source. I checked their SQL Server claims: the five isolation levels, RCSI statement-level versioning, NOLOCK covering data locks only, scalar UDF inlining on 2019/compat 150, and CTE not being materialized. I found no factual or editorial defect. The note has no known violations and no flagged cards. Any rewording would be churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/SQL/SQL.md",
+                "verdict": "CLEAN",
+                "summary": "Complete audit of the folder note found no factual, terminology, ordering or card-quality defect; the keep is justified. The prose separates logical semantics from physical plans, the join example is consistent, and the cards are bounded with primary sources.",
+                "page_type": "FolderNote — hub note with FolderNote tag and protected datacorejsx map; Questions and References optional but present and valid.",
+                "current_text_evidence": [
+                  {
+                    "quote": "SQL has declarative semantics and a separate physical plan.",
+                    "line_start": 31,
+                    "reason": "Separates logical clause order from optimizer execution, which prevents the common misreading of evaluation order as execution order."
+                  },
+                  {
+                    "quote": "The result remains correct. The chosen work is wrong for the actual row counts.",
+                    "line_start": 49,
+                    "reason": "Cardinality misestimates are explained as a cost problem rather than a correctness problem; mechanism and limit are clear."
+                  },
+                  {
+                    "quote": "Putting `o.total >= 50` in `ON` preserves Lin as an unmatched left row.",
+                    "line_start": 69,
+                    "reason": "Worked LEFT JOIN example is internally consistent with the shown output and NULL three-valued logic."
+                  },
+                  {
+                    "quote": "No physical join is universally fastest.",
+                    "line_start": 79,
+                    "reason": "The join table is correctly hedged with conditions (memory, ordering, estimates) that change the decision."
+                  },
+                  {
+                    "quote": "The `READ_COMMITTED_SNAPSHOT` database option changes how `READ COMMITTED` reads behave, but it is not a separate isolation level.",
+                    "line_start": 210,
+                    "reason": "Card answers state the version-specific SQL Server boundary accurately and point to Microsoft primary documentation."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note is a coherent SQL hub; locks, replication, sharding and normalization already live in sibling notes and are linked from prose.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "No proposed edits; independent whole-note review found accurate content, sound ordering, gradeable cards with retained IDs and no concrete rule violations, so the unchanged note is justified.",
+            "change_checks": []
+          },
+          "model_calls": 4
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T06:49:18.695259Z",
+    "checkpoint_at": "2026-11-11T06:49:23.023089Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
