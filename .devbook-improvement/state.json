@@ -12280,10 +12280,10 @@
     "version": 1,
     "id": "546ef5b36e6142c79d9efe91941e131e",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-12T07:25:53.899904Z",
-    "elapsed_seconds": 274.5575412,
-    "calls_reserved": 6,
+    "elapsed_seconds": 279.6230984,
+    "calls_reserved": 7,
     "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
@@ -13232,7 +13232,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T07:30:28.456813Z",
+    "checkpoint_at": "2026-11-12T07:30:33.522370Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
@@ -13257,7 +13257,7 @@
       "pr": null
     },
     "base_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
-    "reservation_deadline": "2026-11-12T07:44:38.510998Z",
+    "reservation_deadline": "2026-11-12T07:45:33.194173Z",
     "last_request": {
       "topic": "networks-ab2c47c3",
       "generation": 1,
