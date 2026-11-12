@@ -12223,649 +12223,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "dbc8c57dd5974251a623c83b7bde80ab",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-11T19:44:27.204881Z",
-    "elapsed_seconds": 701.2180151000001,
-    "calls_reserved": 19,
-    "responses_received": 19,
-    "attempted_paths": [
-      "Vault/Home/DevOps/CI CD tools.md",
-      "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
-      "Vault/Home/DevOps/DevOps.md",
-      "Vault/Home/DevOps/Docker.md",
-      "Vault/Home/DevOps/Infrastructure as Code.md",
-      "Vault/Home/DevOps/Kubernetes.md",
-      "Vault/Home/DevOps/Observability.md",
-      "Vault/Home/DevOps/Version Control Systems/Branching Stratagies.md",
-      "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md"
-    ],
+    "id": "546ef5b36e6142c79d9efe91941e131e",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-12T07:25:53.899904Z",
+    "elapsed_seconds": 0.0013118,
+    "calls_reserved": 0,
+    "responses_received": 0,
+    "attempted_paths": [],
     "accepted_records": [],
-    "outcomes": [
-      {
-        "path": "Vault/Home/DevOps/CI CD tools.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/DevOps/CI CD tools.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text. The opening defines CI, continuous delivery and continuous deployment accurately. The single-artifact section correctly stresses promoting one digest. The stage/gate table separates build evidence from environment evidence. The GitHub Actions snippet is valid: `on`, `jobs`, `runs-on`, `uses`, `needs` and `environment` are explained correctly, and `environment: production` is correctly described as attaching protection and secrets outside the YAML. The platform paragraph (GitHub environments, Azure Pipelines checks, Jenkins controller and plugins) matches current vendor documentation. The one card tests a single comparison, has a complete answer with an AWS source, and agrees with the prose. The References are topic-specific bare links. There are no known violations, no needs-fixing flags and no open feedback. The prose is direct and has no meaningful repetition, so any edit would be cosmetic churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The single note was independently audited in full. No edits were proposed, no known violations or feedback exist, and no concrete defect was found. The keep is justified.",
-            "notes": [
-              {
-                "path": "Vault/Home/DevOps/CI CD tools.md",
-                "verdict": "CLEAN",
-                "summary": "The note defines CI, continuous delivery and continuous deployment, then follows one digest through the pipeline, a stage/gate table, an annotated workflow file and a platform policy comparison. It is accurate, ordered from concept to concrete, and has no meaningful repetition. The single Qard tests one focused comparison, and the References are bare topic-specific links. No concrete defect was found, so leaving it unchanged avoids cosmetic churn.",
-                "page_type": "Concept — typed frontmatter retained. Questions and References are optional and, where present, meet the card and bare-link rules. No fenced block lacks a language identifier, and the wikilink uses the full path with an alias.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Rebuilding after approval can produce different bytes, so the evidence chain holds only if the rebuilt artifact is verified to match the approved digest.",
-                    "line_start": 22,
-                    "reason": "States the mechanism and its condition: promote one digest, because a rebuild breaks the evidence chain unless it is verified to match the approved digest. This is accurate and complete."
-                  },
-                  {
-                    "quote": "Build checks describe the artifact. Deployment checks describe that artifact in a particular environment.",
-                    "line_start": 40,
-                    "reason": "Separates the evidence each stage provides, which makes the preceding table usable for engineering judgment."
-                  },
-                  {
-                    "quote": "`environment: production` can attach host-level protection and secrets outside the YAML.",
-                    "line_start": 68,
-                    "reason": "Correctly hedged and accurate for GitHub environments. It explains the field, and the surrounding sentences cover on, jobs, runs-on, uses, steps and needs."
-                  },
-                  {
-                    "quote": "The important architectural questions are where release policy lives, which identities may deploy, what runners can reach, and who operates them.",
-                    "line_start": 70,
-                    "reason": "Gives decision-oriented tool comparison across GitHub Actions, Azure Pipelines and Jenkins without trivia."
-                  },
-                  {
-                    "quote": "> [!qard]- What separates continuous delivery from continuous deployment?",
-                    "line_start": 75,
-                    "reason": "One focused comparison with a self-contained question. The answer gives the distinction, a table, the gate scope and an answer-side AWS source. The adjacent qard-id is retained."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the topic is one coherent pipeline-to-release explanation. The tool comparison is brief and depends on the pipeline concepts, so a separate note would add no independent value.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 2
-        }
-      },
-      {
-        "path": "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
-        "outcome": "proposal_blocked",
-        "reason": "card edit must replace one complete active Qard block including adjacent metadata",
-        "result": {
-          "status": "proposal_blocked",
-          "stage": "deterministic_application",
-          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
-          "model_calls": 5
-        }
-      },
-      {
-        "path": "Vault/Home/DevOps/DevOps.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/DevOps/DevOps.md",
-                "outcome": "keep",
-                "reason": "Audited the whole folder note against its text and the Twelve-Factor, SRE, DORA, CNCF platforms and NIST SSDF sources it lists. The opening states the operating idea. The DevOps/SRE/platform section keeps ownership with application teams and gives a decision condition for each model. The build/release/run section matches Twelve-Factor and states what it does not cover. The security section places checks by stage and correctly says a signature proves identity and integrity, not safety. The datacorejsx block is protected and has a language identifier. References are bare descriptive links from authoritative providers. The note has no Qards, so there are none to check, and no known violations. No factual error or reader-facing weakness was found, so edits would be churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The single unchanged folder note was audited in full. It has no factual, clarity, voice or structure defects and no known violations. The keep is justified and there are no edits.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/DevOps/DevOps.md",
-                "verdict": "CLEAN",
-                "summary": "Compact folder note with a clear opening idea and three focused sections: ownership models, the build/release/run deployment shape, and security as delivery evidence. Claims are accurate and carry the decision conditions that matter. No edit is warranted.",
-                "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx map block, which has a language identifier. Questions are absent, which is allowed. References are bare links.",
-                "current_text_evidence": [
-                  {
-                    "quote": "DevOps shortens the path from a code change to production without giving up control of risk.",
-                    "line_start": 18,
-                    "reason": "The opening states the operating idea quickly and in a direct, impersonal voice."
-                  },
-                  {
-                    "quote": "SRE fits when reliability needs an explicit budget; a platform earns its cost when several teams will adopt the same path.",
-                    "line_start": 29,
-                    "reason": "Gives the condition that decides between SRE and a platform, and keeps accountability with application teams. This is useful engineering judgment."
-                  },
-                  {
-                    "quote": "**Release** combines that artifact with environment configuration and secret references.",
-                    "line_start": 36,
-                    "reason": "Matches the Twelve-Factor build/release/run separation. The following paragraph also states what the model does not cover."
-                  },
-                  {
-                    "quote": "A signature proves artifact identity and integrity, not that the code is safe.",
-                    "line_start": 45,
-                    "reason": "States a precise limit of signing. The same paragraph says a gate needs evidence and a named response, which gives the security section its decision rule."
-                  },
-                  {
-                    "quote": "- [NIST Secure Software Development Framework](https://csrc.nist.gov/pubs/sp/800/218/final)",
-                    "line_start": 53,
-                    "reason": "References are authoritative, topic-specific, one per provider and content type, and bare descriptive links without annotation."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the sections are brief, share one delivery theme, and each supports the folder hub's overview. Splitting would fragment a compact note.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 7
-        }
-      },
-      {
-        "path": "Vault/Home/DevOps/Docker.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/DevOps/Docker.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against current text and Docker/.NET knowledge. The image/container/writable-layer definitions are correct. The namespaces/cgroups and VM-on-Desktop explanation, including the platform and architecture caveat, is accurate. The multi-stage Dockerfile is consistent: .NET 8 images define APP_UID and default to port 8080, so USER $APP_UID and EXPOSE 8080 are valid. EXPOSE is correctly described as documentation only. The Compose example is valid, with POSTGRES_PASSWORD_FILE, a file-based secret and a named volume. depends_on is correctly said to control only start order, not readiness. The safety bullets on privilege, secrets, state, health, digests and Docker HEALTHCHECK versus Kubernetes probes are correct and concise. There are no cards and no known violations. The prose is direct and has no padding, so edits would be cosmetic churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note audit found no accuracy, clarity, rules or structure defects. No edits were proposed and the keep is justified.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/DevOps/Docker.md",
-                "verdict": "CLEAN",
-                "summary": "The note explains the image, container and runtime boundary, a multi-stage Dockerfile, a Compose file and safety limits accurately and concisely. No concrete defect was found, so leaving it unchanged avoids cosmetic churn.",
-                "page_type": "Concept — typed frontmatter retained; Questions are optional and absent; References are bare descriptive links; fenced blocks carry language identifiers.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The image is portable; the complete runtime is not.",
-                    "line_start": 15,
-                    "reason": "The opening states the operating idea and the key boundary quickly and in a direct whiteboard voice."
-                  },
-                  {
-                    "quote": "A Linux container is a host process isolated with namespaces and constrained with cgroups, not a virtual machine.",
-                    "line_start": 21,
-                    "reason": "This gives the accurate mechanism and the Docker Desktop VM and architecture caveat, which supports engineering judgment."
-                  },
-                  {
-                    "quote": "`EXPOSE 8080` documents the intended listening port but does not publish it to the host.",
-                    "line_start": 41,
-                    "reason": "This correctly separates EXPOSE from publishing. The .NET 8 images define APP_UID and default to port 8080, so the example is consistent."
-                  },
-                  {
-                    "quote": "`depends_on` controls start order but does not prove the database is ready.",
-                    "line_start": 75,
-                    "reason": "This is the correct short-form depends_on semantics. The POSTGRES_PASSWORD_FILE and file-secret example is valid."
-                  },
-                  {
-                    "quote": "a Docker `HEALTHCHECK` does not automatically become a Kubernetes readiness probe.",
-                    "line_start": 82,
-                    "reason": "This is accurate and states a real runtime boundary and its limit."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the image/runtime boundary, Dockerfile, Compose and safety limits form one coherent Docker topic, and splitting them would not add independent value.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 9
-        }
-      },
-      {
-        "path": "Vault/Home/DevOps/Infrastructure as Code.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/DevOps/Infrastructure as Code.md",
-                "outcome": "keep",
-                "reason": "I audited the whole note against its current text and the Terraform and OpenGitOps concepts it cites. The opening defines IaC as a loop of desired state, comparison with observed resources, a proposed plan and an approved apply. The Terraform fragment is explained field by field: the resource address, the identity-affecting `bucket` and the managed `tags` that can drift. The plan/apply loop is shown, and applying a saved reviewed plan is the correct way to bind approval to exact operations. The state section correctly treats state as sensitive operational data that needs a protected remote backend with locking. It also correctly notes that ARM and CloudFormation keep deployment state on the provider side. The drift claim is properly bounded to fields the provider reads and manages. The single-controller and lifecycle-split guidance gives a clear decision rule. The engineering boundaries cover replacements and deletes, provider version pinning, short-lived workload identity and the difference between recreating a database resource and restoring its data. The note has no Qard cards, and none is needed to make the topic recoverable. The two references are authoritative bare links with no annotations. No known violations are listed. I found no factual errors, missing prerequisites, repetition or voice problems, so an edit would be cosmetic churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent full-note audit found no factual, structural, voice or reference defects. The keep is justified and no edits are proposed.",
-            "notes": [
-              {
-                "path": "Vault/Home/DevOps/Infrastructure as Code.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate and compact. It covers the plan/apply loop, state, drift, single-controller ownership and engineering limits. It needs no edit.",
-                "page_type": "Concept — optional Questions are absent, which is allowed. References are bare descriptive links, the code fences have language identifiers, and there is no Links section.",
-                "current_text_evidence": [
-                  {
-                    "quote": "When approval must bind to exact operations, apply the saved reviewed plan rather than recomputing it after the gate.",
-                    "line_start": 40,
-                    "reason": "States the correct mechanism that ties approval to exact operations, which is a condition that changes the engineering decision."
-                  },
-                  {
-                    "quote": "Refresh and plan can expose drift only for fields the provider reads and manages.",
-                    "line_start": 48,
-                    "reason": "Bounds the drift claim accurately and names the exceptions: ignored attributes, provider defaults and external systems."
-                  },
-                  {
-                    "quote": "Two reconcilers managing the same value can repeatedly overwrite each other.",
-                    "line_start": 52,
-                    "reason": "Gives a concrete failure mode that motivates the single-controller rule, in direct whiteboard voice."
-                  },
-                  {
-                    "quote": "Recreating a database resource does not restore its data.",
-                    "line_start": 62,
-                    "reason": "Gives a precise limit on what IaC covers, separating resource recreation from data recovery."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the sections (plan/apply loop, state and drift, controller ownership, engineering boundaries) are interdependent facets of one concept and are compact.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 11
-        }
-      },
-      {
-        "path": "Vault/Home/DevOps/Kubernetes.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/DevOps/Kubernetes.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against current Kubernetes semantics. The opening states the reconciliation model with the API server, controllers, scheduler and kubelet via CRI. Core Objects defines Pod, Deployment (through ReplicaSets), Service (ready Pods), ConfigMap and Secret, including that base64 is not encryption and that Ingress/Gateway need a controller. In the manifest, the selector/template-label match, requests, readiness probe, envFrom and the 80→8080 Service mapping are all correct, and the walk-through explains each. The ownership and wrong-boundary sections give real engineering judgment without padding. The single Qard tests one focused comparison (Pod/Deployment/Service). Its answer is accurate, including the exceptions for selectorless and headless Services and the point that the replica count is only a target. It cites Kubernetes docs. References are real primary sources and the frontmatter is valid. known_violations is empty, and I found no factual error or worthwhile refinement, so editing would be churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The whole note was audited and is accurate, clear and compliant. No edits were proposed, and the keep is supported by current-text evidence.",
-            "notes": [
-              {
-                "path": "Vault/Home/DevOps/Kubernetes.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate and well ordered, moving from the reconciliation model to core objects, a manifest walk-through, ownership, and a decision section on when Kubernetes is the wrong choice. It has one focused comparison Qard with a retained ID and answer-side sources. I found no concrete defect, so leaving it unchanged avoids churn.",
-                "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied (yaml fence), no Links section.",
-                "current_text_evidence": [
-                  {
-                    "quote": "A stopped process is therefore replaced because the declared state still requires it, not because an operator reruns a command.",
-                    "line_start": 18,
-                    "reason": "The opening states the operating idea (reconciliation of declared state) quickly and concretely."
-                  },
-                  {
-                    "quote": "Its replica count is a target, not a guarantee that every replica can serve traffic.",
-                    "line_start": 23,
-                    "reason": "States the important Deployment boundary, which the Qard answer repeats with its failure causes."
-                  },
-                  {
-                    "quote": "Declaring an API object does not create behavior unless a controller owns it.",
-                    "line_start": 28,
-                    "reason": "Gives the Ingress/Gateway limit that changes engineering decisions."
-                  },
-                  {
-                    "quote": "The Deployment's selector must match the Pod-template labels; otherwise it cannot own those Pods.",
-                    "line_start": 80,
-                    "reason": "The manifest walk-through explains the mechanism correctly and keeps the machine visible."
-                  },
-                  {
-                    "quote": "A retrying Job can execute work twice; Kubernetes cannot make a non-idempotent payment handler safe.",
-                    "line_start": 86,
-                    "reason": "Gives a concrete ownership split between application and platform, with real engineering judgment."
-                  },
-                  {
-                    "quote": "A Service without a selector relies on separately managed endpoints, and a headless Service has no virtual IP.",
-                    "line_start": 108,
-                    "reason": "The answer states exceptions to the selector-based ClusterIP behavior, so the Qard is not oversimplified."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note is one coherent introduction to Kubernetes' core model and its decision boundaries. Separate topics such as Ingress/Gateway or probes could be added later but are not required.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 13
-        }
-      },
-      {
-        "path": "Vault/Home/DevOps/Observability.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/DevOps/Observability.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text and the cited primary sources. The opening defines observability and states the instrumentation boundary. The signal table agrees with the Metrics, Logs and Traces sections. Counter, gauge and histogram definitions are accurate. Label cardinality guidance matches Prometheus practice. The JSON log example is consistent with its explanation. W3C traceparent propagation and the head versus tail sampling distinction are correct. The pipeline and collector responsibilities, and the .NET mapping (ILogger, Meter, ActivitySource, OTLP), are accurate. The durable-record caveat for audit data is a sound boundary. Both Qard cards test a single focused task and have sources on the answer side. Their content is consistent with the note body, and the cardinality card does not duplicate the signal-comparison card. The note has no known violations, no flagged cards, and the prose is direct and non-repetitive. No defect was found, so any edit would be churn."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note audit found the note accurate, coherent and well ordered, with two focused Qard cards. No concrete defect was found, so keeping it unchanged is justified.",
-            "notes": [
-              {
-                "path": "Vault/Home/DevOps/Observability.md",
-                "verdict": "CLEAN",
-                "summary": "The note opens with a clear definition, a signal comparison table, per-signal mechanisms, correlation, the collection pipeline, alert quality and a .NET instrumentation mapping. Facts are correct and the prose is direct and non-repetitive. The two Qard cards each test one task and stay consistent with the body.",
-                "page_type": "Concept — typed frontmatter, optional Questions and References present; Qard IDs are protected metadata; code fences have language identifiers (json, text).",
-                "current_text_evidence": [
-                  {
-                    "quote": "A **counter** records a cumulative total such as requests or failures.",
-                    "line_start": 31,
-                    "reason": "Counter, gauge and histogram definitions are correct and concise."
-                  },
-                  {
-                    "quote": "Request IDs, user IDs, raw URLs, and container IDs are unbounded",
-                    "line_start": 35,
-                    "reason": "Cardinality guidance matches Prometheus practice and names where those identifiers belong instead."
-                  },
-                  {
-                    "quote": "Uniform sampling can discard rare failures before their outcome is known; tail sampling can retain errors and slow traces after observing the result.",
-                    "line_start": 59,
-                    "reason": "Correctly contrasts head-style and tail sampling and states the cost of each."
-                  },
-                  {
-                    "quote": "Audit, security, financial, or regulatory records are different",
-                    "line_start": 81,
-                    "reason": "States the exception that keeps best-effort telemetry from being used for durable records."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note is one coherent topic, and the signals, correlation, pipeline and instrumentation sections depend on each other.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": [],
-            "decision_checks": []
-          },
-          "model_calls": 15
-        }
-      },
-      {
-        "path": "Vault/Home/DevOps/Version Control Systems/Branching Stratagies.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/DevOps/Version Control Systems/Branching Stratagies.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its current text and general Git knowledge. GitFlow is described correctly: permanent main and develop, feature branches back to develop, release branches merged to production and back to development, hotfixes from production that also return to development. The trunk-based section matches trunkbaseddevelopment.com on small frequent integration, feature flags, and keeping the trunk green. GitHub Flow is correctly described as a short-lived-branch pull-request flow with one mainline. The decision table and the point that branch lifetime matters more than team size are consistent with those sources. The merge and rebase section is accurate: a merge commit has two parents, a fast-forward only moves the ref, and rebase rewrites commit IDs, so rebasing shared history needs coordination. The prose is direct and has no repetition. The note has no cards, known_violations is empty, and the four references are real, topic-specific bare links. No factual or editorial defect justified an edit."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/DevOps/Version Control Systems/Branching Stratagies.md",
-                "verdict": "CLEAN",
-                "summary": "Whole-note audit finds the note accurate, well ordered (GitFlow, trunk-based, decision conditions, merge vs rebase) and free of repetition or padding. No concrete defect justifies an edit, so keeping it unchanged is correct.",
-                "page_type": "Concept — typed frontmatter and status 'Ready to Repeat' are valid; Questions absent (optional); References are bare descriptive links; no code fences; no hand-rolled navigation.",
-                "current_text_evidence": [
-                  {
-                    "quote": "A hotfix starts from production and must also return to ongoing development.",
-                    "line_start": 20,
-                    "reason": "Accurate GitFlow hotfix mechanism, including the back-merge that is commonly forgotten."
-                  },
-                  {
-                    "quote": "Deployment and feature exposure remain separate decisions.",
-                    "line_start": 26,
-                    "reason": "Correctly separates deploy from release in trunk-based development and explains the feature-flag role."
-                  },
-                  {
-                    "quote": "Team size is not the deciding condition. Branch lifetime is.",
-                    "line_start": 41,
-                    "reason": "Gives a decided engineering judgment with the mechanism (divergence, review scope, integration risk) following directly."
-                  },
-                  {
-                    "quote": "A fast-forward merge only moves the target ref when the incoming branch is already its descendant.",
-                    "line_start": 45,
-                    "reason": "Precise, correct condition for fast-forward; merge/rebase section states two-parent commit and rewritten IDs accurately."
-                  },
-                  {
-                    "quote": "The content result may be equivalent; the collaboration history is not.",
-                    "line_start": 47,
-                    "reason": "Concise conclusion explaining why rebasing shared history needs coordination."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the topics (GitFlow, trunk-based, selection criteria, merge vs rebase) are short and mutually dependent in the decision framing; separation would not add independent value.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The complete note was independently read and is factually correct, clearly ordered, concise, and compliant with the contract. The keep disposition is justified; no edits were proposed and no defects remain.",
-            "change_checks": []
-          },
-          "model_calls": 17
-        }
-      },
-      {
-        "path": "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md",
-                "outcome": "keep",
-                "reason": "I audited the whole note against its current text and the Git and SemVer 2.0.0 specifications, which I know well and did not re-fetch. The note introduces the topic in two compact paragraphs, then moves through four sections: working tree, index, repository and remote states; Git versus hosting platforms; monorepo versus multiple repositories; and SemVer. The state-flow diagram correctly shows add moving changes to the index and commit moving them to the local graph. Fetch updates only remote-tracking refs. Pull is fetch plus merge or rebase. Reset can move a ref and change the index or working tree depending on mode. Revert is the right way to undo a published commit. The hosting section correctly says that host-side rules, issues, permissions and secrets do not travel with a repository. The monorepo table gives decision conditions rather than a slogan. The SemVer section says versioning needs a defined public API. It states that prerelease versions sort below the normal version and that build metadata is ignored for precedence, both matching SemVer 2.0.0. The note has no Qard cards and no known violations. The references are three canonical, bare links, and the code fence has a language identifier. The prose is direct and has no padding or repetition. No factual error or prerequisite gap needs repair, and edits would be cosmetic."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The single unchanged note has no concrete violation. I read it in full and found it accurate, compact and well ordered. The keep disposition is justified.",
-            "notes": [
-              {
-                "path": "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md",
-                "verdict": "CLEAN",
-                "summary": "The note introduces VCS and Git's distributed model quickly. It then covers the working tree/index/repository/remote flow, Git versus hosting platforms, monorepo versus multiple repositories, and SemVer. Git command semantics and SemVer precedence rules are stated accurately and with their conditions, and no defect warrants an edit.",
-                "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx card-map block; Questions are optional and absent; References are bare links.",
-                "current_text_evidence": [
-                  {
-                    "quote": "`fetch` downloads objects and updates remote-tracking refs without integrating them into the current branch.",
-                    "line_start": 37,
-                    "reason": "Correct fetch/pull/restore/reset/revert semantics, with the mode caveat for reset and the reason revert is used for published history."
-                  },
-                  {
-                    "quote": "Host-side rules, issues, workflow history, permissions, and secrets do not move with it automatically.",
-                    "line_start": 43,
-                    "reason": "Draws the Git-versus-host boundary accurately and ends with a clear decision criterion."
-                  },
-                  {
-                    "quote": "The deciding evidence is cross-repository coordination, CI fan-out, release coupling, and access boundaries—not repository count alone.",
-                    "line_start": 55,
-                    "reason": "Table and prose give decision conditions rather than a slogan, and they do not repeat each other."
-                  },
-                  {
-                    "quote": "Prerelease identifiers sort below the corresponding normal version; build metadata does not affect precedence.",
-                    "line_start": 59,
-                    "reason": "Matches SemVer 2.0.0 precedence rules and includes the public-API precondition."
-                  },
-                  {
-                    "quote": "The version number is a claim, not proof.",
-                    "line_start": 61,
-                    "reason": "Direct, judgment-bearing prose that separates SemVer from commit-convention automation."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the sections share one topic (versioning and collaboration practice), each is compact, and none is independently large enough to need its own note.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 19
-        }
-      }
-    ],
+    "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-11T19:56:08.422388Z",
-    "topic": "DevOps",
-    "topic_id": "devops-e491b463",
-    "current_batch": {
-      "topic": "DevOps",
-      "topic_id": "devops-e491b463",
-      "notes": [
-        {
-          "path": "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md",
-          "content": "---\ntopic: [DevOps]\nsubtopic: [Version Control Systems]\nsummary: \"Tracks file changes over time, enabling collaboration, branching, merging, and reverting.\"\nlevel: [\"4\"]\npriority: High\ntags: [FolderNote]\n\npublish: true\nstatus: Ready to Repeat\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.511Z\"\n---\n\nA version control system (VCS) records versions of tracked files so a team can compare, branch, merge, and restore repository history. Git is distributed: a normal clone contains a local object database and refs, so most history operations do not depend on the hosting service.\n\nGit's recovery boundary is explicit. A committed snapshot is durable while it remains reachable or recoverable from local records. An untracked file or an edit Git never captured cannot be reconstructed from Git history.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Working Tree, Index, Repository, and Remote\n\nGit moves snapshots through distinct states:\n\n```text\nworking tree --git add--> index --git commit--> local commit graph\nremote-tracking refs <--git fetch-- remote refs\nlocal refs --git push-------------------------> remote refs\n```\n\nThe **working tree** contains checked-out files. The **index** is the proposed next snapshot. A **commit** stores a snapshot and parent links in the local object database. A **branch** is a movable ref to a commit. A **remote-tracking ref** is the last fetched view of a remote ref.\n\n`fetch` downloads objects and updates remote-tracking refs without integrating them into the current branch. `pull` fetches and then merges or rebases according to configuration. `restore` changes working-tree or index content. `reset` can move a ref and replace index or working-tree state, so its mode matters. A published mistake is usually reversed with a new `revert` commit so shared commit identities remain valid.\n\n# Git and Hosting Platforms\n\nGit defines objects, commits, refs, remotes, and transfer protocols. GitHub, GitLab, and Azure DevOps host repositories and add identity, permissions, pull requests, protected branches, issues, automation, and policy.\n\nA repository can move between hosts without changing its commit graph. Host-side rules, issues, workflow history, permissions, and secrets do not move with it automatically. The hosting decision is therefore about governance, integrations, compliance, and operating cost rather than Git semantics.\n\n# Repository Strategy\n\n| Boundary | Monorepo | Multiple repositories |\n| --- | --- | --- |\n| Cross-component change | One atomic commit and review | Coordinated versions and rollout |\n| Dependency policy | One graph can enforce consistency | Each repository owns its cadence |\n| Access control | Requires reliable path ownership | Repository boundary is explicit |\n| CI | Needs affected-component execution at scale | Smaller pipelines; integration moves downstream |\n| Release | Shared source can still release independently | Independent by default |\n\nA monorepo fits when atomic cross-component changes and shared dependency policy justify build-graph and ownership tooling. Multiple repositories fit when access isolation and independent lifecycles dominate. The deciding evidence is cross-repository coordination, CI fan-out, release coupling, and access boundaries—not repository count alone.\n\n# Semantic Versioning and the Release Contract\n\nSemantic Versioning only works after a project defines its public API. `MAJOR.MINOR.PATCH` means incompatible API change, backward-compatible functionality, and backward-compatible fix. Prerelease identifiers sort below the corresponding normal version; build metadata does not affect precedence.\n\nThe version number is a claim, not proof. API diffs, consumer tests, migration checks, and deprecation policy establish whether a change is compatible. Commit-message or PR-title conventions may automate version selection, but those are repository policy layered on SemVer.\n\n# References\n\n- [Pro Git book](https://git-scm.com/book/en/v2)\n- [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html)\n- [GitHub pull request documentation](https://docs.github.com/en/pull-requests)\n",
-          "hash": "57d2f2036412dbb9980fdababa6eeb3ae253395e59be4e9ee4866ec848e29022",
-          "topic": "DevOps",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "base_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
-    "reservation_deadline": "2026-11-11T20:10:17.500410Z",
-    "stop_reason": "topic_exhausted",
-    "sealed_at": "2026-11-11T19:56:08.422394Z"
+    "checkpoint_at": "2026-11-12T07:25:53.900691Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -20529,6 +19898,652 @@
       "reservation_deadline": "2026-11-11T07:03:53.378753Z",
       "stop_reason": "topic_exhausted",
       "sealed_at": "2026-11-11T06:49:54.589926Z"
+    },
+    "dbc8c57dd5974251a623c83b7bde80ab": {
+      "version": 1,
+      "id": "dbc8c57dd5974251a623c83b7bde80ab",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-11T19:44:27.204881Z",
+      "elapsed_seconds": 701.2180151000001,
+      "calls_reserved": 19,
+      "responses_received": 19,
+      "attempted_paths": [
+        "Vault/Home/DevOps/CI CD tools.md",
+        "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
+        "Vault/Home/DevOps/DevOps.md",
+        "Vault/Home/DevOps/Docker.md",
+        "Vault/Home/DevOps/Infrastructure as Code.md",
+        "Vault/Home/DevOps/Kubernetes.md",
+        "Vault/Home/DevOps/Observability.md",
+        "Vault/Home/DevOps/Version Control Systems/Branching Stratagies.md",
+        "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md"
+      ],
+      "accepted_records": [],
+      "outcomes": [
+        {
+          "path": "Vault/Home/DevOps/CI CD tools.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/DevOps/CI CD tools.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text. The opening defines CI, continuous delivery and continuous deployment accurately. The single-artifact section correctly stresses promoting one digest. The stage/gate table separates build evidence from environment evidence. The GitHub Actions snippet is valid: `on`, `jobs`, `runs-on`, `uses`, `needs` and `environment` are explained correctly, and `environment: production` is correctly described as attaching protection and secrets outside the YAML. The platform paragraph (GitHub environments, Azure Pipelines checks, Jenkins controller and plugins) matches current vendor documentation. The one card tests a single comparison, has a complete answer with an AWS source, and agrees with the prose. The References are topic-specific bare links. There are no known violations, no needs-fixing flags and no open feedback. The prose is direct and has no meaningful repetition, so any edit would be cosmetic churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The single note was independently audited in full. No edits were proposed, no known violations or feedback exist, and no concrete defect was found. The keep is justified.",
+              "notes": [
+                {
+                  "path": "Vault/Home/DevOps/CI CD tools.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note defines CI, continuous delivery and continuous deployment, then follows one digest through the pipeline, a stage/gate table, an annotated workflow file and a platform policy comparison. It is accurate, ordered from concept to concrete, and has no meaningful repetition. The single Qard tests one focused comparison, and the References are bare topic-specific links. No concrete defect was found, so leaving it unchanged avoids cosmetic churn.",
+                  "page_type": "Concept — typed frontmatter retained. Questions and References are optional and, where present, meet the card and bare-link rules. No fenced block lacks a language identifier, and the wikilink uses the full path with an alias.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Rebuilding after approval can produce different bytes, so the evidence chain holds only if the rebuilt artifact is verified to match the approved digest.",
+                      "line_start": 22,
+                      "reason": "States the mechanism and its condition: promote one digest, because a rebuild breaks the evidence chain unless it is verified to match the approved digest. This is accurate and complete."
+                    },
+                    {
+                      "quote": "Build checks describe the artifact. Deployment checks describe that artifact in a particular environment.",
+                      "line_start": 40,
+                      "reason": "Separates the evidence each stage provides, which makes the preceding table usable for engineering judgment."
+                    },
+                    {
+                      "quote": "`environment: production` can attach host-level protection and secrets outside the YAML.",
+                      "line_start": 68,
+                      "reason": "Correctly hedged and accurate for GitHub environments. It explains the field, and the surrounding sentences cover on, jobs, runs-on, uses, steps and needs."
+                    },
+                    {
+                      "quote": "The important architectural questions are where release policy lives, which identities may deploy, what runners can reach, and who operates them.",
+                      "line_start": 70,
+                      "reason": "Gives decision-oriented tool comparison across GitHub Actions, Azure Pipelines and Jenkins without trivia."
+                    },
+                    {
+                      "quote": "> [!qard]- What separates continuous delivery from continuous deployment?",
+                      "line_start": 75,
+                      "reason": "One focused comparison with a self-contained question. The answer gives the distinction, a table, the gate scope and an answer-side AWS source. The adjacent qard-id is retained."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the topic is one coherent pipeline-to-release explanation. The tool comparison is brief and depends on the pipeline concepts, so a separate note would add no independent value.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 2
+          }
+        },
+        {
+          "path": "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
+          "outcome": "proposal_blocked",
+          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+          "result": {
+            "status": "proposal_blocked",
+            "stage": "deterministic_application",
+            "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+            "model_calls": 5
+          }
+        },
+        {
+          "path": "Vault/Home/DevOps/DevOps.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/DevOps/DevOps.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole folder note against its text and the Twelve-Factor, SRE, DORA, CNCF platforms and NIST SSDF sources it lists. The opening states the operating idea. The DevOps/SRE/platform section keeps ownership with application teams and gives a decision condition for each model. The build/release/run section matches Twelve-Factor and states what it does not cover. The security section places checks by stage and correctly says a signature proves identity and integrity, not safety. The datacorejsx block is protected and has a language identifier. References are bare descriptive links from authoritative providers. The note has no Qards, so there are none to check, and no known violations. No factual error or reader-facing weakness was found, so edits would be churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The single unchanged folder note was audited in full. It has no factual, clarity, voice or structure defects and no known violations. The keep is justified and there are no edits.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/DevOps/DevOps.md",
+                  "verdict": "CLEAN",
+                  "summary": "Compact folder note with a clear opening idea and three focused sections: ownership models, the build/release/run deployment shape, and security as delivery evidence. Claims are accurate and carry the decision conditions that matter. No edit is warranted.",
+                  "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx map block, which has a language identifier. Questions are absent, which is allowed. References are bare links.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "DevOps shortens the path from a code change to production without giving up control of risk.",
+                      "line_start": 18,
+                      "reason": "The opening states the operating idea quickly and in a direct, impersonal voice."
+                    },
+                    {
+                      "quote": "SRE fits when reliability needs an explicit budget; a platform earns its cost when several teams will adopt the same path.",
+                      "line_start": 29,
+                      "reason": "Gives the condition that decides between SRE and a platform, and keeps accountability with application teams. This is useful engineering judgment."
+                    },
+                    {
+                      "quote": "**Release** combines that artifact with environment configuration and secret references.",
+                      "line_start": 36,
+                      "reason": "Matches the Twelve-Factor build/release/run separation. The following paragraph also states what the model does not cover."
+                    },
+                    {
+                      "quote": "A signature proves artifact identity and integrity, not that the code is safe.",
+                      "line_start": 45,
+                      "reason": "States a precise limit of signing. The same paragraph says a gate needs evidence and a named response, which gives the security section its decision rule."
+                    },
+                    {
+                      "quote": "- [NIST Secure Software Development Framework](https://csrc.nist.gov/pubs/sp/800/218/final)",
+                      "line_start": 53,
+                      "reason": "References are authoritative, topic-specific, one per provider and content type, and bare descriptive links without annotation."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the sections are brief, share one delivery theme, and each supports the folder hub's overview. Splitting would fragment a compact note.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 7
+          }
+        },
+        {
+          "path": "Vault/Home/DevOps/Docker.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/DevOps/Docker.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against current text and Docker/.NET knowledge. The image/container/writable-layer definitions are correct. The namespaces/cgroups and VM-on-Desktop explanation, including the platform and architecture caveat, is accurate. The multi-stage Dockerfile is consistent: .NET 8 images define APP_UID and default to port 8080, so USER $APP_UID and EXPOSE 8080 are valid. EXPOSE is correctly described as documentation only. The Compose example is valid, with POSTGRES_PASSWORD_FILE, a file-based secret and a named volume. depends_on is correctly said to control only start order, not readiness. The safety bullets on privilege, secrets, state, health, digests and Docker HEALTHCHECK versus Kubernetes probes are correct and concise. There are no cards and no known violations. The prose is direct and has no padding, so edits would be cosmetic churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note audit found no accuracy, clarity, rules or structure defects. No edits were proposed and the keep is justified.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/DevOps/Docker.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains the image, container and runtime boundary, a multi-stage Dockerfile, a Compose file and safety limits accurately and concisely. No concrete defect was found, so leaving it unchanged avoids cosmetic churn.",
+                  "page_type": "Concept — typed frontmatter retained; Questions are optional and absent; References are bare descriptive links; fenced blocks carry language identifiers.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The image is portable; the complete runtime is not.",
+                      "line_start": 15,
+                      "reason": "The opening states the operating idea and the key boundary quickly and in a direct whiteboard voice."
+                    },
+                    {
+                      "quote": "A Linux container is a host process isolated with namespaces and constrained with cgroups, not a virtual machine.",
+                      "line_start": 21,
+                      "reason": "This gives the accurate mechanism and the Docker Desktop VM and architecture caveat, which supports engineering judgment."
+                    },
+                    {
+                      "quote": "`EXPOSE 8080` documents the intended listening port but does not publish it to the host.",
+                      "line_start": 41,
+                      "reason": "This correctly separates EXPOSE from publishing. The .NET 8 images define APP_UID and default to port 8080, so the example is consistent."
+                    },
+                    {
+                      "quote": "`depends_on` controls start order but does not prove the database is ready.",
+                      "line_start": 75,
+                      "reason": "This is the correct short-form depends_on semantics. The POSTGRES_PASSWORD_FILE and file-secret example is valid."
+                    },
+                    {
+                      "quote": "a Docker `HEALTHCHECK` does not automatically become a Kubernetes readiness probe.",
+                      "line_start": 82,
+                      "reason": "This is accurate and states a real runtime boundary and its limit."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the image/runtime boundary, Dockerfile, Compose and safety limits form one coherent Docker topic, and splitting them would not add independent value.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 9
+          }
+        },
+        {
+          "path": "Vault/Home/DevOps/Infrastructure as Code.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/DevOps/Infrastructure as Code.md",
+                  "outcome": "keep",
+                  "reason": "I audited the whole note against its current text and the Terraform and OpenGitOps concepts it cites. The opening defines IaC as a loop of desired state, comparison with observed resources, a proposed plan and an approved apply. The Terraform fragment is explained field by field: the resource address, the identity-affecting `bucket` and the managed `tags` that can drift. The plan/apply loop is shown, and applying a saved reviewed plan is the correct way to bind approval to exact operations. The state section correctly treats state as sensitive operational data that needs a protected remote backend with locking. It also correctly notes that ARM and CloudFormation keep deployment state on the provider side. The drift claim is properly bounded to fields the provider reads and manages. The single-controller and lifecycle-split guidance gives a clear decision rule. The engineering boundaries cover replacements and deletes, provider version pinning, short-lived workload identity and the difference between recreating a database resource and restoring its data. The note has no Qard cards, and none is needed to make the topic recoverable. The two references are authoritative bare links with no annotations. No known violations are listed. I found no factual errors, missing prerequisites, repetition or voice problems, so an edit would be cosmetic churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent full-note audit found no factual, structural, voice or reference defects. The keep is justified and no edits are proposed.",
+              "notes": [
+                {
+                  "path": "Vault/Home/DevOps/Infrastructure as Code.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate and compact. It covers the plan/apply loop, state, drift, single-controller ownership and engineering limits. It needs no edit.",
+                  "page_type": "Concept — optional Questions are absent, which is allowed. References are bare descriptive links, the code fences have language identifiers, and there is no Links section.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "When approval must bind to exact operations, apply the saved reviewed plan rather than recomputing it after the gate.",
+                      "line_start": 40,
+                      "reason": "States the correct mechanism that ties approval to exact operations, which is a condition that changes the engineering decision."
+                    },
+                    {
+                      "quote": "Refresh and plan can expose drift only for fields the provider reads and manages.",
+                      "line_start": 48,
+                      "reason": "Bounds the drift claim accurately and names the exceptions: ignored attributes, provider defaults and external systems."
+                    },
+                    {
+                      "quote": "Two reconcilers managing the same value can repeatedly overwrite each other.",
+                      "line_start": 52,
+                      "reason": "Gives a concrete failure mode that motivates the single-controller rule, in direct whiteboard voice."
+                    },
+                    {
+                      "quote": "Recreating a database resource does not restore its data.",
+                      "line_start": 62,
+                      "reason": "Gives a precise limit on what IaC covers, separating resource recreation from data recovery."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the sections (plan/apply loop, state and drift, controller ownership, engineering boundaries) are interdependent facets of one concept and are compact.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 11
+          }
+        },
+        {
+          "path": "Vault/Home/DevOps/Kubernetes.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/DevOps/Kubernetes.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against current Kubernetes semantics. The opening states the reconciliation model with the API server, controllers, scheduler and kubelet via CRI. Core Objects defines Pod, Deployment (through ReplicaSets), Service (ready Pods), ConfigMap and Secret, including that base64 is not encryption and that Ingress/Gateway need a controller. In the manifest, the selector/template-label match, requests, readiness probe, envFrom and the 80→8080 Service mapping are all correct, and the walk-through explains each. The ownership and wrong-boundary sections give real engineering judgment without padding. The single Qard tests one focused comparison (Pod/Deployment/Service). Its answer is accurate, including the exceptions for selectorless and headless Services and the point that the replica count is only a target. It cites Kubernetes docs. References are real primary sources and the frontmatter is valid. known_violations is empty, and I found no factual error or worthwhile refinement, so editing would be churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The whole note was audited and is accurate, clear and compliant. No edits were proposed, and the keep is supported by current-text evidence.",
+              "notes": [
+                {
+                  "path": "Vault/Home/DevOps/Kubernetes.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate and well ordered, moving from the reconciliation model to core objects, a manifest walk-through, ownership, and a decision section on when Kubernetes is the wrong choice. It has one focused comparison Qard with a retained ID and answer-side sources. I found no concrete defect, so leaving it unchanged avoids churn.",
+                  "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied (yaml fence), no Links section.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "A stopped process is therefore replaced because the declared state still requires it, not because an operator reruns a command.",
+                      "line_start": 18,
+                      "reason": "The opening states the operating idea (reconciliation of declared state) quickly and concretely."
+                    },
+                    {
+                      "quote": "Its replica count is a target, not a guarantee that every replica can serve traffic.",
+                      "line_start": 23,
+                      "reason": "States the important Deployment boundary, which the Qard answer repeats with its failure causes."
+                    },
+                    {
+                      "quote": "Declaring an API object does not create behavior unless a controller owns it.",
+                      "line_start": 28,
+                      "reason": "Gives the Ingress/Gateway limit that changes engineering decisions."
+                    },
+                    {
+                      "quote": "The Deployment's selector must match the Pod-template labels; otherwise it cannot own those Pods.",
+                      "line_start": 80,
+                      "reason": "The manifest walk-through explains the mechanism correctly and keeps the machine visible."
+                    },
+                    {
+                      "quote": "A retrying Job can execute work twice; Kubernetes cannot make a non-idempotent payment handler safe.",
+                      "line_start": 86,
+                      "reason": "Gives a concrete ownership split between application and platform, with real engineering judgment."
+                    },
+                    {
+                      "quote": "A Service without a selector relies on separately managed endpoints, and a headless Service has no virtual IP.",
+                      "line_start": 108,
+                      "reason": "The answer states exceptions to the selector-based ClusterIP behavior, so the Qard is not oversimplified."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note is one coherent introduction to Kubernetes' core model and its decision boundaries. Separate topics such as Ingress/Gateway or probes could be added later but are not required.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 13
+          }
+        },
+        {
+          "path": "Vault/Home/DevOps/Observability.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/DevOps/Observability.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text and the cited primary sources. The opening defines observability and states the instrumentation boundary. The signal table agrees with the Metrics, Logs and Traces sections. Counter, gauge and histogram definitions are accurate. Label cardinality guidance matches Prometheus practice. The JSON log example is consistent with its explanation. W3C traceparent propagation and the head versus tail sampling distinction are correct. The pipeline and collector responsibilities, and the .NET mapping (ILogger, Meter, ActivitySource, OTLP), are accurate. The durable-record caveat for audit data is a sound boundary. Both Qard cards test a single focused task and have sources on the answer side. Their content is consistent with the note body, and the cardinality card does not duplicate the signal-comparison card. The note has no known violations, no flagged cards, and the prose is direct and non-repetitive. No defect was found, so any edit would be churn."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note audit found the note accurate, coherent and well ordered, with two focused Qard cards. No concrete defect was found, so keeping it unchanged is justified.",
+              "notes": [
+                {
+                  "path": "Vault/Home/DevOps/Observability.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note opens with a clear definition, a signal comparison table, per-signal mechanisms, correlation, the collection pipeline, alert quality and a .NET instrumentation mapping. Facts are correct and the prose is direct and non-repetitive. The two Qard cards each test one task and stay consistent with the body.",
+                  "page_type": "Concept — typed frontmatter, optional Questions and References present; Qard IDs are protected metadata; code fences have language identifiers (json, text).",
+                  "current_text_evidence": [
+                    {
+                      "quote": "A **counter** records a cumulative total such as requests or failures.",
+                      "line_start": 31,
+                      "reason": "Counter, gauge and histogram definitions are correct and concise."
+                    },
+                    {
+                      "quote": "Request IDs, user IDs, raw URLs, and container IDs are unbounded",
+                      "line_start": 35,
+                      "reason": "Cardinality guidance matches Prometheus practice and names where those identifiers belong instead."
+                    },
+                    {
+                      "quote": "Uniform sampling can discard rare failures before their outcome is known; tail sampling can retain errors and slow traces after observing the result.",
+                      "line_start": 59,
+                      "reason": "Correctly contrasts head-style and tail sampling and states the cost of each."
+                    },
+                    {
+                      "quote": "Audit, security, financial, or regulatory records are different",
+                      "line_start": 81,
+                      "reason": "States the exception that keeps best-effort telemetry from being used for durable records."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note is one coherent topic, and the signals, correlation, pipeline and instrumentation sections depend on each other.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": [],
+              "decision_checks": []
+            },
+            "model_calls": 15
+          }
+        },
+        {
+          "path": "Vault/Home/DevOps/Version Control Systems/Branching Stratagies.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/DevOps/Version Control Systems/Branching Stratagies.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its current text and general Git knowledge. GitFlow is described correctly: permanent main and develop, feature branches back to develop, release branches merged to production and back to development, hotfixes from production that also return to development. The trunk-based section matches trunkbaseddevelopment.com on small frequent integration, feature flags, and keeping the trunk green. GitHub Flow is correctly described as a short-lived-branch pull-request flow with one mainline. The decision table and the point that branch lifetime matters more than team size are consistent with those sources. The merge and rebase section is accurate: a merge commit has two parents, a fast-forward only moves the ref, and rebase rewrites commit IDs, so rebasing shared history needs coordination. The prose is direct and has no repetition. The note has no cards, known_violations is empty, and the four references are real, topic-specific bare links. No factual or editorial defect justified an edit."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/DevOps/Version Control Systems/Branching Stratagies.md",
+                  "verdict": "CLEAN",
+                  "summary": "Whole-note audit finds the note accurate, well ordered (GitFlow, trunk-based, decision conditions, merge vs rebase) and free of repetition or padding. No concrete defect justifies an edit, so keeping it unchanged is correct.",
+                  "page_type": "Concept — typed frontmatter and status 'Ready to Repeat' are valid; Questions absent (optional); References are bare descriptive links; no code fences; no hand-rolled navigation.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "A hotfix starts from production and must also return to ongoing development.",
+                      "line_start": 20,
+                      "reason": "Accurate GitFlow hotfix mechanism, including the back-merge that is commonly forgotten."
+                    },
+                    {
+                      "quote": "Deployment and feature exposure remain separate decisions.",
+                      "line_start": 26,
+                      "reason": "Correctly separates deploy from release in trunk-based development and explains the feature-flag role."
+                    },
+                    {
+                      "quote": "Team size is not the deciding condition. Branch lifetime is.",
+                      "line_start": 41,
+                      "reason": "Gives a decided engineering judgment with the mechanism (divergence, review scope, integration risk) following directly."
+                    },
+                    {
+                      "quote": "A fast-forward merge only moves the target ref when the incoming branch is already its descendant.",
+                      "line_start": 45,
+                      "reason": "Precise, correct condition for fast-forward; merge/rebase section states two-parent commit and rewritten IDs accurately."
+                    },
+                    {
+                      "quote": "The content result may be equivalent; the collaboration history is not.",
+                      "line_start": 47,
+                      "reason": "Concise conclusion explaining why rebasing shared history needs coordination."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the topics (GitFlow, trunk-based, selection criteria, merge vs rebase) are short and mutually dependent in the decision framing; separation would not add independent value.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The complete note was independently read and is factually correct, clearly ordered, concise, and compliant with the contract. The keep disposition is justified; no edits were proposed and no defects remain.",
+              "change_checks": []
+            },
+            "model_calls": 17
+          }
+        },
+        {
+          "path": "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md",
+                  "outcome": "keep",
+                  "reason": "I audited the whole note against its current text and the Git and SemVer 2.0.0 specifications, which I know well and did not re-fetch. The note introduces the topic in two compact paragraphs, then moves through four sections: working tree, index, repository and remote states; Git versus hosting platforms; monorepo versus multiple repositories; and SemVer. The state-flow diagram correctly shows add moving changes to the index and commit moving them to the local graph. Fetch updates only remote-tracking refs. Pull is fetch plus merge or rebase. Reset can move a ref and change the index or working tree depending on mode. Revert is the right way to undo a published commit. The hosting section correctly says that host-side rules, issues, permissions and secrets do not travel with a repository. The monorepo table gives decision conditions rather than a slogan. The SemVer section says versioning needs a defined public API. It states that prerelease versions sort below the normal version and that build metadata is ignored for precedence, both matching SemVer 2.0.0. The note has no Qard cards and no known violations. The references are three canonical, bare links, and the code fence has a language identifier. The prose is direct and has no padding or repetition. No factual error or prerequisite gap needs repair, and edits would be cosmetic."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The single unchanged note has no concrete violation. I read it in full and found it accurate, compact and well ordered. The keep disposition is justified.",
+              "notes": [
+                {
+                  "path": "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note introduces VCS and Git's distributed model quickly. It then covers the working tree/index/repository/remote flow, Git versus hosting platforms, monorepo versus multiple repositories, and SemVer. Git command semantics and SemVer precedence rules are stated accurately and with their conditions, and no defect warrants an edit.",
+                  "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx card-map block; Questions are optional and absent; References are bare links.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "`fetch` downloads objects and updates remote-tracking refs without integrating them into the current branch.",
+                      "line_start": 37,
+                      "reason": "Correct fetch/pull/restore/reset/revert semantics, with the mode caveat for reset and the reason revert is used for published history."
+                    },
+                    {
+                      "quote": "Host-side rules, issues, workflow history, permissions, and secrets do not move with it automatically.",
+                      "line_start": 43,
+                      "reason": "Draws the Git-versus-host boundary accurately and ends with a clear decision criterion."
+                    },
+                    {
+                      "quote": "The deciding evidence is cross-repository coordination, CI fan-out, release coupling, and access boundaries—not repository count alone.",
+                      "line_start": 55,
+                      "reason": "Table and prose give decision conditions rather than a slogan, and they do not repeat each other."
+                    },
+                    {
+                      "quote": "Prerelease identifiers sort below the corresponding normal version; build metadata does not affect precedence.",
+                      "line_start": 59,
+                      "reason": "Matches SemVer 2.0.0 precedence rules and includes the public-API precondition."
+                    },
+                    {
+                      "quote": "The version number is a claim, not proof.",
+                      "line_start": 61,
+                      "reason": "Direct, judgment-bearing prose that separates SemVer from commit-convention automation."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the sections share one topic (versioning and collaboration practice), each is compact, and none is independently large enough to need its own note.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 19
+          }
+        }
+      ],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-11T19:56:08.422388Z",
+      "topic": "DevOps",
+      "topic_id": "devops-e491b463",
+      "current_batch": {
+        "topic": "DevOps",
+        "topic_id": "devops-e491b463",
+        "notes": [
+          {
+            "path": "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md",
+            "content": "---\ntopic: [DevOps]\nsubtopic: [Version Control Systems]\nsummary: \"Tracks file changes over time, enabling collaboration, branching, merging, and reverting.\"\nlevel: [\"4\"]\npriority: High\ntags: [FolderNote]\n\npublish: true\nstatus: Ready to Repeat\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.511Z\"\n---\n\nA version control system (VCS) records versions of tracked files so a team can compare, branch, merge, and restore repository history. Git is distributed: a normal clone contains a local object database and refs, so most history operations do not depend on the hosting service.\n\nGit's recovery boundary is explicit. A committed snapshot is durable while it remains reachable or recoverable from local records. An untracked file or an edit Git never captured cannot be reconstructed from Git history.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Working Tree, Index, Repository, and Remote\n\nGit moves snapshots through distinct states:\n\n```text\nworking tree --git add--> index --git commit--> local commit graph\nremote-tracking refs <--git fetch-- remote refs\nlocal refs --git push-------------------------> remote refs\n```\n\nThe **working tree** contains checked-out files. The **index** is the proposed next snapshot. A **commit** stores a snapshot and parent links in the local object database. A **branch** is a movable ref to a commit. A **remote-tracking ref** is the last fetched view of a remote ref.\n\n`fetch` downloads objects and updates remote-tracking refs without integrating them into the current branch. `pull` fetches and then merges or rebases according to configuration. `restore` changes working-tree or index content. `reset` can move a ref and replace index or working-tree state, so its mode matters. A published mistake is usually reversed with a new `revert` commit so shared commit identities remain valid.\n\n# Git and Hosting Platforms\n\nGit defines objects, commits, refs, remotes, and transfer protocols. GitHub, GitLab, and Azure DevOps host repositories and add identity, permissions, pull requests, protected branches, issues, automation, and policy.\n\nA repository can move between hosts without changing its commit graph. Host-side rules, issues, workflow history, permissions, and secrets do not move with it automatically. The hosting decision is therefore about governance, integrations, compliance, and operating cost rather than Git semantics.\n\n# Repository Strategy\n\n| Boundary | Monorepo | Multiple repositories |\n| --- | --- | --- |\n| Cross-component change | One atomic commit and review | Coordinated versions and rollout |\n| Dependency policy | One graph can enforce consistency | Each repository owns its cadence |\n| Access control | Requires reliable path ownership | Repository boundary is explicit |\n| CI | Needs affected-component execution at scale | Smaller pipelines; integration moves downstream |\n| Release | Shared source can still release independently | Independent by default |\n\nA monorepo fits when atomic cross-component changes and shared dependency policy justify build-graph and ownership tooling. Multiple repositories fit when access isolation and independent lifecycles dominate. The deciding evidence is cross-repository coordination, CI fan-out, release coupling, and access boundaries—not repository count alone.\n\n# Semantic Versioning and the Release Contract\n\nSemantic Versioning only works after a project defines its public API. `MAJOR.MINOR.PATCH` means incompatible API change, backward-compatible functionality, and backward-compatible fix. Prerelease identifiers sort below the corresponding normal version; build metadata does not affect precedence.\n\nThe version number is a claim, not proof. API diffs, consumer tests, migration checks, and deprecation policy establish whether a change is compatible. Commit-message or PR-title conventions may automate version selection, but those are repository policy layered on SemVer.\n\n# References\n\n- [Pro Git book](https://git-scm.com/book/en/v2)\n- [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html)\n- [GitHub pull request documentation](https://docs.github.com/en/pull-requests)\n",
+            "hash": "57d2f2036412dbb9980fdababa6eeb3ae253395e59be4e9ee4866ec848e29022",
+            "topic": "DevOps",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "base_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
+      "reservation_deadline": "2026-11-11T20:10:17.500410Z",
+      "stop_reason": "topic_exhausted",
+      "sealed_at": "2026-11-11T19:56:08.422394Z"
     }
   },
   "feedback_workloads": {
