@@ -13685,10 +13685,10 @@
     "version": 1,
     "id": "5589fab66fbd42d6ab4c1fac5fc35939",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "review_reserved",
     "started_at": "2026-11-12T20:08:23.345425Z",
-    "elapsed_seconds": 733.7853257999998,
-    "calls_reserved": 18,
+    "elapsed_seconds": 738.3086141999997,
+    "calls_reserved": 19,
     "responses_received": 18,
     "attempted_paths": [
       "Vault/Home/Programming/NET/CSharp/CSharp.md",
@@ -14226,7 +14226,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T20:20:37.130225Z",
+    "checkpoint_at": "2026-11-12T20:20:41.653515Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -14251,7 +14251,7 @@
       "pr": null
     },
     "base_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
-    "reservation_deadline": "2026-11-12T20:35:22.524403Z"
+    "reservation_deadline": "2026-11-12T20:35:41.373730Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
