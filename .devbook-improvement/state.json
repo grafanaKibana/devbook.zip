@@ -12400,11 +12400,11 @@
     "version": 1,
     "id": "546ef5b36e6142c79d9efe91941e131e",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-12T07:25:53.899904Z",
-    "elapsed_seconds": 410.65364130000023,
+    "elapsed_seconds": 418.02345480000025,
     "calls_reserved": 11,
-    "responses_received": 10,
+    "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
       "Vault/Home/Networks/Architecture & Ops/CDN.md",
@@ -13500,7 +13500,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T07:32:44.552915Z",
+    "checkpoint_at": "2026-11-12T07:32:51.922728Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
@@ -31857,5 +31857,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "546ef5b36e6142c79d9efe91941e131e",
+    "topic_id": "networks-ab2c47c3",
+    "batch": {
+      "topic": "Networks",
+      "topic_id": "networks-ab2c47c3",
+      "notes": [
+        {
+          "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+          "content": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"An architecture where peers act as both client and server, avoiding a central bottleneck.\"\nlevel: [\"1\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.358Z\"\n---\n\nPeer-to-peer architecture moves some resource discovery, storage, or transfer from dedicated servers to participating nodes. A peer can consume and provide the same resource. Central services may still handle bootstrap, identity, coordination, or relaying.\n\nDistributing the data path can add capacity as peers join and remove one central transfer bottleneck. It also introduces churn, partial trust, uneven connectivity, and data-availability problems. The architecture is only as decentralized as its remaining control and discovery dependencies.\n\n# How Peers Find Each Other: DHT\n\nDistributed hash tables provide decentralized key lookup in systems such as BitTorrent and IPFS. A DHT assigns responsibility for key/value records across participating nodes without one directory:\n\n```text\nKey: SHA1(\"ubuntu-22.04.iso\")\n     → Hash determines which peer(s) are responsible for this key\n     → Those peers store the list of peers that have the file\n```\n\nEach peer keeps a routing table containing only part of the network. Kademlia-style lookup repeatedly queries nodes whose identifiers are closer to the target. With a healthy, well-distributed table, the number of rounds grows logarithmically with network size. BitTorrent's DHT locates peers for an infohash without requiring a tracker. The torrent identifier still has to arrive through a magnet link, metadata exchange, or another discovery channel.\n\n# P2P Architecture Spectrum\n\n\"Pure P2P\" is one end of a spectrum, not the only option:\n\n- **Structured vs unstructured** — structured networks route a key through an identifier space. Unstructured networks search by flooding or gossip, trading simple membership for higher and less predictable lookup cost.\n- **Peer-only data path** — peers exchange payloads directly, while bootstrap information may still come from a known node or static configuration.\n- **Hybrid / super-peer** — trackers, rendezvous services, or capable peers coordinate discovery while bulk data remains peer-to-peer.\n- **Signaling-assisted** — WebRTC applications use an application-defined signaling channel to exchange offers, answers, and candidates before ICE checks connectivity. Media may flow directly or through a TURN relay.\n\nMost deployed systems are hybrids. \"Peer-to-peer\" describes an important data or coordination path, not proof that every dependency is decentralized.\n\n# Real-World Applications\n\n| Application | P2P use | Why P2P |\n|---|---|---|\n| BitTorrent | File distribution | Scales with demand — more seeders = faster downloads |\n| IPFS | Content-addressed retrieval | Verifiable content identifiers and provider-independent retrieval |\n| WebRTC | Browser video/audio | Direct peer connections reduce server relay cost |\n| Blockchain | Replicated transaction protocol | Agreement among mutually distrustful participants under the protocol's assumptions |\n| Skype (original) | VoIP routing | Reduced server infrastructure cost |\n\n# Tradeoffs\n\n| Dimension | P2P | Client-Server |\n|---|---|---|\n| Scalability | Can gain transfer/storage capacity from peers. Control paths may still bottleneck | Capacity is provisioned by service owners |\n| Single point of failure | Depends on bootstrap, discovery, identity, and relay design | Central service needs redundancy |\n| Consistency | Protocol-specific. Replicas and membership make coordination expensive | Central authority can serialize decisions more directly |\n| Coordination | Discovery, churn, trust, and NAT traversal are part of the design | Clients use a known service endpoint |\n| Latency | Variable across peer paths and relay use | Managed infrastructure gives more control, but the network path still varies |\n\nP2P fits workloads where participants can contribute useful bandwidth, storage, or direct connectivity and where variable membership is acceptable. Client-server remains simpler when one authority owns access control and ordering or when latency and availability require tightly managed infrastructure.\n\n# Pitfalls\n\n**NAT traversal failure**\nNAT and firewall behavior can prevent candidate pairs from connecting directly. ICE checks available host, server-reflexive, and relay candidates, then selects a working pair. TURN must be provisioned as a supported path rather than treated as an exceptional implementation detail.\n\n**DHT poisoning**\nA malicious participant can advertise misleading routing information or surround a target in the identifier space. Defenses depend on the protocol: constrained node identifiers, diverse routing-table entries, authenticated records, and content-address verification protect different boundaries. Content addressing detects bytes that do not match an expected identifier. It does not prove that lookup results are complete or available.\n\n**Churn instability**\nPeers join and leave continuously, so routing entries and provider records become stale. Periodic bucket refresh, record expiration, replication, and parallel lookup keep the overlay usable. Exact bucket sizes and replication rules belong to the specific DHT. They are not universal Kademlia constants.\n\n# WebRTC Connection Setup\n\n```text\n// ICE candidate exchange (simplified)\n1. Peer A creates RTCPeerConnection\n2. Peer A gathers ICE candidates (STUN → public IP/port)\n3. Peer A sends offer + candidates to Peer B via signaling server\n4. Peer B responds with answer + its own candidates\n5. ICE checks prioritized candidate pairs; the controlling peer nominates a valid pair\n6. A TURN relay candidate may be selected when direct checks fail or policy requires relaying\n```\n\n# References\n\n- [Kademlia: A Peer-to-peer Information System](https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf)\n- [How IPFS works](https://docs.ipfs.tech/concepts/how-ipfs-works/)\n- [WebRTC for the Curious](https://webrtcforthecurious.com/)\n",
+          "hash": "ede446c8ffa04489d9547861ec89ae79772e4cbac2a43e05d2b3dec724ae70ba",
+          "topic": "Networks",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against its text. The opening defines P2P and states the central-dependency caveat. The DHT section correctly describes Kademlia-style logarithmic lookup and that the BitTorrent infohash still needs an out-of-band source. The spectrum, tradeoff table and pitfalls are accurate: ICE candidate types, TURN as a supported path, DHT poisoning and content addressing limits, and churn mitigations with protocol-specific parameters. The WebRTC setup steps match the standard offer/answer, signaling and ICE nomination flow. The references are real, topic-specific bare links. The note has no cards, no known violations and no flagged items. Wording is direct and non-repetitive, so a change would be churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md": "ede446c8ffa04489d9547861ec89ae79772e4cbac2a43e05d2b3dec724ae70ba"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-12T07:32:51.922718Z"
+  }
 }
