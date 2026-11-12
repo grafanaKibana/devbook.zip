@@ -12225,16 +12225,16 @@
     "version": 1,
     "id": "546ef5b36e6142c79d9efe91941e131e",
     "status": "active",
-    "phase": "source_completed",
+    "phase": "review_reserved",
     "started_at": "2026-11-12T07:25:53.899904Z",
-    "elapsed_seconds": 118.975331,
-    "calls_reserved": 3,
+    "elapsed_seconds": 123.864431,
+    "calls_reserved": 4,
     "responses_received": 3,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T07:27:52.874603Z",
+    "checkpoint_at": "2026-11-12T07:27:57.763706Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
@@ -12259,7 +12259,7 @@
       "pr": null
     },
     "base_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
-    "reservation_deadline": "2026-11-12T07:55:53.899268Z"
+    "reservation_deadline": "2026-11-12T07:42:57.458424Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
