@@ -13630,11 +13630,11 @@
     "version": 1,
     "id": "5589fab66fbd42d6ab4c1fac5fc35939",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-12T20:08:23.345425Z",
-    "elapsed_seconds": 651.9389464,
+    "elapsed_seconds": 676.7948731999999,
     "calls_reserved": 17,
-    "responses_received": 16,
+    "responses_received": 17,
     "attempted_paths": [
       "Vault/Home/Programming/NET/CSharp/CSharp.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
@@ -14102,7 +14102,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T20:19:15.283847Z",
+    "checkpoint_at": "2026-11-12T20:19:40.139773Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -36786,6 +36786,115 @@
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Reflection.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-12T20:19:10.651854Z"
+    "prepared_at": "2026-11-12T20:19:10.651854Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Independent whole-note audit found no accuracy, clarity, question-quality or rules defect. The keep is justified and no edits were proposed.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Reflection.md",
+            "verdict": "CLEAN",
+            "summary": "The note opens with the operating idea and its main cost, separates discovery from invocation, and covers fast-access alternatives, AOT and trimming limits, pitfalls and tradeoffs without repetition. Its technical claims are consistent with Microsoft's documentation. Each Qard tests one bounded, gradeable task.",
+            "page_type": "Concept: typed frontmatter with an allowed status; optional Questions and References are present and valid; code fences carry language identifiers.",
+            "current_text_evidence": [
+              {
+                "quote": "The cost is a weaker contract: a misspelled member name or incompatible signature becomes a runtime failure instead of a compiler error.",
+                "line_start": 17,
+                "reason": "The opening gives the operating idea and the key boundary quickly."
+              },
+              {
+                "quote": "`[UnsafeAccessor]` can bind a declared external method to a non-public member without per-call reflection.",
+                "line_start": 96,
+                "reason": "Accurate technical detail that states what the compiler checks and what still fails at runtime."
+              },
+              {
+                "quote": "Caching is appropriate only for metadata whose lifetime and load context are understood.",
+                "line_start": 100,
+                "reason": "The pitfall carries a real condition and does not repeat the earlier mechanism section."
+              },
+              {
+                "quote": "Why can name-only `GetMethod` throw before `Invoke` is reached?",
+                "line_start": 160,
+                "reason": "A focused, self-contained question. The answer correctly describes AmbiguousMatchException and the parameter-types overload, and the card carries no invented ID."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: discovery, invocation, performance mitigation and the trimming/AOT boundary form one coherent topic of moderate length.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Reflection.md",
+          "citation_index": 3,
+          "reported_line_start": 160,
+          "resolved_line_start": 165
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Reflection.md": "fda76c86f2cd616439ff7260907f84e83c14937475e885ce78446b0bb1fb095b"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "Independent whole-note audit found no accuracy, clarity, question-quality or rules defect. The keep is justified and no edits were proposed.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Reflection.md",
+          "verdict": "CLEAN",
+          "summary": "The note opens with the operating idea and its main cost, separates discovery from invocation, and covers fast-access alternatives, AOT and trimming limits, pitfalls and tradeoffs without repetition. Its technical claims are consistent with Microsoft's documentation. Each Qard tests one bounded, gradeable task.",
+          "page_type": "Concept: typed frontmatter with an allowed status; optional Questions and References are present and valid; code fences carry language identifiers.",
+          "current_text_evidence": [
+            {
+              "quote": "The cost is a weaker contract: a misspelled member name or incompatible signature becomes a runtime failure instead of a compiler error.",
+              "line_start": 17,
+              "reason": "The opening gives the operating idea and the key boundary quickly."
+            },
+            {
+              "quote": "`[UnsafeAccessor]` can bind a declared external method to a non-public member without per-call reflection.",
+              "line_start": 96,
+              "reason": "Accurate technical detail that states what the compiler checks and what still fails at runtime."
+            },
+            {
+              "quote": "Caching is appropriate only for metadata whose lifetime and load context are understood.",
+              "line_start": 100,
+              "reason": "The pitfall carries a real condition and does not repeat the earlier mechanism section."
+            },
+            {
+              "quote": "Why can name-only `GetMethod` throw before `Invoke` is reached?",
+              "line_start": 165,
+              "reason": "A focused, self-contained question. The answer correctly describes AmbiguousMatchException and the parameter-types overload, and the card carries no invented ID."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: discovery, invocation, performance mitigation and the trimming/AOT boundary form one coherent topic of moderate length.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
