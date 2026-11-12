@@ -12460,11 +12460,11 @@
     "version": 1,
     "id": "546ef5b36e6142c79d9efe91941e131e",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-12T07:25:53.899904Z",
-    "elapsed_seconds": 585.6008453000003,
+    "elapsed_seconds": 597.0903076000003,
     "calls_reserved": 16,
-    "responses_received": 15,
+    "responses_received": 16,
     "attempted_paths": [
       "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
       "Vault/Home/Networks/Architecture & Ops/CDN.md",
@@ -13646,7 +13646,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T07:35:39.500122Z",
+    "checkpoint_at": "2026-11-12T07:35:50.989583Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
@@ -32607,5 +32607,71 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "546ef5b36e6142c79d9efe91941e131e",
+    "topic_id": "networks-ab2c47c3",
+    "batch": {
+      "topic": "Networks",
+      "topic_id": "networks-ab2c47c3",
+      "notes": [
+        {
+          "path": "Vault/Home/Networks/Network Data Path.md",
+          "content": "---\ntopic: [Networks]\nsubtopic: []\nsummary: \"The packet path from an application socket through the kernel, NIC, network, and receiving process.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-07-18T07:07:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-16T07:43:33.509Z\"\n---\n\nA network write crosses several ownership boundaries before another process can read it. The application gives bytes to a socket. The kernel applies transport and IP processing, queues packets, and prepares device descriptors. The NIC transfers packet data with DMA and emits frames. The receive path reverses those transformations and schedules the destination process.\n\nApplication logs expose only part of that path. A successful `send()` may mean only that the kernel accepted bytes. An MTU failure can drop packets after they leave the host, and a receiver that stops reading eventually pushes back through TCP flow control.\n\n# One TCP Write across the Path\n\nSuppose a service writes a 4 KiB response to an established TCP socket:\n\n1. **User space → socket buffer.** `send()` copies or references the bytes into the kernel send buffer. Success means the kernel accepted them, not that the peer received them. A blocking socket waits when this buffer is full. A non-blocking socket returns `EAGAIN`/`EWOULDBLOCK`.\n2. **TCP and IP.** TCP assigns sequence numbers and divides the byte stream according to MSS. IP adds source and destination addresses. The route lookup selects an egress interface and next hop.\n3. **Queueing discipline.** On Linux, the qdisc schedules packets for the device. A growing queue increases latency. Overflow can drop packets, which TCP later infers from acknowledgment behavior and retransmits.\n4. **Driver and NIC.** After the stack prepends the link-layer header, the driver places descriptors in a transmit ring. The NIC reads packet data with DMA, performs configured segmentation/checksum offloads, and emits the physical frame.\n5. **Network hops.** Switches forward frames within a link domain. Routers process the IP packet, decrement the hop limit or TTL, select a next hop, and emit a new link-layer frame. Congestion, filtering, or an MTU mismatch can drop the packet along this path.\n6. **Receive NIC → kernel.** The receiving NIC DMA-writes bytes into memory and signals work. Linux NAPI polls batches from the receive ring, reducing interrupt overhead under load.\n7. **Decapsulation and delivery.** The kernel validates headers, applies policy, reassembles the TCP stream, acknowledges bytes, and queues in-order data in the socket receive buffer. The receiving process gets those bytes only when `read()`/`recv()` runs.\n\n![[Networks/Networks-Network Data Path-18120000.png|theme-aware]]\n\nThe 4 KiB write is not a 4 KiB packet. With a 1500-byte Ethernet MTU, IPv4 and TCP headers often leave an MSS near 1460 bytes, so TCP sends several segments. TCP options, tunnels, IPv6, or a smaller downstream MTU change that value. Path MTU discovery lets the sender size packets for the path and avoids depending on IPv4 fragmentation.\n\n# Backpressure Is End to End\n\nBackpressure begins when the receiver consumes data more slowly than it arrives:\n\n```text\nreceiver application pauses\n  → receive socket buffer fills\n  → TCP advertises a smaller receive window\n  → sender has less data allowed in flight\n  → sender socket buffer fills\n  → send() blocks or reports EAGAIN\n```\n\nThat feedback bounds the amount of receive data the peer advertises, but buffers at every layer can still accumulate delay. Increasing buffer sizes postpones pressure and may convert a short slowdown into stale queued work. Applications still need deadlines and bounded work queues. Socket flow control cannot decide when a response has lost business value.\n\nUDP has no transport receive window or retransmission. When the receive path cannot keep up, datagrams may be dropped. Reliability, pacing, and reconstruction belong to the application protocol when it needs them.\n\n# Failure Trace\n\nConsider a 1500-byte packet sent through a tunnel whose effective path MTU is 1400 bytes. If the packet cannot be fragmented and ICMP fragmentation-needed or Packet Too Big feedback is filtered, TCP keeps retransmitting a segment that never fits. Small requests work, but larger responses stall: a classic PMTU black hole. A packet capture at the sender shows retransmissions. Interface counters may remain clean because the drop occurs later in the path.\n\nThe repair is to restore Packet Too Big feedback or apply a justified TCP MSS clamp at the tunnel boundary. A longer application timeout only waits longer for a segment that cannot cross the path.\n\n# References\n\n- [Path MTU Discovery for IPv6](https://www.rfc-editor.org/rfc/rfc8201)\n- [NAPI](https://docs.kernel.org/networking/napi.html)\n- [socket(7)](https://man7.org/linux/man-pages/man7/socket.7.html)\n",
+          "hash": "e736573d25eb2228dd829b0a7cacb32a22c81f3a0ab962c5703a588b1a6a5275",
+          "topic": "Networks",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [
+        {
+          "path": "Vault/Home/Networks/Network Data Path.md",
+          "expected_hash": "e736573d25eb2228dd829b0a7cacb32a22c81f3a0ab962c5703a588b1a6a5275",
+          "before": "That feedback bounds the amount of receive data the peer advertises, but buffers at every layer can still accumulate delay.",
+          "after": "That feedback limits unacknowledged data in flight to the advertised window, but buffers at every layer can still accumulate delay.",
+          "reason": "Replaces a circular, unclear sentence with the actual mechanism: the receive window caps data in flight.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "advertised receive window limits data in flight",
+            "buffers can still add delay"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The sentence 'bounds the amount of receive data the peer advertises' is circular and obscures what TCP flow control actually limits.",
+          "reader_benefit": "The reader sees directly that the window caps in-flight data while queues elsewhere can still add latency."
+        }
+      ],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Networks/Network Data Path.md",
+          "outcome": "changed",
+          "reason": "Checked the whole note: the seven-step write path, MSS/MTU explanation, backpressure chain, UDP contrast and PMTU black-hole trace are technically accurate and well ordered, and the references are relevant. Only one imprecise sentence in the backpressure section needed a clearer statement of what the receive window limits."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Networks/Network Data Path.md": "e736573d25eb2228dd829b0a7cacb32a22c81f3a0ab962c5703a588b1a6a5275"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Networks/Network Data Path.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-12T07:35:50.989572Z"
+  }
 }
