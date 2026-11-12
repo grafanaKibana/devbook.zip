@@ -12335,14 +12335,15 @@
     "version": 1,
     "id": "546ef5b36e6142c79d9efe91941e131e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-12T07:25:53.899904Z",
-    "elapsed_seconds": 311.08698570000007,
+    "elapsed_seconds": 315.7698912000001,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
-      "Vault/Home/Networks/Architecture & Ops/CDN.md"
+      "Vault/Home/Networks/Architecture & Ops/CDN.md",
+      "Vault/Home/Networks/Architecture & Ops/Forward and Reverse Proxies.md"
     ],
     "accepted_records": [
       {
@@ -13284,10 +13285,78 @@
           },
           "model_calls": 6
         }
+      },
+      {
+        "path": "Vault/Home/Networks/Architecture & Ops/Forward and Reverse Proxies.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Networks/Architecture & Ops/Forward and Reverse Proxies.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against RFC 9110 CONNECT semantics and RFC 7239 Forwarded. The opening defines forward (egress, client side) and reverse (ingress, in front of origins) proxies correctly. The TLS paragraph separates an intercepting proxy, which terminates TLS and needs a trusted CA, from a CONNECT tunnel, which carries opaque encrypted bytes. The examples are accurate: the target sees the proxy address, and downstream code must trust forwarding headers only from known proxies. The 502/504 remark correctly points at the proxy-to-upstream hop. The note has no Qards and no known violations. Its references are real, primary and carry no trailing annotation. The frontmatter is valid, the image embed and the [[Nginx]] link are valid, and there are no code fences. The prose is compact and direct, and no defect justifies an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent full-note audit found no factual, structural or editorial defect. No edits were proposed, so keeping the note unchanged is justified.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/Networks/Architecture & Ops/Forward and Reverse Proxies.md",
+                "verdict": "CLEAN",
+                "summary": "The note is compact, accurate and well ordered. It defines the two proxy roles, separates TLS interception from a CONNECT tunnel, gives concrete examples with the header-trust condition, and ends with a useful failure pattern. No edit is warranted.",
+                "page_type": "Concept — optional Questions are absent, which is allowed. References are bare link bullets. No code fences are present, and frontmatter and taxonomy are valid. The status is Ready to Repeat, which is permitted.",
+                "current_text_evidence": [
+                  {
+                    "quote": "A **forward proxy** sits on the client side of the trust boundary and controls egress. A **reverse proxy** sits in front of origins and controls ingress.",
+                    "line_start": 14,
+                    "reason": "The opening states the operating distinction accurately and quickly, so the topic is recoverable on re-entry."
+                  },
+                  {
+                    "quote": "An intercepting enterprise proxy terminates TLS and establishes a second protected connection, so the proxy can inspect plaintext and must be trusted as a certificate issuer.",
+                    "line_start": 29,
+                    "reason": "This is factually correct. It contrasts with the non-intercepting CONNECT tunnel in the next sentence, which gives the mechanism and the condition that changes the decision."
+                  },
+                  {
+                    "quote": "Downstream code must accept forwarding metadata only from known proxies. Otherwise a client can spoof identity-bearing headers.",
+                    "line_start": 34,
+                    "reason": "This is the key trust limit for reverse proxies and forwarding headers (RFC 7239), stated concretely."
+                  },
+                  {
+                    "quote": "A `502` or `504` points first to the proxy-to-upstream boundary, not necessarily to application code.",
+                    "line_start": 38,
+                    "reason": "The note correctly places the diagnostic at the proxy-to-upstream hop. Redundancy limits are explained just before it."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: forward and reverse proxies are contrasted by which side they represent, and the note is short and coherent.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 8
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T07:31:04.986258Z",
+    "checkpoint_at": "2026-11-12T07:31:09.669164Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
