@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-18T07:07:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-16T14:07:22.449Z
 topic:
   - Software Architecture
@@ -11,7 +11,7 @@ summary: Distributed identifiers trade coordination, temporal order, opacity, in
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 Choose an identifier by its required guarantees: uniqueness scope, sort order, opacity, coordination, index locality, and behavior when clocks or allocators fail. “Globally unique and ordered” is incomplete until the system defines the namespace and ordering boundary.

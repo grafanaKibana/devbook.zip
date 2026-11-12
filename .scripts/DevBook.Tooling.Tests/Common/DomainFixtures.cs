@@ -10,7 +10,7 @@ internal static class DomainFixtures
 {
     public const string Path = "Vault/Home/Programming/NET/Card.md";
     public const string Card = "<!-- qard-source: original -->\n<!-- qard-id: stable_1 -->\n> [!qard]- What is the operating idea?\n> The original answer.\n";
-    public const string Note = "---\ntopic: [Programming]\nsubtopic: [NET]\nlevel: [\"2\"]\npriority: Medium\nstatus: Creation\npublish: false\n---\nThe operating idea has a concrete boundary.\n\n# Questions\n\n" + Card;
+    public const string Note = "---\ntopic: [Programming]\nsubtopic: [NET]\nlevel: [\"2\"]\npriority: Medium\nstatus: In Progress\npublish: false\n---\nThe operating idea has a concrete boundary.\n\n# Questions\n\n" + Card;
 
     public static void CreateReviewContract(string root)
     {

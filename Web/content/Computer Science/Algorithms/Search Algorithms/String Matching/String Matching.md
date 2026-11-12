@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-12T07:33:07.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-12T14:27:20.411Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: Finding a pattern inside text, chosen by how many patterns you match an
 priority: Medium
 level:
   - "4"
-status: Creation
+status: New
 ---
 
 String matching finds occurrences of a pattern inside a text. A naive scan costs `O(n·m)` because it may restart the comparison after every mismatch. Faster methods keep the useful part of that failed comparison and avoid checking characters whose relationship is already known.

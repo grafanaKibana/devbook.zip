@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-08-10T10:51:19.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-08-10T08:02:31.868Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Alternates forward and backward bubble passes so both ends settle durin
 level:
   - "4"
 priority: Low
-status: Not-Started
+status: New
 ---
 
 Cocktail shaker sort runs [[Computer Science/Algorithms/Sorting Algorithms/Bubble Sort|Bubble Sort]] in both directions. The forward pass fixes the largest remaining value at the right boundary. The backward pass fixes the smallest at the left. Both boundaries then move inward.

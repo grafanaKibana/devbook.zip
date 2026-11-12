@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "createdAt": 1794246786203,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "executable-contracts",
+  "title": "Enforce schema, required fields, tool permissions, and input contracts before semantic scoring while identifying requirements that structure alone cannot prove",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "prompt": "An agent can call a tool that immediately emails an attached document. The tool requires a recipient address and a document ID, and the agent may send only documents it has permission to share. A developer proposes checking these requirements only after the tool finishes, when validating the agent's final response. Explain why these checks must run before tool execution.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Required arguments and sharing permission determine whether the tool call is allowed to execute; they must be checked at the tool boundary.",
+          "marks": 1
+        },
+        {
+          "point": "Checking the final response cannot prevent or undo an email already sent, even if that response passes validation.",
+          "marks": 1
+        }
+      ],
+      "model": "Argument and sharing-permission checks must gate the tool call. Once the email is sent, a valid final response cannot undo an unauthorized disclosure.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+        "heading": "Forgetting to Check Tool Inputs, Not Just Outputs"
+      },
+      "objective": "executable-contracts",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "mcq",
+      "prompt": "A support agent returns JSON containing a permitted action, `close_ticket`, and a nonempty reason. All required fields, argument contracts and permission checks pass. No executable rule specifies when closing a ticket resolves the customer's request. Why is semantic evaluation still needed?",
+      "marks": 1,
+      "options": [
+        "The checks establish contract compliance; judging whether closing addresses the request needs assessment beyond those rules.",
+        "The checks establish contract compliance; semantic evaluation must authorize the action before the tool can execute.",
+        "The checks establish that closing is appropriate; semantic evaluation only needs to improve the reason's wording.",
+        "The checks establish that closing is appropriate; semantic evaluation must confirm that the JSON is parseable."
+      ],
+      "answer": 0,
+      "rubric": [
+        {
+          "point": "Identifies that contract compliance does not establish whether the permitted action addresses the customer's request.",
+          "marks": 1
+        }
+      ],
+      "model": "Contract compliance does not prove that closing the ticket addresses the customer's request; that decision is not encoded in the checks.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+        "heading": "Over-Relying on Schema Validation Alone"
+      },
+      "objective": "executable-contracts",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

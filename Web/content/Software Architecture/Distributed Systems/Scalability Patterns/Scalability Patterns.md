@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-28T16:25:46.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.389Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: A system's ability to keep serving requests as load grows by adding res
 level:
   - "2"
 priority: High
-status: Creation
+status: New
 ---
 
 Scalability measures how capacity and unit cost change as load grows and resources are added. A system scales only while it preserves its latency, error, and reliability targets. The question becomes concrete once workload volume, traffic shape, data growth, and the first likely bottleneck are known.

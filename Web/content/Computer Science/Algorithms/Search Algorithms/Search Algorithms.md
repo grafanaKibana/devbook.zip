@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-20T23:50:18.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.340Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: Techniques to find target values in arrays, graphs, or text, chosen by 
 priority: Medium
 level:
   - "4"
-status: Creation
+status: New
 ---
 
 Search starts with the shape of the data, not an algorithm name. An unsorted sequence usually needs a scan. Sorted random-access data can discard ranges, graph search follows edges, and text matching uses structure inside the pattern.

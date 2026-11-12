@@ -11,7 +11,7 @@ summary: Systems built around immutable events and reactions, decoupling produce
 level:
   - "3"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 Event-driven systems move work forward by representing that something happened and letting handlers react. An order service can publish `OrderPlaced` without calling inventory directly. Inventory handles the event under its own delivery and retry rules. The event should be treated as an immutable fact once published, even if its serialized payload is technically mutable.

@@ -11,7 +11,7 @@ summary: Models state and behavior as objects whose methods protect invariants a
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 Object-oriented programming places state beside the operations allowed to change it. The useful boundary is an object that owns an invariant, not a class that merely groups fields. Interfaces name capabilities, composition assembles behavior that can vary independently, and runtime dispatch lets a caller depend on a contract instead of a concrete implementation. Inheritance is optional. It earns its place only when a genuine subtype can preserve the base contract.

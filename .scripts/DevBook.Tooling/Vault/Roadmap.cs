@@ -18,11 +18,9 @@ public static class Roadmap
     private const int StepY = 120;
     private static readonly Dictionary<string, string> Colors = new(StringComparer.Ordinal)
     {
-        ["Not-Started"] = "1",
-        ["Creation"] = "2",
-        ["Repetition"] = "5",
-        ["Ready to Repeat"] = "6",
-        ["Done"] = "4"
+        ["New"] = "1",
+        ["In Progress"] = "2",
+        ["Established"] = "4"
     };
 
     private static string NodeId(string path) => "n_" + Convert.ToHexStringLower(SHA1.HashData(Encoding.UTF8.GetBytes(path)))[..10];
@@ -78,12 +76,8 @@ public static class Roadmap
         {
             return null;
         }
-        if (counts.GetValueOrDefault("Done") == total)
-        {
-            return "Done";
-        }
-        return new[] { "Not-Started", "Creation", "Repetition", "Ready To Repeat" }
-            .FirstOrDefault(status => counts.GetValueOrDefault(status) > 0) ?? "Not-Started";
+        return new[] { "New", "In Progress", "Established" }
+            .FirstOrDefault(status => counts.GetValueOrDefault(status) > 0);
     }
 
     public static RoadmapResult Generate(string repoRoot, DateTimeOffset? now = null)
@@ -248,8 +242,8 @@ public static class Roadmap
         if (nodes.Count > 0)
         {
             int x = nodes.Min(node => node!["x"]!.GetValue<int>()) - 600;
-            string[] flow = ["Not-Started", "Creation", "Repetition", "Ready To Repeat", "Done"];
-            nodes.Add(new JsonObject { ["id"] = NodeId("__roadmap_legend_group__"), ["type"] = "group", ["label"] = "Legend", ["x"] = x - 20, ["y"] = -20, ["width"] = 540, ["height"] = 530 });
+            string[] flow = ["New", "In Progress", "Established"];
+            nodes.Add(new JsonObject { ["id"] = NodeId("__roadmap_legend_group__"), ["type"] = "group", ["label"] = "Legend", ["x"] = x - 20, ["y"] = -20, ["width"] = 540, ["height"] = 150 + flow.Length * 76 });
             string timestamp = (now ?? DateTimeOffset.Now).ToLocalTime().ToString("MMM dd yyyy | hh:mmtt", CultureInfo.InvariantCulture);
             nodes.Add(new JsonObject { ["id"] = NodeId("__roadmap_legend_header__"), ["type"] = "text", ["text"] = $"#### Roadmap legend\n**Generated:** {timestamp}", ["x"] = x, ["y"] = 0, ["width"] = 500, ["height"] = 110 });
             for (var index = 0; index < flow.Length; index++)

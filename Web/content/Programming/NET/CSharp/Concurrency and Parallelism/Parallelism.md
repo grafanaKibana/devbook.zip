@@ -11,7 +11,7 @@ summary: Finishing CPU-bound work faster by using multiple cores at once.
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Concurrency and Parallelism/Parallelism
 flashcard_uid: 5a1bba92

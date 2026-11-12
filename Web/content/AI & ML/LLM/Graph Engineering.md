@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-08-24T16:37:16.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-08-24T16:11:29.262Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Designing an agentic system's execution topology, state transitions, an
 level:
   - "3"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Graph Engineering
 flashcard_uid: ef968013

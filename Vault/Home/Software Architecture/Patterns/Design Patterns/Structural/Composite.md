@@ -4,13 +4,13 @@ subtopic: [Patterns]
 summary: "Composite arranges objects into tree structures and lets clients treat individual objects and compositions uniformly through one interface."
 level: ["3"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Composite"
 flashcard_uid: "dfa91e71"
 created: "2026-03-05T22:12:42.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.453Z"
 ---
 

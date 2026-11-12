@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-08-10T10:51:19.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-08-10T07:55:26.133Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Maintains a running median by partitioning values across a max-heap and
 level:
   - "4"
 priority: Medium
-status: Not-Started
+status: New
 ---
 
 Two heaps maintain an ordered partition as values arrive. A max-heap named `lower` stores the lower half. A min-heap named `upper` stores the upper half. Their roots expose the two values beside the partition, which makes the current median available without sorting the accumulated stream.

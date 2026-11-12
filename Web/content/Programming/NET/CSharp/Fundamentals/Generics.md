@@ -11,7 +11,7 @@ summary: Type-safe, reusable code without duplicating logic per type, including 
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Generics
 flashcard_uid: 3fc98b91

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-15T11:47:56.722Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: Design heuristics like SOLID, DRY, KISS, and YAGNI that keep systems un
 priority: High
 level:
   - "4"
-status: Creation
+status: New
 ---
 
 Principles like SOLID, DRY, KISS, and YAGNI are decision checks, not a scoring system. Each one names a recurring risk: responsibilities that change for different reasons, duplicated rules that drift, unnecessary moving parts, or flexibility built before its requirements are known.

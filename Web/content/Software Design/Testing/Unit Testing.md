@@ -11,7 +11,7 @@ summary: Verifies a small, isolated piece of behaviour quickly and deterministic
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Software Design
 qard-topic: Testing/Unit Testing
 flashcard_uid: 897d08d1

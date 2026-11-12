@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T05:57:55.524Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Sorts ranges by start, then sweeps once to merge overlapping intervals.
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 An arbitrary set of calendar ranges may contain overlaps and nested intervals. Sorting by start time makes those relationships local. A left-to-right sweep then carries one current block: extend it when the next interval overlaps, or emit it when a gap appears.

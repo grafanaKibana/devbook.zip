@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-15T11:47:55.961Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: "Core distributed-systems concepts for production: consistency tradeoff
 priority: High
 level:
   - "4"
-status: Creation
+status: New
 ---
 
 Distributed systems are hard because the network is unreliable and time is messy: partial failures, latency, and inconsistent views of the world. The recurring production problems are consistency tradeoffs, messaging, coordination, and failure handling. CAP, for example, is not a slogan. It explains why a partition forces a system to choose between availability and strong consistency.

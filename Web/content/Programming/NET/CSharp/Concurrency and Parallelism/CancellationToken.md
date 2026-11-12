@@ -11,7 +11,7 @@ summary: Cooperative cancellation where callers request a stop and callees compl
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 `CancellationToken` carries a request to stop through .NET call chains. The caller owns the request. Each operation decides where it can stop without leaving partial state behind. When a request token disappears halfway down the stack, the client may be gone while database or HTTP work keeps running.

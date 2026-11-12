@@ -1,0 +1,406 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/AI & ML/LLM/Embeddings.md",
+      "text": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Mapping text into a dense vector space where semantic similarity becomes geometric proximity.\"\nlevel: [\"2\"]\npriority: High\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Embeddings\"\nflashcard_uid: \"485a25d5\"\ncreated: \"2026-02-27T12:56:16.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:28:37.406Z\"\n---\n\nEmbeddings turn text into vectors so that related meanings occupy nearby points. That geometry lets retrieval match \"throttle partner API traffic\" with a document about \"rate limiting for partner plan\" even when the wording does not overlap.\n\nAn encoder model, usually a transformer trained with a contrastive objective, reads a text span and produces a fixed-length vector. Training pulls similar pairs together and pushes unrelated pairs apart. At query time, the same model embeds the query, and the index finds nearby stored vectors with cosine similarity or dot product. Those neighbors are the candidate chunks.\n\n```mermaid\nsequenceDiagram\n    participant Q as Query Text\n    participant E as Embedding Model\n    participant VS as Vector Space\n    participant I as ANN Index\n    participant R as Top-k Results\n    Q->>E: Encode query\n    E->>VS: Query vector 1x768\n    Note over VS: Cosine similarity\\nagainst stored chunk vectors\n    VS->>I: ANN search -- HNSW or IVF\n    I->>R: Return k nearest chunks\n```\n\nLeaderboard quality is only a starting point. The useful model is the one that meets recall and latency targets on the actual corpus, at an acceptable cost. A model that tops MTEB can still mishandle internal terminology.\n\n# Embedding Model Selection\n\n## Model Families\n\nProduction RAG systems usually start with one of these model families.\n\n**Proprietary API models.** OpenAI `text-embedding-3-small` (1536 dimensions) and `text-embedding-3-large` (3072 dimensions) support a `dimensions` parameter for Matryoshka truncation at inference time. Cohere `embed-v3` distinguishes `search_document` from `search_query` through `input_type` and covers more than 100 languages. Per-token rates change, so cost comparisons need current provider pricing.\n\n**Open-source bi-encoders.** Sentence Transformers (SBERT) includes `all-MiniLM-L6-v2` (384 dimensions, 22M parameters) and `all-mpnet-base-v2` (768 dimensions, 109M parameters). Local inference removes per-token API charges, but the serving hardware and model lifecycle become an internal concern.\n\n**Domain-finetuned models.** A base model can be adapted when internal terminology is the measured source of retrieval misses. In a Databricks FinanceBench experiment, `gte-large-en-v1.5` (0.4B parameters) fine-tuned on synthetic domain data reached [[Monitoring#Retrieval Quality Metrics|Recall@10]] of 0.552 versus 0.44 for `text-embedding-3-large`. Adaptation commonly uses continued masked-language pre-training or contrastive training on query-document pairs.\n\n## Dimensionality\n\nHigher dimensions give the model more room to represent fine-grained distinctions. But higher dimensions also mean more storage (4 bytes × dimensions per vector), more compute for similarity search, and higher ANN index memory.\n\nMatryoshka Representation Learning (MRL) trains models so that prefixes of the full vector remain independently meaningful. OpenAI reports `text-embedding-3-large` at 256 dimensions outperforming `ada-002` at 1536 dimensions on the aggregate MTEB benchmark. That result motivates testing shorter vectors, but corpus-specific Recall@k must establish the retrieval tradeoff. Shorter vectors can reduce storage and search work, with full dimensions reserved for cases that need them.\n\nA two-stage design can generate the full embedding once, normalize and index its reduced prefix for ANN search, then score the small candidate set with the retained full vector or a cross-encoder. Full vectors must live outside the ANN index or be recomputed for the candidates. Retaining them reduces ANN memory and search work but not total vector storage; recomputing them trades storage for API cost and latency.\n\n## Similarity Metrics\n\nThe similarity metric defines what \"near\" means in the vector space.\n\n**Cosine similarity** measures the angle between vectors, ignoring magnitude. Most embedding models are trained with cosine objectives, making it the default choice. Range: -1 to 1 (1 = identical direction).\n\n**Dot product** is cosine similarity scaled by vector magnitudes. For L2-normalized vectors, dot product equals cosine similarity. Normalization is model-specific: OpenAI documents its embedding vectors as length-normalized, while another model may preserve magnitude as part of the signal. The selected model's documentation, not a general assumption about every API, determines whether its vectors are normalized.\n\n**Euclidean (L2) distance** measures straight-line distance in vector space. For length-normalized vectors, squared L2 distance equals 2 − 2 × cosine similarity, so L2 and cosine produce identical rankings; OpenAI documents this for its normalized embeddings. For unnormalized vectors, L2 also reflects vector magnitude and can rank neighbors differently from cosine, so the metric follows the geometry the model's documentation specifies.\n\nCosine similarity is the safe default unless the model documentation specifies another metric.\n\n# Pitfalls\n\n## Distribution Shift on Internal Terminology\n\nA model that scores well on MTEB can still fail on a specific domain. Internal acronyms or product names may be poorly represented in the training data, leaving related queries and documents far apart in vector space.\n\nDetection: recall@k on a held-out set of domain-specific queries is compared with recall@k on generic queries. A significant gap signals distribution shift.\n\nThe repair depends on the failure. Domain adaptation can improve semantic placement, while [[Retrieval|hybrid retrieval]] lets BM25 recover exact terminology that dense retrieval misses.\n\n## Embedding Model Swap Invalidation\n\nChanging the embedding model — even a minor version — invalidates every stored vector. The new model produces vectors in a different geometric space. Cosine similarity between old and new vectors is meaningless.\n\nThis means re-embedding the entire corpus: for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100 and hours of ingestion time. Keying the [[Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching|embedding cache]] by model name + version prevents serving stale vectors.\n\n## Benchmark Leaderboard Overfitting\n\nMTEB aggregates several task families. A model can rank first overall while performing poorly on retrieval because strong classification or semantic-similarity results lift its average. RAG selection therefore uses the `Retrieval` category scores and then a test against a corpus-specific evaluation set.\n\n## Multilingual Embedding Collapse\n\nModels trained primarily on English text cluster non-English content into a smaller region of vector space, reducing separation between distinct concepts. A Spanish query about \"seguridad informática\" and one about \"seguridad alimentaria\" may land closer together than they should because the model undertrained on Spanish semantic distinctions.\n\nMitigation: models with explicit multilingual training (Cohere `embed-v3`, SBERT multilingual variants) reduce the risk, and recall is evaluated per language separately.\n\n# Tradeoffs\n\n| Factor | Proprietary API | Open-Source Self-Hosted | Domain-Finetuned |\n| --- | --- | --- | --- |\n| Cost at scale | Per-token pricing -- scales linearly | Infrastructure cost -- GPU amortized across volume | Training cost upfront -- inference same as base |\n| Recall on general text | High -- trained on massive web corpora | Competitive -- top models match proprietary on MTEB | Depends on base model and training data quality |\n| Recall on domain text | Can miss internal terminology | Same limitation as proprietary | Potentially higher when domain training improves held-out retrieval |\n| Latency | Network round-trip + provider queue | Local inference -- no network hop | Same as self-hosted base model |\n| Operational burden | Minimal -- API call | High -- GPU infra and model serving and updates | Highest -- training pipeline plus serving |\n| Vendor lock-in | Model changes break vector index | Full control over versioning | Full control |\n| Dimensionality control | Some models support MRL truncation | Full control via model choice | Full control |\n\nThe simplest model that establishes a credible recall baseline is the right starting point. Fine-tuning is justified only after failed queries show that domain semantics, rather than chunk boundaries or retrieval configuration, are the bottleneck. Better embeddings cannot repair bad chunks.\n\n# Questions\n\n<!-- qard-id: bb5874a0-b6ba-4318-ab29-25a6079c807a -->\n> [!qard]- How do embeddings support semantic retrieval?\n> An embedding is a vector of numbers that a model produces for a piece of text. The model places texts with related meaning close together, so the distance between two vectors measures how related the texts are. The vector's length is set by the model and, for some models such as OpenAI's `text-embedding-3` family, by a requested output size.\n>\n> Semantic retrieval relies on that geometry:\n>\n> 1. **Indexing:** the embedding model converts each document chunk into a vector, which is stored in a vector index.\n> 2. **Query:** the same model, with the same output size, converts the query into a vector in the same space.\n> 3. **Ranking:** a similarity measure, such as cosine similarity, ranks the stored vectors by closeness to the query vector. The nearest chunks become retrieval candidates.\n>\n> Because matching depends on meaning rather than shared words, a query about throttling partner API traffic can find a document about rate limiting for partners. A high similarity score is only a relevance signal. It does not prove that a chunk answers the question, so retrieval quality still has to be evaluated.\n>\n> [Vector embeddings (OpenAI)](https://developers.openai.com/api/docs/guides/embeddings) · [Vector search overview (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-overview)\n\n<!-- qard-id: cbeb031d-1919-44df-9d70-3df6fafd8901 -->\n> [!qard]- How do Matryoshka embeddings reduce vector storage?\n> Matryoshka Representation Learning (MRL) trains an embedding so that its first dimensions already form a useful coarse representation, and later dimensions add finer detail. A prefix of the vector, such as its first 256 values, therefore still works as a lower-dimensional embedding. Storing only that prefix reduces vector storage.\n>\n> - **Storage:** at the same data type, 256 values instead of 1536 is one-sixth of the raw vector payload. IDs, metadata and index structures do not shrink by the same factor, so the whole index shrinks less.\n> - **Search cost:** shorter vectors also reduce distance-computation work.\n> - **Availability:** shortening is model-specific. OpenAI's `text-embedding-3` models accept a `dimensions` parameter. A vector truncated manually is re-normalized before cosine or dot-product search.\n>\n> [Embeddings guide (OpenAI)](https://developers.openai.com/api/docs/guides/embeddings) · [Matryoshka Representation Learning (arXiv)](https://arxiv.org/abs/2205.13147)\n\n> [!qard]- How should a shorter embedding dimension be validated?\n> Fewer embedding dimensions can lower retrieval quality on a particular corpus.\n>\n> A shorter vector is validated by running the same labeled queries at each candidate dimension and comparing Recall@k and latency. The preferred dimension is the smallest one that still meets the recall and latency targets. A design that re-scores candidates with full-length vectors has to store them elsewhere or recompute them, which adds storage, API cost or latency.\n>\n> [Embeddings guide (OpenAI)](https://developers.openai.com/api/docs/guides/embeddings) · [Matryoshka Representation Learning (arXiv)](https://arxiv.org/abs/2205.13147)\n\n<!-- qard-id: d153db49-a943-4334-bb4e-310ba8915adb -->\n> [!qard]- What happens to retrieval when queries use embeddings from a new model but the corpus still has vectors from the old model?\n> Retrieval quality breaks. The query vector and the stored vectors come from different vector spaces, so the distances between them do not measure relatedness, and the ranking becomes effectively arbitrary.\n>\n> Each embedding model learns its own coordinate system, so the same text receives unrelated vectors from two different models. If both models produce vectors of the same length, the search can still run without any error while returning poor results. That makes the mismatch easy to miss.\n>\n> A model change therefore requires re-embedding the whole corpus with the new model. A safe migration builds and validates the new index first and only then switches query traffic, for example by moving a collection alias. Embedding-cache keys include the model name and version, so cached vectors from the old model are not reused with the new one.\n>\n> [Configure a vectorizer (Azure AI Search)](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-configure-vectorizer)\n\n# References\n\n- [Embeddings guide — text-embedding-3 models and MRL (OpenAI)](https://platform.openai.com/docs/guides/embeddings)\n- [MTEB leaderboard — filter by Retrieval task (Hugging Face)](https://huggingface.co/spaces/mteb/leaderboard)\n- [Matryoshka Representation Learning — original MRL paper (arXiv)](https://arxiv.org/abs/2205.13147)\n- [Azure OpenAI embeddings — deployment and SDK usage (Microsoft Learn)](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/embeddings)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1794301846473,
+  "topic": "Choose an embedding model and similarity measure for domain retrieval and plan re-embedding when representation compatibility changes",
+  "notes": [
+    "Home/AI & ML/LLM/Embeddings.md"
+  ],
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "semantic-geometry",
+  "steps": [
+    {
+      "title": "Measuring closeness: cosine, dot product, L2",
+      "explain": "Nearby vectors mean similar text. To rank stored chunks against a query, the index needs a number for \"nearby\". Three common choices can score the same pair of vectors differently. The difference comes down to **vector length** (magnitude, $\\|v\\|$).\n\n- **Cosine similarity** measures only the angle: $\\cos(q,d) = \\dfrac{q \\cdot d}{\\|q\\|\\,\\|d\\|}$. It ranges from −1 to 1, and length cancels out.\n- **Dot product**: $q \\cdot d = \\|q\\|\\,\\|d\\|\\cos(q,d)$. This is cosine scaled by both lengths. When the cosine with the query is positive, a longer vector pointing the same way scores higher. When the cosine is negative, extra length makes the score more negative. When the cosine is zero (orthogonal vectors), the score stays 0 at any length.\n- **Euclidean (L2) distance** is the straight-line gap $\\|q-d\\|$, where smaller means closer. It also depends on length.\n\n**Example.** Query $q=(1,0)$, length 1. Two stored chunk vectors, both with positive cosine to $q$:\n\n| | vector | length | cosine | dot | L2 distance |\n|---|---|---|---|---|---|\n| A | $(0.8,\\,0.6)$ | 1 | $0.8$ | $0.8$ | $\\sqrt{0.4}\\approx0.63$ |\n| B | $(1.2,\\,1.6)$ | 2 | $1.2/2 = 0.6$ | $1.2$ | $\\sqrt{2.6}\\approx1.61$ |\n\nA points closer to $q$'s direction, so cosine ranks **A first**. Dot product ranks **B first** only because B is twice as long. B's cosine is positive, so its extra length inflates the score even though its direction matches $q$ less well.\n\n**Normalize** B to length 1: $(0.6,\\,0.8)$. Its dot product is now $0.6$, which equals its cosine, so both metrics rank A first. When query and stored vectors are all unit length:\n- dot product = cosine;\n- squared L2 = $2 - 2\\cos$. Here A gives $2-1.6=0.4$ and normalized B gives $2-1.2=0.8$, so L2 also ranks A first.\n\nAll three metrics then produce the same ranking. Without normalization, dot product and L2 also respond to magnitude and can reorder neighbours.\n\nWhether vectors arrive normalized depends on the model. OpenAI documents its embeddings as length-normalized, while another model may keep magnitude as part of the signal. The model's documentation decides the metric, and cosine is the safe default when it says nothing ([[Home/AI & ML/LLM/Embeddings#Similarity Metrics|Similarity Metrics]]). A vector shortened by hand is re-normalized before cosine or dot-product search ([[Home/AI & ML/LLM/Embeddings#Questions|Embeddings: Questions]]).",
+      "connect": "You already know that closeness in vector space means similar meaning. This step shows how closeness is scored and when vector length distorts the score. The next step compares candidate models using this scoring, and the last step plans a re-embedding.",
+      "checkFirst": false,
+      "check": {
+        "id": "k1",
+        "type": "short",
+        "goal": "apply",
+        "objective": "semantic-geometry",
+        "prompt": "A retrieval index stores chunk vectors that are **not** normalized, and their lengths differ from chunk to chunk. Search ranks chunks by **dot product** with the query vector, highest first. To make the results match a cosine-similarity ranking, the team L2-normalizes **only the query vector** (scales it to length 1) before each search. The stored chunk vectors are left unchanged.\n\nDoes this guarantee that the dot-product ranking of the chunks equals their cosine-similarity ranking? Give your verdict and explain why.",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "Verdict: no, normalizing only the query does not guarantee the rankings match.",
+            "marks": 1
+          },
+          {
+            "point": "Reason: dot product = ‖q‖‖d‖cos, and the query length is the same factor for every chunk, so it cannot change the order; the differing chunk lengths still scale each score, so a longer, less-aligned chunk can still outrank a better-aligned one (chunks must be normalized too).",
+            "marks": 1
+          }
+        ],
+        "model": "**No.** Dot product is $\\|q\\|\\,\\|d\\|\\cos\\theta$. The query's length multiplies every chunk's score by the same amount, so normalizing it never reorders anything. Each chunk's own length $\\|d\\|$ still scales its score, so a long chunk can beat a better-aligned short one. Normalizing the stored chunk vectors as well guarantees that dot product equals cosine.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Embeddings.md",
+          "heading": "Similarity Metrics"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Answers yes: once the query has length 1, dot product equals cosine.",
+          "reteach": "Dot product is $q\\cdot d = \\|q\\|\\,\\|d\\|\\cos\\theta$. With $\\|q\\|=1$ the score becomes $\\|d\\|\\cos\\theta$, so each chunk's length still multiplies its score. A chunk twice as long, with a positive cosine, gets twice the score at the same angle. Normalizing **both** the query and the chunk vectors guarantees that dot product equals cosine."
+        },
+        {
+          "signs": "Answers no, but claims normalizing the query changes or partly fixes the ranking (for example, shrinks the advantage of long chunks).",
+          "reteach": "The query is the same vector for every chunk, so its length multiplies **all** scores by one common factor. Multiplying every score by the same positive number leaves the order unchanged. Query normalization has no effect on the ranking; only the chunk lengths cause the disagreement with cosine."
+        },
+        {
+          "signs": "Answers yes because the angle between query and chunk is unchanged by normalization.",
+          "reteach": "The angle is unchanged, which is why cosine is unaffected. But dot product does not read the angle alone: it multiplies $\\cos\\theta$ by the chunk's length. Same angles plus different chunk lengths can still produce a different order from cosine."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Choosing a model and dimension on your corpus",
+      "explain": "From step 1: the model's documentation fixes the similarity measure. Cosine is the default unless the docs say otherwise. Choosing the model itself is a separate question, and a leaderboard can't answer it for your corpus.\n\n**Why leaderboard rank is not enough.** MTEB averages several task families, including classification, semantic similarity and retrieval. A model can rank first overall while being weaker at retrieval. Even its `Retrieval` score comes from public text. Internal acronyms and product names may barely appear in its training data, so queries and documents that use them can land far apart in vector space ([[Home/AI & ML/LLM/Embeddings#Benchmark Leaderboard Overfitting|leaderboard overfitting]], [[Home/AI & ML/LLM/Embeddings#Distribution Shift on Internal Terminology|distribution shift]]). Use the leaderboard's Retrieval category to build a shortlist, then test the shortlist on your own data.\n\n**The test.**\n1. Build a labeled set of real domain queries. For each query, record every chunk that holds the answer. Include queries that use internal terminology.\n2. Embed the corpus with each candidate, using that model's documented similarity measure.\n3. Run every query and measure two things:\n   - **Recall@k** (quality): for one query, the number of its labeled relevant chunks that appear in the top $k$ results, divided by the total number of labeled relevant chunks for that query. Average this over all queries. For example, if a query has 2 relevant chunks and only 1 is in the top 10, that query's Recall@10 is $1/2 = 0.5$.\n   - **Latency** (cost): the time to embed the query and search the index. Count it alongside storage of 4 bytes × dimensions per vector and the API or hosting price.\n4. Choose the simplest, cheapest configuration that meets **both** targets you set beforehand.\n\n**Dimension is a separate decision.** Matryoshka-trained models, such as OpenAI's `text-embedding-3` with its `dimensions` parameter, keep meaning in shorter prefixes of the vector. Shorter vectors take less storage and less search work, but they may lose recall on your corpus. So treat each dimension as another candidate: run the same labeled queries and keep the smallest size that still meets the targets ([[Home/AI & ML/LLM/Embeddings#Dimensionality|Dimensionality]]). Re-normalize a manually truncated vector before cosine or dot-product search.\n\n**Example.** The note cites a Databricks experiment on FinanceBench, a finance question-answering benchmark. There, `gte-large-en-v1.5` (0.4B parameters), fine-tuned on synthetic finance data, reached Recall@10 of 0.552. The general-purpose `text-embedding-3-large` reached 0.44 ([[Home/AI & ML/LLM/Embeddings#Model Families|Model Families]]). The lesson is that a model's general reputation did not predict which one retrieved better on finance queries. Only a measurement on domain queries showed that. A team with its own corpus would run the same kind of comparison on its own labeled queries, and would also check each candidate against its latency target before choosing.\n\nOne boundary: evaluate the retrieval pipeline, not the embeddings alone. If failed queries are caused by bad chunk boundaries, changing the model will not fix them ([[Home/AI & ML/LLM/Embeddings#Tradeoffs|Tradeoffs]]).",
+      "connect": "Step 1 fixed how closeness is scored for a given model. This step chooses which model and vector size produce that geometry for your corpus, and the next step deals with what breaks when that choice later changes.",
+      "checkFirst": false,
+      "check": {
+        "id": "k2",
+        "type": "mcq",
+        "goal": "apply",
+        "objective": "semantic-geometry",
+        "prompt": "A team is choosing an embedding configuration for retrieval over internal engineering documents. They set two targets in advance:\n\n- Recall@10 of at least 0.80, averaged over their labeled domain queries\n- Query latency of at most 50 ms, covering query embedding plus index search\n\nThey run the same labeled set of domain queries against four configurations. Model X ranks first in the MTEB Retrieval category and supports Matryoshka truncation. Model Y ranks ninth.\n\n| Config | Model | Dimensions | Recall@10 | Latency |\n|---|---|---|---|---|\n| A | X | 3072 (full) | 0.84 | 70 ms |\n| B | X | 1024 (truncated, re-normalized) | 0.82 | 40 ms |\n| C | X | 256 (truncated, re-normalized) | 0.71 | 20 ms |\n| D | Y | 768 (full) | 0.78 | 30 ms |\n\nWhich configuration should they choose, and why?",
+        "options": [
+          "Config A, because it has the highest Recall@10 and uses the top-ranked model at full size",
+          "Config B, because it is the only configuration that meets both the recall and the latency targets",
+          "Config C, because the shortest vector always gives the best storage and speed tradeoff",
+          "Config D, because an untruncated vector keeps all of the detail its model was trained with"
+        ],
+        "answer": 1,
+        "marks": 1,
+        "rubric": [
+          {
+            "point": "Chooses Config B as the only configuration that meets both the Recall@10 and latency targets",
+            "marks": 1
+          }
+        ],
+        "model": "**Config B.** It is the only configuration that meets both targets: Recall@10 of 0.82 ≥ 0.80 and latency of 40 ms ≤ 50 ms. A fails the latency target, C fails the recall target, and D fails the recall target.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Embeddings.md",
+          "heading": "Dimensionality"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Chooses A, reasoning that the highest recall or the top leaderboard model should win.",
+          "reteach": "The targets are a gate: a configuration has to pass both of them. A has the best recall, but at 70 ms it misses the 50 ms latency target. Neither its leaderboard rank nor extra recall beyond the target makes up for a failed requirement. Among the configurations that pass both targets, pick the cheapest. Here only B passes."
+        },
+        {
+          "signs": "Chooses C, reasoning that fewer dimensions are always better because they are cheaper and faster.",
+          "reteach": "Shorter vectors save storage and search work, but they may lose recall on your corpus. That is why each dimension has to be tested on the same labeled queries. The rule is the *smallest dimension that still meets the targets*, not the smallest dimension available. C is fast, but its recall of 0.71 is below 0.80, so it fails."
+        },
+        {
+          "signs": "Chooses D, reasoning that truncation must hurt quality, so a full-length vector from another model is safer.",
+          "reteach": "Matryoshka-trained models are built so that prefixes of the vector stay meaningful. Whether truncation hurts is an empirical question, and the measurement answers it: X truncated to 1024 dimensions reached 0.82, while Y at full length reached only 0.78, below the 0.80 target. The decision should follow measured Recall@k on your corpus, not an assumption about full versus truncated vectors."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Planning re-embedding after a model change",
+      "explain": "You already accept that an embedding model places texts with similar meaning close together. That closeness exists only *inside one model's space*. Each model learns its own coordinate system during training, so the axes of model A have no correspondence to the axes of model B. The same sentence gets unrelated vectors from the two models.\n\n**Example.** A help-centre index holds a vector for every article, made by model A. The team replaces model A with model B but switches only the query side. The query \"reset my password\" is now embedded by B and compared with article vectors made by A. Cosine or dot product still produces scores and a ranking. Those scores, however, compare coordinates from two unrelated systems. It is like reading a street address from one city's grid on a map of another city. Sometimes the right article still lands near the top by chance, but the ranking no longer reliably reflects meaning. When both models output the same number of dimensions, the comparison can run normally, so nothing obviously signals the problem.\n\nThe note says this directly: changing the model, *even a minor version*, invalidates every stored vector, so the whole corpus must be re-embedded ([[Home/AI & ML/LLM/Embeddings#Embedding Model Swap Invalidation|Embedding Model Swap Invalidation]]). Order the migration so that a query vector and the document vectors it is compared with always come from one model:\n\n```mermaid\ngraph LR\n  A[\"Add model-versioned<br/>cache keys\"] --> B[\"Build a separate index<br/>with model B\"]\n  B --> C[\"Validate it<br/>(Recall@k on domain queries)\"]\n  C --> D[\"Switch queries to B<br/>together with the index<br/>(e.g. move an alias)\"]\n  D --> E[\"Retire the old index\"]\n```\n\n1. **Model-versioned cache keys first.** A cache keyed only by text could hand a stored model-A vector to the model-B pipeline. Before any model-B vector is generated, key the cache by *model name + version + text*, so model-A and model-B entries can never be confused ([[Home/AI & ML/LLM/Embeddings#Embedding Model Swap Invalidation|same section]]).\n2. **New index beside the old one.** The old index keeps serving model-A queries while model B re-embeds everything.\n3. **Validate before the switch.** Run the labelled domain queries from the model-choice step against the new index.\n4. **Switch atomically.** Queries start using model B at the same moment they start reading the model-B index.\n5. **Retire the old index** once the new one is serving well.\n\nThe cost is real but bounded. The note's example estimates about \\$100 and hours of ingestion for 10M chunks. That is why the change is planned rather than made casually.",
+      "connect": "The previous step chose a model using evidence from your own corpus. When that choice changes, every stored vector belongs to the old model's space, so a new model has to come with a re-embedding plan that never lets the two spaces meet.",
+      "checkFirst": false,
+      "check": {
+        "id": "k3",
+        "type": "short",
+        "goal": "apply",
+        "objective": "semantic-geometry",
+        "prompt": "A team runs semantic search over a single vector index of document chunks. Every chunk was embedded with model A, and live queries are also embedded with model A. The team moves to model B, which outputs vectors with the **same number of dimensions** as model A.\n\nTo avoid running a second index, they re-embed chunks **in place**. A background job overwrites each chunk's stored vector with its model-B vector, one batch at a time. Live queries keep using model A until the job finishes, and then they switch to model B.\n\nPredict how reliable the search results for live queries are **while the job is halfway through**, and explain why.",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "Predicts that ranking over the mixed index is unreliable: overwritten chunks receive scores that do not reflect relevance to the query, so relevant chunks may be missed and irrelevant ones may rank highly.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that models A and B place text in different, unrelated vector spaces, so similarity between a model-A query vector and a model-B chunk vector does not measure relatedness.",
+            "marks": 1
+          }
+        ],
+        "model": "The results are unreliable. Chunks that have not been processed yet still compare correctly with model-A queries. Overwritten chunks, however, get scores that do not track relevance, so relevant chunks can be missed and unrelated ones can rank high.\n\nWhy: each model has its own coordinate system. Cosine or dot product between a model-A query vector and a model-B chunk vector compares unrelated coordinates.\n\n*(Optional: a separate model-B index, validated before queries and index switch together, avoids the mixed state.)*",
+        "source": {
+          "path": "Home/AI & ML/LLM/Embeddings.md",
+          "heading": "Embedding Model Swap Invalidation"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Says results stay reliable because the vectors have the same number of dimensions, or because both models capture the same meaning.",
+          "reteach": "Matching dimensions only means the comparison **can run**. It does not make the score meaningful. Dimension 1 of model A and dimension 1 of model B encode unrelated features, like two maps with the same grid size that show different cities. The same text gets unrelated vectors from each model, so a model-A query has no reason to be close to the model-B vector of the right chunk."
+        },
+        {
+          "signs": "Predicts that the search must fail, crash or reject the mixed index with an error.",
+          "reteach": "Vectors of equal length can be compared as usual. Unless the system tracks which model produced each vector, it may simply compute scores and return a ranked list. The usual failure is poor ranking rather than a guaranteed error. That is why the migration is controlled by process: versioned cache keys, a separate index, validation and then an atomic switch."
+        },
+        {
+          "signs": "Claims the overwritten chunks become completely invisible, or that quality must fall steadily with every batch.",
+          "reteach": "Cross-model scores are **unreliable**, not guaranteed to be low. An overwritten chunk can still rank highly by chance, and measured quality need not fall in a straight line as the job progresses. The problem is that the ranking for those chunks no longer reflects relevance, so results cannot be trusted until queries and documents share one model's space."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "unknown": true
+      },
+      "mark": {
+        "score": 0,
+        "awarded": [
+          false,
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "reply": "No problem. Read the explanation, then look at the model answer."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "choice": 1,
+        "confidence": "sure"
+      },
+      "mark": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      },
+      "reply": "Right."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "half of the data will be embedded with B, while search is done with A, which are different models, that have totally different internal structure, that can match only by a chance",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "half of the data will be embedded with B, while search is done with A",
+            "kind": "correct",
+            "note": "You identified the mixed state: half the chunks are model B while queries still use model A. That is the setup that makes results unreliable."
+          },
+          {
+            "quote": "that can match only by a chance",
+            "kind": "correct",
+            "note": "You predicted that matches on the overwritten chunks happen by chance, so ranking is unreliable. That earns the prediction point."
+          },
+          {
+            "quote": "different models, that have totally different internal structure",
+            "kind": "vague",
+            "note": "You say the models differ, but you don't say that each has its own vector space or that similarity scores between them don't measure relatedness. Name that mechanism explicitly."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You predicted unreliable ranking correctly, but you didn't state that cross-model similarity scores are meaningless because each model has its own coordinate space.",
+        "score": 1
+      },
+      "reply": "Right: the mixed index is unreliable, and matches become chance. One gap remains. \"Different internal structure\" is close, but it isn't the mechanism. Say what it means for the scores: each model has its own coordinate system, so cosine or dot product between a model-A query and a model-B chunk vector compares unrelated axes. Same dimension count only means the maths runs, not that the scores mean anything."
+    }
+  ],
+  "current": 2,
+  "probe": {
+    "questions": [
+      {
+        "id": "p1",
+        "type": "short",
+        "goal": "explain",
+        "prompt": "In semantic retrieval, a model turns each piece of text into an **embedding**, a fixed-length vector of numbers. Explain why a search can find a relevant document even when the query and the document share no words.",
+        "marks": 1,
+        "rubric": [
+          {
+            "point": "States that the model places texts with related meaning close together in vector space, so the search compares vector closeness instead of shared words.",
+            "marks": 1
+          }
+        ],
+        "model": "The model maps texts with similar meaning to nearby vectors. Search ranks documents by how close their vectors are to the query vector, so a match depends on meaning rather than on shared words.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Embeddings.md"
+        }
+      },
+      {
+        "id": "p2",
+        "type": "mcq",
+        "goal": "apply",
+        "marks": 1,
+        "prompt": "Vector A = (1, 1) and vector B = (3, 3) point in exactly the same direction, but B is three times as long. Which statement about comparing A and B is correct?",
+        "options": [
+          "Cosine similarity is 1, and the dot product is larger than it would be for unit-length copies of A and B.",
+          "Cosine similarity is 3 because B is three times as long as A, and the dot product is 1.",
+          "Cosine similarity and dot product are both 1 because the two vectors point in the same direction.",
+          "Cosine similarity is below 1 because the lengths differ, and the dot product ignores length."
+        ],
+        "answer": 0,
+        "rubric": [
+          {
+            "point": "Selects the option stating that cosine similarity is 1 and the dot product grows with vector length.",
+            "marks": 1
+          }
+        ],
+        "model": "**Cosine similarity is 1, and the dot product is larger than it would be for unit-length copies of A and B.** Cosine measures only the angle. The dot product also scales with the vectors' lengths: here it is 6, while unit-length copies would give 1.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Embeddings.md",
+          "heading": "Similarity Metrics"
+        }
+      },
+      {
+        "id": "p3",
+        "type": "cloze",
+        "goal": "recall",
+        "prompt": "A retrieval system returns a ranked list of chunks for each query. Recall@10 is the fraction of the query's {{rel}} chunks that appear in the top 10 results.",
+        "marks": 1,
+        "blanks": [
+          {
+            "id": "rel",
+            "answers": [
+              "relevant",
+              "correct",
+              "ground-truth",
+              "ground truth",
+              "gold"
+            ]
+          }
+        ],
+        "rubric": [
+          {
+            "point": "Fills the blank with relevant (or an equivalent term such as ground-truth).",
+            "marks": 1
+          }
+        ],
+        "model": "Recall@10 is the fraction of the query's **relevant** chunks that appear in the top 10 results.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
+          "heading": "Retrieval Quality Metrics"
+        }
+      }
+    ],
+    "answers": {
+      "p1": {
+        "text": "embedings storing the meaning of the text, not the words. So if two sentences have similar meaning,  they will be close to each other and be consider similar and possible to return.",
+        "confidence": "sure"
+      },
+      "p2": {
+        "unknown": true
+      },
+      "p3": {
+        "blanks": {
+          "rel": "expected"
+        },
+        "confidence": "sure"
+      }
+    },
+    "note": "Checks the three ideas this lesson depends on: embeddings place meaning as nearby vectors, cosine similarity differs from dot product, and Recall@k is a retrieval metric; llm-mechanics is skipped because it is already taught.",
+    "submitted": true,
+    "marks": {
+      "p2": {
+        "score": 0,
+        "awarded": [
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "p3": {
+        "score": 0,
+        "awarded": [
+          false
+        ],
+        "annotations": [],
+        "mistake": "misconception",
+        "feedback": "Compare each blank with the model answer."
+      },
+      "p1": {
+        "awarded": [
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "if two sentences have similar meaning,  they will be close to each other",
+            "kind": "correct",
+            "note": "You said texts with similar meaning end up close together, which is the core mechanism. This is why matching works without shared words."
+          },
+          {
+            "quote": "embedings storing the meaning of the text, not the words",
+            "kind": "insight",
+            "note": "You correctly contrasted meaning with surface wording. To be precise, the vector encodes meaning as a position in space, and closeness is measured geometrically."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "Correct: similar meaning gives nearby vectors, so search matches on meaning rather than shared words.",
+        "score": 1
+      }
+    },
+    "findings": "You hold the core idea that embeddings place similar meanings close together. You didn't know how cosine and dot product differ with vector length, which is an isolated gap."
+  },
+  "map": {
+    "title": "Choosing embeddings and planning re-embedding",
+    "plan": "You already know that similar meaning gives nearby vectors. The first gap is how similarity is measured: cosine versus dot product and why length matters. Then you'll choose a model and dimension using corpus-specific evidence. Last, you'll plan a re-embedding when a model change breaks compatibility.",
+    "mermaid": "graph TD\nA[\"Similar meaning gives nearby vectors\"] --> B[\"Cosine vs dot product vs L2, and normalization\"]\nB --> C[\"Pick model and dimension by corpus recall\"]\nC --> D[\"Model change breaks compatibility\"]\nD --> E[\"Plan re-embedding and safe switchover\"]",
+    "objective": "semantic-geometry",
+    "steps": [
+      {
+        "title": "Measuring closeness: cosine, dot product, L2",
+        "why": "You should explain why parallel vectors of different length score differently under cosine and dot product, and when normalization makes the rankings agree; builds on your knowledge that closeness means similarity, and leaves model choice for later."
+      },
+      {
+        "title": "Choosing a model and dimension on your corpus",
+        "why": "You should pick a candidate model and vector size by measuring Recall@k and latency on domain queries rather than leaderboard rank; needs the similarity measure from step 1, and leaves re-embedding for the next step."
+      },
+      {
+        "title": "Planning re-embedding after a model change",
+        "why": "You should explain why old and new vectors cannot be compared and sequence a migration with a validated new index, a traffic switch and model-versioned cache keys; this applies the model-choice step to the final goal."
+      }
+    ]
+  },
+  "stepsFor": "[\"Choosing embeddings and planning re-embedding\",\"You already know that similar meaning gives nearby vectors. The first gap is how similarity is measured: cosine versus dot product and why length matters. Then you'll choose a model and dimension using corpus-specific evidence. Last, you'll plan a re-embedding when a model change breaks compatibility.\",[[\"Measuring closeness: cosine, dot product, L2\",\"You should explain why parallel vectors of different length score differently under cosine and dot product, and when normalization makes the rankings agree; builds on your knowledge that closeness means similarity, and leaves model choice for later.\"],[\"Choosing a model and dimension on your corpus\",\"You should pick a candidate model and vector size by measuring Recall@k and latency on domain queries rather than leaderboard rank; needs the similarity measure from step 1, and leaves re-embedding for the next step.\"],[\"Planning re-embedding after a model change\",\"You should explain why old and new vectors cannot be compared and sequence a migration with a validated new index, a traffic switch and model-versioned cache keys; this applies the model-choice step to the final goal.\"]]]",
+  "accepted": true,
+  "finishedAt": 1794303282323,
+  "close": {
+    "summary": "Lesson covered three parts of embedding-based retrieval: how similarity is measured, how to pick a model and dimension, and how to plan re-embedding when a model changes.\n\n**Similarity measures:** The student started out knowing that similar meanings produce nearby vectors. They did not know how cosine and dot product differ (0/2, \"didn't know\"). The key points: cosine looks only at the angle between vectors. Dot product also grows with vector length. For L2-normalized vectors, cosine, dot product and L2 distance all give the same ranking. Whether a model's vectors are normalized depends on the model's documentation.\n\n**Model and dimension choice:** The student answered correctly and confidently (1/1). A model is chosen by testing it on your own corpus and queries, not by its MTEB ranking.\n\n**Re-embedding:** Partly right (1/2). The student correctly predicted that ranking becomes unreliable. They did not explain why: each model learns its own coordinate space, so similarity between an old-model vector and a new-model vector means nothing. Search can still run without errors when the dimensions match. The fix is to re-embed the whole corpus, check the new index, then switch traffic and key the cache by model and version.\n\n**Gaps to revisit:** cosine versus dot product with vector length, and why scores across models mean nothing.",
+    "cards": [
+      {
+        "front": "How do cosine similarity and dot product differ when embedding vectors are not normalized?",
+        "back": "Cosine looks only at the angle between vectors and ignores their length. Dot product equals cosine × |a| × |b|, so longer vectors score higher and the ranking can change. For L2-normalized vectors, the two are equal."
+      },
+      {
+        "front": "For length-normalized embeddings, how do L2 distance and cosine similarity relate, and what does that mean for ranking?",
+        "back": "$\\|a-b\\|^2 = 2 - 2\\cos(a,b)$. L2 distance, cosine and dot product therefore give the same nearest-neighbour ranking. The metric only matters when vectors are not normalized, so check the model's documentation."
+      },
+      {
+        "front": "Why is a similarity score between a vector from model A and a vector from model B meaningless?",
+        "back": "Each model learns its own coordinate space, so the same text gets unrelated vectors from different models. Distance between the two spaces does not measure relatedness. If the dimensions match, search runs without any error but returns near-arbitrary results."
+      },
+      {
+        "front": "What is a safe migration plan after changing the embedding model, even for a minor version?",
+        "back": "Re-embed the whole corpus with the new model into a new index. Validate retrieval quality on it, then switch query traffic over, for example with an alias swap. Key the embedding cache by model name and version so old vectors are never reused."
+      }
+    ],
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-10 Choose an embedding model and similarity measure for domain .md",
+    "nextCheck": "2026-11-13"
+  }
+}

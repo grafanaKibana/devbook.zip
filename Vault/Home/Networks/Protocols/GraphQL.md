@@ -4,10 +4,10 @@ subtopic: [Protocols]
 summary: "A typed API query language and execution model that lets clients select response fields."
 level: ["3"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 publish: true
 created: "2026-07-18T07:07:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-16T14:12:13.868Z"
 ---
 

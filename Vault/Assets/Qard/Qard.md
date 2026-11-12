@@ -3,7 +3,7 @@ topic: [Qard]
 subtopic: []
 level: ["1"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 tags: [FolderNote, MetricsIgnore]
 publish: false
 icon: graduation-cap

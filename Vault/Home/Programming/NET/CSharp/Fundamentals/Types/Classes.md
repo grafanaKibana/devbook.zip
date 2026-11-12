@@ -4,13 +4,13 @@ subtopic: [NET]
 summary: "A C# reference type combining shared object identity with state, inheritance, and virtual dispatch."
 level: ["4"]
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Classes"
 flashcard_uid: "0928b940"
 created: "2026-02-18T19:18:52.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.327Z"
 ---
 

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-06-20T08:45:59.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.349Z
 topic:
   - Data Persistence
@@ -10,7 +10,7 @@ summary: Reusing a bounded set of open database connections to avoid costly hand
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Data Persistence
 qard-topic: Connection Pooling
 flashcard_uid: 788e9b4c

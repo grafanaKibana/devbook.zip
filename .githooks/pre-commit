@@ -57,7 +57,7 @@ echo "[pre-commit] Running vault automations..."
 
 # Note-derived artifacts only need refreshes when Markdown changed.
 if [[ ${#STAGED_MD[@]} -gt 0 ]]; then
-    # 1. Sync folder frontmatter (derives status/priority/level from children)
+    # 1. Fill missing folder status and derive priority/level from children.
     ROLLUP_CHANGED=$(cd "$REPO_ROOT/.scripts" && dotnet run --no-cache --file DevBook.Tooling/Scripts/SyncFolderRollupFrontmatter.cs -- --repo-root "$REPO_ROOT" --write --force --print-changed)
     if [[ -n "$ROLLUP_CHANGED" ]]; then
         while IFS= read -r file; do

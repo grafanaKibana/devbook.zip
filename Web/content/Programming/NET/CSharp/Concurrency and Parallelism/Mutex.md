@@ -11,7 +11,7 @@ summary: An OS-backed primitive enforcing single-owner access, useful across pro
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Concurrency and Parallelism/Mutex
 flashcard_uid: 83cc54a7

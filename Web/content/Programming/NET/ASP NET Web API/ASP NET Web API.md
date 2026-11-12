@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-14T21:59:03.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.317Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: How ASP.NET Core routes each HTTP request through middleware to handler
 level:
   - "4"
 priority: High
-status: Creation
+status: New
 ---
 
 An ASP.NET Core API is an ordered HTTP pipeline ending at a selected endpoint. Middleware handles concerns that span requests. Routing selects a Minimal API handler or controller action. Filters and endpoint code handle work that depends on the selected operation.

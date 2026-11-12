@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-06-12T18:21:46.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.484Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Ablation varies one component at a time to isolate what caused a retrie
 level:
   - "2"
 priority: High
-status: Done
+status: In Progress
 ---
 
 End-to-end metrics show that a RAG pipeline regressed. They rarely show why. A lower Recall@5 could come from split evidence, an embedding model that mishandles domain vocabulary, or an ANN index that approximates too aggressively. Component-level evaluation holds most of the pipeline still and moves one part at a time.

@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "createdAt": 1794246706524,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "generation-contract",
+  "title": "Choose sampling, evidence assembly, citations, and output constraints so a generated result can be checked and safely consumed by the next component",
+  "goal": "apply",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "mcq",
+      "prompt": "A generator extracts backup-retention periods using only supplied documents. Its output feeds a service that automatically deletes expired backups. Source S1 describes backup encryption but gives no retention period. The generator returns `{\"retention_days\":30,\"source_id\":\"S1\"}`. The response is complete, matches the required schema, and names an existing source.\n\nWhich handling is justified before the deletion service consumes this result?",
+      "marks": 1,
+      "options": [
+        "Accept the result because schema validation confirms that the retention value meets the output contract.",
+        "Regenerate at zero temperature and accept the result if the same retention value appears again.",
+        "Return an explicit insufficient-evidence result because the cited source does not support the retention value.",
+        "Accept the result because the source identifier resolves to a document about the relevant backups."
+      ],
+      "answer": 2,
+      "rubric": [
+        {
+          "point": "Selects explicit abstention because the retention value lacks source support despite valid structure and a real citation.",
+          "marks": 1
+        }
+      ],
+      "model": "Return an explicit insufficient-evidence result because the cited source does not support the retention value.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Generation.md",
+        "heading": "Structured Output Schema Mismatch"
+      },
+      "objective": "generation-contract",
+      "goal": "apply"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

@@ -4,13 +4,13 @@ subtopic: [NET]
 summary: "A specification of .NET APIs that multiple runtimes agree to implement."
 level: ["4"]
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/NET Standart"
 flashcard_uid: "60a3e364"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.329Z"
 ---
 

@@ -4,13 +4,13 @@ subtopic: [LLM]
 summary: "Continuously observing a deployed RAG pipeline per stage to catch regressions before users do."
 level: ["2"]
 priority: High
-status: Done
+status: In Progress
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Monitoring"
 flashcard_uid: "468101be"
 created: "2026-02-27T12:56:16.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:28:37.414Z"
 ---
 

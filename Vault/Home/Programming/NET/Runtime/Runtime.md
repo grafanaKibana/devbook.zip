@@ -4,14 +4,14 @@ subtopic: [NET]
 summary: "The .NET CLR execution engine: JIT compilation, garbage collection, type safety, and threading."
 tags: [FolderNote]
 publish: true
-status: Creation
+status: New
 priority: High
 level: ["4"]
 qard-deck: "Programming"
 qard-topic: "NET/Runtime/Runtime"
 flashcard_uid: "7ed037a5"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.332Z"
 ---
 

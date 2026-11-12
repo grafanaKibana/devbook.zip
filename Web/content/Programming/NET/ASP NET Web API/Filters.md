@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-19T23:08:30.000Z
-modified: 2026-11-04T13:22:56.731Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.319Z
 topic:
   - Programming
@@ -11,7 +11,7 @@ summary: Filters around ASP.NET Core Web API controller actions and endpoint-han
 level:
   - "2"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/ASP NET Web API/Filters
 flashcard_uid: ef27222b
@@ -141,41 +141,10 @@ Attributes cannot receive runtime services through their own constructors, so at
 
 <!-- qard-id: ec8874e5-0ca6-4d53-a3dd-6594e0a512e3 -->
 
-> [!qard]- Which exceptions can controller exception filters handle in an ASP.NET Core Web API?
-> Controller exception filters handle only unhandled exceptions raised during controller creation, model binding, action filters or the action method. They are not a before-and-after stage; they run only when such an exception occurs.
+> [!qard]- Which part of the controller pipeline do ASP.NET Core exception filters cover?
+> Only the core that runs the action: controller creation, model binding, action filters and the action method. Exception filters run only when that core throws an unhandled exception.
 >
-> **Not covered:**
->
-> - Exceptions from authorization filters and resource filters, which run outside that part of the pipeline.
->
-> - Exceptions from result filters or from executing the action result.
->
-> - Exceptions from middleware, routing or Minimal API handlers, which run outside the controller-filter pipeline.
->
-> [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)
-
-<!-- qard-id: 88201824-3803-4d3e-892a-427b12e49301 -->
-
-> [!qard]- What happens after an ASP.NET Core controller exception filter handles an exception?
->
-> - **Handled:** the filter sets `ExceptionHandled` to `true` or assigns a `Result`, and the exception stops propagating. A supplied `Result` is executed as the response. Ordinary result filters do not run around it; only always-run result filters, such as `IAlwaysRunResultFilter` implementations, do.
-> - **Not handled:** the exception leaves the controller-filter pipeline and continues to outer middleware, such as exception-handling middleware.
->
-> Because of these gaps, exception-handling middleware is the broader boundary for a uniform API error response.
->
-> [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)
-
-<!-- qard-id: b115f4c1-4ffb-413c-917b-d5fcdb62cb05 -->
-
-> [!qard]- Within one ASP.NET Core Web API controller-filter type, how do scope and the `Order` property determine execution order?
-> By default, scope decides the order among filters of one type: global filters wrap controller filters, which wrap action filters. An explicit `Order` value, exposed through `IOrderedFilter`, takes precedence over scope.
->
-> - **Equal `Order` values:** before logic runs global → controller → action, and after logic runs action → controller → global.
-> - **Different `Order` values:** filters are sorted by `Order` first and by scope second. A lower value runs its before logic earlier and its after logic later, so it wraps filters with higher values regardless of their scope.
->
-> For example, an action-level action filter with `Order` 0 runs its before logic ahead of a global action filter with `Order` 1.
->
-> This ordering only arranges filters of the same type. It cannot move an action filter ahead of an authorization filter, because each filter type runs at its own stage of the controller pipeline.
+> Everything else is outside them: authorization filters run earlier, resource filters wrap the core on both sides, result filters and result execution run later, and middleware, routing and Minimal API handlers sit outside the controller-filter pipeline. A uniform API error contract therefore belongs in exception-handling middleware.
 >
 > [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)
 

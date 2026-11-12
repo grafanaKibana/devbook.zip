@@ -11,7 +11,7 @@ summary: Data-centric C# types with generated value equality, ToString, and with
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Types/Records
 flashcard_uid: c03985b0

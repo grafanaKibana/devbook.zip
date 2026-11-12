@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T06:24:35.852Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Estimates a target's position from value ratios in uniformly distribute
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 A sorted array holds ten million evenly spaced sensor readings, and one reading must be located by value. Binary Search ignores one fact the data offers: when values are exactly evenly spaced, the target's _value_ determines its _index_. A reading whose value sits 95% of the way between the smallest and largest one sits 95% of the way through the array.

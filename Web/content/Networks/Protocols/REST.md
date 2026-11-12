@@ -11,7 +11,7 @@ summary: A resource-oriented architectural style built from stateless messages a
 level:
   - "3"
 priority: High
-status: Done
+status: In Progress
 ---
 
 REST is an architectural style for networked systems, not a synonym for JSON over HTTP. It constrains interactions around stable resource identities, a uniform interface, and explicit cache/representation behavior so clients, servers, and intermediaries can evolve with fewer assumptions.

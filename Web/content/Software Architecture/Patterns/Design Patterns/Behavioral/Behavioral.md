@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-03-05T22:12:32.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-15T11:47:55.102Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: Behavioral patterns assign responsibilities and coordinate communicatio
 level:
   - "3"
 priority: High
-status: Done
+status: In Progress
 ---
 
 Behavioral patterns decide where work belongs and how objects pass control between one another. A sender need not know the receiver, a client need not own every algorithm, and a publisher need not depend on every subscriber. The patterns make those collaborations explicit.

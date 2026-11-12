@@ -4,10 +4,10 @@ subtopic: [Data Structures]
 summary: "A prefix tree that stores strings as character paths for exact and prefix queries."
 level: ["4"]
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 publish: true
 created: "2026-06-20T05:33:50.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-10T14:39:34.309Z"
 ---
 

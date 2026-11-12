@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.504Z
 topic:
   - Security
@@ -11,7 +11,7 @@ summary: A compact claims format whose signature, issuer, audience, lifetime, an
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 JSON Web Token (JWT) is a claims format carried inside a JSON Web Signature or JSON Web Encryption object. In JWT bearer authentication, a client presents an access token and the resource server validates it under rules fixed for that token kind. Possession is enough to use a bearer token, so transport, storage, logging, and replay boundaries matter as much as signature verification.

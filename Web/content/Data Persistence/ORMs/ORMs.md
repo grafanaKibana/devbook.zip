@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.352Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: Mappers that translate object graphs and LINQ into SQL, a leaky abstrac
 priority: High
 level:
   - "4"
-status: Creation
+status: New
 qard-deck: Data Persistence
 qard-topic: ORMs/ORMs
 flashcard_uid: e49dfe63

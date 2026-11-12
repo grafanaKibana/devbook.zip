@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-28T13:40:02.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.481Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Decomposing complex tasks into multiple LLM calls for reliability and d
 level:
   - "3"
 priority: Medium
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Prompt Engineering/Prompt Composition
 flashcard_uid: a52de874

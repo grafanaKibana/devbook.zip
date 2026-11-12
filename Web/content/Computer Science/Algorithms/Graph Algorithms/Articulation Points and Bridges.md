@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-11-10T13:12:49.329Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T05:56:46.785Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: A single DFS finds all cut vertices and cut edges, the points whose rem
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 In an undirected network, a router or cable is a single point of failure when removing it leaves some pair of nodes unable to reach each other.

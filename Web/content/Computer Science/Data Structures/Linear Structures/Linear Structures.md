@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-09T18:37:04.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T14:39:34.303Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: Sequence structures like arrays, lists, stacks, queues, and buffers, de
 level:
   - "4"
 priority: Medium
-status: Done
+status: In Progress
 ---
 
 Linear structures arrange elements in a sequence. The category describes access order and position, not one memory layout. Arrays provide direct indexing and good locality. Linked lists trade that locality for edits around a node already in hand, while stacks and queues restrict which end may change.

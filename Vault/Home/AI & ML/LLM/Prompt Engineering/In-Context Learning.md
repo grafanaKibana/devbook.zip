@@ -4,13 +4,13 @@ subtopic: [LLM]
 summary: "An LLM adapting to a task from prompt examples without weight updates."
 level: ["3"]
 priority: Medium
-status: Done
+status: In Progress
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Prompt Engineering/In-Context Learning"
 flashcard_uid: "a871bbf2"
 created: "2026-02-28T13:40:02.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.480Z"
 ---
 

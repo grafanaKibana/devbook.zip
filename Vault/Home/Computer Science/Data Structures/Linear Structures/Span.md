@@ -4,12 +4,12 @@ subtopic: [Data Structures]
 summary: "A stack-only value describing contiguous memory it does not own, enabling zero-copy slicing and parsing."
 level: ["4"]
 priority: Medium
-status: Done
+status: In Progress
 publish: true
 qard-deck: "Computer Science"
 qard-topic: "Data Structures/Linear Structures/Span"
 created: "2026-02-19T22:34:10.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.347Z"
 ---
 
@@ -192,6 +192,7 @@ Backing-store lifetime still matters. A span over `stackalloc` memory is valid o
 > // Read-only window over immutable memory, no allocation:
 > ReadOnlySpan<char> id = "user-42".AsSpan(5);  // "42"
 > ```
+>
 > `tail` and `values` alias the same buffer, so the write through `tail` is observable through `values`. `AsSpan` produces a `ReadOnlySpan<char>` over the string's characters without copying them.
 
 # Comparison

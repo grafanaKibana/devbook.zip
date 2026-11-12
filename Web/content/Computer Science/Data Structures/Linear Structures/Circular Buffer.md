@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-06-20T05:33:50.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.343Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: A fixed-size array with wrapping read and write indices for streaming a
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 A circular buffer keeps a bounded slice of a stream, such as the last N log lines or one frame of audio samples. A growable [[Computer Science/Data Structures/Linear Structures/Queue|Queue]] also uses circular indexing, but it occasionally allocates and copies when capacity runs out. A fixed ring chooses its capacity once and moves indices without resizing.

@@ -52,7 +52,7 @@ public static class Validation
         {
             issues.Add(new("frontmatter.level", note.Rel, level.Line, "`level` contains unsupported values; expected 1-4"));
         }
-        foreach ((string field, string[] allowed) in new[] { ("priority", new[] { "Low", "Medium", "High" }), ("status", new[] { "Not-Started", "Creation", "Ready to Repeat", "Repetition", "Done" }) })
+        foreach ((string field, string[] allowed) in new[] { ("priority", new[] { "Low", "Medium", "High" }), ("status", new[] { "New", "In Progress", "Established" }) })
         {
             if (!fields.TryGetValue(field, out FrontmatterValue? value))
             {

@@ -11,7 +11,7 @@ summary: A typed API query language and execution model that lets clients select
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 GraphQL defines a typed query language and an execution model for APIs. A client selects fields from a server-owned schema. The server validates the operation, executes resolvers, and returns a response shaped like that selection. It fits domains where several clients need different projections and governing one shared schema costs less than adding a REST representation for every screen.

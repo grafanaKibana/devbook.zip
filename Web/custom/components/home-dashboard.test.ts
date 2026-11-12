@@ -34,7 +34,7 @@ const topicPages = (count: number, summary = "Summary") =>
       color: "#4c8000",
       icon: "folder",
       order: index + 1,
-      status: "Not-Started",
+      status: "New",
       summary,
     }
     return {
@@ -46,7 +46,7 @@ const topicPages = (count: number, summary = "Summary") =>
     }
   })
 
-const renderDashboard = async (count: number, summary = "Summary") => {
+const renderDashboard = async (count: number, summary = "Summary", statuses: string[] = []) => {
   const dc = {
     Link: ({ link }: { link: string }) => h("a", { href: `/${link}` }, link),
     require: async (path: string) =>
@@ -57,7 +57,15 @@ const renderDashboard = async (count: number, summary = "Summary") => {
           }
         : { icon: () => "<svg></svg>" },
     useCurrentFile: () => ({ $path: "Home/index.md" }),
-    useQuery: () => topicPages(count, summary),
+    useQuery: () => [
+      ...topicPages(count, summary),
+      ...statuses.map((status, index) => ({
+        $path: `Home/Topic 00/Note ${index}.md`,
+        $name: `Note ${index}`,
+        $tags: [],
+        value: (key: string) => (key === "status" ? status : undefined),
+      })),
+    ],
   }
   const Component = await loadComponent(dc, h)
   return render(h(Component, {}))
@@ -136,4 +144,19 @@ test("rendered topic summaries remain complete and unclamped", async () => {
   const css = /<style>([\s\S]*?)<\/style>/.exec(html)?.[1] ?? ""
   assert.match(html, new RegExp(`${summary.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</p>`))
   assert.doesNotMatch(css, /(?:line-clamp|text-overflow|max-height)/)
+})
+
+test("note development counts all three stages and weights them independently of study", async () => {
+  const html = await renderDashboard(1, "Summary", ["New", "In Progress", "Established"])
+  assert.match(html, /50% overall note development/)
+  assert.match(html, /1 Established, 1 In Progress, 1 New/)
+  assert.doesNotMatch(html, /Ready to Repeat|Repetition|Not-Started|Learning overview/)
+})
+
+test("established notes fill development progress and unknown stages stay visible", async () => {
+  const established = await renderDashboard(1, "Summary", ["Established"])
+  assert.match(established, /100% overall note development/)
+  const unknown = await renderDashboard(1, "Summary", ["Established", "unexpected"])
+  assert.match(unknown, /50% overall note development/)
+  assert.match(unknown, /1 Established, 0 In Progress, 0 New, 1 Other/)
 })

@@ -11,7 +11,7 @@ summary: An event-driven web server and reverse proxy for static delivery, TLS, 
 level:
   - "3"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 NGINX is an event-driven HTTP server and reverse proxy. A master process owns configuration and worker lifecycle. Worker processes handle connections and requests.

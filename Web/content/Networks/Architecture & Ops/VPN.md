@@ -11,7 +11,7 @@ summary: An encrypted tunnel making remote endpoints act as one private network 
 level:
   - "3"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 A virtual private network carries selected traffic through an authenticated, encrypted tunnel over another network. Routing and policy make remote addresses reachable through a virtual interface. The tunnel does not automatically grant access or place every endpoint on one flat network.

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T07:53:59.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-12T14:27:20.400Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: "Best-first shortest-path search ordered by f(n) = g(n) + h(n): admissi
 level:
   - "4"
 priority: High
-status: Creation
+status: New
 ---
 
 To find the shortest route to one destination on a road graph, [[Computer Science/Algorithms/Graph Algorithms/Dijkstra|Dijkstra]] settles nodes in expanding rings of cost-from-source. For a target 10 km east, it settles every node with path cost below 10 km in all directions and may also settle equal-cost nodes before the target, depending on tie-breaking. Almost none of that work touches the optimal path.

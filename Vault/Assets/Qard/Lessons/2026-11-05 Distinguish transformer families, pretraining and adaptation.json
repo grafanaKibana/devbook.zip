@@ -1,0 +1,487 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/AI & ML/LLM/LLM.md",
+      "text": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"A routing hub for model foundations, generation, adaptation, prompting, context, evaluation, and agent runtimes.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"3\"]\npriority: High\nstatus: Creation\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/LLM\"\nflashcard_uid: \"1eb55a0b\"\ncreated: \"2026-02-10T16:03:55.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.410Z\"\n---\n\nA large language model (LLM) is a neural language model trained at enough scale to handle a broad range of language tasks. The name says little about the exact architecture. Decoder-only models continue text causally, encoder-decoder models generate from an encoded source, and encoder-only models produce contextual representations instead of open-ended text.\n\nModel output is probabilistic and untrusted from a system-design perspective. A prompt conditions behavior, context supplies current evidence, and the harness exposes actions. The loop controls iteration and stopping. Evaluation then measures whether those pieces work together. Fluent output remains a candidate result until grounding and validation support it.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Engineering Routes\n\nFour inference-time disciplines form the runtime around a model call:\n\n```mermaid\nflowchart LR\n    P[Prompt Engineering<br>instruction] --> C[Context Engineering<br>evidence and budget]\n    C --> H[Harness Engineering<br>tools and environment]\n    H --> L[Loop Engineering<br>iteration and stopping]\n```\n\n| Route | Unit of design | Question |\n| --- | --- | --- |\n| [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering\\|Prompt Engineering]] | One instruction | How should this task be specified and demonstrated? |\n| [[Home/AI & ML/LLM/Context Engineering/Context Engineering\\|Context Engineering]] | The whole context window | Which evidence enters the window, in what order, and at what cost? |\n| [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering\\|Harness Engineering]] | Tools and execution boundary | What can the model do, and through which constrained interface? |\n| [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering\\|Loop Engineering]] | Runtime across turns | How does work iterate, verify, recover, and stop? |\n\n[[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]] and [[Home/AI & ML/LLM/Safety/Safety|Safety]] span every route. Model-level choices sit underneath them: [[Home/AI & ML/LLM/Generation|generation]] controls decoding, [[Home/AI & ML/LLM/Embeddings|embeddings]] represent inputs for retrieval, [[Home/AI & ML/LLM/Fine-tuning|fine-tuning]] adapts behavior, and [[Home/AI & ML/LLM/Model Selection and Routing|model selection and routing]] chooses which model serves a request.\n\nAt the application level, these disciplines become connected runtime subsystems rather than isolated techniques. This intentionally broad sketch shows one possible composition of request routing, retrieval, shared model access, agents, memory, tools, ingestion, and cross-cutting controls.\n\n![[Assets/Excalidraw/Imaginary AI System Architecture.excalidraw|1200|center]]\n\n# Transformer Foundations and Training\n\nAn LLM checkpoint comes from one architecture, tokenizer, objective, and training pipeline. Its weights are not a self-describing program. A compatible runtime must rebuild the expected computation graph, interpret the stored tensors correctly, apply the matching tokenization rules, and provide every operator required by the architecture and quantization scheme.\n\n## Transformer Families\n\n| Family | Training and attention boundary | Output path | Typical use |\n| --- | --- | --- | --- |\n| Encoder-only | Bidirectional contextual encoding. BERT pretrains with masked-token prediction and sentence-level objectives | One contextual vector per input token or a pooled representation | Classification, extraction, reranking, embeddings |\n| Encoder-decoder | Encoder reads the source bidirectionally. Decoder generates target tokens autoregressively while attending to encoder output | Generated target sequence | Translation, summarization, text-to-text tasks |\n| Decoder-only | Causal attention exposes only earlier tokens during next-token prediction | Generated continuation | Chat, code, completion, tool-call generation |\n\n**BERT** is encoder-only. It predicts masked tokens during pretraining and exposes contextual representations to a task head. It has no autoregressive decoder for open-ended generation.\n\n**T5** is a generative encoder-decoder. It pretrains with a span-corruption text-to-text objective: the encoder consumes corrupted input, and the decoder autoregressively generates missing target spans.\n\n**GPT-style models** are decoder-only. A causal mask makes each position predict from earlier positions, so the same stack can continue a prompt one token at a time.\n\n## Checkpoint is More than Weights\n\nLoading is trustworthy only when several contracts agree:\n\n- **Architecture and configuration** define the layer count, hidden size, attention layout, positional encoding, normalization, activation, vocabulary size, and expert topology.\n- **Tensor contract** covers parameter names, shapes, axis layout, serialization, numerical type, sharding, and any fused or transposed representation.\n- **Tokenizer contract** includes the vocabulary, normalization, splitting and merge rules, byte fallback, and special-token identifiers.\n- **Adaptation and quantization metadata** record adapter targets and scaling alongside quantization groups, scales, zero points, and calibration assumptions.\n- **Runtime operators** must implement compatible attention, position logic, expert routing, normalization, quantized matrix work, and cache layout on the target hardware.\n\nA `.safetensors` file provides a safe tensor container, not a model class or tokenizer. Llama-shaped tensors do not fit a GPT-2 graph. A wrong tokenizer is harder to spot: tensor dimensions still match while the same text maps to different IDs, silently changing behavior.\n\nPortable graph formats such as ONNX make operators and tensor interfaces explicit. The target runtime still needs the graph's operator versions, data types, custom operators, and hardware kernels. Parsing the file proves less than a known-answer inference test against the source runtime.\n\n## Training Pipeline\n\n```text\nbase checkpoint = architecture + tokenizer + pretrained tensors + configuration\ninstruction model = compatible base checkpoint + SFT + optional preference/reward stage\ndeployable artifact = model bundle + runtime + release evaluation\n```\n\n![[AI & ML/AI & ML-LLM-18120000.png|theme-aware]]\n\n1. **Pretraining** fits the architecture’s language objective over a large corpus. The output is a base checkpoint, not automatically a conversational assistant.\n2. **Supervised fine-tuning (SFT)** trains on instruction-response or task examples. [[Home/AI & ML/LLM/Fine-tuning|Fine-tuning]] covers full and parameter-efficient updates, data contracts, preference alignment, GRPO, and evaluation.\n3. **Preference or reward optimization** uses comparisons or verifiable rewards to favor some outputs over others. It remains a separate training stage even when documented in the same canonical note as fine-tuning.\n\nDeployment depends on training provenance. The release record needs the base revision, data version, tokenizer files, configuration, adapters, quantization recipe, runtime version, and evaluation result. A model name alone cannot reproduce an output or explain a regression.\n\n## Failure Modes\n\n- **Architecture mismatch** — tensor names or shapes fail during load, or a permissive loader leaves expected parameters uninitialized.\n- **Tokenizer mismatch** — loading appears successful, but prompts use different token IDs, special markers, or normalization and quality collapses.\n- **Runtime mismatch** — unsupported operators, cache layout, precision, or quantization kernels cause load failure, numerical drift, or a slow fallback path.\n- **Training-stage ambiguity** — benchmark results for a base checkpoint are compared with an instruction or preference-aligned variant as though they were the same model.\n\n# Mixture-of-experts\n\nA sparse mixture-of-experts (MoE) model replaces some dense feed-forward layers with expert networks and a learned router. The router activates only a small subset for each token, then combines their outputs. This adds total parameter capacity without evaluating every expert on every token. It is an internal architecture choice, separate from application-level [[Home/AI & ML/LLM/Model Selection and Routing|model selection and routing]].\n\n## Token Routing\n\n```text\ntoken hidden state\n    → router scores experts\n    → select top-k experts\n    → dispatch token\n    → combine weighted expert outputs\n```\n\nWhen too many tokens choose one expert, its device becomes a bottleneck while others sit idle. Implementations counter this with capacity limits, balancing objectives or biases, token rerouting, and deliberate expert placement.\n\n## What Sparse Activation Saves\n\nSparse activation saves feed-forward arithmetic compared with evaluating every expert. The rest of the transformer still runs, and the full parameter set still affects deployment.\n\nThree measurements describe different costs:\n\n- **Total parameters** affect checkpoint storage and expert placement across device memory.\n- **Active parameters per token** approximate part of the arithmetic executed for a token.\n- **Measured throughput and latency** include router work, token dispatch, all-to-all communication, batching, precision, kernels, and load imbalance.\n\nA dense model can beat a sparse model with a similar advertised active count when expert traffic is communication-bound. Careful expert placement can give an MoE more learned capacity at manageable per-token compute. Parameter counts alone cannot predict either result.\n\n## Capacity and Communication\n\nAn expert capacity factor reserves headroom above the average token share. Too little capacity drops or reroutes tokens. Too much wastes memory and compute. In distributed training or serving, tokens cross device boundaries to reach experts, so interconnect topology and placement become part of model latency.\n\nBatch shape changes that tradeoff. Large batches can spread tokens across experts efficiently, while small low-latency batches expose imbalance and communication overhead. Training throughput is not a substitute for measurement on the intended serving workload.\n\n## Routed and Shared Experts in DeepSeek-V3\n\nThe DeepSeek-V3 report describes routed experts, shared experts, and an auxiliary-loss-free load-balancing strategy. DeepSeek-R1 uses that base architecture, while [[Home/AI & ML/LLM/Fine-tuning#GRPO|GRPO]] belongs to post-training. Token routing and policy optimization solve different problems. Price, hardware, and benchmark comparisons are meaningful only when hardware, precision, prompts, and model versions match.\n\n# Minimal Vocabulary\n\n- **Token** — the integer-id unit produced by a specific tokenizer. Tokenizer choice affects sequence length and must match the checkpoint.\n- **Context window** — the token budget visible to one model invocation, including instructions, history, evidence, tool results, and output allowance.\n- **Inference** — executing a trained model to produce representations or generated tokens. [[Home/AI & ML/LLM/Generation|generation]] covers sampling controls for generative models.\n- **Embedding** — a vector representation used for similarity or downstream prediction. Covered in [[Home/AI & ML/LLM/Embeddings|embeddings]].\n\n# Questions\n\n> [!qard]- How do encoder-only, encoder-decoder, and decoder-only transformers differ?\n> The three families differ in which transformer stacks they use, and therefore in how attention sees the input and what the model produces. Encoder-only models build contextual representations of an input. Decoder-only models generate a continuation one token at a time. Encoder-decoder models read a source sequence and generate a separate target sequence.\n>\n> | Aspect | Encoder-only (BERT) | Encoder-decoder (T5) | Decoder-only (GPT-style) |\n> |---|---|---|---|\n> | Attention | Bidirectional: every token can attend to the whole input | The encoder reads the source bidirectionally; the decoder attends causally to its own earlier tokens and to the encoder's output | Causal: each position attends only to earlier positions |\n> | Pretraining objective | Predict masked tokens from the context on both sides | The encoder reads input with spans removed, and the decoder generates the missing spans | Predict the next token |\n> | Output | One contextual vector per token, or a pooled vector, passed to a task head | A generated target sequence | A generated continuation of the prompt |\n> | Typical use | Classification, extraction, reranking, embeddings | Translation, summarization and other text-to-text tasks | Chat, code, completion, tool-call generation |\n>\n> An encoder-only model has no autoregressive decoder, so it is not used for open-ended generation. The causal mask is what lets one decoder-only stack train on next-token prediction and then continue a prompt token by token. The typical uses describe common fits, not hard limits.\n>\n> Sources: [Attention Is All You Need](https://arxiv.org/abs/1706.03762) · [BERT](https://arxiv.org/abs/1810.04805) · [T5: Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683) · [Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)\n\n<!-- qard-id: 25714b3e-c167-44ee-b9ad-aa5e3144b4dd -->\n> [!qard]- How should prompting, RAG, and fine-tuning be chosen for an LLM system?\n> The choice follows the gap that evaluation reveals. A behavior gap is first addressed with clearer instructions and examples. A knowledge gap is closed by putting the facts into context. Small, stable facts can be written directly into the prompt. Large, private or changing facts are retrieved per request with RAG. Fine-tuning addresses behavior that stays inconsistent after prompt work. The techniques solve different problems and can be combined.\n>\n> | Technique | What it changes | Fits when | Main limit |\n> |---|---|---|---|\n> | Prompting | The instructions, examples and any fixed reference text sent with each request | The model can do the task but needs a clearer specification, output format or examples, or the facts it needs are few and stable enough to write into the prompt | Instructions alone add no knowledge. Facts written into the prompt are fixed in advance and add tokens to every call, so this approach does not scale to large or changing knowledge |\n> | RAG | The evidence selected and placed in the context at request time | Answers depend on current, private or citable information that is too large or changeable to include in every prompt | Answer quality is limited by retrieval quality, and retrieved text does not reliably teach a new format or style |\n> | Fine-tuning | The model's weights, through training on examples | Format, style or task behavior remains inconsistent after prompt work | It needs training data and evaluation, and facts stored in weights are harder to update than retrieved documents |\n>\n> Prompting is the usual starting point because it is the cheapest to iterate, but this is a diagnostic default, not a mandatory sequence. A fine-tuned model can still use RAG: training shapes behavior while retrieval supplies changing facts. Each change is compared on the same representative evaluation set, so an improvement can be attributed to that change.\n>\n> Source: [OpenAI: Optimizing LLM accuracy](https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy)\n\n> [!qard]- How does a sparse mixture-of-experts model work, and what does sparse activation actually save?\n> A sparse mixture-of-experts (MoE) model replaces some dense feed-forward layers with several expert networks and a learned router. Each token is processed by only a few selected experts. Compared with evaluating every expert on every token, this saves feed-forward arithmetic, so total parameter capacity can grow while per-token computation stays roughly constant. It does not shrink the parameter footprint: every expert still has to be stored and placed in device memory, and the rest of the transformer still runs for every token.\n>\n> Routing a token through an MoE layer:\n>\n> 1. The router scores every expert for the token's hidden state.\n> 2. The top-k experts are selected.\n> 3. The token is dispatched to those experts, possibly on other devices.\n> 4. Their outputs are combined using the router's weights.\n>\n> | Measure | What it reflects |\n> |---|---|\n> | Total parameters | Checkpoint size and the device memory needed to hold every expert |\n> | Active parameters per token | Part of the arithmetic performed for each token |\n> | Measured latency and throughput | Arithmetic plus router work, cross-device dispatch, load imbalance, batching and kernels |\n>\n> If many tokens choose the same expert, its device becomes a bottleneck while others sit idle. Capacity limits and load-balancing objectives counter this. Depending on the implementation, tokens beyond an expert's capacity are dropped or rerouted.\n>\n> The saving is relative to evaluating all experts. It is not a guaranteed advantage over every alternative. A dense model with a similar number of active parameters can be faster than an MoE when expert traffic is communication-bound, because the MoE also pays for routing, dispatch and imbalance. Parameter counts alone cannot predict either outcome. Only measurement on the intended serving workload shows the real cost.\n>\n> MoE routing happens inside one model and is separate from application-level routing between different models.\n>\n> Source: [Switch Transformers](https://jmlr.org/papers/v23/21-0998.html)\n\n# References\n\n- [Attention Is All You Need](https://arxiv.org/abs/1706.03762)\n- [BERT](https://arxiv.org/abs/1810.04805)\n- [Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683)\n- [Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)\n- [Training language models to follow instructions with human feedback](https://arxiv.org/abs/2203.02155)\n- [Switch Transformers](https://jmlr.org/papers/v23/21-0998.html)\n- [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1793898038441,
+  "topic": "Distinguish transformer families, pretraining and adaptation, inference context, and sparse-expert routing without equating fluent output with verified reasoning",
+  "notes": [
+    "Home/AI & ML/LLM/LLM.md"
+  ],
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "llm-mechanics",
+  "steps": [
+    {
+      "title": "Tokens and representations",
+      "explain": "A neural network computes with numbers, so text must first be represented numerically. Your **LLM** note defines a token as an integer-ID unit produced by a particular tokenizer. A token can correspond to a word, part of a word, or punctuation; it is not necessarily one whole word.\n\nThe ID identifies a vocabulary entry. Its numerical size does not express meaning: token 200 is not twice as meaningful as token 100. To supply useful numerical features, the model looks up a learned vector for each token ID. This is its token embedding.\n\nThat lookup alone cannot distinguish different uses of the same token. Consider “They sat beside the bank” and “They deposited cash at the bank.” Assuming “bank” receives the same token ID, its lookup embedding is the same, but the surrounding words differ. Transformer layers combine information from the context their architecture permits, producing a contextual representation that can differ between these uses.\n\nThis explains why your note describes encoder-only models as producing contextual representations: their useful output can be vectors representing the input, without generating a new sentence.",
+      "connect": "This checks the numerical-representation foundation from your earlier lesson. Next, we can distinguish transformer families by which context they can use and whether they produce representations or generated text.",
+      "checkFirst": true,
+      "check": {
+        "id": "k1",
+        "type": "long",
+        "prompt": "Suppose the same tokenizer assigns “bank” the same token ID in “They sat beside the bank” and “They deposited cash at the bank.” Must its contextual representation also be identical? Explain using the distinction between a token ID and a contextual representation.",
+        "marks": 3,
+        "rubric": [
+          {
+            "point": "States that the contextual representations need not be identical.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that the token ID identifies a vocabulary entry rather than fixing its meaning in every sentence.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that transformer processing incorporates surrounding context, allowing the representations to reflect the different uses of bank.",
+            "marks": 1
+          }
+        ],
+        "model": "No. The token ID identifies the same vocabulary entry in both inputs; it does not fix the word’s meaning in context. Although its token lookup embedding is the same, transformer layers incorporate surrounding context. The contextual representations can therefore differ, reflecting a river bank in one input and a financial institution in the other.",
+        "source": {
+          "path": "Home/AI & ML/LLM/LLM.md",
+          "heading": "Transformer Families"
+        },
+        "objective": "llm-mechanics",
+        "goal": "explain"
+      },
+      "misconceptions": [
+        {
+          "signs": "The representations must match because the token IDs match.",
+          "reteach": "A matching ID selects the same token lookup embedding. A contextual representation is computed later, using other available tokens, so it can change with the sentence."
+        },
+        {
+          "signs": "The tokenizer must assign different IDs because bank has different meanings.",
+          "reteach": "Tokenization identifies text units; it does not generally assign a separate ID to each intended meaning. In this example the IDs are explicitly the same. Contextual processing can distinguish the uses afterward."
+        },
+        {
+          "signs": "The ID itself encodes the meaning, so a larger or different number would represent another meaning.",
+          "reteach": "An ID is a vocabulary label. Learned vectors and the computations applied to them carry useful features; the numerical ordering of token IDs does not measure meaning."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Transformer families",
+      "explain": "Tokens become vectors, as in the previous step. **Attention** lets a token’s representation incorporate information from permitted positions. Two questions now separate transformer families: which positions are visible, and what does the model produce?\n\nYour **LLM** note, under **Transformer Families**, distinguishes three designs:\n\n- **Encoder-only**, such as BERT, reads an input bidirectionally: a token can use context on both sides. Its output is contextual representations. A task head uses these vectors for classification or extraction. There is no autoregressive decoder to keep generating text.\n- **Encoder-decoder**, such as T5, separates reading from writing. The encoder reads the complete source bidirectionally. The decoder generates a separate target sequence, using earlier target tokens and attending to the encoder’s output. This fits translation: the source is already available while its translation is still being written.\n- **Decoder-only**, such as GPT-style models, uses one causal stack to continue a prompt. Each next-token prediction uses the available prefix; future tokens are unavailable. Repeating this operation produces a continuation.\n\nThese are common task fits, not exclusive abilities: a decoder-only model can also translate. Architecture determines information flow and output structure; it does not establish whether a fluent answer is correct.",
+      "connect": "The previous step established tokens and vector representations; this step explains how attention connects those representations and how outputs emerge. These distinctions prepare us to separate architecture from training, inference context, and verification.",
+      "checkFirst": false,
+      "check": {
+        "id": "k2",
+        "type": "long",
+        "prompt": "An application translates a complete source sentence into a new target sentence. Explain why an encoder-decoder architecture fits this task, including what information its encoder and decoder can use. Then contrast its output path with those of encoder-only and decoder-only models.",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "States that the encoder can use the whole source sentence bidirectionally.",
+            "marks": 1
+          },
+          {
+            "point": "States that the decoder generates the target from earlier target tokens while attending to the encoder’s output.",
+            "marks": 1
+          },
+          {
+            "point": "Contrasts encoder-only output as contextual representations for a task head, without an autoregressive decoder.",
+            "marks": 1
+          },
+          {
+            "point": "Contrasts decoder-only output as a continuation of the prompt produced by one causal stack.",
+            "marks": 1
+          }
+        ],
+        "model": "The complete source is available, so the encoder can build representations using context from both directions. The decoder then generates a separate translation one token at a time, attending to the encoded source and using earlier target tokens without seeing future target tokens.\n\nAn encoder-only model produces contextual representations for a task head and has no autoregressive decoder. A decoder-only model uses one causal stack to generate a continuation of its prompt. It can also translate when prompted; translation is not exclusive to encoder-decoder models.",
+        "source": {
+          "path": "Home/AI & ML/LLM/LLM.md",
+          "heading": "Transformer Families"
+        },
+        "objective": "llm-mechanics",
+        "goal": "explain"
+      },
+      "misconceptions": [
+        {
+          "signs": "Says the translation decoder can attend to future target tokens because the encoder reads bidirectionally.",
+          "reteach": "Source and target have different boundaries. The complete source already exists, so the encoder can read both directions. The target is being generated, so its decoder uses earlier target tokens plus the encoded source."
+        },
+        {
+          "signs": "Says encoder-only models generate open-ended text because they understand the complete input.",
+          "reteach": "Reading the whole input produces contextual representations. Open-ended generation also needs a mechanism that predicts and appends successive tokens. An encoder-only architecture has no autoregressive decoder."
+        },
+        {
+          "signs": "Says decoder-only models cannot translate because translation requires an encoder-decoder.",
+          "reteach": "A decoder-only model can receive the source and translation instruction in its prompt, then continue with a translation. Encoder-decoder models provide a separate source-encoding and target-generation path; that is a structural fit, not an exclusive capability."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Pretraining and adaptation",
+      "explain": "A model’s architecture defines its computation. Its learned parameters determine how that computation responds to inputs. Training adjusts those parameters toward an objective.\n\nYour **LLM** note’s **Training Pipeline** separates three stages. **Pretraining** learns from a large corpus using a language objective: predicting masked tokens for BERT, reconstructing missing spans for T5, or predicting the next token for GPT-style models. These tasks develop language representations and patterns useful across many tasks. Their output is a **base checkpoint**; predicting text does not automatically make it a conversational assistant.\n\nTo encourage instruction-following, training can use examples pairing instructions with desired responses. This is **supervised fine-tuning (SFT)**: parameter updates make those responses more likely. Full fine-tuning updates the model’s weights; parameter-efficient methods train a smaller set of parameters.\n\nA later **preference or reward optimization** stage uses output comparisons or reward signals to favor particular behavior. It provides a different training signal from SFT’s example responses.\n\nThese stages can change behavior while keeping the same transformer family. Unlike ordinary prompting, they update learned parameters. Better instruction-following and fluent explanations still do not establish correctness: a training signal encourages behavior, while verification checks a particular result.",
+      "connect": "The previous step distinguished transformer families by their computation and attention boundaries. This step separates that architecture from the training stages that shape behavior, explaining why the same family can produce different behavior without guaranteeing verified reasoning.",
+      "checkFirst": true,
+      "check": {
+        "id": "k3",
+        "type": "long",
+        "prompt": "Checkpoint A is a decoder-only model pretrained to predict the next token in a large text corpus. Checkpoint B starts from A and receives further training on instruction–response examples, keeping the same architecture. Explain why B may follow instructions better, and whether its fluent answers establish correctness.",
+        "marks": 3,
+        "rubric": [
+          {
+            "point": "Explains that A's pretraining objective rewards next-token prediction rather than directly targeting instruction-following.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that B's instruction–response training updates learned parameters toward desired responses, so behavior can change without changing architecture.",
+            "marks": 1
+          },
+          {
+            "point": "States that fluency or instruction-following does not establish correctness; the particular answer still needs grounding or validation.",
+            "marks": 1
+          }
+        ],
+        "model": "A learns to predict text continuations; that objective does not directly require helpful responses to instructions. B receives supervised fine-tuning on desired instruction–response pairs, which updates learned parameters toward that behavior while preserving its decoder-only architecture. B may therefore follow instructions better, but fluent answers can still be wrong. Correctness needs support from evidence or checks appropriate to the answer.",
+        "source": {
+          "path": "Home/AI & ML/LLM/LLM.md",
+          "heading": "Training Pipeline"
+        },
+        "objective": "llm-mechanics",
+        "goal": "explain"
+      },
+      "misconceptions": [
+        {
+          "signs": "B must have become a different transformer family to follow instructions better.",
+          "reteach": "Architecture defines the computation; training changes its learned parameters. Instruction examples can change a decoder-only model's behavior while its attention pattern and transformer family stay the same."
+        },
+        {
+          "signs": "Instruction fine-tuning only adds examples to the current prompt.",
+          "reteach": "SFT uses examples to update learned parameters. Ordinary prompting supplies examples as input for a model invocation, without updating those parameters."
+        },
+        {
+          "signs": "B's fluent, instruction-following answers must be correct.",
+          "reteach": "Training makes favored responses more likely. It does not certify each generated answer. Evidence, calculations, tests, or other suitable checks must support the particular result."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Inference context and sparse experts",
+      "explain": "Training changes model parameters. Inference executes the trained model on an input. This distinction explains how a model can use new information without another training stage.\n\nYour **LLM** note defines the context window as a limited token budget covering instructions, conversation history, evidence, tool results, and output allowance. Suppose a document changes after training. Placing its updated text into the request gives the model that evidence during inference; it does not update the model’s weights. Retrieval-augmented generation (RAG) selects relevant material and puts it into this context. The evidence can guide an answer, but its presence does not prove the answer used it correctly.\n\nContext determines what information is available. Sparse mixture-of-experts (MoE) routing determines which internal expert networks process a token’s representation. At an MoE layer, a learned router scores experts, selects a small subset, and combines their outputs. These experts are parts of one model, not separate assistants retrieving documents or checking facts.\n\nActivating fewer experts saves feed-forward arithmetic compared with evaluating every expert. All expert parameters still need storage, and routing, communication, and uneven workloads add costs. Therefore, sparse activation alone cannot establish lower response latency; that requires measurement.",
+      "connect": "Pretraining and adaptation explain how the model’s parameters were learned. Context and expert routing explain how a trained model uses request-time information and computation, while leaving answer verification as a separate task.",
+      "checkFirst": false,
+      "check": {
+        "id": "k4",
+        "type": "long",
+        "prompt": "An application retrieves an updated policy document and includes it in a request to a frozen sparse MoE model. At each routed layer, the router selects two of eight experts for each token.\n\nExplain how the updated policy can affect the answer without training, what the router selects, and why selecting two experts does not by itself prove a faster response.",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "The policy supplies evidence through the request context without changing the frozen model’s weights.",
+            "marks": 1
+          },
+          {
+            "point": "The router selects internal expert networks to process each token’s hidden representation, rather than selecting documents or separate models.",
+            "marks": 1
+          },
+          {
+            "point": "Selecting two experts saves feed-forward arithmetic relative to evaluating all eight experts.",
+            "marks": 1
+          },
+          {
+            "point": "Routing, communication or load imbalance can offset arithmetic savings, so response latency must be measured.",
+            "marks": 1
+          }
+        ],
+        "model": "The updated policy enters the context as request-time evidence. It can influence generated tokens even though the model’s weights remain unchanged.\n\nAt each routed layer, the learned router selects two internal expert networks for each token’s hidden representation and combines their outputs. It is not selecting policy documents or separate assistants.\n\nEvaluating two experts requires less expert feed-forward arithmetic than evaluating all eight. Actual response time also includes routing, communication and load imbalance, so faster responses require measurement on the intended workload.",
+        "source": {
+          "path": "Home/AI & ML/LLM/LLM.md",
+          "heading": "Mixture-of-experts"
+        },
+        "objective": "llm-mechanics",
+        "goal": "explain"
+      },
+      "misconceptions": [
+        {
+          "signs": "Including the updated policy retrains the model or stores the policy in its weights.",
+          "reteach": "Context is input to a model invocation. Training updates parameters. A frozen model can condition its answer on new input without retaining that information in its weights."
+        },
+        {
+          "signs": "The router chooses two documents, separate assistants, or fact-checkers.",
+          "reteach": "Retrieval chooses external evidence. An MoE router selects internal neural networks to process token representations. Expert selection does not verify factual claims."
+        },
+        {
+          "signs": "Selecting two of eight experts guarantees a response four times faster.",
+          "reteach": "Only the selected expert computation is reduced relative to evaluating all eight. Other transformer computation still runs, and routing, communication and imbalance also take time."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Fluency and verification",
+      "explain": "Generating a claim and checking that claim are different operations. From the previous step, a decoder produces tokens using its learned weights and available context. Those mechanisms explain how an answer is produced; they do not establish whether its claims match reality.\n\nYour **LLM** note states that “Fluent output remains a candidate result until grounding and validation support it.” A clear explanation can contain a false premise, an unsupported inference, or an invented citation. Adding more explanation does not independently check those weaknesses.\n\nVerification therefore starts with the claim being made. For a factual claim, inspect a reliable source and check that it supports that exact claim. For a performance claim, measure the relevant workload under comparable conditions. A citation supports only what its source establishes; a benchmark supports conclusions within its tested conditions.\n\nFor example, fewer active MoE parameters can reduce some arithmetic. They do not establish lower latency because routing, communication, and batching also affect execution. Fluent reasoning makes the proposed explanation readable. Evidence and measured results determine how much confidence it deserves.",
+      "connect": "The previous step explained what context supplies and how sparse experts process tokens. This step separates those generation mechanisms from the evidence needed to trust an answer, completing the distinction between model capability and verified results.",
+      "checkFirst": true,
+      "check": {
+        "id": "k5",
+        "type": "long",
+        "prompt": "An assistant writes: “Model A uses half as many active parameters per token as Model B, so it will answer our requests twice as fast.” It gives a polished explanation and cites a technical report, but provides no timing results.\n\nHow would you assess and verify this claim before relying on it?",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "Identifies the claimed twofold speedup as unverified despite the polished explanation and citation.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that active parameter count covers only part of execution cost, naming at least one other factor such as routing, communication, batching, or kernels.",
+            "marks": 1
+          },
+          {
+            "point": "Checks whether the cited report supports the exact speed claim rather than merely reporting parameter counts.",
+            "marks": 1
+          },
+          {
+            "point": "Proposes timing both models on representative requests under comparable hardware and serving conditions, limiting the conclusion to the tested conditions.",
+            "marks": 1
+          }
+        ],
+        "model": "The twofold speedup is unverified. A polished explanation and a citation do not establish it. Active parameter count describes only part of computation; routing, communication, batching, and kernels can also affect latency.\n\nI would inspect the report to see whether it actually demonstrates the speedup or only lists parameter counts. Then I would measure both models on representative requests using comparable hardware, precision, input and output lengths, and serving load. Any resulting speed claim should be limited to those tested conditions.",
+        "source": {
+          "path": "Home/AI & ML/LLM/LLM.md",
+          "heading": "What Sparse Activation Saves"
+        },
+        "objective": "llm-mechanics",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Accepts the speedup because the explanation is detailed, confident, or internally consistent.",
+          "reteach": "An explanation can connect its premises correctly while starting from an incomplete premise. Fluent text shows how the claim is presented; measurements must establish the claimed speedup."
+        },
+        {
+          "signs": "Treats the presence of a citation as sufficient verification.",
+          "reteach": "A citation points to possible evidence. Inspect the source and match its findings to the exact claim. A report listing parameter counts does not thereby demonstrate a twofold speedup."
+        },
+        {
+          "signs": "Assumes halving active parameters necessarily halves response time.",
+          "reteach": "Active parameters describe only part of the work. Routing, communication, and other execution costs also consume time, so latency must be measured on the intended workload."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [
+        {
+          "q": "what is contextual representation?",
+          "a": "A **contextual representation** is a vector of numbers that represents a token after the transformer has processed it together with the context it can attend to.\n\nFor example, “bank” starts with the same token embedding in “river bank” and “bank account,” assuming the tokenizer assigns it the same token ID. Transformer layers combine information from surrounding tokens, so its resulting representation can differ between the two phrases. The vector captures features useful for interpreting the token in that context; it is not a human-readable definition.\n\nYour **LLM** note describes encoder-only models as producing these representations. A task head can use them for classification or extraction without generating a sentence.\n\nWhat information would help distinguish “bank” in “river bank” from “bank account”?"
+        },
+        {
+          "q": "the surrounding tokens?",
+          "a": "Yes. The surrounding tokens provide clues: “river” points toward land beside water, while “account” points toward a financial institution.\n\nAs your **LLM** note describes, an encoder can attend to tokens on both sides. Its layers use that context to build a different representation of “bank” in each phrase. A decoder-only model has a different boundary: it can use earlier tokens, but not later ones."
+        }
+      ],
+      "answer": {
+        "text": "The contextual represention will not be identical because surrounding context changing meaning of the \"bank\". Token id represents just an id of a token, i assume for the performance to not calculate vector of the same token twice. Contextual representation vector should represent meaning of the tokens including attention of the tokens between each other which will produce different vectors based on the context",
+        "confidence": "guess"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "The contextual represention will not be identical",
+            "kind": "correct",
+            "note": "You correctly distinguish the contextual representations."
+          },
+          {
+            "quote": "Token id represents just an id of a token",
+            "kind": "correct",
+            "note": "You identify the token ID as an identifier rather than a fixed contextual meaning."
+          },
+          {
+            "quote": "different vectors based on the context",
+            "kind": "correct",
+            "note": "You explain how attention to surrounding tokens can produce different representations."
+          },
+          {
+            "quote": "for the performance to not calculate vector",
+            "kind": "vague",
+            "note": "You should distinguish the ID’s role as a vocabulary identifier from possible implementation optimizations."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "You correctly explain how the same token ID can lead to different representations through context.",
+        "score": 3
+      },
+      "reply": "Yes. The same token ID starts with the same lookup embedding, while attention lets its contextual representation reflect the surrounding words. The ID identifies a vocabulary entry; avoiding repeated calculations is not its defining purpose."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "unknown": true
+      },
+      "mark": {
+        "score": 0,
+        "awarded": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "reply": "No problem. Read the explanation, then look at the model answer."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "unknown": true
+      },
+      "mark": {
+        "score": 0,
+        "awarded": [
+          false,
+          false,
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "reply": "No problem. Read the explanation, then look at the model answer."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "unknown": true
+      },
+      "mark": {
+        "score": 0,
+        "awarded": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "reply": "No problem. Read the explanation, then look at the model answer."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "I would infer the model with the same input with monitoring inference time and compare them",
+        "confidence": "guess"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "monitoring inference time and compare them",
+            "kind": "vague",
+            "note": "You suggest timing the models, but you need comparable hardware and serving conditions, representative requests, and a conclusion limited to those conditions."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You need to identify the claimed twofold speedup as unverified despite the polished explanation and citation."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You need to explain that active parameter count covers only part of execution cost and name another factor."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You need to check whether the cited report supports the exact speed claim."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You need to compare both models on representative requests under comparable hardware and serving conditions, then limit your conclusion to those conditions."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "Your timing comparison is a useful start, but it needs controlled conditions and checks of the claim and its source.",
+        "score": 0
+      },
+      "reply": "Timing both models is a useful start. What conditions would you keep comparable, and what would you look for in the cited report?"
+    }
+  ],
+  "current": 4,
+  "probe": {
+    "questions": [],
+    "answers": {},
+    "submitted": true,
+    "marks": {},
+    "findings": "You have not answered a probe for this objective, so your understanding of LLM mechanics is not yet established. Your prior lesson covered language representations, with one of four checks passed."
+  },
+  "map": {
+    "title": "From representations to LLM systems",
+    "plan": "We’ll start with tokens and representations from your earlier lesson, checking what you remember before building on it. Then we’ll use the LLM note to connect model architecture and training to inference, expert routing, and verification.",
+    "mermaid": "graph TD\nA[\"Tokens and representations\"] --> B[\"Transformer families\"]\nB --> C[\"Pretraining and adaptation\"]\nC --> D[\"Inference context and expert routing\"]\nD --> E[\"Verify outputs against evidence\"]",
+    "objective": "llm-mechanics",
+    "steps": [
+      {
+        "title": "Tokens and representations",
+        "why": "This reconnects the lesson to your earlier work and checks the foundation before introducing model families."
+      },
+      {
+        "title": "Transformer families",
+        "why": "Attention boundaries and output paths explain why encoder-only, encoder-decoder, and decoder-only models fit different tasks."
+      },
+      {
+        "title": "Pretraining and adaptation",
+        "why": "Separating the base training objective from later adaptation explains what each stage changes."
+      },
+      {
+        "title": "Inference context and sparse experts",
+        "why": "Distinguishing request-time evidence from internal token routing explains how models use context and computation."
+      },
+      {
+        "title": "Fluency and verification",
+        "why": "Checking claims against evidence and results prevents a plausible continuation from being treated as verified reasoning."
+      }
+    ]
+  },
+  "stepsFor": "[\"From representations to LLM systems\",[\"Tokens and representations\",\"Transformer families\",\"Pretraining and adaptation\",\"Inference context and sparse experts\",\"Fluency and verification\"]]",
+  "accepted": true,
+  "finishedAt": 1793898644851,
+  "close": {
+    "summary": "The lesson connected tokens and contextual representations to transformer families, training stages, inference context, sparse-expert routing, and verification. You passed all three tokens-and-representations checks, but reported guessing, so secure recall is not yet established. You reported not knowing the answers for transformer families (0/4), pretraining and adaptation (0/3), and inference context and sparse experts (0/4). These distinctions need further practice. The fluency-and-verification checks were also unsuccessful (0/4): your timing comparison was a useful starting point, but needed controlled conditions and checks that the source supports the claim. The central takeaway is that architecture determines attention and output structure, training changes learned parameters, context supplies information during inference, and sparse routing selects experts within a model. Fluent output alone does not establish correctness or verified reasoning.",
+    "cards": [
+      {
+        "front": "How do encoder-only, encoder-decoder, and decoder-only transformers differ in attention and output?",
+        "back": "Encoder-only models such as BERT use bidirectional attention to produce contextual representations. Encoder-decoder models such as T5 encode a source bidirectionally, then generate a target causally while attending to that encoding. Decoder-only models use causal attention to generate a continuation."
+      },
+      {
+        "front": "How do pretraining, supervised fine-tuning, preference optimization, and inference context affect a model?",
+        "back": "Pretraining learns a language objective from a large corpus. Supervised fine-tuning trains on task or instruction-response examples. Preference optimization favors outputs using preferences or rewards. These stages update learned parameters; ordinary inference uses supplied context without updating them. Context has a finite token budget."
+      },
+      {
+        "front": "What does sparse mixture-of-experts routing save, and why does it not guarantee lower latency?",
+        "back": "A router selects a few experts per token and combines their outputs, saving feed-forward arithmetic compared with running every expert. All expert parameters still require storage. Routing, communication, batching, and load imbalance affect latency, so active parameter count alone cannot predict speed."
+      },
+      {
+        "front": "What evidence is needed before accepting a fluent LLM answer that claims one model is faster than another?",
+        "back": "Check measurements under matched workloads, hardware, precision, model versions, and generation settings. Inspect the cited source to confirm it supports the comparison. Fluency and plausible explanations do not verify the claim or its reasoning."
+      }
+    ],
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-05 Distinguish transformer families, pretraining and adaptation.md",
+    "nextCheck": "2026-11-08"
+  }
+}

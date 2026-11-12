@@ -11,7 +11,7 @@ summary: Models computation as the evaluation of pure functions over immutable d
 level:
   - "3"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Software Design
 qard-topic: Paradigms/Functional Programming
 flashcard_uid: 76f68e02

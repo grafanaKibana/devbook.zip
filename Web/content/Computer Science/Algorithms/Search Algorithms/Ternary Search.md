@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T05:55:18.393Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Finds the extremum of a unimodal function by splitting the range in thi
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 A ball's range rises as its launch angle `θ` approaches the optimum, then falls after passing it. Once a model includes drag, the best angle may have no useful closed form. The search must sample the function and narrow the interval around its single peak. [[Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] solves a different problem because there is no ordered target here, only values that rise and then fall.

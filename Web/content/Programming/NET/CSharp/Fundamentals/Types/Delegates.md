@@ -11,7 +11,7 @@ summary: A type-safe function pointer for storing, passing, and invoking methods
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Types/Delegates
 flashcard_uid: c751e8da

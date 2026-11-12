@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-28T21:14:18.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-15T11:47:55.048Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: Patterns that keep distributed systems stable when dependencies degrade
 priority: High
 level:
   - "3"
-status: Done
+status: In Progress
 ---
 
 Resilience patterns control how failure crosses service boundaries. A slow or overloaded dependency is ordinary in a distributed system. Without a response policy, waiting calls consume connection pools and worker capacity while retries add more load.

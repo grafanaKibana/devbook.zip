@@ -4,10 +4,10 @@ subtopic: [Data Structures]
 summary: "Answers incremental connectivity queries through find, union by rank, and path compression."
 level: ["3"]
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 publish: true
 created: "2026-06-30T08:23:11.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-12T14:27:20.418Z"
 ---
 

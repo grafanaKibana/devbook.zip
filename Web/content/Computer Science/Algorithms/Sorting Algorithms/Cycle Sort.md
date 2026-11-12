@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-08-10T10:51:19.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-08-10T08:02:32.162Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Rotates permutation cycles so displaced elements are written directly t
 level:
   - "4"
 priority: Low
-status: Not-Started
+status: New
 ---
 
 Cycle sort reads the mapping from current positions to sorted positions as a set of cycles. At `cycleStart`, it counts smaller values to find where the current value belongs. It writes the value straight there, picks up the displaced value, and follows the cycle until it returns to `cycleStart`.

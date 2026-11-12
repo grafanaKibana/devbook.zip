@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-06-12T18:21:46.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.486Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Pairs queries with their relevant chunks. The hard part is labeling whi
 level:
   - "2"
 priority: High
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets
 flashcard_uid: 476f3199

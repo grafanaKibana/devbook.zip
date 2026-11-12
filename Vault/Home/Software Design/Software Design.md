@@ -7,11 +7,11 @@ subtopic: []
 summary: "How code is structured at the module and class scale — the principles, paradigms, and testing discipline that shape good design."
 tags: [FolderNote]
 publish: true
-status: Not-Started
+status: New
 level: ["4"]
 priority: High
 created: "2026-07-15T12:08:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-15T11:53:27.615Z"
 ---
 

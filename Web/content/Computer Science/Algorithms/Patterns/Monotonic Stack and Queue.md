@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T05:58:06.704Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: A stack or deque kept monotone by popping dominated elements, answering
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 For each daily temperature, the next warmer day may be far ahead. Rescanning the suffix repeats the same comparisons. A monotonic stack keeps only unresolved days, and one warmer value can settle several of them at once.

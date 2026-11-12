@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-16T21:15:26.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.475Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Golden sets detect broad regressions. Targeted suites isolate specific 
 level:
   - "3"
 priority: Medium
-status: Done
+status: In Progress
 ---
 
 Every prompt, model, or retrieval change needs a repeatable comparison with the current baseline. A golden test set provides that stable sample. Targeted suites sit beside it and isolate failures such as prompt injection, unsupported claims, or unsafe tool use.

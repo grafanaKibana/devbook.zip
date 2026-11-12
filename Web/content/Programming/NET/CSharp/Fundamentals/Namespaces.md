@@ -11,7 +11,7 @@ summary: A logical scope organizing types and preventing naming collisions.
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Namespaces
 flashcard_uid: 1f7aec15

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-20T23:50:18.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-12T14:27:20.410Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Searches for a pattern without rescanning text by using a precomputed p
 level:
   - "4"
 priority: Medium
-status: Done
+status: In Progress
 ---
 
 Naive string search restarts the pattern one position later after a mismatch, even when the matched prefix already reveals how far the pattern can move. KMP preprocesses that self-overlap into a prefix, or failure, table.
