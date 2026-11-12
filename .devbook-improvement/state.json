@@ -12460,11 +12460,11 @@
     "version": 1,
     "id": "546ef5b36e6142c79d9efe91941e131e",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-12T07:25:53.899904Z",
-    "elapsed_seconds": 691.4791655000004,
+    "elapsed_seconds": 702.5332168000003,
     "calls_reserved": 18,
-    "responses_received": 17,
+    "responses_received": 18,
     "attempted_paths": [
       "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
       "Vault/Home/Networks/Architecture & Ops/CDN.md",
@@ -14482,7 +14482,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T07:37:25.378443Z",
+    "checkpoint_at": "2026-11-12T07:37:36.432494Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
@@ -33424,5 +33424,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "546ef5b36e6142c79d9efe91941e131e",
+    "topic_id": "networks-ab2c47c3",
+    "batch": {
+      "topic": "Networks",
+      "topic_id": "networks-ab2c47c3",
+      "notes": [
+        {
+          "path": "Vault/Home/Networks/Networks.md",
+          "content": "---\nicon: network\norder: 40\ncolor: \"#f59e0b\"\ntopic: [Networks]\nsubtopic: []\nsummary: \"Protocols, latency, and reliability of how machines communicate over a network.\"\ntags: [FolderNote]\npublish: true\npriority: High\nlevel: [\"3\"]\nstatus: Done\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.342Z\"\n---\n\nNetworking turns local computation into communication between failure domains. A request depends on name resolution, routing, transport state, protocol semantics, and the remote application. Along that path, data may be delayed, rejected, duplicated, reordered, or hidden behind a higher layer's recovery behavior.\n\nThe practical model starts with one question: which component last observed the request in a valid state? An HTTP timeout might begin with slow DNS, lost TCP segments, a TLS handshake, proxy queueing, or application work. Logs become useful only when they are tied to that path.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# The Layer Model\n\nThe stack separates responsibilities without pretending implementations are perfectly isolated. A single request crosses every row:\n\n| Layer | Owns | Examples | Typical failure |\n|---|---|---|---|\n| Link | Frames on the local wire | Ethernet, Wi-Fi, ARP | Driver/physical issues, local congestion |\n| Internet | Addressing and routing between networks | [[Home/Networks/Transport & Sockets/TCP IP\\|IP]], ICMP, routing | Unreachable host, wrong route, MTU/fragmentation |\n| Transport | End-to-end delivery between processes | [[Home/Networks/Transport & Sockets/TCP IP\\|TCP]], [[Home/Networks/Transport & Sockets/UDP\\|UDP]], ports | Refused/reset connections, retransmit-driven latency |\n| Application | What the bytes mean | [[Home/Networks/Protocols/HTTP\\|HTTP]], [[Home/Networks/Protocols/DNS\\|DNS]], TLS, [[Home/Networks/Protocols/gRPC\\|gRPC]] | Wrong status, slow handshakes, protocol mismatch |\n\nTLS uses a transport connection to secure application protocols. DNS is itself an application-layer protocol and often precedes that connection. Resolution and handshake timings therefore belong beside application latency in any request trace.\n\n# Delivery Modes\n\nThe destination address determines who may receive an IP packet. The transport protocol does not change that fact: UDP supports all four patterns where the network does, while a TCP connection is still a unicast conversation between two endpoints.\n\n| Mode | Address ownership | Sender → receivers | Routing scope | Concrete use |\n|---|---|---:|---|---|\n| Unicast | One interface owns the destination | 1 → 1 | Local or routed | A client connects to one API address. Ordinary DNS replies are usually unicast |\n| Broadcast | Every IPv4 host on the attached broadcast domain accepts the destination | 1 → all on-link | IPv4 subnet only. Routers normally do not forward it | A DHCP client without an address sends to `255.255.255.255` |\n| Multicast | Receivers join a group address. No host owns it | 1 → subscribed group | Link-local or routed only where multicast is configured | mDNS uses `224.0.0.251`/`ff02::fb`. Controlled networks distribute media or market data |\n| Anycast | Multiple nodes advertise the same unicast address | 1 → one topologically selected node | Routed | Public DNS and CDN edges route a client to one advertised site; separate policy may withdraw an unhealthy advertisement |\n\nAnycast does not send a packet to every site advertising the address. Routing selects one path, and a route change can move later packets or a new connection elsewhere. Stateful services need an explicit plan for that movement. Multicast has different cardinality: the network replicates traffic toward joined receivers where multicast routing exists. IPv6 uses multicast rather than broadcast for functions such as Neighbor Discovery.\n\nDestination ownership narrows the failure search. Unicast points to one addressed endpoint and its route. Broadcast remains on the local IPv4 link. Multicast depends on group membership and replication state. Anycast can fail selectively because different source networks choose different advertisements.\n\n# References\n\n- [Host Extensions for IP Multicasting](https://www.rfc-editor.org/rfc/rfc1112)\n- [Multicast DNS](https://www.rfc-editor.org/rfc/rfc6762)\n- [High Performance Browser Networking](https://hpbn.co/)\n",
+          "hash": "fd6dfdad5444b61d35c9fa39aeb47c49924c23597d3d314cd1129f82a05ce4d0",
+          "topic": "Networks",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Networks/Networks.md",
+          "outcome": "keep",
+          "reason": "Audited the whole FolderNote against the current text and standard networking knowledge (RFC 1112, RFC 6762, IPv4/IPv6 addressing). The opening frames a request path across failure domains and the datacorejsx card map is intact. The layer table gives correct owner, example and failure per layer, and the wikilinks use the vault's full-path alias form. The TLS/DNS paragraph correctly places resolution and handshake timing in request traces. The delivery-modes table is accurate: DHCP uses 255.255.255.255, mDNS uses 224.0.0.251 and ff02::fb, broadcast is IPv4-only and not routed, IPv6 uses multicast for Neighbor Discovery, anycast selects one path and a route change can move a connection, and TCP is unicast only. The closing paragraph turns each mode into a failure-search heuristic. The three references are relevant and have no trailing annotations. There are no Qards, no known violations, and no unclear prose or repetition. Any edit would be cosmetic churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Networks/Networks.md": "fd6dfdad5444b61d35c9fa39aeb47c49924c23597d3d314cd1129f82a05ce4d0"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Networks/Networks.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-12T07:37:36.432484Z"
+  }
 }
