@@ -13507,7 +13507,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-12T20:08:23.345425Z",
-    "elapsed_seconds": 369.41109859999983,
+    "elapsed_seconds": 373.48366839999983,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
@@ -13812,7 +13812,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T20:14:32.755994Z",
+    "checkpoint_at": "2026-11-12T20:14:36.828564Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -29187,16 +29187,16 @@
   },
   "held_proposals": {
     "programming-e6aba2bd": {
-      "workload_id": "792178af26484b3da828d4cea1e5f39f",
+      "workload_id": "5589fab66fbd42d6ab4c1fac5fc35939",
       "topic_id": "programming-e6aba2bd",
       "batch": {
         "topic": "Programming",
         "topic_id": "programming-e6aba2bd",
         "notes": [
           {
-            "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
-            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"The default in-process mutual-exclusion primitive: one thread in the critical section at a time.\"\nlevel: [\"4\"]\npriority: High\nstatus: Creation\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Concurrency and Parallelism/Locking\"\nflashcard_uid: \"15275eaf\"\ncreated: \"2026-07-14T20:57:52.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-15T06:00:17.802Z\"\n---\n\n`lock` gives one thread at a time access to a synchronous critical section. It fits small in-process state changes such as updating a counter or taking a snapshot of a shared dictionary. Awaited I/O should normally happen outside that mutation and publish its result inside a short lock. When an invariant genuinely must span asynchronous work, `SemaphoreSlim.WaitAsync` can gate that bounded span; cross-process coordination needs [[Mutex]], and N concurrent holders need [[Semaphore]] rather than mutual exclusion.\n\n# How It Works\n\n`lock (obj) { body }` is sugar over `Monitor`:\n\n```csharp\nlock (_gate) { _count++; }\n\n// the compiler emits:\nbool lockTaken = false;\ntry\n{\n    Monitor.Enter(_gate, ref lockTaken);\n    _count++;\n}\nfinally\n{\n    if (lockTaken) Monitor.Exit(_gate);\n}\n```\n\n`lockTaken` records whether `Monitor.Enter` succeeded. If acquisition throws, the `finally` block does not attempt to release a monitor the thread never owned.\n\n**`Monitor`/`lock` is reentrant.** Its owning thread can acquire the same monitor again. Each acquisition increments a recursion count, so the thread must exit the same number of times. A one-permit [[Semaphore|semaphore]] has no such ownership model and self-deadlocks on a nested wait.\n\n**`System.Threading.Lock` (.NET 9+)** makes this intent explicit. When the operand has type `Lock`, the statement uses `Lock.EnterScope()` and disposes its `ref struct` scope at the closing brace instead of lowering to `Monitor.Enter`:\n\n```csharp\nprivate readonly Lock _gate = new();   // .NET 9+\n\nlock (_gate) { _count++; }             // compiler calls _gate.EnterScope()\n```\n\nA dedicated `Lock` field is harder to misuse than a general `object`. With either type, the gate stays `private readonly`. Locking on `this`, a `Type`, or an interned string exposes the monitor to unrelated code and can create invisible [[Deadlocks|lock-ordering cycles]].\n\n# Example\n\n```csharp\npublic sealed class MetricsBuffer\n{\n    private readonly Lock _gate = new();          // .NET 9+; an `object` pre-9\n    private readonly Dictionary<string, long> _counts = new();\n\n    public void Increment(string name)\n    {\n        lock (_gate)\n        {\n            _counts.TryGetValue(name, out long n);\n            _counts[name] = n + 1;\n        }\n    }\n\n    public IReadOnlyDictionary<string, long> Snapshot()\n    {\n        lock (_gate)\n            return new Dictionary<string, long>(_counts);  // copy out under the lock\n    }\n}\n```\n\nBoth reads and writes use `_gate`. `Snapshot` copies the dictionary while protected, then returns data that callers can enumerate after the live lock has been released.\n\n# Pitfalls\n\n- **A monitor cannot span `await`.** Monitor ownership has thread affinity, while a continuation may resume on another thread. The compiler reports CS1996. Async mutual exclusion uses a [[Semaphore|semaphore]] and `WaitAsync`.\n- **I/O inside a lock turns latency into contention.** Every waiter queues behind the slow operation, increasing the chance of convoys and [[Deadlocks|deadlocks]]. Computation and fetching belong outside the lock, which then protects only the shared-state update.\n- **A public gate leaks synchronization.** `this`, a `Type`, and interned strings can all be locked by unrelated code.\n- **`Monitor.TryEnter(obj, timeout)` bounds acquisition.** It is useful when an external lock order cannot be fully controlled. [[Deadlocks]] covers the ordering mechanics.\n\n# Tradeoffs\n\n- **`lock`/`Monitor`** is synchronous, in-process, reentrant mutual exclusion. Its fast path stays in user mode.\n- **`SemaphoreSlim`** is in-process, supports `WaitAsync`, and can expose more than one permit. It has no thread ownership or reentrancy.\n- **`Mutex`** supplies thread-owned mutual exclusion through an operating-system object and can coordinate named participants across processes.\n\nFor short synchronous state changes inside one process, `lock` is the smallest correct primitive. Ordinary async flows need restructuring so awaited I/O completes before the protected mutation. When the invariant must remain gated across asynchronous work, `SemaphoreSlim.WaitAsync` provides that gate, and the span needs to stay bounded because remote latency becomes contention. A real process boundary justifies `Mutex`. N concurrent entrants make the problem a [[Semaphore]] problem regardless of whether callers wait synchronously or asynchronously.\n\n# Questions\n\n> [!qard]- What is a race condition?\n> A race condition occurs when a result depends on the timing of concurrent accesses to shared state. A read-modify-write sequence such as `_count++` can let two threads read the same old value, then overwrite one another's updates. A run that happens to produce the expected result does not prove the code is race-free.\n>\n> [Microsoft: Managed threading best practices](https://learn.microsoft.com/en-us/dotnet/standard/threading/managed-threading-best-practices) · [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)\n\n> [!qard]- How does `lock` prevent a lost-update race?\n> `lock` lets only one thread at a time run code protected by the same lock object, so protected updates cannot interleave.\n>\n> For example, two threads run `_count++` on a shared field. The increment is three steps: read the value, add one and write the result back.\n>\n> 1. Thread A reads 5.\n> 2. Thread B reads 5 before A writes.\n> 3. A writes 6.\n> 4. B writes 6.\n> \n> Two increments ran, but one was lost. With `lock (_gate) { _count++; }` in both threads, B cannot read until A has written and released the lock, so the result is 7.\n>\n> The protection covers only code that takes the same lock. Every read and write of the shared state must use that lock object; an unprotected access elsewhere can still interleave with a protected update.\n>\n> [Microsoft: Managed threading best practices](https://learn.microsoft.com/en-us/dotnet/standard/threading/managed-threading-best-practices) · [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)\n\n<!-- qard-id: e403b36e-6e7b-4f41-826c-e2e258743019 -->\n> [!qard]- When `lock` targets an ordinary object, what does the compiler ensure around the critical section?\n> The compiler acquires the monitor with `Monitor.Enter(obj, ref lockTaken)`, runs the body inside `try`, and exits in `finally` only if acquisition succeeded. This releases ownership on normal and exceptional exits without exiting a monitor the thread never acquired. The specialized `System.Threading.Lock` path in C# 13 uses `EnterScope` instead. [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) · [Monitor.Enter](https://learn.microsoft.com/en-us/dotnet/api/system.threading.monitor.enter?view=net-10.0)\n\n<!-- qard-id: 2c0335e4-1efa-4aa3-b33b-605b74456ccc -->\n> [!qard]- Why can’t a `lock` block contain `await`?\n> `Monitor` ownership belongs to the thread that entered it, and only that thread can exit it. An awaited continuation may resume on a different thread, which would then try to release a monitor it does not own. The C# compiler therefore rejects `await` inside a `lock` block.\n>\n> Holding a lock across `await` would also make other threads wait for the whole asynchronous operation, turning I/O latency into lock contention.\n>\n> Two alternatives remain:\n>\n> - **Restructure:** the awaited work runs outside the lock, and only the resulting state change runs inside a short `lock`. This fits most cases.\n> - **Async-aware gate:** when an invariant must stay protected across an `await`, a `SemaphoreSlim` with one permit and `await WaitAsync()` provides the gate. It has no thread ownership, so a continuation on another thread can release it. `Release()` belongs in `finally`.\n> \n> [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) · [Monitor.Enter](https://learn.microsoft.com/en-us/dotnet/api/system.threading.monitor.enter?view=net-10.0) · [SemaphoreSlim API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0)\n\n<!-- qard-id: 9e14d6f6-6dc4-4b82-bda7-880929057d58 -->\n> [!qard]- What does `System.Threading.Lock` change about `lock` in C# 13 and .NET 9+?\n> `System.Threading.Lock` gives the compiler a dedicated synchronization type instead of an arbitrary object. In C# 13, `lock` on that type lowers to an `EnterScope()` guard that releases when the scope exits, rather than the ordinary `Monitor.Enter`/`Exit` pattern. It remains synchronous and cannot span `await`; the type does not promise a universal speedup. [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)\n\n<!-- qard-id: 0fdc576b-ea0a-41ce-9613-4ec6f7fe0d57 -->\n> [!qard]- How does reentrancy differ between `lock`/`Monitor` and `SemaphoreSlim`?\n> `lock`/`Monitor` is reentrant for its owning thread. `SemaphoreSlim` is not reentrant, because it has no owner.\n>\n> - **`lock`/`Monitor`:** records which thread owns the monitor and how many times it has entered. The owner can enter again without blocking, and other threads can acquire the monitor only after the owner has exited the same number of times.\n> - **`SemaphoreSlim`:** records only how many permits remain, not which thread or asynchronous flow holds them. A second wait from the same code is just another request for a permit.\n> \n> With a one-permit `SemaphoreSlim`, a method that holds the permit and then calls code that waits on the same semaphore ends up waiting for itself. Without a timeout or cancellation, `Wait()` blocks forever and `WaitAsync()` never completes. The permit therefore belongs at one boundary in the call chain, with `Release()` in `finally` so that each acquisition is released exactly once.\n>\n> [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) · [Monitor.Enter](https://learn.microsoft.com/en-us/dotnet/api/system.threading.monitor.enter?view=net-10.0) · [SemaphoreSlim API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0)\n\n> [!qard]- When is `Interlocked` sufficient instead of `lock`?\n> `Interlocked` fits a supported atomic update to one shared location, such as incrementing a counter or exchanging a reference. Its read-modify-write operation cannot lose an update through interleaving:\n>\n> ```csharp\n> Interlocked.Increment(ref completedCount);\n> ```\n>\n> That one atomic operation does not make a sequence of operations or several related fields atomic. A check-then-update rule or a multi-field invariant needs a suitable synchronization design, often one lock around the entire decision and change. In a worker-count example, waiting for every worker to finish is also necessary before asserting the final count. [Microsoft: Interlocked](https://learn.microsoft.com/en-us/dotnet/api/system.threading.interlocked?view=net-10.0)\n\n# References\n\n- [lock statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)\n",
-            "hash": "abdfcc0ff8010ea590a42fa81235041fd89dd7aeb13fd823bf2d2554ecf56999",
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"Type-safe, reusable code without duplicating logic per type, including constraints and variance.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Generics\"\nflashcard_uid: \"3fc98b91\"\ncreated: \"2026-02-18T20:04:43.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:14:17.325Z\"\n---\n\nGenerics parameterize code by type. `List<T>` can store any `T` while the compiler still checks every read and write. That is a stronger contract than accepting `object` and recovering the real type with casts. For value types, generic collections also avoid the boxing required by older object-based APIs.\n\n- `T` is a placeholder for a type chosen by the caller.\n- `List<T>` is an open generic type definition. `List<int>` is a closed constructed type.\n- Constraints (`where T : ...`) are capability contracts that unlock members safely.\n- The runtime specializes generic code for value-type arguments and can share code between reference-type arguments.\n\n# Use Cases\n\n- Collections preserve the element or key type throughout an API.\n- Algorithms can require only the operations they use, such as comparison or numeric operators.\n- Generic result and handler types can keep payload types explicit without duplicating infrastructure.\n\nA generic abstraction should still represent one real behavior. `IRepository<TEntity>` is not useful merely because every entity happens to support create, read, update, and delete operations. Different aggregates often need different contracts.\n\n# Constraints\n\nConstraints tell the compiler what operations are valid for `T`. They also document the smallest capability the algorithm expects.\n\n- `where T : class` - `T` must be a reference type.\n- `where T : struct` - `T` must be a non-nullable value type.\n- `where T : notnull` - nullable analysis warns when a nullable type argument is used.\n- `where T : unmanaged` - `T` is a non-nullable unmanaged type whose fields are also unmanaged. This is not identical to every platform's definition of blittable.\n- `where T : new()` - `T` must have a public parameterless constructor.\n- `where T : BaseType` - `T` must inherit from a specific base type.\n- `where T : ISomeInterface` - `T` must implement a specific interface.\n\n# Variance\n\nVariance controls safe assignment between constructed interface or delegate types when their type arguments are related by inheritance.\n\n- Invariance (default): `List<string>` is not assignable to `List<object>`.\n- Covariance (`out T`): allows a more derived type where a base type is expected for producer-only APIs (for example, `IEnumerable<string>` to `IEnumerable<object>`).\n- Contravariance (`in T`): allows a less derived type where a more derived type is expected for consumer-only APIs (for example, `IComparer<object>` as `IComparer<string>`).\n- Variance is supported on interfaces and delegates marked with `in`/`out`, and only for reference-type substitutions.\n\n```csharp\nIEnumerable<string> names = new List<string> { \"Ada\", \"Linus\" };\nIEnumerable<object> objects = names; // covariance\n\nAction<object> printAny = o => Console.WriteLine(o);\nAction<string> printString = printAny; // contravariance\n\nList<string> list = new();\n// List<object> invalid = list; // does not compile (invariance)\n```\n\n# Example\n\n```csharp\npublic static T CreateAndValidate<T>()\n    where T : EntityBase, IValidatable, new()\n{\n    var value = new T();\n    value.Validate();\n    return value;\n}\n```\n\n# Generic Math (.NET 7+)\n\nGeneric code once had no static contract for operators such as `+`. Static abstract interface members changed that. `INumber<T>` declares numeric operators and identities, so a `where T : INumber<T>` constraint makes arithmetic available on the type parameter.\n\n```csharp\npublic static T Sum<T>(ReadOnlySpan<T> values) where T : INumber<T>\n{\n    T total = T.Zero;\n    foreach (var v in values) total += v;   // operators resolved via the interface\n    return total;\n}\n```\n\nThe same static-member mechanism supports contracts such as `IParsable<TSelf>`, where parsing belongs to the type rather than an instance.\n\n# Reflection over Generics\n\nAn open generic such as `List<>` has unassigned type parameters and cannot be instantiated. Reflection can close it at runtime with `MakeGenericType`. Generic methods use `MakeGenericMethod`.\n\n```csharp\nType closed = typeof(List<>).MakeGenericType(itemType); // e.g. List<Order>\nvar list = Activator.CreateInstance(closed);\n```\n\n`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only. Code using that anti-constraint must obey the ref-safety rules for every possible `T`.\n\n# Pitfalls\n\n- An unconstrained `T` exposes only operations valid for every type. The smallest constraint that the algorithm actually needs makes the required operations available without internal casts.\n- **Static state belongs to each closed type.** `Cache<int>` and `Cache<string>` receive separate copies of a `static` field declared on `Cache<T>`.\n- **Value-type specialization can grow native code.** Separate value-type instantiations can produce separate JIT-compiled bodies. The specialization avoids the boxing that `object`-based storage requires and preserves value semantics, but many large instantiations increase startup and code-size costs.\n- `default(T)` is `null` for reference types and zero-initialized data for value types. Either result may look valid in a domain model, so absence should have an explicit contract.\n- A concrete base-class constraint couples the abstraction to one hierarchy. A behavioral interface avoids that coupling when inheritance is not itself part of the requirement.\n\n# Tradeoffs\n\n- **Generics versus `object`.** Non-generic collections box value types when storing them as `object`. `List<int>` keeps integers unboxed and removes casts at the read boundary.\n- **Generics versus inheritance.** A generic API carries a concrete type argument through compile-time checks. Inheritance allows one base reference to dispatch to different runtime implementations. The choice is about when variation is known, not a blanket performance rule.\n- **Specialization versus code sharing.** The CLR normally specializes code for value-type arguments and shares compatible code for reference-type arguments. This balances value-type performance against native code size.\n\n# Questions\n\n<!-- qard-id: 051626ec-488b-484a-affe-9b09e168fb5e -->\n> [!qard]- What do generics add to a C# API?\n> Generics let one implementation take a type as a parameter. The same code then works with many types, while the compiler still checks the type of every value that goes in or comes out.\n>\n> Compared with an API that accepts `object`:\n>\n> - **Type safety:** an `object`-based API needs casts on the way out, so a wrong type fails only at runtime. A `List<string>` instead rejects an `int` at compile time and returns strings without casts.\n> - **No storage boxing for value types:** an `object`-based collection boxes each `int` it stores, while `List<int>` stores the integers directly. Generic code can still box a value-type `T` through conversions, such as converting it to `object` or to an interface type.\n> \n> **Constraints** such as `where T : IComparable<T>` narrow which type arguments are allowed. In return, the generic code may use the members that the constraint guarantees, such as `CompareTo`.\n>\n> [Microsoft: generic types and methods](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft: constraints on type parameters](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters) · [C# specification: boxing conversions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/conversions#1029-boxing-conversions)\n\n<!-- qard-id: 96d2fdb0-3c95-4eb1-91da-258a4574cde2 -->\n> [!qard]- Why does `IEnumerable<string>` assign to `IEnumerable<object>`, but `List<string>` does not assign to `List<object>`?\n> `IEnumerable<T>` declares its type parameter covariant (`out T`), so the conversion is allowed. `List<T>` is invariant, so it is not.\n>\n> - **`IEnumerable<string>` as `IEnumerable<object>`:** the interface only hands `T` values out. Every string read from the sequence is also an object, so reading strings as objects is safe.\n> - **`List<string>` as `List<object>`:** `List<T>` also takes `T` values in, for example through `Add`. If the conversion were allowed, code could add an `int` through the `List<object>` reference, and the original `List<string>` would then hold a non-string.\n> \n> Variance also has to be declared, and C# allows it only on generic interfaces and delegates. A generic class such as `List<T>` is therefore always invariant, whatever its members do.\n>\n> [Microsoft: covariance and contravariance](https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance)\n\n<!-- qard-id: 222e6ef2-bb7d-4c83-b731-ffd892537b23 -->\n> [!qard]- When should a generic interface type parameter be marked `out` or `in`?\n> A type parameter can be marked `out` when the interface only produces `T`, and `in` when it only consumes `T`. When `T` flows both in and out, it stays invariant.\n>\n> | Marking | Where `T` may appear | Conversion it enables |\n> |---|---|---|\n> | `out` (covariant) | Only in output positions, such as method return types | A more derived type argument can stand in for a less derived one: `IEnumerable<string>` converts to `IEnumerable<object>` |\n> | `in` (contravariant) | Only in input positions, such as method parameter types | A less derived type argument can stand in for a more derived one: `IComparer<object>` converts to `IComparer<string>` |\n> | None (invariant) | In both input and output positions | No conversion, because either direction would allow an unsafe read or write |\n>\n> The compiler enforces these positions, so it accepts a variant marking only when the interface's members keep it safe.\n>\n> Variance conversions work only when the type arguments are reference types. `IEnumerable<int>` does not convert to `IEnumerable<object>`, because a value-type argument makes the constructed type invariant.\n>\n> [Microsoft: covariance and contravariance](https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance)\n\n<!-- qard-id: dd86df45-1404-46cf-8c09-84cb046ef4f3 -->\n> [!qard]- A generic method uses `default(T)` as a fallback. Why can this be dangerous?\n> `default(T)` is not one fixed value. It is `null` when `T` is a reference type, and a zero-initialized value such as `0` or `false` when `T` is a value type. Those values can also be legitimate data, so returning `default(T)` to signal that nothing was found or that something failed makes absence look like a real result.\n>\n> For example, a `GetOrDefault<T>` method that returns `default(T)` for a missing key returns `0` when `T` is `int`. A caller then cannot tell a missing entry from a stored `0`.\n>\n> When that distinction matters, the API reports absence separately from the value:\n>\n> - **`Try` method:** returns `bool` for success and the value through an `out T` parameter.\n> - **Result type:** carries the success or failure state together with the value.\n> - **Nullable contract:** returns `T?`, with `null` meaning absence. This works only when `null` is never legitimate data and the return type can actually hold `null` for the type argument. For a value type that requires `Nullable<T>`, for example `T?` under a `where T : struct` constraint, whose `HasValue` separates a missing entry from a stored `0`. With an unconstrained `T`, `T?` adds no null state for a value-type argument, so `GetOrDefault<int>` would still return `0`.\n> \n> [Microsoft: default keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/default) · [Microsoft: nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types)\n\n> [!qard]- Do different closed forms of a generic type share its static fields?\n> No. `Cache<int>` and `Cache<string>` have separate copies of every static field declared on `Cache<T>`. Incrementing `Cache<int>.Count` leaves `Cache<string>.Count` unchanged. This separation follows type identity and does not depend on whether the CLR shares native method code between compatible instantiations. A per-type cache can use it deliberately; a process-wide total must live outside that generic type's per-instantiation state. [Microsoft: generic classes](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/generic-classes)\n\n# References\n\n- [Generics in C#](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/)\n- [Covariance and contravariance in C#](https://ericlippert.com/2007/10/16/covariance-and-contravariance-in-c-part-1/)\n",
+            "hash": "d37bc748448467f0814404e4b54dac33f4aa2f7eb4a9d61afcb032e926786e3a",
             "topic": "Programming",
             "violations": [],
             "needs_fixing_ids": [],
@@ -29212,51 +29212,140 @@
       },
       "proposal": {
         "version": 1,
-        "edits": [
-          {
-            "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
-            "expected_hash": "abdfcc0ff8010ea590a42fa81235041fd89dd7aeb13fd823bf2d2554ecf56999",
-            "before": "> That one atomic operation does not make a sequence of operations or several related fields atomic. A check-then-update rule or a multi-field invariant needs a suitable synchronization design, often one lock around the entire decision and change. In a worker-count example, waiting for every worker to finish is also necessary before asserting the final count. [Microsoft: Interlocked]",
-            "after": "> That one atomic operation does not make a sequence of operations or several related fields atomic. A check-then-update rule or a multi-field invariant needs a suitable synchronization design, often one lock around the entire decision and change. [Microsoft: Interlocked]",
-            "reason": "Removes a dangling reference to an unstated 'worker-count example' so the answer is self-contained and stays on the recall target.",
-            "kind": "rewrite",
-            "learning_target": "same",
-            "essential_meanings": [
-              "Interlocked suits single-location atomic updates",
-              "It does not make multi-step or multi-field invariants atomic; those need a lock"
-            ],
-            "sources": [],
-            "feedback_keys": [],
-            "problem": "The Interlocked answer ends with a sentence about a 'worker-count example' that the question and note never introduce.",
-            "reader_benefit": "The answer reads cleanly on its own without an unexplained scenario."
-          }
-        ],
+        "edits": [],
         "dispositions": [
           {
-            "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
-            "outcome": "changed",
-            "reason": "Audited the whole note: the Monitor lowering with lockTaken, reentrancy, System.Threading.Lock (.NET 9/C# 13), CS1996 await restriction, SemaphoreSlim alternative and tradeoffs all match Microsoft docs and are coherent. The only defect was an unexplained 'worker-count example' in the Interlocked card, now removed so the answer is self-contained."
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+            "outcome": "keep",
+            "reason": "I read the whole note against the current text and Microsoft's generics, constraints, variance and generic-math documentation. The opening separates the open generic `List<T>` from the closed `List<int>`. The constraint list is accurate, including the `unmanaged` caveat about blittable types. Variance is limited correctly to interfaces and delegates with reference-type arguments. The `INumber<T>` example matches the static abstract member mechanism of .NET 7 and later. The pitfalls section covers per-closed-type static state, `default(T)` and value-type specialization. The five Qards each test a single recall task and agree with the prose. The `default(T)` card has the correct `Nullable<T>` caveat, and the `out`/`in` card has a sound variance table. No factual error, unresolved violation or editorial defect was found. The one weakness is that the `allows ref struct` sentence sits in the reflection section without a language-version note. That is minor and not worth churn."
           }
         ],
         "feedback": []
       },
       "source_hashes": {
-        "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md": "abdfcc0ff8010ea590a42fa81235041fd89dd7aeb13fd823bf2d2554ecf56999"
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md": "d37bc748448467f0814404e4b54dac33f4aa2f7eb4a9d61afcb032e926786e3a"
       },
       "feedback_keys": [],
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "repair_inputs": {
-        "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md": ""
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md": ""
       },
       "prepared_source_version": 1,
-      "prepared_at": "2026-11-04T20:02:24.810667Z",
-      "feedback_snapshot": [],
-      "blocked_review": {
-        "stage": "deterministic_application",
-        "reason": "card edit must replace one complete active Qard block including adjacent metadata"
+      "prepared_at": "2026-11-12T20:14:07.754894Z",
+      "completed_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep is not justified. The note is largely accurate, but `allows ref struct` is misplaced and has no version condition.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is accurate and its cards are well formed. One concrete editorial defect remains: the C# 13 / .NET 9 `allows ref struct` anti-constraint is buried in the reflection section, has no version note, and is missing from the constraints list. The author's keep acknowledges this weakness but leaves it unfixed.",
+            "page_type": "Concept note under Programming/NET/CSharp/Fundamentals; Questions and References are optional and present, and the Qard IDs are protected.",
+            "current_text_evidence": [
+              {
+                "quote": "`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only.",
+                "line_start": 100,
+                "reason": "This sentence sits at the end of the reflection section, which is about `MakeGenericType`. It is a constraint topic and belongs under Constraints. It also gives no version note: `allows ref struct` requires C# 13 / .NET 9."
+              },
+              {
+                "quote": "- `where T : ISomeInterface` - `T` must implement a specific interface.",
+                "line_start": 42,
+                "reason": "The constraint list ends here and omits `struct, Enum` and `allows ref struct`, so the constraints section is incomplete."
+              },
+              {
+                "quote": "Variance is supported on interfaces and delegates marked with `in`/`out`, and only for reference-type substitutions.",
+                "line_start": 51,
+                "reason": "This is accurate and consistent with the variance cards."
+              },
+              {
+                "quote": "`Cache<int>` and `Cache<string>` receive separate copies of a `static` field declared on `Cache<T>`.",
+                "line_start": 105,
+                "reason": "This is accurate and agrees with the static-fields card."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: generics, constraints, variance and their pitfalls form one coherent topic.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Explanation order / version accuracy",
+                "location": "# Reflection over Generics, line 100",
+                "evidence": "`allows ref struct` and `struct, Enum` appear after the reflection code without a version note.",
+                "effect": "A reader looking for constraints will not find them in the Constraints section. The unversioned feature (C# 13 / .NET 9) can mislead about which language versions support it.",
+                "fix": "Move the `struct, Enum` and `allows ref struct` sentence into # Constraints as bullets, and mark `allows ref struct` as C# 13 / .NET 9+."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
       },
-      "failed_at": "2026-11-04T20:02:29.090534Z"
+      "blocked_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep is not justified. The note is largely accurate, but `allows ref struct` is misplaced and has no version condition.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is accurate and its cards are well formed. One concrete editorial defect remains: the C# 13 / .NET 9 `allows ref struct` anti-constraint is buried in the reflection section, has no version note, and is missing from the constraints list. The author's keep acknowledges this weakness but leaves it unfixed.",
+            "page_type": "Concept note under Programming/NET/CSharp/Fundamentals; Questions and References are optional and present, and the Qard IDs are protected.",
+            "current_text_evidence": [
+              {
+                "quote": "`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only.",
+                "line_start": 100,
+                "reason": "This sentence sits at the end of the reflection section, which is about `MakeGenericType`. It is a constraint topic and belongs under Constraints. It also gives no version note: `allows ref struct` requires C# 13 / .NET 9."
+              },
+              {
+                "quote": "- `where T : ISomeInterface` - `T` must implement a specific interface.",
+                "line_start": 42,
+                "reason": "The constraint list ends here and omits `struct, Enum` and `allows ref struct`, so the constraints section is incomplete."
+              },
+              {
+                "quote": "Variance is supported on interfaces and delegates marked with `in`/`out`, and only for reference-type substitutions.",
+                "line_start": 51,
+                "reason": "This is accurate and consistent with the variance cards."
+              },
+              {
+                "quote": "`Cache<int>` and `Cache<string>` receive separate copies of a `static` field declared on `Cache<T>`.",
+                "line_start": 105,
+                "reason": "This is accurate and agrees with the static-fields card."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: generics, constraints, variance and their pitfalls form one coherent topic.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Explanation order / version accuracy",
+                "location": "# Reflection over Generics, line 100",
+                "evidence": "`allows ref struct` and `struct, Enum` appear after the reflection code without a version note.",
+                "effect": "A reader looking for constraints will not find them in the Constraints section. The unversioned feature (C# 13 / .NET 9) can mislead about which language versions support it.",
+                "fix": "Move the `struct, Enum` and `allows ref struct` sentence into # Constraints as bullets, and mark `allows ref struct` as C# 13 / .NET 9+."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "feedback_snapshot": []
     },
     "ai-ml-4edf0823": {
       "workload_id": "b9235098cfe341bd98cce55faa026472",
@@ -35127,6 +35216,78 @@
         "change_checks": []
       },
       "feedback_snapshot": []
+    },
+    "ce86bcfc479645bb0d7d4113c000987c7e5582ee8757aec6713ce03ea8fab663": {
+      "workload_id": "792178af26484b3da828d4cea1e5f39f",
+      "topic_id": "programming-e6aba2bd",
+      "batch": {
+        "topic": "Programming",
+        "topic_id": "programming-e6aba2bd",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
+            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"The default in-process mutual-exclusion primitive: one thread in the critical section at a time.\"\nlevel: [\"4\"]\npriority: High\nstatus: Creation\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Concurrency and Parallelism/Locking\"\nflashcard_uid: \"15275eaf\"\ncreated: \"2026-07-14T20:57:52.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-15T06:00:17.802Z\"\n---\n\n`lock` gives one thread at a time access to a synchronous critical section. It fits small in-process state changes such as updating a counter or taking a snapshot of a shared dictionary. Awaited I/O should normally happen outside that mutation and publish its result inside a short lock. When an invariant genuinely must span asynchronous work, `SemaphoreSlim.WaitAsync` can gate that bounded span; cross-process coordination needs [[Mutex]], and N concurrent holders need [[Semaphore]] rather than mutual exclusion.\n\n# How It Works\n\n`lock (obj) { body }` is sugar over `Monitor`:\n\n```csharp\nlock (_gate) { _count++; }\n\n// the compiler emits:\nbool lockTaken = false;\ntry\n{\n    Monitor.Enter(_gate, ref lockTaken);\n    _count++;\n}\nfinally\n{\n    if (lockTaken) Monitor.Exit(_gate);\n}\n```\n\n`lockTaken` records whether `Monitor.Enter` succeeded. If acquisition throws, the `finally` block does not attempt to release a monitor the thread never owned.\n\n**`Monitor`/`lock` is reentrant.** Its owning thread can acquire the same monitor again. Each acquisition increments a recursion count, so the thread must exit the same number of times. A one-permit [[Semaphore|semaphore]] has no such ownership model and self-deadlocks on a nested wait.\n\n**`System.Threading.Lock` (.NET 9+)** makes this intent explicit. When the operand has type `Lock`, the statement uses `Lock.EnterScope()` and disposes its `ref struct` scope at the closing brace instead of lowering to `Monitor.Enter`:\n\n```csharp\nprivate readonly Lock _gate = new();   // .NET 9+\n\nlock (_gate) { _count++; }             // compiler calls _gate.EnterScope()\n```\n\nA dedicated `Lock` field is harder to misuse than a general `object`. With either type, the gate stays `private readonly`. Locking on `this`, a `Type`, or an interned string exposes the monitor to unrelated code and can create invisible [[Deadlocks|lock-ordering cycles]].\n\n# Example\n\n```csharp\npublic sealed class MetricsBuffer\n{\n    private readonly Lock _gate = new();          // .NET 9+; an `object` pre-9\n    private readonly Dictionary<string, long> _counts = new();\n\n    public void Increment(string name)\n    {\n        lock (_gate)\n        {\n            _counts.TryGetValue(name, out long n);\n            _counts[name] = n + 1;\n        }\n    }\n\n    public IReadOnlyDictionary<string, long> Snapshot()\n    {\n        lock (_gate)\n            return new Dictionary<string, long>(_counts);  // copy out under the lock\n    }\n}\n```\n\nBoth reads and writes use `_gate`. `Snapshot` copies the dictionary while protected, then returns data that callers can enumerate after the live lock has been released.\n\n# Pitfalls\n\n- **A monitor cannot span `await`.** Monitor ownership has thread affinity, while a continuation may resume on another thread. The compiler reports CS1996. Async mutual exclusion uses a [[Semaphore|semaphore]] and `WaitAsync`.\n- **I/O inside a lock turns latency into contention.** Every waiter queues behind the slow operation, increasing the chance of convoys and [[Deadlocks|deadlocks]]. Computation and fetching belong outside the lock, which then protects only the shared-state update.\n- **A public gate leaks synchronization.** `this`, a `Type`, and interned strings can all be locked by unrelated code.\n- **`Monitor.TryEnter(obj, timeout)` bounds acquisition.** It is useful when an external lock order cannot be fully controlled. [[Deadlocks]] covers the ordering mechanics.\n\n# Tradeoffs\n\n- **`lock`/`Monitor`** is synchronous, in-process, reentrant mutual exclusion. Its fast path stays in user mode.\n- **`SemaphoreSlim`** is in-process, supports `WaitAsync`, and can expose more than one permit. It has no thread ownership or reentrancy.\n- **`Mutex`** supplies thread-owned mutual exclusion through an operating-system object and can coordinate named participants across processes.\n\nFor short synchronous state changes inside one process, `lock` is the smallest correct primitive. Ordinary async flows need restructuring so awaited I/O completes before the protected mutation. When the invariant must remain gated across asynchronous work, `SemaphoreSlim.WaitAsync` provides that gate, and the span needs to stay bounded because remote latency becomes contention. A real process boundary justifies `Mutex`. N concurrent entrants make the problem a [[Semaphore]] problem regardless of whether callers wait synchronously or asynchronously.\n\n# Questions\n\n> [!qard]- What is a race condition?\n> A race condition occurs when a result depends on the timing of concurrent accesses to shared state. A read-modify-write sequence such as `_count++` can let two threads read the same old value, then overwrite one another's updates. A run that happens to produce the expected result does not prove the code is race-free.\n>\n> [Microsoft: Managed threading best practices](https://learn.microsoft.com/en-us/dotnet/standard/threading/managed-threading-best-practices) · [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)\n\n> [!qard]- How does `lock` prevent a lost-update race?\n> `lock` lets only one thread at a time run code protected by the same lock object, so protected updates cannot interleave.\n>\n> For example, two threads run `_count++` on a shared field. The increment is three steps: read the value, add one and write the result back.\n>\n> 1. Thread A reads 5.\n> 2. Thread B reads 5 before A writes.\n> 3. A writes 6.\n> 4. B writes 6.\n> \n> Two increments ran, but one was lost. With `lock (_gate) { _count++; }` in both threads, B cannot read until A has written and released the lock, so the result is 7.\n>\n> The protection covers only code that takes the same lock. Every read and write of the shared state must use that lock object; an unprotected access elsewhere can still interleave with a protected update.\n>\n> [Microsoft: Managed threading best practices](https://learn.microsoft.com/en-us/dotnet/standard/threading/managed-threading-best-practices) · [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)\n\n<!-- qard-id: e403b36e-6e7b-4f41-826c-e2e258743019 -->\n> [!qard]- When `lock` targets an ordinary object, what does the compiler ensure around the critical section?\n> The compiler acquires the monitor with `Monitor.Enter(obj, ref lockTaken)`, runs the body inside `try`, and exits in `finally` only if acquisition succeeded. This releases ownership on normal and exceptional exits without exiting a monitor the thread never acquired. The specialized `System.Threading.Lock` path in C# 13 uses `EnterScope` instead. [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) · [Monitor.Enter](https://learn.microsoft.com/en-us/dotnet/api/system.threading.monitor.enter?view=net-10.0)\n\n<!-- qard-id: 2c0335e4-1efa-4aa3-b33b-605b74456ccc -->\n> [!qard]- Why can’t a `lock` block contain `await`?\n> `Monitor` ownership belongs to the thread that entered it, and only that thread can exit it. An awaited continuation may resume on a different thread, which would then try to release a monitor it does not own. The C# compiler therefore rejects `await` inside a `lock` block.\n>\n> Holding a lock across `await` would also make other threads wait for the whole asynchronous operation, turning I/O latency into lock contention.\n>\n> Two alternatives remain:\n>\n> - **Restructure:** the awaited work runs outside the lock, and only the resulting state change runs inside a short `lock`. This fits most cases.\n> - **Async-aware gate:** when an invariant must stay protected across an `await`, a `SemaphoreSlim` with one permit and `await WaitAsync()` provides the gate. It has no thread ownership, so a continuation on another thread can release it. `Release()` belongs in `finally`.\n> \n> [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) · [Monitor.Enter](https://learn.microsoft.com/en-us/dotnet/api/system.threading.monitor.enter?view=net-10.0) · [SemaphoreSlim API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0)\n\n<!-- qard-id: 9e14d6f6-6dc4-4b82-bda7-880929057d58 -->\n> [!qard]- What does `System.Threading.Lock` change about `lock` in C# 13 and .NET 9+?\n> `System.Threading.Lock` gives the compiler a dedicated synchronization type instead of an arbitrary object. In C# 13, `lock` on that type lowers to an `EnterScope()` guard that releases when the scope exits, rather than the ordinary `Monitor.Enter`/`Exit` pattern. It remains synchronous and cannot span `await`; the type does not promise a universal speedup. [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)\n\n<!-- qard-id: 0fdc576b-ea0a-41ce-9613-4ec6f7fe0d57 -->\n> [!qard]- How does reentrancy differ between `lock`/`Monitor` and `SemaphoreSlim`?\n> `lock`/`Monitor` is reentrant for its owning thread. `SemaphoreSlim` is not reentrant, because it has no owner.\n>\n> - **`lock`/`Monitor`:** records which thread owns the monitor and how many times it has entered. The owner can enter again without blocking, and other threads can acquire the monitor only after the owner has exited the same number of times.\n> - **`SemaphoreSlim`:** records only how many permits remain, not which thread or asynchronous flow holds them. A second wait from the same code is just another request for a permit.\n> \n> With a one-permit `SemaphoreSlim`, a method that holds the permit and then calls code that waits on the same semaphore ends up waiting for itself. Without a timeout or cancellation, `Wait()` blocks forever and `WaitAsync()` never completes. The permit therefore belongs at one boundary in the call chain, with `Release()` in `finally` so that each acquisition is released exactly once.\n>\n> [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock) · [Monitor.Enter](https://learn.microsoft.com/en-us/dotnet/api/system.threading.monitor.enter?view=net-10.0) · [SemaphoreSlim API](https://learn.microsoft.com/en-us/dotnet/api/system.threading.semaphoreslim?view=net-10.0)\n\n> [!qard]- When is `Interlocked` sufficient instead of `lock`?\n> `Interlocked` fits a supported atomic update to one shared location, such as incrementing a counter or exchanging a reference. Its read-modify-write operation cannot lose an update through interleaving:\n>\n> ```csharp\n> Interlocked.Increment(ref completedCount);\n> ```\n>\n> That one atomic operation does not make a sequence of operations or several related fields atomic. A check-then-update rule or a multi-field invariant needs a suitable synchronization design, often one lock around the entire decision and change. In a worker-count example, waiting for every worker to finish is also necessary before asserting the final count. [Microsoft: Interlocked](https://learn.microsoft.com/en-us/dotnet/api/system.threading.interlocked?view=net-10.0)\n\n# References\n\n- [lock statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)\n",
+            "hash": "abdfcc0ff8010ea590a42fa81235041fd89dd7aeb13fd823bf2d2554ecf56999",
+            "topic": "Programming",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
+            "expected_hash": "abdfcc0ff8010ea590a42fa81235041fd89dd7aeb13fd823bf2d2554ecf56999",
+            "before": "> That one atomic operation does not make a sequence of operations or several related fields atomic. A check-then-update rule or a multi-field invariant needs a suitable synchronization design, often one lock around the entire decision and change. In a worker-count example, waiting for every worker to finish is also necessary before asserting the final count. [Microsoft: Interlocked]",
+            "after": "> That one atomic operation does not make a sequence of operations or several related fields atomic. A check-then-update rule or a multi-field invariant needs a suitable synchronization design, often one lock around the entire decision and change. [Microsoft: Interlocked]",
+            "reason": "Removes a dangling reference to an unstated 'worker-count example' so the answer is self-contained and stays on the recall target.",
+            "kind": "rewrite",
+            "learning_target": "same",
+            "essential_meanings": [
+              "Interlocked suits single-location atomic updates",
+              "It does not make multi-step or multi-field invariants atomic; those need a lock"
+            ],
+            "sources": [],
+            "feedback_keys": [],
+            "problem": "The Interlocked answer ends with a sentence about a 'worker-count example' that the question and note never introduce.",
+            "reader_benefit": "The answer reads cleanly on its own without an unexplained scenario."
+          }
+        ],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md",
+            "outcome": "changed",
+            "reason": "Audited the whole note: the Monitor lowering with lockTaken, reentrancy, System.Threading.Lock (.NET 9/C# 13), CS1996 await restriction, SemaphoreSlim alternative and tradeoffs all match Microsoft docs and are coherent. The only defect was an unexplained 'worker-count example' in the Interlocked card, now removed so the answer is self-contained."
+          }
+        ],
+        "feedback": []
+      },
+      "source_hashes": {
+        "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md": "abdfcc0ff8010ea590a42fa81235041fd89dd7aeb13fd823bf2d2554ecf56999"
+      },
+      "feedback_keys": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-04T20:02:24.810667Z",
+      "feedback_snapshot": [],
+      "blocked_review": {
+        "stage": "deterministic_application",
+        "reason": "card edit must replace one complete active Qard block including adjacent metadata"
+      },
+      "failed_at": "2026-11-04T20:02:29.090534Z"
     }
   },
   "completed_review_holds": {
@@ -35995,7 +36156,7 @@
     },
     "prepared_source_version": 1,
     "prepared_at": "2026-11-12T20:14:07.754894Z",
-    "completed_review": {
+    "blocked_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The keep is not justified. The note is largely accurate, but `allows ref struct` is misplaced and has no version condition.",
       "change_checks": [],
@@ -36050,6 +36211,77 @@
           }
         }
       ]
-    }
+    },
+    "repair_previous_proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+          "outcome": "keep",
+          "reason": "I read the whole note against the current text and Microsoft's generics, constraints, variance and generic-math documentation. The opening separates the open generic `List<T>` from the closed `List<int>`. The constraint list is accurate, including the `unmanaged` caveat about blittable types. Variance is limited correctly to interfaces and delegates with reference-type arguments. The `INumber<T>` example matches the static abstract member mechanism of .NET 7 and later. The pitfalls section covers per-closed-type static state, `default(T)` and value-type specialization. The five Qards each test a single recall task and agree with the prose. The `default(T)` card has the correct `Nullable<T>` caveat, and the `out`/`in` card has a sound variance table. No factual error, unresolved violation or editorial defect was found. The one weakness is that the `allows ref struct` sentence sits in the reflection section without a language-version note. That is minor and not worth churn."
+        }
+      ],
+      "feedback": []
+    },
+    "repair_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The keep is not justified. The note is largely accurate, but `allows ref struct` is misplaced and has no version condition.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The note is accurate and its cards are well formed. One concrete editorial defect remains: the C# 13 / .NET 9 `allows ref struct` anti-constraint is buried in the reflection section, has no version note, and is missing from the constraints list. The author's keep acknowledges this weakness but leaves it unfixed.",
+          "page_type": "Concept note under Programming/NET/CSharp/Fundamentals; Questions and References are optional and present, and the Qard IDs are protected.",
+          "current_text_evidence": [
+            {
+              "quote": "`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only.",
+              "line_start": 100,
+              "reason": "This sentence sits at the end of the reflection section, which is about `MakeGenericType`. It is a constraint topic and belongs under Constraints. It also gives no version note: `allows ref struct` requires C# 13 / .NET 9."
+            },
+            {
+              "quote": "- `where T : ISomeInterface` - `T` must implement a specific interface.",
+              "line_start": 42,
+              "reason": "The constraint list ends here and omits `struct, Enum` and `allows ref struct`, so the constraints section is incomplete."
+            },
+            {
+              "quote": "Variance is supported on interfaces and delegates marked with `in`/`out`, and only for reference-type substitutions.",
+              "line_start": 51,
+              "reason": "This is accurate and consistent with the variance cards."
+            },
+            {
+              "quote": "`Cache<int>` and `Cache<string>` receive separate copies of a `static` field declared on `Cache<T>`.",
+              "line_start": 105,
+              "reason": "This is accurate and agrees with the static-fields card."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: generics, constraints, variance and their pitfalls form one coherent topic.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Explanation order / version accuracy",
+              "location": "# Reflection over Generics, line 100",
+              "evidence": "`allows ref struct` and `struct, Enum` appear after the reflection code without a version note.",
+              "effect": "A reader looking for constraints will not find them in the Constraints section. The unversioned feature (C# 13 / .NET 9) can mislead about which language versions support it.",
+              "fix": "Move the `struct, Enum` and `allows ref struct` sentence into # Constraints as bullets, and mark `allows ref struct` as C# 13 / .NET 9+."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "FAIL",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    },
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "review_repair_key": "72cc9e9175e6a4def7187aea8020c81086ca05b35be30b49d8370b4d80ade9cb",
+    "author_repair_pending": true
   }
 }
