@@ -13505,11 +13505,11 @@
     "version": 1,
     "id": "5589fab66fbd42d6ab4c1fac5fc35939",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-12T20:08:23.345425Z",
-    "elapsed_seconds": 348.90324809999987,
+    "elapsed_seconds": 369.41109859999983,
     "calls_reserved": 10,
-    "responses_received": 9,
+    "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/Programming/NET/CSharp/CSharp.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
@@ -13812,7 +13812,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T20:14:12.248145Z",
+    "checkpoint_at": "2026-11-12T20:14:32.755994Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -35994,6 +35994,62 @@
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-12T20:14:07.754894Z"
+    "prepared_at": "2026-11-12T20:14:07.754894Z",
+    "completed_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The keep is not justified. The note is largely accurate, but `allows ref struct` is misplaced and has no version condition.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The note is accurate and its cards are well formed. One concrete editorial defect remains: the C# 13 / .NET 9 `allows ref struct` anti-constraint is buried in the reflection section, has no version note, and is missing from the constraints list. The author's keep acknowledges this weakness but leaves it unfixed.",
+          "page_type": "Concept note under Programming/NET/CSharp/Fundamentals; Questions and References are optional and present, and the Qard IDs are protected.",
+          "current_text_evidence": [
+            {
+              "quote": "`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only.",
+              "line_start": 100,
+              "reason": "This sentence sits at the end of the reflection section, which is about `MakeGenericType`. It is a constraint topic and belongs under Constraints. It also gives no version note: `allows ref struct` requires C# 13 / .NET 9."
+            },
+            {
+              "quote": "- `where T : ISomeInterface` - `T` must implement a specific interface.",
+              "line_start": 42,
+              "reason": "The constraint list ends here and omits `struct, Enum` and `allows ref struct`, so the constraints section is incomplete."
+            },
+            {
+              "quote": "Variance is supported on interfaces and delegates marked with `in`/`out`, and only for reference-type substitutions.",
+              "line_start": 51,
+              "reason": "This is accurate and consistent with the variance cards."
+            },
+            {
+              "quote": "`Cache<int>` and `Cache<string>` receive separate copies of a `static` field declared on `Cache<T>`.",
+              "line_start": 105,
+              "reason": "This is accurate and agrees with the static-fields card."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: generics, constraints, variance and their pitfalls form one coherent topic.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Explanation order / version accuracy",
+              "location": "# Reflection over Generics, line 100",
+              "evidence": "`allows ref struct` and `struct, Enum` appear after the reflection code without a version note.",
+              "effect": "A reader looking for constraints will not find them in the Constraints section. The unversioned feature (C# 13 / .NET 9) can mislead about which language versions support it.",
+              "fix": "Move the `struct, Enum` and `allows ref struct` sentence into # Constraints as bullets, and mark `allows ref struct` as C# 13 / .NET 9+."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "FAIL",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
