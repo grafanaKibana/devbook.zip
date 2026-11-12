@@ -13630,9 +13630,9 @@
     "version": 1,
     "id": "5589fab66fbd42d6ab4c1fac5fc35939",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-12T20:08:23.345425Z",
-    "elapsed_seconds": 600.2200832999998,
+    "elapsed_seconds": 604.5594347999998,
     "calls_reserved": 15,
     "responses_received": 15,
     "attempted_paths": [
@@ -13641,7 +13641,8 @@
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Foreach.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Fundamentals.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Namespaces.md"
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Namespaces.md",
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Pattern Matching.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -14020,10 +14021,88 @@
           },
           "model_calls": 13
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Pattern Matching.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Pattern Matching.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and the Microsoft C# patterns reference. The opening claims hold: `is` returns a bool, and a switch expression takes the first matching arm, subject to guards. In the Shape example, a radius of 5 fails `Circle { Radius: > 10 }` and then matches `Circle`. Putting the broad arm first would make the specialized arm subsumed and unreachable. Type, declaration and property patterns do not match null, and the explicit `null` arm and the discard arm are placed correctly. List patterns (C# 11) work on types with Length/Count plus an indexer, including arrays and spans, and are not supported for a plain `IEnumerable<T>`. The two-element pattern requires exactly two elements, and `[var first, ..]` is a slice pattern. `SwitchExpressionException` is correct for a switch expression with no matching arm. The wikilinks and the single reference are relevant, and the code fences have language identifiers. The two cards each test one gradeable task and are consistent with the prose. No factual defect or teaching gap was found, and the only blemish is cosmetic column alignment in the code. Edits would be churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The single note was audited in full and is accurate, compact and well ordered. The two cards each test one task. No concrete defect or essential learning gap exists, so keeping it unchanged is justified.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Pattern Matching.md",
+                "verdict": "CLEAN",
+                "summary": "Whole-note audit found the note accurate and well ordered. It correctly covers first-match arm semantics, null handling, C# 11 list-pattern requirements and run-time exhaustiveness limits. Both cards test a single task. Edits would be cosmetic churn.",
+                "page_type": "Concept. It has typed frontmatter and valid optional Questions and References sections. Code fences have language identifiers. Wikilinks sit in explanatory prose.",
+                "current_text_evidence": [
+                  {
+                    "quote": "a `switch` expression selects the first arm whose pattern and optional guard match",
+                    "line_start": 16,
+                    "reason": "Correct statement of switch-expression semantics, and it introduces the arm-order idea up front."
+                  },
+                  {
+                    "quote": "Moving the broad `Circle` arm before the specialized circle arm would make that specialized arm unreachable.",
+                    "line_start": 35,
+                    "reason": "Accurate, since the compiler reports the later arm as subsumed. It ties the example to the key ordering limit."
+                  },
+                  {
+                    "quote": "Declaration, type, and property patterns do not match null; the null and discard arms make that handling explicit.",
+                    "line_start": 35,
+                    "reason": "Correct null behavior, explained against the example's null and discard arms."
+                  },
+                  {
+                    "quote": "an arbitrary `IEnumerable<T>` is not sufficient",
+                    "line_start": 41,
+                    "reason": "Correct list-pattern constraint: it needs a count or length plus an indexer. The C# 11 version condition is stated."
+                  },
+                  {
+                    "quote": "A missing case can produce `SwitchExpressionException`",
+                    "line_start": 55,
+                    "reason": "Correct run-time failure mode. It also correctly notes that exhaustiveness diagnostics do not close an open hierarchy."
+                  },
+                  {
+                    "quote": "> [!qard]- What sequence shape does the list pattern `[var first, var second]` require?",
+                    "line_start": 64,
+                    "reason": "Bounded, self-contained, single recall task. The answer is plain and carries a primary-source link on the answer side."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: general patterns and list patterns are closely related and compact, so one note stays coherent.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 15
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T20:18:23.564982Z",
+    "checkpoint_at": "2026-11-12T20:18:27.904334Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
