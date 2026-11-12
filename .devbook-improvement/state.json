@@ -9102,6 +9102,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Programming/NET/CSharp/Fundamentals/Namespaces.md": {
+      "content_hash": "ad45cba4627ba6a55b3e423cc60e8045ef9068777093ef758481416f38a4155e",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "ad45cba4627ba6a55b3e423cc60e8045ef9068777093ef758481416f38a4155e",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Namespaces.md",
+          "verdict": "CLEAN",
+          "summary": "The note separates namespaces, assemblies and access modifiers correctly. The using, alias, extern alias and ImplicitUsings material is accurate. The pitfalls are concrete, and the single Qard is a coherent comparison with answer-side primary sources. No edits are needed.",
+          "page_type": "Concept — optional Questions and References are present and valid; no generated navigation, and every code fence has a language identifier.",
+          "current_text_evidence": [
+            {
+              "quote": "A namespace is not a deployment or access boundary.",
+              "line_start": 19,
+              "reason": "States the key boundary up front and correctly: assemblies handle packaging and loading, access modifiers handle visibility."
+            },
+            {
+              "quote": "C# 12 extended aliases to more type forms, including tuples and arrays",
+              "line_start": 50,
+              "reason": "The version-specific claim is correct for C# 12 (alias any type)."
+            },
+            {
+              "quote": "`extern alias` is needed only when two assemblies expose the same fully qualified name.",
+              "line_start": 64,
+              "reason": "Correctly separates the ordinary-alias case from the extern alias case."
+            },
+            {
+              "quote": "It does not make the compiler enforce a folder-to-namespace mapping.",
+              "line_start": 58,
+              "reason": "Accurate statement of RootNamespace behavior, with sensible guidance on folder alignment after it."
+            },
+            {
+              "quote": "> [!qard]- What do a C# namespace, an assembly, and an access modifier control?",
+              "line_start": 78,
+              "reason": "One focused comparison with a finite answer that has primary-source links. The existing qard-id is retained."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: namespaces, using directives and their pitfalls form one compact, coherent topic.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -13507,7 +13567,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-12T20:08:23.345425Z",
-    "elapsed_seconds": 509.8241046999998,
+    "elapsed_seconds": 513.7822350999998,
     "calls_reserved": 13,
     "responses_received": 13,
     "attempted_paths": [
@@ -13824,7 +13884,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T20:16:53.169002Z",
+    "checkpoint_at": "2026-11-12T20:16:57.127133Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -36461,105 +36521,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "5589fab66fbd42d6ab4c1fac5fc35939",
-    "topic_id": "programming-e6aba2bd",
-    "batch": {
-      "topic": "Programming",
-      "topic_id": "programming-e6aba2bd",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Namespaces.md",
-          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"A logical scope organizing types and preventing naming collisions.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Namespaces\"\nflashcard_uid: \"1f7aec15\"\ncreated: \"2026-02-15T16:27:13.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.326Z\"\n---\n\nA namespace gives a type a qualified name. `Billing.User` and `Identity.User` can coexist because the namespace is part of each type's identity. It also gives IDEs and readers a map of the API.\n\nA namespace is not a deployment or access boundary. Assemblies control packaging and loading. Access modifiers control visibility. Two types in the same namespace can live in different assemblies, and sharing a namespace grants no special access.\n\nBlock-scoped syntax can contain more than one namespace block in a file:\n\n```csharp\nnamespace MyProject.Utilities\n{\n    public static class MathUtility\n    {\n        public static int Add(int a, int b) => a + b;\n    }\n}\n```\n\nFile-scoped syntax is the common one-namespace-per-file form:\n\n```csharp\nnamespace MyProject.Utilities;\n\npublic static class MathUtility\n{\n    public static int Add(int a, int b) => a + b;\n}\n```\n\n# Name Lookup and `using`\n\n`using` shortens names within a compilation unit. It does not reference an assembly or copy anything into the file.\n\n- A namespace or type alias disambiguates or shortens a name: `using Json = System.Text.Json;`.\n- `using static System.Math;` brings static members such as `Sqrt` into scope.\n- C# 12 extended aliases to more type forms, including tuples and arrays: `using Point = (int X, int Y);`.\n- `extern alias` handles the rare case where referenced assemblies expose the same fully qualified type. The reference receives an alias, then code qualifies the type with syntax such as `OldSql::System.Data.SqlClient.SqlConnection`.\n\nName resolution starts in the innermost scope and works outward. A nearby declaration can therefore hide a same-named type from an outer namespace. A fully qualified name removes that ambiguity.\n\n## Project Conventions\n\n- `<ImplicitUsings>enable</ImplicitUsings>` asks the SDK to generate a framework-specific set of `global using` directives.\n- `<RootNamespace>` influences generated code and project templates. It does not make the compiler enforce a folder-to-namespace mapping.\n\nKeeping namespaces aligned with folders is still useful when it reflects real ownership. Blindly mirroring every folder creates churn when files move without changing their API role.\n\n# Pitfalls\n\n**Conflicting short names.** Referencing both `System.Data.SqlClient` and `Microsoft.Data.SqlClient` can make `SqlConnection` ambiguous. A normal alias is enough when the namespaces differ. `extern alias` is needed only when two assemblies expose the same fully qualified name.\n\n**Global-using overreach.** Importing both `Newtonsoft.Json` and `System.Text.Json` globally makes `JsonSerializer` ambiguous across the project. Global imports work best for stable, widely used namespaces. Local aliases keep competing APIs explicit.\n\n**Misleading ownership.** A type in `MyApp.Utilities` can live in `MyApp.Core.dll`. That is legal, but a namespace that points at the wrong subsystem makes package and dependency discovery harder.\n\n# Tradeoffs\n\n- File-scoped namespaces remove one indentation level when the whole file belongs to one namespace.\n- Block-scoped namespaces remain useful for files that intentionally contain multiple namespace blocks.\n\n# Questions\n\n<!-- qard-id: 1e220da6-d51b-4556-baa7-0f6c2d8f6488 -->\n> [!qard]- What do a C# namespace, an assembly, and an access modifier control?\n> A namespace organizes qualified names, an assembly is a compiled unit used for deployment and loading, and access modifiers control which code can see a type or member. These are separate boundaries: sharing a namespace does not place types in one assembly or grant access. [Microsoft: namespaces](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/program-structure/namespaces) · [Microsoft: assemblies](https://learn.microsoft.com/en-us/dotnet/standard/assembly/) · [Microsoft: access modifiers](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/access-modifiers)\n\n# References\n\n- [Declare namespaces to organize types](https://learn.microsoft.com/dotnet/csharp/fundamentals/types/namespaces)\n",
-          "hash": "ad45cba4627ba6a55b3e423cc60e8045ef9068777093ef758481416f38a4155e",
-          "topic": "Programming",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Namespaces.md",
-          "outcome": "keep",
-          "reason": "I audited the whole note against its current text and the .NET and C# documentation it relies on. The opening correctly separates namespaces (qualified names), assemblies (packaging and loading) and access modifiers (visibility). Types in one namespace can span assemblies, and sharing a namespace grants no access. The block-scoped and file-scoped examples are valid, and file-scoped is correctly limited to one namespace per file. The `using` section is accurate: aliases, `using static`, C# 12 aliases for tuples and arrays, and `extern alias` reserved for identical fully qualified names. Name lookup is correctly described as innermost scope outward. `ImplicitUsings` generates global usings, and `RootNamespace` does not make the compiler enforce a folder-to-namespace mapping. The pitfalls are sound: the SqlClient and JsonSerializer ambiguities and the misleading-ownership case. The single Qard tests one coherent distinction among three related concepts. Its answer matches the note and cites relevant primary sources. There are no known violations, no flagged cards and no unclear passages, so edits would only be cosmetic."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Namespaces.md": "ad45cba4627ba6a55b3e423cc60e8045ef9068777093ef758481416f38a4155e"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Namespaces.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-12T20:16:31.196997Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "The note was audited in full. It is accurate and clear, and no concrete defect warrants an edit. The keep is justified and there are no edits to check.",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Namespaces.md",
-          "verdict": "CLEAN",
-          "summary": "The note separates namespaces, assemblies and access modifiers correctly. The using, alias, extern alias and ImplicitUsings material is accurate. The pitfalls are concrete, and the single Qard is a coherent comparison with answer-side primary sources. No edits are needed.",
-          "page_type": "Concept — optional Questions and References are present and valid; no generated navigation, and every code fence has a language identifier.",
-          "current_text_evidence": [
-            {
-              "quote": "A namespace is not a deployment or access boundary.",
-              "line_start": 19,
-              "reason": "States the key boundary up front and correctly: assemblies handle packaging and loading, access modifiers handle visibility."
-            },
-            {
-              "quote": "C# 12 extended aliases to more type forms, including tuples and arrays",
-              "line_start": 50,
-              "reason": "The version-specific claim is correct for C# 12 (alias any type)."
-            },
-            {
-              "quote": "`extern alias` is needed only when two assemblies expose the same fully qualified name.",
-              "line_start": 64,
-              "reason": "Correctly separates the ordinary-alias case from the extern alias case."
-            },
-            {
-              "quote": "It does not make the compiler enforce a folder-to-namespace mapping.",
-              "line_start": 58,
-              "reason": "Accurate statement of RootNamespace behavior, with sensible guidance on folder alignment after it."
-            },
-            {
-              "quote": "> [!qard]- What do a C# namespace, an assembly, and an access modifier control?",
-              "line_start": 78,
-              "reason": "One focused comparison with a finite answer that has primary-source links. The existing qard-id is retained."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: namespaces, using directives and their pitfalls form one compact, coherent topic.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
