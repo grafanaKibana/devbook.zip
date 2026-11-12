@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-18T07:07:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T07:35:50.989Z
 published: 2026-07-16T07:43:33.509Z
 topic:
   - Networks
@@ -46,7 +46,7 @@ receiver application pauses
   → send() blocks or reports EAGAIN
 ```
 
-That feedback bounds the amount of receive data the peer advertises, but buffers at every layer can still accumulate delay. Increasing buffer sizes postpones pressure and may convert a short slowdown into stale queued work. Applications still need deadlines and bounded work queues. Socket flow control cannot decide when a response has lost business value.
+That feedback limits unacknowledged data in flight to the advertised window, but buffers at every layer can still accumulate delay. Increasing buffer sizes postpones pressure and may convert a short slowdown into stale queued work. Applications still need deadlines and bounded work queues. Socket flow control cannot decide when a response has lost business value.
 
 UDP has no transport receive window or retransmission. When the receive path cannot keep up, datagrams may be dropped. Reliability, pacing, and reconstruction belong to the application protocol when it needs them.
 
