@@ -12460,9 +12460,9 @@
     "version": 1,
     "id": "546ef5b36e6142c79d9efe91941e131e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-12T07:25:53.899904Z",
-    "elapsed_seconds": 555.0158984000003,
+    "elapsed_seconds": 558.9651963000003,
     "calls_reserved": 15,
     "responses_received": 15,
     "attempted_paths": [
@@ -12470,7 +12470,8 @@
       "Vault/Home/Networks/Architecture & Ops/CDN.md",
       "Vault/Home/Networks/Architecture & Ops/Forward and Reverse Proxies.md",
       "Vault/Home/Networks/Architecture & Ops/Nginx.md",
-      "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md"
+      "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+      "Vault/Home/Networks/Architecture & Ops/VPN.md"
     ],
     "accepted_records": [
       {
@@ -13569,10 +13570,83 @@
           "reason": "source URL missing from owning note: https://www.bittorrent.org/beps/bep_0005.html",
           "model_calls": 13
         }
+      },
+      {
+        "path": "Vault/Home/Networks/Architecture & Ops/VPN.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Networks/Architecture & Ops/VPN.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against current text and standard protocol facts. The opening separates tunnel encryption from access control and routing. How It Works explains encapsulation, with split versus full tunneling tradeoffs stated correctly. The VPN types section is accurate: client, site-to-site and mesh with relay and control-plane dependencies. IPsec transport and tunnel modes with ESP, and IKE/SA separation, match RFC 4301. The WireGuard suite (ChaCha20-Poly1305, Curve25519, BLAKE2s, SipHash24, HKDF) and AllowedIPs as routing plus source filtering match the WireGuard protocol description. The OpenVPN TLS control channel and TCP-over-TCP caveat are correct. The pitfalls (DNS, route versus ACL, MTU with PTB feedback) are sound, and the example config is consistent with a split tunnel. The note has no Questions section and no known violations. Wording is direct and not repetitive, and the references are relevant and bare links. No edit is warranted."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Networks/Architecture & Ops/VPN.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate, well ordered and compact. It separates tunnel encryption from authorization, routing and DNS policy, and covers split/full tunneling, VPN types, protocols, tradeoffs and pitfalls with conditions. No concrete defect justifies an edit, so the keep is supported.",
+                "page_type": "Concept: no Questions section (optional), bare-link References, fenced blocks carry language identifiers (mermaid, text), no manual navigation.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The tunnel does not automatically grant access or place every endpoint on one flat network.",
+                    "line_start": 14,
+                    "reason": "The opening states the key boundary up front: a tunnel gives connectivity, not authorization or a flat network."
+                  },
+                  {
+                    "quote": "This reduces gateway load and often shortens the path for public traffic, but it creates two simultaneous trust paths on the endpoint.",
+                    "line_start": 29,
+                    "reason": "Split tunneling is explained with its benefit and its security cost, which is a mechanism-plus-condition statement."
+                  },
+                  {
+                    "quote": "Running a TCP tunnel over TCP can amplify loss-related stalls, so UDP is normally the better transport when available.",
+                    "line_start": 61,
+                    "reason": "The OpenVPN caveat is correct and carries its reason and its condition."
+                  },
+                  {
+                    "quote": "`AllowedIPs` acts as both routing configuration and a source-address policy.",
+                    "line_start": 58,
+                    "reason": "This is the accurate WireGuard cryptokey-routing behaviour. The listed suite (ChaCha20-Poly1305, Curve25519, BLAKE2s, SipHash24, HKDF) matches the WireGuard protocol description."
+                  },
+                  {
+                    "quote": "Route tables and ACLs should be tested independently because one controls the path and the other controls permission.",
+                    "line_start": 96,
+                    "reason": "The pitfall gives a concrete diagnostic rationale rather than generic advice."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: VPN types, protocols, tradeoffs and pitfalls form one coherent topic and the note is not overlong.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "Whole-note audit finds no factual, structural, voice or rule defects. The keep is justified, and there are no edits, feedback decisions or proposals to reject.",
+            "change_checks": []
+          },
+          "model_calls": 15
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T07:35:08.915174Z",
+    "checkpoint_at": "2026-11-12T07:35:12.864473Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
