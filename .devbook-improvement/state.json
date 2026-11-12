@@ -12462,7 +12462,7 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-12T07:25:53.899904Z",
-    "elapsed_seconds": 666.9974449000002,
+    "elapsed_seconds": 670.9204165000002,
     "calls_reserved": 17,
     "responses_received": 17,
     "attempted_paths": [
@@ -14482,7 +14482,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T07:37:00.896723Z",
+    "checkpoint_at": "2026-11-12T07:37:04.819694Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
