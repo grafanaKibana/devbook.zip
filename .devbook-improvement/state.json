@@ -13385,13 +13385,14 @@
     "version": 1,
     "id": "5589fab66fbd42d6ab4c1fac5fc35939",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-12T20:08:23.345425Z",
-    "elapsed_seconds": 148.97210299999998,
+    "elapsed_seconds": 153.14122159999997,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
-      "Vault/Home/Programming/NET/CSharp/CSharp.md"
+      "Vault/Home/Programming/NET/CSharp/CSharp.md",
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -13467,10 +13468,83 @@
           },
           "model_calls": 2
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and Microsoft's exception-handling documentation. The opening summary and the two-pass behavior are accurate: filters run during handler search, and finally blocks run during unwinding. The handler example compiles in meaning. The throw versus throw ex distinction, ExceptionDispatchInfo, and the Task.WhenAll behavior (await surfaces the first exception, the Task's Exception property keeps the aggregate) are correct. The custom exception example is consistent with current guidance, including omitting legacy serialization constructors. The global handlers section correctly says the unhandled-exception and unobserved-task events are not recovery mechanisms. Pitfalls and Tradeoffs do not duplicate each other. The five cards each test one gradeable task and are self-contained. Their answers state the mechanisms and conditions: wrapping can change which outer catch matches, finally can be skipped by process termination, and an async method's exception sits on its Task. Sources are present and the single reference is relevant. Frontmatter and code fences are valid, and known_violations is empty. No factual defect or readability weakness was found that justifies an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no factual error, unresolved readability problem, rule violation or card-quality defect. A keep with no edits is justified.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate and ordered well, from mechanism to throwing, custom types, aggregation, last-chance handlers, pitfalls and tradeoffs. Its five cards each test one gradeable task with mechanisms and conditions. The small overlap between the pitfalls and the cards is a deliberate recap and does not justify an edit.",
+                "page_type": "Concept — frontmatter, voice, Questions and References are valid; code fences carry language identifiers.",
+                "current_text_evidence": [
+                  {
+                    "quote": "After a handler is selected, the stack is unwound and `finally` blocks run on the path to that handler.",
+                    "line_start": 23,
+                    "reason": "Correctly states the two-pass model: filters run during handler search, finally blocks run during unwinding."
+                  },
+                  {
+                    "quote": "Awaiting a faulted `Task.WhenAll` propagates one exception, while the completed task's `Exception` property retains the aggregate.",
+                    "line_start": 94,
+                    "reason": "Matches the documented await behavior and keeps the aggregate on the Task."
+                  },
+                  {
+                    "quote": "A `when` filter runs before stack unwinding and can select a handler without catching and rethrowing.",
+                    "line_start": 126,
+                    "reason": "Accurate and consistent with the opening mechanism; the filter-versus-unwinding order is explained."
+                  },
+                  {
+                    "quote": "`Environment.FailFast` ends the process without running pending `finally` blocks or finalizers.",
+                    "line_start": 172,
+                    "reason": "Matches the Microsoft documentation; the answer states conditions and exceptions for when finally is skipped."
+                  },
+                  {
+                    "quote": "so a handler that caught the original stops matching when the wrapper's type is neither that type nor derived from it.",
+                    "line_start": 154,
+                    "reason": "Gives the concrete consequence of wrapping on outer catch matching, a mechanism rather than trivia."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the topic is one coherent unit (throw, catch, finally, unwinding and the boundary policy). The sections are not independently useful notes.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 4
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T20:10:52.316997Z",
+    "checkpoint_at": "2026-11-12T20:10:56.486117Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
