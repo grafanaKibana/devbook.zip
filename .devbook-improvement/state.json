@@ -13505,15 +13505,16 @@
     "version": 1,
     "id": "5589fab66fbd42d6ab4c1fac5fc35939",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-12T20:08:23.345425Z",
-    "elapsed_seconds": 295.1236945999999,
+    "elapsed_seconds": 299.4283335999999,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/Programming/NET/CSharp/CSharp.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Foreach.md"
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Foreach.md",
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Fundamentals.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -13735,10 +13736,83 @@
           },
           "model_calls": 6
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+                "outcome": "keep",
+                "reason": "Audited the whole folder note: frontmatter keeps the FolderNote tag, valid status (Creation), and a summary matching the listed topics. The two intro paragraphs are accurate and concise. Value-versus-reference copying, method signatures at API boundaries, generics as compile-time constraints, exceptions propagating up the call stack, foreach acquiring and disposing an enumerator, and reference arguments being passed by value unless `ref` is used are all standard C# semantics. The point that reflection bypasses compiler checks is also correct. The Datacore folder map block is protected and untouched. The code fence has a language identifier. There are no cards, and none are needed on a hub page. The single reference is a real Microsoft C# programming guide link in bare-bullet form. known_violations is empty, so no native violation remains unresolved. No edit is justified."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The only note is a FolderNote hub. It is accurate and concise, it has no concrete rule violations, and no edits are proposed. The keep is justified.",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Fundamentals.md",
+                "verdict": "CLEAN",
+                "summary": "The hub gives two compact paragraphs that name the operating mechanics (copy vs share, by-value reference passing, enumerator disposal, compile-time constraints, reflection) and then the protected Datacore folder map. The claims are accurate and the voice is impersonal and declarative. The frontmatter and the single reference are valid, so keeping the note unchanged is correct.",
+                "page_type": "FolderNote — requires the FolderNote tag and the protected Datacore card map. Questions and References are optional. The concept-only headings are not required.",
+                "current_text_evidence": [
+                  {
+                    "quote": "A reference-type argument still passes the reference value by value unless `ref` is present.",
+                    "line_start": 17,
+                    "reason": "This is correct C# semantics. It states the exact boundary that is easy to get wrong."
+                  },
+                  {
+                    "quote": "Types determine what is copied or shared.",
+                    "line_start": 15,
+                    "reason": "The opening quickly frames the topic as mechanics. The sentence order runs from types to signatures, generics and exceptions, which matches the listed child topics."
+                  },
+                  {
+                    "quote": "Reflection can inspect code that the compiler cannot see, which also means the compiler cannot protect that access.",
+                    "line_start": 17,
+                    "reason": "It states the tradeoff accurately and without padding, so no repetition or vagueness needs repair."
+                  },
+                  {
+                    "quote": "const { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");",
+                    "line_start": 20,
+                    "reason": "The protected Datacore block is intact and its fence has a language identifier (MD040 satisfied)."
+                  },
+                  {
+                    "quote": "- [C# programming guide](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/)",
+                    "line_start": 26,
+                    "reason": "The reference is a single authoritative, topic-specific bare link bullet with no trailing annotation."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the hub only introduces direct-child topics through the folder map. Splitting would add nothing.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 8
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T20:13:18.468589Z",
+    "checkpoint_at": "2026-11-12T20:13:22.773229Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
