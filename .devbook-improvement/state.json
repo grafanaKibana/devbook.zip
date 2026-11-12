@@ -12225,16 +12225,16 @@
     "version": 1,
     "id": "546ef5b36e6142c79d9efe91941e131e",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-12T07:25:53.899904Z",
-    "elapsed_seconds": 45.92890679999999,
+    "elapsed_seconds": 59.8595031,
     "calls_reserved": 2,
-    "responses_received": 1,
+    "responses_received": 2,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T07:26:39.828181Z",
+    "checkpoint_at": "2026-11-12T07:26:53.758777Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
@@ -29889,6 +29889,135 @@
       "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-12T07:26:35.539028Z"
+    "prepared_at": "2026-11-12T07:26:35.539028Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The prose is sound, but the single reference (RFC 1122) does not fit the folder's topic of architecture, telemetry and operations, so the keep is not justified.",
+        "notes": [
+          {
+            "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The two intro paragraphs are accurate, concise and in the right voice, and the protected folder-map block is intact. The only reference, RFC 1122, is a 1989 host-requirements standard. It does not support the folder's subject (architecture, segmentation, capacity, telemetry, incident response), so the keep leaves a weak reference in place.",
+            "page_type": "FolderNote — typed frontmatter, FolderNote tag and protected Datacore map block; Questions and References are optional",
+            "current_text_evidence": [
+              {
+                "quote": "Network architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure.",
+                "line_start": 13,
+                "reason": "Gives a clear distinction between architecture and operations that is easy to re-enter."
+              },
+              {
+                "quote": "Diagnosis gets faster when each observation is tied to the device and protocol that produced it.",
+                "line_start": 15,
+                "reason": "States a concrete diagnostic judgment in a direct, impersonal voice."
+              },
+              {
+                "quote": "- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)",
+                "line_start": 24,
+                "reason": "The sole reference covers host protocol requirements. It is not a topic-specific source for network architecture and operations, so it is a weak fit."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the hub is short and its child topics are already navigated through the folder map.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "References",
+                "location": "# References",
+                "evidence": "RFC 1122 is the only source. It defines Internet host behavior (link, IP, TCP and application layers on hosts). The hub covers routing boundaries, segmentation, capacity, telemetry and incident response.",
+                "effect": "The source is only tangentially related to the hub's subject, so it fails the real, useful, topic-specific reference requirement. The keep rationale stretched it to cover retransmission and timeout behavior.",
+                "fix": "Replace it with a source that covers network architecture or operations (for example vendor-neutral operations or observability guidance), or remove the References section."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "FAIL"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+          "citation_index": 0,
+          "reported_line_start": 13,
+          "resolved_line_start": 15
+        },
+        {
+          "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+          "citation_index": 1,
+          "reported_line_start": 15,
+          "resolved_line_start": 17
+        },
+        {
+          "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+          "citation_index": 2,
+          "reported_line_start": 24,
+          "resolved_line_start": 26
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The prose is sound, but the single reference (RFC 1122) does not fit the folder's topic of architecture, telemetry and operations, so the keep is not justified.",
+      "notes": [
+        {
+          "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The two intro paragraphs are accurate, concise and in the right voice, and the protected folder-map block is intact. The only reference, RFC 1122, is a 1989 host-requirements standard. It does not support the folder's subject (architecture, segmentation, capacity, telemetry, incident response), so the keep leaves a weak reference in place.",
+          "page_type": "FolderNote — typed frontmatter, FolderNote tag and protected Datacore map block; Questions and References are optional",
+          "current_text_evidence": [
+            {
+              "quote": "Network architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure.",
+              "line_start": 15,
+              "reason": "Gives a clear distinction between architecture and operations that is easy to re-enter."
+            },
+            {
+              "quote": "Diagnosis gets faster when each observation is tied to the device and protocol that produced it.",
+              "line_start": 17,
+              "reason": "States a concrete diagnostic judgment in a direct, impersonal voice."
+            },
+            {
+              "quote": "- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)",
+              "line_start": 26,
+              "reason": "The sole reference covers host protocol requirements. It is not a topic-specific source for network architecture and operations, so it is a weak fit."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the hub is short and its child topics are already navigated through the folder map.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "References",
+              "location": "# References",
+              "evidence": "RFC 1122 is the only source. It defines Internet host behavior (link, IP, TCP and application layers on hosts). The hub covers routing boundaries, segmentation, capacity, telemetry and incident response.",
+              "effect": "The source is only tangentially related to the hub's subject, so it fails the real, useful, topic-specific reference requirement. The keep rationale stretched it to cover retransmission and timeout behavior.",
+              "fix": "Replace it with a source that covers network architecture or operations (for example vendor-neutral operations or observability guidance), or remove the References section."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "FAIL"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
