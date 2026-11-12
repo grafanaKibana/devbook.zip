@@ -13505,11 +13505,11 @@
     "version": 1,
     "id": "5589fab66fbd42d6ab4c1fac5fc35939",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-12T20:08:23.345425Z",
-    "elapsed_seconds": 411.4039086999998,
+    "elapsed_seconds": 431.00275429999976,
     "calls_reserved": 11,
-    "responses_received": 10,
+    "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/Programming/NET/CSharp/CSharp.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
@@ -13812,7 +13812,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T20:15:14.748806Z",
+    "checkpoint_at": "2026-11-12T20:15:34.347650Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -36136,12 +36136,57 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+          "expected_hash": "d37bc748448467f0814404e4b54dac33f4aa2f7eb4a9d61afcb032e926786e3a",
+          "before": "- `where T : ISomeInterface` - `T` must implement a specific interface.\n",
+          "after": "- `where T : ISomeInterface` - `T` must implement a specific interface.\n- `where T : struct, Enum` - `T` must be an enum type. `System.Enum` as a base-class constraint is allowed in C# 7.3 and later.\n- `where T : allows ref struct` - an anti-constraint (C# 13, .NET 9) that permits `T` to be a `ref struct` such as `Span<T>`. It widens the accepted type arguments instead of narrowing them, so the generic code must obey ref-safety rules for every possible `T`: no boxing, no static fields of type `T`. It must come after all other constraints and cannot be combined with `class`.\n",
+          "reason": "Moves the constraint material into the Constraints list and adds the version condition.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "allows ref struct is a C# 13 / .NET 9 anti-constraint",
+            "struct, Enum admits enum types"
+          ],
+          "sources": [
+            {
+              "url": "https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters",
+              "claim": "allows ref struct anti-constraint rules: ref safety, no boxing, no static fields, must follow all other constraints, not combinable with class.",
+              "version": "C# 13 / .NET 9"
+            },
+            {
+              "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-13",
+              "claim": "allows ref struct was introduced in C# 13, supported on .NET 9.",
+              "version": "C# 13"
+            }
+          ],
+          "feedback_keys": [],
+          "problem": "The constraint list omits `struct, Enum` and `allows ref struct`, which sit unversioned at the end of the reflection section.",
+          "reader_benefit": "Constraints are found in one place and the language-version requirement is explicit."
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+          "expected_hash": "d37bc748448467f0814404e4b54dac33f4aa2f7eb4a9d61afcb032e926786e3a",
+          "before": "\n`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only. Code using that anti-constraint must obey the ref-safety rules for every possible `T`.\n",
+          "after": "",
+          "reason": "Removes the constraint sentence from the reflection section now that it lives under Constraints.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "reflection section covers only MakeGenericType"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "An off-topic constraint sentence ends the reflection section.",
+          "reader_benefit": "The reflection section stays focused on closing open generics."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
-          "outcome": "keep",
-          "reason": "I read the whole note against the current text and Microsoft's generics, constraints, variance and generic-math documentation. The opening separates the open generic `List<T>` from the closed `List<int>`. The constraint list is accurate, including the `unmanaged` caveat about blittable types. Variance is limited correctly to interfaces and delegates with reference-type arguments. The `INumber<T>` example matches the static abstract member mechanism of .NET 7 and later. The pitfalls section covers per-closed-type static state, `default(T)` and value-type specialization. The five Qards each test a single recall task and agree with the prose. The `default(T)` card has the correct `Nullable<T>` caveat, and the `out`/`in` card has a sound variance table. No factual error, unresolved violation or editorial defect was found. The one weakness is that the `allows ref struct` sentence sits in the reflection section without a language-version note. That is minor and not worth churn."
+          "outcome": "changed",
+          "reason": "The constraint list now includes `struct, Enum` and the C# 13 / .NET 9 `allows ref struct` anti-constraint with its ref-safety conditions, and the reflection section no longer ends on an unrelated constraint sentence. The rest of the note and the cards were verified accurate and left unchanged."
         }
       ],
       "feedback": []
@@ -36156,8 +36201,10 @@
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-12T20:14:07.754894Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-12T20:15:34.347631Z",
+    "review_repair_key": "72cc9e9175e6a4def7187aea8020c81086ca05b35be30b49d8370b4d80ade9cb",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The keep is not justified. The note is largely accurate, but `allows ref struct` is misplaced and has no version condition.",
       "change_checks": [],
@@ -36225,65 +36272,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The keep is not justified. The note is largely accurate, but `allows ref struct` is misplaced and has no version condition.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The note is accurate and its cards are well formed. One concrete editorial defect remains: the C# 13 / .NET 9 `allows ref struct` anti-constraint is buried in the reflection section, has no version note, and is missing from the constraints list. The author's keep acknowledges this weakness but leaves it unfixed.",
-          "page_type": "Concept note under Programming/NET/CSharp/Fundamentals; Questions and References are optional and present, and the Qard IDs are protected.",
-          "current_text_evidence": [
-            {
-              "quote": "`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only.",
-              "line_start": 100,
-              "reason": "This sentence sits at the end of the reflection section, which is about `MakeGenericType`. It is a constraint topic and belongs under Constraints. It also gives no version note: `allows ref struct` requires C# 13 / .NET 9."
-            },
-            {
-              "quote": "- `where T : ISomeInterface` - `T` must implement a specific interface.",
-              "line_start": 42,
-              "reason": "The constraint list ends here and omits `struct, Enum` and `allows ref struct`, so the constraints section is incomplete."
-            },
-            {
-              "quote": "Variance is supported on interfaces and delegates marked with `in`/`out`, and only for reference-type substitutions.",
-              "line_start": 51,
-              "reason": "This is accurate and consistent with the variance cards."
-            },
-            {
-              "quote": "`Cache<int>` and `Cache<string>` receive separate copies of a `static` field declared on `Cache<T>`.",
-              "line_start": 105,
-              "reason": "This is accurate and agrees with the static-fields card."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: generics, constraints, variance and their pitfalls form one coherent topic.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Explanation order / version accuracy",
-              "location": "# Reflection over Generics, line 100",
-              "evidence": "`allows ref struct` and `struct, Enum` appear after the reflection code without a version note.",
-              "effect": "A reader looking for constraints will not find them in the Constraints section. The unversioned feature (C# 13 / .NET 9) can mislead about which language versions support it.",
-              "fix": "Move the `struct, Enum` and `allows ref struct` sentence into # Constraints as bullets, and mark `allows ref struct` as C# 13 / .NET 9+."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "FAIL",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "72cc9e9175e6a4def7187aea8020c81086ca05b35be30b49d8370b4d80ade9cb",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
