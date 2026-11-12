@@ -12225,11 +12225,11 @@
     "version": 1,
     "id": "546ef5b36e6142c79d9efe91941e131e",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-12T07:25:53.899904Z",
-    "elapsed_seconds": 210.56225070000002,
+    "elapsed_seconds": 220.9991072,
     "calls_reserved": 5,
-    "responses_received": 4,
+    "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md"
     ],
@@ -13108,7 +13108,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T07:29:24.461538Z",
+    "checkpoint_at": "2026-11-12T07:29:34.898378Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
@@ -31385,5 +31385,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "546ef5b36e6142c79d9efe91941e131e",
+    "topic_id": "networks-ab2c47c3",
+    "batch": {
+      "topic": "Networks",
+      "topic_id": "networks-ab2c47c3",
+      "notes": [
+        {
+          "path": "Vault/Home/Networks/Architecture & Ops/CDN.md",
+          "content": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"Edge caching servers that serve content from near users, cutting latency and origin load.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\ncreated: \"2026-06-20T08:45:59.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.383Z\"\n---\n\nA content delivery network places shared delivery infrastructure between clients and an origin. Edge nodes cache reusable responses near access networks, reducing round trips to the origin and absorbing repeated requests. The same edge may terminate TLS, route dynamic traffic, filter attacks, or run constrained code, but those capabilities are separate from caching.\n\n# How It Works\n\nA request reaches an edge selected through [[Home/Networks/Protocols/DNS|DNS]] steering, anycast routing, or both:\n\n```mermaid\nflowchart LR\n    U[User] -->|selected edge via DNS/anycast| E[Edge node]\n    E -->|cache HIT| U\n    E -->|cache MISS| O[Origin server]\n    O --> E\n```\n\n- **Cache hit** — the selected edge has a reusable response and can serve it without contacting the origin.\n- **Cache miss** — the edge fetches from the origin, returns the response, and stores it only when policy permits shared caching.\n\nWith **anycast**, several sites announce the same address and routing selects a path. With **GeoDNS**, the resolver receives an address chosen from request context. Neither method guarantees the geographically closest site. Routing policy, resolver location, health, and capacity all affect the decision. See [[Home/Networks/Protocols/DNS|DNS as a traffic director]].\n\n![[Networks/Networks-CDN-18120000.png|theme-aware]]\n\n> [!WARNING] Diagram caveat\n> The provider list is historical—Google Stadia is discontinued—and it mixes general regional serverless products such as Azure Functions with edge runtimes. Treat edge compute as code executed at or near a provider point of presence under that product's documented placement, state, latency, and runtime limits.\n\nFor `GET https://static.example.com/app.9f2c1.js`, the concrete path is:\n\n1. DNS resolves the CDN hostname, and routing brings the client to an available edge. \"Nearest\" is a routing decision, not a guarantee of the geographically closest building.\n2. The edge derives a cache key. A fresh entry returns immediately with an `Age` value: the origin does no work.\n3. On a miss, the edge opens or reuses an origin connection, fetches the object, and applies its cache policy and the response's shared-cache directives.\n4. A purge removes the cached key eventually. A content-hashed replacement avoids that race because the new bytes have a new URL.\n\nAn origin outage therefore affects misses differently from hits. Fresh cached objects can still be served, while uncached objects fail unless the CDN has an explicitly configured stale-response policy. A second origin, origin shield, and tested stale limits address different parts of that failure path.\n\n# Map Tiles: a Cache-Key Example\n\nA slippy map turns a viewport and zoom level into versioned tile coordinates such as `/tiles/v2026-07/12/1204/1538.webp`. Panning requests adjacent coordinates. Zooming changes the level segment. Including the dataset version makes each URL immutable, so public tiles are good CDN objects: the edge either returns the exact tile or fetches it from object storage through the origin path.\n\n![[Networks/Networks-CDN-18120000-1.png|theme-aware]]\n\nThe CDN does not geocode an address, select a route, or rank traffic-aware alternatives. Those are separate services whose results tell the client which tiles and overlays to request. Keeping that boundary explicit prevents a cache layer from becoming an imaginary navigation service.\n\n# What the CDN Caches and For How Long\n\nCDNs apply [[Home/Data Persistence/Caching|HTTP caching]] semantics together with provider-specific cache policy:\n\n- **`Cache-Control: max-age` / `s-maxage`** — `s-maxage` targets *shared* caches (the CDN) specifically, letting the edge cache longer than browsers.\n- **`ETag` / `Last-Modified`** — let the edge revalidate cheaply with the origin (`304 Not Modified`) instead of refetching.\n- **`Vary`** — the edge keys the cache on the listed headers (e.g. `Accept-Encoding`). A careless `Vary: User-Agent` shreds the hit rate.\n- **Cache key** — commonly derived from the URL and selected request properties. Provider configuration can ignore tracking parameters or include another representation dimension.\n\n# Invalidation\n\nContent changes need one of three publication strategies:\n\n- **TTL expiry** — let content age out naturally. Simple, but stale until it expires.\n- **Purge / invalidation** — explicitly evict a URL or tag when content changes. Propagation takes time and provider limits apply.\n- **Cache-busting / immutable URLs** — embed a content hash in the filename (`app.9f2c1.js`) and serve it `Cache-Control: immutable, max-age=31536000`. New bytes receive a new URL. The old object can expire after references move away from it.\n\n# Beyond Static Caching\n\n- **Dynamic acceleration** — an uncacheable response may still benefit from edge TLS termination, connection reuse, or a provider backbone. The gain depends on the client path and the edge-to-origin route.\n- **Edge compute** — provider runtimes can evaluate authentication hints, redirects, request transforms, or small application handlers near the point of presence. Runtime limits and placement determine whether this is actually an edge-latency improvement.\n- **Security** — the distributed edge can terminate TLS, filter requests, and absorb some attacks before traffic reaches the origin, including [[Home/Networks/Transport & Sockets/UDP|volumetric UDP floods]]. The origin still needs access controls that prevent attackers from bypassing the edge.\n\n# Pitfalls\n\n- **Caching personalized or private content** — a shared cache can serve one user's response to another when the cache key omits identity-bearing inputs. `private` prevents shared caching. `no-store` prevents storage. Authenticated responses require an explicit, reviewed cache policy rather than a blanket assumption that authorization alone disables caching.\n- **Forgetting `Vary` / cache-key hygiene** — a missing `Vary: Accept-Encoding` can reuse the wrong representation. Unbounded tracking parameters create many low-reuse keys and reduce the hit ratio.\n- **No explicit `Cache-Control`** — shared caches may apply heuristic freshness or decline to store the response. Deliberate headers make the contract visible, as with [[Home/Data Persistence/Caching|application caching]].\n- **Thundering herd on the origin** — when a popular object expires, many edges miss simultaneously and stampede the origin. Mitigate with origin shield (a mid-tier cache), request coalescing, and stale-while-revalidate.\n- **Stale after deploy** — shipping new HTML that references old cached assets (or vice versa). Cache-busted asset URLs + short-TTL/`no-cache` HTML avoids version skew.\n\n# Tradeoffs\n\n| Concern | With a CDN | Without |\n|---|---|---|\n| Latency for distant users | Low (served from nearby edge) | High (every hop to origin) |\n| Origin load & cost | Low (edge absorbs traffic) | High (all traffic hits origin) |\n| Static asset delivery | Strong fit for immutable, reusable objects | Origin serves every request |\n| Highly dynamic, per-user data | Benefit depends on transport and edge policy | Direct origin path may be simpler |\n| Operational complexity | Cache keys, purges, and version skew | Fewer cache states. Origin carries all load |\n\nA CDN earns its operational cost when repeated public content, geographic distance, origin protection, or edge security controls matter. Content-hashed immutable URLs are the safest default for versioned assets. Dynamic and per-user responses need cache keys and directives designed around their actual variation.\n\n# References\n\n- [What is a CDN?](https://www.cloudflare.com/learning/cdn/what-is-a-cdn/)\n- [Amazon CloudFront Developer Guide](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html)\n- [Caching best practices](https://jakearchibald.com/2016/caching-best-practices/)\n",
+          "hash": "1280cf557faa5bc73734af263e5d3bf6a207a8410167a17fcdfd3dbebc549b14",
+          "topic": "Networks",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Networks/Architecture & Ops/CDN.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against its text and standard HTTP caching semantics (RFC 9111/9111-style shared-cache rules). The opening separates caching from the other edge capabilities. The hit/miss flow and mermaid diagram are consistent with the numbered walk-through. The anycast/GeoDNS caveat that neither guarantees the nearest site is correct. The s-maxage, ETag revalidation, Vary and cache-key statements are accurate. The immutable content-hash URL pattern with max-age=31536000 is accurate. Invalidation, origin-outage behaviour, thundering herd mitigations (shield, coalescing, stale-while-revalidate) and the tradeoff table are coherent and carry conditions. The historical-provider diagram caveat is correct. The map-tile example teaches the cache-key idea without drifting into navigation. There are no Qard cards and no known violations. References are three distinct, authoritative, bare links. Frontmatter and the MD040 fence are fine. No defect or editorial weakness justifies a change."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Networks/Architecture & Ops/CDN.md": "1280cf557faa5bc73734af263e5d3bf6a207a8410167a17fcdfd3dbebc549b14"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Networks/Architecture & Ops/CDN.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-12T07:29:34.898368Z"
+  }
 }
