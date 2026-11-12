@@ -8862,6 +8862,66 @@
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_process": "focused-whole-note-v1",
       "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "Vault/Home/Programming/NET/CSharp/CSharp.md": {
+      "content_hash": "8a897e0231ca83573ddcb34905471e4685741c5d7fab1e3eb62208c131615107",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "8a897e0231ca83573ddcb34905471e4685741c5d7fab1e3eb62208c131615107",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Programming/NET/CSharp/CSharp.md",
+          "verdict": "CLEAN",
+          "summary": "The FolderNote is accurate, concise and well ordered. It states the operating idea, then the key limit of compile-time checks, then orients the reader to the two child groups. Keeping it unchanged avoids cosmetic churn.",
+          "page_type": "FolderNote — keeps tags: [FolderNote], the Datacore folder map block, and optional References. Questions are absent, which is allowed. No hand-rolled navigation.",
+          "current_text_evidence": [
+            {
+              "quote": "Its practical strength is not the number of paradigms.",
+              "line_start": 15,
+              "reason": "The opening gives the topic's operating idea directly, in a decided whiteboard voice."
+            },
+            {
+              "quote": "they do not prove runtime nullability, thread safety, or domain correctness",
+              "line_start": 17,
+              "reason": "States the important boundary of static checking, so the limit that changes engineering judgment is recoverable."
+            },
+            {
+              "quote": "They do not send work to the thread pool by definition.",
+              "line_start": 17,
+              "reason": "Accurate: async/await is a compiler transformation over awaitable operations. It corrects a common misconception."
+            },
+            {
+              "quote": "This folder separates language fundamentals from concurrency and parallelism.",
+              "line_start": 19,
+              "reason": "Orients the reader to the child groups before the folder map. No padding or repetition."
+            },
+            {
+              "quote": "- [C# in Depth](https://csharpindepth.com/)",
+              "line_start": 30,
+              "reason": "References are bare, relevant, non-duplicated links, one per provider and content type."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note is a short hub whose child notes are already separate; the folder map handles navigation.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -13267,14 +13327,14 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-12T20:08:23.345425Z",
-    "elapsed_seconds": 60.81621009999999,
+    "elapsed_seconds": 64.7814679,
     "calls_reserved": 2,
     "responses_received": 2,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T20:09:24.161108Z",
+    "checkpoint_at": "2026-11-12T20:09:28.126365Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -20233,6 +20293,73 @@
       ],
       "source_hashes": {
         "Vault/Home/Networks/Architecture & Ops/VPN.md": "5536d706bc1de18256b712b3bd029f2901b35a9459abff98baba6457d14ac199"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "0122adb58d4697487f154f2c5560b1792178253004e7474595744f931f98a932": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/CSharp.md",
+            "verdict": "CLEAN",
+            "summary": "The FolderNote is accurate, concise and well ordered. It states the operating idea, then the key limit of compile-time checks, then orients the reader to the two child groups. Keeping it unchanged avoids cosmetic churn.",
+            "page_type": "FolderNote — keeps tags: [FolderNote], the Datacore folder map block, and optional References. Questions are absent, which is allowed. No hand-rolled navigation.",
+            "current_text_evidence": [
+              {
+                "quote": "Its practical strength is not the number of paradigms.",
+                "line_start": 15,
+                "reason": "The opening gives the topic's operating idea directly, in a decided whiteboard voice."
+              },
+              {
+                "quote": "they do not prove runtime nullability, thread safety, or domain correctness",
+                "line_start": 17,
+                "reason": "States the important boundary of static checking, so the limit that changes engineering judgment is recoverable."
+              },
+              {
+                "quote": "They do not send work to the thread pool by definition.",
+                "line_start": 17,
+                "reason": "Accurate: async/await is a compiler transformation over awaitable operations. It corrects a common misconception."
+              },
+              {
+                "quote": "This folder separates language fundamentals from concurrency and parallelism.",
+                "line_start": 19,
+                "reason": "Orients the reader to the child groups before the folder map. No padding or repetition."
+              },
+              {
+                "quote": "- [C# in Depth](https://csharpindepth.com/)",
+                "line_start": 28,
+                "reason": "References are bare, relevant, non-duplicated links, one per provider and content type."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note is a short hub whose child notes are already separate; the folder map handles navigation.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The single note was independently read in full. Its prose is accurate, ordered and natural, frontmatter and the Datacore block are valid, and the references are sound. The keep is justified and no edits are needed.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/CSharp.md",
+          "citation_index": 4,
+          "reported_line_start": 28,
+          "resolved_line_start": 30
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Programming/NET/CSharp/CSharp.md": "8a897e0231ca83573ddcb34905471e4685741c5d7fab1e3eb62208c131615107"
       },
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -35202,172 +35329,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "5589fab66fbd42d6ab4c1fac5fc35939",
-    "topic_id": "programming-e6aba2bd",
-    "batch": {
-      "topic": "Programming",
-      "topic_id": "programming-e6aba2bd",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/CSharp.md",
-          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"Statically typed, multi-paradigm .NET language pairing OOP, functional features, and first-class async.\"\ntags: [FolderNote]\npublish: true\nstatus: Creation\nlevel: [\"4\"]\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.320Z\"\n---\n\nC# is a statically typed language for .NET with object-oriented, functional, and low-level features in one type system. Its practical strength is not the number of paradigms. It is the ability to express a high-level domain model while keeping allocation, copying, asynchronous suspension, and interop costs visible when they matter.\n\nCompile-time analysis covers definite assignment, generic constraints, pattern compatibility, and nullable-reference warnings. Those checks reduce entire classes of mistakes, but they do not prove runtime nullability, thread safety, or domain correctness. `async` and `await` are language transformations over awaitable operations. They do not send work to the thread pool by definition.\n\nThis folder separates language fundamentals from concurrency and parallelism. The first group explains types, methods, generics, errors, and reflection. The second follows work across tasks, threads, synchronization, cancellation, and shared-state boundaries.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# References\n\n- [C# documentation](https://learn.microsoft.com/en-us/dotnet/csharp/)\n- [C# language specification](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/introduction)\n- [C# in Depth](https://csharpindepth.com/)\n",
-          "hash": "8a897e0231ca83573ddcb34905471e4685741c5d7fab1e3eb62208c131615107",
-          "topic": "Programming",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/CSharp.md",
-          "outcome": "keep",
-          "reason": "Audited the whole folder note. The opening states the operating idea (one type system spanning high-level modeling and visible low-level costs). The second paragraph gives the key boundary: compile-time checks (definite assignment, constraints, nullable warnings) do not prove runtime nullability or thread safety. It also correctly says async/await is a compiler transformation over awaitables and does not imply thread-pool work by definition; this matches the C# documentation's task-based asynchronous model. The third paragraph orients the reader to the two child groups, and the Datacore folder map block is intact. Frontmatter is valid, with FolderNote tag, status Creation and typed arrays. The References section has three bare, relevant, non-duplicated links (docs, specification, C# in Depth). There are no Qards, no code fences without a language, and no hand-rolled navigation. Prose is direct and concise, with no padding or repetition, so any edit would be cosmetic churn."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Programming/NET/CSharp/CSharp.md": "8a897e0231ca83573ddcb34905471e4685741c5d7fab1e3eb62208c131615107"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Programming/NET/CSharp/CSharp.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-12T20:09:07.032602Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/Programming/NET/CSharp/CSharp.md",
-            "verdict": "CLEAN",
-            "summary": "The FolderNote is accurate, concise and well ordered. It states the operating idea, then the key limit of compile-time checks, then orients the reader to the two child groups. Keeping it unchanged avoids cosmetic churn.",
-            "page_type": "FolderNote — keeps tags: [FolderNote], the Datacore folder map block, and optional References. Questions are absent, which is allowed. No hand-rolled navigation.",
-            "current_text_evidence": [
-              {
-                "quote": "Its practical strength is not the number of paradigms.",
-                "line_start": 15,
-                "reason": "The opening gives the topic's operating idea directly, in a decided whiteboard voice."
-              },
-              {
-                "quote": "they do not prove runtime nullability, thread safety, or domain correctness",
-                "line_start": 17,
-                "reason": "States the important boundary of static checking, so the limit that changes engineering judgment is recoverable."
-              },
-              {
-                "quote": "They do not send work to the thread pool by definition.",
-                "line_start": 17,
-                "reason": "Accurate: async/await is a compiler transformation over awaitable operations. It corrects a common misconception."
-              },
-              {
-                "quote": "This folder separates language fundamentals from concurrency and parallelism.",
-                "line_start": 19,
-                "reason": "Orients the reader to the child groups before the folder map. No padding or repetition."
-              },
-              {
-                "quote": "- [C# in Depth](https://csharpindepth.com/)",
-                "line_start": 28,
-                "reason": "References are bare, relevant, non-duplicated links, one per provider and content type."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the note is a short hub whose child notes are already separate; the folder map handles navigation.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The single note was independently read in full. Its prose is accurate, ordered and natural, frontmatter and the Datacore block are valid, and the references are sound. The keep is justified and no edits are needed.",
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/CSharp.md",
-          "citation_index": 4,
-          "reported_line_start": 28,
-          "resolved_line_start": 30
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/Programming/NET/CSharp/CSharp.md": "8a897e0231ca83573ddcb34905471e4685741c5d7fab1e3eb62208c131615107"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/CSharp.md",
-          "verdict": "CLEAN",
-          "summary": "The FolderNote is accurate, concise and well ordered. It states the operating idea, then the key limit of compile-time checks, then orients the reader to the two child groups. Keeping it unchanged avoids cosmetic churn.",
-          "page_type": "FolderNote — keeps tags: [FolderNote], the Datacore folder map block, and optional References. Questions are absent, which is allowed. No hand-rolled navigation.",
-          "current_text_evidence": [
-            {
-              "quote": "Its practical strength is not the number of paradigms.",
-              "line_start": 15,
-              "reason": "The opening gives the topic's operating idea directly, in a decided whiteboard voice."
-            },
-            {
-              "quote": "they do not prove runtime nullability, thread safety, or domain correctness",
-              "line_start": 17,
-              "reason": "States the important boundary of static checking, so the limit that changes engineering judgment is recoverable."
-            },
-            {
-              "quote": "They do not send work to the thread pool by definition.",
-              "line_start": 17,
-              "reason": "Accurate: async/await is a compiler transformation over awaitable operations. It corrects a common misconception."
-            },
-            {
-              "quote": "This folder separates language fundamentals from concurrency and parallelism.",
-              "line_start": 19,
-              "reason": "Orients the reader to the child groups before the folder map. No padding or repetition."
-            },
-            {
-              "quote": "- [C# in Depth](https://csharpindepth.com/)",
-              "line_start": 30,
-              "reason": "References are bare, relevant, non-duplicated links, one per provider and content type."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note is a short hub whose child notes are already separate; the folder map handles navigation.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The single note was independently read in full. Its prose is accurate, ordered and natural, frontmatter and the Datacore block are valid, and the references are sound. The keep is justified and no edits are needed.",
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
