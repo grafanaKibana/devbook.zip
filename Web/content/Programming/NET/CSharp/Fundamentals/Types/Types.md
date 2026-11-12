@@ -2,7 +2,7 @@
 publish: true
 title: C# Types
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-11-12T10:29:34.513Z
+modified: 2026-11-12T21:09:36.103Z
 published: 2026-07-08T13:14:17.329Z
 tags:
   - FolderNote
@@ -140,18 +140,18 @@ The direct `h.Counter.Inc()` call compiles, but it mutates the temporary value r
 
 <!-- qard-id: d5bda60c-1799-4e4a-ab36-7624ae085e3a -->
 
-> [!qard]- When does each C# type kind fit, from `class` and `record class` to the struct variants?
-> Identity or shared state → a reference type; a small value without identity → a value type; then pick the variant.
+> [!qard]- How should a C# data type be chosen among classes, records and struct variants?
+> Choose how assignment should behave first, then add the equality and mutation rules needed.
 >
-> - **`class`**: an object with identity or an inheritance hierarchy, because equality compares references by default: two objects with equal fields are still two objects.
-> - **`record class`**: reference-type data defined by its values, because the compiler generates value equality (`Equals`, `GetHashCode`, `==`), a member-printing `ToString` and `with`; it can be null and can inherit only from another record.
-> - **`struct`**: a small value copied whole, because every assignment, by-value argument and return copies all its fields without a separate heap allocation. Microsoft advises a struct only for a single logical, small (<16 bytes), immutable, rarely boxed value.
-> - **`ref struct`**: required when a type holds a `Span<T>`, another `ref struct` or a `ref` field, because only a type that never reaches the managed heap may hold them.
-> - **`readonly struct`**: the default form for a struct, because mutable value types are discouraged: no field changes after construction, so no change is lost on a copy.
-> - **`readonly record struct`**: the usual form for a small value with generated equality, because its positional properties are init-only.
-> - **`record struct`**: generated value equality for a value whose members must stay settable, so it carries the mutable-struct risk.
+> 1. **`class` or `struct`: sharing or copying?** A class fits objects that need shared identity or inheritance: assigning it copies a reference to the same object. A struct fits a value that should be copied on assignment. Choosing a struct does not guarantee that no heap allocation occurs.
 >
-> Sources: [Microsoft Learn: Choosing between class and struct](https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/choosing-between-class-and-struct) · [Microsoft Learn: Records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft Learn: Structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft Learn: ref structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/ref-struct)
+> 2. **Add `record` when generated value equality fits.** A `record class` still shares references, while a `record struct` still copies values. Generated equality compares stored fields using each field type’s equality rules; it does not automatically compare the contents of referenced collections. Ordinary structs already have default value equality; records provide generated equality members and other conveniences. Records can be mutable.
+>
+> 3. **Add `readonly` when the struct’s own state should stay fixed after initialization.** Use `readonly struct`, or `readonly record struct` when generated record behavior is also wanted. This prevents changes to the struct’s own fields; it does not freeze objects those fields reference.
+>
+> 4. **Use `ref struct` when the value must hold data such as `Span<T>` or a `ref` field.** The compiler prevents that value from escaping onto the managed heap. `readonly ref struct` combines this restriction with readonly state.
+>
+> Sources: [Microsoft Learn: Structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft Learn: Records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft Learn: Record equality specification](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/structs#16533-equality-members) · [Microsoft Learn: ref structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/ref-struct)
 
 > [!qard]- Why can two anonymous objects compare unequal with `==` but match in `Intersect`?
 > Anonymous types synthesize value-based `Equals` and `GetHashCode`, but do not overload `==`; that operator compares reference identity. Two separately created anonymous objects with the same property names, types, order, and values in the same assembly therefore compare unequal with `==` but equal with `Equals`. `Intersect` uses the default equality comparer, which uses their generated equality and hash rather than the `==` operator. Each property is compared with its own type's equality, not recursively by arbitrary object contents. [Microsoft: anonymous types](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/anonymous-types)

@@ -1,0 +1,142 @@
+{
+  "debugEnabled": false,
+  "defaultToolbar": null,
+  "editorMenuAsToolbar": false,
+  "editorMenuToolbar": null,
+  "emptyViewToolbar": null,
+  "export": {
+    "includeIcons": true,
+    "replaceVars": true,
+    "useDataEls": true,
+    "useIds": true
+  },
+  "folderMappings": [],
+  "icon": "circle-ellipsis",
+  "keepPropsState": false,
+  "lockCallouts": false,
+  "obsidianUiVisibility": {},
+  "onboarding": {
+    "startup-help-view": true
+  },
+  "ribbon": [],
+  "rules": [
+    {
+      "id": "cf0d06d2-cd0c-4a52-a4c5-fc77e45caf7b",
+      "name": "Notes with status",
+      "conjunction": "and",
+      "conditions": [
+        {
+          "id": "7b29a73f-62aa-42d3-a1f7-dcbba1990419",
+          "field": "folder",
+          "operator": "startsWith",
+          "value": "Home"
+        },
+        {
+          "id": "54c3c3d3-1724-48b6-ad6b-70841629bee5",
+          "field": "property",
+          "operator": "exists",
+          "key": "status"
+        }
+      ],
+      "toolbar": "de5941d8-7580-41f6-8e83-52e069e04a53"
+    }
+  ],
+  "scriptingEnabled": true,
+  "showLaunchpad": false,
+  "showToolbarIn": {
+    "audio": false,
+    "bases": false,
+    "canvas": false,
+    "image": false,
+    "kanban": false,
+    "pdf": false,
+    "video": false
+  },
+  "showToolbarInFileMenu": false,
+  "showToolbarInOther": "",
+  "showWhatsNew": true,
+  "textToolbar": null,
+  "textToolbarOnKeyboard": true,
+  "toolbarProp": "notetoolbar",
+  "toolbars": [
+    {
+      "uuid": "de5941d8-7580-41f6-8e83-52e069e04a53",
+      "commandPosition": "float",
+      "customClasses": "",
+      "defaultItem": null,
+      "defaultStyles": [
+        "border",
+        "even",
+        "sticky"
+      ],
+      "description": "Set the note development status",
+      "hasCommand": false,
+      "icon": "list-todo",
+      "items": [
+        {
+          "uuid": "c9cef609-8ab5-41bb-9205-0e9eeed7943b",
+          "icon": "list-todo",
+          "label": "Set status",
+          "tooltip": "Set note development status",
+          "hasCommand": false,
+          "inGallery": false,
+          "link": "",
+          "linkAttr": {
+            "commandCheck": false,
+            "commandId": "",
+            "hasVars": false,
+            "type": "javascript"
+          },
+          "visibility": {
+            "desktop": {
+              "components": [
+                "icon",
+                "label"
+              ]
+            },
+            "mobile": {
+              "components": [
+                "icon",
+                "label"
+              ]
+            },
+            "tablet": {
+              "components": [
+                "icon",
+                "label"
+              ]
+            },
+            "viewMode": "all"
+          },
+          "scriptConfig": {
+            "pluginFunction": "evaluate",
+            "expression": "const file = app.workspace.getActiveFile();\nconst statuses = [\"New\", \"In Progress\", \"Established\"];\nif (!file?.path.startsWith(\"Home/\") || !Object.hasOwn(app.metadataCache.getFileCache(file)?.frontmatter ?? {}, \"status\")) return;\nconst status = await ntb.suggester(statuses, null, { title: \"Set status\", placeholder: \"Choose a status\", allowCustomInput: false });\nif (statuses.includes(status) && app.workspace.getActiveFile() === file) {\n  await ntb.setProperty(\"status\", status);\n}"
+          }
+        }
+      ],
+      "mobileStyles": [],
+      "name": "Note status",
+      "position": {
+        "desktop": {
+          "allViews": {
+            "position": "props"
+          }
+        },
+        "mobile": {
+          "allViews": {
+            "position": "props"
+          }
+        },
+        "tablet": {
+          "allViews": {
+            "position": "props"
+          }
+        }
+      },
+      "updated": "2026-11-12T16:01:07.351Z"
+    }
+  ],
+  "version": 20260812.1,
+  "webviewerToolbar": null,
+  "whatsnew_version": "0"
+}

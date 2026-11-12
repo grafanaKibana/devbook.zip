@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-15T16:27:13.000Z
-modified: 2026-11-10T18:54:35.059Z
+modified: 2026-11-12T21:09:36.103Z
 published: 2026-07-08T13:14:17.325Z
 topic:
   - Programming
@@ -250,10 +250,22 @@ By-value parameters and ordinary virtual dispatch are the default. By-reference 
 <!-- qard-id: 1fe4393b-4d8c-4e2c-9ae5-769106b13e65 -->
 
 > [!qard]- What can a method still change through an `in` parameter?
-> `in` makes the parameter a readonly alias; it does not make the target immutable.
+> A method can still change mutable objects reached through an `in` parameter. It cannot assign a different value to the parameter itself.
 >
-> - **Reference-type argument:** the method cannot reassign the parameter, but it can mutate the referenced object through its members.
-> - **Struct argument:** the method cannot assign the parameter or its fields. Calling a member that is not `readonly` runs on a hidden defensive copy, so any mutation it makes is lost.
+> For a class argument, `in` prevents replacing the object reference. It does not prevent changing the object’s contents:
+>
+> ```csharp
+> static void Add(in List<int> values)
+> {
+>     values.Add(1);
+>     // Reassignment does not compile.
+>     // values = new List<int>();
+> }
+> ```
+>
+> For a struct argument, the method cannot change the struct’s own fields through the parameter. Calling a struct method that is not `readonly` runs it on a defensive copy, so changes to that copy’s own fields do not reach the original struct.
+>
+> However, objects referenced by the struct’s fields remain shared. A method can change those objects, even when it runs on a defensive copy.
 >
 > [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)
 

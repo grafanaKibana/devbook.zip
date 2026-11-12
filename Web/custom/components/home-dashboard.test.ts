@@ -160,3 +160,22 @@ test("established notes fill development progress and unknown stages stay visibl
   assert.match(unknown, /50% overall note development/)
   assert.match(unknown, /1 Established, 0 In Progress, 0 New, 1 Other/)
 })
+
+test("HTML progress square preserves empty, mixed, and full lifecycle fills", async () => {
+  for (const { statuses, percentage, endpoints } of [
+    { statuses: [], percentage: 0, endpoints: [] },
+    { statuses: ["New"], percentage: 0, endpoints: [] },
+    { statuses: ["Established", "In Progress"], percentage: 75, endpoints: [75, 50] },
+    { statuses: ["Established"], percentage: 100, endpoints: [100] },
+  ]) {
+    const html = await renderDashboard(1, "Summary", statuses)
+    const visual = /<div class="dc-progress-visual"[\s\S]*?<\/section>/.exec(html)?.[0] ?? ""
+    assert.match(visual, new RegExp(`${percentage}% overall note development`))
+    assert.match(visual, /class="dc-progress-square"/)
+    assert.doesNotMatch(visual, /<svg|<path|<canvas|data:image/)
+    assert.deepEqual(
+      [...visual.matchAll(/--dc-progress-fill:([\d.]+)%/g)].map(([, value]) => Number(value)),
+      endpoints,
+    )
+  }
+})

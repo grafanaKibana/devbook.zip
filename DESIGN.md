@@ -206,7 +206,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 - Full-card hit areas are semantic links with visible focus.
 - Home opens with its page title as a visible, quiet `h1`, then orders progress first and topic cards second.
 - Note-development progress weights `New`, `In Progress`, and `Established` at `0`, `50`, and `100`; the weights are defined only in the `LIFECYCLE` table in `Vault/Home/index.md`, and a status outside it counts as Other with weight `0`. The percentage measures note development, not mastery or permanent completion.
-- Home never hides a topic's counts, percentage, or bar to fit one screen. Each card states its note count and progress percentage, each bar is labelled with its percentage and lifecycle totals, and the hero legend lists every stage, plus Other when present, beside the weights that produce the percentage.
+- Home never hides a topic's counts, percentage, or bar to fit one screen. Each card states its note count and progress percentage, each bar is labelled with its percentage and lifecycle totals, and the hero legend lists every stage, plus Other when present, beside the weights that produce the percentage. Topic rows absorb spare space above the footer on Quartz desktop and above the pane bottom in Obsidian reading view, retaining content-sized minimum heights; short windows and longer content remain scrollable. The progress square uses Quartz's shared surface radius; Obsidian keeps its own corner treatment.
 - Questions shares topic metadata and icon language but uses disclosure/navigation appropriate to that page.
 
 ### Visualizations

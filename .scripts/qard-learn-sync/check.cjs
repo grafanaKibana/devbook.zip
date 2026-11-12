@@ -28,9 +28,9 @@ async function checkCoverage({ repoRoot = path.resolve(__dirname, '../..'), path
   const result = { unassigned: [], problems: [] };
   const vault = path.resolve(repoRoot, 'Vault');
   if (paths !== undefined && (!Array.isArray(paths) || paths.some(value => typeof value !== 'string'
-    || !/^Home\/[^/]+\/.+\.md$/.test(value) || /[\\\0\r\n]/.test(value)
+    || !/^Home\/.+\.md$/.test(value) || /[\\\0\r\n]/.test(value)
     || value.split('/').some(part => !part || part === '.' || part === '..')))) {
-    result.problems.push('Invalid source path: use vault-relative Home/<subject>/<note>.md paths without traversal.');
+    result.problems.push('Invalid source path: use vault-relative Markdown paths under Home/ without traversal.');
     return result;
   }
   try {

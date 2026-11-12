@@ -451,9 +451,8 @@
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1793779559117,
-      "paused": true,
-      "needsFixing": true
+      "flagsAt": 1794487531929,
+      "repairSince": 1794487531924
     },
     "a16bf465-c1ae-4bca-909c-6f7462f37ca6": {
       "cardId": "a16bf465-c1ae-4bca-909c-6f7462f37ca6",
@@ -502,10 +501,8 @@
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1794421200615,
-      "paused": true,
-      "needsFixing": true,
-      "repairSince": 1793950665833
+      "flagsAt": 1794493114760,
+      "repairSince": 1794493114746
     },
     "19ea3788-056c-4ed6-8bc6-2087ae866f65": {
       "cardId": "19ea3788-056c-4ed6-8bc6-2087ae866f65",
@@ -978,9 +975,8 @@
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1794346874796,
-      "paused": true,
-      "needsFixing": true
+      "flagsAt": 1794496276723,
+      "repairSince": 1794496276687
     },
     "4d37a597-f69e-4d9f-840b-4ec77e3aa513": {
       "cardId": "4d37a597-f69e-4d9f-840b-4ec77e3aa513",
@@ -1005,9 +1001,8 @@
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1794346886441,
-      "paused": true,
-      "needsFixing": true
+      "flagsAt": 1794500444123,
+      "repairSince": 1794500444107
     },
     "ddd8a30b-97ea-4f04-8025-704d1c3481ab": {
       "cardId": "ddd8a30b-97ea-4f04-8025-704d1c3481ab",

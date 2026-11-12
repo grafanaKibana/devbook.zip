@@ -5,7 +5,7 @@ tags: [FolderNote, MetricsIgnore]
 publish: true
 icon: home
 created: "2026-07-05T15:34:15.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-12T21:09:36.103Z"
 published: "2026-07-06T07:55:35.732Z"
 ---
 
@@ -172,6 +172,14 @@ return function TopicDashboard() {
   const CSS = `
 .dc-topic-dashboard { container: dc-home / inline-size; }
 .dc-topic-grid { display: grid; grid-template-columns: 1fr; grid-auto-rows: minmax(min-content, auto); gap: 1rem; width: 100%; }
+/* Home uses spare reading-pane height instead of Obsidian's scroll-past-end
+   padding. Intrinsic minimums let longer content keep scrolling normally. */
+.workspace-leaf-content .markdown-reading-view .markdown-preview-sizer:has(.dc-topic-dashboard) { display: flex; flex-direction: column; min-height: 100% !important; padding-bottom: 0 !important; }
+.workspace-leaf-content .markdown-reading-view :is(.el-pre, .block-language-datacorejsx):has(.dc-topic-dashboard), .workspace-leaf-content .markdown-reading-view .dc-topic-dashboard { display: flex; flex-direction: column; flex: 1; }
+.workspace-leaf-content .markdown-reading-view .dc-topic-grid { flex: 1; }
+.workspace-leaf-content .markdown-reading-view .dc-progress-hero { flex: none; }
+/* The dashboard's own margin supplies the space below the inline title. */
+.workspace-leaf-content .markdown-reading-view .markdown-preview-sizer:has(.dc-topic-dashboard) .inline-title { margin-bottom: 0; }
 .dc-topic-card { overflow: hidden; cursor: pointer; min-width: 0; min-height: 6.75rem; overflow-wrap: anywhere; margin: 0; display: flex; flex-direction: column; }
 .dc-topic-card .db-card-body { flex: 1; min-width: 0; }
 .dc-topic-card .db-card-title { min-width: 0; font-size: 1.04rem; }
@@ -206,26 +214,25 @@ ul.dc-progress-statuses { display: flex; flex-wrap: wrap; gap: 0.55rem 1.1rem; m
 .dc-progress-statuses i { width: 0.55rem; height: 0.55rem; border-radius: 2px; flex: 0 0 auto; }
 p.dc-progress-note { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.8125rem; line-height: 1.45; }
 .dc-progress-visual { display: grid; width: 100%; place-self: stretch; }
-.dc-progress-visual svg { display: none; }
-.dc-progress-ring { fill: none; stroke-linecap: round; }
-.dc-progress-ring--track { stroke: var(--background-modifier-border, var(--lightgray, #d8dee9)); stroke-width: 8; }
-.dc-progress-ring--arc { stroke-width: 8; animation: dc-progress-ring-draw 480ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
+.dc-progress-square { display: none; }
+/* CSS escapes keep the type's angle brackets intact through Syncer's XML serializer. */
+@property --dc-progress-fill { syntax: "\\3c percentage\\3e "; inherits: false; initial-value: 0%; }
+.dc-progress-square-fill { position: absolute; inset: 0; background: conic-gradient(var(--dc-progress-color) var(--dc-progress-fill), transparent 0); animation: dc-progress-square-draw 480ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
 .dc-progress-value { display: none; }
 .dc-progress-value strong { font-family: var(--codeFont, var(--font-monospace, monospace)); font-size: 0.75rem; font-weight: 700; line-height: 1; }
 .dc-progress-value span { display: none; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-family: var(--codeFont, var(--font-monospace, monospace)); font-size: 0.62rem; line-height: 1.15; letter-spacing: 0.04em; text-transform: uppercase; }
 .dc-progress-bar { height: 12px; margin-top: 0; }
-@keyframes dc-progress-ring-draw { from { stroke-dasharray: 0 100; } }
+@keyframes dc-progress-square-draw { from { --dc-progress-fill: 0%; } }
 @container (min-width: 40rem) {
   .dc-progress-hero .db-card-body { grid-template-columns: minmax(0, 1fr) auto; }
   .dc-progress-summary { display: block; }
   .dc-progress-title { font-size: clamp(1.75rem, 4cqi, 2.25rem); }
   .dc-progress-mobile-value { display: none; }
   .dc-progress-visual { position: relative; width: var(--dc-radial-size); aspect-ratio: 1; gap: 0; padding-top: 0; place-self: center; place-items: center; }
-  .dc-progress-visual svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; overflow: visible; transform: rotate(-90deg); }
-  /* Everything inside the ring scales off --dc-radial-size, not the card's cqi:
-     the ring shrinks in fit mode while cqi does not, and a container-sized
-     label overruns the 8-wide stroke. The inline padding keeps the text off
-     the arc itself. */
+  /* Two CSS masks cut out the center without painting over the card surface.
+     Inset, radius and padding preserve the square's existing size and bold line. */
+  .dc-progress-square { position: absolute; inset: 4.1667%; display: block; box-sizing: border-box; border-radius: 19.0909%; padding: calc(var(--dc-radial-size) / 12); background: var(--background-modifier-border, var(--lightgray, #d8dee9)); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; }
+  /* Label and line scale together when the indicator shrinks in a narrow pane. */
   .dc-progress-value { position: relative; display: grid; place-items: center; padding: 0 calc(var(--dc-radial-size) * 0.14); text-align: center; }
   .dc-progress-value strong { font-family: var(--headerFont, var(--font-interface, sans-serif)); font-size: calc(var(--dc-radial-size) * 0.26); letter-spacing: -0.05em; }
   .dc-progress-value span { display: block; margin-top: 0.06em; font-size: calc(var(--dc-radial-size) * 0.095); }
@@ -244,7 +251,7 @@ p.dc-progress-note { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray
 .dc-topic-bar-track span { transform-origin: left center; animation: dc-topic-bar-fill var(--dur-3, 220ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
 /* Needed on its own: this file's CSS is inlined per-page and custom.scss is not
    loaded at all inside Obsidian, so the --dur-* collapse cannot reach here. */
-@media (prefers-reduced-motion: reduce) { .dc-topic-bar-track span, .dc-progress-ring--arc, .dc-progress-hero { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .dc-topic-bar-track span, .dc-progress-square-fill, .dc-progress-hero { animation: none; } }
 @container dc-home (min-width: 28rem) {
   .dc-topic-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
   ${tileRules(6)}
@@ -276,12 +283,11 @@ p.dc-progress-note { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray
             </ul>
           </div>
           <div class="dc-progress-visual" role="img" aria-label={`${oPct}% overall note development`}>
-            <svg viewBox="0 0 120 120" aria-hidden="true">
-              <circle class="dc-progress-ring dc-progress-ring--track" cx="60" cy="60" r="50" pathLength="100" />
-              {STATUS_RAMP.slice().reverse().map((seg) => (
-                <circle class="dc-progress-ring dc-progress-ring--arc" cx="60" cy="60" r="50" pathLength="100" style={{ stroke: heroTint(seg), strokeDasharray: `${oEndpoints[seg.key]} 100` }} />
+            <div class="dc-progress-square" aria-hidden="true">
+              {STATUS_RAMP.slice().reverse().filter((seg) => oByStatus[seg.key] > 0).map((seg) => (
+                <span class="dc-progress-square-fill" style={{ "--dc-progress-color": heroTint(seg), "--dc-progress-fill": `${oEndpoints[seg.key]}%` }} />
               ))}
-            </svg>
+            </div>
             <span class="dc-progress-value"><strong>{oPct}%</strong><span>Progress</span></span>
             <div class="dc-topic-bar dc-progress-bar" aria-hidden="true"><div class="dc-topic-bar-track">{segments(oByStatus, oTotal, heroTint)}</div></div>
           </div>
