@@ -12225,12 +12225,14 @@
     "version": 1,
     "id": "546ef5b36e6142c79d9efe91941e131e",
     "status": "active",
-    "phase": "validation_completed",
+    "phase": "selecting",
     "started_at": "2026-11-12T07:25:53.899904Z",
-    "elapsed_seconds": 180.035348,
+    "elapsed_seconds": 183.7765392,
     "calls_reserved": 4,
     "responses_received": 4,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md"
+    ],
     "accepted_records": [
       {
         "record_id": "c524e1093965584815b5b8ec184a6b8903fbf99c3d769a5a558e48c81ed345ec",
@@ -12395,9 +12397,718 @@
         "phase": "accepted"
       }
     ],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+        "outcome": "proposed",
+        "reason": "",
+        "result": {
+          "status": "proposed",
+          "topic": "Networks",
+          "proposal": {
+            "version": 1,
+            "edits": [
+              {
+                "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                "expected_hash": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000",
+                "before": "- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)",
+                "after": "- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)",
+                "reason": "Swaps the host-requirements RFC for an IETF overview of network fault-detection and performance-monitoring tools (ping, traceroute, BFD, OWAMP/TWAMP), which matches the operations theme.",
+                "kind": "note",
+                "learning_target": "same",
+                "essential_meanings": [
+                  "Reference should be topic-specific to network operations and monitoring"
+                ],
+                "sources": [
+                  {
+                    "url": "https://www.rfc-editor.org/rfc/rfc7276",
+                    "claim": "RFC 7276 surveys IETF OAM tools that detect and isolate failures and monitor performance, aimed at network operators.",
+                    "version": "RFC 7276 (June 2014)"
+                  }
+                ],
+                "feedback_keys": [],
+                "problem": "The only reference, RFC 1122, covers host protocol requirements and is a weak fit for a hub on network architecture and operations.",
+                "reader_benefit": "The reference now points to material on diagnosing failures and measuring network performance, matching the hub's operations focus."
+              }
+            ],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                "outcome": "changed",
+                "reason": "Prose, frontmatter and the protected folder-map block were audited and are sound. The only defect was the topically weak reference, now replaced by RFC 7276, which covers network operations tooling for failure detection and performance monitoring."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The only defect was the weak RFC 1122 reference. RFC 7276 replaces it and fits the hub's operations focus. The prose and the protected folder map are unchanged and sound.",
+            "notes": [
+              {
+                "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                "verdict": "CLEAN",
+                "summary": "The previous finding, a topically weak sole reference, is fixed. RFC 7276 is an IETF overview of OAM tools for fault detection, isolation and performance monitoring, which matches the hub's operations and diagnosis theme. The prose and the Datacore map block are intact.",
+                "page_type": "FolderNote: typed frontmatter, FolderNote tag and protected Datacore map block are kept; Questions and References are optional.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Network architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure.",
+                    "line_start": 15,
+                    "reason": "A clear, direct distinction between architecture and operations that is easy to re-enter."
+                  },
+                  {
+                    "quote": "Diagnosis gets faster when each observation is tied to the device and protocol that produced it.",
+                    "line_start": 17,
+                    "reason": "States a concrete engineering judgment in an impersonal, declarative voice."
+                  },
+                  {
+                    "quote": "- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)",
+                    "line_start": 26,
+                    "reason": "A real, authoritative, topic-specific source on failure detection and performance monitoring (ping, traceroute, BFD, OWAMP/TWAMP). It is a bare descriptive link bullet."
+                  }
+                ],
+                "target_resolution": "RESOLVED",
+                "split_suggestion": "No split: the hub is short and its child topics are navigated through the folder map.",
+                "findings": [],
+                "source_checks": [
+                  {
+                    "url": "https://www.rfc-editor.org/rfc/rfc7276",
+                    "claim": "RFC 7276 surveys IETF OAM tools that detect and isolate failures and monitor performance, aimed at network operators.",
+                    "result": "SUPPORTED",
+                    "reason": "The abstract says OAM is a toolset for fault detection and isolation and for performance measurement. It also says the document focuses on tools for detecting and isolating failures and for performance monitoring, and lists network operators in its target audience."
+                  }
+                ],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "identity_safety": "NOT APPLICABLE",
+                  "question_quality": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": [
+              {
+                "edit_index": 0,
+                "verdict": "WORTHWHILE",
+                "reason": "Replaces the host-requirements RFC, a weak fit, with a source on network fault detection and performance monitoring. The edit touches only the reference line, and the new source is verified."
+              }
+            ]
+          },
+          "review_evidence": null,
+          "candidate": {
+            "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"How networks are designed, observed, and kept healthy in production.\"\ntags: [FolderNote]\npublish: true\npriority: Medium\nlevel: [\"3\"]\nstatus: Creation\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T07:27:45.069Z\"\npublished: \"2026-07-08T13:14:17.356Z\"\n---\n\nNetwork architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure. The work spans routing boundaries, segmentation, capacity, telemetry, and incident response.\n\nAn intermittent request failure rarely identifies its own layer. Application traces may show a timeout while interface counters reveal drops, packet captures reveal retransmissions, or proxy logs reveal an unhealthy upstream. Diagnosis gets faster when each observation is tied to the device and protocol that produced it.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# References\n\n- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)\n"
+          },
+          "summary": "## 1. Note improvements\n\n- [`Networks/Architecture & Ops/Architecture & Ops.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-networks-ab2c47c3-g1/Vault/Home/Networks/Architecture%20%26%20Ops/Architecture%20%26%20Ops.md) — The only reference, RFC 1122, covers host protocol requirements and is a weak fit for a hub on network architecture and operations. Swaps the host-requirements RFC for an IETF overview of network fault-detection and performance-monitoring tools (ping, traceroute, BFD, OWAMP/TWAMP), which matches the operations theme. The reference now points to material on diagnosing failures and measuring network performance, matching the hub's operations focus. [RFC 7276 surveys IETF OAM tools that detect and isolate failures and monitor performance, aimed at network operators.](https://www.rfc-editor.org/rfc/rfc7276)\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz export: awaiting the source-bound native export and checks.\n\nOwner review or size limits freeze unrelated additions; requested fixes and export can continue.\n",
+          "validation": [
+            {
+              "check": "dotnet run --no-cache --file DevBook.Tooling/Scripts/ValidateVault.cs -- --all --repo-root ..",
+              "result": "passed"
+            },
+            {
+              "check": "dotnet test DevBook.Tooling.Tests/DevBook.Tooling.Tests.csproj --configuration Release",
+              "result": "passed"
+            },
+            {
+              "check": "node --test .codex/hooks/tests/note-review-hooks.test.mjs",
+              "result": "passed"
+            },
+            {
+              "check": "npm --prefix Web run test -- custom/transformers/publishing.test.ts",
+              "result": "passed"
+            }
+          ],
+          "question_changes": [],
+          "diff": "diff --git a/Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md b/Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md\nindex 71fbcf7..78ab607 100644\n--- a/Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md\t\n+++ b/Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md\t\n@@ -8,7 +8,7 @@ priority: Medium\n level: [\"3\"]\n status: Creation\n created: \"2026-02-10T01:40:47.000Z\"\n-modified: \"2026-10-28T12:33:42.000Z\"\n+modified: \"2026-11-12T07:27:45.069Z\"\n published: \"2026-07-08T13:14:17.356Z\"\n ---\n \n@@ -23,4 +23,4 @@ return FolderStructureMap;\n \n # References\n \n-- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)\n+- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)\n",
+          "model_calls": 4,
+          "accepted_record": {
+            "record_id": "c524e1093965584815b5b8ec184a6b8903fbf99c3d769a5a558e48c81ed345ec",
+            "workload_id": "546ef5b36e6142c79d9efe91941e131e",
+            "batch": {
+              "topic": "Networks",
+              "topic_id": "networks-ab2c47c3",
+              "notes": [
+                {
+                  "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                  "content": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"How networks are designed, observed, and kept healthy in production.\"\ntags: [FolderNote]\npublish: true\npriority: Medium\nlevel: [\"3\"]\nstatus: Creation\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.356Z\"\n---\n\nNetwork architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure. The work spans routing boundaries, segmentation, capacity, telemetry, and incident response.\n\nAn intermittent request failure rarely identifies its own layer. Application traces may show a timeout while interface counters reveal drops, packet captures reveal retransmissions, or proxy logs reveal an unhealthy upstream. Diagnosis gets faster when each observation is tied to the device and protocol that produced it.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# References\n\n- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)\n",
+                  "hash": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000",
+                  "topic": "Networks",
+                  "violations": [],
+                  "needs_fixing_ids": [],
+                  "repair_input_hash": "",
+                  "selection_reason": "new"
+                }
+              ],
+              "feedback": [],
+              "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+              "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+              "review_process": "focused-whole-note-v1",
+              "pr": null
+            },
+            "proposal": {
+              "version": 1,
+              "edits": [
+                {
+                  "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                  "expected_hash": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000",
+                  "before": "- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)",
+                  "after": "- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)",
+                  "reason": "Swaps the host-requirements RFC for an IETF overview of network fault-detection and performance-monitoring tools (ping, traceroute, BFD, OWAMP/TWAMP), which matches the operations theme.",
+                  "kind": "note",
+                  "learning_target": "same",
+                  "essential_meanings": [
+                    "Reference should be topic-specific to network operations and monitoring"
+                  ],
+                  "sources": [
+                    {
+                      "url": "https://www.rfc-editor.org/rfc/rfc7276",
+                      "claim": "RFC 7276 surveys IETF OAM tools that detect and isolate failures and monitor performance, aimed at network operators.",
+                      "version": "RFC 7276 (June 2014)"
+                    }
+                  ],
+                  "feedback_keys": [],
+                  "problem": "The only reference, RFC 1122, covers host protocol requirements and is a weak fit for a hub on network architecture and operations.",
+                  "reader_benefit": "The reference now points to material on diagnosing failures and measuring network performance, matching the hub's operations focus."
+                }
+              ],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                  "outcome": "changed",
+                  "reason": "Prose, frontmatter and the protected folder-map block were audited and are sound. The only defect was the topically weak reference, now replaced by RFC 7276, which covers network operations tooling for failure detection and performance monitoring."
+                }
+              ],
+              "feedback": []
+            },
+            "result": {
+              "sources": {
+                "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"How networks are designed, observed, and kept healthy in production.\"\ntags: [FolderNote]\npublish: true\npriority: Medium\nlevel: [\"3\"]\nstatus: Creation\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T07:27:45.069Z\"\npublished: \"2026-07-08T13:14:17.356Z\"\n---\n\nNetwork architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure. The work spans routing boundaries, segmentation, capacity, telemetry, and incident response.\n\nAn intermittent request failure rarely identifies its own layer. Application traces may show a timeout while interface counters reveal drops, packet captures reveal retransmissions, or proxy logs reveal an unhealthy upstream. Diagnosis gets faster when each observation is tied to the device and protocol that produced it.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# References\n\n- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)\n"
+              },
+              "edits": [
+                {
+                  "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                  "expected_hash": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000",
+                  "before": "- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)",
+                  "after": "- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)",
+                  "reason": "Swaps the host-requirements RFC for an IETF overview of network fault-detection and performance-monitoring tools (ping, traceroute, BFD, OWAMP/TWAMP), which matches the operations theme.",
+                  "kind": "note",
+                  "learning_target": "same",
+                  "essential_meanings": [
+                    "Reference should be topic-specific to network operations and monitoring"
+                  ],
+                  "sources": [
+                    {
+                      "url": "https://www.rfc-editor.org/rfc/rfc7276",
+                      "claim": "RFC 7276 surveys IETF OAM tools that detect and isolate failures and monitor performance, aimed at network operators.",
+                      "version": "RFC 7276 (June 2014)"
+                    }
+                  ],
+                  "feedback_keys": [],
+                  "problem": "The only reference, RFC 1122, covers host protocol requirements and is a weak fit for a hub on network architecture and operations.",
+                  "reader_benefit": "The reference now points to material on diagnosing failures and measuring network performance, matching the hub's operations focus."
+                }
+              ],
+              "retired_ids": [],
+              "lineage": [],
+              "fingerprints": [
+                "42be0fd76c17e918049fbdde42bfabcb2df1ec432041c2ff0b9cdeaaaa5b9655"
+              ]
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The only defect was the weak RFC 1122 reference. RFC 7276 replaces it and fits the hub's operations focus. The prose and the protected folder map are unchanged and sound.",
+              "notes": [
+                {
+                  "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                  "verdict": "CLEAN",
+                  "summary": "The previous finding, a topically weak sole reference, is fixed. RFC 7276 is an IETF overview of OAM tools for fault detection, isolation and performance monitoring, which matches the hub's operations and diagnosis theme. The prose and the Datacore map block are intact.",
+                  "page_type": "FolderNote: typed frontmatter, FolderNote tag and protected Datacore map block are kept; Questions and References are optional.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Network architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure.",
+                      "line_start": 15,
+                      "reason": "A clear, direct distinction between architecture and operations that is easy to re-enter."
+                    },
+                    {
+                      "quote": "Diagnosis gets faster when each observation is tied to the device and protocol that produced it.",
+                      "line_start": 17,
+                      "reason": "States a concrete engineering judgment in an impersonal, declarative voice."
+                    },
+                    {
+                      "quote": "- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)",
+                      "line_start": 26,
+                      "reason": "A real, authoritative, topic-specific source on failure detection and performance monitoring (ping, traceroute, BFD, OWAMP/TWAMP). It is a bare descriptive link bullet."
+                    }
+                  ],
+                  "target_resolution": "RESOLVED",
+                  "split_suggestion": "No split: the hub is short and its child topics are navigated through the folder map.",
+                  "findings": [],
+                  "source_checks": [
+                    {
+                      "url": "https://www.rfc-editor.org/rfc/rfc7276",
+                      "claim": "RFC 7276 surveys IETF OAM tools that detect and isolate failures and monitor performance, aimed at network operators.",
+                      "result": "SUPPORTED",
+                      "reason": "The abstract says OAM is a toolset for fault detection and isolation and for performance measurement. It also says the document focuses on tools for detecting and isolating failures and for performance monitoring, and lists network operators in its target audience."
+                    }
+                  ],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "identity_safety": "NOT APPLICABLE",
+                    "question_quality": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": [
+                {
+                  "edit_index": 0,
+                  "verdict": "WORTHWHILE",
+                  "reason": "Replaces the host-requirements RFC, a weak fit, with a source on network fault detection and performance monitoring. The edit touches only the reference line, and the new source is verified."
+                }
+              ]
+            },
+            "decisions": [],
+            "review_evidence": null,
+            "source_hashes": {
+              "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000"
+            },
+            "prepared_source_version": 1,
+            "prepared_at": "2026-11-12T07:27:45.069969Z",
+            "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+            "calls_reserved": 4,
+            "elapsed_seconds": 180.0271201,
+            "accepted_at": "2026-11-12T07:28:53.927170Z",
+            "phase": "accepted"
+          },
+          "publication_request": {
+            "topic": "networks-ab2c47c3",
+            "generation": 1,
+            "branch": "notes/automated-networks-ab2c47c3-g1",
+            "base_sources": {
+              "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"How networks are designed, observed, and kept healthy in production.\"\ntags: [FolderNote]\npublish: true\npriority: Medium\nlevel: [\"3\"]\nstatus: Creation\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.356Z\"\n---\n\nNetwork architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure. The work spans routing boundaries, segmentation, capacity, telemetry, and incident response.\n\nAn intermittent request failure rarely identifies its own layer. Application traces may show a timeout while interface counters reveal drops, packet captures reveal retransmissions, or proxy logs reveal an unhealthy upstream. Diagnosis gets faster when each observation is tied to the device and protocol that produced it.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# References\n\n- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)\n"
+            },
+            "pr_sources": {
+              "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"How networks are designed, observed, and kept healthy in production.\"\ntags: [FolderNote]\npublish: true\npriority: Medium\nlevel: [\"3\"]\nstatus: Creation\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T07:27:45.069Z\"\npublished: \"2026-07-08T13:14:17.356Z\"\n---\n\nNetwork architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure. The work spans routing boundaries, segmentation, capacity, telemetry, and incident response.\n\nAn intermittent request failure rarely identifies its own layer. Application traces may show a timeout while interface counters reveal drops, packet captures reveal retransmissions, or proxy logs reveal an unhealthy upstream. Diagnosis gets faster when each observation is tied to the device and protocol that produced it.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# References\n\n- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)\n"
+            },
+            "expected_sources": {
+              "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"How networks are designed, observed, and kept healthy in production.\"\ntags: [FolderNote]\npublish: true\npriority: Medium\nlevel: [\"3\"]\nstatus: Creation\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.356Z\"\n---\n\nNetwork architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure. The work spans routing boundaries, segmentation, capacity, telemetry, and incident response.\n\nAn intermittent request failure rarely identifies its own layer. Application traces may show a timeout while interface counters reveal drops, packet captures reveal retransmissions, or proxy logs reveal an unhealthy upstream. Diagnosis gets faster when each observation is tied to the device and protocol that produced it.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# References\n\n- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)\n"
+            },
+            "candidate": {
+              "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"How networks are designed, observed, and kept healthy in production.\"\ntags: [FolderNote]\npublish: true\npriority: Medium\nlevel: [\"3\"]\nstatus: Creation\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T07:27:45.069Z\"\npublished: \"2026-07-08T13:14:17.356Z\"\n---\n\nNetwork architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure. The work spans routing boundaries, segmentation, capacity, telemetry, and incident response.\n\nAn intermittent request failure rarely identifies its own layer. Application traces may show a timeout while interface counters reveal drops, packet captures reveal retransmissions, or proxy logs reveal an unhealthy upstream. Diagnosis gets faster when each observation is tied to the device and protocol that produced it.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# References\n\n- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)\n"
+            },
+            "title": "notes: improve Networks",
+            "body": "<!-- devbook-improvement:start topic=networks-ab2c47c3 -->\n## 1. Note improvements\n\n- [`Networks/Architecture & Ops/Architecture & Ops.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-networks-ab2c47c3-g1/Vault/Home/Networks/Architecture%20%26%20Ops/Architecture%20%26%20Ops.md) — The only reference, RFC 1122, covers host protocol requirements and is a weak fit for a hub on network architecture and operations. Swaps the host-requirements RFC for an IETF overview of network fault-detection and performance-monitoring tools (ping, traceroute, BFD, OWAMP/TWAMP), which matches the operations theme. The reference now points to material on diagnosing failures and measuring network performance, matching the hub's operations focus. [RFC 7276 surveys IETF OAM tools that detect and isolate failures and monitor performance, aimed at network operators.](https://www.rfc-editor.org/rfc/rfc7276)\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz export: awaiting the source-bound native export and checks.\n\nOwner review or size limits freeze unrelated additions; requested fixes and export can continue.\n<!-- devbook-improvement:end -->\n",
+            "feedback_revision": {
+              "allowlist": [
+                "45916288:grafanaKibana"
+              ],
+              "processed": {}
+            },
+            "expected_base_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
+            "expected_branch_sha": null,
+            "expected_pr_number": null,
+            "freeze": false,
+            "pending_feedback": [],
+            "edits": [
+              {
+                "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                "expected_hash": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000",
+                "before": "- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)",
+                "after": "- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)",
+                "reason": "Swaps the host-requirements RFC for an IETF overview of network fault-detection and performance-monitoring tools (ping, traceroute, BFD, OWAMP/TWAMP), which matches the operations theme.",
+                "kind": "note",
+                "learning_target": "same",
+                "essential_meanings": [
+                  "Reference should be topic-specific to network operations and monitoring"
+                ],
+                "sources": [
+                  {
+                    "url": "https://www.rfc-editor.org/rfc/rfc7276",
+                    "claim": "RFC 7276 surveys IETF OAM tools that detect and isolate failures and monitor performance, aimed at network operators.",
+                    "version": "RFC 7276 (June 2014)"
+                  }
+                ],
+                "feedback_keys": [],
+                "problem": "The only reference, RFC 1122, covers host protocol requirements and is a weak fit for a hub on network architecture and operations.",
+                "reader_benefit": "The reference now points to material on diagnosing failures and measuring network performance, matching the hub's operations focus."
+              }
+            ],
+            "operation_receipts": {
+              "version": 2,
+              "workload_id": "546ef5b36e6142c79d9efe91941e131e",
+              "records": [
+                {
+                  "record_id": "c524e1093965584815b5b8ec184a6b8903fbf99c3d769a5a558e48c81ed345ec",
+                  "workload_id": "546ef5b36e6142c79d9efe91941e131e",
+                  "batch": {
+                    "topic": "Networks",
+                    "topic_id": "networks-ab2c47c3",
+                    "notes": [
+                      {
+                        "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                        "content": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"How networks are designed, observed, and kept healthy in production.\"\ntags: [FolderNote]\npublish: true\npriority: Medium\nlevel: [\"3\"]\nstatus: Creation\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.356Z\"\n---\n\nNetwork architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure. The work spans routing boundaries, segmentation, capacity, telemetry, and incident response.\n\nAn intermittent request failure rarely identifies its own layer. Application traces may show a timeout while interface counters reveal drops, packet captures reveal retransmissions, or proxy logs reveal an unhealthy upstream. Diagnosis gets faster when each observation is tied to the device and protocol that produced it.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# References\n\n- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)\n",
+                        "hash": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000",
+                        "topic": "Networks",
+                        "violations": [],
+                        "needs_fixing_ids": [],
+                        "repair_input_hash": "",
+                        "selection_reason": "new"
+                      }
+                    ],
+                    "feedback": [],
+                    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+                    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+                    "review_process": "focused-whole-note-v1",
+                    "pr": null
+                  },
+                  "proposal": {
+                    "version": 1,
+                    "edits": [
+                      {
+                        "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                        "expected_hash": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000",
+                        "before": "- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)",
+                        "after": "- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)",
+                        "reason": "Swaps the host-requirements RFC for an IETF overview of network fault-detection and performance-monitoring tools (ping, traceroute, BFD, OWAMP/TWAMP), which matches the operations theme.",
+                        "kind": "note",
+                        "learning_target": "same",
+                        "essential_meanings": [
+                          "Reference should be topic-specific to network operations and monitoring"
+                        ],
+                        "sources": [
+                          {
+                            "url": "https://www.rfc-editor.org/rfc/rfc7276",
+                            "claim": "RFC 7276 surveys IETF OAM tools that detect and isolate failures and monitor performance, aimed at network operators.",
+                            "version": "RFC 7276 (June 2014)"
+                          }
+                        ],
+                        "feedback_keys": [],
+                        "problem": "The only reference, RFC 1122, covers host protocol requirements and is a weak fit for a hub on network architecture and operations.",
+                        "reader_benefit": "The reference now points to material on diagnosing failures and measuring network performance, matching the hub's operations focus."
+                      }
+                    ],
+                    "dispositions": [
+                      {
+                        "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                        "outcome": "changed",
+                        "reason": "Prose, frontmatter and the protected folder-map block were audited and are sound. The only defect was the topically weak reference, now replaced by RFC 7276, which covers network operations tooling for failure detection and performance monitoring."
+                      }
+                    ],
+                    "feedback": []
+                  },
+                  "result": {
+                    "sources": {
+                      "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"How networks are designed, observed, and kept healthy in production.\"\ntags: [FolderNote]\npublish: true\npriority: Medium\nlevel: [\"3\"]\nstatus: Creation\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T07:27:45.069Z\"\npublished: \"2026-07-08T13:14:17.356Z\"\n---\n\nNetwork architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure. The work spans routing boundaries, segmentation, capacity, telemetry, and incident response.\n\nAn intermittent request failure rarely identifies its own layer. Application traces may show a timeout while interface counters reveal drops, packet captures reveal retransmissions, or proxy logs reveal an unhealthy upstream. Diagnosis gets faster when each observation is tied to the device and protocol that produced it.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# References\n\n- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)\n"
+                    },
+                    "edits": [
+                      {
+                        "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                        "expected_hash": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000",
+                        "before": "- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)",
+                        "after": "- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)",
+                        "reason": "Swaps the host-requirements RFC for an IETF overview of network fault-detection and performance-monitoring tools (ping, traceroute, BFD, OWAMP/TWAMP), which matches the operations theme.",
+                        "kind": "note",
+                        "learning_target": "same",
+                        "essential_meanings": [
+                          "Reference should be topic-specific to network operations and monitoring"
+                        ],
+                        "sources": [
+                          {
+                            "url": "https://www.rfc-editor.org/rfc/rfc7276",
+                            "claim": "RFC 7276 surveys IETF OAM tools that detect and isolate failures and monitor performance, aimed at network operators.",
+                            "version": "RFC 7276 (June 2014)"
+                          }
+                        ],
+                        "feedback_keys": [],
+                        "problem": "The only reference, RFC 1122, covers host protocol requirements and is a weak fit for a hub on network architecture and operations.",
+                        "reader_benefit": "The reference now points to material on diagnosing failures and measuring network performance, matching the hub's operations focus."
+                      }
+                    ],
+                    "retired_ids": [],
+                    "lineage": [],
+                    "fingerprints": [
+                      "42be0fd76c17e918049fbdde42bfabcb2df1ec432041c2ff0b9cdeaaaa5b9655"
+                    ]
+                  },
+                  "review": {
+                    "verdict": "CLEAN",
+                    "overall_reason": "The only defect was the weak RFC 1122 reference. RFC 7276 replaces it and fits the hub's operations focus. The prose and the protected folder map are unchanged and sound.",
+                    "notes": [
+                      {
+                        "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                        "verdict": "CLEAN",
+                        "summary": "The previous finding, a topically weak sole reference, is fixed. RFC 7276 is an IETF overview of OAM tools for fault detection, isolation and performance monitoring, which matches the hub's operations and diagnosis theme. The prose and the Datacore map block are intact.",
+                        "page_type": "FolderNote: typed frontmatter, FolderNote tag and protected Datacore map block are kept; Questions and References are optional.",
+                        "current_text_evidence": [
+                          {
+                            "quote": "Network architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure.",
+                            "line_start": 15,
+                            "reason": "A clear, direct distinction between architecture and operations that is easy to re-enter."
+                          },
+                          {
+                            "quote": "Diagnosis gets faster when each observation is tied to the device and protocol that produced it.",
+                            "line_start": 17,
+                            "reason": "States a concrete engineering judgment in an impersonal, declarative voice."
+                          },
+                          {
+                            "quote": "- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)",
+                            "line_start": 26,
+                            "reason": "A real, authoritative, topic-specific source on failure detection and performance monitoring (ping, traceroute, BFD, OWAMP/TWAMP). It is a bare descriptive link bullet."
+                          }
+                        ],
+                        "target_resolution": "RESOLVED",
+                        "split_suggestion": "No split: the hub is short and its child topics are navigated through the folder map.",
+                        "findings": [],
+                        "source_checks": [
+                          {
+                            "url": "https://www.rfc-editor.org/rfc/rfc7276",
+                            "claim": "RFC 7276 surveys IETF OAM tools that detect and isolate failures and monitor performance, aimed at network operators.",
+                            "result": "SUPPORTED",
+                            "reason": "The abstract says OAM is a toolset for fault detection and isolation and for performance measurement. It also says the document focuses on tools for detecting and isolating failures and for performance monitoring, and lists network operators in its target audience."
+                          }
+                        ],
+                        "rejection_equivalence": [],
+                        "quality": {
+                          "accuracy": "PASS",
+                          "clarity": "PASS",
+                          "identity_safety": "NOT APPLICABLE",
+                          "question_quality": "NOT APPLICABLE",
+                          "rules_compliance": "PASS"
+                        }
+                      }
+                    ],
+                    "change_checks": [
+                      {
+                        "edit_index": 0,
+                        "verdict": "WORTHWHILE",
+                        "reason": "Replaces the host-requirements RFC, a weak fit, with a source on network fault detection and performance monitoring. The edit touches only the reference line, and the new source is verified."
+                      }
+                    ]
+                  },
+                  "decisions": [],
+                  "review_evidence": null,
+                  "source_hashes": {
+                    "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000"
+                  },
+                  "prepared_source_version": 1,
+                  "prepared_at": "2026-11-12T07:27:45.069969Z",
+                  "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+                  "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+                  "calls_reserved": 4,
+                  "elapsed_seconds": 180.0271201,
+                  "accepted_at": "2026-11-12T07:28:53.927170Z",
+                  "phase": "accepted"
+                }
+              ],
+              "proposal_history": [
+                {
+                  "record_id": "c524e1093965584815b5b8ec184a6b8903fbf99c3d769a5a558e48c81ed345ec",
+                  "workload_id": "546ef5b36e6142c79d9efe91941e131e",
+                  "batch": {
+                    "topic": "Networks",
+                    "topic_id": "networks-ab2c47c3",
+                    "notes": [
+                      {
+                        "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                        "content": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"How networks are designed, observed, and kept healthy in production.\"\ntags: [FolderNote]\npublish: true\npriority: Medium\nlevel: [\"3\"]\nstatus: Creation\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.356Z\"\n---\n\nNetwork architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure. The work spans routing boundaries, segmentation, capacity, telemetry, and incident response.\n\nAn intermittent request failure rarely identifies its own layer. Application traces may show a timeout while interface counters reveal drops, packet captures reveal retransmissions, or proxy logs reveal an unhealthy upstream. Diagnosis gets faster when each observation is tied to the device and protocol that produced it.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# References\n\n- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)\n",
+                        "hash": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000",
+                        "topic": "Networks",
+                        "violations": [],
+                        "needs_fixing_ids": [],
+                        "repair_input_hash": "",
+                        "selection_reason": "new"
+                      }
+                    ],
+                    "feedback": [],
+                    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+                    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+                    "review_process": "focused-whole-note-v1",
+                    "pr": null
+                  },
+                  "proposal": {
+                    "version": 1,
+                    "edits": [
+                      {
+                        "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                        "expected_hash": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000",
+                        "before": "- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)",
+                        "after": "- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)",
+                        "reason": "Swaps the host-requirements RFC for an IETF overview of network fault-detection and performance-monitoring tools (ping, traceroute, BFD, OWAMP/TWAMP), which matches the operations theme.",
+                        "kind": "note",
+                        "learning_target": "same",
+                        "essential_meanings": [
+                          "Reference should be topic-specific to network operations and monitoring"
+                        ],
+                        "sources": [
+                          {
+                            "url": "https://www.rfc-editor.org/rfc/rfc7276",
+                            "claim": "RFC 7276 surveys IETF OAM tools that detect and isolate failures and monitor performance, aimed at network operators.",
+                            "version": "RFC 7276 (June 2014)"
+                          }
+                        ],
+                        "feedback_keys": [],
+                        "problem": "The only reference, RFC 1122, covers host protocol requirements and is a weak fit for a hub on network architecture and operations.",
+                        "reader_benefit": "The reference now points to material on diagnosing failures and measuring network performance, matching the hub's operations focus."
+                      }
+                    ],
+                    "dispositions": [
+                      {
+                        "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                        "outcome": "changed",
+                        "reason": "Prose, frontmatter and the protected folder-map block were audited and are sound. The only defect was the topically weak reference, now replaced by RFC 7276, which covers network operations tooling for failure detection and performance monitoring."
+                      }
+                    ],
+                    "feedback": []
+                  },
+                  "result": {
+                    "sources": {
+                      "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"How networks are designed, observed, and kept healthy in production.\"\ntags: [FolderNote]\npublish: true\npriority: Medium\nlevel: [\"3\"]\nstatus: Creation\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T07:27:45.069Z\"\npublished: \"2026-07-08T13:14:17.356Z\"\n---\n\nNetwork architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure. The work spans routing boundaries, segmentation, capacity, telemetry, and incident response.\n\nAn intermittent request failure rarely identifies its own layer. Application traces may show a timeout while interface counters reveal drops, packet captures reveal retransmissions, or proxy logs reveal an unhealthy upstream. Diagnosis gets faster when each observation is tied to the device and protocol that produced it.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# References\n\n- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)\n"
+                    },
+                    "edits": [
+                      {
+                        "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                        "expected_hash": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000",
+                        "before": "- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)",
+                        "after": "- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)",
+                        "reason": "Swaps the host-requirements RFC for an IETF overview of network fault-detection and performance-monitoring tools (ping, traceroute, BFD, OWAMP/TWAMP), which matches the operations theme.",
+                        "kind": "note",
+                        "learning_target": "same",
+                        "essential_meanings": [
+                          "Reference should be topic-specific to network operations and monitoring"
+                        ],
+                        "sources": [
+                          {
+                            "url": "https://www.rfc-editor.org/rfc/rfc7276",
+                            "claim": "RFC 7276 surveys IETF OAM tools that detect and isolate failures and monitor performance, aimed at network operators.",
+                            "version": "RFC 7276 (June 2014)"
+                          }
+                        ],
+                        "feedback_keys": [],
+                        "problem": "The only reference, RFC 1122, covers host protocol requirements and is a weak fit for a hub on network architecture and operations.",
+                        "reader_benefit": "The reference now points to material on diagnosing failures and measuring network performance, matching the hub's operations focus."
+                      }
+                    ],
+                    "retired_ids": [],
+                    "lineage": [],
+                    "fingerprints": [
+                      "42be0fd76c17e918049fbdde42bfabcb2df1ec432041c2ff0b9cdeaaaa5b9655"
+                    ]
+                  },
+                  "review": {
+                    "verdict": "CLEAN",
+                    "overall_reason": "The only defect was the weak RFC 1122 reference. RFC 7276 replaces it and fits the hub's operations focus. The prose and the protected folder map are unchanged and sound.",
+                    "notes": [
+                      {
+                        "path": "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
+                        "verdict": "CLEAN",
+                        "summary": "The previous finding, a topically weak sole reference, is fixed. RFC 7276 is an IETF overview of OAM tools for fault detection, isolation and performance monitoring, which matches the hub's operations and diagnosis theme. The prose and the Datacore map block are intact.",
+                        "page_type": "FolderNote: typed frontmatter, FolderNote tag and protected Datacore map block are kept; Questions and References are optional.",
+                        "current_text_evidence": [
+                          {
+                            "quote": "Network architecture decides how traffic should flow. Network operations proves that it still flows under real load and failure.",
+                            "line_start": 15,
+                            "reason": "A clear, direct distinction between architecture and operations that is easy to re-enter."
+                          },
+                          {
+                            "quote": "Diagnosis gets faster when each observation is tied to the device and protocol that produced it.",
+                            "line_start": 17,
+                            "reason": "States a concrete engineering judgment in an impersonal, declarative voice."
+                          },
+                          {
+                            "quote": "- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)",
+                            "line_start": 26,
+                            "reason": "A real, authoritative, topic-specific source on failure detection and performance monitoring (ping, traceroute, BFD, OWAMP/TWAMP). It is a bare descriptive link bullet."
+                          }
+                        ],
+                        "target_resolution": "RESOLVED",
+                        "split_suggestion": "No split: the hub is short and its child topics are navigated through the folder map.",
+                        "findings": [],
+                        "source_checks": [
+                          {
+                            "url": "https://www.rfc-editor.org/rfc/rfc7276",
+                            "claim": "RFC 7276 surveys IETF OAM tools that detect and isolate failures and monitor performance, aimed at network operators.",
+                            "result": "SUPPORTED",
+                            "reason": "The abstract says OAM is a toolset for fault detection and isolation and for performance measurement. It also says the document focuses on tools for detecting and isolating failures and for performance monitoring, and lists network operators in its target audience."
+                          }
+                        ],
+                        "rejection_equivalence": [],
+                        "quality": {
+                          "accuracy": "PASS",
+                          "clarity": "PASS",
+                          "identity_safety": "NOT APPLICABLE",
+                          "question_quality": "NOT APPLICABLE",
+                          "rules_compliance": "PASS"
+                        }
+                      }
+                    ],
+                    "change_checks": [
+                      {
+                        "edit_index": 0,
+                        "verdict": "WORTHWHILE",
+                        "reason": "Replaces the host-requirements RFC, a weak fit, with a source on network fault detection and performance monitoring. The edit touches only the reference line, and the new source is verified."
+                      }
+                    ]
+                  },
+                  "decisions": [],
+                  "review_evidence": null,
+                  "source_hashes": {
+                    "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000"
+                  },
+                  "prepared_source_version": 1,
+                  "prepared_at": "2026-11-12T07:27:45.069969Z",
+                  "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+                  "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+                  "calls_reserved": 4,
+                  "elapsed_seconds": 180.0271201,
+                  "accepted_at": "2026-11-12T07:28:53.927170Z",
+                  "phase": "accepted"
+                }
+              ],
+              "topic_id": "networks-ab2c47c3",
+              "generation": 1,
+              "base_note_hashes": {
+                "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md": "3011e7f33478cbebb845d931c346f116b2508aca1d8002efd72c8c55700b2000",
+                "Vault/Home/Networks/Architecture & Ops/CDN.md": "1280cf557faa5bc73734af263e5d3bf6a207a8410167a17fcdfd3dbebc549b14",
+                "Vault/Home/Networks/Architecture & Ops/Forward and Reverse Proxies.md": "f5b0a677e61900cf5c8682b5950c3147d105faacb244dc587e14c7d3ab2c2382",
+                "Vault/Home/Networks/Architecture & Ops/Nginx.md": "4827de3a15b68811381942dba7a4ce70e4217193bdf578fdb71a33367b4cd282",
+                "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md": "ede446c8ffa04489d9547861ec89ae79772e4cbac2a43e05d2b3dec724ae70ba",
+                "Vault/Home/Networks/Architecture & Ops/VPN.md": "5536d706bc1de18256b712b3bd029f2901b35a9459abff98baba6457d14ac199",
+                "Vault/Home/Networks/Network Data Path.md": "e736573d25eb2228dd829b0a7cacb32a22c81f3a0ab962c5703a588b1a6a5275",
+                "Vault/Home/Networks/Networks.md": "fd6dfdad5444b61d35c9fa39aeb47c49924c23597d3d314cd1129f82a05ce4d0",
+                "Vault/Home/Networks/OSI Model.md": "5365e4c2f9b4c20b37655e50122fadfc5fed760a329988242afdee24e032087a",
+                "Vault/Home/Networks/Protocols/DNS.md": "8daf1f038e24573227bcda5709f225ad8c104edf628d2fac9c6441cdbabb0e9f",
+                "Vault/Home/Networks/Protocols/GraphQL.md": "7353e5e76bbde2b1e77983a955c0e08ce24a3e807ccb24a4bdcaa26fe8571a55",
+                "Vault/Home/Networks/Protocols/HTTP 2.md": "15310031c1c7e11f019c706370483bb582dc84de0087b51d566ff34ad527ef29",
+                "Vault/Home/Networks/Protocols/HTTP.md": "0feacfa27db86aa378740ebee1fd262a4f77f2d36f33c35f59e60f748d117151",
+                "Vault/Home/Networks/Protocols/Live Streaming.md": "9eb0cc2996abc1cd33395b97c17244a99cc4be51867b73439fca2a36c9322c5b",
+                "Vault/Home/Networks/Protocols/Ports.md": "0658edeb6a5a119b8b03f114aa3585462641ee571973b3d9928c991c76537a05",
+                "Vault/Home/Networks/Protocols/Protocols.md": "8d19f5048ac8b1830d3804eaadd9a073b130248f997bf1faed535b7ebda9255d",
+                "Vault/Home/Networks/Protocols/REST.md": "232bf5a922ceafd7d76c0b61b4e77192df342a8b6cab8df850a68ba9440e94d9",
+                "Vault/Home/Networks/Protocols/RPC.md": "1f2c77506f7ff442ed72eb94ec023020cacfb9f3b05a5ce195361f0a89629387",
+                "Vault/Home/Networks/Protocols/SMTP.md": "6fa9fa05f753ecaff40a1acfb62a8e9e48a6b7deeb4d799988844e097691de7f",
+                "Vault/Home/Networks/Protocols/SSH.md": "83f9f4093748f75fceb30deef11643828155aecfe16193935e8902de6ef270cb",
+                "Vault/Home/Networks/Protocols/URL.md": "2c6b53986d50ddb3ef8110ecea2e204f2b9d6fed2ed4b83ab291ea275747a6e0",
+                "Vault/Home/Networks/Protocols/WebSockets.md": "4906c3b0e1fa81c0a3547b49913f384689e907e93eb523fc7c5df7c59a6efb1a",
+                "Vault/Home/Networks/Protocols/gRPC.md": "2c283f54eb03316afaec8c4ccec85f0d3d28dbeda2c80f6de78b6f8cb63de0e8",
+                "Vault/Home/Networks/Transport & Sockets/Sockets.md": "513971a9c8ffb56fa840b555bd4838f1941d2578d77ea40ee01dcbe55e9c1fbb",
+                "Vault/Home/Networks/Transport & Sockets/TCP IP.md": "0c3a24d232e1ffd788d7c9ff2f876c1f810f611983433bdffe5ecd737f24b8cd",
+                "Vault/Home/Networks/Transport & Sockets/Transport & Sockets.md": "540318d5464f9a4ced5f2f1d7bbc3e7f6a6c58e1d5ea19cb64785cc2c2681bc5",
+                "Vault/Home/Networks/Transport & Sockets/UDP.md": "147d6d7dbf9864bb9b8b9089918e17ecc2627a6362fbc90ff35cbdbfc4fc9740"
+              }
+            },
+            "export_required": true,
+            "automatic_export": true,
+            "prepared_source_version": 1,
+            "prepared_at": "2026-11-12T07:27:45.069969Z"
+          }
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T07:28:53.934620Z",
+    "checkpoint_at": "2026-11-12T07:28:57.675813Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
