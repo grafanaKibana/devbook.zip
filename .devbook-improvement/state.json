@@ -13565,11 +13565,11 @@
     "version": 1,
     "id": "5589fab66fbd42d6ab4c1fac5fc35939",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-12T20:08:23.345425Z",
-    "elapsed_seconds": 570.7733747999998,
+    "elapsed_seconds": 595.3747612999998,
     "calls_reserved": 15,
-    "responses_received": 14,
+    "responses_received": 15,
     "attempted_paths": [
       "Vault/Home/Programming/NET/CSharp/CSharp.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
@@ -13958,7 +13958,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T20:17:54.118274Z",
+    "checkpoint_at": "2026-11-12T20:18:18.719659Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -36642,6 +36642,63 @@
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Pattern Matching.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-12T20:17:49.801037Z"
+    "prepared_at": "2026-11-12T20:17:49.801037Z",
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The single note was audited in full and is accurate, compact and well ordered. The two cards each test one task. No concrete defect or essential learning gap exists, so keeping it unchanged is justified.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Pattern Matching.md",
+          "verdict": "CLEAN",
+          "summary": "Whole-note audit found the note accurate and well ordered. It correctly covers first-match arm semantics, null handling, C# 11 list-pattern requirements and run-time exhaustiveness limits. Both cards test a single task. Edits would be cosmetic churn.",
+          "page_type": "Concept. It has typed frontmatter and valid optional Questions and References sections. Code fences have language identifiers. Wikilinks sit in explanatory prose.",
+          "current_text_evidence": [
+            {
+              "quote": "a `switch` expression selects the first arm whose pattern and optional guard match",
+              "line_start": 16,
+              "reason": "Correct statement of switch-expression semantics, and it introduces the arm-order idea up front."
+            },
+            {
+              "quote": "Moving the broad `Circle` arm before the specialized circle arm would make that specialized arm unreachable.",
+              "line_start": 35,
+              "reason": "Accurate, since the compiler reports the later arm as subsumed. It ties the example to the key ordering limit."
+            },
+            {
+              "quote": "Declaration, type, and property patterns do not match null; the null and discard arms make that handling explicit.",
+              "line_start": 35,
+              "reason": "Correct null behavior, explained against the example's null and discard arms."
+            },
+            {
+              "quote": "an arbitrary `IEnumerable<T>` is not sufficient",
+              "line_start": 41,
+              "reason": "Correct list-pattern constraint: it needs a count or length plus an indexer. The C# 11 version condition is stated."
+            },
+            {
+              "quote": "A missing case can produce `SwitchExpressionException`",
+              "line_start": 55,
+              "reason": "Correct run-time failure mode. It also correctly notes that exhaustiveness diagnostics do not close an open hierarchy."
+            },
+            {
+              "quote": "> [!qard]- What sequence shape does the list pattern `[var first, var second]` require?",
+              "line_start": 64,
+              "reason": "Bounded, self-contained, single recall task. The answer is plain and carries a primary-source link on the answer side."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: general patterns and list patterns are closely related and compact, so one note stays coherent.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
