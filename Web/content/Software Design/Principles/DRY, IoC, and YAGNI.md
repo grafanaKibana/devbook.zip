@@ -16,7 +16,7 @@ summary: Balances one source of knowledge, framework-owned control, and deferral
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 DRY, Inversion of Control, and YAGNI control different design costs. **DRY** keeps one authoritative representation of knowledge that must change together. **Inversion of Control (IoC)** lets a framework or composition root decide when application code is created and called. **YAGNI** defers features and flexibility that have no current requirement.

@@ -11,7 +11,7 @@ summary: A stateless request-response protocol carrying web and API messages acr
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Networks
 qard-topic: Protocols/HTTP
 flashcard_uid: bf424dee

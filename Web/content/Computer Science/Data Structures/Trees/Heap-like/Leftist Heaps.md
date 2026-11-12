@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-09T18:37:04.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T14:39:34.308Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: A heap-ordered binary tree whose null-path-length invariant keeps merge
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 Leftist heaps make melding the main priority-queue operation. Keys remain heap-ordered in an explicit binary tree, while one extra field per node keeps the path used by merge short.

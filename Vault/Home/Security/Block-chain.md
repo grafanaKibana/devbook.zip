@@ -4,11 +4,11 @@ subtopic: [Security]
 summary: "An append-only ledger of blocks linked by cryptographic hashes, making tampering detectable."
 level: ["1"]
 priority: Low
-status: Ready to Repeat
+status: In Progress
 
 publish: true
 created: "2026-02-15T15:01:57.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.502Z"
 ---
 

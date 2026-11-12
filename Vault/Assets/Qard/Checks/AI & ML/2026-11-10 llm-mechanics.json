@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "createdAt": 1794299067444,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "llm-mechanics",
+  "title": "Distinguish transformer families, pretraining and adaptation, inference context, and sparse-expert routing without equating fluent output with verified reasoning",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "mcq",
+      "marks": 1,
+      "prompt": "A team uses a pretrained T5 checkpoint to write summaries of long incident reports. T5 is an encoder-decoder transformer. A colleague objects: \"T5 contains an encoder, and encoders such as BERT cannot generate open-ended text, so T5 should not be able to write summaries either.\"\n\nWhich statement best explains why T5 can generate summaries even though it contains an encoder?",
+      "options": [
+        "T5's encoder uses causal attention instead of bidirectional attention, so unlike BERT's encoder it can predict the next token and continue the report directly.",
+        "The encoder reads the source report bidirectionally into contextual representations, and a separate decoder attends to them while generating summary tokens autoregressively, one at a time.",
+        "The encoder writes the summary by filling masked slots appended to the end of the report, and the decoder only reranks the finished candidate summaries it receives.",
+        "The encoder and decoder each produce a pooled vector, and a task head uses those vectors to pick the closest summary from a stored set of reference texts."
+      ],
+      "answer": 1,
+      "rubric": [
+        {
+          "point": "Selects the option stating that the encoder builds bidirectional representations of the source while a separate decoder attends to them and generates the output autoregressively.",
+          "marks": 1
+        }
+      ],
+      "model": "**B.** In an encoder-decoder model, the encoder only reads the source and builds contextual representations. The decoder does the generating. It attends to the encoder output and produces target tokens one at a time. BERT cannot generate open-ended text because it has no such decoder, not because it has an encoder.\n\n*Why the others fail:* T5's encoder is bidirectional, not causal. The encoder does not write the output, because generation happens in the decoder. T5 generates new text rather than selecting a stored reference.",
+      "source": {
+        "path": "Home/AI & ML/LLM/LLM.md",
+        "heading": "Transformer Families"
+      },
+      "objective": "llm-mechanics",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "short",
+      "marks": 2,
+      "prompt": "A GPT-style decoder-only model is pretrained only on next-token prediction over large amounts of text. After pretraining, the same model can take a prompt and continue it with new text.\n\nExplain how the model's attention restriction and its pretraining objective together make this continuation possible.",
+      "rubric": [
+        {
+          "point": "States that causal attention (a causal mask) lets each position attend only to earlier tokens, never later ones.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that training to predict the next token from earlier tokens matches generation: the model predicts the token after the prompt, appends it, and repeats one token at a time.",
+          "marks": 1
+        }
+      ],
+      "model": "A causal mask lets each position see only earlier tokens. Pretraining teaches the model to predict the next token from that left context, which is exactly what generation needs. At inference, the model predicts the token after the prompt, appends it and repeats, continuing autoregressively one token at a time.",
+      "source": {
+        "path": "Home/AI & ML/LLM/LLM.md",
+        "heading": "Transformer Families"
+      },
+      "objective": "llm-mechanics",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

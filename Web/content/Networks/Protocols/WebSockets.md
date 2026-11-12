@@ -11,7 +11,7 @@ summary: Full-duplex, message-oriented communication over a long-lived connectio
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Networks
 qard-topic: Protocols/WebSockets
 flashcard_uid: d66e2a8b

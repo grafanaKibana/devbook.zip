@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-27T12:56:16.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.406Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Mapping text into a dense vector space where semantic similarity become
 level:
   - "2"
 priority: High
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Embeddings
 flashcard_uid: 485a25d5

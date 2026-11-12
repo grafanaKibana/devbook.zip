@@ -11,7 +11,7 @@ summary: The ingest, transcoding, packaging, CDN, and playback path for live ada
 level:
   - "3"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 Live streaming distributes media while it is still being captured. The usual path is **ingest → transcode → package → origin → CDN → player**. Latency accumulates at every boundary, especially where a stage waits for a keyframe, segment, network response, or playback buffer.

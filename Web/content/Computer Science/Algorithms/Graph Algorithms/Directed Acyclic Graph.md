@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-08-08T15:37:04.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-08-08T15:24:55.712Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: A directed graph with no directed cycle. In finite graphs, its reachabi
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 A **directed acyclic graph (DAG)** is a directed graph with no directed cycle. Direction gives each edge a one-way meaning such as prerequisite → dependent. Acyclicity prevents a dependency chain from returning to its start. The underlying [[Computer Science/Data Structures/Graph Structures/Graph|Graph]] representation may vary. The DAG property concerns the relationships it represents.

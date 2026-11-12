@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-18T07:07:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-16T18:28:57.241Z
 topic:
   - Programming
@@ -10,7 +10,7 @@ summary: A validated portable instruction format with explicit host imports, lin
 level:
   - "3"
 priority: Medium
-status: Creation
+status: New
 ---
 
 WebAssembly (Wasm) is a compact binary instruction format for a typed stack machine. A host validates a module, compiles or interprets it, supplies imports, and invokes exports. The browser is one possible host. A core Wasm module has no built-in DOM, file system, socket, clock, or process authority.

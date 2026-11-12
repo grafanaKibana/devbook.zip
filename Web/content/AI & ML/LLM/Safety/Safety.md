@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-13T19:23:03.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-13T19:25:45.048Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: Applying guardrails across an LLM system to limit security threats and 
 level:
   - "3"
 priority: Medium
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Safety/Safety
 flashcard_uid: 920e124b

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-18T19:18:52.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T14:39:34.309Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: Hierarchical parent-child structures whose operation bounds depend on t
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 A tree represents relationships through parent-child edges. It is a shape, not a complexity guarantee. A balanced search tree can keep lookup at O(log n), while an unbalanced tree may become a chain and cost O(n). A trie follows another rule entirely: lookup is O(k) in key length, while scanning a flat dictionary for a prefix is O(n).

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-06-11T07:39:53.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.410Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Selecting and routing models from measured task quality, latency, relia
 level:
   - "2"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Model Selection and Routing
 flashcard_uid: 776eda2e

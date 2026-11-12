@@ -4,10 +4,10 @@ subtopic: [Algorithms]
 summary: "Recursively sorts overlapping two-thirds ranges in a first-last-first sequence."
 level: ["4"]
 priority: Low
-status: Not-Started
+status: New
 publish: true
 created: "2026-08-10T10:51:19.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-08-10T13:59:29.611Z"
 ---
 

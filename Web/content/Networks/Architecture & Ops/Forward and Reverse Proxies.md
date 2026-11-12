@@ -11,7 +11,7 @@ summary: Intermediaries that represent either a client reaching the internet or 
 level:
   - "3"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 A proxy receives traffic on one connection and sends it onward through another. A **forward proxy** sits on the client side of the trust boundary and controls egress. A **reverse proxy** sits in front of origins and controls ingress.

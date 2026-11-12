@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.342Z
 tags:
   - FolderNote
@@ -15,7 +15,7 @@ summary: How software stores and protects state across restarts using SQL, NoSQL
 priority: High
 level:
   - "4"
-status: Creation
+status: New
 qard-deck: Data Persistence
 qard-topic: Data Persistence
 flashcard_uid: d03cdcde

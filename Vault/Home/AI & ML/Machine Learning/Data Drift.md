@@ -4,13 +4,13 @@ subtopic: [Machine Learning]
 summary: "When production inputs shift away from training data, potentially weakening model predictions without an obvious error."
 level: ["1"]
 priority: Low
-status: Done
+status: In Progress
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "Machine Learning/Data Drift"
 flashcard_uid: "3212f70c"
 created: "2026-02-16T19:44:24.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.491Z"
 ---
 

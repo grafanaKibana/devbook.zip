@@ -11,7 +11,7 @@ summary: A primitive allowing up to N concurrent holders, for bounded parallelis
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Concurrency and Parallelism/Semaphore
 flashcard_uid: d136a9b7

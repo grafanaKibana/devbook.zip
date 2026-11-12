@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-11-04T13:22:56.731Z
+modified: 2026-11-10T18:54:35.059Z
 published: 2026-07-08T13:14:17.320Z
 topic:
   - Programming
@@ -11,7 +11,7 @@ summary: .NET's model for non-blocking I/O that releases the thread while awaiti
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Concurrency and Parallelism/Async Await
 flashcard_uid: 4a42db52
@@ -200,33 +200,18 @@ A faulted `WhenAll` task records every failure in its `Exception` property, but 
 <!-- qard-id: 52ff6f00-16ec-4741-9be4-2551798fc8ee -->
 
 > [!qard]- What does `ConfigureAwait(false)` change?
-> `ConfigureAwait(false)` tells an `await` that its continuation does not need to resume through the captured `SynchronizationContext` or non-default `TaskScheduler`.
+> `ConfigureAwait(false)` tells an `await` that its continuation need not resume through the captured `SynchronizationContext` or non-default `TaskScheduler`. By default, an incomplete await resumes through that context, which in a UI app means the UI thread; with `false`, the continuation can run on a ThreadPool thread or on the thread that completed the operation.
 >
-> **What changes:**
+> - It does not force a thread switch: an already-completed task continues synchronously in the original context.
+> - It does not stop `ExecutionContext` flow, so `AsyncLocal<T>` values still arrive.
+> - It does not reliably fix blocking on async work, because every `await` on the path would need it.
 >
-> - By default, awaiting an incomplete task captures the current `SynchronizationContext`, or a non-default current `TaskScheduler`, and resumes through it. In a UI app, that returns the continuation to the UI thread.
-> - With `ConfigureAwait(false)`, that scheduling context is not captured. The continuation can run on a ThreadPool thread or directly on the thread that completed the operation.
->
-> **What it does not do:**
->
-> - It does not force a thread switch. If the awaited task has already completed, the method continues synchronously on the current thread, still inside the original context.
->
-> - It does not stop `ExecutionContext` flow. Ambient state such as `AsyncLocal<T>` values still reaches the continuation by default.
->
-> - It is not a reliable fix for code that blocks on asynchronous work. Every `await` along the path would need it; keeping the call chain asynchronous is the durable fix.
->
-> [Microsoft: Task.ConfigureAwait](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.configureawait?view=net-10.0) · [.NET Blog: ConfigureAwait FAQ](https://devblogs.microsoft.com/dotnet/configureawait-faq/) · [Microsoft: HttpContext in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/use-http-context?view=aspnetcore-10.0)
-
-<!-- qard-id: e7d05eae-7ad2-4308-af04-ab1057a8b613 -->
+> [Microsoft: Task.ConfigureAwait](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.configureawait?view=net-10.0) · [.NET Blog: ConfigureAwait FAQ](https://devblogs.microsoft.com/dotnet/configureawait-faq/)
 
 > [!qard]- When is `ConfigureAwait(false)` useful?
-> It fits code that does not require the caller's scheduling context.
+> It fits reusable libraries, which should not depend on or queue back to the caller's context. UI code keeps the default when code after the `await` touches controls. ASP.NET Core normally has no custom `SynchronizationContext`, so the setting changes little there.
 >
-> - **Reusable libraries:** library code stays independent of whatever context its caller has and avoids the cost of queuing back to it.
-> - **UI code:** usually keeps the default, because code after the `await` often updates controls that belong to the UI thread.
-> - **ASP.NET Core:** normally has no custom `SynchronizationContext`, so the setting usually changes little. `HttpContext` lifetime and thread safety remain separate concerns: `HttpContext` is not thread-safe and is unsafe to use outside the processing of its request, whichever thread resumes the method.
->
-> [Microsoft: Task.ConfigureAwait](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.configureawait?view=net-10.0) · [.NET Blog: ConfigureAwait FAQ](https://devblogs.microsoft.com/dotnet/configureawait-faq/) · [Microsoft: HttpContext in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/use-http-context?view=aspnetcore-10.0)
+> [Microsoft: Task.ConfigureAwait](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.configureawait?view=net-10.0) · [.NET Blog: ConfigureAwait FAQ](https://devblogs.microsoft.com/dotnet/configureawait-faq/)
 
 <!-- qard-id: 36a34049-8f3f-493f-b608-a516bf6a28a4 -->
 
@@ -247,11 +232,19 @@ A faulted `WhenAll` task records every failure in its `Exception` property, but 
 <!-- qard-id: 21176d6e-4394-438b-b511-e3f91affc308 -->
 
 > [!qard]- When is `Task.Run` useful?
-> It moves CPU-bound work off a thread that must remain responsive, such as a UI thread. A UI handler can await `Task.Run(() => BuildReport(data))` while it continues processing input. The calculation still occupies a ThreadPool worker and consumes CPU; the benefit is responsiveness, not free computation.
+> When code calls slow synchronous CPU work that has no async version, such as hashing byte arrays already in memory. `SHA256.HashData` is plain synchronous code, so calling it, even inside an `async` method, keeps the calling thread busy until it finishes. `Task.Run` moves that work to a ThreadPool thread, so starting one task per chunk lets several CPU jobs run in parallel:
 >
-> `Task.Run` queues a delegate to the ThreadPool and returns a task representing that work.
+> ```csharp
+> var hashes = await Task.WhenAll(chunks.Select(c => Task.Run(() => SHA256.HashData(c))));
+> ```
+>
+> With 4 similar-sized jobs and 4 free cores, this takes roughly the time of one job instead of four.
+>
+> `Task.Run` adds nothing around a method that is already async, such as `await LoadAsync()`. Awaiting a single `Task.Run` inside an ASP.NET Core request also gains nothing, because the request already runs on a pool thread.
 >
 > [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming) · [Microsoft: ASP.NET Core best practices](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/best-practices?view=aspnetcore-10.0)
+
+<!-- qard-id: eaf4f1d0-cffb-4bac-a7ed-b221b03c8cc7 -->
 
 > [!qard]- Why does wrapping already-asynchronous I/O in `Task.Run` add no useful asynchrony?
 > The I/O API already returns a task without holding a thread through its wait. A Task.Run wrapper only adds a ThreadPool scheduling hop to start the same operation. Awaiting the API directly avoids that hop.
@@ -259,6 +252,8 @@ A faulted `WhenAll` task records every failure in its `Exception` property, but 
 > Wrapping synchronous blocking I/O is different but still holds a pool worker for the entire wait. On a server, request code already runs on pool workers, so awaiting a Task.Run wrapper creates pool pressure without freeing a net thread.
 >
 > [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming) · [Microsoft: ASP.NET Core best practices](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/best-practices?view=aspnetcore-10.0)
+
+<!-- qard-id: 5aa8c873-def1-41f7-b94d-d57d2107cc56 -->
 
 > [!qard]- Why does `GetAsync() ?? throw` fail to reject a null result from `Task<string?>`?
 > The expression checks the returned task reference, not the string that the task eventually produces. A non-null task can complete successfully with a null result. The result guard belongs after the await:
@@ -273,10 +268,14 @@ A faulted `WhenAll` task records every failure in its `Exception` property, but 
 >
 > `Task<string?>` describes a task whose result may be null; it does not make the task itself nullable. [Microsoft: async return types](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-return-types)
 
+<!-- qard-id: 65740b39-9c79-46c5-937b-0af89b968458 -->
+
 > [!qard]- Why does a caller's `try`/`catch` miss a later exception from an unawaited `async Task` method?
 > The async method records the failure on its returned task. Calling it starts execution but does not rethrow that later failure into the caller's stack. Awaiting the task inside the `try` observes and rethrows its failure there. Observing an unrelated delay does not observe the failed task.
 >
 > Modern .NET does not terminate the process by default merely because a task's exception goes unobserved. That policy is not failure handling: the operation still needs code that observes completion and reports failure. [Microsoft: async return types](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-return-types) · [Microsoft: UnobservedTaskException](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.taskscheduler.unobservedtaskexception?view=net-10.0)
+
+<!-- qard-id: 4d37a597-f69e-4d9f-840b-4ec77e3aa513 -->
 
 > [!qard]- Why can an `async void` handler's exception escape a `try`/`catch` around the event invocation?
 > An `async void` method returns no task for its caller to observe. Its exceptions are delivered through the captured `SynchronizationContext`, or through the runtime's unhandled-exception path when no suitable context exists, rather than through the caller's invocation stack. The handler handles its own failures or delegates work to an awaited path. A Task-returning method instead makes completion and failure observable to its owner. [Microsoft: async return types](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-return-types)

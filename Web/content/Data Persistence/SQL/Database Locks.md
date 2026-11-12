@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-15T09:25:25.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-15T09:08:04.269Z
 topic:
   - Data Persistence
@@ -11,7 +11,7 @@ summary: How the database engine serializes conflicting access to enforce isolat
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 A database lock is one mechanism a storage engine uses to serialize conflicting access so concurrent transactions satisfy the selected [[Data Persistence/ACID|ACID]] isolation level. The lock manager records an owner, a logical resource, and an access mode. A compatible request proceeds; an incompatible request waits until the holder releases its lock or the waiter is cancelled, times out, or becomes a deadlock victim.

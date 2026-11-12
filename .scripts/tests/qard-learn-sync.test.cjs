@@ -212,11 +212,11 @@ test('malformed tables fail closed instead of silently dropping rows, IDs, state
 
 
 test('source snapshots ignore lifecycle and stock identity bookkeeping but detect learning-content changes', async () => {
-  const note = '---\nsummary: "Value copying"\nstatus: Creation\n---\n\n> [!qard]- What is copied?\n> The contained value.\n';
+  const note = '---\nsummary: "Value copying"\nstatus: In Progress\n---\n\n> [!qard]- What is copied?\n> The contained value.\n';
   const baseline = await sourceSnapshot(note);
   assert.match(baseline.revision, /^[a-f0-9]{64}$/);
   assert.equal(baseline.cards, 1);
-  const bookkeeping = note.replace('Creation', 'Done').replace('> [!qard]', '<!-- qard-id: stable-card -->\n<!-- qard-location: Programming -->\n> [!qard]');
+  const bookkeeping = note.replace('In Progress', 'Established').replace('> [!qard]', '<!-- qard-id: stable-card -->\n<!-- qard-location: Programming -->\n> [!qard]');
   assert.deepEqual(await sourceSnapshot(bookkeeping.replaceAll('\n', '\r\n')), baseline);
   const changedAnswer = await sourceSnapshot(note.replace('The contained value.', 'Its fields, including shared references.'));
   assert.notEqual(changedAnswer.revision, baseline.revision);

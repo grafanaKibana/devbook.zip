@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-03-05T22:12:42.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.452Z
 topic:
   - Software Architecture
@@ -11,7 +11,7 @@ summary: Bridge decouples an abstraction from its implementation so the two hier
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Software Architecture
 qard-topic: Patterns/Design Patterns/Structural/Bridge
 flashcard_uid: 71628ab5

@@ -11,7 +11,7 @@ summary: A style where a client invokes a server operation like a local function
 level:
   - "3"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 Remote Procedure Call (RPC) exposes operations on another process through a client API. A generated stub or client library serializes the arguments, sends a request, waits for a response, and maps the result back into the caller's language.

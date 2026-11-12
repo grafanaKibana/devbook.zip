@@ -1,0 +1,443 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+      "text": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"How to structure, label, generate, and size the cases that every evaluation method relies on.\"\nlevel: [\"3\"]\npriority: High\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Evaluation/Building an Evaluation Set\"\nflashcard_uid: \"e5bc3ffc\"\ncreated: \"2026-06-12T18:21:46.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.474Z\"\n---\n\nAn evaluation set is the common input to [[LLM-as-a-Judge]], [[Deterministic Checks]], and regression gates. If its cases do not represent the workload, a precise scorer still produces a misleading result. The set defines what is measured before any metric assigns a number.\n\nTwo choices matter most. Labels describe acceptable behavior, which quickly becomes domain-specific: [[Retrieval Evaluation Sets]] shows how queries map to relevant evidence, while an agent may need correct tool choice and trajectory constraints. Sample size determines whether the set can distinguish a real change from sampling noise. A stable subset becomes the release gate described in [[Golden Test Set and Regression Runs]], and [[Online Evaluation and AB Tests]] carries the comparison into production traffic.\n\n# Structure\n\nEach case needs an input and a testable description of acceptable behavior. That description may be a reference answer, a rubric, hard constraints, or some combination. Supporting evidence is part of the case when the system is expected to ground its answer in a particular source.\n\nThe label determines which scorer is valid. Exact or structured expectations support deterministic checks. Open-ended criteria need rubric-based grading. Reference-free methods can measure properties such as faithfulness against supplied context, but they do not replace domain ground truth when correctness depends on facts outside that context. ARES combines synthetic data with a smaller human-labeled set and uses prediction-powered inference to estimate performance over more examples.\n\n# Synthetic Generation\n\nSynthetic generation is a practical bootstrap. It starts from source material with known provenance. A model writes plausible requests that the material can answer, and each generated case keeps its source identifier. This reverses the expensive part of labeling: the evidence is known before the input is written.\n\n```text\nfor item in sample(source_material, n=2000):\n    prompt = f\"\"\"You are a real user of this system. Read the material and\n    write 1-3 natural questions or tasks it fully satisfies. Paraphrase —\n    do not copy phrasing. Skip boilerplate.\n\n    Material:\n    {item.text}\"\"\"\n    for q in llm(prompt):\n        eval_set.append({\"input\": q, \"expected_source_id\": item.id})\n```\n\nThe weakness appears across the set rather than in one obvious bad case. Generated requests tend to share the model's phrasing and preferred difficulty, so ambiguous or adversarial production inputs disappear from view. Stratified source sampling helps. Prompt variants can widen the case shapes, and production examples should replace synthetic cases as real traffic becomes available. Retrieval-specific problems such as lexical leakage are covered in [[Retrieval Evaluation Sets]].\n\n# Size and Statistical Power\n\nAn evaluation result is an estimate over sampled cases. Its uncertainty depends on the metric, case distribution, correlation between observations, and the effect the gate is meant to detect. A small set may expose large failures while remaining unable to separate two close configurations.\n\nThe minimum detectable effect is chosen before the set is sized, and each result reports an interval around the observed difference. Paired evaluation, where baseline and candidate answer the same cases, often reduces variance because each case acts as its own control. End-to-end outcomes may still need many observations when user behavior or task difficulty varies widely.\n\n# Pitfalls\n\n## Eval Set Drift\n\nThe corpus or product changes while the evaluation set stays frozen. Cases begin to reference deleted material or obsolete behavior, yet the dashboard remains stable.\n\nThe set is versioned with the data and policy it describes. Referenced sources are checked to confirm they still exist, and cases are reviewed when the product contract changes. Otherwise a score change cannot be attributed cleanly to the system, the data, or the labels.\n\n## Threshold Cargo-Culting\n\nA threshold copied from another workload has no local meaning. The same score can represent different risks when the rubric, traffic, or cost of failure changes.\n\nThresholds are calibrated against human labels and product outcomes from the workload being shipped. Relative regression limits are useful when the measurement scale is stable, but they cannot make an unsafe baseline acceptable.\n\n# Questions\n\n<!-- qard-id: 7517de71-7dad-4890-bec0-b62b49a788f0 -->\n> [!qard]- When should a team add human-labeled evaluation cases instead of relying only on synthetic generation?\n> Human-labeled cases become necessary when synthetic cases can no longer be trusted to represent the workload or to label it correctly. That happens when correctness depends on expert judgment, when failures are costly, or when production inputs differ from the generated ones.\n>\n> - **What synthetic generation does well:** a model writes plausible requests from source material with known provenance. Coverage and a working evaluation harness therefore arrive quickly and cheaply.\n> - **Where it falls short:** generated cases share the generator's phrasing and preferred difficulty, so ambiguous, messy or adversarial real inputs are under-represented. Generated labels can also miss subtle domain distinctions.\n> - **What human labels add:** reviewed cases ground the evaluation in real inputs and expert judgment. They also show whether synthetic labels and automated judges agree with people. ARES, for example, pairs synthetic training data with a small human-annotated set that corrects its automated estimates.\n>\n> A practical evaluation set often combines synthetic breadth, human-reviewed cases and regression cases taken from real failures. The balance depends on the task's risk and on how closely synthetic cases match production traffic.\n>\n> [ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems (arXiv)](https://arxiv.org/abs/2311.09476) · [Evaluation best practices (OpenAI)](https://developers.openai.com/api/docs/guides/evaluation-best-practices)\n\n# References\n\n- [A statistical approach to model evaluations (Anthropic)](https://www.anthropic.com/research/statistical-approach-to-model-evals)\n- [ARES (Stanford)](https://arxiv.org/abs/2311.09476)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1794163398823,
+  "topic": "Build representative, versioned evaluation cases with references, rubrics, and failure segments while preventing leakage and misleading synthetic coverage",
+  "notes": [
+    "Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md"
+  ],
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "workload-cases",
+  "steps": [
+    {
+      "title": "Define a testable case",
+      "explain": "An output constraint limits what an answer may contain; supporting evidence establishes which claims it can justify. A testable evaluation case makes these expectations explicit for one input.\n\nIn **Building an Evaluation Set**, the **Structure** section defines a case as an input plus a testable description of acceptable behavior. A reference gives an expected answer. A rubric states criteria that allow several valid answers. Hard constraints specify mandatory requirements, such as an output format. When answers must use a particular source, retain that evidence with the case.\n\nFor example, a support assistant receives “When will support reply?” with source S7: “Support replies within two business days.” A reference could be “Within two business days.” A rubric could accept any wording that preserves both the deadline and the business-day qualification. A hard constraint could require one sentence. Keeping S7 makes the factual expectation inspectable.\n\nThese checks measure different properties: an answer can satisfy the sentence limit while making an unsupported promise. The case must define acceptable content as well as required form.",
+      "connect": "This builds on your earlier work with output constraints and evidence by turning them into explicit expectations for one case. Next comes choosing cases that represent the workload.",
+      "checkFirst": false,
+      "check": {
+        "id": "k1",
+        "type": "calc",
+        "goal": "apply",
+        "objective": "workload-cases",
+        "prompt": "An assistant must answer using only the supplied policy. If the policy does not establish the answer, it must use `unknown`. Every response must be a JSON object containing exactly two string fields: `answer` and `source`; `source` must contain the supplied policy ID.\n\nCase input: “Is the office open on public holidays?”\n\nSupplied evidence P4: “The office opens Monday through Friday, 09:00–17:00.” No other evidence is available.\n\nCandidate response: `{\"answer\":\"No\",\"source\":\"P4\"}`\n\nAssess this candidate using three lines:\n- **Format:** compliant or noncompliant with the required JSON structure, field types and source ID.\n- **Answer:** supported or unsupported by P4.\n- **Reason:** one sentence explaining your answer-support decision.",
+        "marks": 3,
+        "rubric": [
+          {
+            "point": "Labels the format compliant.",
+            "marks": 1
+          },
+          {
+            "point": "Labels the answer unsupported.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that a weekday opening schedule does not establish whether public holidays are exceptions.",
+            "marks": 1
+          }
+        ],
+        "model": "**Format:** compliant.\n**Answer:** unsupported.\n**Reason:** P4 gives weekday hours but does not establish whether public holidays are exceptions.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+          "heading": "Structure"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Labels the answer supported because the JSON and source ID are correct.",
+          "reteach": "Correct structure and a source ID establish format compliance. The cited source must also support the claim."
+        },
+        {
+          "signs": "Treats Monday–Friday opening as proof that public holidays are closed.",
+          "reteach": "The schedule does not state a public-holiday rule. Under this contract, that missing evidence requires `unknown`."
+        },
+        {
+          "signs": "Labels the format noncompliant because the answer should be `unknown`.",
+          "reteach": "The candidate has the required JSON fields, string types and source ID. Its unsupported answer is a separate failure."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Cover the workload and its failures",
+      "explain": "Output constraints and supporting evidence describe what an acceptable answer must satisfy. Coverage asks whether the chosen inputs exercise the situations that matter.\n\n**Building an Evaluation Set** recommends combining synthetic breadth, human-reviewed cases, and regression cases from real failures. Group production inputs into meaningful segments: common tasks, difficult input forms, and failures with serious consequences. Ordinary traffic measures everyday usefulness; rare failure cases test important boundaries. Inspect failure segments separately so frequent easy cases cannot hide them.\n\nFor example, a booking assistant receives clear cancellation requests and ambiguous forwarded emails. Sample both from real traffic and retain incidents where it incorrectly promised a refund. Generate additional requests from known policies to exercise less-used rules, keeping each request linked to its source. Human reviewers determine whether a refund is permitted when interpreting the request requires domain judgment.\n\nThese sources complement each other: synthetic generation expands coverage cheaply; production cases reveal real phrasing and difficulty; human labels establish trustworthy expectations and expose incorrect generated labels. More synthetic cases do not establish representativeness when they repeat the same easy patterns. Adding difficult cases improves failure coverage, but their deliberately increased frequency should not be mistaken for their frequency in production.",
+      "connect": "The previous step defined acceptable behavior for one case. This step selects cases that exercise the workload and its failures; the next step protects the comparison from leakage and keeps the set versioned.",
+      "checkFirst": false,
+      "check": {
+        "id": "k2",
+        "type": "calc",
+        "prompt": "A delivery assistant must use the customer's final confirmed address. Its evaluation contains 1,000 synthetic, single-message requests generated from delivery instructions, each with a correct reference answer. Production traffic includes routine requests and conversations where customers correct an earlier address. Confirmed incidents show that the assistant sometimes books delivery to the earlier address.\n\nA teammate proposes generating another 5,000 single-message requests using the same method, claiming this will establish representative coverage. The team has already selected routine production requests and address-correction conversations to add to the set.\n\nAssess this coverage plan in four short bullets:\n- State whether the extra synthetic cases alone establish representative coverage.\n- Explain the coverage gap in that synthetic-only proposal.\n- State whether to include the confirmed wrong-address incidents as regression cases alongside the selected production samples.\n- State what human reviewers should establish or verify when labeling address-correction conversations.",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "States that the extra synthetic cases alone do not establish representative coverage.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that single-message generation leaves conversations requiring interpretation of address corrections untested.",
+            "marks": 1
+          },
+          {
+            "point": "Chooses to include confirmed wrong-address incidents as regression cases.",
+            "marks": 1
+          },
+          {
+            "point": "States that human reviewers should establish or verify the final confirmed address used as the expected answer in correction conversations.",
+            "marks": 1
+          }
+        ],
+        "model": "- No.\n- Single-message cases leave address corrections across messages untested.\n- Include the confirmed wrong-address incidents as regression cases.\n- Have humans verify the final confirmed address used as each conversation's expected answer.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+          "heading": "Synthetic Generation"
+        },
+        "objective": "workload-cases",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Claims that 6,000 correctly labeled synthetic cases establish representative coverage.",
+          "reteach": "Correct labels describe acceptable behavior for the included inputs. Increasing their count does not cover a missing input form, such as corrections across messages."
+        },
+        {
+          "signs": "Excludes confirmed wrong-address incidents because they are rare or because general correction conversations are already sampled.",
+          "reteach": "General samples can miss a known failure pattern. Retaining confirmed incidents tests whether that specific failure returns, even when it is rare."
+        },
+        {
+          "signs": "Says real conversations need no label review, or asks humans only to check whether they sound realistic.",
+          "reteach": "Real inputs supply realistic difficulty, but still need trustworthy expectations. Reviewers must establish which address was finally confirmed so the assistant's output can be marked correctly."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Protect and maintain the set",
+      "explain": "A case ties an input to acceptable behavior; protecting the set preserves what its score can tell us about that behavior.\n\n**Building an Evaluation Set** says to version cases with their data and policies, check that referenced sources still exist, and review cases when the product contract changes. Standard evaluation practice adds a development/held-out split: development cases guide prompt, retrieval, and model changes; held-out cases estimate performance on examples that did not guide those choices.\n\nFor example, suppose a developer puts a held-out support request and its reference answer into a few-shot prompt. Testing on that request now measures performance with prior exposure. Paraphrasing it does not restore independence. Split closely related variants together, restrict access to held-out material, and avoid repeatedly selecting changes using held-out results. Once results guide tuning, reserve fresh cases for independent confirmation.\n\nMaintenance preserves the meaning of the comparison. If a refund policy changes from 30 days to 14, an old reference answer becomes wrong for the current product. Keep the old evaluation version reproducible, create a reviewed version with the new policy and references, and record source revisions, rubrics, and hard constraints. Compare systems on the same evaluation version and source snapshot to isolate a system change.",
+      "connect": "The previous step selected workload and failure segments. Separating development from held-out cases protects that coverage from tuning, while versioning keeps its labels meaningful as sources and policies change.",
+      "checkFirst": false,
+      "check": {
+        "id": "k3",
+        "type": "long",
+        "prompt": "Assess this report: **“Our score rose from 72% to 85%, proving that the new prompt generalizes better under the same product contract.”**\n\nThe team initially reserved evaluation cases from development. Developers never saw their inputs or reference answers, but selected the best of twelve prompt revisions using aggregate scores from those reserved cases. The 72% baseline used a policy allowing cancellation within 48 hours. Before the 85% run, the policy changed to 24 hours and the reference answers were updated. Both runs were recorded under the same evaluation-set identifier; no source or reference revisions were retained.\n\nWrite four short sentences assessing the claim: give your verdict, explain how prompt selection affects the evaluation's independence, explain how the policy and reference changes affect the evaluation target, and explain how missing revision records affect reconstructing a matched comparison.",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "Rejects the claim that these results establish better generalization under the same product contract.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that selecting prompts using reserved-set scores makes that set part of development, even without access to individual cases, so its score is no longer independent confirmation.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that changing the policy and reference answers changes the evaluation target: what counts as acceptable behavior.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that missing revision records prevent reconstructing a matched comparison on the same evaluation version and source snapshot to isolate the prompt change.",
+            "marks": 1
+          }
+        ],
+        "model": "The scores do not establish better generalization under the same contract. Selecting prompts using reserved-set scores makes that set part of development, so it no longer provides independent confirmation. Changing the policy and references changes what counts as correct. Missing revision records prevent reconstructing a matched comparison on the same evaluation version and source snapshot to isolate the prompt's effect.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+          "heading": "Pitfalls / Eval Set Drift"
+        },
+        "objective": "workload-cases",
+        "goal": "explain"
+      },
+      "misconceptions": [
+        {
+          "signs": "Calls the evaluation independent because developers never saw individual cases.",
+          "reteach": "Aggregate scores can still guide tuning. Choosing a prompt because it scores best adapts development to that set; independence depends on how results influence decisions, not only on whether inputs are visible."
+        },
+        {
+          "signs": "Treats 72% and 85% as directly comparable because the evaluation-set identifier stayed unchanged.",
+          "reteach": "An identifier does not freeze the measurement. Changing the policy and reference answers changes what earns credit. Preserve revisions and compare systems on the same evaluation version."
+        },
+        {
+          "signs": "Concludes that the new prompt must be worse because the comparison is compromised.",
+          "reteach": "The evidence cannot isolate the prompt's effect. It establishes neither improvement nor deterioration; an independent, matched comparison is needed."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Design a set for a new workload",
+      "explain": "An output contract gives each case something testable: required behavior and evidence supporting it. **Building an Evaluation Set** adds the wider requirement: the cases must represent the workload whose performance is being claimed.\n\nFor a refund assistant, a six-case pilot might contain four ordinary customer requests, one real dispute about eligibility, and one synthetic request probing a missing policy condition. Each case keeps its input, policy evidence, and reviewed expectation. Check a required decision field deterministically; grade an explanation against a rubric that allows different wording but requires the correct policy reasoning.\n\nKeep the pilot held out from prompt tuning, and version its cases alongside the policy snapshot and scoring rules. If a failed case becomes a development example, use fresh held-out cases for the next comparison.\n\nReport results by segment as well as overall. Five successes out of six can hide failure on the only dispute. This pilot can reveal defects; six cases cannot establish broad reliability or distinguish small performance improvements. Synthetic variety also does not establish that real disputes are covered.",
+      "connect": "The previous step protected the comparison through separation and versioning. Now those controls support a complete design whose cases, scoring, and claimed coverage agree.",
+      "checkFirst": false,
+      "check": {
+        "id": "k4",
+        "type": "calc",
+        "goal": "apply",
+        "objective": "workload-cases",
+        "prompt": "Design the remaining parts of a six-case pilot for a parcel-routing assistant.\n\nThe versioned policy says: route a request to `standard` only if **every parcel** weighs at most 20 kg and has a destination. If any parcel exceeds 20 kg, route the whole request to `manual`, even if another parcel lacks a destination. Otherwise, a missing destination requires `clarify`. The output is one JSON object containing only a `route` field.\n\nFour human-reviewed ordinary production cases already have references. Add these two cases:\n\n- **A — real production failure:** one parcel weighs 24 kg and has a destination; another weighs 3 kg and lacks a destination.\n- **B — synthetic boundary case:** one parcel weighs exactly 20 kg and has a destination.\n\nAll six cases are held out from tuning and frozen with policy version P3 and the scoring rules. No real missing-destination-only requests are represented.\n\nGive a four-line evaluation plan: A's reference output; B's reference output; a pass rule for scoring each case; and one concrete limit on what this pilot establishes about production coverage.",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "A's reference output is {\"route\":\"manual\"}.",
+            "marks": 1
+          },
+          {
+            "point": "B's reference output is {\"route\":\"standard\"}.",
+            "marks": 1
+          },
+          {
+            "point": "The pass rule deterministically checks that the response is a valid JSON object containing only route with the case's expected value; insignificant JSON formatting differences are accepted.",
+            "marks": 1
+          },
+          {
+            "point": "Identifies a concrete coverage limit supported by the set, such as absent real missing-destination-only requests, synthetic boundary coverage not proving real boundary coverage, or six cases being insufficient to establish broad production reliability.",
+            "marks": 1
+          }
+        ],
+        "model": "A: `{\"route\":\"manual\"}`.\nB: `{\"route\":\"standard\"}`.\nScoring: pass only valid JSON with exactly the `route` field and its reference value; ignore whitespace.\nLimit: no real missing-destination-only cases test production requests requiring `clarify`.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+          "heading": "Structure"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "A gets separate routes for its parcels or receives `clarify`.",
+          "reteach": "A case's reference must follow the complete output contract. Here one overweight parcel routes the whole request to `manual`; missing information does not override that condition."
+        },
+        {
+          "signs": "The scoring rule accepts plausible wording or requires an identical raw JSON string.",
+          "reteach": "This contract has a structured expectation. Parse the JSON and check its fields and value. Equivalent whitespace is harmless; extra fields or a different route violate the contract."
+        },
+        {
+          "signs": "Passing all six cases is treated as proof of production coverage.",
+          "reteach": "A pass establishes success on these cases. The missing real `clarify` segment remains untested, and a synthetic boundary case cannot establish how real boundary requests behave."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "text": "{ \"compliant\": true, \"supported\": false, \"reason\": \"The supplied information doesn't contain information about public holidays, so P4 doesnt support the answer\"}",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "\"compliant\": true",
+            "kind": "correct",
+            "note": "You correctly identify the candidate’s format as compliant."
+          },
+          {
+            "quote": "\"supported\": false",
+            "kind": "correct",
+            "note": "You correctly identify the answer as unsupported."
+          },
+          {
+            "quote": "doesn't contain information about public holidays",
+            "kind": "correct",
+            "note": "You recognize that P4 does not establish whether public holidays are exceptions."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "You correctly separate format compliance from whether the evidence supports the answer.",
+        "score": 3
+      },
+      "reply": "Correct: the JSON meets the format requirement, but P4 does not establish the public-holiday policy, so the answer should be `unknown`."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "It will not help, because current and propesed synthetic cases are covering non conversational single message cases, while the problem arrives on cases when there is more than one message conversation, which looks like different cases group. I would include production conversations as regression cases + use them as an examle to extend the set with synthetic casees that have the same problem.",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "It will not help",
+            "kind": "correct",
+            "note": "You correctly reject the claim that more cases alone establish representative coverage."
+          },
+          {
+            "quote": "covering non conversational single message cases",
+            "kind": "correct",
+            "note": "You identify the gap in coverage for conversations with address corrections."
+          },
+          {
+            "quote": "include production conversations as regression cases",
+            "kind": "vague",
+            "note": "You include production conversations, but it is unclear whether you mean the confirmed wrong-address incidents."
+          },
+          {
+            "quote": "production conversations as regression cases",
+            "kind": "missing",
+            "note": "You do not say what reviewers should verify when labeling correction conversations."
+          },
+          {
+            "quote": "extend the set with synthetic casees",
+            "kind": "insight",
+            "note": "You suggest using real conversations to inform additional synthetic cases."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You identified the synthetic coverage gap, but did not explicitly include the confirmed incidents or specify what reviewers should verify.",
+        "score": 2
+      },
+      "reply": "You correctly identified that single-message cases miss address corrections across a conversation. Which confirmed cases should become regression tests, and what address should a reviewer verify for each conversation’s expected answer?"
+    },
+    {
+      "asks": [
+        {
+          "q": "How the prompt looks like?",
+          "a": "Two prompts matter here.\n\n**1. Generation prompt** (in your note, *Building an Evaluation Set*, \"Synthetic Generation\"): the model plays a real user, reads one source item, and writes 1–3 natural questions that the material fully satisfies. It must paraphrase, not copy phrasing, and skip boilerplate. Each case keeps `expected_source_id`.\n\n```text\nYou are a real user of this system. Read the material and\nwrite 1-3 natural questions or tasks it fully satisfies.\nParaphrase — do not copy phrasing. Skip boilerplate.\n\nMaterial:\n{item.text}\n```\n\n**2. Few-shot prompt** (the leakage example in this step): a prompt with example input → reference answer pairs. Putting a held-out case there makes testing on it unreliable. Prior exposure inflates the score, even if the case is paraphrased."
+        },
+        {
+          "q": "I mean. prompt for this question?",
+          "a": "Ah, the **few-shot prompt** from the leakage example. It would look like this:\n\n```text\nAnswer support requests using the examples.\n\nRequest: Can I return a gadget after 20 days?\nAnswer: Yes, returns are accepted within 30 days.\n\nRequest: <held-out request>      ← leaked case\nAnswer: <held-out reference>     ← leaked reference\n\nRequest: <new request>\nAnswer:\n```\n\nThe model sees the held-out request and its answer as an example. Testing on that same request then measures recall of the prompt, not generalization. Paraphrasing it doesn't fix this.\n\nFix: put only **development** cases in the prompt examples. Keep held-out cases out of every prompt, and out of tuning decisions too."
+        },
+        {
+          "q": "How the test cases looked like in this case?",
+          "a": "Each case is an input plus a reference answer, as in your note's **Structure** section. In the support example, the cases are request → reference answer pairs:\n\n```text\nCase A (development, may go in prompt):\n  Request: Can I return a gadget after 20 days?\n  Reference: Yes, returns are accepted within 30 days.\n\nCase B (held-out, must stay hidden):\n  Request: I bought headphones 25 days ago. Can I send them back?\n  Reference: Yes, within the 30-day window.\n```\n\nLeakage happens when Case B's request and reference appear in the few-shot prompt. Testing on B then measures prompt recall.\n\nRewording B as \"Can I return earbuds bought 25 days ago?\" doesn't fix it, because the case is still the same one. Keep close variants together in the same split, either all development or all held-out."
+        }
+      ],
+      "answer": {
+        "unknown": true
+      },
+      "mark": {
+        "score": 0,
+        "awarded": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "reply": "No problem. Read the explanation, then look at the model answer."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "- manual - since one parcel exceeding the 20 kg rule\n- standart - since the rule worded as \"at most 20 kg\" which is allowed top bound\n- pass rule is true or false of matching actual and expected route\n- i dont get the question\n",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          true,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "manual - since one parcel exceeding the 20 kg rule",
+            "kind": "correct",
+            "note": "Right: any parcel over 20 kg sends the whole request to manual, even though the other parcel lacks a destination."
+          },
+          {
+            "quote": "standart - since the rule worded as \"at most 20 kg\" which is allowed top bound",
+            "kind": "correct",
+            "note": "Right: exactly 20 kg satisfies \"at most 20 kg\", and the parcel has a destination, so the route is standard."
+          },
+          {
+            "quote": "pass rule is true or false of matching actual and expected route",
+            "kind": "correct",
+            "note": "This is a deterministic match against the reference. It would be stronger if it also required valid JSON containing only route, but the matching idea is clear."
+          },
+          {
+            "quote": "i dont get the question",
+            "kind": "missing",
+            "note": "No limit on production coverage is stated. Note that no real missing-destination-only requests are in the set, and six cases cannot show broad reliability."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You got both reference routes and a deterministic pass rule, but you gave no limit on what the pilot shows about production coverage.",
+        "score": 3
+      },
+      "reply": "Good work on A and B: the 24 kg parcel forces `manual`, and exactly 20 kg is allowed, so `standard`. Your match-the-route pass rule works too.\n\nThe last line asks what this pilot can't prove. Look at what's missing from the set: no real missing-destination-only requests, and B is synthetic. What does that leave untested in production?"
+    }
+  ],
+  "current": 3,
+  "probe": {
+    "questions": [],
+    "answers": {},
+    "submitted": true,
+    "marks": {},
+    "findings": "You have not answered a probe for this objective, so your understanding of evaluation-set design is not yet known. Your earlier result shows some familiarity with output constraints and evidence, but it does not establish how you build or assess evaluation cases."
+  },
+  "map": {
+    "title": "Build a trustworthy evaluation set",
+    "plan": "Start by connecting an output contract to a testable case, briefly checking what you remember about constraints and supporting evidence. Then build coverage from real and synthetic inputs, protect the comparison from leakage, and version the set. Finish by designing a small set for a new workload and explaining its limits.",
+    "mermaid": "graph TD\nA[\"Output constraints and evidence: briefly retrieve\"] --> B[\"Define testable cases\"]\nB --> C[\"Cover workload and failure segments\"]\nC --> D[\"Prevent leakage and version cases\"]\nD --> E[\"Design and assess an evaluation set\"]",
+    "objective": "workload-cases",
+    "steps": [
+      {
+        "title": "Define a testable case",
+        "why": "Using a brief retrieval of output constraints and evidence, explain how an input, reference or rubric, hard constraints, and source evidence define acceptable behavior; workload coverage comes next."
+      },
+      {
+        "title": "Cover the workload and its failures",
+        "why": "Using the case structure, select representative production and failure segments and explain how synthetic cases and human labels complement each other; leakage and versioning come next."
+      },
+      {
+        "title": "Protect and maintain the set",
+        "why": "Using the selected cases, separate development examples from held-out evaluation cases to prevent leakage and version cases with their sources and policies; the final step combines these decisions."
+      },
+      {
+        "title": "Design a set for a new workload",
+        "why": "Using case design, coverage, leakage controls, and versioning, build a small evaluation set and explain its scoring choices and coverage limits."
+      }
+    ]
+  },
+  "stepsFor": "[\"Build a trustworthy evaluation set\",[\"Define a testable case\",\"Cover the workload and its failures\",\"Protect and maintain the set\",\"Design a set for a new workload\"]]",
+  "accepted": true,
+  "finishedAt": 1794166033508,
+  "close": {
+    "summary": "The lesson went from an output contract to testable cases, then covered workload coverage, protecting the set, and designing a set for a new workload.\n\n**Define a testable case (3/3, sure):** Solid. Each case pairs an input with a reference, rubric, or hard constraints, plus supporting evidence when the answer must be grounded in a source.\n\n**Cover the workload (2/4, unsure):** You spotted that synthetic cases leave a coverage gap. You missed two things: confirmed production incidents should go in as regression cases, and you didn't say what human reviewers should check (label correctness, realistic phrasing, difficulty).\n\n**Protect and maintain the set (0/4, didn't know):** This is the main gap. You asked to see the actual prompt and case shapes, so the idea is still abstract for you. Cases used to tune prompts or few-shot examples can't also score the result. A held-out split, versioning with the data and policy, and checks that referenced sources still exist all keep score changes attributable.\n\n**Design for a new workload (3/4, unsure):** Good reference routes and a deterministic pass rule. You didn't say what a small pilot can't show: it doesn't prove production coverage or separate close configurations.\n\nNext: go over leakage and holdout separation using a concrete example case.",
+    "cards": [
+      {
+        "front": "What is evaluation leakage in an LLM evaluation set, and how is it prevented?",
+        "back": "Leakage happens when cases that score the system also shaped it, for example as few-shot examples, prompt-tuning material, or judge calibration. The score then overstates quality. To prevent it, keep a held-out split that is never used while iterating, track where each case came from, and remove any case that ends up in a prompt."
+      },
+      {
+        "front": "Besides synthetic cases, which two sources should an evaluation set include to cover real failures, and what should reviewers verify?",
+        "back": "(1) Confirmed production incidents, added as regression cases. (2) Human-reviewed real inputs. Reviewers check that each label is correct, the phrasing is realistic, the difficulty is representative, and the referenced evidence actually supports the expected answer."
+      },
+      {
+        "front": "Why is an evaluation set versioned with its data and policy?",
+        "back": "When the corpus or product contract changes, frozen cases point to deleted sources or outdated behavior while the scores stay stable. Versioning, source-existence checks, and review on contract changes let a score change be traced to the system, the data, or the labels."
+      },
+      {
+        "front": "What can a small pilot evaluation set not show?",
+        "back": "It can expose large failures. It cannot prove production coverage, because rare, ambiguous, or adversarial inputs may be missing. It also cannot separate two close configurations without enough cases to detect the effect, so report an interval around the observed difference."
+      }
+    ],
+    "noteEdit": {
+      "path": "Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+      "heading": "Pitfalls",
+      "text": "## Evaluation Leakage\n\nA case that shaped the system can no longer measure it fairly. Cases copied into few-shot examples, used to tune the prompt, or used to calibrate a judge inflate the score on exactly those inputs. A held-out split stays untouched during iteration. Each case records its origin (synthetic source, production sample, or incident), and a case moved into a prompt or tuning loop leaves the scoring split. When the held-out score drops while the development score keeps rising, the system is overfitting to the cases it was tuned on."
+    },
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-08 Build representative, versioned evaluation cases with refere.md",
+    "nextCheck": "2026-11-11"
+  }
+}

@@ -4,13 +4,13 @@ subtopic: [LLM]
 summary: "Stores embeddings and serves fast approximate nearest-neighbor search, trading recall for speed."
 level: ["2"]
 priority: High
-status: Done
+status: In Progress
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Vector Databases"
 flashcard_uid: "797606ed"
 created: "2026-06-11T07:39:53.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:28:37.417Z"
 ---
 

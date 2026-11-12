@@ -11,7 +11,7 @@ summary: A contract-first RPC framework over HTTP/2 using Protocol Buffers for f
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 gRPC is a contract-first RPC framework. A service definition declares methods and message types. Tooling generates clients and server bases for the selected languages. Protocol Buffers is the default interface definition language and message encoding, while [[HTTP 2]] supplies multiplexed streams and flow control.

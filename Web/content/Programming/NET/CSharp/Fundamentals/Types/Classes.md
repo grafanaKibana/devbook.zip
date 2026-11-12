@@ -11,7 +11,7 @@ summary: A C# reference type combining shared object identity with state, inheri
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Types/Classes
 flashcard_uid: 0928b940

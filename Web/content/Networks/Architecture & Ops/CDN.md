@@ -11,7 +11,7 @@ summary: Edge caching servers that serve content from near users, cutting latenc
 level:
   - "3"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 A content delivery network places shared delivery infrastructure between clients and an origin. Edge nodes cache reusable responses near access networks, reducing round trips to the origin and absorbing repeated requests. The same edge may terminate TLS, route dynamic traffic, filter attacks, or run constrained code, but those capabilities are separate from caching.

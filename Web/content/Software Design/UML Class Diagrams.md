@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-18T07:07:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-16T18:17:10.442Z
 topic:
   - Software Design
@@ -11,7 +11,7 @@ summary: Reading and drawing UML class diagrams without confusing type relations
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 A UML class diagram is a static view of classifiers, their members, and selected relationships. It makes a domain model or public contract discussable without pretending to describe every runtime detail. Execution order, persistence layout, and allocation belong in sequence diagrams, data models, or code when those details matter.

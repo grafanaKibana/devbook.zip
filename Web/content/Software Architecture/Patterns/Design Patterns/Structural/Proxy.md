@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-03-05T22:12:42.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.455Z
 topic:
   - Software Architecture
@@ -11,7 +11,7 @@ summary: Provides a surrogate for another object to control access, deferring, c
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Software Architecture
 qard-topic: Patterns/Design Patterns/Structural/Proxy
 flashcard_uid: 1783cee9

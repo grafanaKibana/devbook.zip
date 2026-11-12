@@ -11,7 +11,7 @@ summary: A browser-oriented address with a scheme, authority, path, query, and f
 level:
   - "3"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 A URL identifies how and where a resource can be accessed. Browsers parse URLs with the WHATWG algorithm. Network protocols and many non-browser systems also rely on the generic URI syntax from RFC 3986. The distinction matters because string concatenation, premature decoding, or inconsistent normalization can change the origin, cache key, signature input, or routed resource.

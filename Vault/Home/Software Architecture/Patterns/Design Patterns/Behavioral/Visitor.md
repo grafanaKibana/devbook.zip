@@ -4,13 +4,13 @@ subtopic: [Patterns]
 summary: "Adds new operations to an object hierarchy without modifying its classes, using double dispatch via Accept and Visit."
 level: ["3"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Visitor"
 flashcard_uid: "ff80b76c"
 created: "2026-03-05T22:12:46.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.448Z"
 ---
 

@@ -11,7 +11,7 @@ summary: The standard TCP protocol for sending email between servers and from cl
 level:
   - "3"
 priority: Low
-status: Ready to Repeat
+status: In Progress
 ---
 
 SMTP moves outbound mail into a submission service and relays it between mail servers. IMAP and POP3 solve a different problem: reading messages already stored in a mailbox.

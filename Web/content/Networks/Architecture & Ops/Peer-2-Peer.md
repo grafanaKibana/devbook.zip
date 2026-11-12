@@ -11,7 +11,7 @@ summary: An architecture where peers act as both client and server, avoiding a c
 level:
   - "1"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 Peer-to-peer architecture moves some resource discovery, storage, or transfer from dedicated servers to participating nodes. A peer can consume and provide the same resource. Central services may still handle bootstrap, identity, coordination, or relaying.

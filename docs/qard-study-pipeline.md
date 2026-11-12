@@ -26,16 +26,16 @@ The course order is a suggested interview-preparation route, not an application 
 ### One daily loop
 
 1. Open **Today** and complete due card reviews and due objective checks from subjects already studied. New course setup adds no due dates. If a review backlog consumes the session, defer new material.
-2. Open **Learn → Programming**, choose the earliest ready objective in the active unit, and use its **Teach** action. Read the linked source, predict an example and explain the mechanism from memory. Lessons may span days. Existing familiar material can be tested diagnostically rather than reread repeatedly; a source note marked Done is not automatically a mastered Qard objective.
+2. Open **Learn → Programming**, choose the earliest ready objective in the active unit, and use its **Teach** action. Read the linked source, predict an example and explain the mechanism from memory. Lessons may span days. Existing familiar material can be tested diagnostically rather than reread repeatedly; a source note marked Established is not automatically a mastered Qard objective.
 3. After studying, use the owning note's **Study this note → New cards → Normal session**, within the existing global five-new-card allowance. Ordinary ratings also contribute to the matching first-pass plan. If no cards exist, use explanation/application recall; adding cards later is a separate authoring task. Do not run the plan's automatic introduction queue as an additional daily quota.
 4. After three to five related objectives, revisit an explanation or application problem and use each objective's Learn check when appropriate. Saved practice tests have been removed for now; the current route uses Learn and cards.
 5. On later days, let Today bring back the checks and cards due from actual study. A lesson alone does not establish mastery. Qard uses a 70% assessment pass boundary and promotes an objective to mastered after passing evidence on two days at least two days apart, with harder application work after the first pass; confidence and weak answers can keep it shaky or return it to teaching.
 
 ### Included material and moving between subjects
 
-All 310 objectives are included in the learning flow. The 51 previously planned objectives have been changed to **new** at the owner's request, including topics whose source notes have Creation or Not-Started lifecycle status. They become recommended as their prerequisites are taught. Source-note status does not restrict the Learn route, and no separate material-readiness activation step is required.
+All 310 objectives are included in the learning flow. The 51 previously planned objectives have been changed to **new** at the owner's request, including topics whose source notes have In Progress or New lifecycle status. They become recommended as their prerequisites are taught. Source-note status does not restrict the Learn route, and no separate material-readiness activation step is required.
 
-New means unassessed; it does not establish mastery or create a review due date. Actual lessons, checks and tests supply evidence. Source-note lifecycle remains owner-managed.
+An objective's **new** state means unassessed; it does not establish mastery or create a review due date. Actual lessons, checks and tests supply evidence. Source-note status separately tracks note development: `New` for barely created material, `In Progress` for work already started, and `Established` for a solid, usable explanation that can still improve. Authors may update note status without changing Qard progress or publishing eligibility.
 
 Advance by **completed units and delayed application evidence**, rather than waiting for the entire course map to reach an arbitrary retention percentage. Teach the objectives in the current unit, repair gaps/misconceptions and do a mixed check after a delay. A proposed interview-readiness policy is at least 80% of rubric marks with no critical mechanism or safety error, followed by a different application check at least two days later. This is a manual policy, stricter than Qard's native 70% pass; it is not an automatic unlock or a measured long-term retention rate. Due checks can continue while the next unit or subject begins.
 
@@ -129,17 +129,16 @@ If a concept has no cards, recall its explanation and solve the application exer
 
 Finish the day when due work and the selected learning block are complete. Do not repeatedly reopen All merely to make the queue nonempty. Use Cram for an optional extra rehearsal without recording normal ratings.
 
-## The three curriculum views
+## The curriculum views
 
-| View | Existing note statuses | Meaning |
+| View | Note statuses | Meaning |
 |---|---|---|
-| Learn next | Ready to Repeat, Repetition | Ready material and any topics the owner has placed in repetition |
-| Needs material | Creation, Not-Started | Drafts/outlines that need completeness or accuracy assessment before learning |
-| Previously learned | Done | Optional diagnostic revisits; Qard still schedules existing cards independently |
+| Learn next | Established | Solid, usable source material that remains open to improvement |
+| Needs material | In Progress, New | Drafts/outlines that need completeness or accuracy assessment before learning |
 
-The views group by a suggested area order, then folder and name. They are a navigation queue, not a dependency graph or an automatic mastery detector. Priority remains visible for choosing within an area; level is not used as a prerequisite order. Existing Table and Cards views remain available.
+The views group by a suggested area order, then folder and name. They are a navigation queue, not a dependency graph or an automatic mastery detector. Priority remains visible for choosing within an area; level is not used as a prerequisite order. Existing Table and Cards views remain available. Study history belongs to Qard; note status cannot identify previously learned material.
 
-Qard automatically schedules due cards after actual ratings. The explicit Learn maps identify prerequisite-ready capabilities; Qard does not automatically assess every source note's readiness, switch courses, or advance note statuses. The owner chooses the current concept and changes Repetition/Done when appropriate. Keep the current concept open or bookmark it between sessions. No status or review result is fabricated by this setup.
+Qard automatically schedules due cards after actual ratings. The explicit Learn maps identify prerequisite-ready capabilities; Qard does not automatically assess every source note's readiness, switch courses, or advance note statuses. The owner chooses the current concept; note status describes the material's development independently of study progress. Keep the current concept open or bookmark it between sessions. No mastery or review result is fabricated by this setup.
 
 ## Suggested area route
 
@@ -158,7 +157,7 @@ This is a suggested curriculum, not dependencies encoded in the notes or enforce
 
 ### A foundational Computer Science route for later
 
-Use these existing concept notes as an initial sequence. Some already have Done status: use a brief explanation/application check there and advance immediately if it succeeds. Do not erase those statuses or review histories to restart the route.
+Use these existing concept notes as an initial sequence. Some already have Established status: use a brief explanation/application check when their material is familiar and advance immediately if it succeeds. Established alone is not evidence of prior learning. Preserve note statuses and review histories when restarting the route.
 
 | Step | Note under Vault | Purpose |
 |---|---|---|

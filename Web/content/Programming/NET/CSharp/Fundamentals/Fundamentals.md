@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.324Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: "Core C# building blocks: types, methods, generics, exceptions, namespa
 level:
   - "4"
 priority: High
-status: Creation
+status: New
 ---
 
 C# fundamentals are the mechanics that keep showing up after the syntax has become familiar. Types determine what is copied or shared. Method signatures control how data crosses an API boundary. Generics move assumptions into compile-time constraints, while exceptions define how failures travel through a call stack.

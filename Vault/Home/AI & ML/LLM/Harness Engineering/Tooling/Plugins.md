@@ -3,11 +3,11 @@ topic: [AI & ML]
 subtopic: [LLM]
 summary: "Extension mechanisms that add tools, data, and workflows to coding agents. MCP standardizes server connectivity and capability exchange."
 publish: true
-status: Done
+status: In Progress
 level: ["2"]
 priority: Medium
 created: "2026-08-16T07:07:41.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-08-20T20:41:15.495Z"
 ---
 

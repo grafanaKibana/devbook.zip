@@ -5,7 +5,7 @@ tags: [FolderNote, MetricsIgnore]
 publish: true
 icon: home
 created: "2026-07-05T15:34:15.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-06T07:55:35.732Z"
 ---
 
@@ -15,18 +15,14 @@ const { icon } = await dc.require("Assets/components/devbook-icons.jsx");
 return function TopicDashboard() {
   const ROOT = (dc.useCurrentFile()?.$path || "Home").split("/")[0];
 
-  // The one lifecycle table: `weight` is a note's contribution to progress and
-  // drives every printed %, bar width and ring arc. `mix` is the accent-vs-surface
-  // blend for each segment; solid tints (not opacity) keep segments crisp on dark
-  // backgrounds and over the Quartz dot grid, where a faded alpha would let the
-  // background bleed through. Not-Started adds no fill, so it has no tone: it is
-  // the bar's empty track. A status outside the table counts as Other, weight 0.
+  // Note development only: weights drive the percentage, bars, and ring.
+  // Established notes are usable and remain open to improvement; study progress
+  // belongs to Qard. Solid accent tints keep segments crisp in both readers.
+  // New notes add no fill. Unknown statuses count as Other with weight 0.
   const LIFECYCLE = [
-    { key: "done", tone: "done", label: "Done", weight: 100, mix: 100 },
-    { key: "repetition", tone: "repetition", label: "Repetition", weight: 83, mix: 79 },
-    { key: "ready to repeat", tone: "ready", label: "Ready to Repeat", weight: 66, mix: 58 },
-    { key: "creation", tone: "creation", label: "Creation", weight: 33, mix: 30 },
-    { key: "not-started", label: "Not-Started", weight: 0 },
+    { key: "established", tone: "established", label: "Established", weight: 100, mix: 100 },
+    { key: "in progress", tone: "in-progress", label: "In Progress", weight: 50, mix: 50 },
+    { key: "new", label: "New", weight: 0 },
   ];
   const OTHER = { key: "other", label: "Other", weight: 0 };
   const STAGE = Object.fromEntries(LIFECYCLE.map((seg) => [seg.key, seg]));
@@ -43,7 +39,7 @@ return function TopicDashboard() {
       ? { background: heroTint(seg) }
       : { background: "var(--background-primary, var(--light, #ffffff))", boxShadow: "inset 0 0 0 1px rgba(var(--topic-rgb), 0.5)" };
   const lifecycleText = (byStatus) => stagesFor(byStatus).map((seg) => `${byStatus[seg.key] ?? 0} ${seg.label}`).join(", ");
-  const progressLabel = (pct, byStatus) => `${pct}% progress: ${lifecycleText(byStatus)}`;
+  const progressLabel = (pct, byStatus) => `${pct}% note development: ${lifecycleText(byStatus)}`;
 
   const firstString = (v) =>
     Array.isArray(v) ? (v.length ? String(v[0]).trim() : "") : (v == null ? "" : String(v).trim());
@@ -189,8 +185,8 @@ return function TopicDashboard() {
 .dc-topic-cap strong { color: var(--text-normal, var(--dark, #1f2937)); font-weight: 600; }
 .dc-topic-bar { box-sizing: border-box; position: relative; width: 100%; height: 11px; margin-top: 0.15rem; padding: 2px; border-radius: 999px; border: 1px solid rgba(var(--topic-rgb), 0.5); background: var(--background-primary, var(--light, #ffffff)); overflow: hidden; }
 .dc-topic-bar-track { box-sizing: border-box; position: relative; height: 100%; border-radius: 999px; overflow: hidden; }
-.dc-progress-hero { --topic-rgb: 76, 128, 0; --card-accent: 76, 128, 0; --dc-progress-done: #4c8000; --dc-progress-repetition: #5e9211; --dc-progress-ready: #70a322; --dc-progress-creation: #9cbd66; --dc-radial-size: clamp(6.75rem, 24cqi, 8rem); overflow: hidden; container-type: inline-size; margin: 0 0 clamp(1rem, 2vw, 1.4rem); animation: db-card-in var(--dur-3, 220ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
-.theme-dark .dc-progress-hero, :root[saved-theme="dark"] .dc-progress-hero { --topic-rgb: 132, 204, 22; --card-accent: 132, 204, 22; --dc-progress-done: #84cc16; --dc-progress-repetition: #94d434; --dc-progress-ready: #a3db53; --dc-progress-creation: #c1e88a; }
+.dc-progress-hero { --topic-rgb: 76, 128, 0; --card-accent: 76, 128, 0; --dc-progress-established: #4c8000; --dc-progress-in-progress: #9cbd66; --dc-radial-size: clamp(6.75rem, 24cqi, 8rem); overflow: hidden; container-type: inline-size; margin: 0 0 clamp(1rem, 2vw, 1.4rem); animation: db-card-in var(--dur-3, 220ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
+.theme-dark .dc-progress-hero, :root[saved-theme="dark"] .dc-progress-hero { --topic-rgb: 132, 204, 22; --card-accent: 132, 204, 22; --dc-progress-established: #84cc16; --dc-progress-in-progress: #c1e88a; }
 .dc-progress-hero:hover, .dc-progress-hero:focus-within { border-color: var(--background-modifier-border, var(--lightgray, #d8dee9)); background-color: var(--background-primary, var(--light, #ffffff)); box-shadow: none; transform: none; }
 .dc-progress-hero:hover::before, .dc-progress-hero:focus-within::before { opacity: 0.78; }
 .dc-progress-hero .db-card-body { display: grid; gap: clamp(1rem, 3cqi, 2rem); align-items: center; padding: clamp(1rem, 3cqi, 2rem); }
@@ -265,12 +261,12 @@ p.dc-progress-note { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray
       <section class="db-card dc-progress-hero" aria-labelledby="dc-progress-title">
         <div class="db-card-body">
           <div class="dc-progress-copy">
-            <p class="dc-progress-eyebrow">Learning overview</p>
+            <p class="dc-progress-eyebrow">Note development</p>
             <div class="dc-progress-summary">
               <p class="dc-progress-title" id="dc-progress-title" role="heading" aria-level="2">{plural(oTotal, "note")} across {plural(cards.length, "topic")}</p>
               <span class="dc-progress-mobile-value" aria-hidden="true">{oPct}%</span>
             </div>
-            <ul class="dc-progress-statuses" aria-label="Note lifecycle totals">
+            <ul class="dc-progress-statuses" aria-label="Note development totals">
               {stagesFor(oByStatus).map((seg) => (
                 <li>
                   <i aria-hidden="true" style={swatch(seg)} />
@@ -279,7 +275,7 @@ p.dc-progress-note { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray
               ))}
             </ul>
           </div>
-          <div class="dc-progress-visual" role="img" aria-label={`${oPct}% overall progress`}>
+          <div class="dc-progress-visual" role="img" aria-label={`${oPct}% overall note development`}>
             <svg viewBox="0 0 120 120" aria-hidden="true">
               <circle class="dc-progress-ring dc-progress-ring--track" cx="60" cy="60" r="50" pathLength="100" />
               {STATUS_RAMP.slice().reverse().map((seg) => (

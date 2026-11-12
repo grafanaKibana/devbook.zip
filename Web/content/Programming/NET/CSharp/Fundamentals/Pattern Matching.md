@@ -11,7 +11,7 @@ summary: Selects behavior by an input's type, value, properties, or sequence sha
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Pattern Matching
 ---

@@ -4,13 +4,13 @@ subtopic: [Patterns]
 summary: "Defines a grammar for a language and an interpreter that evaluates sentences, composing complex expressions from simpler ones."
 level: ["3"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Interpreter"
 flashcard_uid: "ea266703"
 created: "2026-03-05T22:12:46.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.440Z"
 ---
 

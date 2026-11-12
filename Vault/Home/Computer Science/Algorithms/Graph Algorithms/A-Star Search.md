@@ -4,10 +4,10 @@ subtopic: [Algorithms]
 summary: "Best-first shortest-path search ordered by f(n) = g(n) + h(n): admissibility gives optimality when improved states reopen, while consistency permits close-once graph search."
 level: ["4"]
 priority: High
-status: Creation
+status: New
 publish: true
 created: "2026-07-10T07:53:59.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-12T14:27:20.400Z"
 ---
 

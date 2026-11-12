@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-28T16:25:46.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.510Z
 topic:
   - DevOps
@@ -10,7 +10,7 @@ summary: Understanding a system's internal state from metrics, logs, and traces.
 level:
   - "2"
 priority: High
-status: Done
+status: In Progress
 qard-deck: DevOps
 qard-topic: Observability
 flashcard_uid: 75262be6

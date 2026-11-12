@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-19T22:34:10.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.347Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: A stack-only value describing contiguous memory it does not own, enabli
 level:
   - "4"
 priority: Medium
-status: Done
+status: In Progress
 qard-deck: Computer Science
 qard-topic: Data Structures/Linear Structures/Span
 ---

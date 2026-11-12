@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-19T22:34:10.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.347Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: A LIFO collection where the most recently pushed element is popped firs
 level:
   - "4"
 priority: Medium
-status: Done
+status: In Progress
 ---
 
 Nested work often resumes in reverse order. A bracket matcher suspends the outer expression while it processes an inner pair. Depth-first traversal does the same with unexplored branches. The most recently suspended item must resume first, and a general list does not enforce that rule.

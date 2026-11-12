@@ -4,13 +4,13 @@ subtopic: [LLM]
 summary: "The execution cycle, ReAct's think-act-observe, that turns an LLM into an autonomous tool-using problem solver."
 level: ["3"]
 priority: Medium
-status: Done
+status: In Progress
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Loop Engineering/Agent Loop"
 flashcard_uid: "d747e381"
 created: "2026-02-27T19:33:38.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:28:37.402Z"
 ---
 

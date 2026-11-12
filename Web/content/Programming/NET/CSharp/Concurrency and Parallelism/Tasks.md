@@ -11,7 +11,7 @@ summary: .NET's core abstraction for asynchronous work, its completion, result, 
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Concurrency and Parallelism/Tasks
 flashcard_uid: 9dbbd8f8

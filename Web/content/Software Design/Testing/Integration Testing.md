@@ -11,7 +11,7 @@ summary: Verifies that multiple components work together with real infrastructur
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 An integration test exercises a boundary between components using enough real implementation to expose its contract. The boundary may be an ASP.NET Core pipeline, a database provider, a message broker, or an HTTP adapter. A unit test can prove a decision in isolation. An integration test proves that configuration, serialization, protocols, and persistence agree at runtime.

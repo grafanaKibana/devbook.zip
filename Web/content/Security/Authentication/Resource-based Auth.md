@@ -11,7 +11,7 @@ summary: Checks whether a user may act on a specific resource instance, not just
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Security
 qard-topic: Authentication/Resource-based Auth
 flashcard_uid: 55d97186

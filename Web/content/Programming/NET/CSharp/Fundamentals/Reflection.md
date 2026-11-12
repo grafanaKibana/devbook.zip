@@ -11,7 +11,7 @@ summary: Runtime metadata inspection and dynamic member access via System.Reflec
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Reflection
 flashcard_uid: a67836fc

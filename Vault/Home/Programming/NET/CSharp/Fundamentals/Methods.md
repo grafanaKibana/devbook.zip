@@ -4,13 +4,13 @@ subtopic: [NET]
 summary: "C#'s unit of behavior, covering parameter modifiers and dispatch keywords."
 level: ["4"]
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Methods"
 flashcard_uid: "a3e803d0"
 created: "2026-02-15T16:27:13.000Z"
-modified: "2026-11-03T19:50:44.499Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.325Z"
 ---
 
@@ -244,8 +244,11 @@ By-value parameters and ordinary virtual dispatch are the default. By-reference 
 > A reference-type argument passes a copy of the reference. The method can mutate the shared object through that copy, but assigning a different object changes only its local copy. `ref` aliases the caller’s variable, allowing the method to replace the reference stored there. [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)
 
 <!-- qard-id: 1fe4393b-4d8c-4e2c-9ae5-769106b13e65 -->
-> [!qard]- What does an `in` parameter prevent the callee from changing?
-> It prevents assignment through the readonly parameter alias. With a reference-type argument, the callee cannot replace the caller's reference through the parameter, but it can call methods that mutate the referenced object. Readonly passing does not make that object immutable. With a mutable struct receiver, calling a potentially mutating member can operate on a defensive copy instead.
+> [!qard]- What can a method still change through an `in` parameter?
+> `in` makes the parameter a readonly alias; it does not make the target immutable.
+>
+> - **Reference-type argument:** the method cannot reassign the parameter, but it can mutate the referenced object through its members.
+> - **Struct argument:** the method cannot assign the parameter or its fields. Calling a member that is not `readonly` runs on a hidden defensive copy, so any mutation it makes is lost.
 >
 > [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)
 
@@ -255,25 +258,18 @@ By-value parameters and ordinary virtual dispatch are the default. By-reference 
 > [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)
 
 <!-- qard-id: 19ea3788-056c-4ed6-8bc6-2087ae866f65 -->
-> [!qard]- How does C# apply an optional parameter's default value, and why can already-compiled callers keep an old default?
-> The default is applied at the call site. When an ordinary compiled call omits an optional argument, the compiler inserts the declared default value into the caller's code, and the method receives it like any other argument.
+> [!qard]- What does the C# compiler do with an optional parameter's default value when a call omits that argument?
+> The compiler copies the default into the call.
 >
-> The declaration rules fit that mechanism:
+> ```csharp
+> public static void Connect(int timeout = 30) { }
 >
-> - **The default must be a compile-time value:** a constant expression, `default(S)`, or `new S()` where `S` is a value type. The compiler has to be able to write the value into each call.
-> - **Optional parameters come after all required parameters.** Named arguments let a call supply a later optional argument while omitting earlier ones.
-> 
-> **Versioning consequence:** the default lives in each caller's compiled code. If a library changes a default, callers compiled against the old version keep passing the old value until they are recompiled. A public default value is therefore part of the library's compatibility contract.
+> Connect();   // compiled as Connect(30);
+> ```
+>
+> The method receives `30` as an ordinary argument and cannot tell whether the caller typed it. Because the value is written into the caller at compile time, it must be a compile-time value: a constant expression, `default(S)`, or `new S()` for a value type `S`.
 >
 > [Microsoft: named and optional arguments](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/named-and-optional-arguments) · [C#: 12.6.2.3 Run-time evaluation of argument lists](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#12623-run-time-evaluation-of-argument-lists)
-
-<!-- qard-id: ffd19d60-4643-4ede-92ff-83ba55b3f613 -->
-> [!qard]- Which modifiers on a base-class method and a same-named derived-class method make a call through a base-typed reference run the derived implementation?
-> The base method must be declared `virtual`, and the derived method must implement it with `override`. The call is then resolved by the runtime type of the object rather than by the declared type of the variable.
->
-> Methods are non-virtual by default. If the base method is not virtual, a call through a base-typed variable binds to the base implementation, even when the derived class declares its own method with `new`.
->
-> [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier)
 
 > [!qard]- What does declaring a base-class method `virtual` commit that API to?
 > A virtual member is an extension point. Derived classes can replace its behavior, unless an override along the hierarchy is marked `sealed`, which stops classes below it from overriding the member again. Ordinary calls to the member on such an object run the most-derived override, including calls made from code inside the base class. An explicit call through `base` in a derived class is the exception: it runs the base class's implementation rather than the most-derived override. The base class can therefore no longer assume that its own implementation of that member is the one that runs.
@@ -281,7 +277,7 @@ By-value parameters and ordinary virtual dispatch are the default. By-reference 
 > [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier) · [Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sealed)
 
 <!-- qard-id: 13e7573c-4ba4-4f2b-a316-4f2dcb52ccd6 -->
-> [!qard]- A base method is not virtual, but a derived class needs different behavior. What are the options, and which ones work through a base-class reference?
+> [!qard]- How do virtual overriding, member hiding, and composition differ in dispatch through a base-class reference?
 > Only virtual dispatch makes a call through a base-class reference run derived code. Making the base member `virtual` and overriding it is therefore the only option that works through such a reference. Hiding with `new` affects only derived-typed references, and composition moves the variation out of inheritance.
 >
 > | Option | Call through a base reference | Fits when |
@@ -300,8 +296,8 @@ By-value parameters and ordinary virtual dispatch are the default. By-reference 
 > [!qard]- Which receiver type controls extension-method lookup?
 > The compile-time type controls lookup. With `Base value = new Derived()`, a method declared only on `Derived` is not found through `value`; an applicable extension for `Base` can be selected instead. An applicable instance method found by ordinary lookup takes precedence over an extension. Generic constraints determine whether an extension candidate is applicable, not whether runtime dispatch replaces it. [Microsoft: extension methods](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/extension-methods)
 
-> [!qard]- Why can `Print<T>(T value)` beat `Print(Base value)` for an argument declared as `Derived`?
-> Type inference can infer `T` as `Derived`, giving the generic candidate an identity conversion. The non-generic candidate needs a conversion from `Derived` to `Base`, so it is a worse match. The generic candidate does not win merely because its constraints are satisfied; constraints must hold for applicability, and otherwise-equivalent candidates have additional tie-breakers. An argument declared as `object` is considered as `object`, even when its runtime value is a string. [C# specification: overload resolution](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#1264-overload-resolution)
+> [!qard]- How do type inference and argument conversions affect generic versus non-generic overload selection?
+> Type inference can make a generic parameter match the argument's compile-time type exactly, giving that candidate an identity conversion. A non-generic overload whose parameter is a base type instead needs a reference conversion, making it a worse match. The generic candidate does not win merely because its constraints are satisfied; constraints must hold for applicability, and otherwise-equivalent candidates have additional tie-breakers. An argument declared as `object` is considered as `object`, even when its runtime value is a string. [C# specification: overload resolution](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#1264-overload-resolution)
 
 > [!qard]- Why can adding an applicable derived overload change a call that previously used a base overload?
 > Method lookup can find an applicable declaration on the derived type and exclude base declarations before the better-function-member comparison. For a derived `Process(double)` and inherited `Process(int)`, `derived.Process(5)` can select the derived member using the implicit int-to-double conversion. This is a lookup rule, not virtual dispatch or a blanket rule that every same-named derived method excludes every base member. Public overload additions can therefore change source behavior when callers recompile. [C# specification: method invocations](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#128103-method-invocations)

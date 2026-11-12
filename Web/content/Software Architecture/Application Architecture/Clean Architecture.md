@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-03-06T22:43:56.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.365Z
 topic:
   - Software Architecture
@@ -11,7 +11,7 @@ summary: "Organizes software so business policy is protected from technical deta
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Software Architecture
 qard-topic: Application Architecture/Clean Architecture
 flashcard_uid: 1f408830

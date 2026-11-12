@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-03-05T22:12:46.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.438Z
 topic:
   - Software Architecture
@@ -11,7 +11,7 @@ summary: Encapsulates a request as an object bundling action, parameters, and re
 level:
   - "2"
 priority: High
-status: Done
+status: In Progress
 qard-deck: Software Architecture
 qard-topic: Patterns/Design Patterns/Behavioral/Command
 flashcard_uid: dd0e4ff8

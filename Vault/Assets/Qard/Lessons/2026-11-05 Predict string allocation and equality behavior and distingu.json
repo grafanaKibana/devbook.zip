@@ -1,0 +1,548 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+      "text": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"An immutable C# reference type where any text change creates a new value.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Types/Strings\"\nflashcard_uid: \"d65a72cc\"\ncreated: \"2026-02-10T16:03:55.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.328Z\"\n---\n\n`string` is the C# alias for the sealed reference type `System.String`. Its contents are immutable. Assignment copies a reference, while an operation that changes text produces a different string. That boundary explains most string behavior, including when concatenation is clear and when incremental construction starts wasting allocations.\n\n# Core Properties\n\n- `string` is a sealed reference type.\n- Strings are immutable in safe managed code.\n- `==` and `Equals` compare string content, not object identity.\n\n```csharp\nvar a = \"hello\";\nvar b = a;\nb = b + \"!\";\n\nConsole.WriteLine(a); // hello\nConsole.WriteLine(b); // hello!\n```\n\n`b = b + \"!\"` creates a new string object. `a` remains unchanged.\n\n# String Interning\n\nString literals can share an interned instance, and identical literals typically do. Object identity is not contractual. Compilation can request `NoStringInterning`, and runtime behavior may still vary:\n\n```csharp\nvar s1 = \"dotnet\";\nvar s2 = \"dotnet\";\n\nConsole.WriteLine(object.ReferenceEquals(s1, s2)); // Typically True; identity is not contractual\n```\n\nRuntime interning is available through `string.Intern(s)`, and `string.IsInterned(s)` checks whether an equivalent value is already present. Interned entries are generally retained until the runtime terminates. Feeding the pool high-cardinality dynamic text trades ordinary garbage collection for long-lived retention, usually a bad deal. Compile-time constant concatenations (`\"a\" + \"b\"`) are folded by the compiler. Runtime-built strings are not automatically interned.\n\n# StringBuilder\n\n`StringBuilder` fits text assembled through repeated appends, especially in a loop or another hot path.\n\n```csharp\nvar sb = new StringBuilder(capacity: 256);\nfor (var i = 0; i < 5; i++)\n{\n    sb.Append(\"item-\").Append(i).AppendLine();\n}\n\nvar result = sb.ToString();\n```\n\nThe usual decision is small:\n\n- Interpolation or concatenation fits small, one-off composition.\n- `StringBuilder` fits repeated incremental construction after the allocation cost matters.\n\n# Encoding and Unicode\n\nA .NET `string` stores UTF-16 code units. A `char` is one 16-bit code unit, not necessarily a complete Unicode scalar value. Characters outside the Basic Multilingual Plane use a surrogate pair, so `\"👍\".Length == 2` and `s[0]` returns only half of that pair.\n\n`Rune` and `EnumerateRunes()` operate on Unicode scalar values. User-perceived characters are a different boundary again: one grapheme may contain a base character plus combining marks, so text-element APIs such as `StringInfo` are needed. `string.Normalize()` can put canonically equivalent sequences into the same normalization form before comparison.\n\n# Low-Allocation String Handling\n\nHot paths sometimes need construction without intermediate strings:\n\n- **`ReadOnlySpan<char>`** slices and parses existing text without allocating another string. Many BCL parse APIs accept spans directly.\n- **`string.Create(length, state, callback)`** fills a new string of known length directly, avoiding a separate builder buffer.\n- **Interpolated string handlers (C# 10)** let an API consume interpolation pieces without first creating the final string. The benefit applies only when the receiving overload accepts a handler, as `StringBuilder.Append` does.\n- **`ArrayPool<char>`** rents scratch buffers for transformations. Pooling is worthwhile only when buffer allocations show up in measurement. Every rental adds ownership and clearing rules.\n\n# Pitfalls\n\n- Repeated `+=` in a loop creates intermediate strings. In a measured hot path, `StringBuilder` or a pre-sized buffer cuts that churn.\n- `ReferenceEquals` checks identity, and interning makes identity depend on how the string was created. Semantic comparison should use APIs that accept `StringComparison`, including `string.Equals`, `StartsWith`, `EndsWith`, and `IndexOf`.\n- Culture-implicit comparison can change with the current culture. Identifiers and protocol values normally need `Ordinal` or `OrdinalIgnoreCase`. Natural-language UI text may need a culture-aware comparison instead.\n\n# Tradeoffs\n\n- **Interpolation or concatenation vs `StringBuilder`:** interpolation is clearer for one-off formatting. A builder pays off when text grows through repeated appends.\n- **Ordinal vs culture-aware comparison:** ordinal rules are stable for technical keys. Culture-aware comparison belongs to natural-language text where locale behavior is intentional.\n- **Interning vs ordinary allocation:** literals can share interned instances, but code must not depend on their identity. Forcing dynamic values into the pool can save duplicates at the price of process-long retention, so it needs a bounded value set and evidence.\n\n# Questions\n\n<!-- qard-id: e73d1e16-6636-4fa5-966c-6c12bab1222c -->\n> [!qard]- When is `StringBuilder` a better choice than string concatenation?\n> `StringBuilder` is the better choice when text is built through many appends, especially in a loop or another frequently executed path where allocations matter. For a small, fixed expression, interpolation or concatenation is clearer.\n>\n> The difference comes from string immutability:\n>\n> - **Repeated concatenation:** a `string` cannot change, so each `result += part` allocates a new string holding the accumulated text plus the new part. Each loop step leaves behind an intermediate string, and the growing text is copied again every time.\n> - **`StringBuilder`:** each append writes into a mutable buffer, and `ToString()` creates the final string once. The buffer reallocates only when it runs out of capacity, so an initial capacity close to the expected final size avoids that growth.\n>\n> No fixed number of appends marks the switch point. The signal for a builder is repeated construction in code where measured allocation cost matters.\n>\n> Sources: [Microsoft Learn: Using the StringBuilder class](https://learn.microsoft.com/en-us/dotnet/standard/base-types/stringbuilder)\n\n<!-- qard-id: cbfb80da-9ddd-4625-8352-7a13aa6b2474 -->\n> [!qard]- Why can `ReferenceEquals(a, b)` be false when `a == b` is true for strings?\n> They test different things. For strings, `==` compares contents: it returns true when both strings hold the same characters in the same order, using an ordinal, case-sensitive comparison. `ReferenceEquals` returns true only when both references point to the same object.\n>\n> Equal text can therefore live in two separate objects. Strings built at run time are not interned automatically, so two strings built from the same pieces are normally distinct instances: `==` returns true while `ReferenceEquals` returns false.\n>\n> Interning can make identity coincide through two different mechanisms:\n>\n> - **Explicit `String.Intern`:** it returns the intern pool's reference for a string with that value, adding the argument to the pool if no equal string is there yet. Equal strings passed through `String.Intern` therefore always come back as the same reference.\n> - **Automatic literal interning:** identical string literals typically share one pooled instance, so `ReferenceEquals` often returns true for them. A compilation can request `NoStringInterning`, and runtime behavior may vary, so literal identity is not a dependable contract.\n>\n> Because identity depends on how each string was produced, `ReferenceEquals` is not a test of content. Content comparisons belong to `==` or `string.Equals`, with an explicit `StringComparison` stating the rule the data needs: ordinal comparison (`Ordinal` or `OrdinalIgnoreCase`) for protocol keys and identifiers, and culture-aware comparison for natural-language text shown to users.\n>\n> Sources: [Microsoft Learn: Object.ReferenceEquals](https://learn.microsoft.com/en-us/dotnet/api/system.object.referenceequals?view=net-10.0) · [Microsoft Learn: String equality operator](https://learn.microsoft.com/en-us/dotnet/api/system.string.op_equality?view=net-10.0) · [Microsoft Learn: String.Intern](https://learn.microsoft.com/en-us/dotnet/api/system.string.intern?view=net-10.0) · [Microsoft Learn: Best practices for comparing strings](https://learn.microsoft.com/en-us/dotnet/standard/base-types/best-practices-strings)\n\n# References\n\n- [Best practices for strings in .NET](https://learn.microsoft.com/en-us/dotnet/standard/base-types/best-practices-strings)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1793882631613,
+  "topic": "Predict string allocation and equality behavior and distinguish UTF-16 code units from user-perceived characters",
+  "notes": [
+    "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md"
+  ],
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "text-semantics",
+  "steps": [
+    {
+      "title": "Trace reference assignment",
+      "explain": "A reference-type variable holds a reference to an object. Assignment copies the value held by the variable, so assigning one reference-type variable to another copies the reference.\n\nYour **Strings** note identifies `string` as a reference type. Apply the assignment rule:\n\n```csharp\nstring first = \"hello\";\nstring second = first;\n```\n\nAfter the second line, both variables refer to the same string object. Copying the reference does not create another string object. The variables themselves remain separate: each holds its own copy of the reference.\n\nNow consider:\n\n```csharp\nsecond = \"goodbye\";\n```\n\nThis assignment replaces the reference held by `second`. It does not assign anything to `first`, so `first` still refers to the string containing `\"hello\"`.\n\nThe note also states that strings are immutable: an existing string's contents cannot change. Reassigning a variable changes which string it refers to. Keeping the variable separate from the object it refers to lets us trace both facts without confusing them.",
+      "connect": "This builds on the reference assignment you have practiced. Tracking references first gives us the foundation for predicting string allocations and distinguishing shared objects from equal text.",
+      "checkFirst": true,
+      "check": {
+        "id": "k1",
+        "type": "long",
+        "prompt": "Trace this code:\n\n```csharp\nstring a = \"north\";\nstring b = a;\na = \"south\";\nConsole.WriteLine(b);\n```\n\nImmediately after `string b = a;`, how are the two variables related to the string object? What does the final line print, and why?",
+        "marks": 3,
+        "rubric": [
+          {
+            "point": "States that immediately after `b = a`, both variables refer to the same string object.",
+            "marks": 1
+          },
+          {
+            "point": "States that the final line prints `north`.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that assigning to `a` replaces only its reference; `b` retains its reference to the original string.",
+            "marks": 1
+          }
+        ],
+        "model": "After `b = a`, both variables refer to the same string object containing `\"north\"`. The final line prints `north`. Assigning `\"south\"` to `a` changes only the reference held by `a`; `b` still refers to the original string.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+          "heading": "Core Properties"
+        },
+        "objective": "text-semantics",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Says `b` prints `south` because it follows `a`.",
+          "reteach": "`b = a` copies the reference that `a` holds at that moment. It does not create a continuing link between the variables. A later assignment to `a` leaves `b` unchanged."
+        },
+        {
+          "signs": "Says `b = a` creates a separate string containing `north`.",
+          "reteach": "`string` is a reference type. This assignment copies a reference, so both variables initially refer to the same object. It does not copy the text into a new object."
+        },
+        {
+          "signs": "Says assigning `south` changes the original string, or that immutability makes the assignment invalid.",
+          "reteach": "Immutability protects the string object's contents. The variable can still receive a different reference. Here, `a` changes which string it refers to; the original string still contains `north`."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Trace immutable string construction",
+      "explain": "In **Strings.md → Core Properties**, a string is a reference type whose contents are immutable: once a string exists, its text cannot change. A variable holding its reference can still be assigned a different reference.\n\nStart with two variables referring to the same string:\n\n```csharp\nvar original = \"cat\";\nvar text = original;\ntext = text + \"s\";\n```\n\nAssignment copied the reference, so both variables initially refer to `\"cat\"`. Concatenation needs the text `\"cats\"`. Because the existing string cannot change, concatenation creates a different string containing that result. Assignment then makes `text` refer to it. `original` still refers to `\"cat\"`.\n\nNow suppose another statement appends `\"!\"`. It creates `\"cats!\"` and assigns that reference to `text`. The earlier `\"cats\"` string was an intermediate result; it was never extended in place.\n\nThis explains the repeated-concatenation cost described in **Strings.md → Pitfalls**: successive appends can allocate successive strings and copy the growing text repeatedly. A `StringBuilder` supports mutable construction when that repeated work matters.",
+      "connect": "The previous step traced how assignment copies a reference. Keeping that rule while adding immutability lets us predict which variables change references and where constructing changed text requires another string.",
+      "checkFirst": true,
+      "check": {
+        "id": "k2",
+        "type": "long",
+        "prompt": "A string's contents cannot change, but a variable can receive a different reference. Use that rule and reference assignment to trace this code:\n\n```csharp\nvar original = \"go\";\nvar text = original;\n\nfor (var i = 0; i < 2; i++)\n{\n    text += \"!\";\n}\n\nConsole.WriteLine(original);\nConsole.WriteLine(text);\n```\n\nWhat two lines are printed? Which string does each loop iteration construct, and why does `original` keep its initial text?",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "States that the first printed line is go.",
+            "marks": 1
+          },
+          {
+            "point": "States that the second printed line is go!!.",
+            "marks": 1
+          },
+          {
+            "point": "Identifies go! and then go!! as the strings constructed by the two iterations.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that each assignment changes text's reference while original still refers to the unchanged initial string.",
+            "marks": 1
+          }
+        ],
+        "model": "The output is:\n\n```text\ngo\ngo!!\n```\n\nInitially, both variables refer to `\"go\"`. The first iteration constructs `\"go!\"` and assigns its reference to `text`. The second constructs `\"go!!\"` and assigns that reference to `text`.\n\n`original` still refers to `\"go\"`. Neither concatenation changes an existing string, and assigning a new reference to `text` does not change `original`.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+          "heading": "Core Properties"
+        },
+        "objective": "text-semantics",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Both lines print go!! because the variables share a string.",
+          "reteach": "They initially share one string, but its contents cannot change. Each concatenation produces another string, and only `text` receives its reference."
+        },
+        {
+          "signs": "Both lines print go because strings are immutable.",
+          "reteach": "Immutability fixes the contents of a string object. It does not prevent a variable from referring to another string. `text += \"!\"` includes that reassignment."
+        },
+        {
+          "signs": "Only go!! is constructed; both iterations extend the same result.",
+          "reteach": "The first iteration constructs `\"go!\"`. The second uses that string to construct `\"go!!\"`. The first result cannot grow in place, so it becomes an intermediate string."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Compare content and identity",
+      "explain": "Assignment copies a reference. Two variables can therefore point to one string object. Immutability means that object's text cannot change; it does not mean every equal piece of text must share one object.\n\nThis gives us two different questions: **Do these strings contain equal text?** and **Do these references point to the same object?** Your **Strings** note distinguishes them under **Core Properties** and **String Interning**.\n\nFor variables typed as `string`, `==` compares content: the same UTF-16 code units in the same order, with case respected. `object.ReferenceEquals(a, b)` checks object identity. Two separately constructed strings can therefore make `a == b` true while `ReferenceEquals(a, b)` is false.\n\nInterning connects these ideas. `string.Intern(s)` returns the pool's shared reference for that content. Interning two equal strings returns the same reference, even if the original objects were separate. It does not change their text or reassign the original variables. Identical literals typically share an interned object too, so content alone cannot tell us whether references share an object.",
+      "connect": "The previous step traced how constructing changed text leaves the original object unchanged. Now we can distinguish whether construction produced equal content, a shared object, or both—separate questions when predicting string behavior.",
+      "checkFirst": false,
+      "check": {
+        "id": "k3",
+        "type": "long",
+        "prompt": "Predict the four printed Boolean values in order. Give a brief reason for each.\n\n```csharp\nstring a = new string(new char[] { 'h', 'i' });\nstring b = new string(new char[] { 'h', 'i' });\nstring c = a;\n\nConsole.WriteLine(a == b);\nConsole.WriteLine(object.ReferenceEquals(a, b));\nConsole.WriteLine(object.ReferenceEquals(a, c));\nConsole.WriteLine(object.ReferenceEquals(\n    string.Intern(a), string.Intern(b)));\n```",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "Predicts True for a == b and explains that string == compares equal content.",
+            "marks": 1
+          },
+          {
+            "point": "Predicts False for ReferenceEquals(a, b) and explains that the two constructor calls create separate string objects.",
+            "marks": 1
+          },
+          {
+            "point": "Predicts True for ReferenceEquals(a, c) and explains that assignment copies a's reference.",
+            "marks": 1
+          },
+          {
+            "point": "Predicts True for the final comparison and explains that Intern returns the same pooled reference for equal content.",
+            "marks": 1
+          }
+        ],
+        "model": "The outputs are **True, False, True, True**.\n\n1. `a == b` is `True`: both strings contain `hi`, and string `==` compares content.\n2. `ReferenceEquals(a, b)` is `False`: each constructor call creates a separate string object.\n3. `ReferenceEquals(a, c)` is `True`: `c = a` copies the reference, so both point to the same object.\n4. The final comparison is `True`: both `Intern` calls return the pool's shared reference for `hi`. The original variables `a` and `b` still refer to their separate objects.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+          "heading": "String Interning"
+        },
+        "objective": "text-semantics",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Predicts False for a == b because a and b are different objects.",
+          "reteach": "Being a reference type determines what assignment copies. It does not determine what every equality operator compares. For strings, `==` compares content, so separate objects containing `hi` compare equal."
+        },
+        {
+          "signs": "Predicts True for ReferenceEquals(a, b) because both contain hi, or False for ReferenceEquals(a, c) because c is a different variable.",
+          "reteach": "`ReferenceEquals` follows references to objects. The two constructor calls create two objects; assignment creates another reference to an existing object. Variable names and matching text do not establish identity."
+        },
+        {
+          "signs": "Predicts False for the final comparison because a and b were constructed separately.",
+          "reteach": "The final comparison uses the references returned by `Intern`. Equal content gets the same pooled reference. Those returned references match even though the original `a` and `b` references remain different."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Count UTF-16 code units and scalar values",
+      "explain": "The previous step separated a string's content from the identity of its object. Now we need to identify what units make up that content.\n\nYour **Strings** note, under **Encoding and Unicode**, states that a .NET string stores UTF-16 code units. Each code unit is 16 bits, and a C# `char` holds exactly one. `Length` counts these units; indexing retrieves one unit.\n\nUnicode uses numbered code points to represent text. A Unicode scalar value is a code point other than a surrogate code point. UTF-16 represents a scalar value using either one code unit or two. The two-unit representation is called a **surrogate pair**: its two halves together encode one scalar value.\n\nFor example, `\"X👍\"` contains one code unit for `X` and two for `👍`. Its `Length` is therefore 3, although it contains 2 scalar values. Indexing at `[1]` retrieves the first surrogate, so that `char` alone does not represent the complete emoji.\n\n`EnumerateRunes()` reads scalar values, combining valid surrogate pairs. Even scalar values do not always match user-perceived characters; combining marks introduce another boundary.",
+      "connect": "Content equality and object identity answer different questions; code-unit counts and scalar-value counts do too. Understanding the stored units makes string length and indexing predictable.",
+      "checkFirst": false,
+      "check": {
+        "id": "k4",
+        "type": "calc",
+        "prompt": "Given `var s = \"A👍B\";`, determine `s.Length`, the number of Unicode scalar values returned by `s.EnumerateRunes()`, and whether `s[1]` represents the complete thumbs-up emoji. Explain using UTF-16 code units.",
+        "marks": 3,
+        "rubric": [
+          {
+            "point": "States Length is 4: A and B contribute one code unit each, and 👍 contributes two.",
+            "marks": 1
+          },
+          {
+            "point": "States there are 3 scalar values because the surrogate pair represents one scalar value.",
+            "marks": 1
+          },
+          {
+            "point": "States s[1] is only the first (high) surrogate, not the complete emoji, because indexing returns one code unit.",
+            "marks": 1
+          }
+        ],
+        "model": "`s.Length` is **4**: one code unit for `A`, two for `👍`, and one for `B`. `s.EnumerateRunes()` returns **3 scalar values**: `A`, `👍`, and `B`. `s[1]` is the high surrogate—the first half of the pair—so it does not represent the complete emoji.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+          "heading": "Encoding and Unicode"
+        },
+        "objective": "text-semantics",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Gives Length as 3 because three symbols are visible.",
+          "reteach": "`Length` counts stored UTF-16 code units. The emoji needs two units, so the count is $1 + 2 + 1 = 4$."
+        },
+        {
+          "signs": "Gives 4 scalar values, counting each surrogate separately.",
+          "reteach": "Surrogates are code units used together to encode one scalar value. `EnumerateRunes()` combines this valid pair, giving three scalar values."
+        },
+        {
+          "signs": "Says s[1] returns the complete emoji.",
+          "reteach": "A string index returns one `char`, which holds one code unit. The emoji occupies indices 1 and 2, so index 1 retrieves only its first surrogate."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Recognize user-perceived characters",
+      "explain": "A Unicode scalar value identifies one Unicode value. It does not necessarily represent a complete visible character. Your **Strings** note, under **Encoding and Unicode**, introduces the next boundary: a **grapheme cluster**, which approximates one user-perceived character.\n\nConsider `\"e\\u0301\"`. The scalar value `e` supplies the base letter; `\\u0301` supplies a combining acute accent. Together they display as **é**. Both values fit into one UTF-16 code unit each, so this string contains two code units, two scalar values, and one grapheme cluster.\n\nThis explains why counting runes does not always give the visible character count. It also explains why deleting one rune can remove only the accent. To count or cut text at user-perceived character boundaries, use text-element APIs such as `System.Globalization.StringInfo`.\n\nAppearance also differs from stored content. `\"\\u00E9\"` stores the precomposed **é** as one scalar value. It is canonically equivalent to `\"e\\u0301\"`, but their UTF-16 sequences differ, so string `==` returns `false`. Normalizing both strings to the same Unicode normalization form makes these two sequences equal. Normalization handles canonical equivalence; it does not make every pair of lookalike symbols equal.",
+      "connect": "The previous step separated UTF-16 code units from scalar values. Grapheme clusters add the boundary needed for visible text operations, while normalization explains why matching appearance alone does not establish string equality.",
+      "checkFirst": true,
+      "check": {
+        "id": "k5",
+        "type": "mcq",
+        "prompt": "In `s = \"e\\u0301\"`, the combining acute accent joins the preceding `e`, displaying **é**. Let `t = \"\\u00E9\"`, the precomposed **é**.\n\nWhich description correctly gives `s`'s UTF-16 code-unit count, scalar-value count, grapheme-cluster count, and the result of string `s == t`?",
+        "marks": 3,
+        "options": [
+          "2 code units, 2 scalar values, 1 grapheme cluster; equality is false.",
+          "2 code units, 2 scalar values, 2 grapheme clusters; equality is false.",
+          "2 code units, 1 scalar value, 1 grapheme cluster; equality is false.",
+          "2 code units, 2 scalar values, 1 grapheme cluster; equality is true."
+        ],
+        "answer": 0,
+        "rubric": [
+          {
+            "point": "Identifies two UTF-16 code units and two Unicode scalar values.",
+            "marks": 1
+          },
+          {
+            "point": "Identifies one grapheme cluster for the base letter and combining accent together.",
+            "marks": 1
+          },
+          {
+            "point": "Identifies false for string equality because the stored UTF-16 sequences differ.",
+            "marks": 1
+          }
+        ],
+        "model": "The first option is correct. `e` and the combining accent are separate scalar values, each occupying one UTF-16 code unit. Together they form one grapheme cluster. String `==` returns `false` because `s` stores two code units while `t` stores one. Normalizing both to the same normalization form makes this canonically equivalent pair equal.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+          "heading": "Encoding and Unicode"
+        },
+        "objective": "text-semantics",
+        "goal": "recognise"
+      },
+      "misconceptions": [
+        {
+          "signs": "Chooses two grapheme clusters because there are two scalar values.",
+          "reteach": "A combining accent joins its base letter within one grapheme cluster. Scalar boundaries describe Unicode values; grapheme boundaries group those values into user-perceived characters."
+        },
+        {
+          "signs": "Chooses one scalar value because the text displays as one character.",
+          "reteach": "Rendering the letter and accent together does not merge their stored values. `e` and `\\u0301` remain two scalar values even though they form one grapheme cluster."
+        },
+        {
+          "signs": "Chooses true for equality because both strings display as é.",
+          "reteach": "String `==` compares the stored UTF-16 sequences without normalizing them. These representations differ until both are normalized to the same normalization form."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "text": "both a and b storing references to the string object (since it is reference type), so final print of b will product \"south\" since we changed object from the reference stored in a which changed b as well",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "both a and b storing references to the string object",
+            "kind": "correct",
+            "note": "You identified that both variables refer to the same string object after the assignment."
+          },
+          {
+            "quote": "final print of b will product \"south\"",
+            "kind": "wrong",
+            "note": "You predicted the wrong output."
+          },
+          {
+            "quote": "we changed object from the reference stored in a",
+            "kind": "wrong",
+            "note": "You treated assignment to a variable as a change to the string object."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to state that the final line prints `north`."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to explain that assigning to `a` replaces only its reference, while `b` retains its original reference."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "You correctly traced the shared reference initially, but treated reassignment as a change to the string object.",
+        "score": 1
+      },
+      "reply": "You identified that `a` and `b` initially refer to the same object. Look at `a = \"south\"`: does that line change the object, or replace the reference held by `a`? What reference does `b` still hold?",
+      "reteach": "Immutability protects the string object's contents. The variable can still receive a different reference. Here, `a` changes which string it refers to; the original string still contains `north`."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "the output will be:\ngo\ngo!!\n\nIt will happen because on first text += \"!\" we will basically do text = text + \"!\" which is basically text = new String(text + \"!\") on each iteration , so we will re-instantiate variable with new reference, which unlinks text from original.",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          false,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "go",
+            "kind": "correct",
+            "note": "You identified the first output line."
+          },
+          {
+            "quote": "go!!",
+            "kind": "correct",
+            "note": "You identified the second output line."
+          },
+          {
+            "quote": "on each iteration",
+            "kind": "missing",
+            "note": "You needed to name the intermediate string constructed by the first iteration and the string constructed by the second."
+          },
+          {
+            "quote": "new reference, which unlinks text from original",
+            "kind": "correct",
+            "note": "You explained that assigning a new reference to text leaves original referring to the initial string."
+          },
+          {
+            "quote": "text = new String(text + \"!\")",
+            "kind": "vague",
+            "note": "You have the right allocation idea, but this is not the actual C# operation; concatenation produces the result directly."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You traced the output and references correctly, but did not name the string constructed in each iteration.",
+        "score": 3
+      },
+      "reply": "Your output and reference reasoning are right. What value does `text` hold after the first iteration, before the second append? Name the string produced by each iteration."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "true - bause the content are ideantical\nfalse - since we are comparing references, not a content, which is different for both object\ntrue - because by doing c = a we assigned ref stored in a to c, then compared them, and they are equal\ntrue - Interning two equal strings will return the same reference, even if the original objects were separate, so comparing their references will return true",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "the content are ideantical",
+            "kind": "correct",
+            "note": "You correctly identify that string equality compares content."
+          },
+          {
+            "quote": "comparing references, not a content",
+            "kind": "correct",
+            "note": "You correctly distinguish the references to the two constructed objects."
+          },
+          {
+            "quote": "assigned ref stored in a to c",
+            "kind": "correct",
+            "note": "You correctly explain that assignment copies the reference."
+          },
+          {
+            "quote": "Interning two equal strings will return the same reference",
+            "kind": "correct",
+            "note": "You correctly explain why the interned references match."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "You correctly distinguish string content, object identity, assignment, and interning.",
+        "score": 4
+      },
+      "reply": "Correct: equal content does not imply the same object, while assignment copies a reference and interning returns a shared reference."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "The length will be 4 since 👍 contain 2 code units for emoji. s.EnumerateRunes() will return 3 because we have 3 scalar values here, s[1] will will return first surrogate of the emoji",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "The length will be 4",
+            "kind": "correct",
+            "note": "You correctly count four UTF-16 code units."
+          },
+          {
+            "quote": "3 because we have 3 scalar values here",
+            "kind": "correct",
+            "note": "You correctly count the surrogate pair as one scalar value."
+          },
+          {
+            "quote": "first surrogate of the emoji",
+            "kind": "correct",
+            "note": "You correctly identify the first surrogate rather than the complete emoji."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "You correctly distinguished code units, scalar values, and indexing.",
+        "score": 3
+      },
+      "reply": "Correct: `Length` counts code units, while `EnumerateRunes()` combines the surrogate pair into one scalar value. `s[1]` is the high surrogate, not the whole emoji."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "choice": 2,
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "1 scalar value",
+            "kind": "wrong",
+            "note": "You treated the displayed character as one scalar value; the letter and accent are separate scalar values."
+          },
+          {
+            "quote": "1 scalar value",
+            "kind": "missing",
+            "note": "You needed to identify two scalar values as well as two UTF-16 code units."
+          },
+          {
+            "quote": "1 grapheme cluster",
+            "kind": "correct",
+            "note": "You identified the letter and accent as one grapheme cluster."
+          },
+          {
+            "quote": "equality is false",
+            "kind": "correct",
+            "note": "You correctly identified that the strings are unequal."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "You correctly identified the grapheme cluster and equality result, but counted the scalar values incorrectly.",
+        "score": 2
+      },
+      "reply": "You counted the displayed character as one scalar value. Look at the letter and the combining accent separately: how many Unicode values are stored?",
+      "reteach": "Rendering the letter and accent together does not merge their stored values. `e` and `\\u0301` remain two scalar values even though they form one grapheme cluster."
+    }
+  ],
+  "current": 4,
+  "probe": {
+    "questions": [],
+    "answers": {},
+    "submitted": true,
+    "marks": {},
+    "findings": "You have shown some understanding of reference-type assignment, though that foundation is still developing. There is no probe evidence yet for string behavior."
+  },
+  "map": {
+    "title": "From references to text semantics",
+    "plan": "We will start with reference assignment, which you have practiced, and use it to trace immutable strings. Then you will connect allocation and equality to how strings are represented, using your Strings note as the guide.",
+    "mermaid": "graph TD\nA[\"Reference assignment copies a reference\"] --> B[\"Immutability and new strings\"]\nB --> C[\"Content equality and object identity\"]\nC --> D[\"UTF-16 code units and scalar values\"]\nD --> E[\"User-perceived characters and text comparisons\"]",
+    "objective": "text-semantics",
+    "steps": [
+      {
+        "title": "Trace reference assignment",
+        "why": "A shared reference is the starting point for predicting what happens when a string variable is reassigned."
+      },
+      {
+        "title": "Trace immutable string construction",
+        "why": "Immutability explains why changed text requires a different string and why repeated concatenation can create intermediate strings."
+      },
+      {
+        "title": "Compare content and identity",
+        "why": "Equal text can belong to different objects, while interning can make references share an object."
+      },
+      {
+        "title": "Count UTF-16 code units and scalar values",
+        "why": "A string's length and indexing count code units, which do not always correspond to complete scalar values."
+      },
+      {
+        "title": "Recognize user-perceived characters",
+        "why": "A grapheme can contain multiple scalar values, so visible character counts and text comparisons need the right boundaries."
+      }
+    ]
+  },
+  "stepsFor": "[\"From references to text semantics\",[\"Trace reference assignment\",\"Trace immutable string construction\",\"Compare content and identity\",\"Count UTF-16 code units and scalar values\",\"Recognize user-perceived characters\"]]",
+  "accepted": true,
+  "finishedAt": 1793884808620,
+  "close": {
+    "summary": "The lesson connected reference assignment and string immutability to allocation, equality, and Unicode representation. You correctly traced initial reference sharing, but confused reassignment with changing the shared string object. During repeated concatenation, you traced outputs and references correctly but did not identify the string constructed in each iteration. You distinguished content equality from object identity correctly throughout those checks. You correctly counted UTF-16 code units and Unicode scalar values in the dedicated check, though your confidence was low. In the grapheme check, you recognized the user-perceived character and equality result correctly but miscounted scalar values. Keep practicing reassignment, intermediate string construction, and the distinction between code units, scalar values, and grapheme clusters.",
+    "cards": [
+      {
+        "front": "After `string a = \"cat\"; string b = a; b += \"s\";`, what do `a` and `b` contain, and what happened to their references?",
+        "back": "`a` contains `\"cat\"`; `b` contains `\"cats\"`. Initially they shared a reference. Concatenation constructed `\"cats\"`, then reassignment changed only `b`'s reference. The original string stayed unchanged."
+      },
+      {
+        "front": "Starting with `string s = \"a\";`, a loop executes `s += \"b\";` three times. Which string is constructed in each iteration?",
+        "back": "In order: `\"ab\"`, `\"abb\"`, `\"abbb\"`. Each concatenation constructs the accumulated text in a new string, then assigns its reference to `s`."
+      },
+      {
+        "front": "Given `string a = \"cat\"; string b = new string(new[] { 'c', 'a', 't' });`, what do `a == b` and `object.ReferenceEquals(a, b)` return?",
+        "back": "`a == b` is `true`: string `==` compares content using ordinal, case-sensitive equality. `ReferenceEquals(a, b)` is `false`: these references point to distinct string objects."
+      },
+      {
+        "front": "For `string s = \"e\\u0301👍\";`, how many UTF-16 code units, Unicode scalar values, and grapheme clusters are present?",
+        "back": "4 code units, 3 scalar values, 2 grapheme clusters. `e` and the combining acute accent each use one code unit and one scalar value; together they form one grapheme. `👍` uses two code units but is one scalar value and one grapheme. `s.Length` is 4."
+      }
+    ],
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-05 Predict string allocation and equality behavior and distingu.md",
+    "nextCheck": "2026-11-08"
+  }
+}

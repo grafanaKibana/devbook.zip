@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T05:58:55.660Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Floyd's tortoise-and-hare detects cycles and functional-graph duplicate
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 A linked list may have no known length and no terminating node. If a tail points back into the list, a plain traversal loops forever. Floyd's tortoise-and-hare detects that cycle without a visited set: two pointers follow the same `next` chain, one moving one node per step and the other moving two. Once both are inside the cycle, their separation changes by one modulo the cycle length, so they must meet. If the faster pointer reaches `null`, the chain is acyclic.

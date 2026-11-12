@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-12T19:33:37.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-12T20:39:23.959Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Resolves hash collisions by chaining entries outside the table or probi
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 A hash table mixes a key into a hash, then reduces that hash to a **home bucket** or slot. Common reductions are `hash mod m` for `m` buckets and `hash & (m - 1)` when `m` is a power of two and the hash bits have already been mixed. Distinct keys can choose the same home bucket even while other buckets remain empty. Once there are more keys than home buckets, the pigeonhole principle guarantees a collision. The response, chaining or probing, determines deletion behavior and how sharply the table slows as it fills. The [[Computer Science/Data Structures/Hash-based Structures/HashMap|HashMap]] note follows these mechanics through .NET's `Dictionary`.

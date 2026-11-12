@@ -4,13 +4,13 @@ subtopic: [Security]
 summary: "Maps data of any size to a fixed-size, one-way, collision-resistant digest."
 level: ["4"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Security"
 qard-topic: "Hashing"
 flashcard_uid: "bca46ee1"
 created: "2026-06-20T19:32:24.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.503Z"
 ---
 

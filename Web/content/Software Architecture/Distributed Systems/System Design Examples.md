@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-18T11:06:07.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-18T08:28:19.601Z
 topic:
   - Software Architecture
@@ -11,7 +11,7 @@ summary: Five system designs compared through their ordering, state ownership, r
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 Start a system design with the fact the system cannot afford to lose. Chat must preserve conversation order. Collaborative editing must converge. A notification service needs an honest record of each policy decision and delivery attempt. Search must identify the content and serving decisions behind a result while indexes keep changing. Trading must admit and match orders in one deterministic sequence.

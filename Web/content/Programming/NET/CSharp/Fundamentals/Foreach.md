@@ -11,7 +11,7 @@ summary: C#'s common way to iterate a sequence, plus iterators and yield.
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Foreach
 flashcard_uid: 2e8ba405
