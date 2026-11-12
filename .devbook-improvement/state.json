@@ -23490,11 +23490,13 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-12T07:35:50.989572Z",
-    "phase": "branch_updated",
-    "updated_at": "2026-11-12T07:39:02Z",
+    "phase": "pr_updated",
+    "updated_at": "2026-11-12T07:39:10Z",
     "evidence": {
       "commit_sha": "b03764a2f8d7c0a144ac3e5e5f440991cb57cade",
-      "branch_sha": "b03764a2f8d7c0a144ac3e5e5f440991cb57cade"
+      "branch_sha": "b03764a2f8d7c0a144ac3e5e5f440991cb57cade",
+      "pr_number": 220,
+      "created": true
     }
   },
   "export_operations": {
