@@ -12400,11 +12400,11 @@
     "version": 1,
     "id": "546ef5b36e6142c79d9efe91941e131e",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-12T07:25:53.899904Z",
-    "elapsed_seconds": 534.1190034000003,
+    "elapsed_seconds": 550.9497374000003,
     "calls_reserved": 15,
-    "responses_received": 14,
+    "responses_received": 15,
     "attempted_paths": [
       "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md",
       "Vault/Home/Networks/Architecture & Ops/CDN.md",
@@ -13512,7 +13512,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-12T07:34:48.018280Z",
+    "checkpoint_at": "2026-11-12T07:35:04.849013Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
@@ -32453,6 +32453,125 @@
       "Vault/Home/Networks/Architecture & Ops/VPN.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-12T07:34:43.751962Z"
+    "prepared_at": "2026-11-12T07:34:43.751962Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/Networks/Architecture & Ops/VPN.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate, well ordered and compact. It separates tunnel encryption from authorization, routing and DNS policy, and covers split/full tunneling, VPN types, protocols, tradeoffs and pitfalls with conditions. No concrete defect justifies an edit, so the keep is supported.",
+            "page_type": "Concept: no Questions section (optional), bare-link References, fenced blocks carry language identifiers (mermaid, text), no manual navigation.",
+            "current_text_evidence": [
+              {
+                "quote": "The tunnel does not automatically grant access or place every endpoint on one flat network.",
+                "line_start": 14,
+                "reason": "The opening states the key boundary up front: a tunnel gives connectivity, not authorization or a flat network."
+              },
+              {
+                "quote": "This reduces gateway load and often shortens the path for public traffic, but it creates two simultaneous trust paths on the endpoint.",
+                "line_start": 29,
+                "reason": "Split tunneling is explained with its benefit and its security cost, which is a mechanism-plus-condition statement."
+              },
+              {
+                "quote": "Running a TCP tunnel over TCP can amplify loss-related stalls, so UDP is normally the better transport when available.",
+                "line_start": 61,
+                "reason": "The OpenVPN caveat is correct and carries its reason and its condition."
+              },
+              {
+                "quote": "`AllowedIPs` acts as both routing configuration and a source-address policy.",
+                "line_start": 58,
+                "reason": "This is the accurate WireGuard cryptokey-routing behaviour. The listed suite (ChaCha20-Poly1305, Curve25519, BLAKE2s, SipHash24, HKDF) matches the WireGuard protocol description."
+              },
+              {
+                "quote": "Route tables and ACLs should be tested independently because one controls the path and the other controls permission.",
+                "line_start": 99,
+                "reason": "The pitfall gives a concrete diagnostic rationale rather than generic advice."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: VPN types, protocols, tradeoffs and pitfalls form one coherent topic and the note is not overlong.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "Whole-note audit finds no factual, structural, voice or rule defects. The keep is justified, and there are no edits, feedback decisions or proposals to reject.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Networks/Architecture & Ops/VPN.md",
+          "citation_index": 4,
+          "reported_line_start": 99,
+          "resolved_line_start": 96
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Networks/Architecture & Ops/VPN.md": "5536d706bc1de18256b712b3bd029f2901b35a9459abff98baba6457d14ac199"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/Networks/Architecture & Ops/VPN.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate, well ordered and compact. It separates tunnel encryption from authorization, routing and DNS policy, and covers split/full tunneling, VPN types, protocols, tradeoffs and pitfalls with conditions. No concrete defect justifies an edit, so the keep is supported.",
+          "page_type": "Concept: no Questions section (optional), bare-link References, fenced blocks carry language identifiers (mermaid, text), no manual navigation.",
+          "current_text_evidence": [
+            {
+              "quote": "The tunnel does not automatically grant access or place every endpoint on one flat network.",
+              "line_start": 14,
+              "reason": "The opening states the key boundary up front: a tunnel gives connectivity, not authorization or a flat network."
+            },
+            {
+              "quote": "This reduces gateway load and often shortens the path for public traffic, but it creates two simultaneous trust paths on the endpoint.",
+              "line_start": 29,
+              "reason": "Split tunneling is explained with its benefit and its security cost, which is a mechanism-plus-condition statement."
+            },
+            {
+              "quote": "Running a TCP tunnel over TCP can amplify loss-related stalls, so UDP is normally the better transport when available.",
+              "line_start": 61,
+              "reason": "The OpenVPN caveat is correct and carries its reason and its condition."
+            },
+            {
+              "quote": "`AllowedIPs` acts as both routing configuration and a source-address policy.",
+              "line_start": 58,
+              "reason": "This is the accurate WireGuard cryptokey-routing behaviour. The listed suite (ChaCha20-Poly1305, Curve25519, BLAKE2s, SipHash24, HKDF) matches the WireGuard protocol description."
+            },
+            {
+              "quote": "Route tables and ACLs should be tested independently because one controls the path and the other controls permission.",
+              "line_start": 96,
+              "reason": "The pitfall gives a concrete diagnostic rationale rather than generic advice."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: VPN types, protocols, tradeoffs and pitfalls form one coherent topic and the note is not overlong.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "Whole-note audit finds no factual, structural, voice or rule defects. The keep is justified, and there are no edits, feedback decisions or proposals to reject.",
+      "change_checks": []
+    }
   }
 }
