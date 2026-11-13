@@ -14326,11 +14326,11 @@
     "version": 1,
     "id": "ed9f729234e2405d9876ac4f5aa28fbd",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-13T20:03:30.781717Z",
-    "elapsed_seconds": 831.3457275999999,
+    "elapsed_seconds": 853.0446326999999,
     "calls_reserved": 18,
-    "responses_received": 17,
+    "responses_received": 18,
     "attempted_paths": [
       "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
       "Vault/Home/Programming/NET/Runtime/Garbage Collector.md",
@@ -17295,7 +17295,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T20:17:22.126956Z",
+    "checkpoint_at": "2026-11-13T20:17:43.825861Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -43492,6 +43492,115 @@
       "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-13T20:17:16.832774Z"
+    "prepared_at": "2026-11-13T20:17:16.832774Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The whole-note audit found no accuracy, clarity, structure or rules defect. A justified keep with no edits is appropriate.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md",
+            "verdict": "CLEAN",
+            "summary": "The note moves from the principal-only case (roles, policies) to resources, then defaults and hooks, pitfalls and tradeoffs. Its technical claims on role OR semantics, handler OR semantics, AND across stacked attributes, FallbackPolicy versus DefaultPolicy and Resource passing match ASP.NET Core behavior. The note admits its own sample's weakness (year-only age) and gives the fix. No edit is warranted.",
+            "page_type": "Concept — authorable prose; optional Questions absent (allowed); a single non-annotated Microsoft reference; all code fences carry language identifiers.",
+            "current_text_evidence": [
+              {
+                "quote": "Authorization succeeds when any registered handler marks that requirement successful, unless the context has been explicitly failed.",
+                "line_start": 125,
+                "reason": "Correctly states handler OR semantics together with the explicit-failure exception, and the AND-across-policies contrast follows."
+              },
+              {
+                "quote": "its year-only age calculation is incomplete around birthdays",
+                "line_start": 84,
+                "reason": "The note flags the simplification in its own sample and gives the production remedy (TryParse, malformed claims unsatisfied, full date). This is honest and avoids misleading the reader."
+              },
+              {
+                "quote": "The status code itself can become an existence oracle.",
+                "line_start": 136,
+                "reason": "The 403/404 pitfall explains the mechanism, the sensitivity-dependent decision and the timing and response-shape caveat."
+              },
+              {
+                "quote": "An attribute cannot evaluate a document that has not been loaded yet.",
+                "line_start": 88,
+                "reason": "The resource-based section states why imperative checks are needed, and the next paragraph explains the Resource property."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: roles, policies, resource checks and defaults are facets of one authorization topic, and each stays compact and coherent.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md",
+          "citation_index": 2,
+          "reported_line_start": 136,
+          "resolved_line_start": 134
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md": "9a827292a3fc124ba4fa5747faae566ed138390486df92c3c6c736ce31ffeb50"
+      },
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The whole-note audit found no accuracy, clarity, structure or rules defect. A justified keep with no edits is appropriate.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md",
+          "verdict": "CLEAN",
+          "summary": "The note moves from the principal-only case (roles, policies) to resources, then defaults and hooks, pitfalls and tradeoffs. Its technical claims on role OR semantics, handler OR semantics, AND across stacked attributes, FallbackPolicy versus DefaultPolicy and Resource passing match ASP.NET Core behavior. The note admits its own sample's weakness (year-only age) and gives the fix. No edit is warranted.",
+          "page_type": "Concept — authorable prose; optional Questions absent (allowed); a single non-annotated Microsoft reference; all code fences carry language identifiers.",
+          "current_text_evidence": [
+            {
+              "quote": "Authorization succeeds when any registered handler marks that requirement successful, unless the context has been explicitly failed.",
+              "line_start": 125,
+              "reason": "Correctly states handler OR semantics together with the explicit-failure exception, and the AND-across-policies contrast follows."
+            },
+            {
+              "quote": "its year-only age calculation is incomplete around birthdays",
+              "line_start": 84,
+              "reason": "The note flags the simplification in its own sample and gives the production remedy (TryParse, malformed claims unsatisfied, full date). This is honest and avoids misleading the reader."
+            },
+            {
+              "quote": "The status code itself can become an existence oracle.",
+              "line_start": 134,
+              "reason": "The 403/404 pitfall explains the mechanism, the sensitivity-dependent decision and the timing and response-shape caveat."
+            },
+            {
+              "quote": "An attribute cannot evaluate a document that has not been loaded yet.",
+              "line_start": 88,
+              "reason": "The resource-based section states why imperative checks are needed, and the next paragraph explains the Resource property."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: roles, policies, resource checks and defaults are facets of one authorization topic, and each stays compact and coherent.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
