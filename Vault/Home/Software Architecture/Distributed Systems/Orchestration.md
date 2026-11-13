@@ -4,10 +4,10 @@ subtopic: [Distributed Systems]
 summary: "Coordinates a multi-service workflow through one component that owns its state, ordering, retries, and compensation decisions."
 level: ["3"]
 priority: High
-status: Not-Started
+status: New
 publish: true
 created: "2026-08-10T10:51:19.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-08-10T08:13:07.674Z"
 ---
 

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T05:57:23.418Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Breaks a problem into smaller independent instances, solves them recurs
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 Sorting a million elements and multiplying two large integers can both be split into smaller instances, solved recursively, and assembled from the partial answers. Divide-and-conquer names that shape. Binary search follows only one side of the split, the close variant usually called decrease-and-conquer.

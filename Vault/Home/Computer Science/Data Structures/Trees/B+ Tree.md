@@ -4,10 +4,10 @@ subtopic: [Data Structures]
 summary: "The B-tree variant databases ship, with data only in leaves chained for fast range scans."
 level: ["4"]
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 publish: true
 created: "2026-07-09T18:37:04.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-10T14:39:34.306Z"
 ---
 
@@ -245,7 +245,8 @@ As with a [[Home/Computer Science/Data Structures/Trees/B-tree|B-tree]], node ca
 >   L2 -. next .-> L3
 >   L3 -. next .-> NIL[null]
 > ```
-> Separators `17` and `40` route descents only. The values `17` and `40` also live in leaves. A scan for `[15, 45]` descends to the `17` leaf, then follows `next` links.
+>
+> Separators `17` and `40` route descents only. The values `17` and `40` also live in leaves. A scan for `[15, 45]` descends to the `5, 9, 12` leaf, finds no qualifying key there, then follows `next` to the `17` leaf and continues through the linked leaves up to `45`.
 
 > [!EXAMPLE]- C# search and range scan
 >
@@ -305,6 +306,7 @@ As with a [[Home/Computer Science/Data Structures/Trees/B-tree|B-tree]], node ca
 >     }
 > }
 > ```
+>
 > Insert and delete (leaf overflow splits, underflow merges, and the `Next` relinking each performs) are omitted. `Range` shows the invariant that makes the structure worthwhile — after `DescendToLeaf` it never returns to an internal node.
 
 # References

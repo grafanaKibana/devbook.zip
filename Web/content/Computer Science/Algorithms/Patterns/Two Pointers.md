@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-06-20T05:33:50.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.338Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Uses two coordinated indices to replace nested scans over a sequence.
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 On a sorted array, two indices replace nested pair enumeration with a converging scan. `left` starts at the smallest value and `right` at the largest. Each sum comparison decides which index moves inward and rules out every pair anchored at the discarded index.

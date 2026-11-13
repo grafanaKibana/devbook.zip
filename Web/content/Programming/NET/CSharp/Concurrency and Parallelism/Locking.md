@@ -11,7 +11,7 @@ summary: "The default in-process mutual-exclusion primitive: one thread in the c
 level:
   - "4"
 priority: High
-status: Creation
+status: New
 qard-deck: Programming
 qard-topic: NET/CSharp/Concurrency and Parallelism/Locking
 flashcard_uid: 15275eaf

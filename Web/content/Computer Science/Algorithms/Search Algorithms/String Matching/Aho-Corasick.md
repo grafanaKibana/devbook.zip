@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-12T14:27:20.410Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Finds all occurrences of many patterns in one text pass using a trie wi
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 A signature engine may scan one byte stream against thousands of fixed, non-empty patterns. Running a separate matcher for each pattern repeats the same prefix work.

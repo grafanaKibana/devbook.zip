@@ -124,7 +124,9 @@ jobs:
       (needs.feedback.result == 'success' && needs.feedback.outputs.feedback_pr != '' && needs.feedback.outputs.feedback_pr != '0'))
     runs-on: ubuntu-latest
     timeout-minutes: 40
-    environment: devbook-improvement-production
+    environment:
+      name: devbook-improvement-production
+      deployment: false
     outputs:
       export_ready: ${{ steps.maintain.outputs.export_ready }}
       export_mode: ${{ steps.maintain.outputs.export_mode }}
@@ -282,7 +284,9 @@ jobs:
       (needs.maintenance.outputs.export_mode == 'finalize' || (needs.render.result == 'success' && needs.render.outputs.ready == 'true'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment: devbook-improvement-production
+    environment:
+      name: devbook-improvement-production
+      deployment: false
     steps:
       - name: Verify trusted workflow and activation
         env:

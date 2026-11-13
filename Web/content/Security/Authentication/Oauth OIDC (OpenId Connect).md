@@ -11,7 +11,7 @@ summary: OAuth delegates API access. OpenID Connect adds an interoperable authen
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 OAuth 2.0 lets a client obtain bounded authority to call a resource server. It is an authorization framework, not a login protocol. OpenID Connect adds an interoperable authentication result through ID tokens and defines discovery, UserInfo, and validation behavior. An OIDC client consumes the ID token. An API consumes an access token issued for that resource.

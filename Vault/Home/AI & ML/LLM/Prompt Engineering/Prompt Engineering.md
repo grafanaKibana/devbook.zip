@@ -3,7 +3,7 @@ topic: [AI & ML]
 subtopic: [LLM]
 summary: "Turning vague intentions into precise, testable model tasks: anatomy, settings, and role prompting."
 level: ["3"]
-status: Done
+status: In Progress
 tags: [FolderNote]
 publish: true
 priority: Medium
@@ -11,7 +11,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Prompt Engineering/Prompt Engineering"
 flashcard_uid: "008ceb7e"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.482Z"
 ---
 

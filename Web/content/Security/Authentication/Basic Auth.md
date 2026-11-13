@@ -11,7 +11,7 @@ summary: "The simplest HTTP scheme: Base64-encoded credentials in the Authorizat
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Security
 qard-topic: Authentication/Basic Auth
 flashcard_uid: ebb77730

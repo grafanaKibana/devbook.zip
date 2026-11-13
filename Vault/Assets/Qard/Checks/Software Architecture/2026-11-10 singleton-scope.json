@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "createdAt": 1794350918439,
+  "mastery": "Assets/Qard/Courses/Software Architecture Mastery.md",
+  "course": "Software Architecture",
+  "objective": "singleton-scope",
+  "title": "Distinguish process-wide access from a container registration lifetime and account for concurrency, disposal, and hidden global dependencies",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "prompt": "Two independent .NET root service providers each register `AddSingleton<ResourceCache>()` and resolve the service. `ResourceCache` implements `IDisposable`, and its disposal releases only that instance's resources. Does disposing the first provider also dispose the cache resolved from the second provider? Explain why.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "States that disposing the first provider does not dispose the second provider's cache.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that singleton ownership is bounded by the root provider: each provider creates and manages a separate instance.",
+          "marks": 1
+        }
+      ],
+      "model": "No. Each root provider owns a separate singleton instance and disposes only the instance it owns.",
+      "source": {
+        "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md",
+        "heading": "Questions"
+      },
+      "objective": "singleton-scope",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "short",
+      "prompt": "A static `Lazy<Counter>` uses its default thread-safe initialization to expose one shared counter. Multiple threads call a method that increments an ordinary integer field using `count++`, without synchronization. Explain how increments can be lost despite thread-safe initialization.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Explains that thread-safe initialization protects creation of the shared instance, not later operations on its mutable fields.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that two threads can read the same count and write the same incremented value, losing an increment.",
+          "marks": 1
+        }
+      ],
+      "model": "`Lazy<T>` protects initialization, not later field updates. Two threads can read the same count and both write the same incremented value, so one increment is lost.",
+      "source": {
+        "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md",
+        "heading": "Singleton Lifetime in .NET"
+      },
+      "objective": "singleton-scope",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

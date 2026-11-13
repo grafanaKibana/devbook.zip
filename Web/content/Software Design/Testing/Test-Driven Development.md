@@ -11,7 +11,7 @@ summary: Writing a failing test before the code, using Red-Green-Refactor as a d
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Software Design
 qard-topic: Testing/Test-Driven Development
 flashcard_uid: 007a0cef

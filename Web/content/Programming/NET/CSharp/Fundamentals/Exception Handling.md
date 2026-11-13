@@ -11,7 +11,7 @@ summary: Handling failures and cleanup during normal control transfer and stack 
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Exception Handling
 flashcard_uid: 6e5f7fa4

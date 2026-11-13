@@ -11,7 +11,7 @@ summary: An immutable C# reference type where any text change creates a new valu
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Types/Strings
 flashcard_uid: d65a72cc

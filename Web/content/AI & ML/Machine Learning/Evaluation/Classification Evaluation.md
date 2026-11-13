@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-16T22:45:34.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.493Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: "Measuring whether a model assigns the right label: false alarms versus
 level:
   - "3"
 priority: Medium
-status: Done
+status: In Progress
 ---
 
 Classification evaluation turns model errors into operating costs. The confusion matrix shows which mistakes occur. The threshold decides how many of each kind the system accepts. A release decision then compares models at the same constraint, such as maximizing precision while keeping recall above 0.95.

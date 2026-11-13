@@ -11,7 +11,7 @@ summary: Prefer the simplest solution that meets the actual requirements.
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 KISS (Keep It Simple, Stupid) favors the least complicated design that satisfies the actual requirements. Simple does not mean improvised or incomplete. It means that the essential state changes, dependencies, and failure modes remain visible without machinery that serves only a hypothetical future.

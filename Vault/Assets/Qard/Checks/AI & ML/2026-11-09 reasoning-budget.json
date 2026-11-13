@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "createdAt": 1794246750538,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "reasoning-budget",
+  "title": "Choose a single reasoning path, sampled agreement, or explicit search according to task verifiability and inference cost rather than trust in a convincing trace",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "mcq",
+      "prompt": "Several sampled reasoning paths for a logic problem produce the same final answer and convincing explanations. Self-consistency selects that answer by majority vote. Why does this agreement still require an independent correctness check?",
+      "marks": 1,
+      "options": [
+        "The samples may repeat the same misconception, so a wrong answer can win the vote.",
+        "The vote gives longer explanations more weight, so verbosity can outweigh a correct answer.",
+        "The vote groups intermediate steps, so different valid routes can split support for one answer.",
+        "The samples prune partial solutions, so an evaluator can discard the branch containing the correct answer."
+      ],
+      "answer": 0,
+      "rubric": [
+        {
+          "point": "Recognises that correlated errors can produce agreement on an incorrect answer.",
+          "marks": 1
+        }
+      ],
+      "model": "The samples may repeat the same misconception, so a wrong answer can win the vote.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
+        "heading": "Self-Consistency"
+      },
+      "objective": "reasoning-budget",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "short",
+      "prompt": "A scheduling puzzle requires assigning jobs to time slots under fixed constraints. Some early assignments lead to dead ends only after further jobs are assigned. A reliable checker can identify a dead end from a partial schedule. Explain what explicit search with branching and backtracking can do here that sampling complete solutions and voting on their final answers does not.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Explains that search can check partial schedules and stop expanding branches identified as dead ends.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that search can return to an earlier partial schedule and try another assignment, whereas final-answer voting only aggregates completed paths.",
+          "marks": 1
+        }
+      ],
+      "model": "Search checks partial schedules and stops expanding dead ends. It can then return to an earlier schedule and try another assignment; final-answer voting only compares completed paths.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md",
+        "heading": "Tree of Thoughts"
+      },
+      "objective": "reasoning-budget",
+      "goal": "explain"
+    }
+  ],
+  "answers": {
+    "c1": {
+      "unknown": true
+    },
+    "c2": {
+      "unknown": true
+    }
+  },
+  "marks": {
+    "c1": {
+      "score": 0,
+      "awarded": [
+        false
+      ],
+      "annotations": [],
+      "mistake": "unknown",
+      "feedback": "You said you didn't know. The model answer shows what was needed."
+    },
+    "c2": {
+      "score": 0,
+      "awarded": [
+        false,
+        false
+      ],
+      "annotations": [],
+      "mistake": "unknown",
+      "feedback": "You said you didn't know. The model answer shows what was needed."
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1794300423073
+}

@@ -7,12 +7,12 @@ level: ["2"]
 priority: High
 tags: [FolderNote]
 publish: true
-status: Done
+status: In Progress
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Evaluation/Evaluation"
 flashcard_uid: "4c492fb9"
 created: "2026-06-12T18:21:46.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-11T21:45:16.245Z"
 ---
 

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-08-10T10:51:19.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-08-10T08:02:32.092Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Places each suffix maximum using only reversals of prefixes that begin 
 level:
   - "4"
 priority: Low
-status: Not-Started
+status: New
 ---
 
 Pancake sort works under an unusual constraint: the only legal move reverses a prefix beginning at index `0`. To place the largest value in the unsorted region, one flip brings it to the front and another moves it to the region's right boundary. Then the boundary shrinks.

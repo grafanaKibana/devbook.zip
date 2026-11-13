@@ -11,7 +11,7 @@ summary: A value type holding its value inline, so assignment copies it.
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Types/Structs
 ---

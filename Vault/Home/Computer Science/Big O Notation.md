@@ -4,13 +4,13 @@ subtopic: []
 summary: "Describes how time or space grows with input size by retaining the dominant term and ignoring constants."
 level: ["3"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Computer Science"
 qard-topic: "Big O Notation"
 flashcard_uid: "0c3fdd6d"
 created: "2026-07-12T19:33:38.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-12T20:39:23.958Z"
 ---
 
@@ -144,6 +144,7 @@ A single algorithm has different bounds depending on the input, and the distinct
 Big O states an upper bound. **Big Θ** (theta) states a *tight* bound where the upper and lower bounds match: merge sort is `Θ(n log n)` in every case, while quicksort is `O(n²)` worst case and `Θ(n log n)` on average. **Big Ω** (omega) states a lower bound. Informal discussion often uses "O" for a tight bound, but Θ is the precise notation for matching asymptotic upper and lower bounds.
 
 > [!EXAMPLE]- Reading complexity off the code (C#)
+>
 > ```csharp
 > // O(n): one pass, work per element is O(1).
 > long Sum(int[] a)
@@ -171,6 +172,7 @@ Big O states an upper bound. **Big Θ** (theta) states a *tight* bound where the
 >     return false;
 > }
 > ```
+>
 > `HasDuplicate` and `HasDuplicateFast` answer the same question. The second trades `O(n)` memory to drop time from `O(n²)` to `O(n)`. Reading a bound is mostly counting nested loops and multiplying by the per-iteration cost, then discarding constants and lower-order terms.
 
 # Where Big O misleads

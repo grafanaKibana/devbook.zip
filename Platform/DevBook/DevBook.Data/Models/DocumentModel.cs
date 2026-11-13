@@ -34,7 +34,7 @@ public sealed record Document
 
     /// <summary>
     /// YAML frontmatter without the surrounding delimiter lines.
-    /// Example: <c>topic: [AI]\nstatus: Creation</c>
+    /// Example: <c>topic: [AI]\nstatus: In Progress</c>
     /// </summary>
     public required string Frontmatter { get; init; }
 

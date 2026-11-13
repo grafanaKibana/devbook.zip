@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "createdAt": 1794246219283,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "prompt-interface",
+  "title": "Specify instructions, inputs, constraints, and expected output as a versioned task interface whose quality is measured on representative cases",
+  "goal": "apply",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "prompt": "An LLM extracts delivery dates from customer messages. Each message contains at most one explicitly stated delivery date. The receiving program requires a JSON object with exactly one key, `delivery_date`: its value must be the date copied exactly as written, or `null` when no delivery date is stated. No surrounding text is accepted.\n\nRewrite this draft prompt to specify the required behavior and output contract. Keep `{{message}}` as the input placeholder.\n\n```text\nExtract the delivery date from this customer message:\n{{message}}\n```",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Requires copying an explicitly stated delivery date exactly as written and returning null when none is stated, without inferring a date.",
+          "marks": 1
+        },
+        {
+          "point": "Requires only a JSON object containing exactly the delivery_date key, with a string or null value and no surrounding text.",
+          "marks": 1
+        }
+      ],
+      "model": "Extract the explicitly stated delivery date from the customer message below. Copy it exactly as written; if none is stated, use null. Do not infer a date. Return only a JSON object with exactly one key, `delivery_date`, whose value is that string or null.\n\nCustomer message:\n{{message}}",
+      "source": {
+        "path": "Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+        "heading": "Instruction Prompting"
+      },
+      "objective": "prompt-interface",
+      "goal": "apply"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

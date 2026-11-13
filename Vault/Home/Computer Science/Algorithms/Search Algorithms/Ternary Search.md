@@ -4,10 +4,10 @@ subtopic: [Algorithms]
 summary: "Finds the extremum of a unimodal function by splitting the range in thirds each step."
 level: ["4"]
 priority: Medium
-status: Creation
+status: New
 publish: true
 created: "2026-07-10T06:24:36.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-10T05:55:18.393Z"
 ---
 

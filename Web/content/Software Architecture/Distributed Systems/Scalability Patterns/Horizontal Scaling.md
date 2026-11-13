@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-28T20:52:28.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.389Z
 topic:
   - Software Architecture
@@ -11,7 +11,7 @@ summary: Horizontal scaling adds service instances. Stateless handlers are simpl
 level:
   - "2"
 priority: High
-status: Creation
+status: New
 qard-deck: Software Architecture
 qard-topic: Distributed Systems/Scalability Patterns/Horizontal Scaling
 flashcard_uid: 07349cc0

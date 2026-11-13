@@ -6,12 +6,12 @@ tags: [FolderNote]
 publish: true
 level: ["3"]
 priority: High
-status: Creation
+status: New
 qard-deck: "AI & ML"
 qard-topic: "LLM/LLM"
 flashcard_uid: "1eb55a0b"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:28:37.410Z"
 ---
 

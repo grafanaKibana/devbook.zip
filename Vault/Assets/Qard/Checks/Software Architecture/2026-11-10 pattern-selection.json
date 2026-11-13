@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "createdAt": 1794339173273,
+  "mastery": "Assets/Qard/Courses/Software Architecture Mastery.md",
+  "course": "Software Architecture",
+  "objective": "pattern-selection",
+  "title": "Justify a design pattern from a recurring problem, constraints and variation point and distinguish its intent and cost from a similar implementation shape",
+  "goal": "apply",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "prompt": "A checkout service computes an order's discount. Each customer contract specifies one discount rule: currently flat percentage, volume tiers or loyalty points. Sales adds a new rule type every few months. The checkout code looks up the customer's contract and picks the rule to apply. An order's rule never changes while that order is processed. Today, the rules sit in a growing `switch` on the rule type, and every new rule means editing and retesting that `switch`.\n\nA colleague suggests the State pattern, because both State and the alternative delegate the discount calculation to a separate object.\n\nName the design pattern that fits this situation better than State, and explain why State's intent does not match this scenario.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Names Strategy (an interchangeable discount algorithm/policy behind a stable contract) as the better fit.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that State is for behavior that follows an object's changing internal state through transitions, whereas here the rule is a fixed policy that the client picks for each contract and does not change during processing, so there are no state transitions.",
+          "marks": 1
+        }
+      ],
+      "model": "**Strategy.** The discount rule is an interchangeable algorithm behind one contract. The checkout code chooses it per contract, and a new rule type becomes a new strategy class instead of another `switch` branch.\n\nState doesn't fit because its intent is behavior that changes as the object moves between states, with transitions defined by the context or by the state objects. Here nothing transitions. The rule is a policy the client picks once and keeps fixed for the order. The two patterns share a delegation shape, but their intent differs.",
+      "source": {
+        "path": "Home/Software Architecture/Patterns/Design Patterns/Design Patterns.md",
+        "heading": "Choose a Pattern by Intent and Cost"
+      },
+      "objective": "pattern-selection",
+      "goal": "apply"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

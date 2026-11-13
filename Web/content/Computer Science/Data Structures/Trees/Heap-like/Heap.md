@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-20T23:50:18.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.346Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: An implicit complete binary tree with a parent-child priority rule, kee
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 A scheduler holds thousands of pending tasks. New work keeps arriving, and the earliest deadline must remain cheap to retrieve.

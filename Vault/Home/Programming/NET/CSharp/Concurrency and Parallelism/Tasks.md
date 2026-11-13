@@ -4,13 +4,13 @@ subtopic: [NET]
 summary: ".NET's core abstraction for asynchronous work, its completion, result, and composition."
 level: ["4"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Tasks"
 flashcard_uid: "9dbbd8f8"
 created: "2026-02-18T20:04:43.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.323Z"
 ---
 

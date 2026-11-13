@@ -1,0 +1,141 @@
+{
+  "title": "Design Patterns Software Engineering Interview Test",
+  "goal": "This is an interview-style software engineering test on the Gang of Four design patterns and GRASP, drawn from the attached Design Patterns course folder. It covers creational, structural and behavioral patterns evenly. As in a real interview, it focuses on choosing a pattern for the pressure in the code, telling apart patterns that look alike, and explaining tradeoffs and when a pattern is overkill, rather than reciting definitions.",
+  "sources": [
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Design Patterns.md",
+      "reason": "Hub: pick patterns by intent and cost"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/GRASP.md",
+      "reason": "Principles for assigning responsibilities"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Creational.md",
+      "reason": "Creational category overview"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Abstract Factory.md",
+      "reason": "Creating families of products"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Builder.md",
+      "reason": "Step-by-step construction, invariants"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Factory Method.md",
+      "reason": "Subclass decides what to create"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Prototype.md",
+      "reason": "Cloning, shallow vs deep copy"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md",
+      "reason": "Thread safety, testability tradeoffs"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Structural/Structural.md",
+      "reason": "Structural category overview"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Structural/Adapter.md",
+      "reason": "Translating mismatched interfaces"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Structural/Bridge.md",
+      "reason": "Splitting abstraction from implementation"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Structural/Composite.md",
+      "reason": "Tree structures, uniform treatment"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator.md",
+      "reason": "Stacking responsibilities at runtime"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Structural/Facade.md",
+      "reason": "Simplified subsystem entry point"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Structural/Flyweight.md",
+      "reason": "Intrinsic vs extrinsic shared state"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Structural/Proxy.md",
+      "reason": "Controlling access to an object"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Behavioral/Behavioral.md",
+      "reason": "Behavioral category overview"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Behavioral/Chain of Responsibility.md",
+      "reason": "Handler pipelines, middleware"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Behavioral/Command.md",
+      "reason": "Requests as objects, undo, queues"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Behavioral/Interpreter.md",
+      "reason": "Evaluating grammars"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Behavioral/Iterator.md",
+      "reason": "Traversal without exposing internals"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Behavioral/Mediator.md",
+      "reason": "Centralizing how objects interact"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Behavioral/Memento.md",
+      "reason": "Saving state without breaking encapsulation"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Behavioral/Observer.md",
+      "reason": "Notifications, lifetime pitfalls"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Behavioral/State.md",
+      "reason": "Behavior that follows state"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Behavioral/Strategy.md",
+      "reason": "Interchangeable algorithms"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Behavioral/Template Method.md",
+      "reason": "Inheritance-based algorithm skeleton"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Behavioral/Visitor.md",
+      "reason": "Double dispatch, adding operations"
+    }
+  ],
+  "sections": [
+    {
+      "title": "Pattern Selection from Scenarios",
+      "focus": "Pick the right pattern for a realistic design scenario, spread across all three GoF categories, and say why it fits.",
+      "questions": "3 multiple choice, 1 short answer",
+      "marks": 10
+    },
+    {
+      "title": "Look-Alike Patterns",
+      "focus": "Tell apart patterns with the same structure but different intent, such as Proxy vs Decorator vs Adapter, State vs Strategy, and Template Method vs Strategy.",
+      "questions": "2 short answer, 1 cloze",
+      "marks": 10
+    },
+    {
+      "title": "Design Judgment and Tradeoffs",
+      "focus": "Defend or reject a pattern in an interview-style design problem: what it costs, its pitfalls (Singleton, Observer lifetimes) and when it is overkill, plus GRASP responsibility assignment.",
+      "questions": "2 long answer, 1 short answer",
+      "marks": 20
+    }
+  ],
+  "questionCount": 10,
+  "totalMarks": 40,
+  "minutes": 40
+}

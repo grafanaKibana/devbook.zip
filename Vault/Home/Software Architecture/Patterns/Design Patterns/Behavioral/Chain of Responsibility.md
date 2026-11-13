@@ -4,13 +4,13 @@ subtopic: [Patterns]
 summary: "Passes a request along a chain of handlers, each deciding to process it or forward it to the next."
 level: ["3"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Chain of Responsibility"
 flashcard_uid: "78366059"
 created: "2026-03-05T22:12:46.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.430Z"
 ---
 

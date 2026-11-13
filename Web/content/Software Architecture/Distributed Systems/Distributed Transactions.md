@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.369Z
 topic:
   - Software Architecture
@@ -11,7 +11,7 @@ summary: Coordinates multi-participant change through atomic 2PC or independentl
 level:
   - "2"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Software Architecture
 qard-topic: Distributed Systems/Distributed Transactions
 flashcard_uid: c508afc9

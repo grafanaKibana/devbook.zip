@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "createdAt": 1794246266380,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "type-shapes",
+  "title": "Choose class, struct or record semantics from identity, equality, copying and inheritance requirements",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "prompt": "Explain what ordinary assignment (`b = a`) copies for a C# `record class` and for a `record struct`.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Record-class assignment copies a reference, so both variables refer to the same instance.",
+          "marks": 1
+        },
+        {
+          "point": "Record-struct assignment copies the value's fields into separate storage; this is a shallow value copy, not a deep copy of referenced objects.",
+          "marks": 1
+        }
+      ],
+      "model": "A record class copies a reference to the same instance. A record struct copies its fields into a separate value; any reference fields still point to the same objects.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+        "heading": "Record Variants"
+      },
+      "objective": "type-shapes",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "short",
+      "prompt": "A C# message model needs generated value equality and a base type from which specialised message types inherit. Both `record class` and `readonly record struct` generate value equality. Why does the inheritance requirement favour `record class`?",
+      "marks": 1,
+      "rubric": [
+        {
+          "point": "Record classes support inheritance by derived record classes, whereas record structs cannot serve as inheritable base types.",
+          "marks": 1
+        }
+      ],
+      "model": "A record class can be a base for derived record classes. A record struct cannot be inherited from.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+        "heading": "Record Inheritance"
+      },
+      "objective": "type-shapes",
+      "goal": "explain"
+    }
+  ],
+  "answers": {
+    "c1": {
+      "text": "for the record it copies a reference, for the record struct it copy the values",
+      "confidence": "unsure"
+    },
+    "c2": {
+      "text": "record support ingeritance, which suit this case better, since structs doesnt support inheritance",
+      "confidence": "unsure"
+    }
+  },
+  "marks": {
+    "c1": {
+      "awarded": [
+        true,
+        true
+      ],
+      "annotations": [
+        {
+          "quote": "for the record it copies a reference",
+          "kind": "correct",
+          "note": "You correctly said that assigning a record class copies a reference, so both variables point to the same instance."
+        },
+        {
+          "quote": "for the record struct it copy the values",
+          "kind": "correct",
+          "note": "You correctly said that a record struct copies its values into separate storage. You could also have noted that this is a shallow copy."
+        }
+      ],
+      "mistake": "none",
+      "feedback": "Both assignment behaviours are stated correctly, and that earns full marks.",
+      "score": 2
+    },
+    "c2": {
+      "awarded": [
+        true
+      ],
+      "annotations": [
+        {
+          "quote": "record support ingeritance",
+          "kind": "correct",
+          "note": "You correctly said that record classes support inheritance."
+        },
+        {
+          "quote": "structs doesnt support inheritance",
+          "kind": "correct",
+          "note": "You correctly gave the contrast: record structs cannot act as a base type, which is why the record class suits the message hierarchy."
+        }
+      ],
+      "mistake": "none",
+      "feedback": "You gave the correct reason: record classes can be inherited and structs cannot.",
+      "score": 1
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1794300536157
+}

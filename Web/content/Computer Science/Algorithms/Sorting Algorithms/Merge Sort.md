@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.341Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Stable divide-and-conquer sort that repeatedly merges ordered runs.
 level:
   - "4"
 priority: Low
-status: Ready to Repeat
+status: In Progress
 ---
 
 A sequential data source or a linked list has no cheap random access, so merging fits better than pivot-based array partitioning. Compare the front values of two sorted sequences, emit the smaller one, and advance that side. Merge sort builds the whole algorithm from this operation. It splits by position until every piece holds one element, then merges those runs pairwise. Their lengths double from 1 to 2, 2 to 4, and onward until one sorted run remains.

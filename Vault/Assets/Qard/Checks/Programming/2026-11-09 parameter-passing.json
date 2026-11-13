@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "createdAt": 1794246311358,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "parameter-passing",
+  "title": "Predict how by-value parameters and ref, out, or in affect caller storage",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "prompt": "Consider this mutable C# struct and method:\n\n```csharp\nstruct Counter\n{\n    public int Value;\n\n    public void Increment()\n    {\n        Value++;\n    }\n}\n\nstatic void Advance(in Counter counter)\n{\n    counter.Increment();\n}\n```\n\nThe caller runs:\n\n```csharp\nCounter counter = new Counter { Value = 4 };\nAdvance(in counter);\n```\n\nWhat is the caller's `counter.Value` afterward? Explain how the `in` parameter affects the call to `Increment()`.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "The caller's counter.Value remains 4.",
+          "marks": 1
+        },
+        {
+          "point": "Calling the non-readonly Increment method through the readonly in parameter operates on a defensive copy of the struct, so its mutation does not reach the caller's storage.",
+          "marks": 1
+        }
+      ],
+      "model": "`counter.Value` remains `4`. Through the readonly `in` parameter, `Increment()` runs on a defensive copy of the struct, so only that copy changes.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+        "heading": "Questions"
+      },
+      "objective": "parameter-passing",
+      "goal": "explain"
+    }
+  ],
+  "answers": {
+    "c1": {
+      "text": "in makes param readonly, but it looks like we dont change the param value directly. Moreover we passing struct which is passed by a value, and in the method we just have a copy, so outer variable should not be changed",
+      "confidence": "guess"
+    }
+  },
+  "marks": {
+    "c1": {
+      "awarded": [
+        true,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "outer variable should not be changed",
+          "kind": "correct",
+          "note": "You correctly concluded the caller's value stays 4."
+        },
+        {
+          "quote": "in makes param readonly, but it looks like we dont change the param value directly.",
+          "kind": "wrong",
+          "note": "`Increment()` does mutate the struct. It is a non-readonly method, and calling it is exactly what triggers the defensive copy."
+        },
+        {
+          "quote": "in the method we just have a copy",
+          "kind": "wrong",
+          "note": "An `in` parameter is passed by reference, not by value, so there is no up-front copy. The copy is made only at the `Increment()` call, because the parameter is readonly and the method is not."
+        }
+      ],
+      "mistake": "misconception",
+      "feedback": "The prediction of 4 is right, but you attributed it to by-value copying instead of the defensive copy the compiler makes when a non-readonly method is called on an `in` parameter.",
+      "score": 1
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1794301119054
+}

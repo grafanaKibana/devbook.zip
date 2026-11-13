@@ -11,7 +11,7 @@ summary: Multiplexes many requests over one TCP connection, removing HTTP/1.1 he
 level:
   - "3"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Networks
 qard-topic: Protocols/HTTP 2
 flashcard_uid: 6284b907

@@ -4,10 +4,10 @@ subtopic: [Distributed Systems]
 summary: "An HTTP callback: a producer POSTs event data to a consumer's pre-registered URL, inverting polling into near real-time push."
 level: ["2"]
 priority: Medium
-status: Done
+status: In Progress
 publish: true
 created: "2026-02-28T20:52:28.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:28:37.390Z"
 ---
 

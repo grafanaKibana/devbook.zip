@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-16T21:15:26.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.476Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Measuring LLM changes on live traffic with outcome metrics, randomized 
 level:
   - "3"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 Online evaluation measures an LLM application under real traffic. In an A/B test, independent units such as users or accounts are randomly assigned to control or treatment. The observed difference estimates the effect of a prompt, model, retrieval, or tool change.

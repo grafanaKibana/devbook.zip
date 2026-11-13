@@ -11,7 +11,7 @@ summary: Five design principles governing how classes relate and where new behav
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 SOLID names five principles for managing change, dependencies, and behavioral contracts in object-oriented design. They are diagnostic tools, not a demand for an interface around every class. Each principle identifies a different failure mode:

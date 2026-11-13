@@ -1,14 +1,14 @@
 ---
 publish: true
 created: 2026-08-16T07:07:41.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-08-20T20:41:15.495Z
 topic:
   - AI & ML
 subtopic:
   - LLM
 summary: Project-level config files telling AI coding agents how a specific repository works.
-status: Done
+status: In Progress
 level:
   - "2"
 priority: Medium

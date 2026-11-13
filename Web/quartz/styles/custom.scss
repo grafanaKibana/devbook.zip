@@ -1319,7 +1319,7 @@ body[data-slug$="/index"]:not([data-slug="tags/index"]) .page-listing {
 //
 // Root home omits ArticleTitle through its configured not-index condition.
 // The Datacore note owns the rectangular card grid in both readers:
-// balanced 3–4–3 rows and content-sized tracks. Home always scrolls.
+// balanced 3–4–3 rows and content-sized minimums. Home always scrolls.
 // Shell changes below stay scoped to the root home.
 // ============================================================================
 body[data-slug="index"] {
@@ -1332,6 +1332,10 @@ body[data-slug="index"] {
   // footer box from layout while letting the fixed controls render.
   .center > .page-footer {
     display: contents;
+  }
+
+  .dc-progress-square {
+    border-radius: var(--surface-radius);
   }
 
   .dc-topic-card {
@@ -1360,6 +1364,7 @@ body[data-slug="index"] {
   body[data-slug="index"] {
     .page > #quartz-body {
       grid-template-columns: #{$sidePanelWidth} auto;
+      grid-template-rows: minmax(min-content, 1fr) auto;
       grid-template-areas:
         "grid-sidebar-left grid-center"
         "grid-sidebar-left grid-footer";
@@ -1367,6 +1372,30 @@ body[data-slug="index"] {
     }
     .page > #quartz-body > .sidebar.right {
       display: none;
+    }
+
+    // Pass the shell's spare height through Syncer's rendered wrapper to the
+    // topic rows. Intrinsic minimums keep short windows and long content scrollable.
+    .center,
+    .center > article,
+    .center > article > .markdown-preview-view,
+    .dc-topic-dashboard {
+      display: flex;
+      flex-direction: column;
+    }
+    .center > article,
+    .center > article > .markdown-preview-view,
+    .dc-topic-dashboard,
+    .dc-topic-grid {
+      flex: 1;
+    }
+    .dc-topic-dashboard {
+      // The page header already supplies clearance below the fixed site header.
+      // Override the source note's inline margin, which otherwise stops collapsing.
+      margin-top: 0 !important;
+    }
+    .dc-progress-hero {
+      flex: none;
     }
   }
 }

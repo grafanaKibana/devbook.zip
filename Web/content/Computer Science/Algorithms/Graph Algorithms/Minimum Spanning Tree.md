@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-06-20T05:33:50.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.334Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: The cheapest cycle-free edge set connecting every vertex of a weighted 
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 Connecting a set of sites with the least total cable means reaching every site without paying for a redundant loop. A spanning tree does exactly that: it touches all `V` vertices, contains no cycle, and has `V − 1` edges. A _minimum_ spanning tree (MST) is the spanning tree with the smallest total edge weight.

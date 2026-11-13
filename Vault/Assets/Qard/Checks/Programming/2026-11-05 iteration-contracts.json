@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "createdAt": 1793892491826,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "iteration-contracts",
+  "title": "Trace enumeration, deferred iterator execution and enumerator disposal on normal exit or failure",
+  "goal": "explain",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "long",
+      "prompt": "Consider this C# code:\n\n```csharp\nstatic IEnumerable<int> Codes()\n{\n    Console.WriteLine(\"started\");\n    try\n    {\n        yield return 6;\n        Console.WriteLine(\"resumed\");\n        yield return 9;\n    }\n    finally\n    {\n        Console.WriteLine(\"finished\");\n    }\n}\n\nvar codes = Codes();\nConsole.WriteLine(\"ready\");\nforeach (var code in codes)\n{\n    Console.WriteLine(code);\n}\n```\n\nExplain the output order and how `GetEnumerator()`, `MoveNext()` and `Current` produce it. Then explain how the output and cleanup change if `break;` is added immediately after `Console.WriteLine(code);`.",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Explains that calling Codes() does not execute its body, so ready is printed before started.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that foreach obtains an enumerator once, calls MoveNext() to advance execution, and reads Current after each successful advance.",
+          "marks": 1
+        },
+        {
+          "point": "Gives the complete normal output order: ready, started, 6, resumed, 9, finished; explains that enumeration resumes after each yield.",
+          "marks": 1
+        },
+        {
+          "point": "Gives the break output order: ready, started, 6, finished; explains that foreach disposes the suspended iterator, running its pending finally without executing resumed or yielding 9.",
+          "marks": 1
+        }
+      ],
+      "model": "Calling `Codes()` creates the enumerable without running the iterator body, so `ready` appears first. `foreach` calls `GetEnumerator()` once. Each successful `MoveNext()` runs or resumes the iterator up to a `yield return`; `Current` then supplies the yielded value.\n\nNormal output is:\n\n```text\nready\nstarted\n6\nresumed\n9\nfinished\n```\n\nAfter `9`, another `MoveNext()` resumes execution, runs the `finally`, and returns `false`. The loop then exits and disposes the enumerator; cleanup is not printed twice.\n\nWith `break`, output is:\n\n```text\nready\nstarted\n6\nfinished\n```\n\nThe iterator is suspended at the first yield. Leaving `foreach` disposes it and runs the pending `finally`. Disposal does not continue ordinary execution through `resumed` or the second yield.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Foreach.md",
+        "heading": "Iterators and Yield"
+      },
+      "objective": "iteration-contracts",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "long",
+      "prompt": "An iterator contains this body:\n\n```csharp\ntry\n{\n    yield return \"first\";\n    yield return \"second\";\n}\nfinally\n{\n    Console.WriteLine(\"released\");\n}\n```\n\nCompare two consumers, each using a fresh enumerator. Both successfully obtain the first item, then throw an exception while processing it. An outer caller catches the exception.\n\n- Consumer A uses `foreach`.\n- Consumer B manually calls `GetEnumerator()`, `MoveNext()` and `Current`, but never calls `Dispose()` and has no `using` or cleanup `finally`.\n\nExplain whether `released` is printed in each case, why the outer `catch` matters or does not matter, and what cleanup Consumer B needs.",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "States that Consumer A prints released because foreach disposes the enumerator when the consumer body throws.",
+          "marks": 1
+        },
+        {
+          "point": "States that Consumer B does not print released in the described execution because the iterator remains suspended and is neither resumed to completion nor disposed.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that catching the exception outside the consumer does not itself dispose Consumer B's enumerator or run the suspended iterator's finally.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that Consumer B must ensure enumerator disposal with using or a try/finally covering enumeration and item processing, including exceptional exits.",
+          "marks": 1
+        }
+      ],
+      "model": "Consumer A prints `released`. When processing throws, control leaves `foreach` through its cleanup path. It disposes the enumerator, which runs the iterator's pending `finally` before the exception reaches the outer caller.\n\nConsumer B does not print `released` during the described execution. Its iterator is suspended at the first `yield return`. An exception in consumer code does not automatically resume or dispose that iterator. The outer `catch` handles the exception but performs no enumerator cleanup.\n\nConsumer B needs a `using` around the disposable enumerator, or a `try/finally` that calls `Dispose()`. That scope must cover both advancing the enumerator and processing its items, so cleanup also runs when either operation throws.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Foreach.md",
+        "heading": "Questions"
+      },
+      "objective": "iteration-contracts",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

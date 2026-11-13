@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "createdAt": 1793889496345,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "delegate-contracts",
+  "title": "Trace delegate invocation and captured state, including lifetime and multicast failure behavior",
+  "goal": "explain",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "long",
+      "prompt": "Consider this C# code:\n\n```csharp\nstatic (Func<int> Read, Action Advance) CreateCounter()\n{\n    int count = 6;\n    return (() => count, () => count += 3);\n}\n\nvar counter = CreateCounter();\ncounter.Advance();\ncounter.Advance();\nConsole.WriteLine(counter.Read());\n```\n\nExplain why this prints `12`, even though `CreateCounter` has returned. Explain what keeps the captured state available and whether a second call to `CreateCounter` would share that state.",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Both delegates from one call capture the same variable storage, rather than separate copies of its initial value.",
+          "marks": 1
+        },
+        {
+          "point": "The two Advance calls change that shared count from 6 to 9 to 12, which Read observes.",
+          "marks": 1
+        },
+        {
+          "point": "The reachable returned delegates retain the captured state, allowing it to outlive the method call.",
+          "marks": 1
+        },
+        {
+          "point": "A second CreateCounter call creates a separate captured count initialized to 6.",
+          "marks": 1
+        }
+      ],
+      "model": "Both lambdas capture the same `count` variable, not snapshots of `6`. Each `Advance()` changes that shared storage, first to `9` and then to `12`, so `Read()` returns `12`.\n\nThe returned delegates keep the captured state reachable after `CreateCounter` returns. Returning from the method therefore does not end that state's lifetime. A second call creates its own captured variable initialized to `6`; its delegates do not share the first counter's state.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+        "heading": "Closures"
+      },
+      "objective": "delegate-contracts",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "long",
+      "prompt": "Consider this C# code:\n\n```csharp\nint completed = 0;\nFunc<int> batch = () => { completed++; return 20; };\nbatch += () => throw new InvalidOperationException();\nbatch += () => { completed += 10; return 80; };\n\nint result = -1;\ntry\n{\n    result = batch();\n}\ncatch (InvalidOperationException)\n{\n}\n```\n\nExplain why the final values are `completed == 1` and `result == -1`. Include why catching the exception around the whole call does not let the final handler run, and how failures could instead be isolated so later handlers are attempted.",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Handlers run synchronously in registration order; the second handler throws and the third is skipped.",
+          "marks": 1
+        },
+        {
+          "point": "The first handler's increment remains, giving completed == 1; the exception does not roll back that change.",
+          "marks": 1
+        },
+        {
+          "point": "batch() never returns normally, so assignment to result does not occur and the earlier return value 20 is not used.",
+          "marks": 1
+        },
+        {
+          "point": "The outer catch receives control after multicast invocation has unwound; attempting later handlers requires enumerating GetInvocationList() and catching failures separately around each handler call.",
+          "marks": 1
+        }
+      ],
+      "model": "The first handler runs, increments `completed` to `1`, and returns `20`. The second handler then throws. Invocation stops, so the third handler never adds `10`. The first increment is not rolled back.\n\nBecause `batch()` throws instead of returning normally, `result = batch()` never performs its assignment. `result` stays `-1`; the earlier handler's `20` is not a fallback result.\n\nThe outer catch handles the exception after control has left the multicast invocation. It does not resume the invocation list. To attempt later handlers despite failures, enumerate `batch.GetInvocationList()` and invoke each entry inside its own `try/catch`.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+        "heading": "Multicast Delegates"
+      },
+      "objective": "delegate-contracts",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

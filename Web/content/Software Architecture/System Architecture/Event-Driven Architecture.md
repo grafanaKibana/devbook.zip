@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.398Z
 topic:
   - Software Architecture
@@ -11,7 +11,7 @@ summary: A style where services communicate by publishing and consuming events i
 level:
   - "2"
 priority: High
-status: Done
+status: In Progress
 qard-deck: Software Architecture
 qard-topic: System Architecture/Event-Driven Architecture
 flashcard_uid: 784f3460

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.495Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Five levels of AI involvement, from fully human-driven to fully autonom
 level:
   - "1"
 priority: Low
-status: Done
+status: In Progress
 ---
 
 The automation spectrum is a deployment model for deciding how much authority an AI system receives. It runs from human-only work through observation and assistance to autonomous action. Each step changes the blast radius of a bad prediction.

@@ -11,7 +11,7 @@ summary: .NET's shared execution engine for Task-based work, managing worker and
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Concurrency and Parallelism/ThreadPool
 flashcard_uid: fd7a2ebc

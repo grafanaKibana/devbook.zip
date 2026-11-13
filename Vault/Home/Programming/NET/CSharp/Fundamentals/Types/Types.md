@@ -5,14 +5,14 @@ subtopic: [NET]
 summary: "How C# types define shape, behavior, and value versus reference assignment semantics."
 tags: [FolderNote]
 publish: true
-status: Creation
+status: New
 priority: Medium
 level: ["4"]
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Types"
 flashcard_uid: "a5c39ae2"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-03T09:57:43.792Z"
+modified: "2026-11-12T21:09:36.103Z"
 published: "2026-07-08T13:14:17.329Z"
 ---
 
@@ -76,18 +76,32 @@ The direct `h.Counter.Inc()` call compiles, but it mutates the temporary value r
 # Questions
 
 <!-- qard-id: d8eb59cf-ad2d-43be-954f-44db23f34d38 -->
-> [!qard]- Why might mutating a struct inside `foreach` fail to update the collection?
-> In an ordinary (non-`ref`) `foreach`, each struct element reaches the loop body as a copy held in a read-only iteration variable. Changes to the copy's own fields never reach the stored element.
+> [!qard]- Why does a mutating method in a normal `foreach` leave the stored struct’s fields unchanged?
+> A normal `foreach` copies each struct element into the loop variable. A mutating method changes that copy, but `foreach` never writes it back. The struct stored in the collection therefore keeps its original field values.
 >
-> - Assigning the iteration variable, or one of its fields, is rejected by the compiler.
-> - Calling a mutating method on it compiles, but the method changes the copy's fields rather than the stored element's, so the update is silently lost.
-> 
-> The copy is shallow. When a field of the struct refers to an object, such as a `List<T>`, the copy and the stored element refer to the same object. A change made to that object through the copy, such as adding an item, therefore remains visible through the collection. Only changes to the struct's own field values are lost.
+> For an array of `Counter` structs starting at `0`, where `Increment()` increases `Value`:
 >
+> ```csharp
+> foreach (Counter counter in counters)
+> {
+>     counter.Increment();
+> }
 >
-> An ordinary struct-valued property has a similar copy boundary: a mutating method call can change only the returned temporary. Direct field assignment through that property may instead be rejected. A property containing a struct enumerator can return a fresh copy on each access, so repeatedly calling MoveNext on the property does not advance one persistent enumerator.
+> Console.WriteLine(counters[0].Value);
+> ```
 >
-> Sources: [Microsoft Learn: Iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements) · [Microsoft Learn: Structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft Learn: Value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types)
+> The output is `0`. Conceptually, each iteration works like this, where `i` is the element’s index:
+>
+> ```csharp
+> Counter copy = counters[i];
+> copy.Increment();
+> ```
+>
+> There is no `counters[i] = copy` to save the change. This illustrates the copying behavior, rather than exact compiler output.
+>
+> This concerns the struct’s own fields; objects referenced by those fields can still be shared and changed.
+>
+> Sources: [Microsoft Learn: Iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements) · [Microsoft Learn: Value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types)
 
 > [!qard]- How can stored struct elements be updated rather than discarded copies?
 > The stored elements can be updated in two ways. The same read-modify-write-back approach applies to an ordinary struct-valued property:
@@ -101,17 +115,15 @@ The direct `h.Counter.Inc()` call compiles, but it mutates the temporary value r
 
 <!-- qard-id: b89f32ef-f23d-488d-a26a-78ebe0051826 -->
 > [!qard]- Where does boxing commonly happen?
-> Boxing happens wherever a value type is converted to `object` or to an interface it implements. The runtime allocates an object on the managed heap and copies the value into it. A nullable value type is boxed according to its contents: a populated `int?` boxes its underlying `int` value, and an empty one converts to a `null` reference without allocating.
+> Wherever a value type is converted to `object` or to an interface type. Everyday cases:
 >
-> Common places:
+> - **`object` or `params object[]` parameters:** `logger.LogInformation("Id {Id}", id)`, `string.Format("{0}", 42)`.
+> - **Non-generic collections:** `ArrayList.Add(42)`.
+> - **Interface-typed variables:** `IComparable c = 42;`.
 >
-> - **`object`-typed variables, collections and parameters:** `object o = 42;`, adding an `int` to a `List<object>` or an `ArrayList`, or passing a struct to a parameter of type `object`.
-> - **Interface-typed variables and parameters:** assigning a struct to an `IComparable` variable, or passing it where an interface type is declared.
-> 
-> Each box is a separate heap allocation that the garbage collector must later reclaim. The box also holds a copy, so later changes to the original value do not affect it.
+> Each box is a separate heap allocation holding a copy of the value.
 >
->
-> Sources: [Microsoft Learn: Boxing and unboxing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing) · [Microsoft Learn: Nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types#boxing-and-unboxing) · [Microsoft Learn: Generic classes and methods](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft Learn: OpCodes.Constrained](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-10.0)
+> Sources: [Microsoft Learn: Boxing and unboxing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing)
 
 > [!qard]- How can boxing be reduced on a measured hot path?
 > The conversion to object or an interface value must be removed from the actual call path.
@@ -124,19 +136,18 @@ The direct `h.Counter.Inc()` call compiles, but it mutates the temporary value r
 > Sources: [Microsoft Learn: Boxing and unboxing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing) · [Microsoft Learn: Nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types#boxing-and-unboxing) · [Microsoft Learn: Generic classes and methods](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft Learn: OpCodes.Constrained](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-10.0)
 
 <!-- qard-id: d5bda60c-1799-4e4a-ab36-7624ae085e3a -->
-> [!qard]- When should a type be a `struct`, `class`, or `record class`?
-> The choice follows the semantics the type needs. A `struct` fits a small value that is copied field by field, a `class` fits an object with its own identity, and a `record class` fits a reference type whose contents define its equality. Copying, mutation and measured allocation costs then confirm or adjust that semantic choice.
+> [!qard]- How should a C# data type be chosen among classes, records and struct variants?
+> Choose how assignment should behave first, then add the equality and mutation rules needed.
 >
-> | Aspect | `struct` | `class` | `record class` |
-> |---|---|---|---|
-> | Assignment and passing | Copies every field, so each variable holds its own field values. The copy is shallow: a reference-type field copies only the reference, so both copies can still point to one object. | Copies a reference, so several variables can share and observe one object. | Copies a reference, as a class does. |
-> | Default equality | `Equals` is true when both have the same type and the same stored values. | Equality holds only when both references point to the same object, even if every field matches. | Compiler-generated `Equals` and `==` compare the type and member values. The generated `GetHashCode` compares nothing; it returns hash codes compatible with that equality, so equal records hash equally. |
-> | Mutation | A change to a copy's own fields affects only that copy, so such changes are easy to lose. A change to an object reached through a reference field is visible through every copy that shares it. | A change is visible through every reference to the object. | Positional properties are init-only by default, and a `with` expression creates a modified shallow copy whose reference-type members still point to the same objects. |
-> | Allocation and cost | Stored inline in the variable, field or array element that holds it, with no allocation of its own. Large values make every copy expensive, and boxing allocates. | One heap allocation per instance. | One heap allocation per instance, as with a class. |
-> | Inheritance | Cannot derive from another struct or class or serve as a base type, though it can implement interfaces. | Supports class inheritance. | Can inherit only from another record. |
-> | Typical fit | Small data-centric values with little behavior, such as a coordinate. | Entities with identity, a lifecycle or polymorphic behavior. | Data defined by its contents, such as messages or DTOs. |
+> 1. **`class` or `struct`: sharing or copying?** A class fits objects that need shared identity or inheritance: assigning it copies a reference to the same object. A struct fits a value that should be copied on assignment. Choosing a struct does not guarantee that no heap allocation occurs.
 >
-> Sources: [Microsoft Learn: Structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft Learn: Value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types) · [Microsoft Learn: Classes (C# language specification)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes) · [Microsoft Learn: Records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
+> 2. **Add `record` when generated value equality fits.** A `record class` still shares references, while a `record struct` still copies values. Generated equality compares stored fields using each field type’s equality rules; it does not automatically compare the contents of referenced collections. Ordinary structs already have default value equality; records provide generated equality members and other conveniences. Records can be mutable.
+>
+> 3. **Add `readonly` when the struct’s own state should stay fixed after initialization.** Use `readonly struct`, or `readonly record struct` when generated record behavior is also wanted. This prevents changes to the struct’s own fields; it does not freeze objects those fields reference.
+>
+> 4. **Use `ref struct` when the value must hold data such as `Span<T>` or a `ref` field.** The compiler prevents that value from escaping onto the managed heap. `readonly ref struct` combines this restriction with readonly state.
+>
+> Sources: [Microsoft Learn: Structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft Learn: Records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft Learn: Record equality specification](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/structs#16533-equality-members) · [Microsoft Learn: ref structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/ref-struct)
 
 > [!qard]- Why can two anonymous objects compare unequal with `==` but match in `Intersect`?
 > Anonymous types synthesize value-based `Equals` and `GetHashCode`, but do not overload `==`; that operator compares reference identity. Two separately created anonymous objects with the same property names, types, order, and values in the same assembly therefore compare unequal with `==` but equal with `Equals`. `Intersect` uses the default equality comparer, which uses their generated equality and hash rather than the `==` operator. Each property is compared with its own type's equality, not recursively by arbitrary object contents. [Microsoft: anonymous types](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/anonymous-types)

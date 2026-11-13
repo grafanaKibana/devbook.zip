@@ -4,13 +4,13 @@ subtopic: [Application Architecture]
 summary: "How MVC, MVVM, MVP, MVU, coordinators, and VIPER divide presentation state, rendering, interaction, and navigation."
 level: ["3"]
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Application Architecture/Presentation Architecture Variants"
 flashcard_uid: "864352fa"
 created: "2026-07-18T07:07:47.000Z"
-modified: "2026-10-31T09:00:37.443Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-16T16:55:26.602Z"
 ---
 

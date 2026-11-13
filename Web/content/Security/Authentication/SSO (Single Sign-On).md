@@ -11,7 +11,7 @@ summary: Federated login through an identity provider, with separate sessions an
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 Single Sign-On (SSO) lets several applications trust one identity provider (IdP) for authentication. An existing IdP session can remove the next credential prompt. Each application still validates a new assertion or ID token, applies local authorization, and creates its own session.

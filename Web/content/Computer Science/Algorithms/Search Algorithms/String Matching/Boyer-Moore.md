@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-12T14:27:20.410Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Matches a pattern by comparing right-to-left and skipping ahead via bad
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 Boyer-Moore aligns the pattern under the text and compares from right to left. A mismatch exposes both the offending text character and the suffix that already matched. Two precomputed rules turn that information into a safe jump over alignments that cannot succeed.

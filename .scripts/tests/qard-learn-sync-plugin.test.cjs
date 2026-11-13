@@ -11,7 +11,7 @@ const { inspectCourse } = require('../qard-learn-sync/core.cjs');
 
 const COURSE_PATH = 'Assets/Qard/Courses/Programming Mastery.md';
 const SOURCE_PATH = 'Home/Programming/Types.md';
-const SOURCE = '---\nsummary: "Copies and aliases"\nstatus: Creation\n---\n\nValue assignment copies contained values.\n\n> [!qard]- What is copied?\n> Every value field, including reference fields.\n';
+const SOURCE = '---\nsummary: "Copies and aliases"\nstatus: In Progress\n---\n\nValue assignment copies contained values.\n\n> [!qard]- What is copied?\n> Every value field, including reference fields.\n';
 const COURSE = `---
 qard-mastery: "Programming"
 publish: false
@@ -443,7 +443,7 @@ test('unloading during a source read prevents the in-flight sync from writing', 
 test('note lifecycle and stock Qard identity metadata do not flag changed learning material', async t => {
   const host = await makeHost().boot(); t.after(() => host.stop());
   const baseline = host.text(COURSE_PATH);
-  const studied = SOURCE.replace('status: Creation', 'status: Done')
+  const studied = SOURCE.replace('status: In Progress', 'status: Established')
     .replace('> [!qard]-', '<!-- qard-id: stable-card -->\n> [!qard]-');
   host.edit(SOURCE_PATH, studied);
   await host.flush();

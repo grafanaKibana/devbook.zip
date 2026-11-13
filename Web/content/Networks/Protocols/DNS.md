@@ -11,7 +11,7 @@ summary: The internet's distributed directory mapping hostnames to records like 
 level:
   - "3"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 DNS (Domain Name System) maps names to typed records in a distributed hierarchy. Before opening a transport connection, an application usually resolves a name through local caches, static host mappings, and a recursive resolver.
