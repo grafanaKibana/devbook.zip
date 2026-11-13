@@ -287,7 +287,7 @@ internal sealed class DemoApi : IGitHubApi
 
     public Task<JsonNode?> GraphqlAsync(string query, JsonObject variables, CancellationToken cancellationToken = default)
     {
-        Pr!["draft"] = true;
+        Pr!["draft"] = !query.Contains("markPullRequestReadyForReview", StringComparison.Ordinal);
         return Task.FromResult<JsonNode?>(new JsonObject());
     }
 }
