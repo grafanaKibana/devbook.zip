@@ -13790,14 +13790,15 @@
     "version": 1,
     "id": "2b8d0b6edd0c40dc8564a83316ed31b6",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 354.1677915000001,
+    "elapsed_seconds": 358.27869940000005,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md"
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md",
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -13879,10 +13880,21 @@
           },
           "model_calls": 5
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+        "outcome": "proposal_blocked",
+        "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+          "model_calls": 8
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:03:52.188916Z",
+    "checkpoint_at": "2026-11-13T07:03:56.299824Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
