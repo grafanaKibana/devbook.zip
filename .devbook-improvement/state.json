@@ -13920,11 +13920,11 @@
     "version": 1,
     "id": "2b8d0b6edd0c40dc8564a83316ed31b6",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 561.0029733000001,
+    "elapsed_seconds": 584.8720795000002,
     "calls_reserved": 14,
-    "responses_received": 13,
+    "responses_received": 14,
     "attempted_paths": [
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md",
@@ -14182,7 +14182,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:07:19.024101Z",
+    "checkpoint_at": "2026-11-13T07:07:42.893207Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -38835,6 +38835,62 @@
       "Vault/Home/Programming/NET/NET Standart.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-13T07:07:14.670234Z"
+    "prepared_at": "2026-11-13T07:07:14.670234Z",
+    "completed_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The facts hold, but the single Qard answer is overloaded and restates the body. The \"no version after 2.1\" fact repeats across the note, and the proposal made no edits to fix this.",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/NET Standart.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "Technically accurate, but the retrieval value of the one Qard is weak. Its answer runs to several paragraphs and a table that duplicate the Pitfalls and Tradeoffs sections. Several sections also repeat the end-of-2.1 fact. Keeping the note unchanged leaves these defects unresolved.",
+          "page_type": "Concept — optional Questions and References present; single Qard with a protected ID; the note has no generated whats-next navigation.",
+          "current_text_evidence": [
+            {
+              "quote": ".NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
+              "line_start": 32,
+              "reason": "The end-of-2.1 fact first appears here."
+            },
+            {
+              "quote": ".NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants",
+              "line_start": 42,
+              "reason": "The 'Why it Ended' section restates the same fact, and the Qard answer states it a third time, so the body is repetitive."
+            },
+            {
+              "quote": "> [!qard]- When is targeting .NET Standard still justified?",
+              "line_start": 91,
+              "reason": "The question asks for one decision. Its answer then adds contract semantics, a four-row table and a retargeting note, which duplicate the Tradeoffs section and make the answer hard to retrieve under pressure."
+            },
+            {
+              "quote": "- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.",
+              "line_start": 84,
+              "reason": "This restates the tradeoff content that the Qard table repeats, so two places cover the same comparison."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the topic is compact and coherent, and the content belongs in a single note.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Question quality / repetition",
+              "location": "Qard answer (lines 92-103) and sections at lines 32, 42, 84-86",
+              "evidence": "The answer to 'When is targeting .NET Standard still justified?' adds contract semantics, a full target table and a retargeting note. The table duplicates the Tradeoffs bullets, and the end-of-2.1 fact is repeated in the key-mechanics bullet, in 'Why it Ended' and in the Qard.",
+              "effect": "The answer is too long to retrieve under pressure, and the body repeats itself, which lowers learning value.",
+              "fix": "Tighten the Qard answer to the justification, the netstandard2.0 reach and the condition for choosing a modern target. Drop the table or move it to the body. Merge the repeated end-of-2.1 statements into one."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "FAIL",
+            "question_quality": "FAIL",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
