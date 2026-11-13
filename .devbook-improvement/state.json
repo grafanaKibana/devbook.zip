@@ -41271,11 +41271,13 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-13T22:22:25.417490Z",
-    "phase": "branch_updated",
-    "updated_at": "2026-11-13T22:24:30Z",
+    "phase": "pr_updated",
+    "updated_at": "2026-11-13T22:24:37Z",
     "evidence": {
       "commit_sha": "3799f97e624416fcc78dc5a33abcf6d831744da7",
-      "branch_sha": "3799f97e624416fcc78dc5a33abcf6d831744da7"
+      "branch_sha": "3799f97e624416fcc78dc5a33abcf6d831744da7",
+      "pr_number": 220,
+      "created": false
     }
   },
   "export_operations": {
