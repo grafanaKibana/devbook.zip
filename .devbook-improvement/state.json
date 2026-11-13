@@ -41271,8 +41271,11 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-13T22:22:25.417490Z",
-    "phase": "prepared",
-    "updated_at": "2026-11-13T22:24:11Z"
+    "phase": "commit_created",
+    "updated_at": "2026-11-13T22:24:17Z",
+    "evidence": {
+      "commit_sha": "3799f97e624416fcc78dc5a33abcf6d831744da7"
+    }
   },
   "export_operations": {
     "8ee974ce274c4cbc": {
