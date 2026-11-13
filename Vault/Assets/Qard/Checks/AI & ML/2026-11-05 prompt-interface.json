@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "createdAt": 1794223228977,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "prompt-interface",
+  "title": "Specify instructions, inputs, constraints, and expected output as a versioned task interface whose quality is measured on representative cases",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "questions": [
+    {
+      "id": "c1",
+      "type": "mcq",
+      "marks": 1,
+      "objective": "prompt-interface",
+      "goal": "explain",
+      "prompt": "A support team uses an LLM prompt to classify incoming tickets into a fixed label set. An engineer rewrites the instruction and output indicator. The new wording fixes three tickets that the old prompt had mislabeled. The engineer proposes replacing the production prompt with it today.\n\nWhich practice treats the prompt as a production task interface, and why?",
+      "options": [
+        "Save the new prompt and settings as a new version and score both versions on the same representative tickets, because a fix on three tickets can still break others.",
+        "Deploy the new prompt with temperature set to 0, because removing sampling randomness makes the fix on three tickets carry over to all other tickets.",
+        "Add a role such as \"expert support agent\" to the new prompt, because a concrete role makes the model follow the label set without any further testing.",
+        "Deploy the new prompt behind schema validation of its output, because a label that passes the schema check shows that the classification is correct."
+      ],
+      "answer": 0,
+      "rubric": [
+        {
+          "point": "Chooses versioning the prompt and settings and comparing versions on a representative evaluation set, because changes can cause regressions elsewhere",
+          "marks": 1
+        }
+      ],
+      "model": "**Option 1.** The new prompt and its settings become a new version. Both versions are scored on the same representative tickets. Three fixed examples cannot show that the change didn't cause failures on other tickets.\n\n*Why the others are wrong:* lowering temperature reduces sampling randomness, but it cannot guarantee correct labels or make a wording fix generalise to other tickets. A role changes perspective and does not replace task constraints or evaluation. Schema validation checks the shape of the output, not whether the label is correct.\n\nSee [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering#Choosing a Technique|Prompt Engineering: Choosing a Technique]] on representative evaluation, and [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering#Pitfalls|Pitfalls]] on correct shape with wrong content.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+        "heading": "Choosing a Technique"
+      }
+    },
+    {
+      "id": "c2",
+      "type": "short",
+      "marks": 2,
+      "objective": "prompt-interface",
+      "goal": "explain",
+      "prompt": "A team has prompt version v3 for extracting invoice fields. On their representative evaluation set, v3 scored well on model A with temperature 0.2. They now move to model B. The prompt text and the temperature value stay exactly the same.\n\nCan v3's earlier evaluation result be trusted for model B without running the evaluation again? Give a verdict and the reason.",
+      "rubric": [
+        {
+          "point": "Verdict: no. The evaluation must be rerun on model B (or the earlier result does not transfer).",
+          "marks": 1
+        },
+        {
+          "point": "Reason: the measured quality comes from the combination of prompt, settings and model. Model B may interpret the prompt differently, or handle or support the settings differently, so a score from model A does not carry over.",
+          "marks": 1
+        }
+      ],
+      "model": "**No.** v3 needs to be evaluated again on model B. The earlier score measured how the prompt and settings worked together on model A. Model B can respond differently to the same wording, and it may handle or support the same settings differently. So the result does not carry over.\n\nSee [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering#LLM Settings|Prompt Engineering: LLM Settings]], which notes that production values need task-specific evaluation on the chosen model.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+        "heading": "LLM Settings"
+      }
+    }
+  ],
+  "answers": {
+    "c1": {
+      "choice": 0
+    },
+    "c2": {
+      "text": "No, everything should be re-evaluated since new model  = different output/reasoning/tokenizer etc etc, so results can drastically differ and this should be checked",
+      "confidence": "unsure"
+    }
+  },
+  "marks": {
+    "c1": {
+      "score": 1,
+      "awarded": [
+        true
+      ],
+      "annotations": [],
+      "mistake": "none",
+      "feedback": "Correct."
+    },
+    "c2": {
+      "awarded": [
+        true,
+        true
+      ],
+      "annotations": [
+        {
+          "quote": "No, everything should be re-evaluated",
+          "kind": "correct",
+          "note": "You gave the right verdict: the earlier result does not transfer and the evaluation must be rerun on model B."
+        },
+        {
+          "quote": "new model  = different output/reasoning/tokenizer etc etc, so results can drastically differ",
+          "kind": "correct",
+          "note": "You explained that model B behaves differently on the same input, so model A's score does not carry over. That is the same reason as the rubric's, expressed in your own words."
+        }
+      ],
+      "mistake": "none",
+      "feedback": "Correct verdict, and you gave a valid reason: a different model can behave differently, so the score needs to be re-measured.",
+      "score": 2
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1794223466711
+}

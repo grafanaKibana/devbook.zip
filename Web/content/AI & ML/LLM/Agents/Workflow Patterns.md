@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-13T19:23:03.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-13T19:05:02.499Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Five orchestration patterns — chaining, routing, parallelization, orc
 level:
   - "3"
 priority: Medium
-status: Creation
+status: New
 qard-deck: AI & ML
 qard-topic: LLM/Agents/Workflow Patterns
 flashcard_uid: 27b2b0a4
@@ -35,7 +35,7 @@ It fits tasks with a stable sequence, such as drafting an outline, validating re
 ## Routing
 
 ```mermaid
-flowchart TD
+flowchart LR
     In[Input] --> R[Router LLM]
     R --> P1[Prompt or Model A]
     R --> P2[Prompt or Model B]
@@ -49,7 +49,7 @@ It fits distinct categories with different handling. General questions might use
 ## Parallelization
 
 ```mermaid
-flowchart TD
+flowchart LR
     In[Input] --> A[LLM Call A] & B[LLM Call B] & C[LLM Call C]
     A --> Agg[Aggregator]
     B --> Agg
@@ -64,7 +64,7 @@ It reduces wall-clock time when subtasks are independent, for example separate c
 ## Orchestrator-Workers
 
 ```mermaid
-flowchart TD
+flowchart LR
     In[Input] --> O[Orchestrator LLM]
     O --> W1[Worker 1] & W2[Worker 2] & W3[Worker 3]
     W1 --> S[Synthesize]
@@ -80,7 +80,7 @@ Anthropic reports this design in its Research system: a lead agent starts three 
 ## Evaluator-Optimizer
 
 ```mermaid
-flowchart TD
+flowchart LR
     In[Input] --> G[Generator LLM]
     G --> D[Draft]
     D --> E[Evaluator LLM]

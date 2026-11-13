@@ -1,0 +1,407 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+      "text": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Executable checks that reject malformed or policy-violating output before semantic evaluation.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Evaluation/Deterministic Checks\"\nflashcard_uid: \"29dd80f1\"\ncreated: \"2026-02-16T21:15:26.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.474Z\"\n---\n\nDeterministic checks turn explicit requirements into executable pass/fail rules. They validate structure, required fields, tool permissions, and other contracts without asking another model for an opinion. They run before semantic scorers, so no judge call is paid for when the output is malformed or an agent called a forbidden tool.\n\nThe boundary is simple: deterministic checks enforce properties that can be stated exactly. They can judge correctness only where an explicit rule encodes it. Without such a rule, they cannot decide whether a valid action was the right action, whether an explanation is persuasive, or whether an answer captured the user's intent.\n\n# Types of Deterministic Checks\n\n| Check type | What it validates | Example |\n|-----------|------------------|---------|\n| **Schema validation** | Output is parseable and matches expected structure | JSON schema, required fields, no extra fields |\n| **Allowlist enforcement** | Only permitted actions/tools are invoked | `action` must be one of `[\"search\", \"escalate\"]` |\n| **Citation rules** | Factual answers must cite sources | Response contains at least one `[source]` reference |\n| **PII scanning** | Known personal-data patterns are blocked or flagged | Email, account, and phone-number detectors |\n| **Safe rendering** | Output cannot introduce active content | Escaped HTML and an allowlist for permitted elements |\n| **Length constraints** | Output is within expected bounds | Response is 10–500 characters |\n| **Language/encoding** | Output is in the expected language and encoding | UTF-8, English only |\n\n# Example — JSON Schema Contract\n\n```json\n{\n  \"type\": \"object\",\n  \"additionalProperties\": false,\n  \"properties\": {\n    \"action\": {\"type\": \"string\", \"enum\": [\"search\", \"escalate\"]},\n    \"reason\": {\"type\": \"string\", \"minLength\": 1},\n    \"citations\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}}\n  },\n  \"required\": [\"action\", \"reason\"]\n}\n```\n\nAn output that fails this schema is rejected immediately. No judge is needed.\n\n# Where Deterministic Checks Fit in the Evaluation Pipeline\n\n```text\nLLM Output\n    │\n    ▼\n[1] Deterministic checks  ← fast, cheap, run first\n    │ FAIL → reject immediately\n    │ PASS\n    ▼\n[2] LLM-as-judge          ← slow, expensive, run only on valid outputs\n    │ FAIL → flag for review\n    │ PASS\n    ▼\n[3] Human review          ← for high-stakes or ambiguous cases\n```\n\nDeterministic checks run first because malformed JSON and disallowed actions are hard failures.\n\n# Deterministic Checks Vs LLM-as-Judge\n\n| Aspect | Deterministic checks | LLM-as-judge |\n|--------|---------------------|--------------|\n| Speed | Usually local and fast | Usually a model call |\n| Cost | Compute for parsing or scanning | Model inference per judgment |\n| Repeatability | Stable for the same rule and input | Can vary by model and sampling settings |\n| What it measures | Format, structure, hard rules | Semantic quality, relevance, tone |\n| Error boundary | Exact for schema and allowlist rules. Heuristic scanners can misclassify | Judge can misread the rubric or candidate |\n| Coverage | Only explicitly defined properties | Open-ended quality dimensions |\n\nThe two layers solve different problems. Hard contracts belong in code. Semantic quality belongs in a calibrated judge or human review.\n\n# Pitfalls\n\n## Over-Relying on Schema Validation Alone\n\nSchema validation can pass an output that is semantically wrong. The `action` field may contain `\"search\"` even when the case required `\"escalate\"`. Both values are valid under the contract.\n\nDeterministic business rules fit only where the expected behavior is explicit. Cases that require judgment belong with a rubric scorer, since brittle string matching would hide a semantic decision.\n\n## Treating Deterministic Failures as Soft Warnings\n\nA failed policy rule cannot be repaired by a favorable semantic score. If PII is detected or a disallowed action is invoked, the result fails even when the answer otherwise reads well.\n\nSome scanners are heuristic, so their operational response may be quarantine or human review rather than automatic rejection. That choice belongs in the policy attached to the check.\n\n## Forgetting to Check Tool Inputs, Not Just Outputs\n\nValidating only the final response misses the actions that produced it. An agent can call `delete_record`, receive a successful result, and then return perfectly valid JSON.\n\nPermission and argument checks belong at the tool boundary, before execution. Output validation comes later.\n\n# Questions\n\n<!-- qard-id: a37f0da1-2f80-49e2-90ed-6c7ef87f195f -->\n> [!qard]- Which deterministic checks should run before and after a tool-using agent calls a tool?\n> Before a tool runs, deterministic checks confirm that the caller is allowed to perform the requested action and validate the arguments against the tool's contract. After the call, they validate any returned data against the schema the next step expects.\n>\n> - **Before execution:** a permission or allowlist rule rejects an action the caller may not take. Argument validation rejects missing, malformed or out-of-range inputs. These checks must come first because later validation cannot undo a side effect: an agent can call `delete_record`, receive a success result and still return perfectly valid JSON.\n> - **After execution:** result validation stops malformed or unexpected data from reaching the next step.\n>\n> A strict function schema constrains the shape of arguments. Schema validity neither authorizes the action nor shows that it was the right action. A schema-valid request can still choose the wrong permitted action, such as `search` when the case required `escalate`. The product's risks determine which further checks are needed and whether a failure is rejected outright or routed to review.\n>\n> Sources: [OpenAI: Function calling](https://developers.openai.com/api/docs/guides/function-calling) · [OWASP: LLM06 Excessive Agency](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/) · [JSON Schema Core](https://json-schema.org/draft/2020-12/json-schema-core)\n\n# References\n\n- [JSON Schema Core specification](https://json-schema.org/draft/2020-12/json-schema-core)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1794175194420,
+  "topic": "Enforce schema, required fields, tool permissions, and input contracts before semantic scoring while identifying requirements that structure alone cannot prove",
+  "notes": [
+    "Home/AI & ML/LLM/Evaluation/Deterministic Checks.md"
+  ],
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "executable-contracts",
+  "steps": [
+    {
+      "title": "Permissions and argument contracts at the tool boundary",
+      "explain": "You already apply a schema's `required` and `additionalProperties` rules to a model's **final output**. The same rules also apply to a different object: the **tool call** an agent makes on the way to that output.\n\nCode can check two separate parts of a tool call:\n\n- **Which tool:** a permission rule, also called an allowlist. It is an enum over tool names, such as \"this agent may call only `lookup_customer` and `send_email`\". If the name is not on the list, the call is rejected. The arguments do not matter.\n- **With what arguments:** an argument contract. This is a JSON Schema for the tool's inputs. It rejects missing fields (`required`), wrong types such as a `count` sent as a string, and out-of-range values such as a number above a stated `maximum`. It rejects extra fields only if the arguments object sets `additionalProperties: false`. JSON Schema allows extra properties by default.\n\nThe two checks are independent. Passing one says nothing about the other. Both are exact pass/fail rules, and no model gives an opinion ([[Home/AI & ML/LLM/Evaluation/Deterministic Checks#Types of Deterministic Checks|types of deterministic checks]]).\n\n**Timing.** These checks must run **before the tool executes**. A tool can change the world through a side effect: an email is sent, a record is deleted, money moves. Once that has happened, a later check can only report it. It cannot undo it.\n\nExample: an agent may call `send_email(to, subject, body)`, and the argument contract requires `to` to match the company's domain. Without that check, the agent sends to an outside address. The email goes out, and the agent then returns perfectly valid JSON: `{\"action\": \"search\", \"reason\": \"done\"}`. Validating that final output finds nothing wrong, even though the harm has already happened. Argument validation at the tool boundary would have blocked the call ([[Home/AI & ML/LLM/Evaluation/Deterministic Checks#Forgetting to Check Tool Inputs, Not Just Outputs|tool inputs, not just outputs]]).\n\nThe checks run in this order:\n1. Before execution: the permission check, then argument validation.\n2. The tool runs.\n3. After execution: the returned data is validated against the schema the next step expects.",
+      "connect": "This takes the schema rules you already apply to final outputs and moves them earlier, to each tool call. Next comes the other ordering rule: hard checks run before any judge does.",
+      "checkFirst": false,
+      "check": {
+        "id": "k1",
+        "type": "mcq",
+        "prompt": "A read-only support agent is allowed to call only two tools: `search_orders` and `get_order`. The system has four checks:\n\n- a permission check before any tool runs\n- argument validation against the called tool's argument schema, also before the tool runs\n- validation of the tool's returned result after it runs\n- validation of the agent's final JSON reply against the output schema\n\nThe system also defines a tool called `cancel_order`. Its argument schema is `{order_id: string}`, with `order_id` required. Calling it cancels the order immediately, and a cancellation cannot be reversed.\n\nDuring one run, the agent asks to call `cancel_order` with `{\"order_id\": \"A-17\"}`.\n\nWhich outcome is correct?",
+        "options": [
+          "The call runs, because its arguments match the `cancel_order` schema and so it passes the checks before execution.",
+          "The permission check rejects the call before it runs, because `cancel_order` is not on this agent's allowlist.",
+          "The call is caught after it runs, when the result of `cancel_order` is validated against its result schema.",
+          "The call is caught at the end, when the agent's final JSON reply is validated against the output schema."
+        ],
+        "answer": 1,
+        "rubric": [
+          {
+            "point": "Identifies that the permission/allowlist check rejects the call before execution because the tool is not allowed, even though its arguments are valid",
+            "marks": 1
+          }
+        ],
+        "model": "**B.** The arguments are valid, so argument validation passes. But `cancel_order` is not on the agent's allowlist, so the permission check rejects the call before it runs and the order is never cancelled.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+          "heading": "Forgetting to Check Tool Inputs, Not Just Outputs"
+        },
+        "objective": "executable-contracts",
+        "goal": "apply",
+        "marks": 1
+      },
+      "misconceptions": [
+        {
+          "signs": "Chooses option A: valid arguments mean the call is allowed.",
+          "reteach": "The permission check and the argument contract answer different questions. Argument validation asks whether the inputs are well formed for *this* tool. The permission check asks whether *this caller* may use the tool at all. `{\"order_id\": \"A-17\"}` passes the first and fails the second. One failed check before execution is enough to reject the call."
+        },
+        {
+          "signs": "Chooses option C: result validation catches the call.",
+          "reteach": "Result validation runs **after** the tool has executed. By then order A-17 has already been cancelled, and that cannot be reversed. Result validation protects the next step from bad data. It cannot prevent a side effect. Rules that must stop an action run before the tool runs."
+        },
+        {
+          "signs": "Chooses option D: final-output validation catches the call.",
+          "reteach": "The output schema describes the fields of the reply, not the actions taken during the run. The agent can cancel the order and still return a reply that is perfectly valid. A forbidden tool is a property of the tool call, so it has to be checked at the tool boundary, before execution."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Deterministic gate before the judge",
+      "explain": "You already know how a schema rejects an output: a missing `required` field or an extra field under `additionalProperties: false` fails, with no judgement involved. Step 1 placed permission and argument checks at the tool boundary. This step covers what the pipeline does with those failures.\n\n**The gate.** Deterministic checks run first. Any hard failure rejects the output on the spot, and only outputs that pass go on to the LLM judge ([[Home/AI & ML/LLM/Evaluation/Deterministic Checks#Where Deterministic Checks Fit in the Evaluation Pipeline|pipeline order]]):\n\n```mermaid\ngraph LR\n  A[\"LLM output\"] --> B[\"Deterministic checks<br/>schema, allowlist, arguments\"]\n  B -- \"FAIL\" --> R[\"Reject<br/>no judge call\"]\n  B -- \"PASS\" --> J[\"LLM judge<br/>semantic score\"]\n```\n\nThere are two reasons for this order.\n\n1. **Cost.** A judge call is a slow, paid model call. If the outcome is already decided, the call buys nothing.\n2. **The kind of verdict.** A schema or allowlist rule is a contract: the output either meets it or it doesn't. It is not one more quality dimension that can be traded against the others. A judge scores things like relevance and tone, and none of those can turn a broken contract into a valid one. In the note's words, [[Home/AI & ML/LLM/Evaluation/Deterministic Checks#Treating Deterministic Failures as Soft Warnings|a failed policy rule cannot be repaired by a favorable semantic score]].\n\n**Example.** The contract allows `action` to be only `\"search\"` or `\"escalate\"`. The model returns `{\"action\": \"refund\", \"reason\": \"Customer was double-charged; refund is clearly the right fix.\"}`. The reason is well argued, and a judge might score it highly. But the enum check fails, so the output is rejected and the judge is never called. Downstream code cannot run a `refund` action, however good the explanation is.\n\n**Boundary.** This holds for exact rules such as schemas, allowlists and argument contracts. Heuristic scanners, such as PII detectors, can misclassify. For those, the attached policy may send the output to quarantine or human review instead of rejecting it automatically. That is a policy choice about what to do on failure. It still does not let a semantic score cancel the flag.",
+      "connect": "Step 1 decided which contract checks exist and where they run. This step decides what a failure means for the rest of the pipeline: the output stops before the judge. Step 3 looks at the opposite case, an output that passes the gate but is still wrong.",
+      "checkFirst": false,
+      "check": {
+        "id": "k2",
+        "type": "short",
+        "prompt": "An agent's output must match a JSON schema that lists `action` and `reason` as `required`. A team's evaluation pipeline runs the schema check and an LLM judge on every output and combines them into one score:\n\n$$\\text{final} = 0.2 \\times \\text{schema} + 0.8 \\times \\text{judge}$$\n\nHere `schema` is 1 if the schema check passes and 0 if it fails, and `judge` is the judge's semantic score from 0 to 1. An output passes evaluation if $\\text{final} \\ge 0.7$.\n\nOne output is `{\"action\": \"escalate\"}`, with no `reason` field. The judge scores it 0.95, so $\\text{final} = 0.76$ and the pipeline marks it as passing.\n\nIn a pipeline designed with a deterministic gate before the judge, what verdict should this output get? Give the verdict and explain why the team's scoring rule is wrong.",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "Verdict: the output is rejected (fails evaluation).",
+            "marks": 1
+          },
+          {
+            "point": "Reason: the missing required field is a hard schema failure, which is pass/fail rather than a quality dimension, so a favorable judge score cannot offset it; blending it into a weighted score lets the judge score make up for a violation it cannot repair. (Also accept: the failing output should be rejected at the gate before any judge call.)",
+            "marks": 1
+          }
+        ],
+        "model": "**Verdict:** reject.\n\n**Why the rule is wrong:** the output is missing the required `reason`, a hard schema failure. That is a pass/fail contract violation, not one quality signal among several, so mixing it into a weighted score lets a high judge score (0.95) outweigh it. A deterministic gate rejects the output before any judge call, so no semantic score can rescue it.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+          "heading": "Treating Deterministic Failures as Soft Warnings"
+        },
+        "objective": "executable-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Accepts the pass because 0.76 ≥ 0.7, or says the judge's high score shows the output is good enough overall.",
+          "reteach": "The threshold only makes sense for things that can be traded off against each other, such as relevance and tone. A missing required field is not a little less quality. It breaks the contract that downstream code relies on: code that reads `reason` gets nothing. A contract failure is pass/fail, so it must stop the output before any scoring. A high judge score does not supply the missing field."
+        },
+        {
+          "signs": "Says the fix is to raise the schema weight or the threshold, for example to 0.5 / 0.5 or to 0.8.",
+          "reteach": "Some retuning does block this output. With weights 0.5 / 0.5 and threshold 0.7, a schema failure scores at most $0.5 \\times 0 + 0.5 \\times 1 = 0.5$, so it can never pass. Other choices don't: keeping 0.2 / 0.8 and raising the threshold to 0.8 still lets a perfect judge score (0.8) pass. Even a weighting that prevents acceptance still calls the judge on an output that has already failed, which wastes a paid call, and correctness now depends on keeping the numbers tuned. An explicit gate enforces the rejection directly: FAIL → reject before judging, and only a PASS goes on to the judge."
+        },
+        {
+          "signs": "Says the output should be flagged as a soft warning or sent to human review because the judge liked it.",
+          "reteach": "Review on failure is a policy option for heuristic scanners, such as PII detectors, which can misclassify. A required-field check is exact: the field is either present or absent. The judge's opinion doesn't change that, so the output is rejected."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "What a valid output cannot prove",
+      "explain": "You already know how a schema decides validity: required fields must be present, no extra fields are allowed, and `action` must be one of the values listed in its `enum`. A schema answers one question: **is this output well-formed?** It does not answer a second one: **is this the right output for this case?**\n\nTake the contract from the note, where `action` is `\"search\"` or `\"escalate\"` and `reason` is a non-empty string. Suppose the case is a customer reporting a suspected account takeover, and the expected behaviour is to escalate. The agent returns:\n\n```json\n{\"action\": \"search\", \"reason\": \"Looking up account login history\"}\n```\n\nEvery schema rule passes. Both required fields are present, there are no extra fields, `search` is in the enum, and `reason` is not empty. The output is still wrong, because the schema allows **both** actions and has no information about which one this case needs. See [[Home/AI & ML/LLM/Evaluation/Deterministic Checks#Over-Relying on Schema Validation Alone|Over-relying on schema validation alone]].\n\nThis gap can be closed in one of two ways. Which one fits depends on whether the right answer can be stated exactly:\n\n- **Explicit business rule (still code).** If the expected action follows from known inputs, write it as a rule. For example: `if case.category == \"account_takeover\" then action must be \"escalate\"`. This is deterministic and needs no judge, but it only works where the expected behaviour is spelled out.\n- **Rubric scorer (judgment).** If the right action depends on interpreting the situation, such as how urgent a free-text complaint sounds, a judge applies a rubric. Matching strings in code here would hide a semantic decision behind a brittle rule.\n\nIn short, a schema proves the output is in the allowed set. Choosing the right member of that set needs either a rule that encodes the choice or a scorer that judges it.",
+      "connect": "The previous step showed that a deterministic failure ends evaluation before any judge runs. This step covers the other direction: passing those checks only means the output is valid, not that it is right. That sets up sorting requirements into code rules and judgment in the final step.",
+      "checkFirst": false,
+      "check": {
+        "id": "k3",
+        "type": "mcq",
+        "marks": 1,
+        "goal": "apply",
+        "objective": "executable-contracts",
+        "prompt": "A support agent must return JSON matching this schema: `action` is required and must be one of `\"reply\"` or `\"handoff\"`, `reason` is a required non-empty string, and no other fields are allowed.\n\nEach incoming ticket has structured fields, including `tier` and `priority`. Company policy states exactly: *every ticket with `tier = \"enterprise\"` and `priority = \"P1\"` must be handed off to a human.*\n\nFor one ticket with `tier = \"enterprise\"` and `priority = \"P1\"`, the agent returns:\n\n```json\n{\"action\": \"reply\", \"reason\": \"Sharing the reset steps directly\"}\n```\n\nWhich statement correctly describes how this output should be evaluated?",
+        "options": [
+          "Schema validation rejects it, because `reply` is the wrong value for an enterprise P1 ticket and the schema checks each field's value.",
+          "The schema passes, and because the policy is stated exactly in terms of the ticket's fields, a deterministic business rule can fail the output without a judge.",
+          "The schema passes, but only an LLM judge with a rubric can catch the error, because choosing an action is always a semantic decision.",
+          "The schema passes, so the output counts as correct: `reply` is a permitted action and the contract defines what a correct output is."
+        ],
+        "answer": 1,
+        "rubric": [
+          {
+            "point": "Identifies that the output is schema-valid, and that the wrong action can be caught by a deterministic business rule because the policy is stated exactly in terms of known input fields (option B)",
+            "marks": 1
+          }
+        ],
+        "model": "**B.** The output passes the schema: both required fields are present, there are no extra fields, and `reply` is in the enum. It is still the wrong action. Because the policy is an exact condition on structured fields (`tier = \"enterprise\"` and `priority = \"P1\"` means `handoff`), it can be written as a code rule that fails this output, with no judge needed.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+          "heading": "Over-Relying on Schema Validation Alone"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Chooses A: thinks the schema rejects `reply` because it is wrong for this ticket.",
+          "reteach": "A schema only checks whether a value is in the allowed set. `reply` is in the enum, so the schema passes for every ticket, enterprise P1 included. The schema never sees `tier` or `priority`. Tying the action to the ticket's fields requires a separate rule that reads both the input and the output."
+        },
+        {
+          "signs": "Chooses C: believes every wrong-action error needs an LLM judge.",
+          "reteach": "A judge is needed only when the right answer depends on interpretation. Here the policy is an exact condition on structured fields, so `if tier == \"enterprise\" and priority == \"P1\" then action == \"handoff\"` is a deterministic check. It is cheaper and repeatable, and it can run before any judge. Use a rubric scorer when the expected behaviour cannot be stated as an exact rule, for example judging urgency from free text."
+        },
+        {
+          "signs": "Chooses D: treats schema-valid as correct because the value is permitted.",
+          "reteach": "A contract defines the *allowed* outputs, not the *right* one for each case. Both `reply` and `handoff` are allowed, so the schema accepts either one whatever the ticket says. Correctness for a specific case needs a business rule that encodes the expected choice, or a rubric scorer that judges it."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Classify requirements: code rule or judgment",
+      "explain": "Sort one requirement at a time with one test: **can the pass/fail rule be stated exactly, using only data the checker has at that moment?** If it can, the requirement belongs in code. If deciding it means interpreting meaning, intent or quality, it needs a rubric scorer (an LLM judge) or human review.\n\nTake a support agent with a `close_ticket(ticket_id)` tool and an output schema with fields `action` and `reply`:\n\n| Requirement | Exact rule over available data? | Layer |\n|---|---|---|\n| Only agents with role `support` may call `close_ticket` | Yes: role vs allowlist | Code, at the tool boundary |\n| `ticket_id` must exist and be open | Yes: lookup in the ticket store | Code, at the tool boundary |\n| Output is JSON with `action` and `reply`, no extra fields | Yes: schema | Code, on the output |\n| `action` = `escalate` whenever `account_tier` is `enterprise` and `severity` is `1` | Yes: both fields are recorded | Code, an explicit business rule |\n| `reply` actually resolves what the customer asked | No: depends on meaning | Judge |\n\nThe fourth row matters. Choosing between valid actions is usually a judgment, but here the expected action has been written as an exact rule over known fields, so code can enforce it. Without that rule, a schema-valid `search` instead of `escalate` requires semantic assessment by a rubric scorer or human reviewer ([[Home/AI & ML/LLM/Evaluation/Deterministic Checks#Over-Relying on Schema Validation Alone|Over-relying on schema validation]]).\n\nThe layers then run in this order:\n\n1. **Before a tool executes:** permission and argument checks, because a side effect cannot be undone later ([[Home/AI & ML/LLM/Evaluation/Deterministic Checks#Forgetting to Check Tool Inputs, Not Just Outputs|tool inputs]]).\n2. **On the final output:** schema and other deterministic rules. A failure here rejects the output.\n3. **Only on outputs that pass:** the semantic judge, then human review for high-stakes or ambiguous cases ([[Home/AI & ML/LLM/Evaluation/Deterministic Checks#Where Deterministic Checks Fit in the Evaluation Pipeline|pipeline]]).",
+      "connect": "Step 3 showed that a valid output can still be the wrong one. This step uses that limit as a sorting rule: anything that can be stated exactly goes to code and runs first, and whatever is left goes to the judge.",
+      "checkFirst": false,
+      "check": {
+        "id": "k4",
+        "type": "short",
+        "goal": "apply",
+        "objective": "executable-contracts",
+        "prompt": "A refund agent can call `issue_refund(order_id, amount)`. Each order record stores a `delivered_at` date, and each case records the date it was opened. When the checks run, the checker can read the order record, the case's opened date, and the agent's tool calls and output.\n\nRequirement: *the agent must not call `issue_refund` for an order whose `delivered_at` is more than 30 days before the case was opened.*\n\nShould this requirement be enforced by a **deterministic code check** or by **judgment** (a rubric scorer or human review)? Give your classification and the reason for it.",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "Classifies the requirement as a deterministic code check (contract or business rule), not judgment.",
+            "marks": 1
+          },
+          {
+            "point": "Reason: pass/fail is an exact rule over data the checker already has (comparing recorded dates against a 30-day limit and checking whether `issue_refund` was called), so no interpretation of meaning is needed.",
+            "marks": 1
+          }
+        ],
+        "model": "**Code.** The rule is exact and uses only recorded data: compute the gap between `delivered_at` and the case's opened date, and if it exceeds 30 days, any `issue_refund` call fails. Nothing needs interpreting.\n\n*Optional:* it fits best at the tool boundary, rejecting the call before the refund executes.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+          "heading": "Over-Relying on Schema Validation Alone"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Classifies it as judgment because deciding whether to refund sounds like a decision about the right action.",
+          "reteach": "Choosing an action needs a judge only when no exact rule says which one is expected. Here the policy is a date comparison over recorded fields, so code can decide pass/fail. This is the [[Home/AI & ML/LLM/Evaluation/Deterministic Checks#Over-Relying on Schema Validation Alone|explicit business rule]] case."
+        },
+        {
+          "signs": "Says code, but the reason is that the output or tool call is schema-valid.",
+          "reteach": "Schema validity only proves `order_id` and `amount` have the right shape. A well-formed `issue_refund` call on a 45-day-old order still breaks the policy. The requirement is code because the 30-day rule itself can be computed from recorded dates, not because the schema passes."
+        },
+        {
+          "signs": "Says code, but places the check only on the final output after the refund has run.",
+          "reteach": "The classification is right, but a refund is a side effect. Checking it after execution can flag the violation but cannot undo it. Argument and permission rules belong at the [[Home/AI & ML/LLM/Evaluation/Deterministic Checks#Forgetting to Check Tool Inputs, Not Just Outputs|tool boundary]], before the call runs."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "choice": 1,
+        "confidence": "sure"
+      },
+      "mark": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      },
+      "reply": "Right."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "The weight are incorrect, even is schema is not followed, it possible to pass threshold. It would be better to have schema weight at least 0.31, so if judge marks perfectly, final will be 0.69, right under threshold.  Or have deterministic gate before judge scoring, if schema is failed, no need to check judge, and consider full case failed. The passing schema + low score of the judge != no passing schema + perfect judge even score are equal",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "Or have deterministic gate before judge scoring, if schema is failed, no need to check judge, and consider full case failed.",
+            "kind": "correct",
+            "note": "You give the right verdict: reject at the gate, with no judge call."
+          },
+          {
+            "quote": "It would be better to have schema weight at least 0.31",
+            "kind": "wrong",
+            "note": "Raising the weight only moves the threshold. A weighted sum still lets a strong judge score offset a hard contract failure."
+          },
+          {
+            "quote": "The passing schema + low score of the judge != no passing schema + perfect judge even score are equal",
+            "kind": "vague",
+            "note": "This hints that the two cases differ, but it doesn't say why. The missing point is that a schema failure is a pass/fail contract, not a quality dimension, so no judge score can repair it."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You reached the right verdict, but you mostly framed the problem as bad weights and never said that a schema failure is a pass/fail contract that no judge score can offset.",
+        "score": 1
+      },
+      "reply": "Verdict is right: reject at the gate, no judge call.\n\nThe reasoning needs work. Tuning the weight to 0.31 is a patch, not the fix. A weighted sum still treats a missing required field as one quality signal that a high judge score can partly cancel.\n\nAsk yourself why that field can't be traded off. What kind of verdict is a schema check, compared with a judge's score?",
+      "reteach": "Some retuning does block this output. With weights 0.5 / 0.5 and threshold 0.7, a schema failure scores at most $0.5 \\times 0 + 0.5 \\times 1 = 0.5$, so it can never pass. Other choices don't: keeping 0.2 / 0.8 and raising the threshold to 0.8 still lets a perfect judge score (0.8) pass. Even a weighting that prevents acceptance still calls the judge on an output that has already failed, which wastes a paid call, and correctness now depends on keeping the numbers tuned. An explicit gate enforces the rejection directly: FAIL → reject before judging, and only a PASS goes on to the judge."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "choice": 1,
+        "confidence": "unsure"
+      },
+      "mark": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      },
+      "reply": "Right."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "This is deterministic rule, so it should be enforced by the deterministic check, to ensure 100% accuracy. Judgement still can hallucinate, human review is redundant, one simple `if` can replace human here",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "This is deterministic rule, so it should be enforced by the deterministic check",
+            "kind": "correct",
+            "note": "You classified it as a code check, not judgment."
+          },
+          {
+            "quote": "one simple `if` can replace human here",
+            "kind": "correct",
+            "note": "A single date comparison settles pass/fail with no interpretation, which is the reason the rule belongs in code."
+          },
+          {
+            "quote": "Judgement still can hallucinate",
+            "kind": "insight",
+            "note": "A judge can be wrong on a question that has an exact answer, so a code check is also the more reliable choice here."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "You classified it as code and gave the right reason: it is an exact rule over data the checker already has.",
+        "score": 2
+      },
+      "reply": "Correct. The 30-day limit is an exact comparison of `delivered_at` against the case's opened date. Checking whether `issue_refund` was called needs no interpretation, so one `if` is enough. A judge adds error risk and nothing else here. Next time, also say where the check runs. Ideally it sits at the tool boundary, so a bad refund is blocked before it executes."
+    }
+  ],
+  "current": 3,
+  "probe": {
+    "questions": [
+      {
+        "id": "p1",
+        "type": "mcq",
+        "marks": 1,
+        "goal": "apply",
+        "prompt": "A JSON Schema for an object declares properties `action` and `reason`, lists both under `required`, and sets `\"additionalProperties\": false`. Which output object fails validation?",
+        "options": [
+          "`{\"action\": \"search\", \"reason\": \"user asked\"}`",
+          "`{\"action\": \"search\", \"reason\": \"user asked\", \"debug\": true}`",
+          "`{\"reason\": \"user asked\", \"action\": \"search\"}`",
+          "`{\"action\": \"escalate\", \"reason\": \"needs a human\"}`"
+        ],
+        "answer": 1,
+        "rubric": [
+          {
+            "point": "Selects the object with the extra `debug` field",
+            "marks": 1
+          }
+        ],
+        "model": "`{\"action\": \"search\", \"reason\": \"user asked\", \"debug\": true}` fails because `additionalProperties: false` forbids any property not declared in the schema.\n\nSee [[Home/AI & ML/LLM/Evaluation/Deterministic Checks#Example — JSON Schema Contract]].",
+        "source": {
+          "path": "Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+          "heading": "Example — JSON Schema Contract"
+        }
+      }
+    ],
+    "answers": {
+      "p1": {
+        "choice": 1,
+        "confidence": "sure"
+      }
+    },
+    "note": "Probes whether the student can apply the JSON Schema additionalProperties rule to candidate outputs; workload-cases is skipped as already taught.",
+    "submitted": true,
+    "marks": {
+      "p1": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      }
+    },
+    "findings": "You apply a schema's required and additionalProperties rules correctly. Not yet tested: tool permissions, input contracts, check ordering before a judge, and what a schema-valid output still cannot prove."
+  },
+  "map": {
+    "title": "Contracts first, then what they miss",
+    "plan": "You already read a schema's required and extra-field rules correctly, so the lesson starts after that. First, which exact properties code can enforce, including tool permissions and input arguments, and why those checks run before any judge call. Then the limit: a valid output can still be the wrong one. The last step sorts requirements into code-checkable and judgment-needed.",
+    "mermaid": "graph TD\nA[\"Schema rules: required, additionalProperties\"] --> B[\"Allowlists and tool permissions at the tool boundary\"]\nB --> C[\"Input contract checks before execution\"]\nC --> D[\"Order: deterministic first, judge only on valid output\"]\nD --> E[\"Valid is not correct: what structure cannot prove\"]\nE --> F[\"Sort requirements: code rule or semantic scorer\"]",
+    "objective": "executable-contracts",
+    "steps": [
+      {
+        "title": "Permissions and argument contracts at the tool boundary",
+        "why": "Extend the schema rules you know to allowlists and argument validation, and explain why these checks must run before execution, since later validation cannot undo a side effect."
+      },
+      {
+        "title": "Deterministic gate before the judge",
+        "why": "Explain why a hard failure rejects the output without a judge call, and why a favorable semantic score cannot repair it."
+      },
+      {
+        "title": "What a valid output cannot prove",
+        "why": "Show with an example that `search` can be schema-valid when the case required `escalate`, and name why this needs a rubric scorer or an explicit business rule."
+      },
+      {
+        "title": "Classify requirements: code rule or judgment",
+        "why": "Apply the whole objective by sorting a set of requirements into enforceable contract checks and semantic ones, and state the order in which they run."
+      }
+    ]
+  },
+  "stepsFor": "[\"Contracts first, then what they miss\",\"You already read a schema's required and extra-field rules correctly, so the lesson starts after that. First, which exact properties code can enforce, including tool permissions and input arguments, and why those checks run before any judge call. Then the limit: a valid output can still be the wrong one. The last step sorts requirements into code-checkable and judgment-needed.\",[[\"Permissions and argument contracts at the tool boundary\",\"Extend the schema rules you know to allowlists and argument validation, and explain why these checks must run before execution, since later validation cannot undo a side effect.\"],[\"Deterministic gate before the judge\",\"Explain why a hard failure rejects the output without a judge call, and why a favorable semantic score cannot repair it.\"],[\"What a valid output cannot prove\",\"Show with an example that `search` can be schema-valid when the case required `escalate`, and name why this needs a rubric scorer or an explicit business rule.\"],[\"Classify requirements: code rule or judgment\",\"Apply the whole objective by sorting a set of requirements into enforceable contract checks and semantic ones, and state the order in which they run.\"]]]",
+  "accepted": true,
+  "finishedAt": 1794218379925,
+  "close": {
+    "summary": "The lesson started from what the student already knew (a schema's `required` and `additionalProperties` rules) and went past it. It covered:\n\n- **Tool boundary:** permission/allowlist checks and argument contracts run *before* execution, because no later output check can undo a side effect. The student got this right with confidence.\n- **Deterministic gate before the judge:** schema and policy checks run first, so malformed or forbidden outputs never cost a judge call. The student reached the right verdict but treated the problem as one of bad weighting. They missed the key point: a deterministic failure is a hard pass/fail contract, and no favourable judge score can offset it.\n- **What a valid output cannot prove:** a schema-valid output can still pick the wrong permitted action, e.g. `search` when the case needed `escalate`. The student answered correctly but was unsure.\n- **Classification:** the student correctly sorted requirements into code-checkable rules and ones that need judgment (2/2).\n\n**Gap to revisit:** say plainly that deterministic failures are gates, not inputs to a weighted score.",
+    "cards": [
+      {
+        "front": "Why can't a high LLM-judge score rescue an output that failed a deterministic check (schema, forbidden tool, PII)?",
+        "back": "A deterministic check is a pass/fail contract, not one weighted input in a score. A failure means a hard requirement was broken, so the result fails however well the answer reads. Heuristic scanners may send failures to quarantine or human review instead, but a judge score never offsets them."
+      },
+      {
+        "front": "Why do permission and argument checks run at the tool boundary before execution, not on the final output?",
+        "back": "Side effects can't be undone. An agent can call `delete_record`, get a success result, and still return perfectly valid JSON. Allowlist/permission rules and argument validation must reject the call before it runs."
+      },
+      {
+        "front": "What can a schema-valid output still get wrong?",
+        "back": "It can choose the wrong permitted action or content, e.g. `action: \"search\"` when the case required `\"escalate\"`. Both values satisfy the schema. Validity proves shape, not authorization, correctness or intent. Those need an explicit business rule, if one can be written exactly, or a judge."
+      },
+      {
+        "front": "Why do deterministic checks run before the LLM judge in the eval pipeline?",
+        "back": "They are cheap, fast and exact. Rejecting malformed outputs and forbidden actions first means no judge call is paid for on outputs that already fail a hard contract. The judge scores only valid outputs, on semantic quality."
+      }
+    ],
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-08 Enforce schema, required fields, tool permissions, and input.md",
+    "nextCheck": "2026-11-12"
+  }
+}

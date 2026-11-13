@@ -4,10 +4,10 @@ subtopic: [Machine Learning]
 summary: "Whether predicted probabilities match reality: 0.7 predictions should be right about 70% of the time."
 level: ["2"]
 priority: Medium
-status: Done
+status: In Progress
 publish: true
 created: "2026-06-11T07:39:53.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.492Z"
 ---
 

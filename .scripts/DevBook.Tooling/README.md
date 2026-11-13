@@ -128,7 +128,7 @@ Optional `model_diagnostics` report safe timing, turn, token/search and permissi
 These are setup instructions, not authorization to provision credentials, publish a first real PR or enable scheduling. Keep production and scheduling disabled until each corresponding check succeeds. The protected environment permits only `main`; credential-free branch/PR fixtures need no temporary secret grants.
 
 1. Manually merge the reviewed tooling and current Qard authoring/reader contracts to `main`. Scheduling and protected maintenance use that branch. Keep unrelated local work out of publication.
-2. Create protected environment `devbook-improvement-production`, restricted to `main`. Credentials belong there; control variables below belong in **repository Actions variables**, because job selection precedes environment-variable availability. Per-run required reviewers are unnecessary only after explicit unattended activation is authorized.
+2. Create protected environment `devbook-improvement-production`, restricted to `main`. Credentials belong there; control variables below belong in **repository Actions variables**, because job selection precedes environment-variable availability. The maintenance and publication jobs use `deployment: false`: this environment scopes credentials and does not represent a site deployment. Per-run required reviewers are unnecessary only after explicit unattended activation is authorized.
 3. Install the pinned CLI and create the subscription token locally. Use hidden prompts to store it; never put tokens in chat, shell history or committed configuration:
 
    ```sh

@@ -4,10 +4,10 @@ subtopic: [Data Structures]
 summary: "A lazy heap that defers consolidation to extract-min and cuts decreased nodes into the root list."
 level: ["4"]
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 publish: true
 created: "2026-07-09T18:37:04.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-10T14:39:34.307Z"
 ---
 

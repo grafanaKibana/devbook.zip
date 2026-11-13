@@ -4,10 +4,10 @@ subtopic: [SQL]
 summary: "Keeping copies of data on multiple nodes to spread reads and survive failures."
 level: ["4"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 publish: true
 created: "2026-02-28T20:52:28.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.354Z"
 ---
 

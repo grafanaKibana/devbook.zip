@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-19T22:34:10.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.346Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: A FIFO collection where the earliest enqueued item is processed first, 
 level:
   - "4"
 priority: Medium
-status: Done
+status: In Progress
 ---
 
 A queue preserves arrival order. When a service accepts work faster than one worker can drain it, the oldest waiting job remains at the front.

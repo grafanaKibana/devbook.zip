@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T06:06:54.584Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Sorts bounded-width keys one digit at a time with stable distribution-a
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 [[Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quick Sort]] and [[Computer Science/Algorithms/Sorting Algorithms/Merge Sort|Merge Sort]] discover order by comparing keys. Radix Sort takes a different route. It treats each key as a sequence of digits in radix `b`, then distributes the keys by one digit at a time. Its cost follows key width rather than the number of comparisons needed to establish order.

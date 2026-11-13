@@ -1,0 +1,430 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/Software Architecture/Patterns/Patterns.md",
+      "text": "---\ntitle: Software Architecture Patterns\ntopic: [Software Architecture]\nsubtopic: [Patterns]\nsummary: \"Reusable solutions to recurring design problems around boundaries, dependencies, and change.\"\ntags: [FolderNote]\npublish: true\npriority: High\nlevel: [\"4\"]\nstatus: Done\nqard-deck: \"Software Architecture\"\nqard-topic: \"Patterns/Patterns\"\nflashcard_uid: \"cfaa4058\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-15T11:47:54.862Z\"\n---\n\nPatterns name recurring design pressures and the tradeoffs of a known response. They give a team shared language for boundaries, dependencies, and change. A useful pattern makes variation easier to see. A premature one hides simple control flow behind indirection.\n\n> [!IMPORTANT]\n> A pattern earns its place when the problem already exists. Dependency injection helps when composition or substitution is real. One concrete dependency with no variation usually needs only a direct call.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Questions\n\n<!-- qard-id: 66d6574d-0bb3-4d17-b1e0-53177c19b42f -->\n> [!qard]- What evidence justifies introducing a pattern?\n> A pattern is justified when the code already shows a design pressure that the pattern handles more cheaply than the direct design. That pressure takes one of three forms:\n>\n> - **Recurring variation:** the same point in the code repeatedly needs different behavior. A known structure for substituting or composing that behavior then pays off.\n> - **A responsibility boundary:** one concern needs to be separated from another, and the pattern makes that boundary explicit.\n> - **A failure mode:** the direct design keeps producing the same defect or cost, and the pattern makes it cheaper to handle.\n>\n> The decision is a cost comparison. Every pattern adds indirection, such as extra types and interfaces, and its control flow is less direct. When the pattern answers a problem the code already has, it makes the variation or boundary easier to see. When the problem is only anticipated, the indirection is speculative. It hides simple control flow without solving anything yet.\n>\n> **Example:** dependency injection behind an interface earns its place when implementations are actually substituted or composed. One concrete dependency with no variation is usually clearer as a direct call.\n\n# References\n\n- [Software design pattern](https://en.wikipedia.org/wiki/Software_design_pattern)"
+    },
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Design Patterns.md",
+      "text": "---\ntopic: [Software Architecture]\nsubtopic: [Patterns]\nsummary: \"23 reusable object-oriented solutions to recurring design problems, giving teams a shared vocabulary for design intent and tradeoffs.\"\ntags: [FolderNote]\npriority: High\npublish: true\nlevel: [\"3\"]\nstatus: Done\nqard-deck: \"Software Architecture\"\nqard-topic: \"Patterns/Design Patterns/Design Patterns\"\nflashcard_uid: \"ddaa5e07\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-15T11:47:55.058Z\"\n---\n\nThe Gang of Four catalog names 23 recurring object-oriented design problems and the collaborations that address them. A pattern communicates intent and consequences. It is not a ready-made class diagram. Strategy says that an algorithm varies behind a stable contract, while Observer says that an unknown set of dependents receives notifications. The name is useful only when that pressure exists in the code.\n\nThe catalog groups patterns by what varies. Creational patterns move construction decisions, structural patterns compose objects and interfaces, and behavioral patterns assign work or communication. The categories help with recall, but intent decides the pattern.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Choose a Pattern by Intent and Cost\n\nPattern selection starts from the pressure in the code. The smallest pattern that makes a real variation or responsibility boundary explicit is the candidate, and the condition that would justify deleting it is kept with that decision.\n\n| Pressure | Candidate | What it buys | What it costs | Reject it when |\n|---|---|---|---|---|\n| Construction selects among related product families | [[Home/Software Architecture/Patterns/Design Patterns/Creational/Abstract Factory]] | Keeps compatible products and construction policy together | Each new family adds a concrete factory; each new product kind adds a product interface and an abstract-factory operation that every concrete factory must implement | There is one concrete family |\n| Construction has many ordered or optional inputs | [[Home/Software Architecture/Patterns/Design Patterns/Creational/Builder]] | Names construction steps and protects invariants | Extra builder type and duplicated API surface | A constructor or options record stays readable |\n| Existing interface does not match a consumer | [[Home/Software Architecture/Patterns/Design Patterns/Structural/Adapter]] | Localizes translation at one boundary | Another abstraction to test and maintain | Both sides are controlled and their contracts can be aligned directly |\n| Add behavior around one object without subclass combinations | [[Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator]] | Composes responsibilities at runtime | Nested wrappers obscure execution order | One direct implementation has no meaningful variants |\n| Choose one interchangeable algorithm | [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Strategy]] | Makes policy selection explicit and testable | More types or delegates | A small conditional is stable and clearer |\n| Notify unknown dependents about state changes | [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Observer]] | Decouples publisher from subscriber set | Ordering, lifetime, and error handling become indirect | There is one required caller that should invoke directly |\n| Encapsulate a request for queuing, undo, or dispatch | [[Home/Software Architecture/Patterns/Design Patterns/Behavioral/Command]] | Turns an operation into data with explicit execution | Boilerplate around simple method calls | No delayed, logged, retried, or reversible execution exists |\n\nSimilar structure does not imply the same pattern. Proxy and Decorator both wrap an interface, but Proxy controls access while Decorator adds responsibility. State and Strategy both delegate behavior. They differ by intent rather than by who selects the delegate: State transitions may be defined by the context or by the concrete states, while a client usually supplies a Strategy as policy. When the variation disappears, the abstraction no longer earns its cost and can be collapsed.\n\n# Questions\n\n> [!qard]- What is a design pattern?\n> A design pattern is a named, reusable solution to a recurring design problem. It describes the problem, how a set of objects collaborates to address it, and the consequences of using it. It is not ready-made code or a fixed class diagram.\n>\n> - **Name:** a shared word for the design. Saying Strategy communicates that an algorithm varies behind a stable contract.\n> - **Problem:** the pressure the pattern responds to, such as an unknown set of dependents that must be notified of state changes (Observer).\n> - **Solution:** the roles and their collaboration, adapted to each codebase rather than copied literally.\n> - **Consequences:** what the pattern buys, such as replaceable behavior, and what it costs, such as extra types and indirection.\n>\n> The best-known catalog is the Gang of Four book, which describes 23 object-oriented patterns grouped as creational, structural and behavioral. A pattern is justified only when its problem actually exists in the code; otherwise its indirection is pure cost.\n>\n> [GoF: Design Patterns: Elements of Reusable Object-Oriented Software](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/) · [[Home/Software Architecture/Patterns/Design Patterns/Design Patterns|Design Patterns overview]] · [[Home/Software Architecture/Patterns/Design Patterns/Design Patterns#Choose a Pattern by Intent and Cost|Choose a pattern by intent and cost]]\n\n<!-- qard-id: 8c5c7210-03f3-4e93-a3d4-c5db11cfc871 -->\n> [!qard]- How do the GoF categories (creational, structural, behavioral) relate to choosing a design pattern?\n> The three categories group the GoF patterns by the kind of problem they address. They narrow where to look, but the concrete design pressure and each pattern's intent decide which pattern fits.\n>\n> | Category | Problem it addresses | Examples |\n> |---|---|---|\n> | Creational | Where construction decisions live: which concrete class is created, how a complex object is assembled, or how instances are copied or limited. | Factory Method, Abstract Factory, Builder, Prototype, Singleton |\n> | Structural | How objects and types are composed into larger structures, and how interfaces are adapted or wrapped. | Adapter, Composite, Decorator, Facade, Proxy |\n> | Behavioral | How responsibilities and communication are distributed among objects. | Strategy, Observer, Command, State, Template Method |\n>\n> A category alone cannot decide, because patterns with a similar structure serve different intents. State and Strategy both delegate behavior to another object, but they differ by intent rather than by who selects the delegate: State lets behavior follow the context's current state, with transitions defined by the context or by the state objects, while Strategy makes an interchangeable algorithm a policy that a client usually supplies. The useful starting point is the pressure in the code, such as an algorithm that must vary or an interface that does not match. The pattern whose intent addresses that pressure is the candidate.\n>\n> [GoF: Design Patterns: Elements of Reusable Object-Oriented Software](https://www.oreilly.com/library/view/design-patterns-elements/0201633612/) · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Creational#Patterns at a Glance|Creational patterns at a glance]] · [[Home/Software Architecture/Patterns/Design Patterns/Design Patterns#Choose a Pattern by Intent and Cost|Choose a pattern by intent and cost]]\n\n<!-- qard-id: 374c4c3e-1864-4454-84c3-32aa6dac7319 -->\n> [!qard]- When does using a design pattern become an anti-pattern?\n> A pattern becomes an anti-pattern when the indirection it adds costs more than the variation or responsibility boundary it protects. The pattern name alone never pays for the extra complexity.\n>\n> Every pattern adds cost:\n>\n> - more types or delegates to read and maintain\n> - an extra hop between a caller and the behavior\n> - execution order, lifetime or error handling that becomes harder to follow\n>\n> Typical signs that the cost is not repaid:\n>\n> - **No real variation:** an Abstract Factory with only one product family, or a Strategy replacing a small conditional that is stable and clearer.\n> - **Trivial construction:** a Builder around values that a readable constructor or options record already handles.\n> - **No boundary to protect:** an Adapter between two contracts that the same team controls and could simply align.\n> - **Flexibility nobody uses:** a Command wrapper where nothing is delayed, logged, retried or undone, or an Observer with one required dependent that could be called directly.\n>\n> When the variation that justified a pattern disappears, collapsing the abstraction back into direct code removes its cost.\n>\n> [GoF: Design Patterns: Elements of Reusable Object-Oriented Software](https://cs.gonzaga.edu/faculty/crandall/misc/GoF.pdf) · [[Home/Software Architecture/Patterns/Design Patterns/Design Patterns#Choose a Pattern by Intent and Cost|Choose a pattern by intent and cost]]\n\n<!-- qard-id: f29d53c2-0b44-4cdf-9181-ab4e4a3c89f1 -->\n> [!qard]- How do Adapter, Decorator, and Proxy differ despite their similar wrapper shape?\n> An object Adapter, a Decorator and a Proxy all wrap another object, but for different reasons. An Adapter translates an incompatible contract into the one a client expects. A Decorator keeps the same interface and adds behavior. A Proxy keeps the same interface and controls access to the real object. A class Adapter adapts through inheritance instead of wrapping an object, so the wrapper comparison describes the object form.\n>\n> | Aspect | Object Adapter | Decorator | Proxy |\n> |---|---|---|---|\n> | Interface toward the client | A different interface from the wrapped object's: the one the client expects. | The same interface as the wrapped object. | The same interface as the real object. |\n> | Responsibility | Translating calls and data between two incompatible contracts at one boundary. | Adding a responsibility around the call. Several decorators can be stacked at runtime, and their order affects behavior. | Deciding whether, when or how a call reaches the real object. |\n> | Effect on a call | It is converted into the wrapped object's operations, and results are converted back. | It normally reaches the wrapped object, with extra behavior before or after. | It may be forwarded, deferred or refused according to the access rule. |\n>\n> Because their class shapes look alike, the wrapper's responsibility, not its structure, identifies the pattern.\n>\n> [GoF: Design Patterns: Elements of Reusable Object-Oriented Software](https://cs.gonzaga.edu/faculty/crandall/misc/GoF.pdf) · [GoF: Adapter (InformIT excerpt)](https://www.informit.com/articles/article.aspx?p=1398600) · [[Home/Software Architecture/Patterns/Design Patterns/Design Patterns#Choose a Pattern by Intent and Cost|Choose a pattern by intent and cost]]\n\n# References\n\n- [Refactoring.Guru design-pattern catalog](https://refactoring.guru/design-patterns)\n- [Design Patterns video playlist](https://www.youtube.com/playlist?list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc)\n- [Design Patterns: Elements of Reusable Object-Oriented Software](https://www.pearson.com/en-us/subject-catalog/p/design-patterns-elements-of-reusable-object-oriented-software/P200000009480/9780321700698)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1794338418045,
+  "topic": "Justify a design pattern from a recurring problem, constraints and variation point and distinguish its intent and cost from a similar implementation shape",
+  "notes": [
+    "Home/Software Architecture/Patterns/Patterns.md",
+    "Home/Software Architecture/Patterns/Design Patterns/Design Patterns.md"
+  ],
+  "mastery": "Assets/Qard/Courses/Software Architecture Mastery.md",
+  "course": "Software Architecture",
+  "objective": "pattern-selection",
+  "steps": [
+    {
+      "title": "Consequences are a two-sided tradeoff",
+      "explain": "You already reject a pattern when no real variation exists. That judgement compares two things: what the pattern would give you and what it would cost. A pattern's **consequences** are both sides of that comparison, not just its drawbacks.\n\n- **What it buys:** the problem it makes easier, such as replaceable behaviour, a protected boundary or decoupled parts.\n- **What it costs:** the price of that help, such as extra types, an extra hop between caller and behaviour, or control flow that is harder to follow.\n\nYour notes frame pattern selection as this pair of columns. See [[Home/Software Architecture/Patterns/Design Patterns/Design Patterns#Choose a Pattern by Intent and Cost|Choose a pattern by intent and cost]]. [[Home/Software Architecture/Patterns/Patterns|Patterns]] calls the decision \"a cost comparison\".\n\n**Example: Observer.** An object's state changes, and an unknown, changing set of other objects needs to react.\n- *Buys:* the publisher does not know who its subscribers are. Subscribers can be added or removed without editing the publisher.\n- *Costs:* notification order, subscriber lifetime and error handling are no longer visible at the call site. They happen indirectly.\n\nIf you list only the costs, Observer looks like pure overhead. If you list only the benefit, it looks free. Neither version lets you decide. The verdict comes from weighing both sides against the pressure in the code.\n\nNow change one premise. Suppose exactly one dependent reacts, it is fixed and known in advance, and the publisher can call it directly. Nothing needs to subscribe or unsubscribe, and there is no boundary between publisher and dependent to keep. The benefit side is now empty, but the cost of indirect notification is still there, so a direct call wins. If that single dependent still had to be swappable, or the publisher had to stay unaware of it, the benefit would come back and you would need to weigh the two sides again.",
+      "connect": "This fixes the earlier \"drawbacks\" wording: consequences are a benefit and a cost together. The next step looks at the benefit side. It names the recurring problem, the constraints and the variation point that let the benefit outweigh the cost.",
+      "checkFirst": false,
+      "check": {
+        "id": "k1",
+        "type": "short",
+        "goal": "apply",
+        "objective": "pattern-selection",
+        "prompt": "A text editor wraps each edit operation (insert, delete, format) in a **Command** object so that edits can be undone and redone. In a design review, a teammate writes:\n\n> *Consequences of Command here: one extra class per operation and boilerplate around what used to be simple method calls.*\n\nIs this a complete statement of the pattern's consequences in this design? Give your verdict and say what, if anything, is missing.",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "Verdict: the statement is incomplete because it lists only costs, and consequences include benefits as well as costs.",
+            "marks": 1
+          },
+          {
+            "point": "Names the missing benefit as undo/redo of edits, which Command makes possible in this design. Accept another benefit only if it follows from the stated scenario, such as keeping an edit history to undo or redo.",
+            "marks": 1
+          }
+        ],
+        "model": "Incomplete. It lists only the costs. The missing side is what Command buys here: it makes undo/redo of edits possible.",
+        "source": {
+          "path": "Home/Software Architecture/Patterns/Design Patterns/Design Patterns.md",
+          "heading": "Choose a Pattern by Intent and Cost"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Says the statement is complete, or adds only more costs such as \"more indirection\" or \"harder to debug\".",
+          "reteach": "Consequences have two sides. Adding more costs still leaves the benefit side empty. Ask what problem the pattern solves *here*. In this editor, Command is what makes undo/redo possible. Without that benefit, nothing can outweigh the costs."
+        },
+        {
+          "signs": "Says it is incomplete, but the missing item is generic praise (\"cleaner code\", \"follows best practice\", \"more flexible\") with no link to undo/redo.",
+          "reteach": "A benefit counts only when it is concrete and tied to the pressure in this design. \"Flexible\" names no problem. Here the pressure is undo/redo, and Command is what supports it."
+        },
+        {
+          "signs": "Treats the listed costs as a reason to reject Command and calls the design wrong, instead of judging whether the consequences statement is complete.",
+          "reteach": "The question asks whether the description is complete, not whether to use the pattern. Costs alone never decide. They have to be weighed against what the pattern buys. In an editor that needs undo/redo, the benefit is real. A complete statement of consequences names both sides before any verdict."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Justify a pattern from problem, constraints and variation point",
+      "explain": "You already reject a pattern when nothing varies. Turn that test around and you get a useful way to argue *for* one. It has three parts, each visible in the code as it is today:\n\n- **Recurring problem:** a design pressure the code already has, not one you expect later. For example, the same place keeps needing different behaviour.\n- **Constraints:** what must stay fixed while that pressure is handled. For example, callers must not change, or each variant must be testable on its own.\n- **Variation point:** the one place that changes, named precisely, behind a contract that stays stable.\n\nWhen all three are present, the candidate is the pattern whose intent fits that variation point. You then weigh what it buys against what it costs, as in the previous step.\n\nVariation is the most common justification, but not the only one. The notes list three kinds of pressure: recurring variation, a **responsibility boundary** (one concern must be kept apart from another), and a **failure mode** (the direct design keeps producing the same defect or cost). See [[Home/Software Architecture/Patterns/Patterns#Questions|evidence that justifies a pattern]]. The selection rule is to pick \"the smallest pattern that makes a real variation or responsibility boundary explicit\" ([[Home/Software Architecture/Patterns/Design Patterns/Design Patterns#Choose a Pattern by Intent and Cost|choose a pattern by intent and cost]]). So if you find no variation point, look for those other pressures before you conclude the pattern is unjustified.\n\n**Example: a checkout that prices shipping.**\n\n- *Before:* there is one carrier with one fixed rate. Nothing creates pressure, so a direct calculation is correct. A Strategy would add indirection and solve nothing.\n- *After:* the shop now uses several carriers, and each carrier changes its rate rules on its own schedule.\n  - **Problem:** the same calculation repeatedly needs different behaviour.\n  - **Constraints:** checkout code must stay unchanged when a carrier is changed or added, and each carrier's rules must be tested on their own.\n  - **Variation point:** \"how shipping cost is computed for an order\", behind one stable contract such as `decimal Quote(Order order)`.\n\nThat phrasing matches Strategy's intent: interchangeable algorithms behind a stable contract. What it buys is that carriers plug in without touching checkout. What it costs is extra implementations (classes or delegates, one per algorithm) and one more level of indirection between checkout and the rule it runs.\n\nThe same reasoning tells you when to revisit the decision. Suppose the shop goes back to one carrier. The swap between carriers is gone, but that carrier's rules may still change independently of checkout, and the testing constraint may still hold. So you check whether that remaining pressure still costs more than the indirection, and only then decide whether to inline the Strategy.",
+      "connect": "The previous step framed a pattern's consequences as benefits weighed against costs. This step names the evidence that makes the benefits real: a recurring problem, its constraints and, most often, a specific variation point. The next step uses that intent to tell apart patterns that look alike.",
+      "checkFirst": false,
+      "check": {
+        "id": "k2",
+        "type": "short",
+        "goal": "apply",
+        "objective": "pattern-selection",
+        "prompt": "An `OrderService` places orders. After each order it calls `Inventory.Reserve(order)` directly, and that reservation must always happen. Three new requirements arrive: the email team, the analytics team and the loyalty team each want to react when an order is placed. More teams are expected to join over time. Each team owns its own handler. `OrderService` must not be edited every time a team starts or stops listening.\n\nThe **Observer** pattern lets a publisher notify a changing set of subscribers through a common interface, without knowing who they are.\n\nIs introducing Observer for these team reactions justified? Give your verdict and name the variation point that supports it.",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "Verdict: yes, Observer is justified for the team reactions.",
+            "marks": 1
+          },
+          {
+            "point": "Names the variation point as the set of handlers or subscribers that react to an order being placed (which teams listen).",
+            "marks": 1
+          }
+        ],
+        "model": "Yes, it is justified. The variation point is **which handlers react to \"order placed\"**: the changing set of team-owned subscribers.\n\n*Optional detail:* that set grows and shrinks while `OrderService` publishes through one stable contract, so it needs no edit when a team joins or leaves. The required inventory reservation can stay a direct call.",
+        "source": {
+          "path": "Home/Software Architecture/Patterns/Design Patterns/Design Patterns.md",
+          "heading": "Choose a Pattern by Intent and Cost"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Says Observer is not justified because `OrderService` already works with a direct call, or calls the pattern premature or speculative.",
+          "reteach": "A direct call is right when there is **one required dependent**, such as the inventory reservation that `OrderService` calls. That reservation can stay direct. The new reactions are different: three teams want them now, more are expected, each team owns its handler, and `OrderService` must not change per team. That pressure already exists, so it is not speculative. Speculative would mean adding Observer when the inventory reservation was the only dependent."
+        },
+        {
+          "signs": "Names the variation point as the order data, the inventory logic, or \"how an order is placed\".",
+          "reteach": "The variation point is what keeps changing while the contract stays stable. The order and the act of placing it do not change, and the inventory reservation is fixed. What changes is **which handlers react**: email, analytics, loyalty, and teams that have not joined yet. Observer's intent is exactly that: a changing set of dependents behind one notification contract."
+        },
+        {
+          "signs": "Says yes, but justifies it with \"decoupling is good practice\" or \"more flexible\" and names no specific variation point.",
+          "reteach": "General goodness is not a justification, because every pattern claims flexibility. Point to what the code shows: the **problem** (more teams need to react to the same event), the **constraint** (`OrderService` must not change per team) and the **variation point** (the set of subscribers)."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Distinguish look-alike shapes by intent and cost",
+      "explain": "You already identify a Proxy by what the wrapper is *for*, not by how it is built. Proxy and Decorator have the same structure: each wraps an object with the same interface. Forwarding the call doesn't tell them apart, because both normally forward and either one can stop a call in some cases. For example, a Decorator that adds input validation may reject a bad request. The difference is intent. A Proxy exists to **control access** to the real object: whether, when or how a call reaches it. A Decorator exists to **add a responsibility**, such as logging, validation or caching, around the object it wraps. The same rule settles other look-alike pairs: [[Home/Software Architecture/Patterns/Design Patterns/Design Patterns#Choose a Pattern by Intent and Cost|similar structure does not imply the same pattern]].\n\n**State vs Strategy.** In both, an object (the *context*) delegates part of its behaviour to another object behind an interface. In a class diagram they look identical. They solve different problems:\n\n- **Strategy:** the delegate is an interchangeable *algorithm*, a policy for how one job gets done. A client usually supplies it. It can still be swapped at runtime, for example when a user changes a setting. Swapping it changes the policy. It does not mean the object has moved to a new stage.\n- **State:** behaviour depends on the context's *current condition*, and that condition changes over the object's lifetime. The delegate is replaced as the object moves from one condition to the next. The transition rules may live in the context or in the state objects.\n\nThe note says that who picks the delegate is not the real test. The test is whether the delegate represents an **interchangeable policy** or a **condition in the object's lifecycle**.\n\n**Example.** Two classes each delegate one call:\n\n1. An `Invoice` calls `pricing.Calculate(order)`. The caller supplies `StandardPricing` or `DiscountPricing`, and an admin may switch it later. Each option is just a different way to compute a price. That is **Strategy**.\n2. A `Document` calls `stage.Publish(doc)`. In `Draft`, the call sends the document to review and the stage becomes `InReview`. In `InReview`, it publishes and the stage becomes `Published`. In `Published`, it does nothing. That is **State**: the same call does different things depending on how far the document has progressed, and operations move it between conditions.\n\n**Cost follows intent.** A pattern's consequences come from its intent. The [[Home/Software Architecture/Patterns/Design Patterns/Design Patterns#Choose a Pattern by Intent and Cost|selection table]] gives some of them:\n\n- Strategy makes policy selection explicit and testable. It costs more types or delegates, and a small, stable conditional can be clearer.\n- Decorator composes responsibilities at runtime. It costs nested wrappers that hide the order of execution.\n\nThe same reasoning covers the other two:\n\n- State can move condition-specific branching out of the context's methods. Depending on the implementation, it may add a class per state, and transition logic may be split between the context and the states.\n- Proxy centralises an access rule. It costs an extra indirection on every call.\n\nIf you name the wrong pattern, you expect the wrong benefits and pay costs that the problem never called for.",
+      "connect": "Step 2 justified a pattern from its problem, constraints and variation point. This step uses the same justification to separate patterns whose class shapes are identical. That completes the goal of choosing a pattern by intent and cost rather than by structure.",
+      "checkFirst": false,
+      "check": {
+        "id": "k3",
+        "type": "short",
+        "goal": "apply",
+        "objective": "pattern-selection",
+        "prompt": "A `VendingMachine` class delegates `InsertCoin()` and `SelectItem()` to a handler object behind an `IMachineHandler` interface. There are three handlers: `NoCoin`, `HasCoin` and `SoldOut`. When a coin is inserted, `NoCoin` stores it and replaces the machine's handler with `HasCoin`. `HasCoin.SelectItem()` dispenses the item and then sets the handler back to `NoCoin`, or to `SoldOut` if stock reached zero. No caller of `VendingMachine` ever chooses or passes in a handler.\n\nA colleague calls this the Strategy pattern \"because the behaviour sits in an interchangeable object behind an interface.\"\n\nIs this State or Strategy? Give your verdict and a reason based on intent.",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "Verdict: this is State, not Strategy.",
+            "marks": 1
+          },
+          {
+            "point": "Reason based on intent: each handler represents a condition the machine is in (no coin, has coin, sold out), and operations move the machine between those conditions, so the same call behaves differently depending on the current condition. This is not a choice among interchangeable algorithms as policy. Accept any equivalent wording; sharing the delegate-behind-an-interface shape does not make it Strategy.",
+            "marks": 1
+          }
+        ],
+        "model": "**State.** Each handler stands for a condition the machine is in: no coin, has coin or sold out. Operations move the machine from one condition to the next, so `SelectItem()` behaves according to the current condition. A Strategy would be an interchangeable algorithm chosen as a policy for doing one job. Both patterns delegate behind an interface, so the shape cannot decide between them.",
+        "source": {
+          "path": "Home/Software Architecture/Patterns/Design Patterns/Design Patterns.md",
+          "heading": "Choose a Pattern by Intent and Cost"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Answers Strategy because the behaviour sits in a separate object behind an interface and can be swapped at runtime.",
+          "reteach": "Both patterns share that shape, and both allow the delegate to be swapped at runtime. So neither fact can decide. Ask what the delegate *represents*. A Strategy is an interchangeable algorithm, a policy for how a job is done, and swapping it changes that policy. Here each handler stands for a condition the machine is in (no coin, has coin, sold out), and inserting coins or selecting items moves the machine between those conditions. Behaviour that follows the object's current condition is State."
+        },
+        {
+          "signs": "Says State, but the only reason given is \"the machine picks the handler itself, not the client\", with nothing about conditions or transitions.",
+          "reteach": "Who picks the delegate is a common sign, but it is not the test. In State, transitions may be defined by the context *or* by the states. A Strategy could also be chosen internally, for example from configuration. What makes this State is that each handler models a condition of the machine, and operations move it between conditions. Base your reason on that intent."
+        },
+        {
+          "signs": "Calls it Decorator or Proxy because the machine holds a handler and forwards calls to it.",
+          "reteach": "Forwarding a call does not make something a wrapper pattern. A Decorator wraps an object to add a responsibility, and a Proxy wraps it to control access. Neither describes this case. Here the handlers stand for the machine's conditions (no coin, has coin, sold out), and each operation can replace the handler to move the machine into a new condition. Delegation that tracks a changing condition is State. Classify the pattern by the problem the delegation solves."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "text": "Without shared contract it would be bigger overhead to support operation history for undo/redo, and each new operation will require changing the code with huge switch, that was already done in some moment which will violate open/close principle. ",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "Without shared contract it would be bigger overhead to support operation history for undo/redo",
+            "kind": "insight",
+            "note": "You correctly see that undo/redo history is what the Command objects make practical. But you used it to argue against the alternative, not to answer whether the teammate's statement is complete."
+          },
+          {
+            "quote": "each new operation will require changing the code with huge switch, that was already done in some moment which will violate open/close principle.",
+            "kind": "vague",
+            "note": "Avoiding a growing switch is a real benefit, but you never say whether the teammate's list is complete or that it leaves out benefits."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed an explicit verdict: the statement is incomplete because it lists only costs. Then you needed to name undo/redo as the benefit it leaves out."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "Your answer contains the right ingredients but gives no verdict on the teammate's statement and never names undo/redo as the missing benefit.",
+        "score": 0
+      },
+      "reply": "You've spotted real benefits: Command gives you an operation history for undo/redo, and it avoids a growing switch. But the question asked for a verdict. Is the teammate's list complete? Say yes or no, then name what it leaves out. Hint: it lists only one side of the tradeoff. Which side is missing, and what does Command buy here?"
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "It looks justified for me, the observer pattern is created directly for the case when some action should notify someone about it, which trigger another action",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "It looks justified for me",
+            "kind": "correct",
+            "note": "Correct verdict: Observer is justified here."
+          },
+          {
+            "quote": "when some action should notify someone about it, which trigger another action",
+            "kind": "vague",
+            "note": "This describes what Observer does in general. It doesn't name what varies in this case: the changing set of team handlers reacting to an order being placed."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "Verdict is right, but you justified it with Observer's general purpose instead of naming the variation point.",
+        "score": 1
+      },
+      "reply": "Right verdict. But you described what Observer does in general, not what varies here. A justification needs the variation point named precisely.\n\nNudge: what in this scenario keeps changing while `OrderService` stays the same? Think about who listens, and why the inventory reservation doesn't count as part of that.",
+      "reteach": "General goodness is not a justification, because every pattern claims flexibility. Point to what the code shows: the **problem** (more teams need to react to the same event), the **constraint** (`OrderService` must not change per team) and the **variation point** (the set of subscribers)."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "I would assume it can be state pattern, but i wouldnt recall it if you wasnt mention it. Cant explain why this pattern",
+        "confidence": "guess"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "I would assume it can be state pattern",
+            "kind": "vague",
+            "note": "You leaned toward State, which is right, but you framed it as a guess. No verdict is committed to, and no reasoning backs it."
+          },
+          {
+            "quote": "Cant explain why this pattern",
+            "kind": "missing",
+            "note": "The reason was needed: each handler is a condition the machine is in (no coin, has coin, sold out), and operations move it between them."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "Your instinct toward State is right, but no intent-based reason was given, so no marks are earned.",
+        "score": 0
+      },
+      "reply": "Your instinct is right: it's State. The reason is what's missing.\n\nAsk what each handler *represents*. `NoCoin`, `HasCoin` and `SoldOut` are conditions the machine is in. Calls like `InsertCoin()` and `SelectItem()` move it from one condition to the next, so the same call behaves differently depending on where it is.\n\nA Strategy would be an interchangeable algorithm, such as a pricing policy. Having a delegate behind an interface doesn't decide it."
+    }
+  ],
+  "current": 2,
+  "probe": {
+    "questions": [
+      {
+        "id": "p1",
+        "type": "mcq",
+        "marks": 1,
+        "goal": "explain",
+        "prompt": "A payment service currently calls one concrete `StripeClient` directly. No other provider is planned, and tests already run against a Stripe sandbox. A teammate proposes wrapping it behind an `IPaymentProvider` interface and a Strategy so providers can be swapped. Which judgement is best justified?",
+        "options": [
+          "Introduce the Strategy now, because programming to an interface is always better design than a concrete call.",
+          "Keep the direct call, because no real variation exists yet, so the extra interface would be indirection without a problem to solve.",
+          "Introduce the Strategy now, because adding the interface later would require rewriting the whole service.",
+          "Keep the direct call, because Strategy only applies to sorting and searching algorithms, not to external services."
+        ],
+        "answer": 1,
+        "rubric": [
+          {
+            "point": "Chooses keeping the direct call because no real variation exists, so the pattern's indirection is not repaid",
+            "marks": 1
+          }
+        ],
+        "model": "Keep the direct call: with one concrete dependency and no actual substitution, the interface adds types and an extra hop without solving an existing problem.",
+        "source": {
+          "path": "Home/Software Architecture/Patterns/Patterns.md"
+        }
+      },
+      {
+        "id": "p2",
+        "type": "cloze",
+        "marks": 1,
+        "goal": "recall",
+        "prompt": "A design pattern is described by its name, the problem it responds to, the solution (roles and how they collaborate), and its {{consequences}}, meaning what applying it buys and what it costs.",
+        "blanks": [
+          {
+            "id": "consequences"
+          }
+        ],
+        "rubric": [
+          {
+            "point": "consequences: the pattern's tradeoffs (benefits and costs) of applying it",
+            "marks": 1
+          }
+        ],
+        "model": "Consequences (its tradeoffs).",
+        "source": {
+          "path": "Home/Software Architecture/Patterns/Design Patterns/Design Patterns.md",
+          "heading": "Questions"
+        }
+      },
+      {
+        "id": "p3",
+        "type": "mcq",
+        "marks": 1,
+        "goal": "recognise",
+        "objective": "pattern-selection",
+        "prompt": "A class implements `IRepository`, holds a reference to another `IRepository`, and forwards calls to it. Before forwarding, it checks the caller's permissions and refuses the call if they are missing. Which pattern does it implement, judged by intent?",
+        "options": [
+          "Decorator, because it wraps an object with the same interface and forwards calls to it.",
+          "Proxy, because its purpose is to control whether the call reaches the real object.",
+          "Adapter, because it sits between the caller and the wrapped repository.",
+          "Decorator, because a permission check is extra behavior added before the call."
+        ],
+        "answer": 1,
+        "rubric": [
+          {
+            "point": "Identifies Proxy, because the wrapper's intent is access control (it can refuse the call), not adding responsibility",
+            "marks": 1
+          }
+        ],
+        "model": "Proxy: it keeps the same interface but controls access, deciding whether the call reaches the real object.",
+        "source": {
+          "path": "Home/Software Architecture/Patterns/Design Patterns/Design Patterns.md",
+          "heading": "Choose a Pattern by Intent and Cost"
+        }
+      }
+    ],
+    "answers": {
+      "p1": {
+        "choice": 1,
+        "confidence": "sure"
+      },
+      "p2": {
+        "blanks": {
+          "consequences": "drawbacks"
+        },
+        "confidence": "sure"
+      },
+      "p3": {
+        "choice": 1,
+        "confidence": "sure"
+      }
+    },
+    "note": "Checks whether the student rejects a pattern without real variation, recalls that a pattern includes its consequences, and identifies a same-shape wrapper by intent.",
+    "submitted": true,
+    "marks": {
+      "p1": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      },
+      "p3": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      },
+      "p2": {
+        "awarded": [
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "drawbacks",
+            "kind": "vague",
+            "note": "Drawbacks covers only the costs. The slot needs the full tradeoffs, benefits and costs, and the sentence already says \"what applying it buys and what it costs\", so this word just repeats the cost half."
+          }
+        ],
+        "mistake": "imprecise",
+        "feedback": "Consequences means both what the pattern buys and what it costs, while \"drawbacks\" names only the costs.",
+        "score": 0
+      }
+    },
+    "findings": "You judged intent over shape correctly in p1 and p3, so you can tell a pattern from its wrapper form. Your p2 slip, \"drawbacks\" for consequences, is an isolated imprecision: a pattern's consequences include benefits as well as costs."
+  },
+  "map": {
+    "title": "Justify a Pattern by Pressure and Cost",
+    "plan": "You already reject patterns with no real variation and identify a Proxy by its intent. The lesson starts by restating a pattern's consequences as a two-sided tradeoff. Then it builds the justification from a recurring problem, constraints and variation point. It ends by applying that justification to look-alike shapes.",
+    "mermaid": "graph TD\n A[\"No variation means keep the direct call\"] --> B[\"Consequences are benefits plus costs\"]\n B --> C[\"Justify from problem, constraints, variation point\"]\n C --> D[\"Separate look-alike shapes by intent and cost\"]",
+    "objective": "pattern-selection",
+    "steps": [
+      {
+        "title": "Consequences are a two-sided tradeoff",
+        "why": "You should explain that a pattern's consequences cover both what it buys and what it costs, which fixes the p2 slip and sets up cost comparison."
+      },
+      {
+        "title": "Justify a pattern from problem, constraints, variation point",
+        "why": "You should name the recurring problem, the constraints and the variation point that make a pattern pay off, building on your no-variation judgement from p1."
+      },
+      {
+        "title": "Distinguish look-alike shapes by intent and cost",
+        "why": "You should pick between shapes such as Decorator and Proxy, or State and Strategy, by intent and cost, extending your p3 reasoning to a new case."
+      }
+    ]
+  },
+  "stepsFor": "[\"Justify a Pattern by Pressure and Cost\",\"You already reject patterns with no real variation and identify a Proxy by its intent. The lesson starts by restating a pattern's consequences as a two-sided tradeoff. Then it builds the justification from a recurring problem, constraints and variation point. It ends by applying that justification to look-alike shapes.\",[[\"Consequences are a two-sided tradeoff\",\"You should explain that a pattern's consequences cover both what it buys and what it costs, which fixes the p2 slip and sets up cost comparison.\"],[\"Justify a pattern from problem, constraints, variation point\",\"You should name the recurring problem, the constraints and the variation point that make a pattern pay off, building on your no-variation judgement from p1.\"],[\"Distinguish look-alike shapes by intent and cost\",\"You should pick between shapes such as Decorator and Proxy, or State and Strategy, by intent and cost, extending your p3 reasoning to a new case.\"]]]",
+  "accepted": true,
+  "finishedAt": 1794340368530,
+  "close": {
+    "summary": "The lesson covered how to justify a design pattern and tell it apart from look-alike structures. It had three parts. First, a pattern's consequences are a two-sided tradeoff: what the pattern buys and what it costs. Second, a pattern is justified by a recurring problem, the constraints on it, and a concrete variation point. Third, patterns with the same wrapper or delegation shape are told apart by intent and cost.\n\n**What you showed:** In the probe you judged intent over shape correctly. You rejected patterns where nothing really varies, and you recognised Proxy by its intent. The checks showed the same gap each time: the right instinct but no precise reason.\n- **Consequences (0/2):** You had the right ingredients but never ruled on the teammate's claim. You also didn't name undo/redo as the benefit they left out. Calling consequences \"drawbacks\" (from the probe) is the same slip.\n- **Justification (1/2):** Your verdict was right, but you backed it with Observer's general purpose instead of naming the variation point.\n- **Look-alikes (0/2):** Leaning toward State was right, but you gave no reason based on intent.\n\n**Next:** For every pattern judgement, give a verdict, name the specific variation point or benefit, and say how it differs from the look-alike by intent.",
+    "cards": [
+      {
+        "front": "What do a design pattern's consequences include?",
+        "back": "Both sides of the tradeoff: what the pattern buys (for example, replaceable behaviour, or undo/redo with Command) and what it costs (extra types, indirection, less direct control flow). They are not only drawbacks."
+      },
+      {
+        "front": "What three things justify using a design pattern, and which one must you name explicitly?",
+        "back": "A recurring problem that already exists, the constraints on it, and a concrete variation point (the specific place where behaviour really varies). Name that variation point. Restating the pattern's general purpose doesn't justify it."
+      },
+      {
+        "front": "State and Strategy both delegate behaviour to an object. How do you tell them apart?",
+        "back": "By intent. State models an object whose behaviour changes as its internal state changes. The context or the concrete states drive the transitions. Strategy is a policy, usually supplied by the client, for swapping an algorithm behind a stable contract."
+      },
+      {
+        "front": "Proxy and Decorator both wrap the same interface. What is the intent of each?",
+        "back": "Proxy controls access to the wrapped object (for example lazy loading, remote access or protection). Decorator adds responsibilities to it. Same shape, different intent."
+      }
+    ],
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-10 Justify a design pattern from a recurring problem, constrain.md",
+    "nextCheck": "2026-11-17"
+  }
+}

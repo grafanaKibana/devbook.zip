@@ -4,13 +4,13 @@ subtopic: [Patterns]
 summary: "Defines an interface for creating an object but lets subclasses decide which concrete class to instantiate."
 level: ["1"]
 priority: High
-status: Done
+status: In Progress
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Factory Method"
 flashcard_uid: "33124e08"
 created: "2026-03-05T22:12:38.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.450Z"
 ---
 

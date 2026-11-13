@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-12T19:33:37.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-12T20:39:23.959Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Stores strings with trie-style depth and a character BST at each positi
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 A plain trie must choose how each node stores its children. A `σ`-wide array wastes slots on sparse branches. A `Dictionary<char, Node>` stores only real branches but hashes each character and loses the array's natural order. A ternary search tree (TST) uses a small **binary search tree keyed on the next character** instead. Each node has three pointers, and character order survives.

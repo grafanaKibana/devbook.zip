@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-11T16:12:59.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-12T14:27:20.402Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Builds a minimum spanning tree in parallel rounds by adding each compon
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 A [[Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree|minimum spanning tree]] can grow from many fragments at once. Borůvka's algorithm starts with one component per vertex. During each round, every component selects its cheapest outgoing edge. A [[Computer Science/Data Structures/Graph Structures/Disjoint Set|disjoint set]] accepts a selected edge only while its endpoints remain in different components. The merged components then become the input to the next round.

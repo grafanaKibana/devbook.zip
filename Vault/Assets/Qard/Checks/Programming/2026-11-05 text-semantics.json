@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "createdAt": 1793884855105,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "text-semantics",
+  "title": "Predict string allocation and equality behavior and distinguish UTF-16 code units from user-perceived characters",
+  "goal": "explain",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "long",
+      "prompt": "Consider this C# code:\n\n```csharp\nstring label = new string(new[] { 'm', 'a', 'p' });\nstring saved = label;\nlabel += \"!\";\nstring other = new string(new[] { 'm', 'a', 'p' });\n```\n\nExplain which statements create new string objects and why `saved` still contains `\"map\"`. Then explain the results of `saved == other` and `object.ReferenceEquals(saved, other)`.",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Both `new string(...)` expressions create string objects; assigning `label` to `saved` only copies the reference.",
+          "marks": 1
+        },
+        {
+          "point": "`label += \"!\"` produces a new string and reassigns `label`; immutability leaves the object referenced by `saved` unchanged.",
+          "marks": 1
+        },
+        {
+          "point": "`saved == other` is true because string `==` compares content, and both contain `map`.",
+          "marks": 1
+        },
+        {
+          "point": "`ReferenceEquals(saved, other)` is false because the two constructor calls produced separate objects.",
+          "marks": 1
+        }
+      ],
+      "model": "Each `new string(...)` creates a string object. `saved = label` copies the reference without creating another string.\n\n`label += \"!\"` creates the string `\"map!\"` and assigns its reference to `label`. Strings are immutable, so the original object still contains `\"map\"`, and `saved` continues to reference it.\n\n`saved == other` is `true`: both strings contain `\"map\"`. `object.ReferenceEquals(saved, other)` is `false`: their equal contents belong to separate objects created by the two constructor calls.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+        "heading": "Core Properties"
+      },
+      "objective": "text-semantics",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "long",
+      "prompt": "A C# string contains a rocket emoji followed by `n` with a combining tilde:\n\n```csharp\nstring text = \"\\U0001F680n\\u0303\"; // 🚀ñ\n```\n\nExplain why this string has four UTF-16 code units, three Unicode scalar values, and two user-perceived characters. Why would taking `text[0]` fail to extract the first complete displayed character, and which .NET API works at the user-perceived-character boundary?",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Explains that the rocket uses two UTF-16 code units, while `n` and the combining tilde use one each, giving `Length == 4`.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that the rocket is one Unicode scalar value, with `n` and the combining tilde contributing one each, giving three scalar values.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that `n` plus the combining tilde forms one grapheme, so the string contains two user-perceived characters.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that `text[0]` returns only one surrogate code unit and identifies `StringInfo` text-element APIs as suitable for grapheme boundaries.",
+          "marks": 1
+        }
+      ],
+      "model": "The rocket is outside the Basic Multilingual Plane, so UTF-16 represents it with a surrogate pair: two code units. `n` and the combining tilde each use one more code unit, making `text.Length` equal to 4.\n\nThe surrogate pair represents one Unicode scalar value. Together with `n` and the combining tilde, that gives three scalar values; `EnumerateRunes()` operates at this boundary.\n\nThe combining tilde joins the preceding `n` into one grapheme. The rocket is another grapheme, giving two user-perceived characters.\n\n`text[0]` returns a single `char`, which is only the first half of the rocket's surrogate pair. `StringInfo` text-element APIs operate on grapheme clusters and can extract complete user-perceived characters.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+        "heading": "Encoding and Unicode"
+      },
+      "objective": "text-semantics",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

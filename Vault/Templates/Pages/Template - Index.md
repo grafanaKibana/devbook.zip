@@ -3,7 +3,7 @@ topic: []
 subtopic: []
 level: []
 priority: Medium
-status: Not-Started
+status: New
 tags: [Template, FolderNote]
 publish: false
 ---

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-12T14:27:20.411Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Computes the longest prefix match starting at each index in one forward
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 The Z-algorithm computes how much of a string's prefix reappears at every position. Its **Z-array** stores that result: `z[i]` is the length of the longest substring beginning at `i` that matches a prefix of `S`.

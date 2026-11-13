@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-08-10T10:51:19.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-08-10T09:32:47.561Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Repeatedly permutes the input until it happens to be sorted, illustrati
 level:
   - "4"
 priority: Low
-status: Not-Started
+status: New
 ---
 
 Bogo sort takes generate-and-test literally. It checks whether the array is sorted, shuffles when it is not, then starts over. With `n` distinct values, only one of the `n!` permutations is sorted, so each random attempt succeeds with probability `1/n!`. The shuffles can miss forever.

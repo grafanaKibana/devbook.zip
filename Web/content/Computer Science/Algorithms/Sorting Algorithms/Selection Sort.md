@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.342Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Repeatedly selects the minimum of the unsorted suffix and places it at 
 level:
   - "4"
 priority: Low
-status: Ready to Repeat
+status: In Progress
 ---
 
 Selection sort is useful when writes cost much more than comparisons, such as on flash or EEPROM with limited erase cycles. Pass `i` scans the unsorted suffix `a[i..n-1]`, finds its minimum, and swaps that value into position `i`. The guarded implementation performs at most one swap per pass. Position `i` is now final, while the other position touched by the swap remains in the unsorted suffix and may be written again.

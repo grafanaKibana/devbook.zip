@@ -7,9 +7,9 @@ tags: [FolderNote]
 publish: true
 priority: Medium
 level: ["3"]
-status: Done
+status: In Progress
 created: "2026-02-17T23:29:46.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:28:37.417Z"
 ---
 

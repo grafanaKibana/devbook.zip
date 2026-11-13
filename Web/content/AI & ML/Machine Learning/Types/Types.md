@@ -2,7 +2,7 @@
 publish: true
 title: Machine Learning Types
 created: 2026-02-19T22:34:10.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.496Z
 tags:
   - FolderNote
@@ -11,7 +11,7 @@ topic:
 subtopic:
   - Machine Learning
 summary: How a model learns from data and feedback. The choice drives data, training, and evaluation.
-status: Done
+status: In Progress
 priority: Low
 level:
   - "1"

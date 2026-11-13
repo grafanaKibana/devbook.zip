@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "createdAt": 1793898831182,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "generation-contract",
+  "title": "Choose sampling, evidence assembly, citations, and output constraints so a generated result can be checked and safely consumed by the next component",
+  "goal": "apply",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "calc",
+      "prompt": "A factual extraction service has a 3,600-token budget. Instructions and the request use 800 tokens; 1,000 tokens are reserved for completion. Evidence chunks, ranked by relevance, are A: 950 tokens, B: 750 tokens, C: 600 tokens. Each chunk includes its source ID. The model supports temperature and top-p.\n\nCalculate the evidence budget and choose complete chunks to include, in order. Then choose a sampling configuration for initial evaluation and state whether identical inputs and a fixed seed guarantee identical output.",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Calculates the evidence budget as 1,800 tokens.",
+          "marks": 1
+        },
+        {
+          "point": "Includes A then B with their source IDs, using 1,700 tokens, and drops C instead of truncating chunks.",
+          "marks": 1
+        },
+        {
+          "point": "Chooses a low temperature, such as 0–0.3, with top-p left at its default as an evaluation starting point.",
+          "marks": 1
+        },
+        {
+          "point": "States that identical inputs and a fixed seed provide best-effort repeatability, not guaranteed identical output.",
+          "marks": 1
+        }
+      ],
+      "model": "Evidence budget: $3600 - 800 - 1000 = 1800$ tokens. Include A followed by B, retaining their source IDs: $950 + 750 = 1700$ tokens. Drop C; do not shorten every chunk to fit it.\n\nStart evaluation with temperature 0.1 and top-p at its default. Identical inputs and a fixed seed do not guarantee identical output because provider infrastructure can introduce variation.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Generation.md"
+      },
+      "objective": "generation-contract",
+      "goal": "apply"
+    },
+    {
+      "id": "c2",
+      "type": "long",
+      "prompt": "A service extracts a return window for a checkout component. Supplied source A says 30 days; source B says 14 days. Both describe the same product and current policy, with no rule establishing precedence. The generated result cites A and reports 30 days. Its JSON parses and passes schema validation.\n\nWrite brief pseudocode for generation and validation before passing a result to checkout. Use a fixed response contract with `status` (`answer` or `abstain`), `days` (integer or null), and `source_ids` (array of strings). Choose the output mechanism, handle unsuccessful generation, and show what happens for this conflict.",
+      "marks": 4,
+      "rubric": [
+        {
+          "point": "Uses schema-constrained output for the specified contract, including an explicit abstention representation.",
+          "marks": 1
+        },
+        {
+          "point": "Checks for refusal or incomplete generation and prevents either from reaching checkout as an answer.",
+          "marks": 1
+        },
+        {
+          "point": "Validates the returned schema and field consistency, including an integer for an answer and null days for abstention.",
+          "marks": 1
+        },
+        {
+          "point": "Checks cited support and conflicting supplied evidence, converting this unresolved conflict to abstention instead of forwarding 30 or 14 days.",
+          "marks": 1
+        }
+      ],
+      "model": "```text\nresponse = generate(\n    sources = [A, B],\n    output = constrained_json_schema(\n        status: enum(\"answer\", \"abstain\"),\n        days: integer_or_null,\n        source_ids: array_of_strings\n    ),\n    instruction = \"Use supplied evidence only; abstain on unresolved conflicts.\"\n)\n\nif response.refused or response.incomplete:\n    return generation_failure\n\nresult = parse_and_validate_schema(response)\nif validation_failed:\n    return invalid_result\n\nif result.status == \"answer\" and result.days is null:\n    return invalid_result\nif result.status == \"abstain\" and result.days is not null:\n    return invalid_result\n\nif result.status == \"answer\":\n    verify_source_ids_exist(result.source_ids)\n    verify_cited_passages_support(result.days)\n    check_all_supplied_sources_for_conflicts()\n    if support_missing or unresolved_conflict:\n        result = {status: \"abstain\", days: null, source_ids: []}\n\nreturn result\n```\n\nHere A and B conflict without an established precedence rule, so checkout receives abstention with null days. Valid JSON, a valid schema, and a real citation do not establish that 30 days is a reliable answer.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Generation.md"
+      },
+      "objective": "generation-contract",
+      "goal": "apply"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

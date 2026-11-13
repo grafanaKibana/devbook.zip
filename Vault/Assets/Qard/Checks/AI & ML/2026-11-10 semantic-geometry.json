@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "createdAt": 1794303332360,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "semantic-geometry",
+  "title": "Choose an embedding model and similarity measure for domain retrieval and plan re-embedding when representation compatibility changes",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "objective": "semantic-geometry",
+      "goal": "explain",
+      "prompt": "A retrieval system's embedding model returns **unnormalized** vectors: their length (magnitude) varies from text to text. The vector index scores matches by **dot product**, but a colleague's tests used **cosine similarity**. On the same query and corpus, the two methods return different top-k chunks.\n\nExplain why dot product can rank the chunks differently from cosine similarity here, and state a condition on the vectors under which the two would produce identical rankings for a given query.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Dot product equals cosine similarity multiplied by the vectors' magnitudes, so a stored vector with a larger magnitude can score higher even when its direction (angle) is less similar to the query; cosine ignores magnitude.",
+          "marks": 1
+        },
+        {
+          "point": "States a valid condition for identical rankings: all stored vectors have the same (positive) magnitude, for example all L2-normalized to unit length, so dot product is a constant positive multiple of (or equal to) cosine similarity. Normalizing the query is not required, since the query's magnitude scales every score equally.",
+          "marks": 1
+        }
+      ],
+      "model": "Dot product is cosine similarity scaled by both vectors' magnitudes. With unnormalized vectors, a chunk whose vector is long can outscore a chunk whose direction is closer to the query, while cosine compares only the angle. The rankings become identical when every stored vector has the same length, for example when all are L2-normalized: dot product is then cosine similarity times a constant positive factor, so the order does not change.\n\n*Optional:* the query's own length multiplies every score by the same amount, so it never changes the ranking. The model's documentation determines whether magnitude is part of the signal and which metric to use.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Embeddings.md",
+        "heading": "Similarity Metrics"
+      }
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-06-12T18:50:14.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.404Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Scoring the whole path an agent took via reference-trajectory match or 
 level:
   - "3"
 priority: High
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Agents/Evaluation/Trajectory Evaluation
 flashcard_uid: 4a7a9900

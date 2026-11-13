@@ -4,14 +4,14 @@ subtopic: [NET]
 summary: "Microsoft's cross-platform runtime and framework for building web, cloud, desktop, and mobile software."
 tags: [FolderNote]
 publish: true
-status: Creation
+status: New
 level: ["4"]
 priority: High
 qard-deck: "Programming"
 qard-topic: "NET/NET"
 flashcard_uid: "f0f708ed"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.329Z"
 ---
 
@@ -39,7 +39,6 @@ return FolderStructureMap;
 > | Runtime (CLR) | Load assemblies and run managed code: JIT compilation, garbage collection, exception handling and threading. | GC pauses, or slow startup while methods are compiled. |
 > | Base libraries | Shared APIs such as collections, I/O, networking and threading primitives. | The behavior or cost of a specific API, such as a collection or stream. |
 > | Application frameworks | Application models such as ASP.NET Core, WPF or .NET MAUI, including pipelines like HTTP middleware. | A slow or misordered request pipeline. |
->
 >
 > This is a conceptual map rather than an official fixed taxonomy; component and version boundaries can change.
 >

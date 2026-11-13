@@ -14,7 +14,7 @@ case "$(uname -s)" in
     *) fail 'This setup requires macOS or Linux. Native Windows is unsupported by the export lock.' ;;
 esac
 
-for tool in git dotnet node npm; do
+for tool in git dotnet node npm python3 gh; do
     command -v "$tool" >/dev/null 2>&1 || fail "Missing $tool. Install it, activate Node 22 and .NET SDK 10.0.100, and rerun bash .scripts/setup.sh."
 done
 SDK_VERSION="$(cd "$REPO_ROOT/.scripts" && dotnet --version)" || fail 'Install .NET SDK 10.0.100 and rerun bash .scripts/setup.sh.'

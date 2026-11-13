@@ -11,7 +11,7 @@ summary: The CLR's automatic memory manager reclaiming unreachable objects gener
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/Runtime/Garbage Collector
 flashcard_uid: 4b72550a

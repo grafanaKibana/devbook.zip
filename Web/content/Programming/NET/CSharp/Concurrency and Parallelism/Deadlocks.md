@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-18T20:04:43.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.367Z
 topic:
   - Programming
@@ -11,7 +11,7 @@ summary: When execution paths wait forever on resources each other holds, haltin
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Concurrency and Parallelism/Deadlocks
 flashcard_uid: f9642578

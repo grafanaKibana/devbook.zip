@@ -11,7 +11,7 @@ summary: .NET's execution engine compiling IL to native code and managing memory
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/Runtime/Common Language Runtime
 flashcard_uid: e98a40ab

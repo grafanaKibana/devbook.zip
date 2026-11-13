@@ -4,13 +4,13 @@ subtopic: [LLM]
 summary: "A model grades candidate output with anchored scorecards or pairwise preference, then human labels calibrate the judge."
 level: ["3"]
 priority: Medium
-status: Done
+status: In Progress
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Evaluation/LLM-as-a-Judge"
 flashcard_uid: "446768f0"
 created: "2026-02-16T18:33:57.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.476Z"
 ---
 

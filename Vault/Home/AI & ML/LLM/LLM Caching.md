@@ -4,10 +4,10 @@ subtopic: [LLM]
 summary: "Reuses prompt computation or completed answers; matching rules, freshness, permissions, and measured savings determine which cache is useful."
 level: ["2"]
 priority: High
-status: Creation
+status: New
 publish: true
 created: "2026-09-29T12:13:16.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-09-21T08:42:39.653Z"
 ---
 

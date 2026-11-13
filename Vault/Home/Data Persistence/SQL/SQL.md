@@ -6,12 +6,12 @@ tags: [FolderNote]
 publish: true
 priority: High
 level: ["4"]
-status: Creation
+status: New
 qard-deck: "Data Persistence"
 qard-topic: "SQL/SQL"
 flashcard_uid: "af026b91"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.354Z"
 ---
 

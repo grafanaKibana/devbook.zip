@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.352Z
 topic:
   - Data Persistence
@@ -11,7 +11,7 @@ summary: Index structures across database engines and the operators, storage lay
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 An index trades storage and write work for a cheaper access path. It can locate or order data without scanning every base row, but “add an index” is still incomplete advice: B+ trees, hash tables, inverted indexes, spatial trees, block summaries, LSM-based layouts, and columnstores accelerate different operators and impose different costs.

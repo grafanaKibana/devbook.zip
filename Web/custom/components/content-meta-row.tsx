@@ -13,14 +13,14 @@ import styles from "./styles/content-meta-row.scss"
 // where it renders. Suppressed on the home dashboard, which carries no
 // content-meta by design; page-contribute self-suppresses on the rest.
 //
-// Notes still at Not-Started or Creation lead the row with a static
+// Notes still at New or In Progress lead the row with a static
 // "In progress" chip; the modified date beside it already says when.
 interface ContentMetaRowOptions {
   meta: QuartzComponent
   contribute: QuartzComponent
 }
 
-const UNFINISHED_STATUSES = new Set(["not-started", "creation"])
+const UNFINISHED_STATUSES = new Set(["new", "in progress"])
 
 const statusValues = (value: unknown): string[] => {
   if (Array.isArray(value)) return value.flatMap(statusValues)

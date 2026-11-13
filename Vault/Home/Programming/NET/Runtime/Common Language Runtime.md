@@ -4,7 +4,7 @@ subtopic: [NET]
 summary: ".NET's execution engine compiling IL to native code and managing memory and types."
 level: ["4"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 
 publish: true
 qard-deck: "Programming"

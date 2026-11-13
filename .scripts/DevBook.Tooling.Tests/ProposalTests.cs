@@ -23,6 +23,104 @@ public sealed class ProposalTests
         result.Arr("retired_ids").Should().BeEmpty();
     }
 
+    [Fact]
+    public void SameTargetFragmentInsideOneCardBecomesACompleteCardRewrite()
+    {
+        // Arrange
+        const string fragment = "The original answer.";
+        const string replacement = "The answer explains its mechanism and boundary.";
+        var sources = new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Note };
+        JsonObject edit = DomainFixtures.Edit("replace", after: replacement);
+        edit["before"] = fragment;
+        JsonObject proposal = DomainFixtures.Proposal(edit);
+
+        // Act
+        JsonObject result = Proposal.Apply(sources, proposal);
+
+        // Assert
+        string expectedCard = DomainFixtures.Card.Replace(fragment, replacement);
+        result.Obj("sources").Str(DomainFixtures.Path).Should().Be(DomainFixtures.Note.Replace(DomainFixtures.Card, expectedCard));
+        JsonObject applied = result.Arr("edits").OfType<JsonObject>().Single();
+        applied.Str("kind").Should().Be("rewrite");
+        applied.Str("before").Should().Be(DomainFixtures.Card);
+        applied.Str("after").Should().Be(expectedCard);
+    }
+
+    [Fact]
+    public void CardWithoutItsMetadataAnchorBecomesACompleteCardRewrite()
+    {
+        // Arrange
+        string body = DomainFixtures.Card[DomainFixtures.Card.IndexOf("> [!qard]", StringComparison.Ordinal)..];
+        var sources = new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Note };
+        JsonObject edit = DomainFixtures.Edit(after: body.Replace("The original answer.", "The revised answer."));
+        edit["before"] = body;
+
+        // Act
+        JsonObject result = Proposal.Apply(sources, DomainFixtures.Proposal(edit));
+
+        // Assert
+        result.Obj("sources").Str(DomainFixtures.Path).Should().Be(DomainFixtures.Note.Replace("The original answer.", "The revised answer."));
+        result.Arr("edits").OfType<JsonObject>().Single().Str("before").Should().Be(DomainFixtures.Card);
+    }
+
+    [Theory]
+    [InlineData("same", "stable_1", "stable_9")]
+    [InlineData("same", "qard-source: original", "qard-source: changed")]
+    [InlineData("same", "The original answer.", "The original answer.\n> [!qard]- Injected?\n> Injected answer.")]
+    [InlineData("same", "The original answer.", "The original answer. <!-- qard-id: injected -->")]
+    [InlineData("new", "The original answer.", "A retargeted answer.")]
+    public void UnsafeFragmentInsideACardIsRejected(string target, string fragment, string replacement)
+    {
+        // Arrange
+        var sources = new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Note };
+        JsonObject edit = DomainFixtures.Edit(target == "same" ? "rewrite" : "replace", target, replacement);
+        edit["before"] = fragment;
+
+        // Act
+        Action apply = () => Proposal.Apply(sources, DomainFixtures.Proposal(edit));
+
+        // Assert
+        apply.Should().Throw<ProposalException>();
+        sources[DomainFixtures.Path].Should().Be(DomainFixtures.Note);
+    }
+
+    [Fact]
+    public void TwoFragmentsInOneCardAskForOneCardRewrite()
+    {
+        // Arrange
+        var sources = new Dictionary<string, string> { [DomainFixtures.Path] = DomainFixtures.Note };
+        JsonObject question = DomainFixtures.Edit(after: "What is the core idea?");
+        question["before"] = "What is the operating idea?";
+        JsonObject answer = DomainFixtures.Edit(after: "The revised answer.");
+        answer["before"] = "The original answer.";
+        JsonObject proposal = DomainFixtures.Proposal(question);
+        proposal.Arr("edits").Add(answer);
+
+        // Act
+        Action apply = () => Proposal.Apply(sources, proposal);
+
+        // Assert
+        apply.Should().Throw<ProposalException>().WithMessage("multiple edits target one Qard card*");
+    }
+
+    [Fact]
+    public void FragmentSpanningTwoCardsIsRejected()
+    {
+        // Arrange
+        const string second = "<!-- qard-id: stable_2 -->\n> [!qard]- What is the second idea?\n> The second answer.\n";
+        string note = DomainFixtures.Note + "\n" + second;
+        var sources = new Dictionary<string, string> { [DomainFixtures.Path] = note };
+        JsonObject edit = DomainFixtures.Edit(after: "> Merged answer.\n");
+        edit["expected_hash"] = LegacyIdentity.Digest(note);
+        edit["before"] = "> The original answer.\n\n<!-- qard-id: stable_2 -->";
+
+        // Act
+        Action apply = () => Proposal.Apply(sources, DomainFixtures.Proposal(edit));
+
+        // Assert
+        apply.Should().Throw<ProposalException>().WithMessage("card edit must replace one complete active Qard block*");
+    }
+
     [Theory]
     [InlineData("hash")]
     [InlineData("path")]

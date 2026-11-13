@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-28T13:40:02.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.480Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Repeatable loops that generate, evaluate, and select prompt candidates 
 level:
   - "3"
 priority: Low
-status: Done
+status: In Progress
 ---
 
 Manual prompt tuning works until prompts multiply. Model upgrades, new domains, and changing examples then turn each wording change into another experiment. Automated prompt optimization makes that experiment explicit: generate candidates, score them on a fixed evaluation set, and keep the variant that performs best.

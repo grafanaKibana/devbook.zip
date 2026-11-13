@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-06-11T07:39:53.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-13T18:58:50.735Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: Deliberately deciding what fills the finite context window, and in what
 level:
   - "2"
 priority: High
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Context Engineering/Context Engineering
 flashcard_uid: 0d1d06bc
@@ -148,6 +148,11 @@ The smallest context that answers the task is the starting point. Retrieval and 
 > Compaction trades space for possible detail loss: a summary can drop a subtle fact that later matters. Where exact recovery matters, the source material is kept outside the window instead of being trusted to the summary.
 >
 > [Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
+
+<!-- qard-id: c021e091-0251-4b34-b654-ae63a06562a3 -->
+
+> [!qard]- Is an LLM's `max_tokens` (output) a separate budget from the input context?
+> No. The prompt, tool schemas, history, retrieved evidence, tool results and output all share one context window. Output can only use what the input leaves: $\text{input} + \text{max\_tokens} \le \text{context limit}$.
 
 # References
 

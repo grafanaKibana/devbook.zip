@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T05:57:12.067Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Binary-searches the space of possible answers using a monotonic feasibi
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 A fleet must clear a queue of packages within `D` days. The unknown is the smallest ship capacity that finishes on time. That capacity lies between `max(weight)`, which can carry the heaviest package, and `sum(weights)`, which can carry everything in one day.

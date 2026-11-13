@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-09T18:37:04.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T14:39:34.302Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: A double-ended queue that pushes and pops at both ends, generalizing st
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 A deque serves sequences that grow and shrink at _both_ ends. A sliding window admits new elements at the back and expires old ones at the front. A work-stealing scheduler lets the owner take from one end while other threads steal from the other.

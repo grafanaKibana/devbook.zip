@@ -4,10 +4,10 @@ subtopic: []
 summary: "How k+m data and parity shards trade storage efficiency for reconstruction work."
 level: ["3"]
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 publish: true
 created: "2026-07-18T07:07:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-16T07:57:59.169Z"
 ---
 

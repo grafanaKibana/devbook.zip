@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-15T12:08:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-15T11:53:22.637Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: Testing as a design and verification discipline — unit vs integration
 priority: High
 level:
   - "4"
-status: Not-Started
+status: New
 ---
 
 Testing gathers evidence about specific failure risks. [[Software Design/Testing/Unit Testing|Unit tests]] give fast feedback on narrow behavior, [[Software Design/Testing/Integration Testing|integration tests]] exercise real boundaries and wiring, and [[Software Design/Testing/Testing Pyramid|the testing pyramid]] models the cost of moving an assertion through more of the system. [[Software Design/Testing/Test-Driven Development|TDD]] adds a short test-first feedback loop when that loop helps shape an interface or behavior.

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-31T09:00:37.443Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.319Z
 topic:
   - Programming
@@ -11,7 +11,7 @@ summary: Components forming the ASP.NET Core HTTP pipeline, each wrapping the ne
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/ASP NET Web API/Middlewares
 flashcard_uid: 7fb97c90
@@ -166,19 +166,16 @@ Middleware fits a concern that belongs outside a particular endpoint model or mu
 
 <!-- qard-id: 044cb1c8-912a-42fc-82d3-f9e2167680f6 -->
 
-> [!qard]- How does middleware differ from an action filter in an ASP.NET Core controller-based Web API?
-> Middleware runs in the general ASP.NET Core request pipeline for every request that reaches it, and it can run before an endpoint is selected. A controller action filter runs around a selected Web API controller action. It can read and change the action's arguments and result.
+> [!qard]- How does middleware differ from a controller action filter in ASP.NET Core?
+> Both can run shared code before and after request-handling work, and both can stop that work early. Both have access to the HTTP request and response through `HttpContext`.
 >
-> | Aspect | Middleware | Controller action filter |
-> |---|---|---|
-> | Position | A pipeline component that runs in registration order and can run before routing selects an endpoint. | Runs after controller action selection, immediately before and after the action method. |
-> | Requests covered | Every request that reaches it, including static files, Minimal API endpoints and requests that do not invoke controllers. An earlier component that short-circuits, or a branch that bypasses it, removes that coverage. | Only the controller actions the filter is applied to. |
-> | Context | `HttpContext` and the rest of the pipeline. It has no model-bound arguments or action result. | Action context: model-bound arguments, which it can read or replace before the action runs, and the result, which it can inspect or replace afterward. |
-> | Fits | Concerns that span endpoint types, such as exception handling, request logging, CORS and authentication. | Behavior that depends on action arguments or results for a set of controllers or actions. |
+> **Middleware wraps the next part of the HTTP pipeline.** It can surround the whole controller execution, including preparing the action’s inputs and writing its response. It can also cover requests handled elsewhere in the application. Its position determines which requests reach it.
 >
-> Minimal API handlers do not run controller action filters; endpoint filters provide handler-scoped behavior. Endpoint filters can also be explicitly attached to mapped controller actions, but they use an invocation context rather than controller-filter context.
+> **An action filter wraps the controller’s action method.** It runs after MVC has prepared the values passed to that method. Alongside `HttpContext`, it receives those values and can inspect or change the result the method returns, before MVC writes that result as the HTTP response.
 >
-> [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0) · [Microsoft: Middleware in Minimal API apps](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/middleware?view=aspnetcore-10.0) · [Microsoft: Endpoint filters](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/min-api-filters?view=aspnetcore-10.0)
+> Middleware fits behavior that should work independently of controller actions. An action filter fits behavior that needs direct access to an action’s inputs or returned result.
+>
+> [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0) · [Microsoft: ASP.NET Core middleware](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-10.0)
 
 <!-- qard-id: 8d463f18-1072-4f4b-b785-c13f213e9fc9 -->
 

@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "createdAt": 1794301597238,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "generic-contracts",
+  "title": "Choose generic type parameters and constraints without replacing type safety with object casts",
+  "goal": "apply",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "cloze",
+      "objective": "generic-contracts",
+      "goal": "apply",
+      "prompt": "A helper returns the largest element of an array. It must work for both `int[]` and `string[]` and use no casts. It must also pass `best` to `CompareTo` as a `T`, so an `int` argument is not boxed. Fill in the smallest constraint that makes the body compile:\n\n```csharp\nstatic T Largest<T>(T[] items) where T : {{constraint}}\n{\n    T best = items[0];\n    foreach (var item in items)\n        if (item.CompareTo(best) > 0) best = item;\n    return best;\n}\n```",
+      "marks": 1,
+      "blanks": [
+        {
+          "id": "constraint",
+          "answers": [
+            "IComparable<T>",
+            "System.IComparable<T>"
+          ]
+        }
+      ],
+      "rubric": [
+        {
+          "point": "Constraint is the generic `IComparable<T>`, which supplies `CompareTo(T)` for both `int` and `string`",
+          "marks": 1
+        }
+      ],
+      "model": "`IComparable<T>`\n\nOptional: the non-generic `IComparable` takes an `object` argument, so it boxes an `int`. `INumber<T>` would exclude `string`.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+        "heading": "Constraints"
+      }
+    },
+    {
+      "id": "c2",
+      "type": "short",
+      "objective": "generic-contracts",
+      "goal": "apply",
+      "prompt": "A message bus offers two versions of a registration method. `IHandler` is an interface with a `Handle()` method.\n\n```csharp\n// A\nstatic void Register(object handler)\n{\n    var h = (IHandler)handler;   // explicit cast\n    h.Handle();\n}\n\n// B\nstatic void Register<T>(T handler) where T : IHandler\n{\n    handler.Handle();\n}\n```\n\nA caller passes an instance of `AuditLog`, a class that does **not** implement `IHandler`, to each version. For each version, state whether the mistake is caught at compile time or at run time, and what happens.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Version A compiles, then fails at run time when the cast to `IHandler` executes (an `InvalidCastException` is thrown)",
+          "marks": 1
+        },
+        {
+          "point": "Version B is rejected at compile time because `AuditLog` does not satisfy the `IHandler` constraint, so the program does not build",
+          "marks": 1
+        }
+      ],
+      "model": "- **A:** compiles. At run time the cast `(IHandler)handler` throws an `InvalidCastException`.\n- **B:** compile-time error. `AuditLog` does not meet the `where T : IHandler` constraint, so the call is rejected before the code runs.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+        "heading": "Constraints"
+      }
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

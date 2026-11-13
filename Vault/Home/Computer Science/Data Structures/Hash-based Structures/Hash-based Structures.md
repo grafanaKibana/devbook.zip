@@ -5,10 +5,10 @@ summary: "Dictionary, hash set, and Bloom filter, trading element ordering for n
 tags: [FolderNote]
 level: ["4"]
 priority: Medium
-status: Done
+status: In Progress
 publish: true
 created: "2026-07-09T18:37:04.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-10T14:39:34.300Z"
 ---
 

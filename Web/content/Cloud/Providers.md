@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-08-16T07:07:52.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-08-20T20:41:15.510Z
 topic:
   - Cloud
@@ -10,7 +10,7 @@ summary: A developer-oriented introduction to AWS, Azure, and Google Cloud and t
 level:
   - "2"
 priority: Medium
-status: Creation
+status: New
 ---
 
 AWS, Microsoft Azure, and Google Cloud expose the same broad capability families: compute, storage, databases, messaging, identity, networking, observability, analytics, and AI. They are not interchangeable implementations. Each provider has different APIs, identity conventions, regions, quotas, pricing meters, consistency guarantees, and failure behavior.

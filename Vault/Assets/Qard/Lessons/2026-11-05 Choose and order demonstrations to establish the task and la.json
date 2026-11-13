@@ -1,0 +1,520 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
+      "text": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"An LLM adapting to a task from prompt examples without weight updates.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: Done\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Prompt Engineering/In-Context Learning\"\nflashcard_uid: \"a871bbf2\"\ncreated: \"2026-02-28T13:40:02.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:14:17.480Z\"\n---\n\nIn-context learning changes model behavior through examples in the prompt, without updating model weights. The model still predicts the next token at inference time. Demonstrations shift that prediction by establishing the task, label space, and expected output shape.\n\nShot count is only the visible control: zero-shot provides no example, one-shot provides one, and few-shot provides several. Example choice, order, and formatting often matter as much as count. Every demonstration also consumes context that could have held the actual input.\n\n# Zero-Shot Prompting\n\nZero-shot prompting supplies instructions without a demonstration. It is the cheapest useful baseline because every later technique should beat it by enough to justify extra tokens and maintenance.\n\nIt works well when labels are clear, fields are explicit, or a transformation has a simple rule.\n\nInstruction-tuned models are built to follow task descriptions, so they are generally stronger zero-shot baselines than base language models.\n\n```text\nClassify sentiment as Positive, Neutral, or Negative.\n\nText: \"The battery life is acceptable, but the camera is disappointing.\"\nAnswer:\n```\n\nTypical output:\n\n```text\nNeutral\n```\n\n# One-Shot Prompting\n\nOne-shot prompting adds one complete input-output pair. A single example is often enough when the instruction is understood but the output schema is not.\n\n```text\nExtract entities from support messages.\nReturn JSON with keys: customer, issue, severity.\n\nInput: \"Tom reports typo in footer link on pricing page.\"\nOutput: {\"customer\":\"Tom\",\"issue\":\"footer link typo on pricing page\",\"severity\":\"low\"}\n\nInput: \"Ava cannot reset password after SSO migration. She is blocked from login.\"\nOutput:\n```\n\nPossible output:\n\n```json\n{\"customer\":\"Ava\",\"issue\":\"password reset fails after SSO migration\",\"severity\":\"high\"}\n```\n\n# Few-Shot Prompting\n\nFew-shot prompting adds several demonstrations. The set can show class boundaries and edge cases that prose describes poorly, but repeated easy examples mostly burn tokens.\n\nExamples make the local task concrete. They expose the allowed labels, demonstrate the schema, and give the model a nearby pattern to continue.\n\nMin et al. (2022) found that demonstration format, label space, and input distribution explain much of few-shot performance on the tasks they studied. Corrupting labels did less damage than a simple input-label mapping account would predict. Correct labels are still the only sensible production choice. The result shows how strongly the model uses structure around them.\n\n```text\nExtract entities from support messages.\nReturn JSON with keys: customer, issue, severity.\n\nInput: \"Maria says checkout crashes on payment step. Impact is high for all EU users.\"\nOutput: {\"customer\":\"Maria\",\"issue\":\"checkout crash on payment step\",\"severity\":\"high\"}\n\nInput: \"Tom reports typo in footer link on pricing page.\"\nOutput: {\"customer\":\"Tom\",\"issue\":\"footer link typo on pricing page\",\"severity\":\"low\"}\n\nInput: \"Ava cannot reset password after SSO migration. She is blocked from login.\"\nOutput:\n```\n\nPossible output:\n\n```json\n{\"customer\":\"Ava\",\"issue\":\"password reset fails after SSO migration\",\"severity\":\"high\"}\n```\n\n# Building a Demonstration Set\n\n- Separators, casing, and field order stay consistent across examples.\n- The set covers real decision boundaries, including classes that are easy to confuse.\n- A few representative examples are more useful than many near-duplicates.\n- More than one ordering is tested because later examples can receive disproportionate influence.\n- Demonstrations are added for format or boundary failures. They cannot supply missing external facts reliably.\n\n# Limitations\n\n- Long dependency chains and global constraints can remain brittle even with good examples.\n- Demonstrations condition behavior. They are not a reliable store for facts absent from the model and prompt.\n- Long example blocks leave less context for the request and its source material.\n- A model upgrade, reordered example, or formatting change can move quality enough to require reevaluation.\n\nWhen this pattern is not enough for reasoning-heavy tasks, [[Reasoning Techniques]] covers the next options.\n\n# Pitfalls\n\n## Recency Bias in Example Ordering\n\nThe last example can pull outputs toward a rare edge case.\n\nSeveral fixed orderings are tested against the same evaluation set. Randomizing order in production can reduce systematic position bias, but it also makes failures harder to reproduce, so that tradeoff is measured before randomization is enabled.\n\n## Adding More Shots Instead of Fixing the Root Cause\n\nInconsistent output often comes from ambiguous instructions or mismatched example formats. Adding more examples can amplify both problems.\n\nThe schema is normalized first. Another shot is added only when evaluation shows a missing case rather than a broken contract.\n\n## Context Window Pressure\n\nA long demonstration block can crowd out the document or conversation being processed. The failure may appear as truncation, lost instructions, or weak attention to earlier content.\n\nThe fixed token cost of the prompt is measured, and context is reserved for the largest supported input and output. When that budget no longer fits, demonstrations are shortened or retrieved.\n\n# Tradeoffs\n\n| Approach | Token cost | Format control (heuristic) | External facts supplied by the technique | Use when |\n|----------|-----------|---------------|-------------------|----------|\n| Zero-shot | Minimal | Low | None | Simple, well-specified tasks. Instruction-tuned models |\n| One-shot | Low | Medium | None | Format is inconsistent. One example clarifies the schema |\n| Few-shot (3-5) | Medium | High | None | Ambiguous class boundaries. Complex output structure |\n| Fine-tuning | High (training) | Very high | No reliable external source | Stable behavior at scale. Examples cannot fit in context |\n| RAG + zero-shot | Medium (retrieval) | Low | Yes (external docs) | Task requires external knowledge not in model weights |\n\nThe facts column describes only the evidence that each technique supplies automatically. Shot count describes only the number of demonstrations, so trusted documents supplied separately can accompany a zero-shot, one-shot or few-shot prompt. The format-control ratings are heuristics that require validation on the target model and task. Neither examples nor fine-tuning enforce a schema, so a strict output shape still needs structured outputs or schema validation.\n\nZero-shot is the starting baseline. One example is added for a stubborn output contract, and further demonstrations only for measured boundary failures. Fine-tuning fits stable behavior at scale. Retrieval fits tasks that need external facts.\n\n# Questions\n\n<!-- qard-id: c88469f4-babd-4f11-9181-de7a49f1a0f7 -->\n> [!qard]- When should a prompt move from zero-shot to one-shot or few-shot?\n> A prompt moves beyond zero-shot only when evaluation shows a gap that examples can close. Each added example stays only if it improves results on a representative evaluation set.\n>\n> 1. **Zero-shot:** instructions without examples. This is enough when the instruction and allowed labels already define the task, and it is the cheapest baseline that later prompts must beat.\n> 2. **One-shot:** one complete input-output pair. This fits when the task is understood but the output shape is not, such as JSON keys or field order.\n> 3. **Few-shot:** several diverse examples. These fit when they show decision boundaries better than prose can, such as classes that are easy to confuse. Near-duplicate easy examples add tokens without adding information.\n>\n> The evaluation gate matters because examples are not free. Each one consumes context on every request. Example choice, order and formatting can also change behavior, so a model upgrade or a reordering can require reevaluation. When inconsistent output comes from an ambiguous instruction or conflicting example formats, more examples can amplify the problem, so fixing the instruction and format comes first.\n>\n> Examples make a format likely, not guaranteed. A strict output shape still needs structured outputs or schema validation.\n>\n> Sources: [Min et al., Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837) · [OpenAI Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs)\n\n<!-- qard-id: 72a29801-08d8-4f28-a17b-c5049c397cfc -->\n> [!qard]- How does in-context learning differ from fine-tuning and retrieval?\n> In-context learning adapts a pretrained model to a task through instructions and examples placed in the prompt. The model still predicts the next token, and the examples shift that prediction by showing the task structure, the label space and the output format. No weights change, so the effect applies only to requests that include the examples.\n>\n> | Aspect | In-context learning | Fine-tuning | Retrieval |\n> |---|---|---|---|\n> | What changes | The prompt of one request. | The model's weights, through a training run. | The context, filled at request time with passages from an external store. |\n> | What it mainly supplies | How to perform the task: format, labels and boundary cases. | Stable learned behavior that no longer has to fit in every prompt. | Evidence the model lacks, such as current or private documents. |\n> | How long the effect lasts | Only while the examples are in the prompt. | Until the model is retrained or replaced. | It reflects whatever the index contains when the request runs. |\n> | Main cost | Context tokens on every request, plus sensitivity to example choice and order. | Training data, training runs and a model lifecycle to maintain. | Indexing and retrieval quality; poor retrieval caps answer quality. |\n>\n> The mechanisms combine: one prompt can contain retrieved passages and a few examples and be sent to a base or fine-tuned model. Examples are still not a reliable substitute for current or private source material, because they demonstrate behavior rather than serving as a dependable store of facts.\n>\n> Sources: [Brown et al., Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165) · [Min et al., Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837) · [OpenAI prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering)\n\n<!-- qard-id: 10d2fab2-81ed-4276-8775-ea307e40ec1b -->\n> [!qard]- What can few-shot examples clarify, and what problems do they not solve?\n> Few-shot examples clarify how a task should be performed. They show the output format, the allowed labels, conventions such as casing and field order, and the boundary between easily confused cases. They are not a dependable source of facts and cannot enforce permissions or runtime limits. Their own effect also depends on how they are chosen.\n>\n> What they do not solve:\n>\n> - **Missing or changing facts:** examples condition the response to the current prompt without updating model weights. They demonstrate behavior, so they are not a reliable store for facts absent from the model and the supplied context. Current or private evidence comes from trusted context supplied with the request, such as provided documents or retrieved passages.\n> - **Permissions and runtime limits:** prompt text cannot enforce authorization, budgets or loop termination in a multi-step workflow. Those controls run in the runtime, outside the model.\n>\n> Their effect is also sensitive and costly. Example choice, format and order, as well as the model itself, can change the result, so a change to any of them needs reevaluation. A long example block also uses context needed for the request and its source material.\n>\n> Sources: [Min et al., Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837) · [OpenAI prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering)\n\n# References\n\n- [Brown et al. 2020 - Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)\n- [Min et al. 2022 - Rethinking the Role of Demonstrations](https://arxiv.org/abs/2202.12837)\n- [Prompt Engineering for Large Language Models (Eugene Yan)](https://eugeneyan.com/writing/prompting/)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1793900156296,
+  "topic": "Choose and order demonstrations to establish the task and label space without leaking evaluation answers or wasting the context budget",
+  "notes": [
+    "Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md"
+  ],
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "demonstration-effects",
+  "steps": [
+    {
+      "title": "How demonstrations work",
+      "explain": "Start with what never changes: an LLM predicts the next token. Its weights are fixed at inference time. So a prompt can change behaviour only by changing the text the model continues.\n\nA demonstration is text of that kind. An input-output pair inside the prompt makes some continuations much more likely than others. Compare the two prompts below.\n\n- **Instruction only:** \"Extract customer, issue, severity.\" The model still has to guess the schema.\n- **Instruction plus one pair:** the model now sees the JSON keys, the casing, and what a \"low\" severity looks like. The nearest pattern to continue is obvious.\n\nSo demonstrations establish three things: the **task**, the **label space** (the allowed outputs), and the **output shape** (format). *In-Context Learning* says this directly. The examples shift the prediction. They do not retrain the model, and the effect lasts only while the examples are in that request.\n\nThe shot count names the visible control:\n\n- **Zero-shot:** instructions only.\n- **One-shot:** one pair.\n- **Few-shot:** several pairs.\n\nCount is only part of the story. Min et al. (2022), cited in the note, found that format, label space and input distribution explain much of the gain. Example choice, order and formatting matter at least as much as the number of shots.\n\nThere is also a cost. Every example uses context that could have held the real input.",
+      "connect": "This opens the lesson. The task interface you already specified (instructions, inputs, constraints, outputs) is what demonstrations fill in. The later steps on choosing, ordering and budgeting examples all rest on this mechanism.",
+      "checkFirst": true,
+      "check": {
+        "id": "k1",
+        "type": "long",
+        "prompt": "A prompt says \"Classify sentiment as Positive, Neutral, or Negative\" and the model sometimes answers with a full sentence instead of one label. You add two input-output examples, and the answers become single labels. No model weights were updated.\n\nExplain what the examples changed and why the effect appeared. Then name one cost of adding them.",
+        "marks": 3,
+        "goal": "explain",
+        "objective": "demonstration-effects",
+        "source": {
+          "path": "Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
+          "heading": "Few-Shot Prompting"
+        },
+        "rubric": [
+          {
+            "point": "The model still predicts the next token with fixed weights. The examples change the prompt text it conditions on, so they shift the prediction without retraining.",
+            "marks": 1
+          },
+          {
+            "point": "The examples established the output shape or label space: a single label from the allowed set. This gave the model a nearby pattern to continue.",
+            "marks": 1
+          },
+          {
+            "point": "Names a cost: examples use context tokens on every request, leaving less room for the real input. Also accept that behaviour is sensitive to example choice or order and needs re-evaluation.",
+            "marks": 1
+          }
+        ],
+        "model": "The model's weights never changed. It still predicts the next token, but the prompt now contains two input-output pairs. Those pairs show the allowed labels and the expected output shape, a single word, so the most likely continuation is now one label instead of a sentence. The effect is local: it applies only to requests that include the examples.\n\nCost: the examples take up context tokens on every request, leaving less room for the actual input. Behaviour can also shift if the examples are reordered or reformatted."
+      },
+      "misconceptions": [
+        {
+          "signs": "Says the model \"learned\" the task or was updated or fine-tuned by the examples, and that it will now remember the format in later requests.",
+          "reteach": "Weights are fixed at inference. The examples are just prompt text that the model conditions on when predicting the next token. Remove them from the next request and the effect disappears. That is the difference from fine-tuning, where weights change and the behaviour persists."
+        },
+        {
+          "signs": "Credits only the number of examples, e.g. \"more shots means better\", and ignores what the examples showed (format, label space).",
+          "reteach": "Count is only the visible control. What matters is what the examples establish: the task, the allowed labels and the output shape. Min et al. found format, label space and input distribution explain much of the gain. Repeated easy examples mostly waste tokens."
+        },
+        {
+          "signs": "Gives no cost, or says examples are free once written. May claim they supply new facts the model lacks.",
+          "reteach": "Every demonstration occupies context on every request, which leaves less room for the real input. Examples also demonstrate behaviour. They are not a reliable store of facts the model and prompt lack."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Decision gate: zero, one, or few",
+      "explain": "Two facts are already accepted. Demonstrations shift the next-token prediction without changing weights. Every demonstration also costs context tokens on every request.\n\nA cost paid on every request needs a measured gain. So shot count is not a style choice. Evidence decides it, starting from the cheapest option.\n\n1. **Zero-shot first.** *In-Context Learning* calls it the cheapest useful baseline. Every later technique must beat it by enough to justify the extra tokens and upkeep. It is enough when the instruction and labels already define the task.\n2. **Evaluate, then read the failure.** The failure type picks the fix:\n   - Task understood, **output shape** wrong (JSON keys, field order) → **one-shot**. One complete input-output pair shows the contract.\n   - **Class boundaries** wrong between easily confused labels → **few-shot**. Several diverse examples show what prose describes poorly.\n   - Inconsistent output from an **ambiguous instruction or mismatched example formats** → fix the instruction or format first. More shots amplify the problem.\n3. **Keep a shot only if it earns its place.** Re-test on a representative evaluation set. Near-duplicate easy examples add tokens but no information.\n\nExamples make a format likely, not guaranteed. A strict schema still needs structured outputs or validation.",
+      "connect": "Step 1 showed that demonstrations shift predictions by fixing task, label space and format. This step turns that into a decision rule: add shots only for a measured gap a demonstration can close, so the context budget is not wasted.",
+      "checkFirst": true,
+      "check": {
+        "id": "k2",
+        "type": "long",
+        "goal": "apply",
+        "objective": "demonstration-effects",
+        "marks": 3,
+        "prompt": "A zero-shot support-ticket extractor gets the content right, but the JSON keys vary between runs (`issue`, `problem`, `description`). A teammate proposes adding 8 examples \"just to be safe\". What would you do instead, and why? Name the cost of the teammate's plan.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
+          "heading": "Few-Shot Prompting"
+        },
+        "rubric": [
+          {
+            "point": "Diagnoses the failure as an output-shape/format problem, not a missing-knowledge or boundary problem, so the right fix is one example (one-shot) showing the exact keys, or first stating the schema in the instruction",
+            "marks": 1
+          },
+          {
+            "point": "Rejects 8 examples as unmeasured: add shots only when evaluation shows a gap examples can close, and verify the fix on an evaluation set",
+            "marks": 1
+          },
+          {
+            "point": "Names the cost: every shot consumes context tokens on every request, leaving less room for the input; near-duplicates add tokens without information",
+            "marks": 1
+          }
+        ],
+        "model": "Add one complete input-output example showing the exact keys (`customer`, `issue`, `severity`). The content is already correct, so the gap is the output shape, and one pair is the lightest thing that closes it. Fix the instruction wording first if it does not name the keys. Then re-run the evaluation set to confirm the keys are stable.\n\nEight examples is a guess. Each shot costs context tokens on every request and leaves less room for the real input. Similar easy examples add tokens but no information. Add more shots only if evaluation shows a remaining gap, such as confused class boundaries. If strict keys are required, use structured outputs or schema validation, because examples only make the format likely."
+      },
+      "misconceptions": [
+        {
+          "signs": "Says to add more examples (e.g. 8 or 10) for safety, or that more shots always improve consistency.",
+          "reteach": "Shots are not free: each one costs context tokens on every request. Near-duplicate examples add no information, and when the real problem is an ambiguous instruction or mismatched formats, more examples amplify it. Add a shot only for a measured gap, and prefer the smallest fix: here one example showing the keys."
+        },
+        {
+          "signs": "Picks few-shot because the output is inconsistent, without identifying what kind of failure it is.",
+          "reteach": "Match the failure to the fix. Wrong output shape, with content correct → one complete pair. Confused class boundaries → several diverse examples. Ambiguous instruction → fix the instruction first. Here the content is right and only the keys drift, so it is a shape problem."
+        },
+        {
+          "signs": "Says examples or one-shot will guarantee the JSON keys, or skips the evaluation step.",
+          "reteach": "Examples make a format likely, not guaranteed. Confirm the change on a representative evaluation set. If the schema must be exact, use structured outputs or schema validation."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Building an effective set",
+      "explain": "Each demonstration costs context on every request. The In-Context Learning note: \"every demonstration also consumes context that could have held the actual input.\" So each example must teach something the others don't.\n\nAsk what a demonstration can teach: the task, the label space, the output shape. Once an example has shown that, a near-copy shows nothing new. The note says it directly: \"repeated easy examples mostly burn tokens.\"\n\nWhat earns tokens:\n\n- **Decision boundaries.** Prose describes the line between easily confused classes badly. Examples on either side of it describe it well. Easy cases the model already gets right teach nothing.\n- **Consistent format.** Separators, casing and field order stay identical across examples. The model continues the nearest pattern, so a mismatched example gives it two patterns to choose from. Min et al. found that format, label space and input distribution explain much of few-shot performance.\n- **Diversity over volume.** A few representative examples beat many near-duplicates.\n\nWhat to drop: near-duplicates, trivially easy cases, and anything added to supply facts the model lacks. Demonstrations condition behavior; they do not store facts.\n\nSelection rule: add an example for a measured format or boundary failure.",
+      "connect": "Step 2 decided when to move beyond zero-shot; this step decides what goes into the shots once you do, since every one costs tokens.",
+      "checkFirst": true,
+      "check": {
+        "id": "k3",
+        "type": "long",
+        "goal": "apply",
+        "objective": "demonstration-effects",
+        "marks": 3,
+        "source": {
+          "path": "Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
+          "heading": "Building a Demonstration Set"
+        },
+        "prompt": "A prompt extracts `severity` (low / medium / high) from support messages as JSON. The budget allows 4 demonstrations. Candidate pool:\n\n1. \"Tom reports typo in footer link.\" → `{\"severity\":\"low\"}`\n2. \"Sam reports typo in header link.\" → `{\"severity\":\"low\"}`\n3. \"Lee reports typo in sidebar text.\" → `{\"severity\":\"low\"}`\n4. \"Export is slow for one user; a workaround exists.\" → `{\"severity\":\"medium\"}`\n5. \"Ava is blocked from login after SSO migration.\" → `{\"severity\":\"high\"}`\n6. \"Checkout crashes on payment for all EU users.\" → `Severity: HIGH`\n\nWhich 4 would you use, what would you change, and why?",
+        "rubric": [
+          {
+            "point": "Keeps only one of examples 1–3 and drops the other two as near-duplicates that add tokens but no new information",
+            "marks": 1
+          },
+          {
+            "point": "Keeps examples 4, 5 and 6 (or equivalent) because they cover the medium/high boundary and a distinct case, not just easy low cases",
+            "marks": 1
+          },
+          {
+            "point": "Rewrites example 6 to the same JSON format (`{\"severity\":\"high\"}`) because mixed formats give the model competing patterns",
+            "marks": 1
+          }
+        ],
+        "model": "Keep one typo example (say 1), plus 4, 5 and 6.\n\n- 1–3 are near-duplicates; one shows the low class and the other two only burn tokens.\n- 4, 5 and 6 cover the medium/high boundary, which is where the model is most likely to err and which prose describes poorly.\n- Example 6 uses `Severity: HIGH` while all others use lowercase JSON. Rewrite it as `{\"severity\":\"high\"}` so the format is consistent."
+      },
+      "misconceptions": [
+        {
+          "signs": "Keeps examples 1, 2, 3 and one other, or says more examples of the same class improve reliability.",
+          "reteach": "Near-duplicates teach the same thing once. The note: \"repeated easy examples mostly burn tokens.\" Spend the budget on cases that differ, especially across the class boundary, such as medium vs high."
+        },
+        {
+          "signs": "Keeps example 6 as-is, or picks it without mentioning that its output format differs.",
+          "reteach": "The model continues the nearest pattern. One example with `Severity: HIGH` among lowercase JSON examples creates two competing patterns. Keep separators, casing and field order identical across all demonstrations."
+        },
+        {
+          "signs": "Chooses examples by how typical or easy they are, ignoring where the classes are hard to tell apart.",
+          "reteach": "Easy cases the model already handles add nothing. The set should cover real decision boundaries, including classes that are easy to confuse, because that is what instructions alone describe poorly."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Pitfalls: ordering and iteration",
+      "explain": "A few-shot prompt is read top to bottom, and the model predicts the next token right after the last example. That makes the **last demonstration** the closest evidence when it answers. *In-Context Learning* calls this recency bias: later examples can get disproportionate influence.\n\nSuppose the last three examples all carry the label `negative`. The model may lean toward `negative` on a new input, whatever the input says. The set is the same and only the order changed, but behaviour shifts. So order is tested, not assumed: run several fixed orderings on the same evaluation set. Randomising order can reduce systematic bias, but failures become harder to reproduce, so measure that tradeoff first.\n\nThe second trap is a wrong diagnosis. When output is inconsistent, adding shots feels like the fix. If the real cause is an ambiguous instruction or examples with mismatched formats, more shots **amplify** the problem, because each new example repeats the confusion. Each also costs context on every request.\n\nRule of thumb: check the instruction and example format first. Add or reorder shots only after both are clear, and re-evaluate after any reorder, format change, or model upgrade.",
+      "connect": "Step 3 built a set that covers boundaries in a consistent format; this step shows how that set still fails (order) and when to stop adding to it (fix the instruction first), which protects the context and evaluation budget.",
+      "checkFirst": false,
+      "check": {
+        "id": "k4",
+        "type": "long",
+        "prompt": "A 6-shot classifier gives inconsistent labels, and most predictions match the label of the last two demonstrations. A teammate proposes adding 6 more shots. (a) What does the pattern suggest, and how would you test it? (b) What would you check before adding shots, and why can adding them make things worse?",
+        "marks": 4,
+        "goal": "explain",
+        "objective": "demonstration-effects",
+        "source": {
+          "path": "Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
+          "heading": "Recency Bias in Example Ordering"
+        },
+        "rubric": [
+          {
+            "point": "Identifies recency bias: later examples get disproportionate influence on the prediction",
+            "marks": 1
+          },
+          {
+            "point": "Tests by running several fixed orderings of the same examples on the same evaluation set and comparing results",
+            "marks": 1
+          },
+          {
+            "point": "Checks for an ambiguous instruction or mismatched/inconsistent example formats before adding shots",
+            "marks": 1
+          },
+          {
+            "point": "Explains that more shots amplify an unclear instruction or format conflict and cost extra context on every request",
+            "marks": 1
+          }
+        ],
+        "model": "(a) The predictions track the last demonstrations, which points to recency bias: later examples are weighted more. Test it by running several fixed orderings of the same examples against the same evaluation set and comparing accuracy and label distribution. (b) Before adding shots, check whether the instruction is ambiguous or the examples use inconsistent formats or labels. If so, 6 more shots repeat and amplify the confusion rather than resolve it, and they also consume context on every request. Fix the instruction and format first, then re-evaluate."
+      },
+      "misconceptions": [
+        {
+          "signs": "Says more shots will fix inconsistency, or that order does not matter because the examples are the same.",
+          "reteach": "Same examples in a different order can change output, since the model predicts right after the last one. Test several fixed orderings on one evaluation set. More shots only help once the instruction and format are clear."
+        },
+        {
+          "signs": "Proposes randomising order in production as the fix without testing, or ignores the instruction as a possible cause.",
+          "reteach": "Randomising can reduce position bias but makes failures hard to reproduce, so measure it first. Also check whether an ambiguous instruction or mismatched formats are the root cause; shots amplify those."
+        },
+        {
+          "signs": "Says to fine-tune or retrain because prompts are unreliable.",
+          "reteach": "The symptom has cheap prompt-level causes: order and instruction/format clarity. Diagnose those first; retraining is a heavier response to a problem not yet isolated."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Context and evaluation boundaries",
+      "explain": "Demonstrations are not free. Every example is sent on **every request**, so it consumes context that the real input, source material and output also need. In *In-Context Learning*, the fix is to measure the fixed token cost of the prompt and reserve room for the largest supported input and output. If that budget no longer fits, shorten the demonstrations or retrieve only the relevant ones.\\n\\nNow the second boundary. A demonstration set is tuned against an evaluation set. Ask what happens if an evaluation item (or a near-copy) is used as a demonstration. The model copies the label instead of solving the task, and the score rises without the prompt getting better. That is **leakage**. Demonstrations and evaluation items must therefore come from separate pools.\\n\\nThe same evaluation set also decides whether a shot stays. The note's gate: a prompt moves beyond zero-shot only when evaluation shows a gap that examples can close, and each added example stays only if it improves results on a *representative* held-out set. A model upgrade, reorder or format change means re-running it.\\n\\nSo each demonstration is judged on two numbers: tokens it costs per request, and score it adds on data it was not copied from.",
+      "connect": "Step 4 showed that order and iteration change results; this step gives the two constraints, token budget and clean evaluation, that decide which changes are worth keeping.",
+      "checkFirst": true,
+      "check": {
+        "id": "k5",
+        "type": "long",
+        "prompt": "A team has 40 labelled support tickets. They put 8 of them in a few-shot prompt, then score the prompt on all 40 and see accuracy jump from 70% to 95%. Each extra shot also adds about 150 tokens to every request.\n\nGive **two** problems with how they measured this, and say what they should do instead.",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "Identifies leakage: 8 of the 40 scored tickets are also demonstrations, so the model can copy their labels and the score is inflated.",
+            "marks": 1
+          },
+          {
+            "point": "Says the evaluation must use held-out items not present in the prompt (separate demonstration and evaluation pools).",
+            "marks": 1
+          },
+          {
+            "point": "Identifies cost: each shot adds ~150 tokens on every request, so 8 shots add ~1,200 tokens per call that must be weighed against the gain and the context budget for input and output.",
+            "marks": 1
+          },
+          {
+            "point": "Says to keep a shot only if it improves the held-out score enough to justify its tokens, e.g. compare against the zero-shot baseline and fewer-shot variants, and re-evaluate after changes.",
+            "marks": 1
+          }
+        ],
+        "model": "1. **Leakage.** 8 of the 40 scored tickets are in the prompt as demonstrations. The model can copy their labels, so 95% overstates real performance. Fix: split the tickets into a demonstration pool and a held-out evaluation set, and score only on the held-out set.\n2. **Cost not weighed.** 8 shots at ~150 tokens add ~1,200 tokens to every request, shrinking room for the ticket and the answer. Fix: compare zero-shot, 1-, 2- and 4-shot variants on the held-out set and keep only the shots whose gain justifies their tokens. Re-run after any model, order or format change.",
+        "objective": "demonstration-effects",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Says the 95% is fine, or only criticises the token cost, without noticing that demonstrations overlap the evaluation items.",
+          "reteach": "Scoring on items that appear in the prompt tests copying, not the task. The model sees the answer. Keep demonstrations and evaluation items in separate pools, and score only on the held-out set."
+        },
+        {
+          "signs": "Suggests adding more shots, or all 40 tickets, to push accuracy higher.",
+          "reteach": "More shots are not free: each is resent on every request and uses context the input and output need. Near-duplicate easy examples add tokens without information. Add a shot only when held-out evaluation shows a boundary failure it fixes."
+        },
+        {
+          "signs": "Proposes randomising example order or changing the model to fix the measurement problem.",
+          "reteach": "Order and model changes affect behaviour, not the validity of the measurement. The measurement problem is leakage, fixed by a clean held-out set. Any such change also requires re-evaluating on that set."
+        }
+      ]
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "text": "It calls one-show/few-shot prompting, when we guide model by giving examples of expected output.  The cost is token usage, latency",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          false,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "when we guide model by giving examples",
+            "kind": "vague",
+            "note": "You named the technique but didn't explain the mechanism—the model's weights don't change, but the prompt text shifts what token it predicts next."
+          },
+          {
+            "quote": "giving examples of expected output.",
+            "kind": "missing",
+            "note": "You didn't specify what the examples demonstrated: the output shape (single label), the label space (Positive/Neutral/Negative), or why the model then continued with that format."
+          },
+          {
+            "quote": "The cost is token usage, latency",
+            "kind": "vague",
+            "note": "Token usage is correct, but you didn't explain why it matters: examples consume context tokens on every request, leaving less room for the actual input."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You named few-shot prompting and one cost, but didn't explain the mechanism or what the examples establish about output format and label space.",
+        "score": 1
+      },
+      "reply": "You're right that examples shift behaviour without retraining, and token usage is a cost. But the model's weights don't change—so how does adding example text make it predict single labels instead of sentences? What did each example show?"
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "Teammates plan would improve the JSON keys in the reponses by leaning token prediction to the tokens we expect, but will not guarantee them, more over it will spend more tokens spending token context, increase the cost, and increase chance for the hallucinations. I would better pass expected json schema to the structured output parameter",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          false,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "will not guarantee them",
+            "kind": "correct",
+            "note": "You correctly diagnosed this as a format problem, not a knowledge gap."
+          },
+          {
+            "quote": "I would better pass expected json schema to the structured output parameter",
+            "kind": "correct",
+            "note": "Schema validation directly prevents inconsistent output, avoiding in-context learning overhead."
+          },
+          {
+            "quote": "will spend more tokens spending token context, increase the cost",
+            "kind": "correct",
+            "note": "You clearly named the token cost: every shot consumes context on every request."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You rejected 8 examples for cost, but missed the key principle: measure first. Only add shots when evaluation shows you actually need them."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "Format diagnosis and token cost are right, but you skipped the crucial step: evaluate the zero-shot baseline first, then measure whether more shots close a real gap.",
+        "score": 2
+      },
+      "reply": "Good format diagnosis and token cost. Missing: only add shots when evaluation on a test set proves they're needed. Start simpler—one-shot or improve the instruction—then measure on real data."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "1, 4, 5 - to show example of each severity example, and i thing that is enough. I was thinking adding 6 as bad example, but i think it might produce more hallucinations that prevent, i would better add example with case where severity impossible to identify with null response",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "1, 4, 5",
+            "kind": "correct",
+            "note": "You've kept one low example and dropped the redundant ones 2–3."
+          },
+          {
+            "quote": "i think it might produce more hallucinations that prevent",
+            "kind": "missing",
+            "note": "Example 6 demonstrates the medium–high boundary; you need 4, 5, 6 together to cover the lesson, not skip the hard case."
+          },
+          {
+            "quote": "i would better add example with case where severity impossible to identify with null response",
+            "kind": "missing",
+            "note": "Example 6's format inconsistency is the teaching point—include it and reformat it to `{\"severity\":\"high\"}` to show the model consistent formatting."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You correctly dropped duplicates but missed that example 6 teaches format consistency when reformatted, not by avoiding it.",
+        "score": 1
+      },
+      "reply": "You got the near-duplicate removal right. But example 6 serves two purposes: (1) high-severity boundary, and (2) format lesson. By dropping it, you lose the second. The point isn't that format errors harm models—it's that we *include* them, then *fix* them, so the model learns consistency. Null response is a different lesson; you'd need 6 or similar."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "it is recency bias, instead of adding shots which will aplify the confusing, i would reorder shots, evaluation for each reorder, with choosing option where order produced least bias\n",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "it is recency bias",
+            "kind": "correct",
+            "note": "You've correctly identified the pattern—later examples get disproportionate influence."
+          },
+          {
+            "quote": "reorder shots, evaluation for each reorder, with choosing option where order produced least bias",
+            "kind": "vague",
+            "note": "Right method, but imprecise. You need to state that you'd evaluate each reordering on the same evaluation set and compare accuracy or label distribution across orderings."
+          },
+          {
+            "quote": "instead of adding shots which will aplify the confusing, i would reorder shots",
+            "kind": "missing",
+            "note": "Before proposing reordering, the rubric asks what you'd check first. You didn't mention verifying that the instruction is clear and examples use consistent formats—these could be the real root cause."
+          },
+          {
+            "quote": "which will aplify the confusing",
+            "kind": "vague",
+            "note": "You see adding shots makes things worse, but didn't explain that they amplify an unclear instruction or format conflict specifically, or mention the extra context cost on every request."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You diagnosed the bias correctly and know reordering tests it, but skipped checking whether ambiguous instructions or format conflicts are the real cause—and didn't explain why adding shots amplifies the problem beyond just 'confusion.'",
+        "score": 2
+      },
+      "reply": "You nailed the diagnosis, but the rubric asks a diagnostic step before proposing a fix: **check if the instruction is clear and examples use consistent formats.** If they aren't, reordering won't help—fix those first. More shots just amplify that confusion *and* waste context on every request. State both reasons why adding shots fails.",
+      "reteach": "Randomising can reduce position bias but makes failures hard to reproduce, so measure it first. Also check whether an ambiguous instruction or mismatched formats are the root cause; shots amplify those."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "1. They need to separate tickets that they are using for shots, and for testing to prevent prompt overfitting, which probably produced high result.\n2. I think they can start with fewer shots, and evaluate each variation of addition, and stop adding shots when accuracy improvement doesnt improve accuracy",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "separate tickets that they are using for shots, and for testing",
+            "kind": "correct",
+            "note": "You identified that demonstrations and evaluation must be kept in separate pools to prevent leakage."
+          },
+          {
+            "quote": "prevent prompt overfitting, which probably produced high result",
+            "kind": "correct",
+            "note": "You understood that the 95% is inflated due to overlap between demonstration and evaluation items—this is exactly leakage."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You didn't mention that each shot adds ~150 tokens per request, and that cost must be weighed against accuracy gains."
+          },
+          {
+            "quote": "evaluate each variation of addition, and stop adding shots when accuracy improvement doesnt improve accuracy",
+            "kind": "vague",
+            "note": "You have the right idea—test variants and keep only helpful ones—but the phrasing is unclear, and you didn't explain the criterion: a shot's accuracy gain must justify its token cost."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You correctly identified leakage and separation, but you missed the token cost analysis entirely, which is essential for deciding whether shots are worth keeping.",
+        "score": 2
+      },
+      "reply": "Right—separate pools prevent leakage. But you missed cost: each shot adds ~150 tokens per request. Compare zero-, 1-, 2-, 4-shot variants on held-out items and keep only shots whose accuracy gain justifies their tokens."
+    }
+  ],
+  "current": 4,
+  "probe": {
+    "questions": [],
+    "answers": {},
+    "submitted": true,
+    "marks": {},
+    "findings": "No probe submitted; starting fresh from prompt-interface."
+  },
+  "map": {
+    "title": "Demonstrations: choosing, ordering, and budgets",
+    "plan": "You've mastered specifying task interfaces. Now you'll learn how demonstrations fill that interface—shifting the model's predictions through examples without expensive retraining. Start with how zero, one, and few shots work, then learn what makes a demonstration set effective: coverage of decision boundaries, consistent format, and avoiding wasted tokens. Finally, you'll trace the pitfalls—recency bias in ordering, and when to fix the instruction instead of adding more shots—and how to measure context cost against evaluation budget.",
+    "mermaid": "graph TD\n  A[\"Demonstrations shift predictions by establishing task, labels, format\"] --> B[\"Choose shot count: move beyond zero only if evaluation shows a gap\"]\n  B --> C[\"Build set: cover boundaries, keep consistent format, avoid duplicates\"]\n  C --> D[\"Order: test multiple orderings; avoid recency pull; fix instruction first\"]\n  C --> E[\"Measure token cost; reserve context budget; keep eval set separate\"]\n  D --> F[\"Choose and order demonstrations strategically\"]\n  E --> F",
+    "objective": "demonstration-effects",
+    "steps": [
+      {
+        "title": "How demonstrations work",
+        "why": "Understanding the mechanism—that examples shift predictions without retraining—prevents over-relying on shots and guides when they actually matter."
+      },
+      {
+        "title": "Decision gate: zero, one, or few",
+        "why": "Each shot costs context tokens; grounding shot count in measured gaps prevents guessing and waste."
+      },
+      {
+        "title": "Building an effective set",
+        "why": "Good coverage of decision boundaries and consistent format earn their tokens; near-duplicates and easy cases waste them."
+      },
+      {
+        "title": "Pitfalls: ordering and iteration",
+        "why": "Recency bias and instruction clarity are the main traps; knowing them prevents adding shots when you should fix the root cause."
+      },
+      {
+        "title": "Context and evaluation boundaries",
+        "why": "Token cost and eval leakage are the operational constraints; measuring them keeps demonstrations sustainable."
+      }
+    ]
+  },
+  "stepsFor": "[\"Demonstrations: choosing, ordering, and budgets\",[\"How demonstrations work\",\"Decision gate: zero, one, or few\",\"Building an effective set\",\"Pitfalls: ordering and iteration\",\"Context and evaluation boundaries\"]]",
+  "accepted": true,
+  "finishedAt": 1793901946654,
+  "close": {
+    "summary": "Lesson on how demonstrations fill a task interface in in-context learning: how zero, one and few shots work, when to move up from zero-shot, how to build a demonstration set, ordering pitfalls, and context-budget and leakage limits.\n\n**What the student showed**\n- Named few-shot prompting and one cost, but did not explain the mechanism. Demonstrations establish the task, output format and label space without any weight update.\n- Diagnosed format problems and token cost correctly. Skipped the step of evaluating a zero-shot baseline first, then checking whether extra shots close a real gap.\n- Dropped duplicate examples correctly. Missed that a reformatted example teaches format consistency.\n- Spotted recency bias and knew that reordering tests it. Did not check first whether an ambiguous instruction or a format conflict is the real cause.\n- Identified leakage and the need to separate demonstrations from evaluation data. Did not do the token-cost analysis that decides whether shots are worth keeping.\n\n**Gaps to revisit**\n- The mechanism: what demonstrations establish.\n- The zero-shot baseline gate.\n- Token cost against evaluation budget.",
+    "cards": [
+      {
+        "front": "What do in-context demonstrations establish for the model, and what do they not change?",
+        "back": "They establish the task, the output format and the label space, and they shift predictions at inference time. Model weights are unchanged."
+      },
+      {
+        "front": "Before adding few-shot examples, what should you measure first, and why?",
+        "back": "The zero-shot baseline. Add shots only if a measured gap remains. If the instruction is ambiguous or the format conflicts, fix those first, because more shots can amplify the confusion."
+      },
+      {
+        "front": "Demonstration order seems to bias outputs toward the last label. How do you test it, and what do you rule out first?",
+        "back": "Reorder the demonstrations and check whether predictions follow the order. Before blaming recency bias, rule out an ambiguous instruction and a format inconsistency."
+      },
+      {
+        "front": "How do you decide whether a demonstration is worth its place in the context?",
+        "back": "Compare its token cost against the context and evaluation budget, and keep it only if it adds coverage (a label or decision boundary) or a format signal that other shots lack. Drop duplicates. Never draw demonstrations from the evaluation set, because that leaks answers."
+      }
+    ],
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-05 Choose and order demonstrations to establish the task and la.md",
+    "nextCheck": "2026-11-08"
+  }
+}
