@@ -13980,16 +13980,16 @@
     "version": 1,
     "id": "ed9f729234e2405d9876ac4f5aa28fbd",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-13T20:03:30.781717Z",
-    "elapsed_seconds": 44.82628170000001,
+    "elapsed_seconds": 70.59505240000001,
     "calls_reserved": 1,
-    "responses_received": 0,
+    "responses_received": 1,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T20:04:15.607506Z",
+    "checkpoint_at": "2026-11-13T20:04:41.376273Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -39716,7 +39716,7 @@
   },
   "parked_author_proposals": {},
   "pending_author_proposal": {
-    "workload_id": "2b8d0b6edd0c40dc8564a83316ed31b6",
+    "workload_id": "ed9f729234e2405d9876ac4f5aa28fbd",
     "topic_id": "programming-e6aba2bd",
     "batch": {
       "topic": "Programming",
@@ -39741,12 +39741,62 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
+          "expected_hash": "9a51f4d51594dcee6627c0ca5a8a7dcf1b75efd03144403aa8d273d2844d98ea",
+          "before": "    LOAD[Assembly loader] --> VERIFY[Type verifier]\n    VERIFY --> JIT[JIT compiler]",
+          "after": "    LOAD[Assembly loader] --> TYPES[Type loading and binding]\n    TYPES --> JIT[JIT compiler]",
+          "reason": "Replaces the 'Type verifier' stage with type loading and binding, which the loader table row and startup steps already describe.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Diagram shows loader, type binding, JIT, native code"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The diagram presents an IL verifier stage as a fixed part of the runtime path, which the rest of the note never defines and which is not part of the described startup steps.",
+          "reader_benefit": "The diagram matches the startup steps and subsystem table."
+        },
+        {
+          "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
+          "expected_hash": "9a51f4d51594dcee6627c0ca5a8a7dcf1b75efd03144403aa8d273d2844d98ea",
+          "before": "Assembly loading, validation, code generation, and dependency resolution happen incrementally. Verification depends on the loaded and executed path and on how code is produced, so the runtime does not eagerly verify or compile the whole application before its entry point runs.",
+          "after": "Assembly loading, type binding, code generation, and dependency resolution happen incrementally, so the runtime does not eagerly load or compile the whole application before its entry point runs.",
+          "reason": "Drops the vague verification claim and keeps the incremental-execution point.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Loading, binding and compilation are incremental, not eager"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The sentence hedges about verification without stating what is verified, which misleads about the modern runtime path.",
+          "reader_benefit": "The explanation states only the incremental behavior that the startup steps support."
+        },
+        {
+          "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
+          "expected_hash": "9a51f4d51594dcee6627c0ca5a8a7dcf1b75efd03144403aa8d273d2844d98ea",
+          "before": "<!-- qard-id: 1df86558-fa6b-4e81-85a8-817e1ea6a4b7 -->\n> [!qard]- How do managed and unmanaged code differ?\n> Managed code runs under the CLR and relies on its services, such as garbage collection of managed objects, exception handling and the runtime type system. Unmanaged (native) code runs outside those services. It follows a native platform ABI and its own ownership rules, such as explicit freeing or reference counting.\n>\n>\n> Interop declarations must also match the native ABI, including calling convention and data layout; that determines call correctness rather than resource lifetime.\n>\n> [Microsoft: Native interoperability ABI support](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/abi-support) · [Microsoft: SafeHandle class](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle)",
+          "after": "<!-- qard-id: 1df86558-fa6b-4e81-85a8-817e1ea6a4b7 -->\n> [!qard]- How do managed and unmanaged code differ?\n> Managed code runs under the CLR and relies on its services, such as garbage collection of managed objects, exception handling and the runtime type system. Unmanaged (native) code runs outside those services. It follows a native platform ABI and its own ownership rules, such as explicit freeing or reference counting.\n>\n> [Microsoft: Native interoperability ABI support](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/abi-support) · [Microsoft: SafeHandle class](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle)",
+          "reason": "Removes the ABI side paragraph, which the next card covers, so the answer stays a clean contrast.",
+          "kind": "rewrite",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Managed code runs under CLR services",
+            "Unmanaged code is outside them and uses native ABI and ownership rules"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The first card's answer ends with an ABI paragraph that repeats the next card and is off the question.",
+          "reader_benefit": "A tighter, gradeable answer without duplicated content."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its text and Microsoft's managed-execution, ReadyToRun and Native AOT documentation. The opening defines the CLR and the IL, ReadyToRun and Native AOT paths. The diagram is explicitly caveated as conceptual and incremental. The subsystem table, JIT/ReadyToRun/AOT comparison and tiering section are accurate, including Dynamic PGO on by default from .NET 8, OSR, and the two-pass exception dispatch. The assembly-loading section correctly states cooperative unloading of collectible contexts. The pitfalls are consistent with the finalization and dispose cards in sibling notes. The three cards each test one gradeable task, with sources on the answer side, and they do not duplicate nearby GC or startup cards. The only open point is the 'Type verifier' box in the diagram. It is a conceptual simplification for CoreCLR and the prose already hedges it, and I could not establish a better wording from a primary source, so it is left unchanged. No native violations are known."
+          "outcome": "changed",
+          "reason": "Removed the 'Type verifier' stage from the diagram and the vague verification sentence, so the path matches the startup steps and table. Trimmed a duplicated ABI aside from the first card while keeping its ID. The rest (JIT/ReadyToRun/AOT, tiering, loading, pitfalls, other cards) was checked and is kept."
         }
       ],
       "feedback": []
@@ -39761,8 +39811,10 @@
       "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-13T07:10:48.245696Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-13T20:04:41.376251Z",
+    "review_repair_key": "6c07ede9b9e90afed000835362667fb23282cdbfb9a5334e7930b307a4e2a029",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "notes": [
         {
@@ -39833,68 +39885,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The note is strong overall, but the diagram and the verification sentence still present an IL \"Type verifier\" stage as part of the modern CLR path. Current .NET (CoreCLR) does not perform IL verification, so this stays inaccurate. The keep disposition left it open without resolving it.",
-          "page_type": "Concept — typed frontmatter; Questions and References optional; Qard callouts with protected IDs; voice of a senior engineer at a whiteboard.",
-          "current_text_evidence": [
-            {
-              "quote": "LOAD[Assembly loader] --> VERIFY[Type verifier]",
-              "line_start": 36,
-              "reason": "The diagram shows a verifier stage between loading and JIT. Current CoreCLR has no IL verifier, so the stage misleads a reader about the runtime path."
-            },
-            {
-              "quote": "Verification depends on the loaded and executed path and on how code is produced",
-              "line_start": 48,
-              "reason": "The prose hedges the verifier but still implies that verification takes place. It should state that CoreCLR does not verify IL, or the stage should be removed or renamed."
-            },
-            {
-              "quote": "Interop declarations must also match the native ABI, including calling convention and data layout; that determines call correctness rather than resource lifetime.",
-              "line_start": 131,
-              "reason": "A side point in the managed-versus-unmanaged answer. It repeats in the next card and makes the answer wander."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the runtime execution, JIT/AOT and interop topics form one coherent CLR overview, and a split would not make any part more useful.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Accuracy",
-              "location": "Mermaid diagram (line 36) and the paragraph at line 48",
-              "evidence": "\"LOAD[Assembly loader] --> VERIFY[Type verifier]\" and \"Verification depends on the loaded and executed path\"",
-              "effect": "A reader concludes that the modern .NET runtime verifies IL. .NET Core and later do not perform IL verification; the JIT only does limited validity checks. The inaccuracy remains in an audited note.",
-              "fix": "Remove the verifier box or rename it to type loading and binding. State in the prose that CoreCLR does not verify IL, and that verification belonged to the .NET Framework security model."
-            },
-            {
-              "severity": "Medium",
-              "dimension": "Question quality",
-              "location": "First Qard, 'How do managed and unmanaged code differ?'",
-              "evidence": "The answer ends with a paragraph on ABI and calling convention, with stray double blank lines.",
-              "effect": "Off-question trivia and repetition: the ABI point is repeated in the second card, and the answer is no longer a clean contrast.",
-              "fix": "Remove the ABI paragraph from the first card and keep it in the interop card only if it is wanted. Retain the existing card ID."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "FAIL",
-            "clarity": "PASS",
-            "question_quality": "FAIL",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The keep disposition leaves a known inaccurate \\\"Type verifier\\\" stage in the diagram and the verification prose unresolved. One Qard also carries off-topic ABI content. The note is therefore not clean.",
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "6c07ede9b9e90afed000835362667fb23282cdbfb9a5334e7930b307a4e2a029",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
