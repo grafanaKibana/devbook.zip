@@ -9517,6 +9517,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Programming/NET/NET.md": {
+      "content_hash": "2b281408d4e00833c4fbb6fcdd6b1e06a01633b8e1078bd151821487c61eb7cb",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "2b281408d4e00833c4fbb6fcdd6b1e06a01633b8e1078bd151821487c61eb7cb",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Programming/NET/NET.md",
+          "verdict": "CLEAN",
+          "summary": "The complete note is accurate, compact and well ordered: stack overview, a diagnostic rule, a version-neutral support-policy statement, then two distinct cards. No concrete defect justifies an edit, and rewording would be churn.",
+          "page_type": "FolderNote — keeps tags: [FolderNote], the protected datacorejsx map block, optional Questions and References, and Qard identity metadata.",
+          "current_text_evidence": [
+            {
+              "quote": ".NET is a cross-platform application stack built from a runtime, base libraries, SDK tooling, languages, and higher-level frameworks.",
+              "line_start": 18,
+              "reason": "The opening names the layers quickly and accurately, and assigns GC to the runtime and restore/build/publish to the SDK."
+            },
+            {
+              "quote": "“.NET is slow” is not yet a useful hypothesis.",
+              "line_start": 20,
+              "reason": "The prose gives a concrete engineering decision: separate retention, pipeline, synchronous I/O and codegen causes rather than blaming .NET as a whole."
+            },
+            {
+              "quote": ".NET ships annually with separate LTS and STS support tracks.",
+              "line_start": 22,
+              "reason": "This lifecycle claim is version-neutral and still correct, so it will not go stale; it states the policy consequence without hardcoding dates."
+            },
+            {
+              "quote": "This is a conceptual map rather than an official fixed taxonomy; component and version boundaries can change.",
+              "line_start": 44,
+              "reason": "The table is one focused comparison and carries the caveat that matters, avoiding overclaiming an official taxonomy."
+            },
+            {
+              "quote": "Why does identifying the owning .NET layer help diagnose a symptom?",
+              "line_start": 48,
+              "reason": "The second card tests a distinct mechanism-and-why task and does not repeat the table; its answer cites relevant Microsoft Learn sources."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note is a compact hub whose overview, layer map and diagnostic reasoning form one coherent topic; child notes are reached through the folder map.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -13922,7 +13982,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 717.6364470000004,
+    "elapsed_seconds": 721.2899277000005,
     "calls_reserved": 17,
     "responses_received": 17,
     "attempted_paths": [
@@ -14194,7 +14254,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:09:55.657576Z",
+    "checkpoint_at": "2026-11-13T07:09:59.311057Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -39296,105 +39356,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "2b8d0b6edd0c40dc8564a83316ed31b6",
-    "topic_id": "programming-e6aba2bd",
-    "batch": {
-      "topic": "Programming",
-      "topic_id": "programming-e6aba2bd",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/NET.md",
-          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"Microsoft's cross-platform runtime and framework for building web, cloud, desktop, and mobile software.\"\ntags: [FolderNote]\npublish: true\nstatus: Creation\nlevel: [\"4\"]\npriority: High\nqard-deck: \"Programming\"\nqard-topic: \"NET/NET\"\nflashcard_uid: \"f0f708ed\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:14:17.329Z\"\n---\n\n.NET is a cross-platform application stack built from a runtime, base libraries, SDK tooling, languages, and higher-level frameworks. The runtime executes managed code and owns services such as garbage collection. The SDK restores, builds, tests, and publishes projects. C# and F# target the same runtime model, while ASP.NET Core and other frameworks add application-specific abstractions.\n\nThese boundaries matter during diagnosis. A memory symptom can begin with application retention and become visible through GC behavior. Slow HTTP work may come from a framework pipeline, synchronous I/O, or generated machine code. “.NET is slow” is not yet a useful hypothesis.\n\n.NET ships annually with separate LTS and STS support tracks. Deployment policy should follow the current support lifecycle rather than assuming that a runtime remains serviced because an application still starts on it.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Questions\n\n<!-- qard-id: 290f9386-ef5a-4148-8677-71811ce19253 -->\n> [!qard]- What are the main layers of .NET?\n> A practical model splits .NET into languages and compilers, SDK tooling, the runtime, the base libraries and application frameworks.\n>\n> | Layer | What it owns | Example of a problem it owns |\n> |---|---|---|\n> | Languages and compilers | Translate C#, F# or Visual Basic source into IL stored in assemblies. | A compile error, or unexpected behavior of a language feature. |\n> | SDK and tools | Restore packages, then build, test and publish projects, mainly through the `dotnet` CLI. | A package-restore, build or publish failure. |\n> | Runtime (CLR) | Load assemblies and run managed code: JIT compilation, garbage collection, exception handling and threading. | GC pauses, or slow startup while methods are compiled. |\n> | Base libraries | Shared APIs such as collections, I/O, networking and threading primitives. | The behavior or cost of a specific API, such as a collection or stream. |\n> | Application frameworks | Application models such as ASP.NET Core, WPF or .NET MAUI, including pipelines like HTTP middleware. | A slow or misordered request pipeline. |\n>\n>\n> This is a conceptual map rather than an official fixed taxonomy; component and version boundaries can change.\n>\n> Sources: [Microsoft Learn: Introduction to .NET](https://learn.microsoft.com/en-us/dotnet/core/introduction) · [Microsoft Learn: Common Language Runtime overview](https://learn.microsoft.com/en-us/dotnet/standard/clr)\n\n> [!qard]- Why does identifying the owning .NET layer help diagnose a symptom?\n> Each layer owns different behavior, so naming the owning layer turns a vague symptom into a testable hypothesis. A symptom can appear elsewhere from its cause: rising memory appears as GC activity even when application code keeps objects reachable; a slow HTTP request can come from the framework pipeline, synchronous application I/O, or generated machine code. The diagnosis follows the responsible mechanism rather than treating all of .NET as one component.\n>\n> Sources: [Microsoft Learn: Introduction to .NET](https://learn.microsoft.com/en-us/dotnet/core/introduction) · [Microsoft Learn: Common Language Runtime overview](https://learn.microsoft.com/en-us/dotnet/standard/clr)\n\n# References\n\n- [.NET documentation](https://learn.microsoft.com/en-us/dotnet/)\n- [.NET runtime source](https://github.com/dotnet/runtime)\n- [.NET release lifecycle](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core)\n",
-          "hash": "2b281408d4e00833c4fbb6fcdd6b1e06a01633b8e1078bd151821487c61eb7cb",
-          "topic": "Programming",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Programming/NET/NET.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its current text and the cited Microsoft Learn pages. The intro correctly describes .NET as runtime, base libraries, SDK tooling, languages and frameworks. It says the runtime owns GC, the SDK owns restore/build/test/publish, and ASP.NET Core adds application abstractions; all of that matches the documented model. The diagnosis paragraph gives a concrete decision rule (memory retention vs GC, pipeline vs sync I/O vs JIT code). The lifecycle sentence (annual releases, separate LTS and STS tracks, deployment follows support policy) is accurate and deliberately version-neutral, so it cannot go stale. The layer table in the first card is a single focused comparison. It carries an explicit caveat that the taxonomy is conceptual, and its sources are versioned and relevant. The second card tests a distinct reasoning task without repeating the table. The FolderNote map block, qard IDs, frontmatter and References are intact, and the references are bare, authoritative and non-duplicated. No known violations are listed. No defect warrants an edit, and rewording would be churn."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Programming/NET/NET.md": "2b281408d4e00833c4fbb6fcdd6b1e06a01633b8e1078bd151821487c61eb7cb"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Programming/NET/NET.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-13T07:09:35.378862Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/NET.md",
-          "verdict": "CLEAN",
-          "summary": "The complete note is accurate, compact and well ordered: stack overview, a diagnostic rule, a version-neutral support-policy statement, then two distinct cards. No concrete defect justifies an edit, and rewording would be churn.",
-          "page_type": "FolderNote — keeps tags: [FolderNote], the protected datacorejsx map block, optional Questions and References, and Qard identity metadata.",
-          "current_text_evidence": [
-            {
-              "quote": ".NET is a cross-platform application stack built from a runtime, base libraries, SDK tooling, languages, and higher-level frameworks.",
-              "line_start": 18,
-              "reason": "The opening names the layers quickly and accurately, and assigns GC to the runtime and restore/build/publish to the SDK."
-            },
-            {
-              "quote": "“.NET is slow” is not yet a useful hypothesis.",
-              "line_start": 20,
-              "reason": "The prose gives a concrete engineering decision: separate retention, pipeline, synchronous I/O and codegen causes rather than blaming .NET as a whole."
-            },
-            {
-              "quote": ".NET ships annually with separate LTS and STS support tracks.",
-              "line_start": 22,
-              "reason": "This lifecycle claim is version-neutral and still correct, so it will not go stale; it states the policy consequence without hardcoding dates."
-            },
-            {
-              "quote": "This is a conceptual map rather than an official fixed taxonomy; component and version boundaries can change.",
-              "line_start": 44,
-              "reason": "The table is one focused comparison and carries the caveat that matters, avoiding overclaiming an official taxonomy."
-            },
-            {
-              "quote": "Why does identifying the owning .NET layer help diagnose a symptom?",
-              "line_start": 48,
-              "reason": "The second card tests a distinct mechanism-and-why task and does not repeat the table; its answer cites relevant Microsoft Learn sources."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note is a compact hub whose overview, layer map and diagnostic reasoning form one coherent topic; child notes are reached through the folder map.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The whole-note audit found no concrete error, readability problem, repetition or card-quality defect. The keep is supported by current-text evidence, and the existing Qard ID and frontmatter remain intact.",
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
