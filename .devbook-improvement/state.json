@@ -330,46 +330,56 @@
       }
     },
     "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md": {
-      "content_hash": "80a77805481a8a17a566f98debd65ceba8d69144cf9bc04bfdb031b521e28661",
-      "rules_hash": "82a04e65ab00760ab41233edf8129ba880e8d1cec5477811d321548e627e215a",
+      "content_hash": "a5462d89287a779c30903aa2638163781603d2d637c5d894e55b6e9dbdfa9b58",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "outcome": "keep",
       "repair_input_hash": "",
-      "evaluation_hash": "5a3fa995c63f53372dd78ead04ba8f98f001da6bbdef06a9844aa9812c855360",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_process": "focused-whole-note-v1",
       "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "keep_review": {
-        "content_hash": "80a77805481a8a17a566f98debd65ceba8d69144cf9bc04bfdb031b521e28661",
-        "rules_hash": "82a04e65ab00760ab41233edf8129ba880e8d1cec5477811d321548e627e215a",
-        "evaluation_hash": "5a3fa995c63f53372dd78ead04ba8f98f001da6bbdef06a9844aa9812c855360",
+        "content_hash": "a5462d89287a779c30903aa2638163781603d2d637c5d894e55b6e9dbdfa9b58",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
         "review": {
           "path": "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md",
           "verdict": "CLEAN",
-          "summary": "The compact hub note states the pipeline model and where each concern belongs. Its request-flow explanation, diagram and two valid endpoint snippets match the documented ASP.NET Core model. Frontmatter, the protected folder-map block and the single Microsoft reference are intact, and no edit is warranted.",
-          "page_type": "FolderNote: keeps the FolderNote tag and the protected datacorejsx card-map block. Questions are optional and absent.",
+          "summary": "The hub note states the pipeline model and the middleware-versus-endpoint placement decision, then gives a matching flow diagram and two valid endpoint snippets. The prose is direct and non-repetitive, and no accuracy, structure or protected-block issue was found, so keeping it unchanged is justified.",
+          "page_type": "FolderNote — keeps tags: [FolderNote] and the protected Datacore folder map. Questions are optional and absent. One References bullet is a bare descriptive link.",
           "current_text_evidence": [
             {
               "quote": "An ASP.NET Core API is an ordered HTTP pipeline ending at a selected endpoint.",
-              "line_start": 15,
-              "reason": "This opening states the operating idea quickly and accurately: ordered middleware, then routing to an endpoint."
+              "line_start": 16,
+              "reason": "The opening gives the operating idea quickly, and it is accurate."
             },
             {
-              "quote": "A misplaced concern either runs too broadly or gets copied across handlers.",
-              "line_start": 17,
-              "reason": "This states the engineering decision and the failure that results from a wrong placement. It is not rubric filler."
+              "quote": "Authentication, exception handling, and request logging usually sit in middleware.",
+              "line_start": 18,
+              "reason": "This gives the concrete placement decision, contrasted with endpoint-level concerns such as authorization metadata, binding and validation. The split is correct for ASP.NET Core."
             },
             {
               "quote": "The response then unwinds through the same middleware in reverse order, which is why registration order affects both request and response behavior.",
-              "line_start": 26,
-              "reason": "This explains the mechanism and the condition that matters, and it is factually correct for ASP.NET Core middleware."
+              "line_start": 27,
+              "reason": "This states the mechanism and its consequence correctly."
             },
             {
-              "quote": "return FolderStructureMap;",
-              "line_start": 21,
-              "reason": "The protected folder-map block is intact, as the FolderNote contract requires."
+              "quote": "Endpoint->>Middleware: Result",
+              "line_start": 39,
+              "reason": "The diagram matches the described unwinding. It is a simplified but not misleading flow."
+            },
+            {
+              "quote": "app.MapGet(\"/health\", () => Results.Ok(new { status = \"ok\" }));",
+              "line_start": 50,
+              "reason": "The Minimal API snippet is valid, and its fence has a language identifier."
+            },
+            {
+              "quote": "public sealed class OrdersController : ControllerBase",
+              "line_start": 60,
+              "reason": "The controller snippet correctly uses [ApiController], [Route] and [HttpGet] on a ControllerBase subclass. Its fence is typed."
             }
           ],
           "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note is a short hub with one coherent topic, the request pipeline and endpoint styles. Nothing in it is separable and independently useful.",
+          "split_suggestion": "No split: the note is one compact hub topic. The pipeline model and the two endpoint styles are interdependent, and there is no separately useful subtopic.",
           "findings": [],
           "source_checks": [],
           "rejection_equivalence": [],
@@ -382,6 +392,54 @@
           }
         },
         "review_process": "focused-whole-note-v1"
+      },
+      "keep_review_history": {
+        "0ed61b00d3ff2091ba1dbf35b389ace5bd4c4844fbc621e1fa4990ba497d84b2": {
+          "content_hash": "80a77805481a8a17a566f98debd65ceba8d69144cf9bc04bfdb031b521e28661",
+          "rules_hash": "82a04e65ab00760ab41233edf8129ba880e8d1cec5477811d321548e627e215a",
+          "evaluation_hash": "5a3fa995c63f53372dd78ead04ba8f98f001da6bbdef06a9844aa9812c855360",
+          "review": {
+            "path": "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md",
+            "verdict": "CLEAN",
+            "summary": "The compact hub note states the pipeline model and where each concern belongs. Its request-flow explanation, diagram and two valid endpoint snippets match the documented ASP.NET Core model. Frontmatter, the protected folder-map block and the single Microsoft reference are intact, and no edit is warranted.",
+            "page_type": "FolderNote: keeps the FolderNote tag and the protected datacorejsx card-map block. Questions are optional and absent.",
+            "current_text_evidence": [
+              {
+                "quote": "An ASP.NET Core API is an ordered HTTP pipeline ending at a selected endpoint.",
+                "line_start": 15,
+                "reason": "This opening states the operating idea quickly and accurately: ordered middleware, then routing to an endpoint."
+              },
+              {
+                "quote": "A misplaced concern either runs too broadly or gets copied across handlers.",
+                "line_start": 17,
+                "reason": "This states the engineering decision and the failure that results from a wrong placement. It is not rubric filler."
+              },
+              {
+                "quote": "The response then unwinds through the same middleware in reverse order, which is why registration order affects both request and response behavior.",
+                "line_start": 26,
+                "reason": "This explains the mechanism and the condition that matters, and it is factually correct for ASP.NET Core middleware."
+              },
+              {
+                "quote": "return FolderStructureMap;",
+                "line_start": 21,
+                "reason": "The protected folder-map block is intact, as the FolderNote contract requires."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note is a short hub with one coherent topic, the request pipeline and endpoint styles. Nothing in it is separable and independently useful.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          },
+          "review_process": "focused-whole-note-v1"
+        }
       }
     },
     "Vault/Home/Programming/NET/ASP NET Web API/Authentication.md": {
@@ -14212,7 +14270,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-13T20:03:30.781717Z",
-    "elapsed_seconds": 678.1477683999999,
+    "elapsed_seconds": 682.9128219999999,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -17021,7 +17079,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T20:14:48.928995Z",
+    "checkpoint_at": "2026-11-13T20:14:53.694049Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -43171,110 +43229,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "ed9f729234e2405d9876ac4f5aa28fbd",
-    "topic_id": "programming-e6aba2bd",
-    "batch": {
-      "topic": "Programming",
-      "topic_id": "programming-e6aba2bd",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md",
-          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"How ASP.NET Core routes each HTTP request through middleware to handlers or controllers.\"\nlevel: [\"4\"]\npriority: High\ntags: [FolderNote]\n\npublish: true\nstatus: Creation\ncreated: \"2026-02-14T21:59:03.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.317Z\"\n---\n\nAn ASP.NET Core API is an ordered HTTP pipeline ending at a selected endpoint. Middleware handles concerns that span requests. Routing selects a Minimal API handler or controller action. Filters and endpoint code handle work that depends on the selected operation.\n\nThe main design decision is where each concern belongs. Authentication, exception handling, and request logging usually sit in middleware. Authorization metadata, model binding, validation, and response mapping stay closer to the endpoint. A misplaced concern either runs too broadly or gets copied across handlers.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Request Flow\n\nThe request moves inward through middleware until routing and endpoint execution take over. The response then unwinds through the same middleware in reverse order, which is why registration order affects both request and response behavior.\n\n```mermaid\nsequenceDiagram\n  participant Client\n  participant Middleware\n  participant Routing\n  participant Endpoint\n\n  Client->>Middleware: Request\n  Middleware->>Routing: Route match\n  Routing->>Endpoint: Invoke\n  Endpoint->>Middleware: Result\n  Middleware->>Client: Response\n```\n\n# Endpoint Examples\n\nMinimal API:\n\n```csharp\nvar app = WebApplication.CreateBuilder(args).Build();\n\napp.MapGet(\"/health\", () => Results.Ok(new { status = \"ok\" }));\n\napp.Run();\n```\n\nController style:\n\n```csharp\n[ApiController]\n[Route(\"api/orders\")]\npublic sealed class OrdersController : ControllerBase\n{\n    [HttpGet(\"{id}\")]\n    public ActionResult<OrderDto> GetById(string id) => Ok(new OrderDto(id));\n}\n```\n\n# References\n\n- [ASP.NET Core web API documentation](https://learn.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-10.0)\n",
-          "hash": "a5462d89287a779c30903aa2638163781603d2d637c5d894e55b6e9dbdfa9b58",
-          "topic": "Programming",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md",
-          "outcome": "keep",
-          "reason": "Audited the whole folder note against ASP.NET Core 10 web API behavior. The opening states the operating idea (ordered pipeline ending at a selected endpoint) and the placement decision (middleware versus endpoint-level concerns). The Request Flow section correctly says the response unwinds through middleware in reverse, so registration order matters. The sequence diagram matches that flow. Both C# examples are valid: the Minimal API uses WebApplication.CreateBuilder and MapGet, and the controller uses [ApiController], [Route] and [HttpGet] with ControllerBase. The Datacore folder map is protected and kept. The fence languages are set, there is a single relevant Microsoft reference, and the note has no cards, so there are no question defects. No known violations are reported. The note is compact and complete for a hub page, so edits would only be cosmetic."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md": "a5462d89287a779c30903aa2638163781603d2d637c5d894e55b6e9dbdfa9b58"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-13T20:14:25.820308Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "The single folder note is accurate, compact and self-contained for a hub page. It has no known violations, no edits are proposed, and the keep disposition is supported by the current text.",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md",
-          "verdict": "CLEAN",
-          "summary": "The hub note states the pipeline model and the middleware-versus-endpoint placement decision, then gives a matching flow diagram and two valid endpoint snippets. The prose is direct and non-repetitive, and no accuracy, structure or protected-block issue was found, so keeping it unchanged is justified.",
-          "page_type": "FolderNote — keeps tags: [FolderNote] and the protected Datacore folder map. Questions are optional and absent. One References bullet is a bare descriptive link.",
-          "current_text_evidence": [
-            {
-              "quote": "An ASP.NET Core API is an ordered HTTP pipeline ending at a selected endpoint.",
-              "line_start": 16,
-              "reason": "The opening gives the operating idea quickly, and it is accurate."
-            },
-            {
-              "quote": "Authentication, exception handling, and request logging usually sit in middleware.",
-              "line_start": 18,
-              "reason": "This gives the concrete placement decision, contrasted with endpoint-level concerns such as authorization metadata, binding and validation. The split is correct for ASP.NET Core."
-            },
-            {
-              "quote": "The response then unwinds through the same middleware in reverse order, which is why registration order affects both request and response behavior.",
-              "line_start": 27,
-              "reason": "This states the mechanism and its consequence correctly."
-            },
-            {
-              "quote": "Endpoint->>Middleware: Result",
-              "line_start": 39,
-              "reason": "The diagram matches the described unwinding. It is a simplified but not misleading flow."
-            },
-            {
-              "quote": "app.MapGet(\"/health\", () => Results.Ok(new { status = \"ok\" }));",
-              "line_start": 50,
-              "reason": "The Minimal API snippet is valid, and its fence has a language identifier."
-            },
-            {
-              "quote": "public sealed class OrdersController : ControllerBase",
-              "line_start": 60,
-              "reason": "The controller snippet correctly uses [ApiController], [Route] and [HttpGet] on a ControllerBase subclass. Its fence is typed."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note is one compact hub topic. The pipeline model and the two endpoint styles are interdependent, and there is no separately useful subtopic.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
