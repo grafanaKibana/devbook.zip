@@ -27569,10 +27569,11 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-13T20:06:59.454392Z",
-    "phase": "commit_created",
-    "updated_at": "2026-11-13T20:19:51Z",
+    "phase": "branch_updated",
+    "updated_at": "2026-11-13T20:19:58Z",
     "evidence": {
-      "commit_sha": "7a5d484049ea147a8ec95c727aff5fb731dda244"
+      "commit_sha": "7a5d484049ea147a8ec95c727aff5fb731dda244",
+      "branch_sha": "7a5d484049ea147a8ec95c727aff5fb731dda244"
     }
   },
   "export_operations": {
