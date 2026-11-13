@@ -1,0 +1,68 @@
+name: Vercel Deployments
+
+on:
+  repository_dispatch:
+    types:
+      - vercel.deployment.ready
+      - vercel.deployment.success
+      - vercel.deployment.promoted
+      - vercel.deployment.error
+      - vercel.deployment.failed
+      - vercel.deployment.canceled
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: vercel-deployment-${{ github.event.client_payload.git.ref }}
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  report:
+    if: >-
+      github.event.sender.login == 'vercel[bot]' &&
+      github.event.client_payload.project.id == 'prj_NwP2L88ODNMTDmHk0fWS5c1jtw2Y' &&
+      ((github.event.client_payload.git.ref == 'main' && github.event.client_payload.environment == 'production') ||
+      (github.event.client_payload.git.ref == 'stage' && github.event.client_payload.environment == 'preview')) &&
+      (github.event.action != 'vercel.deployment.ready' || github.event.client_payload.git.ref == 'stage')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const payload = context.payload.client_payload;
+            const environment = { main: 'Production', stage: 'Stage' }[payload.git.ref];
+            const state = {
+              'vercel.deployment.ready': 'success',
+              'vercel.deployment.success': 'success',
+              'vercel.deployment.promoted': 'success',
+              'vercel.deployment.error': 'error',
+              'vercel.deployment.failed': 'failure',
+              'vercel.deployment.canceled': 'inactive',
+            }[context.payload.action];
+            if (!environment || !state || !/^[a-f0-9]{40}$/.test(payload.git.sha)) {
+              throw new Error('Invalid Vercel deployment event');
+            }
+            const url = payload.url ? new URL(payload.url) : undefined;
+            if (url && (url.protocol !== 'https:' || url.username || url.password)) {
+              throw new Error('Invalid Vercel deployment URL');
+            }
+            const task = `vercel:${payload.id || payload.git.sha}`;
+            const { data: existing } = await github.rest.repos.listDeployments({
+              ...context.repo, sha: payload.git.sha, environment, task, per_page: 1,
+            });
+            const deployment = existing[0] || (await github.rest.repos.createDeployment({
+              ...context.repo, ref: payload.git.sha, environment, task,
+              auto_merge: false, required_contexts: [],
+              production_environment: payload.git.ref === 'main',
+              description: `Vercel ${payload.git.ref} deployment`,
+            })).data;
+            await github.rest.repos.createDeploymentStatus({
+              ...context.repo, deployment_id: deployment.id, state,
+              environment_url: url?.href || '', log_url: url?.href || '',
+              auto_inactive: state === 'success',
+              description: `Vercel deployment ${state}`,
+            });
