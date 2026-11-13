@@ -13922,7 +13922,7 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 514.6473666,
+    "elapsed_seconds": 518.5230611000001,
     "calls_reserved": 12,
     "responses_received": 12,
     "attempted_paths": [
@@ -14182,7 +14182,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:06:32.668494Z",
+    "checkpoint_at": "2026-11-13T07:06:36.544188Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
