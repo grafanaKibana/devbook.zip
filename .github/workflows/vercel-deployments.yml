@@ -62,7 +62,8 @@ jobs:
             })).data;
             await github.rest.repos.createDeploymentStatus({
               ...context.repo, deployment_id: deployment.id, state,
-              environment_url: url?.href || '', log_url: url?.href || '',
+              environment_url: environment === 'Stage' ? 'https://stage.devbook.zip' : url?.href || '',
+              log_url: url?.href || '',
               auto_inactive: state === 'success',
               description: `Vercel deployment ${state}`,
             });
