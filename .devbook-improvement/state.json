@@ -15004,7 +15004,7 @@
   "focused_workload": {
     "version": 1,
     "id": "33d52575e13e4f17bb1f948894b16798",
-    "status": "sealed",
+    "status": "invalidated",
     "phase": "sealed",
     "started_at": "2026-11-13T21:02:51.294207Z",
     "elapsed_seconds": 136.69518250000002,
@@ -28911,7 +28911,13 @@
     },
     "summary": "## 1. Note improvements\n\nReviewed 1 notes in Networks; improved 1. Calls: 2; elapsed: 137 seconds; stop: provider_error.\n\n- [`Networks/Architecture & Ops/Architecture & Ops.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-networks-ab2c47c3-g1/Vault/Home/Networks/Architecture%20%26%20Ops/Architecture%20%26%20Ops.md) — The only reference, RFC 1122, covers host protocol requirements and is a weak fit for a hub on network architecture and operations. Swaps the host-requirements RFC for an IETF overview of network fault-detection and performance-monitoring tools (ping, traceroute, BFD, OWAMP/TWAMP), which matches the operations theme. The reference now points to material on diagnosing failures and measuring network performance, matching the hub's operations focus. [RFC 7276 surveys IETF OAM tools that detect and isolate failures and monitor performance, aimed at network operators.](https://www.rfc-editor.org/rfc/rfc7276)\n- [`Networks/Network Data Path.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-networks-ab2c47c3-g1/Vault/Home/Networks/Network%20Data%20Path.md) — The sentence 'bounds the amount of receive data the peer advertises' is circular and obscures what TCP flow control actually limits.; Owner feedback says the current sentence is correct but harder to comprehend and remember. Replaces a circular, unclear sentence with the actual mechanism: the receive window caps data in flight.; Replaces the dense phrasing with a short subject-verb sentence that keeps the accurate window-caps-in-flight mechanism. The reader sees directly that the window caps in-flight data while queues elsewhere can still add latency.; The window mechanism is stated plainly, so it is easier to read and recall.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- https://github.com/grafanaKibana/devbook.zip/pull/220#discussion_r4551630961: implemented — Reworded the sentence into simpler, more memorable prose while preserving the accurate meaning.\n\n<!-- devbook-export-validation -->Quartz export: awaiting the source-bound native export and checks.\n",
     "diff": "diff --git a/Vault/Home/Networks/Network Data Path.md b/Vault/Home/Networks/Network Data Path.md\nindex 24911d7..2a4892b 100644\n--- a/Vault/Home/Networks/Network Data Path.md\t\n+++ b/Vault/Home/Networks/Network Data Path.md\t\n@@ -7,7 +7,7 @@ priority: Medium\n status: Ready to Repeat\n publish: true\n created: \"2026-07-18T07:07:47.000Z\"\n-modified: \"2026-11-12T07:35:50.989Z\"\n+modified: \"2026-11-13T21:03:38.263Z\"\n published: \"2026-07-16T07:43:33.509Z\"\n ---\n \n@@ -44,7 +44,7 @@ receiver application pauses\n   → send() blocks or reports EAGAIN\n ```\n \n-That feedback limits unacknowledged data in flight to the advertised window, but buffers at every layer can still accumulate delay. Increasing buffer sizes postpones pressure and may convert a short slowdown into stale queued work. Applications still need deadlines and bounded work queues. Socket flow control cannot decide when a response has lost business value.\n+The receiver's window caps how much data the sender can have in flight, but buffers at every layer can still add delay. Increasing buffer sizes postpones pressure and may convert a short slowdown into stale queued work. Applications still need deadlines and bounded work queues. Socket flow control cannot decide when a response has lost business value.\n \n UDP has no transport receive window or retransmission. When the receive path cannot keep up, datagrams may be dropped. Reliability, pacing, and reconstruction belong to the application protocol when it needs them.\n \n",
-    "question_changes": []
+    "question_changes": [],
+    "invalidation": {
+      "reason": "Base branch changed before publication.",
+      "expected_base_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
+      "observed_base_sha": "2032b76ef1fbc6e01fc6e8d7861493b4a6b0859b",
+      "at": "2026-11-13T21:05:18.285927Z"
+    }
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -40549,7 +40555,7 @@
     "cfdd8b66d8d000aa09c26959ae34f9850d9479953c7455e7b594c50c296f0f9c": {
       "id": "cfdd8b66d8d000aa09c26959ae34f9850d9479953c7455e7b594c50c296f0f9c",
       "topic": "Networks",
-      "status": "pending",
+      "status": "invalidated",
       "base_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
       "head_sha": "04a2ad2670875c25c0c6dd9e3b46a137fae9c14e",
       "feedback": [
@@ -43490,7 +43496,8 @@
       },
       "source_hashes": {
         "Vault/Home/Networks/Network Data Path.md": "72ddc869b14695eb0ee21da56a6e140badc525013c10bd8d9c4f0e068ccd5eb2"
-      }
+      },
+      "invalidated_reason": "Base branch changed before publication."
     }
   },
   "held_proposals": {
