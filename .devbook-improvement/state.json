@@ -13978,384 +13978,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "2b8d0b6edd0c40dc8564a83316ed31b6",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 803.2513312000003,
-    "calls_reserved": 19,
-    "responses_received": 19,
-    "attempted_paths": [
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md",
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md",
-      "Vault/Home/Programming/NET/NET Standart.md",
-      "Vault/Home/Programming/NET/NET.md"
-    ],
+    "id": "ed9f729234e2405d9876ac4f5aa28fbd",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-13T20:03:30.781717Z",
+    "elapsed_seconds": 0.0011662,
+    "calls_reserved": 0,
+    "responses_received": 0,
+    "attempted_paths": [],
     "accepted_records": [],
-    "outcomes": [
-      {
-        "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
-        "outcome": "proposal_blocked",
-        "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance",
-        "result": {
-          "status": "proposal_blocked",
-          "stage": "deterministic_application",
-          "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance",
-          "model_calls": 3
-        }
-      },
-      {
-        "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md",
-                "outcome": "keep",
-                "reason": "I read the whole note against the C# event rules and found no defect that justifies an edit.\n\n- **Opening:** it correctly says that code outside the declaring type can only use `+=` and `-=`.\n- **PriceFeed example:** it follows the standard pattern, with `EventHandler<T>`, a protected virtual `OnPriceChanged` and `?.Invoke`. The null-conditional call reads the delegate once, so it also avoids a race with unsubscription.\n- **Public delegate field vs event:** the three blocked operations (assign, invoke, replace) match the language rules, and the first Qard's table repeats them accurately.\n- **Custom accessors:** the lock-based `add`/`remove` example is valid. The INFO callout is accurate. Field-like events have compiler-generated thread-safe accessors, the language does not mandate an implementation, and raising the event is a separate race.\n- **Pitfalls:** the leak path (GC root, publisher, delegate, subscriber) is correct. The point that a short-lived publisher does not keep subscribers alive is correct. The `async void` caveat is correct, and the link to the Async Await note supplies the missing detail.\n- **Qards:** both cards test one task each and carry Microsoft primary sources, and their answers give mechanisms and boundaries.\n- **Known violations:** the inventory is empty, so no native violation needs fixing.\n\nThe prose is concise and in a whiteboard voice. I did not make cosmetic edits."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The note is accurate and compact, both Qards are single-task with primary sources, and no native violation or concrete defect justifies an edit. The keep is justified.",
-            "notes": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md",
-                "verdict": "CLEAN",
-                "summary": "The whole note was read and found accurate. The access restriction, the standard pattern, the thread-safety nuance, the leak mechanism and the async void caveat are all correct and ordered sensibly. The Qards are bounded and sourced. The keep is justified.",
-                "page_type": "Concept — typed frontmatter retained, optional Questions and References present, code fences carry language identifiers, and the [[Async Await]] link is explained in prose.",
-                "current_text_evidence": [
-                  {
-                    "quote": "it cannot raise the event or replace its invocation list",
-                    "line_start": 17,
-                    "reason": "States the core access restriction up front, which is the correct and decisive boundary."
-                  },
-                  {
-                    "quote": "The `event` keyword blocks all three operations outside the declaring type.",
-                    "line_start": 54,
-                    "reason": "Explains why events are preferred over delegate fields, with the three blocked operations listed immediately above."
-                  },
-                  {
-                    "quote": "the language does not require a particular locking or compare-exchange implementation",
-                    "line_start": 80,
-                    "reason": "This version-safe thread-safety caveat is accurate, and it separates subscription from raising."
-                  },
-                  {
-                    "quote": "exceptions after an `await` do not flow back through the event invocation",
-                    "line_start": 86,
-                    "reason": "Correct async void mechanism, with a pointer to the owning note."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: delegate events, their pitfalls and their tradeoffs form one cohesive, compact topic.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 5
-        }
-      },
-      {
-        "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
-        "outcome": "proposal_blocked",
-        "reason": "card edit must replace one complete active Qard block including adjacent metadata",
-        "result": {
-          "status": "proposal_blocked",
-          "stage": "deterministic_application",
-          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
-          "model_calls": 8
-        }
-      },
-      {
-        "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
-                "outcome": "keep",
-                "reason": "Read the whole note against current .NET/C# behavior. The following claims check out: immutability and reference-copy semantics, content-based == and Equals, literal interning (identity not contractual, NoStringInterning relaxation), string.Intern/IsInterned retention, compile-time constant folding, UTF-16 surrogate pairs with Rune, StringInfo and Normalize, string.Create, span parsing, interpolated string handlers (C# 10, StringBuilder.Append overload), ArrayPool caveats, and the guidance on ordinal versus culture comparison. The sections run in a sensible order from core properties through interning, StringBuilder, Unicode, low-allocation techniques, pitfalls and tradeoffs. The overlap between Pitfalls and Tradeoffs is small and each section adds a decision condition. The two Qards each test one task: the StringBuilder-versus-concatenation decision, and why ReferenceEquals can differ from ==. Their answers explain the mechanism and its limits, cite Microsoft Learn, and have no flagged defects. There are no known violations, so no edit is justified."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note audit found no factual, structural, question-quality or rule defects; the keep with no edits is justified.",
-            "notes": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate and well ordered, from immutability through interning, StringBuilder, UTF-16 and low-allocation techniques to pitfalls and tradeoffs. Both Qards are single bounded tasks with mechanism-level answers and Microsoft Learn sources. No concrete defect was found, so leaving it unchanged is the right call.",
-                "page_type": "Concept — frontmatter intact, optional Questions/References present and valid, code fences have language identifiers, no Links section.",
-                "current_text_evidence": [
-                  {
-                    "quote": "`string` is the C# alias for the sealed reference type `System.String`.",
-                    "line_start": 17,
-                    "reason": "The opening states the operating idea (immutability and reference copy) before the details, so the topic is quick to re-enter."
-                  },
-                  {
-                    "quote": "Compilation can request `NoStringInterning`, and runtime behavior may still vary:",
-                    "line_start": 38,
-                    "reason": "Interning is correctly stated as non-contractual; the code comment repeats this and is consistent with the later Qard."
-                  },
-                  {
-                    "quote": "Interned entries are generally retained until the runtime terminates.",
-                    "line_start": 47,
-                    "reason": "Matches the String.Intern documentation and gives the engineering consequence (high-cardinality text is a poor fit)."
-                  },
-                  {
-                    "quote": "Characters outside the Basic Multilingual Plane use a surrogate pair, so `\"\uD83D\uDC4D\".Length == 2`",
-                    "line_start": 70,
-                    "reason": "The UTF-16 explanation is correct and separates code units, scalar values (Rune) and graphemes (StringInfo)."
-                  },
-                  {
-                    "quote": "The benefit applies only when the receiving overload accepts a handler, as `StringBuilder.Append` does.",
-                    "line_start": 80,
-                    "reason": "Version (C# 10) and condition are stated precisely; this is a real condition, not a vague claim."
-                  },
-                  {
-                    "quote": "Pooling is worthwhile only when buffer allocations show up in measurement.",
-                    "line_start": 81,
-                    "reason": "Gives the decision condition and a cost, not just a technique list."
-                  },
-                  {
-                    "quote": "Forcing dynamic values into the pool can save duplicates at the price of process-long retention",
-                    "line_start": 93,
-                    "reason": "Tradeoffs add a decision condition; the overlap with Pitfalls is small and does not need removal."
-                  },
-                  {
-                    "quote": "> [!qard]- When is `StringBuilder` a better choice than string concatenation?",
-                    "line_start": 98,
-                    "reason": "One decision task. The answer explains the immutability mechanism, the capacity caveat and the lack of a fixed threshold, and cites a primary source."
-                  },
-                  {
-                    "quote": "> [!qard]- Why can `ReferenceEquals(a, b)` be false when `a == b` is true for strings?",
-                    "line_start": 111,
-                    "reason": "One dependent behavior-and-why explanation. It covers explicit and automatic interning and cites the Microsoft Learn API pages."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the topics (immutability, interning, building, Unicode, comparison) are all facets of System.String behavior and share one mental model; length does not warrant separate notes.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 10
-        }
-      },
-      {
-        "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against current C# and .NET behavior. The checked claims were: copy semantics; readonly and ref struct restrictions, including the C# 13 interface and async relaxations; the C# 10 parameterless constructor and the default-value bypass; ValueType.Equals and GetHashCode behavior; the absence of a default ==; boxing paths; using-statement copy capture; implicit versus explicit conversions; layout and padding; and C# 11 ref fields and C# 12 primary constructors. All were accurate and appropriately qualified. The explanation order works: semantics, modifiers, boxing, copies, conversions, layout, pitfalls, tradeoffs. The five Qards each test one gradeable task, are self-contained and carry primary Microsoft sources. No known violations are open, and no unresolved defects or redundancy justify an edit."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The whole-note audit found no factual, structural, question-quality or editorial defect that justifies an edit. The keep disposition is supported and no edits are proposed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate and version-qualified (C# 10 parameterless constructors, C# 11 ref fields, C# 12 primary constructors, C# 13 ref struct relaxations). It moves in a sensible order from semantics to modifiers, boxing, disposal copies, conversions, layout, pitfalls and tradeoffs. The five Qards each test one gradeable task and carry Microsoft sources. The keep is justified.",
-                "page_type": "Concept: frontmatter intact, optional Questions and References present, code fences have language identifiers, no hand-written navigation.",
-                "current_text_evidence": [
-                  {
-                    "quote": "The example's “bitwise copy” comment describes the independent value result.",
-                    "line_start": 39,
-                    "reason": "Corrects a likely misconception about the code comment without losing the example."
-                  },
-                  {
-                    "quote": "The 16-byte guideline is a starting point from framework design guidance, not a runtime cutoff.",
-                    "line_start": 43,
-                    "reason": "Gives a decided, conditioned size guideline and points to measurement, which is the engineering-judgment content the note needs."
-                  },
-                  {
-                    "quote": "C# 13 permits interface implementation and broader generic use under ref-safety rules, but converting the value to an interface still requires forbidden boxing.",
-                    "line_start": 80,
-                    "reason": "States the version-specific condition accurately with its limit."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: all sections concern one type's copy semantics and the decisions that follow from them. They are not independently useful topics.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 12
-        }
-      },
-      {
-        "path": "Vault/Home/Programming/NET/NET Standart.md",
-        "outcome": "proposal_blocked",
-        "reason": "card edit must replace one complete active Qard block including adjacent metadata",
-        "result": {
-          "status": "proposal_blocked",
-          "stage": "deterministic_application",
-          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
-          "model_calls": 15
-        }
-      },
-      {
-        "path": "Vault/Home/Programming/NET/NET.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Programming/NET/NET.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its current text and the cited Microsoft Learn pages. The intro correctly describes .NET as runtime, base libraries, SDK tooling, languages and frameworks. It says the runtime owns GC, the SDK owns restore/build/test/publish, and ASP.NET Core adds application abstractions; all of that matches the documented model. The diagnosis paragraph gives a concrete decision rule (memory retention vs GC, pipeline vs sync I/O vs JIT code). The lifecycle sentence (annual releases, separate LTS and STS tracks, deployment follows support policy) is accurate and deliberately version-neutral, so it cannot go stale. The layer table in the first card is a single focused comparison. It carries an explicit caveat that the taxonomy is conceptual, and its sources are versioned and relevant. The second card tests a distinct reasoning task without repeating the table. The FolderNote map block, qard IDs, frontmatter and References are intact, and the references are bare, authoritative and non-duplicated. No known violations are listed. No defect warrants an edit, and rewording would be churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/Programming/NET/NET.md",
-                "verdict": "CLEAN",
-                "summary": "The complete note is accurate, compact and well ordered: stack overview, a diagnostic rule, a version-neutral support-policy statement, then two distinct cards. No concrete defect justifies an edit, and rewording would be churn.",
-                "page_type": "FolderNote — keeps tags: [FolderNote], the protected datacorejsx map block, optional Questions and References, and Qard identity metadata.",
-                "current_text_evidence": [
-                  {
-                    "quote": ".NET is a cross-platform application stack built from a runtime, base libraries, SDK tooling, languages, and higher-level frameworks.",
-                    "line_start": 18,
-                    "reason": "The opening names the layers quickly and accurately, and assigns GC to the runtime and restore/build/publish to the SDK."
-                  },
-                  {
-                    "quote": "“.NET is slow” is not yet a useful hypothesis.",
-                    "line_start": 20,
-                    "reason": "The prose gives a concrete engineering decision: separate retention, pipeline, synchronous I/O and codegen causes rather than blaming .NET as a whole."
-                  },
-                  {
-                    "quote": ".NET ships annually with separate LTS and STS support tracks.",
-                    "line_start": 22,
-                    "reason": "This lifecycle claim is version-neutral and still correct, so it will not go stale; it states the policy consequence without hardcoding dates."
-                  },
-                  {
-                    "quote": "This is a conceptual map rather than an official fixed taxonomy; component and version boundaries can change.",
-                    "line_start": 44,
-                    "reason": "The table is one focused comparison and carries the caveat that matters, avoiding overclaiming an official taxonomy."
-                  },
-                  {
-                    "quote": "Why does identifying the owning .NET layer help diagnose a symptom?",
-                    "line_start": 48,
-                    "reason": "The second card tests a distinct mechanism-and-why task and does not repeat the table; its answer cites relevant Microsoft Learn sources."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note is a compact hub whose overview, layer map and diagnostic reasoning form one coherent topic; child notes are reached through the folder map.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The whole-note audit found no concrete error, readability problem, repetition or card-quality defect. The keep is supported by current-text evidence, and the existing Qard ID and frontmatter remain intact.",
-            "change_checks": []
-          },
-          "model_calls": 17
-        }
-      }
-    ],
+    "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:11:21.272460Z",
-    "topic": "Programming",
-    "topic_id": "programming-e6aba2bd",
-    "current_batch": {
-      "topic": "Programming",
-      "topic_id": "programming-e6aba2bd",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
-          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \".NET's execution engine compiling IL to native code and managing memory and types.\"\nlevel: [\"4\"]\npriority: High\nstatus: Ready to Repeat\n\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/Runtime/Common Language Runtime\"\nflashcard_uid: \"e98a40ab\"\ncreated: \"2026-02-10T16:03:55.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:14:17.331Z\"\n---\n\nThe Common Language Runtime (CLR) is .NET's managed execution engine. It loads assemblies, establishes their types, executes managed methods, and supplies services such as garbage collection, exception handling, threading, and native interoperability.\n\nMost .NET language builds produce assemblies containing Common Intermediate Language (CIL, usually called IL) and metadata. A normal runtime deployment turns executable IL into machine code with a just-in-time compiler. ReadyToRun adds native code for many methods while retaining IL, and Native AOT produces a platform-specific native application at publish time.\n\nThe runtime, libraries, and standardized assembly/type model make cross-language and cross-platform execution possible. A source language alone does not guarantee either property. Native AOT also retains runtime services even though the deployed application has no JIT compiler.\n\n# How It Works\n\n```mermaid\nflowchart TB\n  subgraph SOURCE[Source code]\n    direction LR\n    CS[C# source] --> CSC[Roslyn compiler] --> IL[Assembly with IL and metadata]\n    FS[F# source] --> FSC[F# compiler] --> IL\n  end\n\n  subgraph CLR[Common Language Runtime]\n    direction TB\n    LOAD[Assembly loader] --> VERIFY[Type verifier]\n    VERIFY --> JIT[JIT compiler]\n    JIT --> NATIVE[Native machine code]\n    NATIVE --> GC[Garbage Collector]\n    NATIVE --> EH[Exception handling]\n    NATIVE --> THREAD[Thread management]\n  end\n\n  IL --> LOAD\n  NATIVE --> OS[Operating System]\n```\n\nThe diagram is a conceptual JIT path. The arrows from native code to the GC, exception handling, and thread management show runtime services participating during execution. They are not later pipeline stages or outputs of native code. Assembly loading, validation, code generation, and dependency resolution happen incrementally. Verification depends on the loaded and executed path and on how code is produced, so the runtime does not eagerly verify or compile the whole application before its entry point runs.\n\n**Typical startup path:**\n\n1. A native host resolves the runtime configuration and starts a compatible runtime.\n2. The loader locates the entry assembly and dependencies, reads metadata as needed, and binds type and method references.\n3. Executed methods use available ReadyToRun code or are JIT-compiled. Tiered compilation may replace an earlier native body later.\n4. Runtime services such as the GC and thread pool initialize and expand according to demand.\n\n**Core runtime responsibilities:**\n\n| Subsystem | What it does |\n|---|---|\n| JIT compiler | Produces native method bodies and can recompile hot code at higher tiers |\n| Garbage collector | Allocates managed objects and reclaims unreachable graphs |\n| Type system and loader | Bind metadata, enforce runtime type rules, and support reflection |\n| Exception handling | Finds handlers and unwinds managed frames while running cleanup |\n| Thread pool | Schedules worker and I/O-completion work and adapts its thread supply |\n| Interop | Marshals calls and data across managed and native boundaries |\n\n# Managed Vs Unmanaged Code\n\nManaged code executes with runtime metadata and services. Garbage collection owns managed object storage, while the type system and exception machinery remain involved in execution. An `unsafe` C# block can use pointers without turning the containing method into unmanaged code.\n\nUnmanaged code is native code outside those managed lifetime rules. It may use manual allocation, RAII, reference counting, or another native ownership model. The GC cannot prove when a native handle or buffer should be released, so the managed boundary needs an explicit ownership contract, usually `SafeHandle` or deterministic disposal.\n\nThis example is Windows-specific P/Invoke:\n\n```csharp\nusing System.Runtime.InteropServices;\n\n[DllImport(\"kernel32.dll\", SetLastError = true)]\nstatic extern bool Beep(uint dwFreq, uint dwDuration);\n\nBeep(440, 500); // A4 note for 500ms\n```\n\n# JIT Vs AOT\n\n| Mode | Code available at startup | Runtime adaptation | Main cost |\n|---|---|---|---|\n| JIT | IL. Native code is produced when needed | Tiering and profile data can optimize executed paths for the current machine | First-use compilation and a runtime JIT |\n| ReadyToRun | IL plus precompiled native code for many methods | The JIT can still compile unsupported methods and replace hot ReadyToRun bodies | Larger assemblies and target-specific publishing |\n| Native AOT | A self-contained native application | No runtime JIT or dynamic code generation | Trimming and AOT-compatibility constraints. Target-specific output |\n\nJIT is the flexible default when dynamic loading, runtime code generation, or warm steady-state optimization matters. ReadyToRun is a middle path for reducing first-use compilation while retaining the JIT. Native AOT fits startup- and footprint-sensitive deployments whose dependencies pass AOT analysis. Measurements decide whether the publish-time tradeoff helps a particular application.\n\n## Tiered Compilation\n\nTiered compilation does not promise exactly two compilations for every method. A method may begin with quickly generated Tier 0 code, a ReadyToRun body, or a more optimized initial body, depending on runtime policy and method shape. Frequently executed code can move through additional instrumented and optimized tiers.\n\n- **Tier 0** favors low compilation cost and fast availability.\n- **Tier 1** spends more time optimizing code that has proved hot.\n- **On-Stack Replacement (OSR)** can transfer a running loop to optimized code without waiting for a later method call.\n- **Dynamic PGO**, enabled by default starting with .NET 8, feeds observed types and branch behavior into later optimization. ReadyToRun methods can also be replaced through tiering.\n\n## Assembly Loading and the Type System\n\nCurrent .NET applications use an **`AssemblyLoadContext`** to locate, load, and cache managed assemblies and their dependencies. A collectible context supports plugin-style unloading, but unloading is cooperative: the context and every object, type, method, or thread rooted through it must first become unreachable. Type identity therefore includes the loaded assembly instance, not only a namespace-qualified name.\n\nCoreCLR commonly shares JIT-generated generic code across reference-type arguments and specializes code for value-type arguments. That strategy preserves value layout and avoids boxing while limiting duplicate native code. The exact sharing strategy is a runtime implementation detail. [[Generics]] defines the language-facing constraints.\n\n## Memory Model and Exceptions\n\nThe .NET memory model constrains how reads and writes become visible across threads. `volatile`, `Interlocked`, locks, and explicit barriers provide different ordering and atomicity guarantees. They are not interchangeable performance hints.\n\nManaged exception dispatch uses two logical passes. The search pass walks frames and evaluates filters while the stack is intact. Once a handler is selected, the unwind pass runs intervening `finally` and fault cleanup before control enters that handler.\n\n# Pitfalls\n\n**Treating first-use cost as random latency.** JIT, assembly loading, static initialization, and connection setup can all appear on an early request. Traces should identify the actual source before ReadyToRun, Native AOT, or warm-up is introduced.\n\n**Blocking shared worker threads.** Sustained synchronous waits can consume the available thread-pool supply faster than its control loop adds threads. Async I/O removes that wait from a worker only when the underlying operation is genuinely asynchronous.\n\n**Using finalization as normal cleanup.** An unreachable object whose finalization remains registered stays alive until its finalizer is scheduled and run, then normally needs a later collection for reclamation. A successful dispose path normally releases the resource and calls `GC.SuppressFinalize`, avoiding that pending-finalization lifetime. `IDisposable` and `SafeHandle` make resource release explicit. A finalizer remains a narrow fallback for missed disposal.\n\n# Questions\n\n<!-- qard-id: 1df86558-fa6b-4e81-85a8-817e1ea6a4b7 -->\n> [!qard]- How do managed and unmanaged code differ?\n> Managed code runs under the CLR and relies on its services, such as garbage collection of managed objects, exception handling and the runtime type system. Unmanaged (native) code runs outside those services. It follows a native platform ABI and its own ownership rules, such as explicit freeing or reference counting.\n>\n>\n> Interop declarations must also match the native ABI, including calling convention and data layout; that determines call correctness rather than resource lifetime.\n>\n> [Microsoft: Native interoperability ABI support](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/abi-support) · [Microsoft: SafeHandle class](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle)\n\n> [!qard]- Why does interop require explicit resource lifetime management?\n> Interop needs careful lifetime management because the GC manages only one side of the boundary:\n>\n> - The GC tracks managed objects only. It cannot tell when a native handle or buffer is no longer needed.\n> - A native resource is released only when code calls its native cleanup. Disposal does this deterministically when ownership ends. A finalizer on the managed wrapper can do it later, as a fallback, if disposal was missed.\n> - `SafeHandle` is the usual managed owner for a native handle. It releases the handle when disposed, or during finalization if disposal never happened.\n> \n> If no code clearly owns a native resource, nothing may release it, and it leaks. Interop declarations must also match the native ABI, such as calling convention and data layout. That requirement affects whether a call works correctly, not how long a resource lives.\n>\n> [Microsoft: Native interoperability ABI support](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/abi-support) · [Microsoft: SafeHandle class](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle)\n\n<!-- qard-id: 58941e73-5fa8-4d3c-bbdf-87e201b3d6d8 -->\n> [!qard]- How does .NET turn IL into machine code?\n> Assemblies normally contain IL, which the processor cannot run directly. By default the runtime's JIT compiler turns each method into machine code when it is first needed. ReadyToRun moves part of that work to publish time while keeping the JIT. Native AOT moves all of it to publish time and ships no JIT.\n>\n> | Aspect | JIT | ReadyToRun | Native AOT |\n> |---|---|---|---|\n> | When machine code is produced | At run time, as methods are first used. Tiered compilation can later recompile hot methods with more optimization. | At publish time for many methods. The JIT still compiles methods without usable precompiled code and can re-optimize hot ones. | Entirely at publish time. The app runs without a JIT. |\n> | Startup | Early calls pay for compilation. | Less compilation work at startup. | No JIT work at startup. |\n> | Runtime flexibility | Dynamic loading and runtime code generation work. | Same as JIT, because the IL is kept. | Restricted: no runtime code generation, and code must work with trimming. |\n> | Main cost | Compilation time on first use. | Larger assemblies built for a specific target. | Compatibility constraints and platform-specific output. |\n>\n>\n> [Microsoft: .NET application publishing overview](https://learn.microsoft.com/en-us/dotnet/core/deploying/) · [Microsoft: Native AOT deployment](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/)\n\n> [!qard]- When do JIT, ReadyToRun, and Native AOT each fit?\n> JIT is the flexible default, especially when an app loads code dynamically or generates code at run time. ReadyToRun reduces startup compilation without giving up the JIT. Native AOT fits startup- and footprint-sensitive deployments whose code and dependencies work with AOT and trimming. ReadyToRun trades larger assemblies for less startup compilation, while Native AOT trades runtime flexibility for startup and footprint benefits, so the choice rests on measured startup and footprint needs and on the runtime features the app requires. Native AOT is not a universal upgrade.\n>\n> [Microsoft: .NET application publishing overview](https://learn.microsoft.com/en-us/dotnet/core/deploying/) · [Microsoft: Native AOT deployment](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/)\n\n# References\n\n- [Managed execution process](https://learn.microsoft.com/en-us/dotnet/standard/managed-execution-process)\n",
-          "hash": "9a51f4d51594dcee6627c0ca5a8a7dcf1b75efd03144403aa8d273d2844d98ea",
-          "topic": "Programming",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "base_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
-    "reservation_deadline": "2026-11-13T07:25:51.692785Z",
-    "stop_reason": "repair_pending",
-    "sealed_at": "2026-11-13T07:11:21.272461Z"
+    "checkpoint_at": "2026-11-13T20:03:30.782519Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -27182,6 +26816,387 @@
       "reservation_deadline": "2026-11-12T20:35:41.373730Z",
       "stop_reason": "call_limit",
       "sealed_at": "2026-11-12T20:21:45.716121Z"
+    },
+    "2b8d0b6edd0c40dc8564a83316ed31b6": {
+      "version": 1,
+      "id": "2b8d0b6edd0c40dc8564a83316ed31b6",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-13T06:57:58.021761Z",
+      "elapsed_seconds": 803.2513312000003,
+      "calls_reserved": 19,
+      "responses_received": 19,
+      "attempted_paths": [
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md",
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md",
+        "Vault/Home/Programming/NET/NET Standart.md",
+        "Vault/Home/Programming/NET/NET.md"
+      ],
+      "accepted_records": [],
+      "outcomes": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+          "outcome": "proposal_blocked",
+          "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance",
+          "result": {
+            "status": "proposal_blocked",
+            "stage": "deterministic_application",
+            "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance",
+            "model_calls": 3
+          }
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note against the C# event rules and found no defect that justifies an edit.\n\n- **Opening:** it correctly says that code outside the declaring type can only use `+=` and `-=`.\n- **PriceFeed example:** it follows the standard pattern, with `EventHandler<T>`, a protected virtual `OnPriceChanged` and `?.Invoke`. The null-conditional call reads the delegate once, so it also avoids a race with unsubscription.\n- **Public delegate field vs event:** the three blocked operations (assign, invoke, replace) match the language rules, and the first Qard's table repeats them accurately.\n- **Custom accessors:** the lock-based `add`/`remove` example is valid. The INFO callout is accurate. Field-like events have compiler-generated thread-safe accessors, the language does not mandate an implementation, and raising the event is a separate race.\n- **Pitfalls:** the leak path (GC root, publisher, delegate, subscriber) is correct. The point that a short-lived publisher does not keep subscribers alive is correct. The `async void` caveat is correct, and the link to the Async Await note supplies the missing detail.\n- **Qards:** both cards test one task each and carry Microsoft primary sources, and their answers give mechanisms and boundaries.\n- **Known violations:** the inventory is empty, so no native violation needs fixing.\n\nThe prose is concise and in a whiteboard voice. I did not make cosmetic edits."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The note is accurate and compact, both Qards are single-task with primary sources, and no native violation or concrete defect justifies an edit. The keep is justified.",
+              "notes": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md",
+                  "verdict": "CLEAN",
+                  "summary": "The whole note was read and found accurate. The access restriction, the standard pattern, the thread-safety nuance, the leak mechanism and the async void caveat are all correct and ordered sensibly. The Qards are bounded and sourced. The keep is justified.",
+                  "page_type": "Concept — typed frontmatter retained, optional Questions and References present, code fences carry language identifiers, and the [[Async Await]] link is explained in prose.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "it cannot raise the event or replace its invocation list",
+                      "line_start": 17,
+                      "reason": "States the core access restriction up front, which is the correct and decisive boundary."
+                    },
+                    {
+                      "quote": "The `event` keyword blocks all three operations outside the declaring type.",
+                      "line_start": 54,
+                      "reason": "Explains why events are preferred over delegate fields, with the three blocked operations listed immediately above."
+                    },
+                    {
+                      "quote": "the language does not require a particular locking or compare-exchange implementation",
+                      "line_start": 80,
+                      "reason": "This version-safe thread-safety caveat is accurate, and it separates subscription from raising."
+                    },
+                    {
+                      "quote": "exceptions after an `await` do not flow back through the event invocation",
+                      "line_start": 86,
+                      "reason": "Correct async void mechanism, with a pointer to the owning note."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: delegate events, their pitfalls and their tradeoffs form one cohesive, compact topic.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 5
+          }
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+          "outcome": "proposal_blocked",
+          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+          "result": {
+            "status": "proposal_blocked",
+            "stage": "deterministic_application",
+            "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+            "model_calls": 8
+          }
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+                  "outcome": "keep",
+                  "reason": "Read the whole note against current .NET/C# behavior. The following claims check out: immutability and reference-copy semantics, content-based == and Equals, literal interning (identity not contractual, NoStringInterning relaxation), string.Intern/IsInterned retention, compile-time constant folding, UTF-16 surrogate pairs with Rune, StringInfo and Normalize, string.Create, span parsing, interpolated string handlers (C# 10, StringBuilder.Append overload), ArrayPool caveats, and the guidance on ordinal versus culture comparison. The sections run in a sensible order from core properties through interning, StringBuilder, Unicode, low-allocation techniques, pitfalls and tradeoffs. The overlap between Pitfalls and Tradeoffs is small and each section adds a decision condition. The two Qards each test one task: the StringBuilder-versus-concatenation decision, and why ReferenceEquals can differ from ==. Their answers explain the mechanism and its limits, cite Microsoft Learn, and have no flagged defects. There are no known violations, so no edit is justified."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note audit found no factual, structural, question-quality or rule defects; the keep with no edits is justified.",
+              "notes": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate and well ordered, from immutability through interning, StringBuilder, UTF-16 and low-allocation techniques to pitfalls and tradeoffs. Both Qards are single bounded tasks with mechanism-level answers and Microsoft Learn sources. No concrete defect was found, so leaving it unchanged is the right call.",
+                  "page_type": "Concept — frontmatter intact, optional Questions/References present and valid, code fences have language identifiers, no Links section.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "`string` is the C# alias for the sealed reference type `System.String`.",
+                      "line_start": 17,
+                      "reason": "The opening states the operating idea (immutability and reference copy) before the details, so the topic is quick to re-enter."
+                    },
+                    {
+                      "quote": "Compilation can request `NoStringInterning`, and runtime behavior may still vary:",
+                      "line_start": 38,
+                      "reason": "Interning is correctly stated as non-contractual; the code comment repeats this and is consistent with the later Qard."
+                    },
+                    {
+                      "quote": "Interned entries are generally retained until the runtime terminates.",
+                      "line_start": 47,
+                      "reason": "Matches the String.Intern documentation and gives the engineering consequence (high-cardinality text is a poor fit)."
+                    },
+                    {
+                      "quote": "Characters outside the Basic Multilingual Plane use a surrogate pair, so `\"\uD83D\uDC4D\".Length == 2`",
+                      "line_start": 70,
+                      "reason": "The UTF-16 explanation is correct and separates code units, scalar values (Rune) and graphemes (StringInfo)."
+                    },
+                    {
+                      "quote": "The benefit applies only when the receiving overload accepts a handler, as `StringBuilder.Append` does.",
+                      "line_start": 80,
+                      "reason": "Version (C# 10) and condition are stated precisely; this is a real condition, not a vague claim."
+                    },
+                    {
+                      "quote": "Pooling is worthwhile only when buffer allocations show up in measurement.",
+                      "line_start": 81,
+                      "reason": "Gives the decision condition and a cost, not just a technique list."
+                    },
+                    {
+                      "quote": "Forcing dynamic values into the pool can save duplicates at the price of process-long retention",
+                      "line_start": 93,
+                      "reason": "Tradeoffs add a decision condition; the overlap with Pitfalls is small and does not need removal."
+                    },
+                    {
+                      "quote": "> [!qard]- When is `StringBuilder` a better choice than string concatenation?",
+                      "line_start": 98,
+                      "reason": "One decision task. The answer explains the immutability mechanism, the capacity caveat and the lack of a fixed threshold, and cites a primary source."
+                    },
+                    {
+                      "quote": "> [!qard]- Why can `ReferenceEquals(a, b)` be false when `a == b` is true for strings?",
+                      "line_start": 111,
+                      "reason": "One dependent behavior-and-why explanation. It covers explicit and automatic interning and cites the Microsoft Learn API pages."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the topics (immutability, interning, building, Unicode, comparison) are all facets of System.String behavior and share one mental model; length does not warrant separate notes.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 10
+          }
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against current C# and .NET behavior. The checked claims were: copy semantics; readonly and ref struct restrictions, including the C# 13 interface and async relaxations; the C# 10 parameterless constructor and the default-value bypass; ValueType.Equals and GetHashCode behavior; the absence of a default ==; boxing paths; using-statement copy capture; implicit versus explicit conversions; layout and padding; and C# 11 ref fields and C# 12 primary constructors. All were accurate and appropriately qualified. The explanation order works: semantics, modifiers, boxing, copies, conversions, layout, pitfalls, tradeoffs. The five Qards each test one gradeable task, are self-contained and carry primary Microsoft sources. No known violations are open, and no unresolved defects or redundancy justify an edit."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The whole-note audit found no factual, structural, question-quality or editorial defect that justifies an edit. The keep disposition is supported and no edits are proposed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate and version-qualified (C# 10 parameterless constructors, C# 11 ref fields, C# 12 primary constructors, C# 13 ref struct relaxations). It moves in a sensible order from semantics to modifiers, boxing, disposal copies, conversions, layout, pitfalls and tradeoffs. The five Qards each test one gradeable task and carry Microsoft sources. The keep is justified.",
+                  "page_type": "Concept: frontmatter intact, optional Questions and References present, code fences have language identifiers, no hand-written navigation.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "The example's “bitwise copy” comment describes the independent value result.",
+                      "line_start": 39,
+                      "reason": "Corrects a likely misconception about the code comment without losing the example."
+                    },
+                    {
+                      "quote": "The 16-byte guideline is a starting point from framework design guidance, not a runtime cutoff.",
+                      "line_start": 43,
+                      "reason": "Gives a decided, conditioned size guideline and points to measurement, which is the engineering-judgment content the note needs."
+                    },
+                    {
+                      "quote": "C# 13 permits interface implementation and broader generic use under ref-safety rules, but converting the value to an interface still requires forbidden boxing.",
+                      "line_start": 80,
+                      "reason": "States the version-specific condition accurately with its limit."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: all sections concern one type's copy semantics and the decisions that follow from them. They are not independently useful topics.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 12
+          }
+        },
+        {
+          "path": "Vault/Home/Programming/NET/NET Standart.md",
+          "outcome": "proposal_blocked",
+          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+          "result": {
+            "status": "proposal_blocked",
+            "stage": "deterministic_application",
+            "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+            "model_calls": 15
+          }
+        },
+        {
+          "path": "Vault/Home/Programming/NET/NET.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Programming/NET/NET.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its current text and the cited Microsoft Learn pages. The intro correctly describes .NET as runtime, base libraries, SDK tooling, languages and frameworks. It says the runtime owns GC, the SDK owns restore/build/test/publish, and ASP.NET Core adds application abstractions; all of that matches the documented model. The diagnosis paragraph gives a concrete decision rule (memory retention vs GC, pipeline vs sync I/O vs JIT code). The lifecycle sentence (annual releases, separate LTS and STS tracks, deployment follows support policy) is accurate and deliberately version-neutral, so it cannot go stale. The layer table in the first card is a single focused comparison. It carries an explicit caveat that the taxonomy is conceptual, and its sources are versioned and relevant. The second card tests a distinct reasoning task without repeating the table. The FolderNote map block, qard IDs, frontmatter and References are intact, and the references are bare, authoritative and non-duplicated. No known violations are listed. No defect warrants an edit, and rewording would be churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/Programming/NET/NET.md",
+                  "verdict": "CLEAN",
+                  "summary": "The complete note is accurate, compact and well ordered: stack overview, a diagnostic rule, a version-neutral support-policy statement, then two distinct cards. No concrete defect justifies an edit, and rewording would be churn.",
+                  "page_type": "FolderNote — keeps tags: [FolderNote], the protected datacorejsx map block, optional Questions and References, and Qard identity metadata.",
+                  "current_text_evidence": [
+                    {
+                      "quote": ".NET is a cross-platform application stack built from a runtime, base libraries, SDK tooling, languages, and higher-level frameworks.",
+                      "line_start": 18,
+                      "reason": "The opening names the layers quickly and accurately, and assigns GC to the runtime and restore/build/publish to the SDK."
+                    },
+                    {
+                      "quote": "“.NET is slow” is not yet a useful hypothesis.",
+                      "line_start": 20,
+                      "reason": "The prose gives a concrete engineering decision: separate retention, pipeline, synchronous I/O and codegen causes rather than blaming .NET as a whole."
+                    },
+                    {
+                      "quote": ".NET ships annually with separate LTS and STS support tracks.",
+                      "line_start": 22,
+                      "reason": "This lifecycle claim is version-neutral and still correct, so it will not go stale; it states the policy consequence without hardcoding dates."
+                    },
+                    {
+                      "quote": "This is a conceptual map rather than an official fixed taxonomy; component and version boundaries can change.",
+                      "line_start": 44,
+                      "reason": "The table is one focused comparison and carries the caveat that matters, avoiding overclaiming an official taxonomy."
+                    },
+                    {
+                      "quote": "Why does identifying the owning .NET layer help diagnose a symptom?",
+                      "line_start": 48,
+                      "reason": "The second card tests a distinct mechanism-and-why task and does not repeat the table; its answer cites relevant Microsoft Learn sources."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note is a compact hub whose overview, layer map and diagnostic reasoning form one coherent topic; child notes are reached through the folder map.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The whole-note audit found no concrete error, readability problem, repetition or card-quality defect. The keep is supported by current-text evidence, and the existing Qard ID and frontmatter remain intact.",
+              "change_checks": []
+            },
+            "model_calls": 17
+          }
+        }
+      ],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-13T07:11:21.272460Z",
+      "topic": "Programming",
+      "topic_id": "programming-e6aba2bd",
+      "current_batch": {
+        "topic": "Programming",
+        "topic_id": "programming-e6aba2bd",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
+            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \".NET's execution engine compiling IL to native code and managing memory and types.\"\nlevel: [\"4\"]\npriority: High\nstatus: Ready to Repeat\n\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/Runtime/Common Language Runtime\"\nflashcard_uid: \"e98a40ab\"\ncreated: \"2026-02-10T16:03:55.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:14:17.331Z\"\n---\n\nThe Common Language Runtime (CLR) is .NET's managed execution engine. It loads assemblies, establishes their types, executes managed methods, and supplies services such as garbage collection, exception handling, threading, and native interoperability.\n\nMost .NET language builds produce assemblies containing Common Intermediate Language (CIL, usually called IL) and metadata. A normal runtime deployment turns executable IL into machine code with a just-in-time compiler. ReadyToRun adds native code for many methods while retaining IL, and Native AOT produces a platform-specific native application at publish time.\n\nThe runtime, libraries, and standardized assembly/type model make cross-language and cross-platform execution possible. A source language alone does not guarantee either property. Native AOT also retains runtime services even though the deployed application has no JIT compiler.\n\n# How It Works\n\n```mermaid\nflowchart TB\n  subgraph SOURCE[Source code]\n    direction LR\n    CS[C# source] --> CSC[Roslyn compiler] --> IL[Assembly with IL and metadata]\n    FS[F# source] --> FSC[F# compiler] --> IL\n  end\n\n  subgraph CLR[Common Language Runtime]\n    direction TB\n    LOAD[Assembly loader] --> VERIFY[Type verifier]\n    VERIFY --> JIT[JIT compiler]\n    JIT --> NATIVE[Native machine code]\n    NATIVE --> GC[Garbage Collector]\n    NATIVE --> EH[Exception handling]\n    NATIVE --> THREAD[Thread management]\n  end\n\n  IL --> LOAD\n  NATIVE --> OS[Operating System]\n```\n\nThe diagram is a conceptual JIT path. The arrows from native code to the GC, exception handling, and thread management show runtime services participating during execution. They are not later pipeline stages or outputs of native code. Assembly loading, validation, code generation, and dependency resolution happen incrementally. Verification depends on the loaded and executed path and on how code is produced, so the runtime does not eagerly verify or compile the whole application before its entry point runs.\n\n**Typical startup path:**\n\n1. A native host resolves the runtime configuration and starts a compatible runtime.\n2. The loader locates the entry assembly and dependencies, reads metadata as needed, and binds type and method references.\n3. Executed methods use available ReadyToRun code or are JIT-compiled. Tiered compilation may replace an earlier native body later.\n4. Runtime services such as the GC and thread pool initialize and expand according to demand.\n\n**Core runtime responsibilities:**\n\n| Subsystem | What it does |\n|---|---|\n| JIT compiler | Produces native method bodies and can recompile hot code at higher tiers |\n| Garbage collector | Allocates managed objects and reclaims unreachable graphs |\n| Type system and loader | Bind metadata, enforce runtime type rules, and support reflection |\n| Exception handling | Finds handlers and unwinds managed frames while running cleanup |\n| Thread pool | Schedules worker and I/O-completion work and adapts its thread supply |\n| Interop | Marshals calls and data across managed and native boundaries |\n\n# Managed Vs Unmanaged Code\n\nManaged code executes with runtime metadata and services. Garbage collection owns managed object storage, while the type system and exception machinery remain involved in execution. An `unsafe` C# block can use pointers without turning the containing method into unmanaged code.\n\nUnmanaged code is native code outside those managed lifetime rules. It may use manual allocation, RAII, reference counting, or another native ownership model. The GC cannot prove when a native handle or buffer should be released, so the managed boundary needs an explicit ownership contract, usually `SafeHandle` or deterministic disposal.\n\nThis example is Windows-specific P/Invoke:\n\n```csharp\nusing System.Runtime.InteropServices;\n\n[DllImport(\"kernel32.dll\", SetLastError = true)]\nstatic extern bool Beep(uint dwFreq, uint dwDuration);\n\nBeep(440, 500); // A4 note for 500ms\n```\n\n# JIT Vs AOT\n\n| Mode | Code available at startup | Runtime adaptation | Main cost |\n|---|---|---|---|\n| JIT | IL. Native code is produced when needed | Tiering and profile data can optimize executed paths for the current machine | First-use compilation and a runtime JIT |\n| ReadyToRun | IL plus precompiled native code for many methods | The JIT can still compile unsupported methods and replace hot ReadyToRun bodies | Larger assemblies and target-specific publishing |\n| Native AOT | A self-contained native application | No runtime JIT or dynamic code generation | Trimming and AOT-compatibility constraints. Target-specific output |\n\nJIT is the flexible default when dynamic loading, runtime code generation, or warm steady-state optimization matters. ReadyToRun is a middle path for reducing first-use compilation while retaining the JIT. Native AOT fits startup- and footprint-sensitive deployments whose dependencies pass AOT analysis. Measurements decide whether the publish-time tradeoff helps a particular application.\n\n## Tiered Compilation\n\nTiered compilation does not promise exactly two compilations for every method. A method may begin with quickly generated Tier 0 code, a ReadyToRun body, or a more optimized initial body, depending on runtime policy and method shape. Frequently executed code can move through additional instrumented and optimized tiers.\n\n- **Tier 0** favors low compilation cost and fast availability.\n- **Tier 1** spends more time optimizing code that has proved hot.\n- **On-Stack Replacement (OSR)** can transfer a running loop to optimized code without waiting for a later method call.\n- **Dynamic PGO**, enabled by default starting with .NET 8, feeds observed types and branch behavior into later optimization. ReadyToRun methods can also be replaced through tiering.\n\n## Assembly Loading and the Type System\n\nCurrent .NET applications use an **`AssemblyLoadContext`** to locate, load, and cache managed assemblies and their dependencies. A collectible context supports plugin-style unloading, but unloading is cooperative: the context and every object, type, method, or thread rooted through it must first become unreachable. Type identity therefore includes the loaded assembly instance, not only a namespace-qualified name.\n\nCoreCLR commonly shares JIT-generated generic code across reference-type arguments and specializes code for value-type arguments. That strategy preserves value layout and avoids boxing while limiting duplicate native code. The exact sharing strategy is a runtime implementation detail. [[Generics]] defines the language-facing constraints.\n\n## Memory Model and Exceptions\n\nThe .NET memory model constrains how reads and writes become visible across threads. `volatile`, `Interlocked`, locks, and explicit barriers provide different ordering and atomicity guarantees. They are not interchangeable performance hints.\n\nManaged exception dispatch uses two logical passes. The search pass walks frames and evaluates filters while the stack is intact. Once a handler is selected, the unwind pass runs intervening `finally` and fault cleanup before control enters that handler.\n\n# Pitfalls\n\n**Treating first-use cost as random latency.** JIT, assembly loading, static initialization, and connection setup can all appear on an early request. Traces should identify the actual source before ReadyToRun, Native AOT, or warm-up is introduced.\n\n**Blocking shared worker threads.** Sustained synchronous waits can consume the available thread-pool supply faster than its control loop adds threads. Async I/O removes that wait from a worker only when the underlying operation is genuinely asynchronous.\n\n**Using finalization as normal cleanup.** An unreachable object whose finalization remains registered stays alive until its finalizer is scheduled and run, then normally needs a later collection for reclamation. A successful dispose path normally releases the resource and calls `GC.SuppressFinalize`, avoiding that pending-finalization lifetime. `IDisposable` and `SafeHandle` make resource release explicit. A finalizer remains a narrow fallback for missed disposal.\n\n# Questions\n\n<!-- qard-id: 1df86558-fa6b-4e81-85a8-817e1ea6a4b7 -->\n> [!qard]- How do managed and unmanaged code differ?\n> Managed code runs under the CLR and relies on its services, such as garbage collection of managed objects, exception handling and the runtime type system. Unmanaged (native) code runs outside those services. It follows a native platform ABI and its own ownership rules, such as explicit freeing or reference counting.\n>\n>\n> Interop declarations must also match the native ABI, including calling convention and data layout; that determines call correctness rather than resource lifetime.\n>\n> [Microsoft: Native interoperability ABI support](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/abi-support) · [Microsoft: SafeHandle class](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle)\n\n> [!qard]- Why does interop require explicit resource lifetime management?\n> Interop needs careful lifetime management because the GC manages only one side of the boundary:\n>\n> - The GC tracks managed objects only. It cannot tell when a native handle or buffer is no longer needed.\n> - A native resource is released only when code calls its native cleanup. Disposal does this deterministically when ownership ends. A finalizer on the managed wrapper can do it later, as a fallback, if disposal was missed.\n> - `SafeHandle` is the usual managed owner for a native handle. It releases the handle when disposed, or during finalization if disposal never happened.\n> \n> If no code clearly owns a native resource, nothing may release it, and it leaks. Interop declarations must also match the native ABI, such as calling convention and data layout. That requirement affects whether a call works correctly, not how long a resource lives.\n>\n> [Microsoft: Native interoperability ABI support](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/abi-support) · [Microsoft: SafeHandle class](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle)\n\n<!-- qard-id: 58941e73-5fa8-4d3c-bbdf-87e201b3d6d8 -->\n> [!qard]- How does .NET turn IL into machine code?\n> Assemblies normally contain IL, which the processor cannot run directly. By default the runtime's JIT compiler turns each method into machine code when it is first needed. ReadyToRun moves part of that work to publish time while keeping the JIT. Native AOT moves all of it to publish time and ships no JIT.\n>\n> | Aspect | JIT | ReadyToRun | Native AOT |\n> |---|---|---|---|\n> | When machine code is produced | At run time, as methods are first used. Tiered compilation can later recompile hot methods with more optimization. | At publish time for many methods. The JIT still compiles methods without usable precompiled code and can re-optimize hot ones. | Entirely at publish time. The app runs without a JIT. |\n> | Startup | Early calls pay for compilation. | Less compilation work at startup. | No JIT work at startup. |\n> | Runtime flexibility | Dynamic loading and runtime code generation work. | Same as JIT, because the IL is kept. | Restricted: no runtime code generation, and code must work with trimming. |\n> | Main cost | Compilation time on first use. | Larger assemblies built for a specific target. | Compatibility constraints and platform-specific output. |\n>\n>\n> [Microsoft: .NET application publishing overview](https://learn.microsoft.com/en-us/dotnet/core/deploying/) · [Microsoft: Native AOT deployment](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/)\n\n> [!qard]- When do JIT, ReadyToRun, and Native AOT each fit?\n> JIT is the flexible default, especially when an app loads code dynamically or generates code at run time. ReadyToRun reduces startup compilation without giving up the JIT. Native AOT fits startup- and footprint-sensitive deployments whose code and dependencies work with AOT and trimming. ReadyToRun trades larger assemblies for less startup compilation, while Native AOT trades runtime flexibility for startup and footprint benefits, so the choice rests on measured startup and footprint needs and on the runtime features the app requires. Native AOT is not a universal upgrade.\n>\n> [Microsoft: .NET application publishing overview](https://learn.microsoft.com/en-us/dotnet/core/deploying/) · [Microsoft: Native AOT deployment](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/)\n\n# References\n\n- [Managed execution process](https://learn.microsoft.com/en-us/dotnet/standard/managed-execution-process)\n",
+            "hash": "9a51f4d51594dcee6627c0ca5a8a7dcf1b75efd03144403aa8d273d2844d98ea",
+            "topic": "Programming",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "base_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
+      "reservation_deadline": "2026-11-13T07:25:51.692785Z",
+      "stop_reason": "repair_pending",
+      "sealed_at": "2026-11-13T07:11:21.272461Z"
     }
   },
   "feedback_workloads": {
