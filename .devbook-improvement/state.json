@@ -14095,15 +14095,16 @@
     "version": 1,
     "id": "ed9f729234e2405d9876ac4f5aa28fbd",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-13T20:03:30.781717Z",
-    "elapsed_seconds": 447.55043419999987,
+    "elapsed_seconds": 453.51231059999986,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
       "Vault/Home/Programming/NET/Runtime/Garbage Collector.md",
-      "Vault/Home/Programming/NET/Runtime/Memory Leaks.md"
+      "Vault/Home/Programming/NET/Runtime/Memory Leaks.md",
+      "Vault/Home/Programming/NET/Runtime/Runtime.md"
     ],
     "accepted_records": [
       {
@@ -16686,10 +16687,83 @@
           },
           "model_calls": 6
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/Runtime/Runtime.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/Runtime/Runtime.md",
+                "outcome": "keep",
+                "reason": "I audited the whole folder note against its current text and my knowledge of the .NET documentation. I did not fetch or re-verify sources in this pass. The intro frames the runtime concerns (JIT, GC, type loading, threading) and the boundary with application lifetime and blocking decisions. It also points to the three child notes, and the datacore map is intact. The first card (startup) is one dependent explanation, and its host, assembly-loading, code-generation and type-initialization points match the cited documentation. The static-constructor behavior matches the C# specification: a class with an explicit static constructor is initialized at first instance creation or first static member reference, and a class without one is initialized at an implementation-dependent time before first static field use. The ReadyToRun, tiered compilation and Native AOT statements are accurate. The second card (early-call latency) is a distinct recall task with a bounded answer, and it correctly states the ReadyToRun size tradeoff and the Native AOT dynamic-code restriction. The prose is direct and impersonal, with no redundancy worth rewriting. Frontmatter and protected qard-id metadata are intact, the References section has a single bare link, and no known violations are open. No edit is warranted."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/Runtime/Runtime.md",
+                "verdict": "CLEAN",
+                "summary": "The folder note has a clear intro, a protected folder map, and two focused cards whose answers are accurate and carry their mechanisms and conditions. No concrete defect was found, so leaving it unchanged is justified.",
+                "page_type": "FolderNote — keeps tags: [FolderNote]; datacorejsx folder map and qard-id metadata are protected; Questions and References are optional and present.",
+                "current_text_evidence": [
+                  {
+                    "quote": "a symptom attributed to “the runtime” often begins with an application lifetime or blocking decision",
+                    "line_start": 18,
+                    "reason": "The intro states the operating idea and the boundary of what counts as a runtime problem, in direct impersonal prose."
+                  },
+                  {
+                    "quote": "The CLR note covers loading and execution, the garbage-collector note covers managed allocation and reclamation",
+                    "line_start": 20,
+                    "reason": "The intro orients the reader to the three child notes and their split, so the folder is re-enterable."
+                  },
+                  {
+                    "quote": "Without one, static field initializers run at an implementation-dependent time before the first use of a static field.",
+                    "line_start": 36,
+                    "reason": "This matches the C# specification's static-constructor rules and states the exception that changes behavior."
+                  },
+                  {
+                    "quote": "Native AOT removes runtime JIT work but restricts features such as runtime code generation.",
+                    "line_start": 44,
+                    "reason": "The ReadyToRun size tradeoff and the Native AOT restriction are accurate and carry the decision condition."
+                  },
+                  {
+                    "quote": "<!-- qard-id: 85533752-810c-478c-849a-eb6486511be8 -->",
+                    "line_start": 29,
+                    "reason": "The protected Qard identity metadata is intact and unchanged."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note is a compact hub for three child notes. The two cards both concern first-use runtime cost and do not form separable topics.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "Whole-note audit found accurate content, coherent ordering, protected metadata preserved, and no concrete native-rule violation. The startup card is one dependent overview, and the latency card is a separate bounded task. Keeping the note unchanged is justified.",
+            "change_checks": []
+          },
+          "model_calls": 8
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T20:10:58.331658Z",
+    "checkpoint_at": "2026-11-13T20:11:04.293535Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
