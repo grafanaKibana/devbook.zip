@@ -13790,13 +13790,14 @@
     "version": 1,
     "id": "2b8d0b6edd0c40dc8564a83316ed31b6",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 207.89015730000006,
+    "elapsed_seconds": 211.88723790000006,
     "calls_reserved": 5,
     "responses_received": 5,
     "attempted_paths": [
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md"
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -13810,10 +13811,78 @@
           "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance",
           "model_calls": 3
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md",
+                "outcome": "keep",
+                "reason": "I read the whole note against the C# event rules and found no defect that justifies an edit.\n\n- **Opening:** it correctly says that code outside the declaring type can only use `+=` and `-=`.\n- **PriceFeed example:** it follows the standard pattern, with `EventHandler<T>`, a protected virtual `OnPriceChanged` and `?.Invoke`. The null-conditional call reads the delegate once, so it also avoids a race with unsubscription.\n- **Public delegate field vs event:** the three blocked operations (assign, invoke, replace) match the language rules, and the first Qard's table repeats them accurately.\n- **Custom accessors:** the lock-based `add`/`remove` example is valid. The INFO callout is accurate. Field-like events have compiler-generated thread-safe accessors, the language does not mandate an implementation, and raising the event is a separate race.\n- **Pitfalls:** the leak path (GC root, publisher, delegate, subscriber) is correct. The point that a short-lived publisher does not keep subscribers alive is correct. The `async void` caveat is correct, and the link to the Async Await note supplies the missing detail.\n- **Qards:** both cards test one task each and carry Microsoft primary sources, and their answers give mechanisms and boundaries.\n- **Known violations:** the inventory is empty, so no native violation needs fixing.\n\nThe prose is concise and in a whiteboard voice. I did not make cosmetic edits."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note is accurate and compact, both Qards are single-task with primary sources, and no native violation or concrete defect justifies an edit. The keep is justified.",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md",
+                "verdict": "CLEAN",
+                "summary": "The whole note was read and found accurate. The access restriction, the standard pattern, the thread-safety nuance, the leak mechanism and the async void caveat are all correct and ordered sensibly. The Qards are bounded and sourced. The keep is justified.",
+                "page_type": "Concept — typed frontmatter retained, optional Questions and References present, code fences carry language identifiers, and the [[Async Await]] link is explained in prose.",
+                "current_text_evidence": [
+                  {
+                    "quote": "it cannot raise the event or replace its invocation list",
+                    "line_start": 17,
+                    "reason": "States the core access restriction up front, which is the correct and decisive boundary."
+                  },
+                  {
+                    "quote": "The `event` keyword blocks all three operations outside the declaring type.",
+                    "line_start": 54,
+                    "reason": "Explains why events are preferred over delegate fields, with the three blocked operations listed immediately above."
+                  },
+                  {
+                    "quote": "the language does not require a particular locking or compare-exchange implementation",
+                    "line_start": 80,
+                    "reason": "This version-safe thread-safety caveat is accurate, and it separates subscription from raising."
+                  },
+                  {
+                    "quote": "exceptions after an `await` do not flow back through the event invocation",
+                    "line_start": 86,
+                    "reason": "Correct async void mechanism, with a pointer to the owning note."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: delegate events, their pitfalls and their tradeoffs form one cohesive, compact topic.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 5
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:01:25.911282Z",
+    "checkpoint_at": "2026-11-13T07:01:29.908363Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
