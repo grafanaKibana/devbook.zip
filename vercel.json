@@ -1,4 +1,11 @@
 {
+  "git": {
+    "deploymentEnabled": {
+      "**": false,
+      "main": true,
+      "stage": true
+    }
+  },
   "installCommand": "cd Web && npm ci",
   "buildCommand": "cd Web && npm run build",
   "outputDirectory": "Web/public",

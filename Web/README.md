@@ -112,6 +112,8 @@ The Questions page has one web renderer. Syncer may freeze the in-note Datacore 
 
 Vercel builds from the repo-root `vercel.json`:
 
+Automatic Git deployments are limited to `main` and `stage`. Vercel's native GitHub integration records them as **Production** and **Preview**, respectively; keep its **Git → `deployment_status` Events** enabled. The preview for `stage` is also available at `https://stage.devbook.zip`; keep that Vercel domain assigned to the `stage` branch with its recommended CNAME configured at the authoritative DNS provider. Restrict the GitHub **Production** environment to the `main` branch and **Preview** to `stage`. Improvement jobs use `deployment: false` on their credential environment so maintenance runs do not appear as site deployments.
+
 ```text
 installCommand:  cd Web && npm ci
 buildCommand:    cd Web && npm run build
