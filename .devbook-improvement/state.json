@@ -14374,9 +14374,9 @@
     "version": 1,
     "id": "ed9f729234e2405d9876ac4f5aa28fbd",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-13T20:03:30.781717Z",
-    "elapsed_seconds": 858.0245237999999,
+    "elapsed_seconds": 862.4363643999999,
     "calls_reserved": 18,
     "responses_received": 18,
     "attempted_paths": [
@@ -14387,7 +14387,8 @@
       "Vault/Home/Programming/Programming.md",
       "Vault/Home/Programming/WebAssembly.md",
       "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md",
-      "Vault/Home/Programming/NET/ASP NET Web API/Authentication.md"
+      "Vault/Home/Programming/NET/ASP NET Web API/Authentication.md",
+      "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md"
     ],
     "accepted_records": [
       {
@@ -17340,10 +17341,78 @@
           },
           "model_calls": 16
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md",
+                "outcome": "keep",
+                "reason": "I read the whole note against the current text and my knowledge of the ASP.NET Core authorization documentation. I did not fetch the source pages in this session, so the checks below rest on that knowledge. Roles: comma-separated roles in [Authorize(Roles = ...)] give OR semantics, and roles are read from claims. Policies: AddPolicy, RequireClaim, RequireRole, custom IAuthorizationRequirement and AuthorizationHandler<T> are used correctly, and registering the handler as an IAuthorizationHandler singleton is valid. Age handler: the note itself says the year-only age calculation is incomplete and states the production fix. Resource-based authorization: loading the resource first, then calling IAuthorizationService.AuthorizeAsync(User, resource, policy), is correct, and the resource reaches the handler as AuthorizationHandlerContext.Resource. Fallback and default policies: FallbackPolicy applies only to endpoints without authorization metadata, and a bare [Authorize] uses DefaultPolicy. Handler semantics: several handlers for one requirement give OR semantics unless the context is explicitly failed, and stacked [Authorize] attributes give AND across policies. Other hooks: RequireAssertion, IAuthorizationMiddlewareResultHandler and Minimal API RequireAuthorization are described accurately. The 403/404 pitfall is a sound existence-oracle explanation with the sensitivity-dependent decision and the timing and response-shape caveat. Teaching quality: the order runs from the principal-only case to policies, then to resources, defaults and pitfalls. Terminology is consistent, code fences have language identifiers, and the prose has the right whiteboard voice. The note has no Qard cards, so there are no card-quality issues. The References section has one canonical, non-annotated Microsoft link. No known violations are unresolved. No defect was found that would justify an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The whole-note audit found no accuracy, clarity, structure or rules defect. A justified keep with no edits is appropriate.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md",
+                "verdict": "CLEAN",
+                "summary": "The note moves from the principal-only case (roles, policies) to resources, then defaults and hooks, pitfalls and tradeoffs. Its technical claims on role OR semantics, handler OR semantics, AND across stacked attributes, FallbackPolicy versus DefaultPolicy and Resource passing match ASP.NET Core behavior. The note admits its own sample's weakness (year-only age) and gives the fix. No edit is warranted.",
+                "page_type": "Concept — authorable prose; optional Questions absent (allowed); a single non-annotated Microsoft reference; all code fences carry language identifiers.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Authorization succeeds when any registered handler marks that requirement successful, unless the context has been explicitly failed.",
+                    "line_start": 125,
+                    "reason": "Correctly states handler OR semantics together with the explicit-failure exception, and the AND-across-policies contrast follows."
+                  },
+                  {
+                    "quote": "its year-only age calculation is incomplete around birthdays",
+                    "line_start": 84,
+                    "reason": "The note flags the simplification in its own sample and gives the production remedy (TryParse, malformed claims unsatisfied, full date). This is honest and avoids misleading the reader."
+                  },
+                  {
+                    "quote": "The status code itself can become an existence oracle.",
+                    "line_start": 134,
+                    "reason": "The 403/404 pitfall explains the mechanism, the sensitivity-dependent decision and the timing and response-shape caveat."
+                  },
+                  {
+                    "quote": "An attribute cannot evaluate a document that has not been loaded yet.",
+                    "line_start": 88,
+                    "reason": "The resource-based section states why imperative checks are needed, and the next paragraph explains the Resource property."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: roles, policies, resource checks and defaults are facets of one authorization topic, and each stays compact and coherent.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 18
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T20:17:48.805752Z",
+    "checkpoint_at": "2026-11-13T20:17:53.217593Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
