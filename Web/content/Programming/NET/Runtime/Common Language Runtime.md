@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-13T20:04:41.376Z
 published: 2026-07-08T13:14:17.331Z
 topic:
   - Programming
@@ -35,8 +35,8 @@ flowchart TB
 
   subgraph CLR[Common Language Runtime]
     direction TB
-    LOAD[Assembly loader] --> VERIFY[Type verifier]
-    VERIFY --> JIT[JIT compiler]
+    LOAD[Assembly loader] --> TYPES[Type loading and binding]
+    TYPES --> JIT[JIT compiler]
     JIT --> NATIVE[Native machine code]
     NATIVE --> GC[Garbage Collector]
     NATIVE --> EH[Exception handling]
@@ -47,7 +47,7 @@ flowchart TB
   NATIVE --> OS[Operating System]
 ```
 
-The diagram is a conceptual JIT path. The arrows from native code to the GC, exception handling, and thread management show runtime services participating during execution. They are not later pipeline stages or outputs of native code. Assembly loading, validation, code generation, and dependency resolution happen incrementally. Verification depends on the loaded and executed path and on how code is produced, so the runtime does not eagerly verify or compile the whole application before its entry point runs.
+The diagram is a conceptual JIT path. The arrows from native code to the GC, exception handling, and thread management show runtime services participating during execution. They are not later pipeline stages or outputs of native code. Assembly loading, type binding, code generation, and dependency resolution happen incrementally, so the runtime does not eagerly load or compile the whole application before its entry point runs.
 
 **Typical startup path:**
 
@@ -129,8 +129,6 @@ Managed exception dispatch uses two logical passes. The search pass walks frames
 
 > [!qard]- How do managed and unmanaged code differ?
 > Managed code runs under the CLR and relies on its services, such as garbage collection of managed objects, exception handling and the runtime type system. Unmanaged (native) code runs outside those services. It follows a native platform ABI and its own ownership rules, such as explicit freeing or reference counting.
->
-> Interop declarations must also match the native ABI, including calling convention and data layout; that determines call correctness rather than resource lifetime.
 >
 > [Microsoft: Native interoperability ABI support](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/abi-support) · [Microsoft: SafeHandle class](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle)
 
