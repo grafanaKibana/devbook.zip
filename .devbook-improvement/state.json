@@ -14095,11 +14095,11 @@
     "version": 1,
     "id": "ed9f729234e2405d9876ac4f5aa28fbd",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-13T20:03:30.781717Z",
-    "elapsed_seconds": 490.25186099999985,
+    "elapsed_seconds": 500.9740712999998,
     "calls_reserved": 9,
-    "responses_received": 8,
+    "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
       "Vault/Home/Programming/NET/Runtime/Garbage Collector.md",
@@ -16763,7 +16763,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T20:11:41.033086Z",
+    "checkpoint_at": "2026-11-13T20:11:51.755295Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -42913,5 +42913,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "ed9f729234e2405d9876ac4f5aa28fbd",
+    "topic_id": "programming-e6aba2bd",
+    "batch": {
+      "topic": "Programming",
+      "topic_id": "programming-e6aba2bd",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/Programming.md",
+          "content": "---\nicon: terminal\norder: 10\ncolor: \"#f43f5e\"\ntopic: [Programming]\nsubtopic: []\nsummary: \"Software craft focused on the .NET stack: C#, runtime, web APIs, and concurrency.\"\ntags: [FolderNote]\npublish: true\nstatus: Creation\nlevel: [\"4\"]\npriority: High\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.340Z\"\n---\n\nProgramming turns an operational problem into software whose behavior can be explained, tested, and changed. The code is only one part of that result. Contracts, failure handling, runtime cost, and the path from a source change to production all shape whether the system remains useful.\n\nThis section is centered on .NET backend work while retaining the surrounding web platform. Its notes connect C# semantics and runtime behavior to API design, browser execution, internationalization, and portable WebAssembly modules. The recurring judgment is where a responsibility belongs and which cost becomes visible when that boundary is wrong.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# API Contracts and SDK Tooling\n\nAn API is a contract between software components. For a service API, a client SDK packages the wire contract into language-specific types, authentication, serialization, helpers, documentation, examples, and sometimes build or diagnostic tools. Calling an HTTP API directly exposes the transport and wire schema. Calling it through an SDK buys ergonomics and consistency while adding package lifecycle, generated-code, and abstraction costs.\n\n## The Same Call Two Ways\n\nFor `GET /v1/widgets/{id}`, a manual .NET client owns every HTTP detail:\n\n```csharp\nusing var request = new HttpRequestMessage(HttpMethod.Get, $\"v1/widgets/{id}\");\nrequest.Headers.Authorization = new AuthenticationHeaderValue(\"Bearer\", token);\n\nusing HttpResponseMessage response = await httpClient.SendAsync(request, ct);\nresponse.EnsureSuccessStatusCode();\n\nWidget widget = (await response.Content.ReadFromJsonAsync<Widget>(ct))!;\n```\n\n```csharp\nWidget widget = await widgets.GetAsync(id, cancellationToken: ct);\n```\n\nThe short call did not remove HTTP. The SDK still chooses a base URL, sends credentials, serializes parameters, maps non-success responses, and deserializes the representation. Good SDKs leave escape hatches for response headers, cancellation, raw errors, custom transports, and new server fields.\n\n![[Programming/Programming-Programming-18120000.png|theme-aware]]\n\nThe visual shows a common HTTP API and client-toolkit relationship, not a definition. APIs are not limited to HTTP, and an SDK may wrap several APIs, local libraries, emulators, generators, and tools. The contract remains the authority. The SDK is one packaged consumer surface.\n\n## Costs and Versioning\n\n| Concern | Direct API call | SDK |\n| --- | --- | --- |\n| Transport exposure | Method, URI, headers, status, and wire schema stay visible | Abstraction is easier to use but can hide useful protocol details |\n| Language coupling | Any client that speaks the contract can call it | Each supported language needs design, generation, release, and support |\n| Compatibility | Client chooses when to adopt contract changes | Package releases must track additive and breaking API changes |\n| Retries | Caller chooses policy per operation | Central policy is consistent but unsafe if it retries non-replayable operations blindly |\n| Errors | Wire-level errors are explicit | Typed errors help, but lossy mappings make diagnosis harder |\n| Maintenance | Repeated auth, serialization, pagination, and error code | Generated surface drift, package security, docs, examples, and deprecations |\n\nVersion the API contract and SDK package separately. An additive server field may need no API version but still justify an SDK release with a new property. A package major version does not make a breaking wire change safe for old clients. Generated SDKs reduce mechanical work only when the OpenAPI description is accurate and generation is reproducible. Handwritten layers still earn their keep for idiomatic workflows, pagination, long-running operations, and better errors.\n\nPut retries at the layer that understands replay safety. A generated client can retry a timed-out `GET`. It must not silently replay a charge-creation `POST` unless the API defines an idempotency contract. Retry counts, backoff, `Retry-After`, cancellation, and final failure remain observable to callers.\n\n# References\n\n- [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)\n",
+          "hash": "552117e30560e092948ed70a4bc27ce4b3c7f5b0e414dd982562ac2d2c94489f",
+          "topic": "Programming",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Programming/Programming.md",
+          "outcome": "keep",
+          "reason": "Audited the whole folder note. The intro states the section's scope and its recurring judgment. The Datacore card map is protected and untouched. The API/SDK section is accurate. The manual HttpClient snippet (relative URI, bearer header, EnsureSuccessStatusCode, ReadFromJsonAsync) matches standard .NET usage. The comparison table gives the condition that changes each choice. Versioning is stated correctly: the API contract and the SDK package version independently. Retry guidance is correct: a GET is replay-safe, while a charge-creating POST needs an idempotency contract. The one reference is the real OpenAPI spec. The fence languages are set, there are no Questions cards to check, and the frontmatter and lifecycle are valid. No defect found, so no edit is warranted."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Programming/Programming.md": "552117e30560e092948ed70a4bc27ce4b3c7f5b0e414dd982562ac2d2c94489f"
+    },
+    "feedback_keys": [],
+    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Programming/Programming.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-13T20:11:51.755286Z"
+  }
 }
