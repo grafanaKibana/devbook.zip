@@ -15007,7 +15007,7 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-13T22:21:42.093452Z",
-    "elapsed_seconds": 113.82024929999999,
+    "elapsed_seconds": 118.23512659999999,
     "calls_reserved": 2,
     "responses_received": 2,
     "attempted_paths": [
@@ -17926,7 +17926,7 @@
       }
     ],
     "feedback_pr": 220,
-    "checkpoint_at": "2026-11-13T22:23:35.913233Z",
+    "checkpoint_at": "2026-11-13T22:23:40.328118Z",
     "feedback_scope_id": "a01574a861c817a06504feab2e349362e3335205b6f574ab9ffb1b1bb370e74b",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
