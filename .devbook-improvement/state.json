@@ -13735,16 +13735,16 @@
     "version": 1,
     "id": "2b8d0b6edd0c40dc8564a83316ed31b6",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 106.5115199,
+    "elapsed_seconds": 124.27530390000001,
     "calls_reserved": 3,
-    "responses_received": 2,
+    "responses_received": 3,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T06:59:44.532645Z",
+    "checkpoint_at": "2026-11-13T07:00:02.296434Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -37434,12 +37434,53 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+          "expected_hash": "6c29fd3cac95137f54297946e87c3791ee298ab2a1381f0c3a279f45a3cc8ab8",
+          "before": "Delegate compatibility supports covariance for return values and contravariance for parameters:",
+          "after": "Delegate compatibility supports covariance for return values and contravariance for parameters. Both apply only to reference types, through an identity or implicit reference conversion; a value-type argument such as `int` is not converted to `object` this way.",
+          "reason": "States the reference-type condition that the variance rules depend on.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "variance conversions require reference types"
+          ],
+          "sources": [
+            {
+              "url": "https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance",
+              "claim": "Variance applies only to reference types; a value type type argument makes the parameter invariant.",
+              "version": "not version-specific"
+            }
+          ],
+          "feedback_keys": [],
+          "problem": "The Variance section states the rules without the reference-type condition, which could mislead for value types.",
+          "reader_benefit": "Readers know when delegate variance conversions apply and when they do not."
+        },
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+          "expected_hash": "6c29fd3cac95137f54297946e87c3791ee298ab2a1381f0c3a279f45a3cc8ab8",
+          "before": "> [!qard]- Why do callbacks from a `for` loop often observe the loop variable's final value?\n> The callbacks capture one shared variable, not a snapshot of its value at each assignment. When they run after the loop, they read the same storage containing its final value. Declaring a local inside the loop body gives each iteration separate storage; capturing that local preserves the intended value. A `Select(i => () => Use(i))` invocation instead has its own value parameter `i` for each call, so those callbacks do not share the for-loop variable. This distinction does not depend on the C#5 change to foreach iteration variables. [C# specification: anonymous function expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#1222-anonymous-function-expressions)",
+          "after": "> [!qard]- Why do callbacks from a `for` loop often observe the loop variable's final value?\n> The callbacks capture one shared variable, not a snapshot of its value at each assignment. When they run after the loop, they read the same storage containing its final value. Declaring a local inside the loop body gives each iteration separate storage; capturing that local preserves the intended value.\n>\n> [C# specification: anonymous function expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#1222-anonymous-function-expressions)",
+          "reason": "Removes the confusing Select/foreach tangent and the 'C#5' typo, keeping the core shared-storage explanation and fix.",
+          "kind": "rewrite",
+          "learning_target": "same",
+          "essential_meanings": [
+            "closures capture a variable, not a value",
+            "one shared for variable holds the final value",
+            "per-iteration local fixes it"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The final card answer adds an unexplained tangent that blurs its single recall task.",
+          "reader_benefit": "The answer is focused and easy to retrieve."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against the current text and my knowledge of the C# specification and .NET documentation. The opening definition (signature plus method plus optional target) and the PriceCalculator example are correct. The multicast details match the specification: handlers run in order, an exception stops later handlers, only the last return value is exposed, and -= removes the last matching entry. The variance examples are valid (Func<Dog> to Func<Animal>, Action<Animal> to Action<Dog>). The closure section correctly shows the shared for-variable and the per-iteration local fix. The allocation section is accurate: delegates are immutable, static lambdas arrived in C# 9, method-group conversion caching in C# 11, function pointers in C# 9, and BeginInvoke throws PlatformNotSupportedException on modern .NET. The Pitfalls section deliberately restates earlier points as a recall list, which is acceptable. The cards each test one gradeable task, with answers that cover mechanism and conditions. The state card is a dependent explanation and need not be split. There are no known violations. I found no factual or structural defect that justifies an edit, and rewording would be cosmetic churn."
+          "outcome": "changed",
+          "reason": "Whole note audited; multicast, closure, allocation and pitfall content is accurate. Two fixes: the variance section now states the reference-type condition, and the last card drops a confusing Select/foreach tangent and typo, so the answer stays focused on shared captured storage."
         }
       ],
       "feedback": []
@@ -37454,8 +37495,10 @@
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-13T06:58:44.699593Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-13T07:00:02.296395Z",
+    "review_repair_key": "2b19e4deeef71b517a07e1114a44a1db008dfc40121c87d5f36e56c31c7fe94d",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The keep is not justified for the whole note. The final Qard answer has a muddled tangent and a typo, and the Variance section omits the reference-type condition. The rest of the note is technically sound.",
       "notes": [
@@ -37531,73 +37574,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The keep is not justified for the whole note. The final Qard answer has a muddled tangent and a typo, and the Variance section omits the reference-type condition. The rest of the note is technically sound.",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "Most of the note is accurate and well ordered: definition, built-ins, multicast, variance, closures, allocation and pitfalls. The last card's answer has a confusing tangent, and the Variance section omits the reference-type condition.",
-          "page_type": "Concept note; typed frontmatter, optional Questions and References are present; the qard-id is protected metadata.",
-          "current_text_evidence": [
-            {
-              "quote": "A `Select(i => () => Use(i))` invocation instead has its own value parameter `i` for each call",
-              "line_start": 195,
-              "reason": "This tangent about Select and foreach (it follows the answer's core explanation) is hard to parse and blurs a card whose core answer is shared storage."
-            },
-            {
-              "quote": "This distinction does not depend on the C#5 change to foreach iteration variables.",
-              "line_start": 195,
-              "reason": "It uses the typo 'C#5' and refers to a foreach change that the note never explains, which makes the answer harder to retrieve."
-            },
-            {
-              "quote": "Delegate compatibility supports covariance for return values and contravariance for parameters:",
-              "line_start": 62,
-              "reason": "The section omits that variance applies only to reference-type conversions, so it can mislead for value types such as int to object."
-            },
-            {
-              "quote": "-= removes the last matching handler from the invocation list.",
-              "line_start": 58,
-              "reason": "This matches the specification and was checked."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the delegate topic, covering multicast, closures and allocation, is cohesive and not independently separable.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Clarity / question quality",
-              "location": "Final Qard answer (for-loop closure)",
-              "evidence": "The answer adds a Select(i => () => Use(i)) tangent and says 'does not depend on the C#5 change to foreach iteration variables'.",
-              "effect": "The tangent muddles the one-task recall answer, the foreach reference is unexplained, and 'C#5' is a typo.",
-              "fix": "Keep the shared-storage explanation and the per-iteration local fix. Cut the Select digression, or state the foreach C# 5 difference in one clear sentence with 'C# 5'."
-            },
-            {
-              "severity": "Medium",
-              "dimension": "Accuracy",
-              "location": "# Variance",
-              "evidence": "Covariance and contravariance are stated without the reference-type condition.",
-              "effect": "A reader may expect variance conversions to work for value-type parameters or returns.",
-              "fix": "Add one sentence saying that variance conversions require reference types (an identity or implicit reference conversion)."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "FAIL",
-            "clarity": "FAIL",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "2b19e4deeef71b517a07e1114a44a1db008dfc40121c87d5f36e56c31c7fe94d",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
