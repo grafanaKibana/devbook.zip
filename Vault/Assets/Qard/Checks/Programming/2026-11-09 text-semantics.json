@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "createdAt": 1794246405400,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "text-semantics",
+  "title": "Predict string allocation and equality behavior and distinguish UTF-16 code units from user-perceived characters",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "prompt": "Consider this C# code:\n```csharp\nstring first = \"reed\";\nstring second = first;\nsecond += \"s\";\n```\nExplain why `first == second` evaluates to `false`, even though `second` initially held the same reference as `first`.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Strings are immutable: concatenation creates a new string assigned to second, leaving first referring to \"reed\".",
+          "marks": 1
+        },
+        {
+          "point": "String == compares contents, and \"reed\" differs from \"reeds\".",
+          "marks": 1
+        }
+      ],
+      "model": "Concatenation creates a new string, `\"reeds\"`, and reassigns `second`; `first` remains `\"reed\"` because strings are immutable. String `==` compares contents, which now differ.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+        "heading": "Core Properties"
+      },
+      "objective": "text-semantics",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "mcq",
+      "prompt": "A .NET label contains `\"a\\u0308\"`: a base letter followed by a combining diaeresis, displayed together as one user-perceived character. Why does `label.EnumerateRunes().Count()` return 2 rather than 1?",
+      "marks": 1,
+      "options": [
+        "Rune enumeration counts UTF-16 code units, so it splits the displayed character into two storage units.",
+        "Rune enumeration counts Unicode scalar values, so the letter and combining mark remain separate scalars.",
+        "Rune enumeration counts user-perceived characters, so the combining mark becomes a separate displayed character.",
+        "Rune enumeration counts encoded UTF-8 bytes, so the letter and combining mark each contribute one byte."
+      ],
+      "answer": 1,
+      "rubric": [
+        {
+          "point": "Selects the explanation that the letter and combining mark are separate Unicode scalar values within one user-perceived character.",
+          "marks": 1
+        }
+      ],
+      "model": "Rune enumeration counts Unicode scalar values, so the letter and combining mark remain separate scalars.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+        "heading": "Encoding and Unicode"
+      },
+      "objective": "text-semantics",
+      "goal": "explain"
+    }
+  ],
+  "answers": {
+    "c1": {
+      "text": "The string have overriden equality comparer which compares strings by the values, even they are ref types",
+      "confidence": "sure"
+    },
+    "c2": {
+      "choice": 1,
+      "confidence": "unsure"
+    }
+  },
+  "marks": {
+    "c2": {
+      "score": 1,
+      "awarded": [
+        true
+      ],
+      "annotations": [],
+      "mistake": "none",
+      "feedback": "Correct."
+    },
+    "c1": {
+      "awarded": [
+        false,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "The string have overriden equality comparer which compares strings by the values",
+          "kind": "correct",
+          "note": "You correctly say string `==` compares by value, but you never connect it to the specific values here, \"reed\" and \"reeds\", so the second rubric point is not shown."
+        },
+        {
+          "quote": "even they are ref types",
+          "kind": "insight",
+          "note": "Noting that strings are reference types with value-based equality is accurate background, but it does not answer why the two variables differ."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to say that strings are immutable, so `+=` creates a new string \"reeds\" assigned to `second` while `first` still refers to \"reed\". You also needed to say that the contents now differ."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You stated that string equality compares values, but you did not explain immutability or that `second` now holds different content from `first`.",
+      "score": 0
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1794301252617
+}

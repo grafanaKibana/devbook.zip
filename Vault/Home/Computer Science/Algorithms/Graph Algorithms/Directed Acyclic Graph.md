@@ -4,10 +4,10 @@ subtopic: [Algorithms]
 summary: "A directed graph with no directed cycle. In finite graphs, its reachability order enables dependency-first processing."
 level: ["4"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 publish: true
 created: "2026-08-08T15:37:04.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-08-08T15:24:55.712Z"
 ---
 

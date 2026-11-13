@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-06-11T06:20:33.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.496Z
 topic:
   - AI & ML
@@ -10,7 +10,7 @@ summary: Designing and operating AI so failures are bounded, decisions explainab
 level:
   - "3"
 priority: Medium
-status: Done
+status: In Progress
 ---
 
 Responsible AI turns broad duties toward people into engineering constraints. The work begins before model selection: identify who can be affected, decide which failures are unacceptable, then build controls and evidence around the full system. A strong model inside a weak decision process is still an unsafe product.

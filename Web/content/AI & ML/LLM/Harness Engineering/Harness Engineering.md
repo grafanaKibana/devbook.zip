@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-13T18:58:50.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-13T18:59:30.970Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: Designing the tools, protocol wiring, and execution boundary that a mod
 level:
   - "3"
 priority: Medium
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Harness Engineering/Harness Engineering
 flashcard_uid: c0ec4e2e

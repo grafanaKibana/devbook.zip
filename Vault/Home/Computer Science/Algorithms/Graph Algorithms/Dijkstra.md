@@ -4,10 +4,10 @@ subtopic: [Algorithms]
 summary: "Single-source shortest paths on graphs with non-negative edge weights, greedily finalizing the closest tentative node and relaxing its outgoing edges."
 level: ["4"]
 priority: Medium
-status: Done
+status: In Progress
 publish: true
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.333Z"
 ---
 

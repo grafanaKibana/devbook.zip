@@ -3,7 +3,7 @@ topic: [Programming]
 subtopic: [NET]
 summary: "Keeping work progressing without blocking, and using multiple cores for CPU-bound work."
 priority: High
-status: Creation
+status: New
 tags: [FolderNote]
 publish: true
 level: ["4"]
@@ -11,7 +11,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism"
 flashcard_uid: "4b1835fe"
 created: "2026-02-18T20:04:43.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.321Z"
 ---
 

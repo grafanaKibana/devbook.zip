@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-18T07:07:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-16T07:10:34.187Z
 topic:
   - Cloud
@@ -10,7 +10,7 @@ summary: Designing application behavior so cloud cost stays attributable, measur
 level:
   - "2"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 Cloud cost is partly an application behavior. A request can consume compute time, database operations, queue deliveries, object storage, network transfer, and telemetry. The monthly bill shows the total; architecture explains why the work happened.

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-09T18:46:12.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-09T20:18:34.868Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Scans elements one by one until a match and works without ordering or i
 level:
   - "4"
 priority: Medium
-status: Done
+status: In Progress
 ---
 
 An unsorted log buffer has no order or index that can rule out an unread line. Linear Search accepts that limitation. It checks each element in sequence, returns the first match, and reports absence only after the sequence ends.

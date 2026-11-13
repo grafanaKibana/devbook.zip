@@ -194,7 +194,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 - `SiteFooter` wraps the configured community footer instead of replacing its links. Informational links stay left-aligned opposite per-page sharing; below `768px`, shareable pages collapse those labels to their existing icons so both groups stay on one row. Pages without sharing keep the labels visible and centered at every width. Every footer owns the same `--lightgray` top border and `1.5rem` vertical padding, with no added horizontal padding; its height follows its content. Separation from content stays outside the footer, with no empty grid row or trailing margin.
 - Share actions remain static-first canonical anchors. Copy enhances its same-page link only when the Clipboard API is available, shows a transient check state, and resets after navigation or its timeout; the other links open native X, LinkedIn, and Reddit share targets.
 - Share icons are decorative SVGs behind accessible link names. Footer links use the shared compact spacing, accent hover, and visible accent focus outline; informational links retain normal text color while the Share label and icons use the same subtle color until interaction.
-- Unfinished notes are marked in place, not site-wide: `Not-Started` and `Creation` lead the article meta row with one static `In progress` state chip beside the modified date and Edit/Report links. `Ready to Repeat` and later show nothing, and lifecycle state never uses motion, banners, or a second issue link.
+- Notes under development are marked in place, not site-wide: `New` and `In Progress` lead the article meta row with one static `In progress` state chip beside the modified date and Edit/Report links. `Established` shows nothing; it means usable and open to improvement. Lifecycle state never uses motion, banners, or a second issue link.
 - The 404 page uses the default frame, so the header, search, and skip link stay available; its copy says nothing is published at the address and points to search and Home.
 - The desktop search pill shows the platform's search shortcut (`⌘K` or `Ctrl K`); touch and mobile widths omit it.
 - Below `768px`, header icon buttons keep `44px` hit areas at their `20px` glyph size and embedded documents shrink to the column. At every width, the scroll buttons step aside while they would cover a StepTrace or Excalidraw surface.
@@ -205,8 +205,8 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 - `db-card` owns shared chrome; consumers own layout and genuinely local additions.
 - Full-card hit areas are semantic links with visible focus.
 - Home opens with its page title as a visible, quiet `h1`, then orders progress first and topic cards second.
-- Lifecycle progress weights each note by its stage (Not-Started, Creation, Ready to Repeat, Repetition, Done, rising in that order); the weights are defined only in the `LIFECYCLE` table in `Vault/Home/index.md`, and a status outside it counts as Other with weight `0`.
-- Home never hides a topic's counts, percentage, or bar to fit one screen. Each card states its note count and progress percentage, each bar is labelled with its percentage and lifecycle totals, and the hero legend lists every stage, plus Other when present, beside the weights that produce the percentage.
+- Note-development progress weights `New`, `In Progress`, and `Established` at `0`, `50`, and `100`; the weights are defined only in the `LIFECYCLE` table in `Vault/Home/index.md`, and a status outside it counts as Other with weight `0`. The percentage measures note development, not mastery or permanent completion.
+- Home never hides a topic's counts, percentage, or bar to fit one screen. Each card states its note count and progress percentage, each bar is labelled with its percentage and lifecycle totals, and the hero legend lists every stage, plus Other when present, beside the weights that produce the percentage. Topic rows absorb spare space above the footer on Quartz desktop and above the pane bottom in Obsidian reading view, retaining content-sized minimum heights; short windows and longer content remain scrollable. The progress square uses Quartz's shared surface radius; Obsidian keeps its own corner treatment.
 - Questions shares topic metadata and icon language but uses disclosure/navigation appropriate to that page.
 
 ### Visualizations
@@ -280,7 +280,7 @@ Prefer container queries or mounted-instance measurement for content components.
 
 - Direct, concrete, calm, and opinionated.
 - Name real APIs, states, operations, errors, and costs.
-- Use lifecycle names consistently: Not-Started, Creation, Ready to Repeat, Repetition, Done.
+- Use lifecycle names consistently: New, In Progress, Established.
 - Trace copy names the real operation: compare, enqueue, relax, swap, visit, accept, reject.
 - Keep labels short and explanations in prose, trace, status, or annotations.
 - Avoid hype, throat-clearing, repeated summaries, and generic cheerful empty states.

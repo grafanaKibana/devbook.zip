@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-18T07:07:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-16T14:47:46.724Z
 topic:
   - Data Persistence
@@ -11,7 +11,7 @@ summary: Redis data structures, persistence, replication, clustering, and the fa
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 Redis keeps a working data set in memory and exposes atomic commands over typed values such as strings, hashes, sets, sorted sets, streams, and bitmaps. A `GET`, counter increment, or leaderboard update is cheap, but memory speed says nothing about durability or consistency. The design must still identify the authoritative system, the meaning of an acknowledged write, the failover loss window, and the application's behavior when Redis is unavailable.

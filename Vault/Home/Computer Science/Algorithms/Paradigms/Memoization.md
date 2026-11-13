@@ -4,13 +4,13 @@ subtopic: [Algorithms]
 summary: "Caches pure function results by arguments so repeated subproblems return without recomputation."
 level: ["4"]
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Computer Science"
 qard-topic: "Algorithms/Paradigms/Memoization"
 flashcard_uid: "0f376618"
 created: "2026-07-12T19:33:38.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-12T20:39:23.957Z"
 ---
 

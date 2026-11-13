@@ -4,10 +4,10 @@ subtopic: [LLM]
 summary: "Repeatable loops that generate, evaluate, and select prompt candidates against a validation set."
 level: ["3"]
 priority: Low
-status: Done
+status: In Progress
 publish: true
 created: "2026-02-28T13:40:02.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.480Z"
 ---
 

@@ -4,10 +4,10 @@ subtopic: [NoSQL]
 summary: "A write-optimized storage engine that buffers writes in memory and flushes immutable sorted files, trading read amplification for sequential-write throughput — the B-tree's counterpart."
 level: ["4"]
 priority: High
-status: Creation
+status: New
 publish: true
 created: "2026-07-15T08:20:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-15T08:11:32.112Z"
 ---
 

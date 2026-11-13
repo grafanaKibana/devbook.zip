@@ -4,13 +4,13 @@ subtopic: [LLM]
 summary: "Sets the unit of retrieval: too wide adds noise, too narrow splits meaning."
 level: ["2"]
 priority: High
-status: Done
+status: In Progress
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Chunking"
 flashcard_uid: "6bf1b415"
 created: "2026-02-27T12:56:16.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.484Z"
 ---
 
@@ -41,7 +41,7 @@ Fixed-size chunking is the blunt baseline.
 - The work scales predictably with document size, and uniform chunks make capacity planning straightforward.
 
 ```mermaid
-flowchart TD
+flowchart LR
   S[Source -- Keep logs 90 days -- Exception 365 days for security] --> SP[Fixed-size split at 200 tokens]
   SP --> C1[Chunk 1 -- Keep logs 90 days]
   SP --> C2[Chunk 2 -- Exception 365 days for security]

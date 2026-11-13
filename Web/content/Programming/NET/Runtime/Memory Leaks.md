@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.373Z
 topic:
   - Programming
@@ -11,7 +11,7 @@ summary: Useless objects still reachable from GC roots, plus unfreed unmanaged m
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/Runtime/Memory Leaks
 flashcard_uid: e5a2c1b5

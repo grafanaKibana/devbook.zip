@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-14T20:57:52.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-14T19:22:41.324Z
 topic:
   - Programming
@@ -11,7 +11,7 @@ summary: Bounded async producer-consumer handoff with explicit backpressure.
 level:
   - "4"
 priority: High
-status: Creation
+status: New
 qard-deck: Programming
 qard-topic: NET/CSharp/Concurrency and Parallelism/Channels
 flashcard_uid: a3dbcc37
@@ -133,6 +133,8 @@ A bounded `Channel<T>` fits asynchronous producer-consumer work that belongs to 
 > A typical use is an HTTP endpoint that queues a job while a `BackgroundService` in the same process handles it.
 >
 > [Microsoft: Channels](https://learn.microsoft.com/en-us/dotnet/core/extensions/channels) · [Microsoft: Queued background tasks](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-10.0)
+
+<!-- qard-id: e35c9bdd-b5d5-44ef-867d-b310a29b136b -->
 
 > [!qard]- What delivery guarantees does an in-memory `Channel<T>` lack?
 > It provides in-process handoff, not durable delivery.

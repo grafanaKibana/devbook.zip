@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-27T12:56:16.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.490Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Decides what evidence enters the prompt, balancing recall, precision, a
 level:
   - "2"
 priority: High
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Context Engineering/RAG/Retrieval
 flashcard_uid: 6dc71082

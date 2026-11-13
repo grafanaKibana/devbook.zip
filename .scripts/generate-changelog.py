@@ -8,8 +8,9 @@ Fetches every release for the repo via `gh api --paginate`, splits each
 release body into an AI-written summary (the lines between
 `<!--ai-summary:start-->`/`<!--ai-summary:end-->`, when a manual
 summarization routine has added them) and the git-cliff detail section, and
-overwrites Vault/Home/Changelog.md wholesale. The file is 100% generated —
-there is no marker/partial-replace logic, run it again to refresh.
+replaces the generated content of Vault/Home/Changelog.md, preserving source
+dates maintained by vault tooling. Unchanged content is not rewritten.
+Pre-commit runs it before vault maintenance and the verified Syncer export.
 """
 
 from __future__ import annotations
@@ -67,10 +68,11 @@ class Release:
 
 def fetch_releases(repo: str = REPO_SLUG) -> list[Release]:
     result = subprocess.run(
-        ["gh", "api", "--paginate", f"repos/{repo}/releases"],
+        ["gh", "api", "--paginate", "--slurp", f"repos/{repo}/releases?per_page=100"],
         check=True,
         text=True,
         capture_output=True,
+        timeout=30,
     )
     raw = json.loads(result.stdout)
     releases = [
@@ -79,7 +81,9 @@ def fetch_releases(repo: str = REPO_SLUG) -> list[Release]:
             date=(item.get("published_at") or "")[:10],
             body=item.get("body") or "",
         )
-        for item in raw
+        for page in raw
+        for item in page
+        if not item.get("draft", False)
     ]
     releases.sort(key=lambda r: r.date, reverse=True)
     return releases
@@ -156,6 +160,19 @@ def render_changelog(releases: list[Release]) -> str:
 def main() -> int:
     releases = fetch_releases()
     content = render_changelog(releases)
+    existing = ""
+    if os.path.exists(CHANGELOG_PATH):
+        with open(CHANGELOG_PATH, encoding="utf-8") as f:
+            existing = f.read()
+        # Source dates belong to the vault date tooling, not release generation.
+        frontmatter = re.match(r"\A---\n(.*?)\n---\n", existing, re.DOTALL)
+        if frontmatter:
+            dates = re.findall(r"^(?:created|modified|published):[^\n]*$", frontmatter[1], re.MULTILINE)
+            if dates:
+                content = content.replace("\n---\n", "\n" + "\n".join(dates) + "\n---\n", 1)
+    if content == existing:
+        print(f"Changelog.md: {len(releases)} releases, unchanged")
+        return 0
     with open(CHANGELOG_PATH, "w", encoding="utf-8") as f:
         f.write(content)
     print(f"Changelog.md: {len(releases)} releases written")

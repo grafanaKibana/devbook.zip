@@ -6,12 +6,12 @@ tags: [FolderNote]
 priority: High
 publish: true
 level: ["3"]
-status: Done
+status: In Progress
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Design Patterns"
 flashcard_uid: "ddaa5e07"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-15T11:47:55.058Z"
 ---
 

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-06-20T08:45:59.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.381Z
 topic:
   - Data Persistence
@@ -11,7 +11,7 @@ summary: The four NoSQL families (document, key-value, wide-column, graph) and t
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 The four common NoSQL families are **document**, **key-value**, **wide-column**, and **graph**. They differ in the data they keep together and the queries they make cheap. Horizontal scaling, flexible schema, and [[Replication|eventual consistency]] are common associations under [[CAP theorem|CAP]], but none is a shared guarantee. [[Data Persistence/NoSQL/NoSQL|NoSQL]] explains when a specialized model is worth adding at all.

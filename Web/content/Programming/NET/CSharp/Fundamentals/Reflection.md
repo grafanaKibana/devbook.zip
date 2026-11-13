@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-15T16:27:13.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.326Z
 topic:
   - Programming
@@ -11,7 +11,7 @@ summary: Runtime metadata inspection and dynamic member access via System.Reflec
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Reflection
 flashcard_uid: a67836fc

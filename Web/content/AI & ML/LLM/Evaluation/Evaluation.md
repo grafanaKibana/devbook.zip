@@ -2,7 +2,7 @@
 publish: true
 title: LLM Evaluation
 created: 2026-02-16T18:33:57.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.407Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ subtopic:
 summary: Measuring LLM behavior with versioned cases, exact checks, semantic scoring, and production outcomes.
 level:
   - "3"
-status: Done
+status: In Progress
 priority: High
 ---
 

@@ -4,10 +4,10 @@ subtopic: []
 summary: "Provisioning infrastructure through version-controlled files, making environments repeatable and auditable."
 level: ["3"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 publish: true
 created: "2026-06-20T19:32:24.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.509Z"
 ---
 

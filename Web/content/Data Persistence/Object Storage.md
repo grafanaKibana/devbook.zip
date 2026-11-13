@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-18T07:07:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-16T08:10:34.169Z
 topic:
   - Data Persistence
@@ -10,7 +10,7 @@ summary: How object keys, metadata, HTTP APIs, multipart writes, and lifecycle t
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 Object storage keeps bytes and metadata under one key inside a bucket or container. Applications put, get, list, copy, or delete whole objects through an API. They do not manage disk blocks or depend on shared filesystem locking. The contract fits large values that are usually replaced as a unit, including media, backups, build artifacts, and data-lake files.

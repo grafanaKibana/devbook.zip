@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "createdAt": 1794352795666,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "workload-cases",
+  "title": "Build representative, versioned evaluation cases with references, rubrics, and failure segments while preventing leakage and misleading synthetic coverage",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "mcq",
+      "marks": 1,
+      "objective": "workload-cases",
+      "goal": "explain",
+      "prompt": "A support assistant answers questions from a help-centre corpus. Over the past year, the team rewrote its refund policy and deleted or merged many help articles. The evaluation set has not changed during that time. Each case still holds the original input, expected answer and expected source article. A spot check shows that many cases name source articles that no longer exist. Many refund cases also expect answers under the old, superseded policy. The model has never been trained on the evaluation set. The score on the set has stayed at about 91% throughout.\n\nWhich explanation best shows why this stable score is weak evidence that the assistant still behaves correctly?",
+      "options": [
+        "The cases now point to deleted sources and expect superseded policy, so the score measures agreement with an old product contract, not the current workload.",
+        "The set is probably too small to detect a change, so it would become reliable once more cases were added while the existing labels were kept.",
+        "Reusing the same cases makes every run a paired comparison, so the steady score already shows that no regression has happened since last year.",
+        "The frozen cases have been seen so often that the assistant has adapted to them, so its answers are memorised and the score is inflated."
+      ],
+      "answer": 0,
+      "rubric": [
+        {
+          "point": "Selects the option explaining that cases reference deleted sources and superseded expected behaviour, so the score measures an outdated contract rather than the current workload (eval set drift).",
+          "marks": 1
+        }
+      ],
+      "model": "**Option 1.** The corpus and refund policy changed, but the cases did not. Many now expect deleted articles as sources and answers under the superseded policy, so the score measures fit to an old contract rather than correct behaviour on the current workload. A stable score therefore cannot be attributed cleanly to the system, the data or the labels.\n\n*Optional detail:* adding more cases with stale labels does not fix the problem. Pairing reduces variance, but it does not make outdated labels valid. The scenario gives no evidence that the assistant has adapted to these cases, so the memorisation explanation is unsupported, while the stale sources and policy are directly observed.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+        "heading": "Eval Set Drift"
+      }
+    }
+  ],
+  "answers": {
+    "c1": {
+      "choice": 0,
+      "confidence": "sure"
+    }
+  },
+  "marks": {
+    "c1": {
+      "score": 1,
+      "awarded": [
+        true
+      ],
+      "annotations": [],
+      "mistake": "none",
+      "feedback": "Correct."
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1794384415590
+}

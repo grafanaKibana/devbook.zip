@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "createdAt": 1794246372483,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "iteration-contracts",
+  "title": "Trace enumeration, deferred iterator execution and enumerator disposal on normal exit or failure",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "mcq",
+      "prompt": "Consider this synchronous C# iterator:\n\n```csharp\nIEnumerable<int> Values(int count)\n{\n    if (count < 0)\n        throw new ArgumentOutOfRangeException(nameof(count));\n\n    yield return count;\n}\n\nIEnumerable<int> sequence;\ntry\n{\n    sequence = Values(-1);\n}\ncatch (ArgumentOutOfRangeException)\n{\n    Console.WriteLine(\"caught\");\n    return;\n}\n\nforeach (var value in sequence)\n    Console.WriteLine(value);\n```\n\nWhy does the `catch` shown fail to catch the validation exception?",
+      "marks": 1,
+      "options": [
+        "Calling `Values` creates the sequence; validation runs when `foreach` calls `MoveNext` outside the `try`.",
+        "Calling `Values` validates the input; enumeration later rethrows the exception stored during that call.",
+        "Calling `Values` schedules background execution; validation runs after control has left the `try`.",
+        "Calling `Values` runs validation immediately; iterator exceptions bypass catches surrounding the method call."
+      ],
+      "answer": 0,
+      "rubric": [
+        {
+          "point": "Selects the explanation that iterator-body validation executes during enumeration outside the surrounding try block.",
+          "marks": 1
+        }
+      ],
+      "model": "Calling `Values` creates the sequence; its body first runs when `foreach` calls `MoveNext`, outside the `try`.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Foreach.md",
+        "heading": "Iterators and Yield"
+      },
+      "objective": "iteration-contracts",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "short",
+      "prompt": "Consider this synchronous C# code:\n\n```csharp\nIEnumerable<int> Values()\n{\n    try\n    {\n        yield return 7;\n        yield return 9;\n    }\n    finally\n    {\n        Console.WriteLine(\"released\");\n    }\n}\n\nforeach (var value in Values())\n{\n    throw new InvalidOperationException();\n}\n```\n\nThe caller catches the exception. Explain why `released` is printed before the exception reaches that caller, although the sequence was not exhausted.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Explains that foreach disposes this iterator's enumerator when the loop body throws, through its cleanup path.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that disposing the suspended iterator executes its pending finally block, which prints released.",
+          "marks": 1
+        }
+      ],
+      "model": "When the loop body throws, `foreach` disposes the enumerator during exception unwinding. Disposal runs the iterator's pending `finally`, printing `released` before the exception propagates to the caller.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Foreach.md",
+        "heading": "Iterators and Yield"
+      },
+      "objective": "iteration-contracts",
+      "goal": "explain"
+    }
+  ],
+  "answers": {
+    "c1": {
+      "choice": 1,
+      "confidence": "unsure"
+    },
+    "c2": {
+      "text": "IEnumerable materialized in foreach heade, when first move next is called, then the foreach body is executed",
+      "confidence": "unsure"
+    }
+  },
+  "marks": {
+    "c1": {
+      "score": 0,
+      "awarded": [
+        false
+      ],
+      "annotations": [],
+      "mistake": "misconception",
+      "feedback": "The answer is “Calling `Values` creates the sequence; validation runs when `foreach` calls `MoveNext` outside the `try`.”."
+    },
+    "c2": {
+      "awarded": [
+        false,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "IEnumerable materialized in foreach heade, when first move next is called",
+          "kind": "wrong",
+          "note": "You describe deferred execution starting at the first MoveNext, which is true but does not address why `released` prints when the body throws. The question asks about disposal, not when iteration begins."
+        },
+        {
+          "quote": "then the foreach body is executed",
+          "kind": "missing",
+          "note": "You needed to say that foreach disposes the enumerator when the body throws, and that disposing the suspended iterator runs its pending `finally`, printing `released`."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You described deferred iteration start but never explained the disposal on exception or the pending `finally` running, so neither rubric point is earned.",
+      "score": 0
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1794299292874
+}

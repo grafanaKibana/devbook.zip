@@ -55,6 +55,15 @@ test('missing courses leave cards unassigned while malformed or duplicate regist
   assert.match(result.problems.join('\n'), /duplicate.*course/i);
 });
 
+test('scoped checks accept root dashboards while preserving subject assignment checks', async t => {
+  const repoRoot = fixture(t, { 'Home/index.md': 'Home dashboard.\n',
+    'Home/Questions.md': 'Questions dashboard.\n', 'Home/Programming/New.md': CARD });
+  assert.deepEqual(await checkCoverage({ repoRoot, paths: ['Home/index.md', 'Home/Questions.md'] }),
+    { unassigned: [], problems: [] });
+  assert.deepEqual(await checkCoverage({ repoRoot, paths: ['Home/index.md', 'Home/Programming/New.md'] }),
+    { unassigned: [{ path: 'Home/Programming/New.md', cards: 1, course: 'Programming' }], problems: [] });
+});
+
 test('scoped source paths cannot follow symlink files or directories outside the vault', async t => {
   const repoRoot = fixture(t, { 'Home/Programming/Types.md': CARD, 'Assets/Qard/Courses/Programming.md': COURSE });
   const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'qard-outside-'));

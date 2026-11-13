@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "createdAt": 1794175270552,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "llm-mechanics",
+  "title": "Distinguish transformer families, pretraining and adaptation, inference context, and sparse-expert routing without equating fluent output with verified reasoning",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "questions": [
+    {
+      "id": "c1",
+      "type": "mcq",
+      "marks": 1,
+      "objective": "llm-mechanics",
+      "goal": "explain",
+      "prompt": "A team serves a sparse mixture-of-experts (MoE) model across several GPUs. Requests arrive one at a time (batch size 1). The MoE model turns out slower per token than a dense model that has about the same number of **active parameters per token**. Which explanation best fits this result?",
+      "options": [
+        "At small batch sizes the router falls back to activating every expert, so the MoE model performs the full dense arithmetic of all its experts for each token.",
+        "Every token still multiplies through the model's total parameter set, so the active-parameter count understates the arithmetic actually performed per token.",
+        "Active parameters only approximate part of the arithmetic. The MoE model also pays for router work, cross-device token dispatch and load imbalance, which small batches expose.",
+        "Small batches make the serving layer switch between separate model checkpoints for each request, and loading those checkpoints adds per-token latency."
+      ],
+      "answer": 2,
+      "rubric": [
+        {
+          "point": "Selects the option attributing the slowdown to routing, cross-device dispatch and load imbalance that active-parameter counts do not capture.",
+          "marks": 1
+        }
+      ],
+      "model": "**Active parameters only approximate part of the arithmetic. The MoE model also pays for router work, cross-device token dispatch and load imbalance, which small batches expose.**\n\nOptional: Sparse routing still activates only top-k experts, and total parameters affect storage and placement, not per-token arithmetic. MoE routing is inside one model, unrelated to application-level model routing.",
+      "source": {
+        "path": "Home/AI & ML/LLM/LLM.md",
+        "heading": "What Sparse Activation Saves"
+      }
+    },
+    {
+      "id": "c2",
+      "type": "short",
+      "marks": 2,
+      "objective": "llm-mechanics",
+      "goal": "explain",
+      "prompt": "A developer wants a chatbot that writes free-form replies, and plans to use a pretrained BERT checkpoint as the model that generates the reply text. Explain why BERT, on its own, is unsuitable for generating these open-ended replies. Address both (a) what BERT's architecture outputs and (b) what its pretraining objective trains it to do.",
+      "rubric": [
+        {
+          "point": "(a) Architecture: states that BERT is encoder-only, producing contextual representations (per-token or pooled vectors) for a task head, with no autoregressive decoder that emits new tokens one at a time.",
+          "marks": 1
+        },
+        {
+          "point": "(b) Pretraining: states that BERT is pretrained to predict masked tokens using context on both sides (bidirectional), not causal next-token prediction, so its pretraining does not directly train continuing text.",
+          "marks": 1
+        }
+      ],
+      "model": "(a) BERT is encoder-only: it turns input into contextual vectors for a task head and has no autoregressive decoder to emit a continuation token by token.\n\n(b) It is pretrained with bidirectional attention to predict masked tokens from both sides, not with a causal mask on next-token prediction, so its pretraining does not directly train causal next-token continuation.\n\nOptional: a decoder-only (GPT-style) or encoder-decoder model fits generation.",
+      "source": {
+        "path": "Home/AI & ML/LLM/LLM.md",
+        "heading": "Transformer Families"
+      }
+    }
+  ],
+  "answers": {
+    "c2": {
+      "text": "Bert is a classifier model, where it generetes decisions and probability, not a free form text. It possbile to use bert to select pre-existing text based on its classification",
+      "confidence": "guess"
+    },
+    "c1": {
+      "choice": 2,
+      "confidence": "guess"
+    }
+  },
+  "marks": {
+    "c1": {
+      "score": 1,
+      "awarded": [
+        true
+      ],
+      "annotations": [],
+      "mistake": "none",
+      "feedback": "Correct."
+    },
+    "c2": {
+      "awarded": [
+        false,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "Bert is a classifier model, where it generetes decisions and probability",
+          "kind": "wrong",
+          "note": "BERT is an encoder-only model that outputs contextual vectors for a task head. It is not inherently a classifier, and the answer never says it lacks an autoregressive decoder that emits tokens one at a time."
+        },
+        {
+          "quote": "not a free form text",
+          "kind": "vague",
+          "note": "This correctly says BERT does not produce free-form text. It gives no architectural reason, such as the missing decoder."
+        },
+        {
+          "quote": "It possbile to use bert to select pre-existing text based on its classification",
+          "kind": "insight",
+          "note": "Using BERT to pick or rank existing responses is a valid selection use. It does not answer why BERT cannot generate."
+        },
+        {
+          "quote": "Bert is a classifier model",
+          "kind": "missing",
+          "note": "Part (b) is absent. You need to say BERT is pretrained to predict masked tokens using context on both sides, not to predict the next token."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You reached the right conclusion that BERT isn't suited to free-form generation, but you gave neither the encoder-only architecture nor the masked-token pretraining objective.",
+      "score": 0
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1794217041891
+}

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T05:55:48.750Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Dynamic-programming all-pairs shortest paths.
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 Floyd-Warshall computes the shortest distance between every ordered pair in a weighted directed graph, producing a full `V×V` table. Running a single-source algorithm from each vertex can produce the same table, but on a dense graph that repeats much of the work. Negative edge weights also rule out Dijkstra.

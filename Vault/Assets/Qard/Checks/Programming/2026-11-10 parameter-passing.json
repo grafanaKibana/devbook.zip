@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "createdAt": 1794301247203,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "parameter-passing",
+  "title": "Predict how by-value parameters and ref, out, or in affect caller storage",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "goal": "explain",
+      "objective": "parameter-passing",
+      "prompt": "Consider this C# program. `total` is a static `int` field, and `Report` takes an `in int` parameter.\n\n```csharp\nstatic int total = 5;\n\nstatic void Report(in int value)\n{\n    total = 20;\n    Console.WriteLine(value);\n}\n\nReport(in total);\n```\n\n`Report` never assigns `value`; it assigns only the field `total`. Predict what the program prints, and explain why `in` gives that result.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Predicts that the program prints 20.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that `in` makes `value` a readonly alias of `total`'s storage rather than a copy of 5. Readonly only blocks writes through `value`, so the write to `total` is visible when `value` is read.",
+          "marks": 1
+        }
+      ],
+      "model": "It prints **20**. The `in` parameter is a by-reference alias of the variable `total`, not a copy of its value at the time of the call. Readonly means only that `Report` cannot assign through `value`. Other code can still change the underlying storage, so after `total = 20` the alias reads 20.\n\n*(Optional: without `in`, `value` would be a copy and the program would print 5.)*",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+        "heading": "In"
+      }
+    },
+    {
+      "id": "c2",
+      "type": "mcq",
+      "goal": "explain",
+      "objective": "parameter-passing",
+      "prompt": "`Account` is a class with a public writable `int Balance` field. Both parameters are ordinary by-value parameters, and the caller passes the same variable to both.\n\n```csharp\nstatic void Sync(Account source, Account target)\n{\n    target.Balance = 40;\n    target = new Account { Balance = 90 };\n    source.Balance += 5;\n}\n\nvar acct = new Account { Balance = 20 };\nSync(acct, acct);\nConsole.WriteLine(acct.Balance);\n```\n\nWhich option gives the printed value with the correct explanation?",
+      "marks": 1,
+      "options": [
+        "20, because each class parameter receives its own copy of the object, so neither write in the method reaches the object that acct refers to",
+        "45, because both parameters hold copies of one reference: the write through target changes the shared object, and rebinding target leaves source on it",
+        "95, because both parameters alias the same caller variable, so rebinding target also moves source to the new object before the final write",
+        "90, because assigning a new object to a class parameter replaces the caller's reference in acct, so acct now refers to the new object"
+      ],
+      "answer": 1,
+      "rubric": [
+        {
+          "point": "Chooses 45: the write through target mutates the object shared with source and acct, and reassigning target rebinds only that local reference, so source still adds 5 to the original object.",
+          "marks": 1
+        }
+      ],
+      "model": "**45.** Each by-value parameter is a separate copy of the same reference. `target.Balance = 40` changes the object that `source` and `acct` also refer to. Assigning `new Account` rebinds only `target`, so `source.Balance += 5` still updates the original object: 40 + 5 = 45.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+        "heading": "Ref"
+      }
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

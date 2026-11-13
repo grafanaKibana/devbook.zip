@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-09T18:37:04.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T14:39:34.306Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: The B-tree variant databases ship, with data only in leaves chained for
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 A database index serves point lookups and ordered ranges such as every key from `15` through `40`. Separator keys route a lookup down the tree. A range scan has another requirement: once it reaches the first matching leaf, it needs a cheap path to the next one.
@@ -249,7 +249,7 @@ As with a [[Computer Science/Data Structures/Trees/B-tree|B-tree]], node capacit
 >   L3 -. next .-> NIL[null]
 > ```
 >
-> Separators `17` and `40` route descents only. The values `17` and `40` also live in leaves. A scan for `[15, 45]` descends to the `17` leaf, then follows `next` links.
+> Separators `17` and `40` route descents only. The values `17` and `40` also live in leaves. A scan for `[15, 45]` descends to the `5, 9, 12` leaf, finds no qualifying key there, then follows `next` to the `17` leaf and continues through the linked leaves up to `45`.
 
 > [!EXAMPLE]- C# search and range scan
 >

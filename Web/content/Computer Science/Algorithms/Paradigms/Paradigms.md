@@ -2,7 +2,7 @@
 publish: true
 title: Algorithm Design Paradigms
 created: 2026-06-20T05:33:50.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.375Z
 tags:
   - FolderNote
@@ -14,7 +14,7 @@ summary: The broad strategies for constructing a solution, the lens you choose b
 priority: High
 level:
   - "4"
-status: Creation
+status: New
 ---
 
 An algorithmic paradigm supplies the broad shape of a solution before implementation details take over. Merge sort divides and combines. Dijkstra commits greedily. Fibonacci with memoization stores repeated states. Recognizing that shape narrows both the implementation and the proof: a greedy choice needs an exchange argument, while an optimization DP needs optimal substructure.

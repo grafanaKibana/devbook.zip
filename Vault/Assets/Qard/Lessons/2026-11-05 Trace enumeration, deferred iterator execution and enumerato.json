@@ -1,0 +1,464 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/Programming/NET/CSharp/Fundamentals/Foreach.md",
+      "text": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"C#'s common way to iterate a sequence, plus iterators and yield.\"\nlevel: [\"4\"]\npriority: High\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Foreach\"\nflashcard_uid: \"2e8ba405\"\ncreated: \"2026-02-15T16:27:13.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:14:17.324Z\"\n---\n\n`foreach` asks a source for one item at a time. Most sources implement `IEnumerable<T>`, but the compiler also accepts types that expose the required enumerator pattern without implementing the interface. This is why arrays, collections, spans, and custom stack-only enumerators can all use the same loop syntax.\n\nThe source must provide either an enumerable interface or a suitable `GetEnumerator()` method. The returned enumerator exposes `Current` and a parameterless `MoveNext()` returning `bool`.\n\nFor a normal enumerable, the lowering is roughly:\n\n```csharp\nvar enumerator = collection.GetEnumerator();\ntry\n{\n    while (enumerator.MoveNext())\n    {\n        var item = enumerator.Current;\n        // Use item\n    }\n}\nfinally\n{\n    // Conceptually: if this enumerator requires disposal, dispose it here.\n    // The exact pattern depends on its static type and may avoid boxing a struct.\n}\n```\n\nThe exact lowering depends on the source type. Arrays receive specialized index-based handling. Other enumerators are disposed when required, including after `break` or an exception. A hand-written `while (MoveNext())` loop must preserve that cleanup itself.\n\nConcrete collections can expose struct enumerators, avoiding a heap allocation for the enumerator. Upcasting such a collection to `IEnumerable<T>` may box that enumerator. This matters only on measured hot paths. The interface is often the better boundary elsewhere.\n\n# Iterators and Yield\n\n`yield return` lets a method describe a sequence without building the whole result first. The compiler turns the method into a state machine that resumes at the next statement each time the consumer asks for another element. `yield break` ends the sequence.\n\nAn iterator returning `IEnumerable<T>` normally starts work during enumeration, not when the method is called:\n\n- Calling the method obtains the enumerable state machine.\n- `MoveNext()` runs the body until it reaches a `yield return` or finishes.\n- Disposing the enumerator runs pending `finally` blocks.\n\nAsync iterators apply the same idea through `IAsyncEnumerable<T>` and `await foreach`.\n\nExample:\n\n```csharp\npublic static IEnumerable<int> CountNumbers(int start, int end)\n{\n    for (int i = start; i <= end; i++)\n    {\n        yield return i;\n    }\n}\n\nforeach (var number in CountNumbers(1, 5))\n{\n    Console.WriteLine(number);\n}\n```\n\nTwo boundaries are easy to miss:\n\n- **Deferred execution moves failures.** Validation inside the iterator body throws when enumeration begins. A non-iterator wrapper can validate immediately and return a private iterator.\n- **`yield return` has placement restrictions.** It cannot appear in a `catch` or `finally`, or in a `try` that has a `catch`. A `try` with only `finally` is allowed so the state machine can preserve cleanup.\n\n# Pitfalls\n\n**Changing the source during enumeration.** Many mutable collections, including `List<T>` and `Dictionary<TKey,TValue>`, invalidate active enumerators after structural changes and throw `InvalidOperationException`. Applying changes after the loop or iterating an intentional snapshot avoids the exception.\n\n**Deferred work captures more than the item.** Since C# 5, each `foreach` iteration has its own iteration variable, so lambdas do not all observe the final item. Captured mutable state outside the loop is still shared, and closures can outlive resources used during enumeration.\n\n**Source binding differs from deferred work.** LINQ operators receive their source object when called. Later reassignment of the caller's source variable does not replace that object inside the query. Changes to the object itself, and separately captured predicate variables, can still change a later enumeration.\n\n**Multiple enumeration.** An `IEnumerable<T>` may repeat I/O, database work, or side effects every time it is enumerated. Materialization is worthwhile only when a stable snapshot or repeated traversal is actually needed.\n\n# Tradeoffs\n\n- `foreach` expresses sequential traversal without exposing indexes. `for` fits when the index itself is part of the algorithm or the collection must be updated by position.\n- LINQ expresses a transformation pipeline. A loop is easier to step through and can avoid iterator or delegate overhead, but performance depends on the source and operators.\n- `Span<T>` provides a stack-only view over contiguous memory. It helps APIs avoid copies and allocations. It is not an automatic reason to replace every collection loop.\n\n# Questions\n\n<!-- qard-id: 23508898-cc73-4289-ba2c-ab026d0258b2 -->\n> [!qard]- What must a type provide to work with `foreach`?\n> A type works with `foreach` in either of two ways. It implements `IEnumerable<T>` or `IEnumerable`, or it matches the enumerator pattern that the compiler looks for. The interface is the usual reusable contract, but it is not required.\n>\n> The pattern has two parts:\n>\n> - **The source** has a public parameterless `GetEnumerator()` method. That method can also be an extension method.\n> - **The returned enumerator** has a public `Current` property and a public parameterless `MoveNext()` method that returns `bool`.\n>\n> The compiler binds to these members rather than to an interface, so a type can be iterated without implementing either interface. Arrays also receive specialized compiler handling.\n>\n> [Microsoft: iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements)\n\n<!-- qard-id: cdfb0d9a-b75e-43e1-b6ed-ac7ea0da25c7 -->\n> [!qard]- How does `foreach` work under the hood?\n> The compiler rewrites `foreach` into lower-level code, and the result depends on the source type. For the general enumerator pattern, the rewrite is roughly:\n>\n> ```csharp\n> var enumerator = source.GetEnumerator();\n> try\n> {\n>     while (enumerator.MoveNext())\n>     {\n>         var item = enumerator.Current;\n>         // loop body\n>     }\n> }\n> finally\n> {\n>     // Disposes the enumerator when it requires disposal.\n> }\n> ```\n>\n> 1. `GetEnumerator()` is called once, before the first element.\n> 2. Each `MoveNext()` call advances to the next element and returns `false` when the sequence is exhausted.\n> 3. `Current` supplies that element, which is assigned to the iteration variable before the body runs.\n> 4. When the enumerator requires disposal, the `finally` block disposes it, including after `break` or an exception. A handwritten `while (MoveNext())` loop has to provide that cleanup itself, or the enumerator's cleanup does not run.\n>\n> No single generated shape fits every source. Arrays, for example, can be lowered to index-based code without an enumerator.\n>\n> [Microsoft: iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements)\n\n<!-- qard-id: 0cfeffdf-d33d-4c50-a677-d2f470332fd4 -->\n> [!qard]- When is `yield return` useful compared with a materialized collection?\n> `yield return` produces values on demand, so a consumer can stop early without first building the whole result. The iterator body runs during enumeration; enumerating again runs it again and may observe changed state. A materialized collection is preferable when a stable snapshot or repeated traversal is needed. [Microsoft: yield statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/yield)\n\n> [!qard]- Does a deferred LINQ query follow later reassignment of its source variable?\n> No. An operator receives the source object when the pipeline is constructed. Reassigning the caller's variable cannot replace the source already passed to it:\n>\n> ```csharp\n> int[] source = [1, 2, 3];\n> var query = source.Where(n => n > 1);\n> source = [10, 20];\n> // Prints 2, 3 from the original source.\n> Console.WriteLine(string.Join(\", \", query));\n> ```\n>\n> Deferred execution postpones enumeration, not evaluation of the source argument. Mutation of the same source object can affect a later enumeration, and variables separately captured by a predicate remain live. Materializing the results creates a snapshot of those results. [Microsoft: Enumerable.Where](https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.where?view=net-10.0)\n\n# References\n\n- [C# iteration statements](https://learn.microsoft.com/dotnet/csharp/language-reference/statements/iteration-statements#the-foreach-statement)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1793889592626,
+  "topic": "Trace enumeration, deferred iterator execution and enumerator disposal on normal exit or failure",
+  "notes": [
+    "Home/Programming/NET/CSharp/Fundamentals/Foreach.md"
+  ],
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "iteration-contracts",
+  "steps": [
+    {
+      "title": "Connect a sequence to an enumerator",
+      "explain": "A reference variable identifies an object. Assigning that reference to another variable gives both variables access to the same object; it does not copy the object.\n\nThe **Foreach** note introduces a second role: the **enumerator**, which tracks progress through a sequence. The source provides access to values; the enumerator records where one traversal has reached. This distinction lets two loops traverse the same list without sharing a position.\n\nFor a `List<int>`, each call to `GetEnumerator()` obtains independent traversal state. Initially, an enumerator is positioned before the first element. Calling `MoveNext()` attempts to advance it: `true` means an element is available, and `Current` supplies that element. A later `MoveNext()` returning `false` means the traversal has finished.\n\nConsequently, sharing a list reference does not make separately obtained enumerators advance together. Moving one changes its traversal position, while the other retains its own position. Neither movement changes the list's elements.\n\nThis gives us the first tracing rule: identify the source, then track each enumerator's position separately. For each successful `MoveNext()`, determine which value `Current` now supplies.",
+      "connect": "Your reference practice explains why two variables can identify the same list. Tracking traversal state separately prepares us to trace when iterator code runs and which enumerator must be cleaned up.",
+      "checkFirst": true,
+      "check": {
+        "id": "k1",
+        "type": "calc",
+        "prompt": "Each call to a list's `GetEnumerator()` starts an independent traversal before its first element. `MoveNext()` advances that traversal; after success, `Current` supplies its element.\n\nWhat does this code print, and how do the shared references and traversal positions explain the result?\n\n```csharp\nvar source = new List<int> { 10, 20 };\nvar alias = source;\n\nvar first = source.GetEnumerator();\nvar second = alias.GetEnumerator();\n\nfirst.MoveNext();\nfirst.MoveNext();\nsecond.MoveNext();\n\nConsole.WriteLine($\"{first.Current}, {second.Current}\");\n```",
+        "marks": 3,
+        "rubric": [
+          {
+            "point": "States that the output is `20, 10`.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that `source` and `alias` refer to the same list; the assignment does not copy the list.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that the separately obtained enumerators have independent positions: `first` advances twice and `second` advances once.",
+            "marks": 1
+          }
+        ],
+        "model": "It prints `20, 10`. `source` and `alias` reference the same list, but the two `GetEnumerator()` calls obtain independent traversal state. `first` advances to `10`, then `20`; `second` advances only to `10`.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Foreach.md",
+          "heading": "Questions"
+        },
+        "objective": "iteration-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Says both enumerators share a position because `source` and `alias` reference the same list.",
+          "reteach": "The shared object is the list. Each `GetEnumerator()` call obtains its own traversal state, so advancing `first` does not advance `second`."
+        },
+        {
+          "signs": "Gets `20, 10` but explains that assigning `source` to `alias` copied the list.",
+          "reteach": "`List<int>` is a reference type. Assignment copies the reference, so both variables identify one list. The independent positions come from the separate `GetEnumerator()` calls."
+        },
+        {
+          "signs": "Says the first `MoveNext()` skips `10`, or that enumeration removes elements.",
+          "reteach": "An enumerator starts before the first element. Its first successful advance reaches `10`; its second reaches `20`. Advancing changes traversal state, not the list's contents."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Trace each iteration",
+      "explain": "An enumerator holds the position of one traversal. As the **Foreach** note explains, `GetEnumerator()` obtains it before the first item. Obtaining an enumerator does not give the loop an item yet.\n\nThe loop needs to know whether an item exists before using it. It therefore calls `MoveNext()` first. If the result is `true`, the loop reads `Current`, assigns that value to the iteration variable, and runs the body. Only after the body finishes does the loop request another item through `MoveNext()`.\n\nThis gives a repeating order: **advance → read → use**. Each successful advance permits one execution of the body. A `false` result ends the repetition: the loop neither reads `Current` nor executes the body for that request.\n\nFor two items, completing the loop therefore requires three calls to `MoveNext()`: two successful requests and one final request that discovers exhaustion. Keeping requests separate from successful iterations makes the trace predictable.",
+      "connect": "The previous step separated the sequence from its enumerator. Now we follow that enumerator’s requests in order, establishing where deferred producer work and cleanup will fit later.",
+      "checkFirst": true,
+      "check": {
+        "id": "k2",
+        "type": "long",
+        "prompt": "A custom enumerable produces `4`, then `7`, then ends. Its members log each call as follows:\n\n- `GetEnumerator()` logs `GetEnumerator`.\n- `MoveNext()` logs `MoveNext: true` or `MoveNext: false`, matching its result.\n- Reading `Current` logs `Current: 4` or `Current: 7`, matching the current item.\n\nThe consumer runs:\n\n```csharp\nforeach (var item in source)\n{\n    Console.WriteLine($\"Body: {item}\");\n}\n```\n\nWrite the complete log in order, ending with the `MoveNext()` call that returns `false`. No call throws, and the loop runs to completion. Leave disposal out of this trace.",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "Starts with exactly one GetEnumerator call before any MoveNext call.",
+            "marks": 1
+          },
+          {
+            "point": "Traces the first item as MoveNext: true, Current: 4, Body: 4, in that order.",
+            "marks": 1
+          },
+          {
+            "point": "Traces the second item as MoveNext: true, Current: 7, Body: 7, after the first body finishes.",
+            "marks": 1
+          },
+          {
+            "point": "Ends with a third MoveNext call returning false, with no subsequent Current read or body execution.",
+            "marks": 1
+          }
+        ],
+        "model": "```text\nGetEnumerator\nMoveNext: true\nCurrent: 4\nBody: 4\nMoveNext: true\nCurrent: 7\nBody: 7\nMoveNext: false\n```\n\nEach successful request is followed by a `Current` read and the body. The final unsuccessful request ends the loop.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Foreach.md",
+          "heading": "Questions"
+        },
+        "objective": "iteration-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Reads Current before the first MoveNext call, or treats GetEnumerator as selecting 4.",
+          "reteach": "`GetEnumerator()` obtains traversal state. The first `MoveNext()` must succeed before the loop can read the first item through `Current`."
+        },
+        {
+          "signs": "Requests both items before running either body, or gets a new enumerator for each item.",
+          "reteach": "One enumerator serves the whole loop. Each successful request is followed immediately by reading that item and running its body; the next request waits until the body finishes."
+        },
+        {
+          "signs": "Omits the final MoveNext: false, or reads Current and runs the body after it.",
+          "reteach": "The loop discovers exhaustion by making another request. A `false` result stops the loop before `Current` or the body, so two items require three `MoveNext()` calls."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Trace deferred iterator execution",
+      "explain": "The **Foreach** note’s “Iterators and Yield” section connects the requests you already traced to execution inside an iterator method.\n\nAn enumerator tracks progress through a sequence. For a method returning `IEnumerable<int>` through `yield`, that progress includes a saved position in the method body. Calling the method obtains the sequence without running its body. `GetEnumerator()` obtains the enumerator; the first `MoveNext()` starts the body.\n\nExecution continues until `yield return` supplies a value. The enumerator makes that value available through `Current`, and `MoveNext()` returns `true`. The body is now suspended. Reading `Current` does not resume it.\n\nAnother `MoveNext()` resumes execution immediately after the suspended `yield return`. It runs until another yield, completion, or an exception. Completion returns `false`; an exception escapes from that particular `MoveNext()` call.\n\nThis gives a way to discover the trace: move through the consumer until it requests an item, then follow the iterator until it yields, finishes, or throws. Side effects occur only when execution reaches their statements.",
+      "connect": "Previously, you traced `MoveNext()`, `Current`, and the loop body. Now you can trace the work each request triggers inside the iterator, locating failures before following their cleanup in the final step.",
+      "checkFirst": true,
+      "check": {
+        "id": "k3",
+        "type": "long",
+        "prompt": "Trace this code. What lines are printed, in order, and which operation causes the iterator to reach `throw`?\n\n```csharp\nIEnumerable<int> Values()\n{\n    Console.WriteLine(\"start\");\n    yield return 7;\n    Console.WriteLine(\"resume\");\n    throw new InvalidOperationException();\n}\n\nvar sequence = Values();\nConsole.WriteLine(\"created\");\nusing var e = sequence.GetEnumerator();\nConsole.WriteLine(\"obtained\");\ne.MoveNext();\nConsole.WriteLine(e.Current);\n\ntry\n{\n    e.MoveNext();\n}\ncatch (InvalidOperationException)\n{\n    Console.WriteLine(\"caught\");\n}\n```",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "Places created and obtained first, in that order, before any iterator-body output.",
+            "marks": 1
+          },
+          {
+            "point": "Places start followed by 7 next: the first MoveNext reaches the yield, and Current supplies 7.",
+            "marks": 1
+          },
+          {
+            "point": "Places resume next, identifying that the second MoveNext resumes after yield return.",
+            "marks": 1
+          },
+          {
+            "point": "Places caught last and identifies the second MoveNext as the operation from which the exception escapes.",
+            "marks": 1
+          }
+        ],
+        "model": "```text\ncreated\nobtained\nstart\n7\nresume\ncaught\n```\n\nNeither `Values()` nor `GetEnumerator()` runs this iterator body. The first `MoveNext()` prints `start` and suspends at `yield return 7`. Reading `Current` supplies 7 without resuming execution. The second `MoveNext()` resumes after the yield, prints `resume`, and reaches `throw`. The exception escapes that call, so the caller’s catch prints `caught`.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Foreach.md",
+          "heading": "Iterators and Yield"
+        },
+        "objective": "iteration-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Prints start before created, or between created and obtained.",
+          "reteach": "For this iterator, calling `Values()` obtains the sequence and `GetEnumerator()` obtains its cursor. Neither executes the body. The first request through `MoveNext()` reaches `Console.WriteLine(\"start\")`."
+        },
+        {
+          "signs": "Places resume before 7, or says reading Current triggers the exception.",
+          "reteach": "`yield return 7` suspends the body and makes 7 available. `Current` reads that value. Only the next `MoveNext()` continues to `resume` and `throw`."
+        },
+        {
+          "signs": "Omits resume and caught because the iterator has already returned its value.",
+          "reteach": "`yield return` pauses execution; it does not finish the sequence. The second `MoveNext()` requests more work, so execution continues after the yield and reaches the exception."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Trace disposal on exit and failure",
+      "explain": "A `finally` block runs when control leaves its associated `try`, including through an exception. In **Foreach.md**, the conceptual `foreach` expansion places enumeration inside `try` and enumerator disposal inside `finally`. That gives cleanup a path even when the loop stops early.\n\nFrom the previous step, `yield return` suspends the iterator. Suspension does not leave its `try`, so it does not run the iterator’s `finally` yet. The consumer might request another value.\n\nNow follow each exit. On exhaustion, the iterator finishes its body, running its `finally`, and `MoveNext()` returns `false`. The loop then disposes the enumerator. On `break` or an exception in the loop body, `foreach` disposes the suspended iterator, which runs its pending `finally` without executing the ordinary statements after `yield return`.\n\nIf the iterator itself throws, its `finally` runs as the failing `MoveNext()` unwinds. The enclosing `foreach` also follows its disposal path; the iterator’s completed cleanup does not run twice. Cleanup does not swallow the exception: it continues to the matching `catch`.",
+      "connect": "The previous step traced how `MoveNext()` resumes deferred work. Adding cleanup completes that trace: every exit must account for both the last executed statement and the iterator’s pending `finally`.",
+      "checkFirst": false,
+      "check": {
+        "id": "k4",
+        "type": "long",
+        "prompt": "Trace this program for four separate runs with `mode` equal to `\"normal\"`, `\"break\"`, `\"body\"`, and `\"iterator\"`. What lines are printed, in order, in each run?\n\n```csharp\nstatic IEnumerable<int> Values(bool fail)\n{\n    try\n    {\n        yield return 1;\n        Console.WriteLine(\"resume\");\n        if (fail)\n            throw new InvalidOperationException();\n        yield return 2;\n    }\n    finally\n    {\n        Console.WriteLine(\"cleanup\");\n    }\n}\n\ntry\n{\n    foreach (int value in Values(mode == \"iterator\"))\n    {\n        Console.WriteLine(value);\n        if (mode == \"break\")\n            break;\n        if (mode == \"body\")\n            throw new InvalidOperationException();\n    }\n    Console.WriteLine(\"after\");\n}\ncatch (InvalidOperationException)\n{\n    Console.WriteLine(\"caught\");\n}\n```",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "Normal run: prints 1, resume, 2, cleanup, after, in that order.",
+            "marks": 1
+          },
+          {
+            "point": "Break run: prints 1, cleanup, after, in that order.",
+            "marks": 1
+          },
+          {
+            "point": "Body-failure run: prints 1, cleanup, caught, in that order.",
+            "marks": 1
+          },
+          {
+            "point": "Iterator-failure run: prints 1, resume, cleanup, caught, in that order, with cleanup appearing once.",
+            "marks": 1
+          }
+        ],
+        "model": "`\"normal\"`:\n```text\n1\nresume\n2\ncleanup\nafter\n```\nThe next request after `2` finishes the iterator, running its `finally` before `MoveNext()` returns `false`.\n\n`\"break\"`:\n```text\n1\ncleanup\nafter\n```\nDisposal runs the suspended iterator’s pending `finally`. It does not resume the ordinary code that prints `resume`.\n\n`\"body\"`:\n```text\n1\ncleanup\ncaught\n```\nThe loop body throws. Enumeration cleanup runs before control reaches `catch`; `after` is skipped.\n\n`\"iterator\"`:\n```text\n1\nresume\ncleanup\ncaught\n```\nThe second `MoveNext()` resumes the iterator and throws. Its `finally` runs during unwinding. The loop’s disposal path does not run that completed cleanup again.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Foreach.md"
+        },
+        "objective": "iteration-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Omits cleanup after break or an exception, or places caught before cleanup.",
+          "reteach": "`foreach` places required disposal in a `finally`. Leaving the loop through `break` or an exception still crosses that cleanup boundary. Here, cleanup finishes before the outer `catch` runs."
+        },
+        {
+          "signs": "Prints resume after break or a loop-body exception.",
+          "reteach": "Disposing a suspended iterator runs its pending `finally`; it does not request another item. The ordinary statements after `yield return` need another `MoveNext()`, which these exits never request."
+        },
+        {
+          "signs": "Prints cleanup twice for iterator failure, or prints after before caught.",
+          "reteach": "The iterator’s exception runs its `finally` while leaving the iterator body. Later disposal does not repeat that completed block. The exception then bypasses `after` and reaches `catch`."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "text": "i think it will return \"null, 20\". I thing current for enumerator starts from the first element, and moving forward twice will go out of the list bounds. Second will traverse to the second element on single call.",
+        "confidence": "guess"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "current for enumerator starts from the first element",
+            "kind": "wrong",
+            "note": "You placed the enumerator at the first element before it advances; it starts before the first element."
+          },
+          {
+            "quote": "Second will traverse to the second element on single call.",
+            "kind": "wrong",
+            "note": "You treated the first move as skipping the first element."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to give the output `20, 10`."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to explain that `source` and `alias` refer to the same list."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to explain that the two enumerators have independent positions and advance twice and once, respectively."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "You started each enumerator at the first element instead of before it.",
+        "score": 0
+      },
+      "reply": "In the **Foreach** note, an enumerator starts *before* the first element. If the first `MoveNext()` reaches `10`, where does the next call take it? Trace each enumerator separately.",
+      "reteach": "An enumerator starts before the first element. Its first successful advance reaches `10`; its second reaches `20`. Advancing changes traversal state, not the list's contents."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "GetEnumerator\nMoveNext: true\nCurrent: 4\nBody: 4\nMoveNext: true\nCurrent: 7\nBody: 7\nMoveNext: false",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "GetEnumerator",
+            "kind": "correct",
+            "note": "You obtain one enumerator before advancing."
+          },
+          {
+            "quote": "Current: 4\nBody: 4",
+            "kind": "correct",
+            "note": "You read and use the first item after a successful advance."
+          },
+          {
+            "quote": "Current: 7\nBody: 7",
+            "kind": "correct",
+            "note": "You trace the second item after the first body finishes."
+          },
+          {
+            "quote": "MoveNext: false",
+            "kind": "correct",
+            "note": "You include the final request that detects exhaustion."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "Your trace follows the correct order throughout.",
+        "score": 4
+      },
+      "reply": "Correct. Each successful `MoveNext()` leads to a `Current` read and one body execution; the final `false` ends the loop."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "it will print:\ncreated\nstart\nobtained\n7\ncaught",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "start",
+            "kind": "wrong",
+            "note": "You placed this before `obtained`, but the iterator body has not started yet."
+          },
+          {
+            "quote": "obtained",
+            "kind": "missing",
+            "note": "You needed to place `created` and `obtained` before any iterator-body output."
+          },
+          {
+            "quote": "7",
+            "kind": "missing",
+            "note": "You needed to place `start` immediately after `obtained`, followed by `7`."
+          },
+          {
+            "quote": "7",
+            "kind": "missing",
+            "note": "You needed to include `resume` and explain that the second `MoveNext()` resumes after the yield."
+          },
+          {
+            "quote": "caught",
+            "kind": "missing",
+            "note": "You needed to identify the second `MoveNext()` as the call from which the exception escapes."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "You started the iterator body too early and omitted the effect of the second `MoveNext()` call.",
+        "score": 0
+      },
+      "reply": "You placed `start` before `obtained`. Which operation first requests a value from the iterator? Then trace from the yield to the next request: what runs before the exception reaches the catch?",
+      "reteach": "For this iterator, calling `Values()` obtains the sequence and `GetEnumerator()` obtains its cursor. Neither executes the body. The first request through `MoveNext()` reaches `Console.WriteLine(\"start\")`."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "normal: 1, resume, 2, after\nbreak: 1, after\nbody: 1, caught\niterator: 1, resume, caught",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "normal: 1, resume, 2, after",
+            "kind": "missing",
+            "note": "You needed cleanup between 2 and after."
+          },
+          {
+            "quote": "break: 1, after",
+            "kind": "missing",
+            "note": "You needed cleanup between 1 and after."
+          },
+          {
+            "quote": "body: 1, caught",
+            "kind": "missing",
+            "note": "You needed cleanup between 1 and caught."
+          },
+          {
+            "quote": "iterator: 1, resume, caught",
+            "kind": "missing",
+            "note": "You needed cleanup once between resume and caught."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "You omitted cleanup in all four runs.",
+        "score": 0
+      },
+      "reply": "You omitted `cleanup` in every run. In **Foreach.md**, disposal happens when the loop exits, and the iterator’s `finally` runs when its `try` ends. Trace when that happens in each run, before `after` or `caught`.",
+      "reteach": "`foreach` places required disposal in a `finally`. Leaving the loop through `break` or an exception still crosses that cleanup boundary. Here, cleanup finishes before the outer `catch` runs."
+    }
+  ],
+  "current": 3,
+  "probe": {
+    "questions": [],
+    "answers": {},
+    "submitted": true,
+    "marks": {},
+    "findings": "There was no probe, so there is no evidence yet of how you trace enumeration or cleanup. Your previous work gives us a starting point in value and reference semantics, while failure and cleanup boundaries still need practice."
+  },
+  "map": {
+    "title": "Trace iteration and cleanup",
+    "plan": "We will start with the value and reference semantics you have already practised, then connect them to a sequence and its enumerator in the Foreach note. We will build a trace one request at a time, including when iterator code runs and how cleanup follows completion, early exit, or failure.",
+    "mermaid": "graph TD\nA[\"A reference can identify a sequence\"] --> B[\"An enumerator advances one item at a time\"]\nB --> C[\"Iterator work runs when requested\"]\nC --> D[\"Exit or failure triggers enumerator cleanup\"]\nD --> E[\"Trace enumeration and disposal\"]",
+    "objective": "iteration-contracts",
+    "steps": [
+      {
+        "title": "Connect a sequence to an enumerator",
+        "why": "Your practice with references helps establish what the sequence and its separate traversal state represent."
+      },
+      {
+        "title": "Trace each iteration",
+        "why": "Following GetEnumerator, MoveNext, Current, and the loop body establishes the order needed to predict behavior."
+      },
+      {
+        "title": "Trace deferred iterator execution",
+        "why": "Identifying when the iterator body resumes explains when values, side effects, and failures occur."
+      },
+      {
+        "title": "Trace disposal on exit and failure",
+        "why": "Following cleanup after exhaustion, break, or an exception completes the enumeration contract."
+      }
+    ]
+  },
+  "stepsFor": "[\"Trace iteration and cleanup\",[\"Connect a sequence to an enumerator\",\"Trace each iteration\",\"Trace deferred iterator execution\",\"Trace disposal on exit and failure\"]]",
+  "accepted": true,
+  "finishedAt": 1793892431107,
+  "close": {
+    "summary": "The lesson connected sequences and enumerators to value and reference semantics, then traced `MoveNext()`, `Current`, deferred iterator execution, and cleanup.\n\nYou traced individual iterations correctly (4/4, sure). Enumerator setup remains a gap (0/3, guess): a new enumerator starts **before** the first element. Deferred execution also needs practice (0/4, sure): you started the iterator body too early and missed the work performed by the second `MoveNext()`. Cleanup was omitted in all four exit and failure runs (0/4, sure).\n\nThe main practice targets are separating sequence creation from execution, resuming after each `yield return`, and including cleanup on completion, early exit, and exceptions. High confidence on the last two checks did not match the results.",
+    "cards": [
+      {
+        "front": "Where is a newly obtained enumerator positioned, and how does the first element become available?",
+        "back": "It starts before the first element. Call `MoveNext()`; if it returns `true`, `Current` supplies the first element. `Current` is not valid before that successful call."
+      },
+      {
+        "front": "For a C# iterator method returning `IEnumerable<T>`, does calling the method or obtaining its enumerator execute the iterator body?",
+        "back": "Neither executes the body. The first `MoveNext()` starts it and runs until a `yield return`, completion, or exception."
+      },
+      {
+        "front": "An iterator body is `Log(\"A\"); yield return 10; Log(\"B\"); yield return 20; Log(\"C\");`. What happens during its first two `MoveNext()` calls?",
+        "back": "First call: logs A, returns `true`, and makes `Current` equal to 10. Second call: resumes after the first yield, logs B, returns `true`, and makes `Current` equal to 20. C has not run."
+      },
+      {
+        "front": "Once `foreach` has acquired an enumerator that requires disposal, which exits trigger disposal: exhaustion, `break`, a loop-body exception, or a `MoveNext()` exception?",
+        "back": "All four. `foreach` guarantees disposal through cleanup equivalent to `finally`. For an iterator, pending `finally` blocks run when their active scopes are exited through completion, failure, or disposal after early exit."
+      }
+    ],
+    "noteEdit": {
+      "path": "Home/Programming/NET/CSharp/Fundamentals/Foreach.md",
+      "heading": "Iterators and Yield",
+      "text": "A newly obtained enumerator starts **before the first element**. `Current` is valid only after `MoveNext()` returns `true`; reading it does not advance enumeration. After `MoveNext()` returns `false`, `Current` is no longer valid."
+    },
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-05 Trace enumeration, deferred iterator execution and enumerato.md",
+    "nextCheck": "2026-11-08"
+  }
+}

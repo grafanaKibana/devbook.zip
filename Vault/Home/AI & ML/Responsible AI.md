@@ -4,10 +4,10 @@ subtopic: []
 summary: "Designing and operating AI so failures are bounded, decisions explainable, and impact fair."
 level: ["3"]
 priority: Medium
-status: Done
+status: In Progress
 publish: true
 created: "2026-06-11T06:20:33.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.496Z"
 ---
 

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.405Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Coordinating multiple LLM agents, each with its own context and tools, 
 level:
   - "3"
 priority: Low
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Loop Engineering/Multi-Agentic Systems
 flashcard_uid: 743a064f

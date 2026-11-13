@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-18T19:18:52.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.328Z
 topic:
   - Programming
@@ -11,7 +11,7 @@ summary: A restricted delegate member implementing publisher and subscriber comm
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Types/Events
 flashcard_uid: 6b17a98d

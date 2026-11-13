@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-28T20:52:28.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.361Z
 topic:
   - Networks
@@ -11,7 +11,7 @@ summary: A stateless request-response protocol carrying web and API messages acr
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Networks
 qard-topic: Protocols/HTTP
 flashcard_uid: bf424dee

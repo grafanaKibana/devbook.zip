@@ -5,13 +5,13 @@ summary: "Systems where an LLM controls part of the workflow, calling tools, mak
 tags: [FolderNote]
 publish: true
 level: ["3"]
-status: Creation
+status: New
 priority: High
 qard-deck: "AI & ML"
 qard-topic: "LLM/Agents/Agents"
 flashcard_uid: "ef9c99bb"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:28:37.403Z"
 ---
 

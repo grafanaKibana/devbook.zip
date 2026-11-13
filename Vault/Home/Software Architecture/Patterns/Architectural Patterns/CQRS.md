@@ -4,14 +4,14 @@ subtopic: [Patterns]
 summary: "Separates the write path from the read path so each can be scaled and optimized independently."
 level: ["3"]
 priority: High
-status: Done
+status: In Progress
 
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Architectural Patterns/CQRS"
 flashcard_uid: "45394597"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.426Z"
 ---
 

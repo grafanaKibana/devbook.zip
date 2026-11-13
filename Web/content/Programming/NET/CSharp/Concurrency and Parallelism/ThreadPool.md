@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-18T20:04:43.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.323Z
 topic:
   - Programming
@@ -11,7 +11,7 @@ summary: .NET's shared execution engine for Task-based work, managing worker and
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Concurrency and Parallelism/ThreadPool
 flashcard_uid: fd7a2ebc

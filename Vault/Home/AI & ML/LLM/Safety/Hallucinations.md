@@ -4,13 +4,13 @@ subtopic: [LLM]
 summary: "An LLM producing fluent, confident output unsupported by evidence, because it optimizes likelihood, not truth."
 level: ["3"]
 priority: Medium
-status: Done
+status: In Progress
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Safety/Hallucinations"
 flashcard_uid: "23b732e3"
 created: "2026-02-16T21:15:26.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:28:37.410Z"
 ---
 

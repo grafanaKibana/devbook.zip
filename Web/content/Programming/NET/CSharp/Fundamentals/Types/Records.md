@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-18T19:18:52.000Z
-modified: 2026-11-03T09:52:48.695Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.328Z
 topic:
   - Programming
@@ -11,7 +11,7 @@ summary: Data-centric C# types with generated value equality, ToString, and with
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Types/Records
 flashcard_uid: c03985b0

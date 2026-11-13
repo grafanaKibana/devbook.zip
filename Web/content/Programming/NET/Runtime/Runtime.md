@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.332Z
 tags:
   - FolderNote
@@ -10,7 +10,7 @@ topic:
 subtopic:
   - NET
 summary: "The .NET CLR execution engine: JIT compilation, garbage collection, type safety, and threading."
-status: Creation
+status: New
 priority: High
 level:
   - "4"

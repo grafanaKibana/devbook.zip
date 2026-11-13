@@ -104,7 +104,7 @@ public sealed class IngestionServiceTests
     {
         // Arrange
         using var workspace = TestWorkspace.Create();
-        workspace.WriteMarkdown(ScopedNotePath, Published("# Note\n\nFresh content.", "status: Creation"));
+        workspace.WriteMarkdown(ScopedNotePath, Published("# Note\n\nFresh content.", "status: In Progress"));
         Document? upsertedDocument = null;
         IReadOnlyCollection<StoredChunk>? replacedChunks = null;
         var documents = new Mock<IDocumentRepository>(MockBehavior.Strict);
@@ -133,7 +133,7 @@ public sealed class IngestionServiceTests
         {
             SourcePath = ScopedNotePath,
             Title = "Note",
-            Frontmatter = "publish: true\nstatus: Creation",
+            Frontmatter = "publish: true\nstatus: In Progress",
             PageContent = "# Note\n\nFresh content.",
         });
         replacedChunks.Should().NotBeEmpty();

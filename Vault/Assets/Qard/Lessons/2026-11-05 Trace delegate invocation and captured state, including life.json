@@ -1,0 +1,422 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+      "text": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"A type-safe function pointer for storing, passing, and invoking methods as values.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Types/Delegates\"\nflashcard_uid: \"c751e8da\"\ncreated: \"2026-02-18T19:18:52.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:14:17.327Z\"\n---\n\nA delegate is a C# type that describes a callable method signature. A delegate value pairs that signature with a method and, for a closed instance method, its target object. The value can then be stored, passed around, combined with other delegates, and invoked later.\n\nThis makes delegates the common mechanism behind callbacks, LINQ operators, strategy-style APIs, and events. Any static or instance method with a compatible signature can be assigned to the delegate type.\n\n```csharp\nstatic decimal StandardPrice(int q, decimal p) => q * p;\n\nPriceCalculator calc = StandardPrice;\nvar total = calc(3, 19.99m); // 59.97\n\npublic delegate decimal PriceCalculator(int quantity, decimal unitPrice);\n```\n\n# Built-in Generic Delegates\n\n- `Action<T...>`: returns `void`\n- `Func<T..., TResult>`: returns a value\n- `Predicate<T>`: returns `bool` for one input. Its signature matches `Func<T, bool>`, but it remains a different delegate type.\n\n```csharp\nFunc<int, int, int> add = (a, b) => a + b;\nAction<string> log = s => Console.WriteLine(s);\nPredicate<int> isEven = n => n % 2 == 0;\n```\n\n# Multicast Delegates\n\nA delegate can represent more than one method. `+=` combines invocation lists, `-=` removes an entry, and invoking the result calls its handlers in registration order.\n\n```csharp\nAction pipeline = () => Console.WriteLine(\"Step 1\");\npipeline += () => Console.WriteLine(\"Step 2\");\npipeline += () => Console.WriteLine(\"Step 3\");\n\npipeline();\n```\n\nThree details matter at runtime:\n\n- If one handler throws, later handlers are not invoked.\n- For non-`void` delegates, only the last handler's return value is returned.\n- `-=` removes the last matching handler from the invocation list.\n\n# Variance\n\nDelegate compatibility supports covariance for return values and contravariance for parameters:\n\n- **Covariance**: a method may return a more derived type.\n- **Contravariance**: a method may accept a less derived parameter type.\n\n```csharp\nFunc<Dog> dogFactory = () => new Dog();\nFunc<Animal> animalFactory = dogFactory; // covariance\n\nAction<Animal> inspectAnimal = a => Console.WriteLine(a.GetType().Name);\nAction<Dog> inspectDog = inspectAnimal;   // contravariance\n\nclass Animal { }\nclass Dog : Animal { }\n```\n\n# Anonymous Methods and Lambdas\n\nAnonymous methods (`delegate(...) { ... }`) and lambdas (`(...) => ...`) can be converted to delegate instances. Both forms may capture local variables.\n\n```csharp\nint threshold = 10;\nFunc<int, bool> greaterThanThreshold = x => x > threshold;\n```\n\nThe captured variable becomes shared closure state. It is not copied when the delegate is created.\n\n# Closures\n\nA closure holds variables captured from an outer scope by a lambda or anonymous method. Every delegate that closes over the same variable sees the same storage, including later updates.\n\n```csharp\nvar handlers = new List<Action>();\n\nfor (int i = 0; i < 3; i++)\n{\n    handlers.Add(() => Console.WriteLine(i));\n}\n\nhandlers.ForEach(h => h()); // 3, 3, 3\n```\n\nThe lambda captures the single `for` variable `i`, not its value during each iteration.\n\n```csharp\nvar handlers = new List<Action>();\n\nfor (int i = 0; i < 3; i++)\n{\n    int copy = i; // capture per-iteration value\n    handlers.Add(() => Console.WriteLine(copy));\n}\n\nhandlers.ForEach(h => h()); // 0, 1, 2\n```\n\nThe extra local gives each iteration separate storage. This is needed whenever later mutation of shared captured state would change the delegate's meaning, with `for` loop indices being the usual example.\n\n# Allocation, Captures, and Function Pointers\n\n- **Delegates are immutable.** `+=` and `-=` create a new multicast delegate with an updated invocation list through `Delegate.Combine` or `Delegate.Remove`. Frequent subscription changes on a hot path therefore allocate.\n- **A capturing lambda needs closure state.** A `static` lambda (C# 9) cannot capture locals, so the compiler rejects accidental captures and may reuse the delegate instance.\n- **Static method-group conversions can be cached by the compiler.** C# 11 added cached static method-group conversions, avoiding a fresh delegate allocation when the same conversion is evaluated repeatedly.\n- **`DynamicInvoke` uses late-bound invocation.** It performs runtime checks and can box arguments, so a typed call is preferable. For an instance method, a closed delegate binds its target instance, while an open delegate receives that instance as its first argument.\n- **Function pointers (`delegate*`, C# 9) remove the delegate object.** They fit narrow `unsafe` or interop paths where the calling convention and lifetime are controlled. They give up delegate safety and composition to get there.\n\n# Pitfalls\n\n- **One exception stops a multicast call.** Later handlers are skipped. Isolating handlers requires enumerating `GetInvocationList()` and invoking each one inside its own `try/catch`.\n- **A non-`void` multicast call exposes only the last return value.** Collecting every result requires enumerating the handlers, invoking each one separately and keeping each return value.\n- **Captured loop state can drift.** Closures capture variables rather than snapshots, so several handlers may observe the same final value. A per-iteration local creates the intended snapshot.\n- **The legacy asynchronous delegate pattern is unsupported on modern .NET.** Calling delegate `BeginInvoke` or `EndInvoke` throws `PlatformNotSupportedException`. `Task`-based APIs are the replacement.\n\n# Questions\n\n<!-- qard-id: c922b7d0-655f-4f50-89fd-bfc97950ccfa -->\n> [!qard]- What is a delegate?\n> A delegate is a type that represents references to methods with a particular signature. The delegate type fixes the parameter and return types. A delegate value packages a compatible method so it can be stored, passed and invoked later like any other value.\n>\n>\n> [Microsoft: delegates](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/) · [C# specification: delegates](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates) · [Microsoft: Delegate.CreateDelegate](https://learn.microsoft.com/en-us/dotnet/api/system.delegate.createdelegate?view=net-10.0)\n\n> [!qard]- What state does a delegate value carry?\n> A delegate value carries:\n>\n> - **Method:** the method to call, which must be compatible with the delegate's signature.\n> - **Target (optional):** a delegate closed over an instance method also stores the object the method runs on. A delegate with no bound object, such as one created from an ordinary static method, has no target. Reflection through `Delegate.CreateDelegate` can also create open instance delegates, which receive the instance as an argument, and static delegates closed over their first argument.\n> - **Invocation list:** a delegate can combine several methods, for example with `+=`. Invoking it calls each in order.\n>\n> ```csharp\n> var tenPercent = new Discount(0.10m);\n> PriceCalculator calc = tenPercent.Apply; // closed instance delegate: method Apply, target tenPercent\n> decimal total = calc(3, 20m);            // runs tenPercent.Apply: 54.00\n>\n> public delegate decimal PriceCalculator(int quantity, decimal unitPrice);\n>\n> public sealed class Discount\n> {\n>     private readonly decimal _rate;\n>     public Discount(decimal rate) => _rate = rate;\n>     public decimal Apply(int quantity, decimal unitPrice) => quantity * unitPrice * (1 - _rate);\n> }\n> ```\n>\n> Delegate values are immutable: adding or removing a method produces a new delegate. Lambdas and method groups convert to delegate types, which is how callbacks, LINQ operators and events pass behavior around.\n>\n> [Microsoft: delegates](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/) · [C# specification: delegates](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates) · [Microsoft: Delegate.CreateDelegate](https://learn.microsoft.com/en-us/dotnet/api/system.delegate.createdelegate?view=net-10.0)\n\n> [!qard]- In what order does a multicast delegate invoke its methods?\n> Synchronously, one after another, in invocation-list order. That is the order in which the methods were combined; a direct multicast invocation does not schedule them in parallel.\n>\n> [C# specification: delegates (delegate invocation)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates)\n\n> [!qard]- Which return value does a non-void multicast delegate expose?\n> Only the last invoked method's return value. Earlier return values are discarded:\n>\n> ```csharp\n> Func<int> f = () => 1;\n> f += () => 2;\n> f += () => 3;\n> int result = f(); // 3\n> ```\n>\n> Collecting every return value requires enumerating GetInvocationList(), invoking each entry, and storing its result.\n>\n> [C# specification: delegates (delegate invocation)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates)\n\n> [!qard]- What happens when a method in a multicast delegate throws?\n> The exception propagates to the caller and the remaining invocation-list entries are skipped. One event subscriber can therefore stop later subscribers from running. Isolating failures requires invoking entries from GetInvocationList() separately inside their own try/catch blocks.\n>\n> [C# specification: delegates (delegate invocation)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates)\n\n> [!qard]- Why do callbacks from a `for` loop often observe the loop variable's final value?\n> The callbacks capture one shared variable, not a snapshot of its value at each assignment. When they run after the loop, they read the same storage containing its final value. Declaring a local inside the loop body gives each iteration separate storage; capturing that local preserves the intended value. A `Select(i => () => Use(i))` invocation instead has its own value parameter `i` for each call, so those callbacks do not share the for-loop variable. This distinction does not depend on the C#5 change to foreach iteration variables. [C# specification: anonymous function expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#1222-anonymous-function-expressions)\n\n# References\n\n- [C# language specification: Delegates](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/delegates)\n- [Migrating delegate BeginInvoke calls for .NET Core](https://devblogs.microsoft.com/dotnet/migrating-delegate-begininvoke-calls-for-net-core/)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1793885625041,
+  "topic": "Trace delegate invocation and captured state, including lifetime and multicast failure behavior",
+  "notes": [
+    "Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md"
+  ],
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "delegate-contracts",
+  "steps": [
+    {
+      "title": "Delegate values and invocation",
+      "explain": "Assignment copies a value into a variable. To trace delegates, first identify what that value represents.\n\nYour **Delegates** note defines a delegate type as a callable method signature: the parameter types it accepts and the return type it produces. For example:\n\n```csharp\nstatic int Double(int x) => x * 2;\n\nTransform operation = Double;\nint result = operation(3); // 6\n\npublic delegate int Transform(int value);\n```\n\n`Transform` describes a call that takes one `int` and returns an `int`. `Double` fits that contract. Assigning `Double` creates a delegate referring to that method; it does not execute the method. The parentheses in `operation(3)` invoke it, supplying `3` as the argument.\n\nDelegate types are reference types. Assigning `saved = operation` copies the reference to the delegate object. Both variables then refer to the same callable object; neither contains a previously calculated result.\n\nThe variables remain separate storage locations. Reassigning `operation` changes which delegate that variable refers to. It does not reassign `saved`. This distinction lets us trace which method a later invocation actually calls.",
+      "connect": "This first step builds on your understanding that assignment copies a value. Separating the delegate object from the variable holding its reference prepares us to trace captured state and multicast invocation.",
+      "checkFirst": true,
+      "check": {
+        "id": "k1",
+        "type": "long",
+        "prompt": "A `Transform` delegate refers to a method taking one `int` and returning an `int`. Trace this code: what value does `result` receive, and why?\n\n```csharp\nstatic int Twice(int x) => x * 2;\nstatic int PlusOne(int x) => x + 1;\n\nTransform first = Twice;\nTransform second = first;\nfirst = PlusOne;\nint result = second(4);\n\npublic delegate int Transform(int value);\n```",
+        "marks": 3,
+        "rubric": [
+          {
+            "point": "States that result is 8.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that second = first copies the reference to the delegate referring to Twice.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that reassigning first changes only first, so invoking second still calls Twice.",
+            "marks": 1
+          }
+        ],
+        "model": "`result` is `8`. `second = first` copies the reference to the delegate referring to `Twice`. Reassigning `first` to a delegate referring to `PlusOne` changes only `first`. Therefore, `second(4)` still calls `Twice(4)`, which returns `8`.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+          "heading": "Questions"
+        },
+        "objective": "delegate-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Answers 5 because second follows the later assignment to first.",
+          "reteach": "`second = first` copies the reference currently stored in `first`; it does not connect the two variables. Reassigning `first` leaves `second` referring to the original delegate."
+        },
+        {
+          "signs": "Says second stores a result calculated when it is assigned.",
+          "reteach": "The delegate stores callable behavior. Neither assignment supplies an argument or invokes `Twice`. The call happens at `second(4)`."
+        },
+        {
+          "signs": "Says second becomes invalid when first is reassigned.",
+          "reteach": "`second` still holds its own reference to the original delegate. Reassigning another variable does not remove that reference or prevent invocation."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Captured variables",
+      "explain": "A variable provides storage for a value. With `int snapshot = count;`, assignment copies the current integer into separate storage. Later assignments to `count` do not change `snapshot`.\n\nA lambda can also use a variable declared outside its body. This is called **capturing** the variable. Your **Delegates** note, under **Closures**, states that delegates capturing the same variable share its storage.\n\nConsider:\n\n```csharp\nint threshold = 10;\nFunc<int, bool> above = x => x > threshold;\nthreshold = 20;\nbool result = above(15);\n```\n\nCreating `above` stores callable behavior; it does not run the comparison. When `above(15)` runs, it reads `threshold` from the captured storage. That storage now contains `20`, so the result is `false`.\n\nThe distinction is between copying a value into another variable and creating behavior that accesses an existing variable. To trace a callback, first identify which variable it captures, then follow changes to that variable until invocation.",
+      "connect": "Step 1 established that creating or storing a delegate does not invoke it. Captured storage explains which state its behavior reads when it eventually runs, preparing us to trace that state beyond the creating scope.",
+      "checkFirst": true,
+      "check": {
+        "id": "k2",
+        "type": "long",
+        "prompt": "Here, `Func<int>` represents a call with no arguments that returns an integer; `Action` represents a call with no arguments and no return value.\n\n```csharp\nint count = 2;\nint snapshot = count;\nFunc<int> read = () => count;\nAction increment = () => count++;\n\ncount = 5;\nincrement();\nConsole.WriteLine(read());\nConsole.WriteLine(snapshot);\n```\n\nWhat two numbers are printed, in order? Explain which storage `read` and `increment` access and why `snapshot` behaves as it does.",
+        "marks": 3,
+        "rubric": [
+          {
+            "point": "States that the first printed number is 6.",
+            "marks": 1
+          },
+          {
+            "point": "States that the second printed number is 2.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that both lambdas capture the same count variable, while snapshot holds an independently copied integer.",
+            "marks": 1
+          }
+        ],
+        "model": "The output is:\n\n```text\n6\n2\n```\n\nBoth lambdas capture the same `count` storage. Assignment changes it to `5`; calling `increment()` changes it to `6`; calling `read()` reads that `6`. The earlier assignment to `snapshot` copied the integer `2` into separate storage, which remains unchanged.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+          "heading": "Closures"
+        },
+        "objective": "delegate-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Predicts that read() returns 2 because that was count's value when read was created.",
+          "reteach": "The lambda captures the variable, not its value at creation. Its body reads `count` when invoked, after assignment and increment have changed it."
+        },
+        {
+          "signs": "Predicts that read() returns 5 because increment changes its own captured copy.",
+          "reteach": "Both lambdas refer to the same outer variable. Creating two delegates does not create two copies of `count`; the increment is visible to `read`."
+        },
+        {
+          "signs": "Predicts that snapshot prints 6 because it follows count.",
+          "reteach": "`int snapshot = count;` copies the current integer into a separate variable. Unlike the lambdas, `snapshot` does not retain access to `count`."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Captured state lifetime",
+      "explain": "A variable's scope determines where its name can be used. Its lifetime determines how long its storage remains available. These are different questions.\n\nYour **Delegates** note, under **Closures**, establishes that a capturing delegate uses the captured variable's storage. Suppose a method creates `count`, then returns a delegate that increments it. Returning ends the method call, but the returned delegate still needs that storage when invoked later. The captured storage therefore survives the method's return.\n\nFollow the references: the caller holds the delegate, and the delegate keeps the captured state reachable. Each invocation accesses the same `count`, so changes persist between calls. Copying the delegate reference gives another way to reach that same state; it does not create another counter.\n\nThis extends the note's capture rule using standard C# lifetime behavior. When nothing reachable retains the captured state, it becomes eligible for garbage collection. Collection need not happen immediately. Leaving the original scope alone does not make captured state unreachable.",
+      "connect": "The previous step established which variable a delegate accesses. Following references now explains why that variable remains available for later calls, preparing us to trace state changes across multicast handlers.",
+      "checkFirst": true,
+      "check": {
+        "id": "k3",
+        "type": "long",
+        "prompt": "Here, `Func<int>` means a delegate that takes no arguments and returns an `int`.\n\n```csharp\nstatic Func<int> MakeCounter()\n{\n    int count = 0;\n    return () => ++count;\n}\n\nvar first = MakeCounter();\nvar second = first;\n\nConsole.WriteLine(first());\nConsole.WriteLine(second());\n```\n\nWhat does this print, and why can both calls access `count` after `MakeCounter` has returned? (`++count` increments first, then returns the new value.)",
+        "marks": 3,
+        "rubric": [
+          {
+            "point": "States that the output is 1 followed by 2.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that copying the delegate reference makes both variables access the same captured count storage.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that the retained delegate keeps captured storage reachable after MakeCounter returns, extending its lifetime beyond its original scope.",
+            "marks": 1
+          }
+        ],
+        "model": "It prints:\n\n```text\n1\n2\n```\n\n`second = first` copies the delegate reference, so both calls use the same captured `count`. The first call changes it from 0 to 1; the second changes it from 1 to 2. Although `MakeCounter` has returned, the caller retains the delegate, which keeps the captured storage reachable.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+          "heading": "Closures"
+        },
+        "objective": "delegate-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Says the calls fail because count disappeared when MakeCounter returned.",
+          "reteach": "Returning ends the method call and removes access through the local name. The captured storage survives because the returned delegate still retains it."
+        },
+        {
+          "signs": "Predicts 1 and 1 because assigning second creates a separate counter.",
+          "reteach": "Assignment copies the delegate reference. It does not run `MakeCounter` again or duplicate captured storage. Both calls update the same variable."
+        },
+        {
+          "signs": "Predicts 1 and 2 but says garbage collection can remove count while the delegate still needs it.",
+          "reteach": "Garbage collection preserves reachable state. A reachable delegate keeps the captured storage it needs reachable too."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Multicast invocation and failure",
+      "explain": "A delegate invocation is a method call. If that method changes a captured variable, the change remains after the method returns.\n\nYour **Delegates** note, under **Multicast Delegates**, extends this to an ordered list of handlers. Combining delegates with `+=` adds handlers to that list. A direct invocation calls them synchronously, one after another, in registration order. If handlers capture the same variable, each sees the changes made by earlier handlers.\n\nFor a delegate that returns a value, each handler computes its own result. If every handler completes normally, the whole invocation returns only the last handler’s result. Earlier results are discarded; their changes to shared state remain.\n\nNow consider a handler that throws an exception which it does not catch. Its call cannot finish normally, so the multicast invocation stops there. Later handlers do not run, and the exception propagates to the caller. The whole invocation returns no value, even if earlier handlers returned successfully. Changes already made to captured state remain: an exception does not automatically undo them.\n\nA `try/catch` around the whole invocation catches that failure, but does not resume the remaining handlers.",
+      "connect": "The previous step established why captured storage can remain alive with a delegate. This step traces how an ordered list of handlers reads and changes that storage, including where a failure stops execution.",
+      "checkFirst": false,
+      "check": {
+        "id": "k4",
+        "type": "long",
+        "prompt": "Trace this code twice: first with `fail = false`, then with `fail = true`. Each run starts fresh with `state = 0` and `result = -1`.\n\n```csharp\nbool fail = false;\nint state = 0;\n\nFunc<int> pipeline = () =>\n{\n    state += 1;\n    return state;\n};\n\npipeline += () =>\n{\n    state += 10;\n    if (fail)\n        throw new InvalidOperationException();\n    return state;\n};\n\npipeline += () =>\n{\n    state += 100;\n    return state;\n};\n\nint result = -1;\ntry\n{\n    result = pipeline();\n}\ncatch (InvalidOperationException)\n{\n}\n\nConsole.WriteLine($\"{state}, {result}\");\n```\n\nWhat line is printed in each run? Explain which handlers run and why `result` ends with that value.",
+        "marks": 4,
+        "rubric": [
+          {
+            "point": "With fail = false, state is 111 because all three handlers run in order and add 1, 10, and 100.",
+            "marks": 1
+          },
+          {
+            "point": "With fail = false, result is 111 because the multicast invocation returns the last handler's return value.",
+            "marks": 1
+          },
+          {
+            "point": "With fail = true, state is 11: the second handler's mutation remains, and its exception prevents the third handler from running.",
+            "marks": 1
+          },
+          {
+            "point": "With fail = true, result remains -1 because pipeline() throws instead of returning, so the assignment does not complete.",
+            "marks": 1
+          }
+        ],
+        "model": "With `fail = false`, the output is `111, 111`. The handlers run in registration order, changing `state` to 1, then 11, then 111. The whole invocation returns the third handler’s value, 111.\n\nWith `fail = true`, the output is `11, -1`. The first handler makes `state` 1. The second makes it 11, then throws. That change remains, but the third handler is skipped. The exception reaches the surrounding catch. Because `pipeline()` never returns a value, `result = pipeline()` never completes its assignment, leaving `result` at -1.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+          "heading": "Multicast Delegates"
+        },
+        "objective": "delegate-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Predicts that the successful run returns 123, or returns all three handler results.",
+          "reteach": "A multicast delegate does not add or collect return values. The handlers change the same captured variable, and the whole successful invocation exposes only the last handler’s result."
+        },
+        {
+          "signs": "Predicts that the third handler runs after the second throws because the caller has a catch block.",
+          "reteach": "The exception leaves the multicast invocation immediately. The caller’s catch handles it after that invocation has stopped; execution does not resume at the next handler."
+        },
+        {
+          "signs": "Predicts state returns to 0 after failure, or result becomes 1 or 11.",
+          "reteach": "Changes made before the throw remain, so state stays 11. Return values from earlier handlers cannot become a fallback result: the whole invocation throws, leaving the assignment to result unfinished."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "text": "result will be 5.\nfirst initially will have ref to Twice, second will have ref from the first, to the same method, then methond under first reference was changed, and since the same ref is in the second too, it will be changed as well, so method will be not PlusOne for both, and result will be 5",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          true,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "second will have ref from the first",
+            "kind": "correct",
+            "note": "You identified that the assignment copies the reference."
+          },
+          {
+            "quote": "it will be changed as well",
+            "kind": "wrong",
+            "note": "You treated reassignment of `first` as a change to `second`."
+          },
+          {
+            "quote": "result will be 5.",
+            "kind": "missing",
+            "note": "You needed to state that `result` is 8."
+          },
+          {
+            "quote": "it will be changed as well",
+            "kind": "missing",
+            "note": "You needed to explain that reassigning `first` leaves `second` referring to `Twice`."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "You correctly traced the copied reference, but treated the later reassignment as changing both variables.",
+        "score": 1
+      },
+      "reply": "You copied the reference correctly. The error is in saying that `second` changes when `first` is reassigned: assignment changes the variable on its left. Which method does `second` still refer to, and what does that method return for `4`?",
+      "reteach": "`second = first` copies the reference currently stored in `first`; it does not connect the two variables. Reassigning `first` leaves `second` referring to the original delegate."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "output will be:\n6 - 2 was changed to 5, then incremented via increment(); to 6\n2 - int is the value type, so in snapshot will be copy of the current count value, which is 2.\n\n",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "then incremented via increment(); to 6",
+            "kind": "correct",
+            "note": "You correctly traced the first output to 6."
+          },
+          {
+            "quote": "which is 2.",
+            "kind": "correct",
+            "note": "You correctly identified the copied value as 2."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to state that both lambdas capture the same count variable."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You traced both values correctly, but did not explain the shared captured storage.",
+        "score": 2
+      },
+      "reply": "Your outputs and explanation of `snapshot` are correct. What does `read` access after `increment` changes `count`, and how does that connect the two lambdas?"
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "",
+        "unknown": true
+      },
+      "mark": {
+        "score": 0,
+        "awarded": [
+          false,
+          false,
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "reply": "No problem. Read the explanation, then look at the model answer."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "false - it will print 111, since we made multicast delegate that capture state variable, and modifies it per each delegate we registred.\ntrue - it will print -1, since state didnt reached return on the second delegate, and was thrown, so state wasnt assigned to the return, and default -1 value was used",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          false,
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "modifies it per each delegate we registred",
+            "kind": "correct",
+            "note": "You identified that each registered handler changes the captured state in the successful run."
+          },
+          {
+            "quote": "it will print 111",
+            "kind": "missing",
+            "note": "You needed to explain that the invocation returns the last handler’s value, so result is 111."
+          },
+          {
+            "quote": "it will print -1",
+            "kind": "missing",
+            "note": "You needed to trace state to 11 and explain that the exception skips the third handler."
+          },
+          {
+            "quote": "default -1 value was used",
+            "kind": "missing",
+            "note": "You needed to explain that result remains -1 because the assignment does not complete when pipeline() throws."
+          },
+          {
+            "quote": "it will print -1",
+            "kind": "vague",
+            "note": "You identified the value of result, but the output also includes state."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You tracked the successful state changes, but did not fully trace both printed values and the assignment after an exception.",
+        "score": 1
+      },
+      "reply": "You identified that all handlers change the captured state when `fail` is false. The output contains **two values**: `state` and `result`. For the failing run, trace the changes to `state` before the throw, then ask whether `pipeline()` returns so the assignment can finish."
+    }
+  ],
+  "current": 3,
+  "probe": {
+    "questions": [],
+    "answers": {},
+    "submitted": true,
+    "marks": {},
+    "findings": "You have shown some understanding of value and reference assignment, but there is no probe evidence yet for delegates. Your existing evidence also shows uncertainty about parameter passing and generic contracts."
+  },
+  "map": {
+    "title": "Trace delegates and captured state",
+    "plan": "We will start with your existing understanding that assignment copies a value, because a delegate can be stored and passed as a value. Using the Delegates note, we will build toward tracing captured variables, their lifetime, and multicast calls when a handler fails.",
+    "mermaid": "graph TD\nA[\"Assignment copies a value\"] --> B[\"Delegate values carry callable behavior\"]\nB --> C[\"Captured variables share storage\"]\nC --> D[\"References extend captured state lifetime\"]\nD --> E[\"Trace multicast order and failure\"]",
+    "objective": "delegate-contracts",
+    "steps": [
+      {
+        "title": "Delegate values and invocation",
+        "why": "A delegate value connects the familiar idea of storing and passing a value to invoking a method later."
+      },
+      {
+        "title": "Captured variables",
+        "why": "Tracing shared storage explains why a callback can observe changes made after it was created."
+      },
+      {
+        "title": "Captured state lifetime",
+        "why": "Following references explains how captured state can remain reachable after its original scope exits."
+      },
+      {
+        "title": "Multicast invocation and failure",
+        "why": "Tracing handlers in order shows which calls run, what result is returned, and where an exception stops execution."
+      }
+    ]
+  },
+  "stepsFor": "[\"Trace delegates and captured state\",[\"Delegate values and invocation\",\"Captured variables\",\"Captured state lifetime\",\"Multicast invocation and failure\"]]",
+  "accepted": true,
+  "finishedAt": 1793889440369,
+  "close": {
+    "summary": "The lesson covered delegate assignment and invocation, shared captured variables, captured-state lifetime, and multicast execution when a handler throws. You correctly traced a copied delegate reference, but treated later reassignment as changing both variables. You traced captured values correctly, but did not explain that the delegates share captured storage. Captured-state lifetime remained a gap. For multicast calls, you tracked successful state changes, but missed parts of the printed output and the effect of an exception on the receiving assignment. Further practice should connect each trace to the underlying rule: assignment copies a reference, closures retain variables, and exceptions interrupt execution without undoing earlier effects.",
+    "cards": [
+      {
+        "front": "What does this print, and why?\n```csharp\nFunc<int> a = () => 1;\nFunc<int> b = a;\na = () => 2;\nConsole.WriteLine(a());\nConsole.WriteLine(b());\n```",
+        "back": "It prints `2`, then `1`. `b = a` copies the delegate reference into a separate variable. Reassigning `a` changes only `a`; `b` still refers to the original delegate."
+      },
+      {
+        "front": "Why does `read()` return `6` after `increment()` runs?\n```csharp\nint count = 5;\nAction increment = () => count++;\nFunc<int> read = () => count;\nincrement();\n```",
+        "back": "Both delegates capture the same variable storage, not separate copies of `5`. `increment()` updates that storage to `6`, and `read()` reads it."
+      },
+      {
+        "front": "A method creates a local counter and returns a delegate that increments it. Why can later calls continue from the previous count after the method returns?",
+        "back": "The delegate retains access to the captured variable's storage beyond the method call. While the delegate remains reachable, that state remains available. Returning from the method does not reset it."
+      },
+      {
+        "front": "What does this print, and what are the final values of `state` and `result`?\n```csharp\nint state = 0;\nint result = 99;\nFunc<int> f = () => ++state;\nf += () =>\n{\n    Console.WriteLine(state);\n    state += 10;\n    throw new InvalidOperationException();\n};\nf += () => ++state;\ntry { result = f(); }\ncatch (InvalidOperationException)\n{\n    Console.WriteLine(state);\n}\nConsole.WriteLine(result);\n```",
+        "back": "It prints `1`, `11`, then `99`. Final values: `state = 11`, `result = 99`. Handlers run in order; the second throws, so the third is skipped. Earlier state changes remain. Because `f()` throws without returning, the assignment to `result` never occurs."
+      }
+    ],
+    "noteEdit": {
+      "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+      "heading": "Closures",
+      "text": "Captured variables can outlive the method call that created them. A reachable delegate keeps the captured storage it uses alive, so invoking a returned delegate later accesses the same variable and preserves changes between calls. Returning from the method does not reset that state. Once no reachable delegate or other reference keeps the captured storage alive, it becomes eligible for garbage collection."
+    },
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-05 Trace delegate invocation and captured state, including life.md",
+    "nextCheck": "2026-11-08"
+  }
+}

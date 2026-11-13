@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-06-12T18:21:46.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.474Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: How to structure, label, generate, and size the cases that every evalua
 level:
   - "3"
 priority: High
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Evaluation/Building an Evaluation Set
 flashcard_uid: e5bc3ffc

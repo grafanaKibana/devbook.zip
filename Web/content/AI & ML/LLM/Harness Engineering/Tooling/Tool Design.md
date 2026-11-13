@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-08-20T20:41:15.496Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Designing callable operations that models can select, execute, and reco
 level:
   - "3"
 priority: Low
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Harness Engineering/Tooling/Tool Design
 flashcard_uid: 4f5034d3

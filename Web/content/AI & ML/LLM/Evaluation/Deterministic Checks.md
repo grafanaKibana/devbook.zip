@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-16T21:15:26.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.474Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Executable checks that reject malformed or policy-violating output befo
 level:
   - "3"
 priority: Medium
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Evaluation/Deterministic Checks
 flashcard_uid: 29dd80f1

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.499Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: How credentials, authentication ceremonies, sessions, and delegated aut
 priority: High
 level:
   - "4"
-status: Ready to Repeat
+status: In Progress
 ---
 
 Authentication establishes a principal from evidence supplied during a protocol exchange. Authorization decides what that principal may do. A complete design also defines credential enrollment, proof, session continuity, revocation, and recovery. Collapsing those responsibilities into one "authentication method" hides the boundary that failed.

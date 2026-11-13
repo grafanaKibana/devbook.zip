@@ -6,7 +6,7 @@ aliases:
   - IoC (Holywood Principle)
   - IoC (Hollywood Principle)
 created: 2026-08-10T10:51:19.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-08-10T08:06:35.019Z
 topic:
   - Software Design
@@ -16,7 +16,7 @@ summary: Balances one source of knowledge, framework-owned control, and deferral
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 DRY, Inversion of Control, and YAGNI control different design costs. **DRY** keeps one authoritative representation of knowledge that must change together. **Inversion of Control (IoC)** lets a framework or composition root decide when application code is created and called. **YAGNI** defers features and flexibility that have no current requirement.

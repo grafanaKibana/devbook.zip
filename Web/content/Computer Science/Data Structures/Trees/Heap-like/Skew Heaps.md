@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-09T18:37:04.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T14:39:34.308Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: A self-adjusting mergeable heap that swaps children after every recursi
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 Skew heaps are small mergeable priority queues. They store a heap-ordered binary tree and make merge the only structural operation. Insert merges a singleton, and extract-min merges the old root's children.

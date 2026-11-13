@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-28T21:14:18.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-15T11:47:55.208Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: Architectural patterns define how a system's components are organized, 
 priority: High
 level:
   - "3"
-status: Done
+status: In Progress
 ---
 
 Architectural patterns set the large-scale shape of a system: where responsibilities sit, how components communicate, and how data moves. A poor choice is expensive because local refactoring cannot repair a boundary that cuts through the wrong business capability or gives failure recovery to the wrong component.

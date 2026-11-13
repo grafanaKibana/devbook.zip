@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T06:07:02.310Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Scatters elements into range buckets, sorts each, then concatenates. Wo
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 For numeric keys in a known, bounded range, magnitude can identify a range slice directly. Bucket Sort divides that range into `m` equal-width buckets, maps each key with one arithmetic calculation, sorts within each bucket, then concatenates the buckets in range order.

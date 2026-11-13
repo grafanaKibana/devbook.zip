@@ -8,10 +8,10 @@ public sealed record FolderRollupChange(string Path, string Content, IReadOnlyLi
 
 public sealed record FolderRollupResult(int FolderNotes, IReadOnlyList<FolderRollupChange> Changes);
 
-/// <summary>Maintains the existing descendant-derived FolderNote frontmatter.</summary>
+/// <summary>Fills missing FolderNote fields from descendants while preserving valid explicit statuses.</summary>
 public static class FolderRollup
 {
-    private static readonly string[] StatusOrder = ["Creation", "Repetition", "Ready To Repeat", "Not-Started", "Done"];
+    private static readonly string[] StatusOrder = ["In Progress", "New", "Established"];
     private static readonly string[] Priorities = ["High", "Medium", "Low"];
 
     private sealed record RollupNote(string Path, string Content, List<string> Frontmatter, string Body,
@@ -164,7 +164,7 @@ public static class FolderRollup
             int? level = children.Select(note => note.Level).Max();
             List<string> lines = [.. folder.Frontmatter];
             var details = new List<string>();
-            if (status is not null && (force ? folder.Status != status : !StatusOrder.Contains(folder.Status)))
+            if (status is not null && !StatusOrder.Contains(folder.Status))
             {
                 lines = ReplaceBlock(lines, "status", $"status: {status}");
                 details.Add($"status: {folder.Status ?? "∅"} -> {status}");
@@ -211,6 +211,7 @@ public static class FolderRollup
         if (args.Contains("--help") || args.Contains("-h"))
         {
             Console.WriteLine("Sync descendant-derived FolderNote fields. --root <Vault/Home> --write --force --print-changed");
+            Console.WriteLine("Valid explicit statuses are preserved; --force recomputes priority and level only.");
             return Task.FromResult(0);
         }
         try

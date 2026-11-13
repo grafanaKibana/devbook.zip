@@ -181,14 +181,20 @@ public static class Proposal
             {
                 throw new ProposalException($"unsafe or unguarded proposal path: {path}");
             }
-            string before = edit.Str("before");
-            string after = edit.Str("after");
             if (LegacyIdentity.Digest(source) != edit.Str("expected_hash"))
             {
                 throw new ProposalException($"whole-note CAS conflict: {path}");
             }
-            int start = UniqueIndex(source, before, $"replacement anchor must be unique: {path}");
-            int end = start + before.Length;
+            string anchor = edit.Str("before");
+            int start = UniqueIndex(source, anchor, $"replacement anchor must be unique: {path}");
+            int end = start + anchor.Length;
+            if (edit.Str("kind") is not ("note" or "add") && edit.Str("learning_target") == "same")
+            {
+                (start, end) = WidenToCard(edit, source, start, end);
+                edit["kind"] = "rewrite";
+            }
+            string before = edit.Str("before");
+            string after = edit.Str("after");
             string exact = LegacyIdentity.Proposal(edit);
             string semantic = LegacyIdentity.Proposal(edit, semantic: true);
             HashSet<string> feedbackKeys = edit.Arr("feedback_keys").Strings().ToHashSet();
@@ -249,7 +255,9 @@ public static class Proposal
             }
             if (edits.Any(prior => start < prior.End && end > prior.Start))
             {
-                throw new ProposalException("proposal edits overlap in the original note");
+                throw new ProposalException(edits.Any(prior => prior.Start == start && prior.End == end) && QardSpans(source).Any(span => span.Start == start)
+                    ? "multiple edits target one Qard card; combine them into one card rewrite"
+                    : "proposal edits overlap in the original note");
             }
             edits.Add((start, end, edit));
             fingerprints.Add(exact);
@@ -290,6 +298,19 @@ public static class Proposal
         };
     }
 
+    private static (int Start, int End) WidenToCard(JsonObject edit, string source, int start, int end)
+    {
+        var spans = QardSpans(source).Where(span => span.Start <= start && end <= span.End).ToArray();
+        if (spans.Length != 1 || (spans[0].Start == start && CardEndMatches(source, spans[0].End, end)))
+        {
+            return (start, end);
+        }
+        (int cardStart, int cardEnd, string card) = spans[0];
+        edit["before"] = card;
+        edit["after"] = source[cardStart..start] + edit.Str("after") + source[end..cardEnd];
+        return (cardStart, cardEnd);
+    }
+
     private static void ValidateCardEdit(JsonObject edit, string source, int start, int end, List<string> retired, JsonArray lineage)
     {
         string kind = edit.Str("kind");
@@ -318,7 +339,8 @@ public static class Proposal
         }
         if (target == "same")
         {
-            if (kind != "rewrite" || cards.Count != 1 || !beforeMeta.SequenceEqual(afterMeta))
+            if (kind != "rewrite" || cards.Count != 1 || !beforeMeta.SequenceEqual(afterMeta)
+                || !HiddenQardPattern.Matches(before).Select(match => match.Value).SequenceEqual(HiddenQardPattern.Matches(after).Select(match => match.Value)))
             {
                 throw new ProposalException("same-target rewrite must preserve all adjacent Qard metadata exactly");
             }

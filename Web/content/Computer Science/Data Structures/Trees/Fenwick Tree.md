@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-09T18:37:04.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T14:39:34.307Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: A binary indexed tree that computes prefix sums and point updates in on
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 A mutable score array must answer “total through index `i`” while individual values keep changing. Rebuilding every prefix after an update repeats work. A Fenwick tree keeps the needed partial sums in one indexed array.

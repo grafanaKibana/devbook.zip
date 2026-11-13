@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.402Z
 tags:
   - FolderNote
@@ -15,7 +15,7 @@ summary: "How learning systems are built, evaluated, and operated: classic ML, L
 level:
   - "3"
 priority: High
-status: Creation
+status: New
 qard-deck: AI & ML
 qard-topic: AI & ML
 flashcard_uid: 792c6bf3

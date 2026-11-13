@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-18T07:07:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-16T18:52:20.728Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: A hierarchical spatial encoding that turns longitude and latitude into 
 level:
   - "4"
 priority: Medium
-status: Creation
+status: New
 ---
 
 A geohash converts a longitude/latitude point into a base-32 string whose prefixes name progressively smaller rectangular cells. It is an encoding and query-partitioning technique, not a distance metric or a complete spatial index. The practical advantage is that a two-dimensional location can become a one-dimensional key for a sorted index, cache, partition key, or aggregation bucket.
