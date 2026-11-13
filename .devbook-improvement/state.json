@@ -13735,16 +13735,30 @@
     "version": 1,
     "id": "2b8d0b6edd0c40dc8564a83316ed31b6",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 127.72941680000001,
+    "elapsed_seconds": 131.6363154,
     "calls_reserved": 3,
     "responses_received": 3,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md"
+    ],
     "accepted_records": [],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+        "outcome": "proposal_blocked",
+        "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance",
+          "model_calls": 3
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:00:05.750540Z",
+    "checkpoint_at": "2026-11-13T07:00:09.657440Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
