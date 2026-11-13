@@ -9467,6 +9467,56 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md": {
+      "content_hash": "de6318797be29364d60166b1dbe626c9f4855995dfa1ddec6fd4113173cacfa3",
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "de6318797be29364d60166b1dbe626c9f4855995dfa1ddec6fd4113173cacfa3",
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate and version-qualified (C# 10 parameterless constructors, C# 11 ref fields, C# 12 primary constructors, C# 13 ref struct relaxations). It moves in a sensible order from semantics to modifiers, boxing, disposal copies, conversions, layout, pitfalls and tradeoffs. The five Qards each test one gradeable task and carry Microsoft sources. The keep is justified.",
+          "page_type": "Concept: frontmatter intact, optional Questions and References present, code fences have language identifiers, no hand-written navigation.",
+          "current_text_evidence": [
+            {
+              "quote": "The example's “bitwise copy” comment describes the independent value result.",
+              "line_start": 39,
+              "reason": "Corrects a likely misconception about the code comment without losing the example."
+            },
+            {
+              "quote": "The 16-byte guideline is a starting point from framework design guidance, not a runtime cutoff.",
+              "line_start": 43,
+              "reason": "Gives a decided, conditioned size guideline and points to measurement, which is the engineering-judgment content the note needs."
+            },
+            {
+              "quote": "C# 13 permits interface implementation and broader generic use under ref-safety rules, but converting the value to an interface still requires forbidden boxing.",
+              "line_start": 80,
+              "reason": "States the version-specific condition accurately with its limit."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: all sections concern one type's copy semantics and the decisions that follow from them. They are not independently useful topics.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -13872,7 +13922,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 507.4411743000001,
+    "elapsed_seconds": 510.8255278000001,
     "calls_reserved": 12,
     "responses_received": 12,
     "attempted_paths": [
@@ -14068,7 +14118,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:06:25.462301Z",
+    "checkpoint_at": "2026-11-13T07:06:28.846654Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -38674,95 +38724,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "2b8d0b6edd0c40dc8564a83316ed31b6",
-    "topic_id": "programming-e6aba2bd",
-    "batch": {
-      "topic": "Programming",
-      "topic_id": "programming-e6aba2bd",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md",
-          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"A value type holding its value inline, so assignment copies it.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Types/Structs\"\ncreated: \"2026-02-18T19:18:52.000Z\"\nmodified: \"2026-11-03T10:42:12.241Z\"\npublished: \"2026-07-08T13:14:17.328Z\"\n---\n\nA struct is a C# value type. Assignment copies its fields as a new value, including any references those fields contain. That behavior fits small, immutable data representing one logical value, such as a coordinate or money amount.\n\nStorage depends on context. A struct may be a local, live inline inside a heap object or array, or be copied into a box. Structs derive from `System.ValueType`, cannot inherit from another class or struct, and may implement interfaces.\n\n# Value-Copy Semantics\n\n```csharp\npublic readonly struct Money\n{\n    public decimal Amount { get; }\n    public string Currency { get; }\n\n    public Money(decimal amount, string currency)\n    {\n        Amount = amount;\n        Currency = currency;\n    }\n}\n\nvar price = new Money(9.99m, \"USD\");\nvar copy = price;   // full bitwise copy — independent value\n```\n\nThe example's “bitwise copy” comment describes the independent value result. The language guarantees value-copy semantics, not a particular machine instruction sequence.\n\nA struct cannot declare a finalizer or use class-style abstract and virtual members. Its default value has every field set to that field's default, even when an explicit parameterless constructor would establish a different application invariant.\n\nUse a struct when the type behaves as a single value, copying is cheap, and boxing is uncommon. Immutability matters more than a universal byte limit. The 16-byte guideline is a starting point from framework design guidance, not a runtime cutoff. Measure larger hot-path values in their real APIs.\n\nEquality also deserves an explicit decision. The inherited `ValueType.Equals(object)` boxes and compares fields: bitwise for some layouts without reference fields or padding, otherwise through reflection. The inherited `GetHashCode` may be computed from only some fields, so distinct values can collide. A plain struct also has no `==` operator; `a == b` does not compile unless the type declares one or converts implicitly to a type that has it. Public values used heavily in dictionaries or comparisons often benefit from `IEquatable<T>`, a matching `GetHashCode`, and `==`/`!=`. A `record struct` synthesizes all of them.\n\n# Struct Modifiers\n\n## Readonly Struct\n\nA readonly struct prevents instance fields from being reassigned after construction. Its instance fields must be readonly, and auto-properties must expose only `get` or `init`. This lets the compiler avoid defensive copies for readonly receivers when the invoked member is known not to mutate the value.\n\n```csharp\npublic readonly struct Vector2\n{\n    public double X { get; }\n    public double Y { get; }\n\n    public Vector2(double x, double y) => (X, Y) = (x, y);\n\n    public double Length => Math.Sqrt(X * X + Y * Y);\n    public Vector2 Normalize() => new(X / Length, Y / Length);\n}\n```\n\nWithout that guarantee, calling a potentially mutating member through an `in` parameter or readonly field can require a defensive copy. Individual members on a mutable struct can also be marked `readonly` when they do not mutate state.\n\n## Ref Struct\n\nA `ref struct` is restricted from escaping into ordinary managed-heap storage. It cannot be boxed, used as an array element, captured by a lambda or local function, or used where its lifetime could outlive referenced data. `Span<T>` relies on these checks to expose contiguous memory without giving managed references an unsafe lifetime.\n\n```csharp\npublic ref struct SpanPair\n{\n    public Span<byte> First;\n    public Span<byte> Second;\n}\n```\n\nIt cannot be a field of a class or ordinary struct, a static field, or a `record`. C# 13 permits interface implementation and broader generic use under ref-safety rules, but converting the value to an interface still requires forbidden boxing. The same release permits local use in async methods and iterators when the value does not cross an `await` or `yield` boundary.\n\n## Readonly Ref Struct\n\nA readonly ref struct combines ref-safety restrictions with an immutable receiver. `ReadOnlySpan<T>` is the standard example:\n\n```csharp\npublic readonly ref struct ReadOnlySpan<T>\n{\n    // ...internal pointer and length...\n}\n\nReadOnlySpan<char> slice = \"Hello, World!\".AsSpan(0, 5);\n```\n\nThe declaration blocks field reassignment and ordinary heap escape. It does not make memory reached through every contained reference deeply immutable.\n\n## Partial Struct\n\nA partial struct spreads one type declaration across files. The compiler combines the parts into a single value type.\n\n```csharp\n// Measurement.cs\npublic partial struct Measurement\n{\n    public double Value { get; set; }\n}\n\n// Measurement.Validation.cs\npublic partial struct Measurement\n{\n    public bool IsValid() => !double.IsNaN(Value);\n}\n```\n\n## Modifier Compatibility\n\n| Modifier combination | Allowed? |\n|---|---|\n| `readonly` + `ref` | Yes (`readonly ref struct`) |\n| `readonly` + `partial` | Yes |\n| `ref` + `partial` | Yes |\n| `abstract` | No — structs are implicitly sealed |\n| `sealed` | No — structs are implicitly sealed |\n| `static` | No |\n\n# Boxing\n\nBoxing copies a value into an object on the managed heap. It appears when a value is converted to `object`, `dynamic`, or an interface value. Non-generic collections and `params object[]` are common accidental boundaries.\n\nConstrained generic calls can invoke interface members without first converting the value to an interface object. Modern interpolated string handlers can also format values without boxing, depending on the overload and formatter. The allocation question belongs to the actual call path, not the presence of interpolation syntax alone.\n\nCalls to members declared on `object` deserve the same care. The JIT can use constrained calls, while some interface or object-typed paths require a box. `EqualityComparer<T>.Default` is usually the right generic equality boundary.\n\n# Copies During Disposal\n\nA `using (existingValue)` statement captures the resource expression once. For a struct, that captures a value copy. Mutating the copy during `Dispose` does not change fields on the original local:\n\n```csharp\nvar resource = new Resource();\nusing (resource) { }\n// Prints False: disposal changed the captured copy.\nConsole.WriteLine(resource.IsDisposed);\n\npublic struct Resource : IDisposable\n{\n    public bool IsDisposed { get; private set; }\n    public void Dispose() => IsDisposed = true;\n}\n```\n\nThe disposal call for this value-type case need not box. The distinction comes from the captured value, not an obligatory conversion to `IDisposable`. A reference-type resource instead copies a reference to the same object. A `using` declaration that declares the resource has its own resource variable; the copy observation above applies specifically to capturing an existing struct expression.\n\n# User-Defined Conversions\n\nA struct can define conversions between itself and another type. An `implicit` conversion needs no cast at the call site, so it should preserve information and avoid surprising failures. An `explicit` conversion makes the caller acknowledge validation, information loss, or another meaningful change.\n\n```csharp\npublic readonly struct Percentage\n{\n    public decimal Value { get; }\n\n    public Percentage(decimal value)\n    {\n        if (value is < 0 or > 100)\n        {\n            throw new ArgumentOutOfRangeException(nameof(value));\n        }\n        Value = value;\n    }\n\n    public static implicit operator decimal(Percentage value) => value.Value;\n    public static explicit operator Percentage(decimal value) => new(value);\n}\n```\n\nConverting a valid `Percentage` to `decimal` preserves its number. Converting an arbitrary decimal back can fail validation, so it requires a cast. A conversion can also make a built-in arithmetic operator applicable without declaring that operator on the struct. Exposing that convenience indiscriminately can discard the domain meaning of a unit or validated value.\n\n# Memory Layout\n\nA struct's managed size includes field storage and alignment padding. For example, a `bool` followed by a `long` may occupy 16 bytes rather than nine. `[StructLayout(LayoutKind.Sequential)]` preserves field order for layout-sensitive interop, while `Explicit` uses `[FieldOffset]`. Auto layout leaves ordering to the runtime and is unsuitable for unmanaged interop.\n\nSize affects copy cost and cache behavior, but it does not create a fixed class-versus-struct boundary. A 24-byte value passed by reference may outperform a heap-allocated object in one workload and lose in another.\n\n# Modern Struct Features\n\n- **Primary constructors (C# 12)** work on structs: `public readonly struct Point(int x, int y) { public int X => x; }`. Parameters become stored state only when their use requires capture.\n- **`ref` fields and `scoped` (C# 11)** let a ref struct store a managed reference while the compiler limits how far that reference can escape.\n\n# Pitfalls\n\n1. **Mutable structs.** Assignment and ordinary property returns copy the value. Mutating a copy does not update the original storage and often fails to compile at obvious property or indexer boundaries:\n\n```csharp\nstruct MutablePoint { public int X; public int Y; }\n\nvar list = new List<MutablePoint> { new() { X = 1, Y = 2 } };\n// list[0].X = 10;  // Compile error — indexer returns a copy\n```\n\nReadonly values remove most accidental mutation paths. APIs that need in-place updates should expose that choice explicitly through a ref return or replace the whole value.\n\n2. **Large copies.** Copy cost grows with the value and call pattern. `in`, `ref`, or `ref readonly` can avoid a copy, but indirection and defensive copies can erase the benefit. Benchmark before spreading ref semantics through an API.\n\n3. **Default equality on a hot path.** Each inherited `ValueType.Equals` call boxes, and a struct with reference fields or padding is compared through reflection. As a dictionary key, the inherited `GetHashCode` can also produce avoidable collisions. A typed `IEquatable<T>` with a matching `GetHashCode` controls both semantics and cost.\n\n4. **Boxing behind abstraction.** Converting a struct to `object` or an interface allocates a box. A constrained generic call on `T` can keep the value unboxed.\n\n5. **The zero value bypasses an explicit parameterless constructor.** Since C# 10, a struct may declare that constructor, but `default(T)` and zero-initialized arrays still produce the all-default field state. A struct invariant must tolerate that value.\n\n# Tradeoffs\n\n- **Struct or class:** a struct gives value-copy semantics and can avoid a separate object allocation. A class makes identity sharing cheap and avoids copying a large payload.\n- **Readonly or mutable:** readonly is the safe default for value objects. Mutable structs fit narrow low-level APIs where mutation is explicit.\n- **By value or by reference:** by-value calls are simplest and often fastest for small values. Ref semantics earn their complexity only when measurement shows copy cost matters.\n\n# Questions\n\n> [!qard]- Why can `using(existingStruct)` dispose a copy without changing the original struct's disposal flag?\n> The using statement evaluates and captures the resource expression once. Capturing a struct copies its fields, and `Dispose` operates on that captured resource value. Its field mutation is not a mutation of the original local. The value-type disposal path does not require boxing to explain this result. Reference-type resources copy a reference to the same object, and using declarations that introduce their own resource variable are a different source shape. [C# specification: using statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/statements#1314-the-using-statement)\n\n> [!qard]- When should a user-defined conversion be explicit instead of implicit?\n> An explicit conversion fits when it can lose information, fail validation, or surprise a caller. An implicit conversion participates without a cast in assignment and overload applicability, so it should preserve information and behave predictably. A validated percentage can convert implicitly to its decimal value, but constructing one from an arbitrary decimal should be explicit because the input may be outside the allowed range. [Microsoft: user-defined conversions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/user-defined-conversion-operators)\n\n> [!qard]- Why can calling a member on a struct stored in a `readonly` field or `in` parameter run the member on a copy, and how does `readonly struct` prevent it?\n> A struct instance member receives `this` by reference and may assign its fields, while readonly storage must not change. When the member is not declared `readonly`, the compiler does not inspect its body; it copies the value into a hidden temporary and calls the member on that copy. Every call pays for the copy, and any mutation the member performs lands on the temporary and is lost.\n>\n> ```csharp\n> class Holder\n> {\n>     private readonly Counter counter;\n>     public int Tick() => counter.Next(); // always 1: Next increments a copy\n> }\n>\n> struct Counter { private int n; public int Next() => ++n; }\n> ```\n>\n> A `readonly struct` requires every instance field to be readonly, so no member can mutate `this`, and members run directly on the original storage. A mutable struct gets the same effect per member by marking non-mutating members `readonly`; the compiler already treats auto-implemented `get` accessors as readonly.\n>\n> [Microsoft: structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)\n\n> [!qard]- What restrictions apply to a `ref struct`, and why do they exist?\n> A `ref struct` can never be stored on the managed heap. It cannot be boxed or converted to `object`, `ValueType`, or an interface type. It cannot be a field of a class or ordinary struct, a static field, or an array element. A lambda or local function cannot capture it, a variable of the type cannot stay live across an `await` or `yield return`, and the type cannot be declared as a record.\n>\n> The type can hold a reference into stack memory or into the middle of another object, as `Span<T>` over `stackalloc` memory does. A heap copy could outlive that stack frame or referenced data and leave a dangling reference. Keeping every copy where the compiler's ref-safety analysis tracks its lifetime makes such references safe without runtime checks.\n>\n> [Microsoft: ref structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/ref-struct)\n\n> [!qard]- Why should a struct that is compared or hashed often implement `IEquatable<T>` instead of relying on inherited `ValueType` equality?\n> Inherited `ValueType.Equals(object)` takes `object`, so comparing two structs boxes both values. It compares raw bytes only for some layouts, when no field is a reference type and the struct has no padding; otherwise it compares fields through reflection, which is much slower. Inherited `ValueType.GetHashCode` uses one or more fields, not necessarily all of them, so distinct values can share a hash and slow down lookups. By default, `Dictionary<TKey,TValue>` and `HashSet<T>` use `EqualityComparer<T>.Default`, which calls a typed `IEquatable<T>.Equals(T)` without boxing when the struct implements it.\n>\n> A complete implementation pairs `IEquatable<T>.Equals(T)` with `Equals(object)` and `GetHashCode` overrides over the same fields. A struct has no `==` or `!=` by default, so those operators need explicit declarations. A `record struct` synthesizes all of these members.\n>\n> [Microsoft: ValueType.Equals](https://learn.microsoft.com/en-us/dotnet/api/system.valuetype.equals) · [Microsoft: ValueType.GetHashCode](https://learn.microsoft.com/en-us/dotnet/api/system.valuetype.gethashcode) · [Microsoft: define value equality](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type)\n\n# References\n\n- [Structure types](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/struct)\n",
-          "hash": "de6318797be29364d60166b1dbe626c9f4855995dfa1ddec6fd4113173cacfa3",
-          "topic": "Programming",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against current C# and .NET behavior. The checked claims were: copy semantics; readonly and ref struct restrictions, including the C# 13 interface and async relaxations; the C# 10 parameterless constructor and the default-value bypass; ValueType.Equals and GetHashCode behavior; the absence of a default ==; boxing paths; using-statement copy capture; implicit versus explicit conversions; layout and padding; and C# 11 ref fields and C# 12 primary constructors. All were accurate and appropriately qualified. The explanation order works: semantics, modifiers, boxing, copies, conversions, layout, pitfalls, tradeoffs. The five Qards each test one gradeable task, are self-contained and carry primary Microsoft sources. No known violations are open, and no unresolved defects or redundancy justify an edit."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md": "de6318797be29364d60166b1dbe626c9f4855995dfa1ddec6fd4113173cacfa3"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-13T07:05:56.013879Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "The whole-note audit found no factual, structural, question-quality or editorial defect that justifies an edit. The keep disposition is supported and no edits are proposed.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md",
-          "verdict": "CLEAN",
-          "summary": "The note is accurate and version-qualified (C# 10 parameterless constructors, C# 11 ref fields, C# 12 primary constructors, C# 13 ref struct relaxations). It moves in a sensible order from semantics to modifiers, boxing, disposal copies, conversions, layout, pitfalls and tradeoffs. The five Qards each test one gradeable task and carry Microsoft sources. The keep is justified.",
-          "page_type": "Concept: frontmatter intact, optional Questions and References present, code fences have language identifiers, no hand-written navigation.",
-          "current_text_evidence": [
-            {
-              "quote": "The example's “bitwise copy” comment describes the independent value result.",
-              "line_start": 39,
-              "reason": "Corrects a likely misconception about the code comment without losing the example."
-            },
-            {
-              "quote": "The 16-byte guideline is a starting point from framework design guidance, not a runtime cutoff.",
-              "line_start": 43,
-              "reason": "Gives a decided, conditioned size guideline and points to measurement, which is the engineering-judgment content the note needs."
-            },
-            {
-              "quote": "C# 13 permits interface implementation and broader generic use under ref-safety rules, but converting the value to an interface still requires forbidden boxing.",
-              "line_start": 80,
-              "reason": "States the version-specific condition accurately with its limit."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: all sections concern one type's copy semantics and the decisions that follow from them. They are not independently useful topics.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
-    }
-  }
+  "parked_author_proposals": {}
 }
