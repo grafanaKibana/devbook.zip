@@ -13737,14 +13737,14 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 68.26185319999999,
+    "elapsed_seconds": 71.7885819,
     "calls_reserved": 2,
     "responses_received": 2,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T06:59:06.282977Z",
+    "checkpoint_at": "2026-11-13T06:59:09.809706Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -29876,16 +29876,16 @@
   },
   "held_proposals": {
     "programming-e6aba2bd": {
-      "workload_id": "5589fab66fbd42d6ab4c1fac5fc35939",
+      "workload_id": "2b8d0b6edd0c40dc8564a83316ed31b6",
       "topic_id": "programming-e6aba2bd",
       "batch": {
         "topic": "Programming",
         "topic_id": "programming-e6aba2bd",
         "notes": [
           {
-            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
-            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"Type-safe, reusable code without duplicating logic per type, including constraints and variance.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Generics\"\nflashcard_uid: \"3fc98b91\"\ncreated: \"2026-02-18T20:04:43.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:14:17.325Z\"\n---\n\nGenerics parameterize code by type. `List<T>` can store any `T` while the compiler still checks every read and write. That is a stronger contract than accepting `object` and recovering the real type with casts. For value types, generic collections also avoid the boxing required by older object-based APIs.\n\n- `T` is a placeholder for a type chosen by the caller.\n- `List<T>` is an open generic type definition. `List<int>` is a closed constructed type.\n- Constraints (`where T : ...`) are capability contracts that unlock members safely.\n- The runtime specializes generic code for value-type arguments and can share code between reference-type arguments.\n\n# Use Cases\n\n- Collections preserve the element or key type throughout an API.\n- Algorithms can require only the operations they use, such as comparison or numeric operators.\n- Generic result and handler types can keep payload types explicit without duplicating infrastructure.\n\nA generic abstraction should still represent one real behavior. `IRepository<TEntity>` is not useful merely because every entity happens to support create, read, update, and delete operations. Different aggregates often need different contracts.\n\n# Constraints\n\nConstraints tell the compiler what operations are valid for `T`. They also document the smallest capability the algorithm expects.\n\n- `where T : class` - `T` must be a reference type.\n- `where T : struct` - `T` must be a non-nullable value type.\n- `where T : notnull` - nullable analysis warns when a nullable type argument is used.\n- `where T : unmanaged` - `T` is a non-nullable unmanaged type whose fields are also unmanaged. This is not identical to every platform's definition of blittable.\n- `where T : new()` - `T` must have a public parameterless constructor.\n- `where T : BaseType` - `T` must inherit from a specific base type.\n- `where T : ISomeInterface` - `T` must implement a specific interface.\n\n# Variance\n\nVariance controls safe assignment between constructed interface or delegate types when their type arguments are related by inheritance.\n\n- Invariance (default): `List<string>` is not assignable to `List<object>`.\n- Covariance (`out T`): allows a more derived type where a base type is expected for producer-only APIs (for example, `IEnumerable<string>` to `IEnumerable<object>`).\n- Contravariance (`in T`): allows a less derived type where a more derived type is expected for consumer-only APIs (for example, `IComparer<object>` as `IComparer<string>`).\n- Variance is supported on interfaces and delegates marked with `in`/`out`, and only for reference-type substitutions.\n\n```csharp\nIEnumerable<string> names = new List<string> { \"Ada\", \"Linus\" };\nIEnumerable<object> objects = names; // covariance\n\nAction<object> printAny = o => Console.WriteLine(o);\nAction<string> printString = printAny; // contravariance\n\nList<string> list = new();\n// List<object> invalid = list; // does not compile (invariance)\n```\n\n# Example\n\n```csharp\npublic static T CreateAndValidate<T>()\n    where T : EntityBase, IValidatable, new()\n{\n    var value = new T();\n    value.Validate();\n    return value;\n}\n```\n\n# Generic Math (.NET 7+)\n\nGeneric code once had no static contract for operators such as `+`. Static abstract interface members changed that. `INumber<T>` declares numeric operators and identities, so a `where T : INumber<T>` constraint makes arithmetic available on the type parameter.\n\n```csharp\npublic static T Sum<T>(ReadOnlySpan<T> values) where T : INumber<T>\n{\n    T total = T.Zero;\n    foreach (var v in values) total += v;   // operators resolved via the interface\n    return total;\n}\n```\n\nThe same static-member mechanism supports contracts such as `IParsable<TSelf>`, where parsing belongs to the type rather than an instance.\n\n# Reflection over Generics\n\nAn open generic such as `List<>` has unassigned type parameters and cannot be instantiated. Reflection can close it at runtime with `MakeGenericType`. Generic methods use `MakeGenericMethod`.\n\n```csharp\nType closed = typeof(List<>).MakeGenericType(itemType); // e.g. List<Order>\nvar list = Activator.CreateInstance(closed);\n```\n\n`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only. Code using that anti-constraint must obey the ref-safety rules for every possible `T`.\n\n# Pitfalls\n\n- An unconstrained `T` exposes only operations valid for every type. The smallest constraint that the algorithm actually needs makes the required operations available without internal casts.\n- **Static state belongs to each closed type.** `Cache<int>` and `Cache<string>` receive separate copies of a `static` field declared on `Cache<T>`.\n- **Value-type specialization can grow native code.** Separate value-type instantiations can produce separate JIT-compiled bodies. The specialization avoids the boxing that `object`-based storage requires and preserves value semantics, but many large instantiations increase startup and code-size costs.\n- `default(T)` is `null` for reference types and zero-initialized data for value types. Either result may look valid in a domain model, so absence should have an explicit contract.\n- A concrete base-class constraint couples the abstraction to one hierarchy. A behavioral interface avoids that coupling when inheritance is not itself part of the requirement.\n\n# Tradeoffs\n\n- **Generics versus `object`.** Non-generic collections box value types when storing them as `object`. `List<int>` keeps integers unboxed and removes casts at the read boundary.\n- **Generics versus inheritance.** A generic API carries a concrete type argument through compile-time checks. Inheritance allows one base reference to dispatch to different runtime implementations. The choice is about when variation is known, not a blanket performance rule.\n- **Specialization versus code sharing.** The CLR normally specializes code for value-type arguments and shares compatible code for reference-type arguments. This balances value-type performance against native code size.\n\n# Questions\n\n<!-- qard-id: 051626ec-488b-484a-affe-9b09e168fb5e -->\n> [!qard]- What do generics add to a C# API?\n> Generics let one implementation take a type as a parameter. The same code then works with many types, while the compiler still checks the type of every value that goes in or comes out.\n>\n> Compared with an API that accepts `object`:\n>\n> - **Type safety:** an `object`-based API needs casts on the way out, so a wrong type fails only at runtime. A `List<string>` instead rejects an `int` at compile time and returns strings without casts.\n> - **No storage boxing for value types:** an `object`-based collection boxes each `int` it stores, while `List<int>` stores the integers directly. Generic code can still box a value-type `T` through conversions, such as converting it to `object` or to an interface type.\n> \n> **Constraints** such as `where T : IComparable<T>` narrow which type arguments are allowed. In return, the generic code may use the members that the constraint guarantees, such as `CompareTo`.\n>\n> [Microsoft: generic types and methods](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft: constraints on type parameters](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters) · [C# specification: boxing conversions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/conversions#1029-boxing-conversions)\n\n<!-- qard-id: 96d2fdb0-3c95-4eb1-91da-258a4574cde2 -->\n> [!qard]- Why does `IEnumerable<string>` assign to `IEnumerable<object>`, but `List<string>` does not assign to `List<object>`?\n> `IEnumerable<T>` declares its type parameter covariant (`out T`), so the conversion is allowed. `List<T>` is invariant, so it is not.\n>\n> - **`IEnumerable<string>` as `IEnumerable<object>`:** the interface only hands `T` values out. Every string read from the sequence is also an object, so reading strings as objects is safe.\n> - **`List<string>` as `List<object>`:** `List<T>` also takes `T` values in, for example through `Add`. If the conversion were allowed, code could add an `int` through the `List<object>` reference, and the original `List<string>` would then hold a non-string.\n> \n> Variance also has to be declared, and C# allows it only on generic interfaces and delegates. A generic class such as `List<T>` is therefore always invariant, whatever its members do.\n>\n> [Microsoft: covariance and contravariance](https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance)\n\n<!-- qard-id: 222e6ef2-bb7d-4c83-b731-ffd892537b23 -->\n> [!qard]- When should a generic interface type parameter be marked `out` or `in`?\n> A type parameter can be marked `out` when the interface only produces `T`, and `in` when it only consumes `T`. When `T` flows both in and out, it stays invariant.\n>\n> | Marking | Where `T` may appear | Conversion it enables |\n> |---|---|---|\n> | `out` (covariant) | Only in output positions, such as method return types | A more derived type argument can stand in for a less derived one: `IEnumerable<string>` converts to `IEnumerable<object>` |\n> | `in` (contravariant) | Only in input positions, such as method parameter types | A less derived type argument can stand in for a more derived one: `IComparer<object>` converts to `IComparer<string>` |\n> | None (invariant) | In both input and output positions | No conversion, because either direction would allow an unsafe read or write |\n>\n> The compiler enforces these positions, so it accepts a variant marking only when the interface's members keep it safe.\n>\n> Variance conversions work only when the type arguments are reference types. `IEnumerable<int>` does not convert to `IEnumerable<object>`, because a value-type argument makes the constructed type invariant.\n>\n> [Microsoft: covariance and contravariance](https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance)\n\n<!-- qard-id: dd86df45-1404-46cf-8c09-84cb046ef4f3 -->\n> [!qard]- A generic method uses `default(T)` as a fallback. Why can this be dangerous?\n> `default(T)` is not one fixed value. It is `null` when `T` is a reference type, and a zero-initialized value such as `0` or `false` when `T` is a value type. Those values can also be legitimate data, so returning `default(T)` to signal that nothing was found or that something failed makes absence look like a real result.\n>\n> For example, a `GetOrDefault<T>` method that returns `default(T)` for a missing key returns `0` when `T` is `int`. A caller then cannot tell a missing entry from a stored `0`.\n>\n> When that distinction matters, the API reports absence separately from the value:\n>\n> - **`Try` method:** returns `bool` for success and the value through an `out T` parameter.\n> - **Result type:** carries the success or failure state together with the value.\n> - **Nullable contract:** returns `T?`, with `null` meaning absence. This works only when `null` is never legitimate data and the return type can actually hold `null` for the type argument. For a value type that requires `Nullable<T>`, for example `T?` under a `where T : struct` constraint, whose `HasValue` separates a missing entry from a stored `0`. With an unconstrained `T`, `T?` adds no null state for a value-type argument, so `GetOrDefault<int>` would still return `0`.\n> \n> [Microsoft: default keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/default) · [Microsoft: nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types)\n\n> [!qard]- Do different closed forms of a generic type share its static fields?\n> No. `Cache<int>` and `Cache<string>` have separate copies of every static field declared on `Cache<T>`. Incrementing `Cache<int>.Count` leaves `Cache<string>.Count` unchanged. This separation follows type identity and does not depend on whether the CLR shares native method code between compatible instantiations. A per-type cache can use it deliberately; a process-wide total must live outside that generic type's per-instantiation state. [Microsoft: generic classes](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/generic-classes)\n\n# References\n\n- [Generics in C#](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/)\n- [Covariance and contravariance in C#](https://ericlippert.com/2007/10/16/covariance-and-contravariance-in-c-part-1/)\n",
-            "hash": "d37bc748448467f0814404e4b54dac33f4aa2f7eb4a9d61afcb032e926786e3a",
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"A type-safe function pointer for storing, passing, and invoking methods as values.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Types/Delegates\"\nflashcard_uid: \"c751e8da\"\ncreated: \"2026-02-18T19:18:52.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:14:17.327Z\"\n---\n\nA delegate is a C# type that describes a callable method signature. A delegate value pairs that signature with a method and, for a closed instance method, its target object. The value can then be stored, passed around, combined with other delegates, and invoked later.\n\nThis makes delegates the common mechanism behind callbacks, LINQ operators, strategy-style APIs, and events. Any static or instance method with a compatible signature can be assigned to the delegate type.\n\n```csharp\nstatic decimal StandardPrice(int q, decimal p) => q * p;\n\nPriceCalculator calc = StandardPrice;\nvar total = calc(3, 19.99m); // 59.97\n\npublic delegate decimal PriceCalculator(int quantity, decimal unitPrice);\n```\n\n# Built-in Generic Delegates\n\n- `Action<T...>`: returns `void`\n- `Func<T..., TResult>`: returns a value\n- `Predicate<T>`: returns `bool` for one input. Its signature matches `Func<T, bool>`, but it remains a different delegate type.\n\n```csharp\nFunc<int, int, int> add = (a, b) => a + b;\nAction<string> log = s => Console.WriteLine(s);\nPredicate<int> isEven = n => n % 2 == 0;\n```\n\n# Multicast Delegates\n\nA delegate can represent more than one method. `+=` combines invocation lists, `-=` removes an entry, and invoking the result calls its handlers in registration order.\n\n```csharp\nAction pipeline = () => Console.WriteLine(\"Step 1\");\npipeline += () => Console.WriteLine(\"Step 2\");\npipeline += () => Console.WriteLine(\"Step 3\");\n\npipeline();\n```\n\nThree details matter at runtime:\n\n- If one handler throws, later handlers are not invoked.\n- For non-`void` delegates, only the last handler's return value is returned.\n- `-=` removes the last matching handler from the invocation list.\n\n# Variance\n\nDelegate compatibility supports covariance for return values and contravariance for parameters:\n\n- **Covariance**: a method may return a more derived type.\n- **Contravariance**: a method may accept a less derived parameter type.\n\n```csharp\nFunc<Dog> dogFactory = () => new Dog();\nFunc<Animal> animalFactory = dogFactory; // covariance\n\nAction<Animal> inspectAnimal = a => Console.WriteLine(a.GetType().Name);\nAction<Dog> inspectDog = inspectAnimal;   // contravariance\n\nclass Animal { }\nclass Dog : Animal { }\n```\n\n# Anonymous Methods and Lambdas\n\nAnonymous methods (`delegate(...) { ... }`) and lambdas (`(...) => ...`) can be converted to delegate instances. Both forms may capture local variables.\n\n```csharp\nint threshold = 10;\nFunc<int, bool> greaterThanThreshold = x => x > threshold;\n```\n\nThe captured variable becomes shared closure state. It is not copied when the delegate is created.\n\n# Closures\n\nA closure holds variables captured from an outer scope by a lambda or anonymous method. Every delegate that closes over the same variable sees the same storage, including later updates.\n\n```csharp\nvar handlers = new List<Action>();\n\nfor (int i = 0; i < 3; i++)\n{\n    handlers.Add(() => Console.WriteLine(i));\n}\n\nhandlers.ForEach(h => h()); // 3, 3, 3\n```\n\nThe lambda captures the single `for` variable `i`, not its value during each iteration.\n\n```csharp\nvar handlers = new List<Action>();\n\nfor (int i = 0; i < 3; i++)\n{\n    int copy = i; // capture per-iteration value\n    handlers.Add(() => Console.WriteLine(copy));\n}\n\nhandlers.ForEach(h => h()); // 0, 1, 2\n```\n\nThe extra local gives each iteration separate storage. This is needed whenever later mutation of shared captured state would change the delegate's meaning, with `for` loop indices being the usual example.\n\n# Allocation, Captures, and Function Pointers\n\n- **Delegates are immutable.** `+=` and `-=` create a new multicast delegate with an updated invocation list through `Delegate.Combine` or `Delegate.Remove`. Frequent subscription changes on a hot path therefore allocate.\n- **A capturing lambda needs closure state.** A `static` lambda (C# 9) cannot capture locals, so the compiler rejects accidental captures and may reuse the delegate instance.\n- **Static method-group conversions can be cached by the compiler.** C# 11 added cached static method-group conversions, avoiding a fresh delegate allocation when the same conversion is evaluated repeatedly.\n- **`DynamicInvoke` uses late-bound invocation.** It performs runtime checks and can box arguments, so a typed call is preferable. For an instance method, a closed delegate binds its target instance, while an open delegate receives that instance as its first argument.\n- **Function pointers (`delegate*`, C# 9) remove the delegate object.** They fit narrow `unsafe` or interop paths where the calling convention and lifetime are controlled. They give up delegate safety and composition to get there.\n\n# Pitfalls\n\n- **One exception stops a multicast call.** Later handlers are skipped. Isolating handlers requires enumerating `GetInvocationList()` and invoking each one inside its own `try/catch`.\n- **A non-`void` multicast call exposes only the last return value.** Collecting every result requires enumerating the handlers, invoking each one separately and keeping each return value.\n- **Captured loop state can drift.** Closures capture variables rather than snapshots, so several handlers may observe the same final value. A per-iteration local creates the intended snapshot.\n- **The legacy asynchronous delegate pattern is unsupported on modern .NET.** Calling delegate `BeginInvoke` or `EndInvoke` throws `PlatformNotSupportedException`. `Task`-based APIs are the replacement.\n\n# Questions\n\n<!-- qard-id: c922b7d0-655f-4f50-89fd-bfc97950ccfa -->\n> [!qard]- What is a delegate?\n> A delegate is a type that represents references to methods with a particular signature. The delegate type fixes the parameter and return types. A delegate value packages a compatible method so it can be stored, passed and invoked later like any other value.\n>\n>\n> [Microsoft: delegates](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/) · [C# specification: delegates](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates) · [Microsoft: Delegate.CreateDelegate](https://learn.microsoft.com/en-us/dotnet/api/system.delegate.createdelegate?view=net-10.0)\n\n> [!qard]- What state does a delegate value carry?\n> A delegate value carries:\n>\n> - **Method:** the method to call, which must be compatible with the delegate's signature.\n> - **Target (optional):** a delegate closed over an instance method also stores the object the method runs on. A delegate with no bound object, such as one created from an ordinary static method, has no target. Reflection through `Delegate.CreateDelegate` can also create open instance delegates, which receive the instance as an argument, and static delegates closed over their first argument.\n> - **Invocation list:** a delegate can combine several methods, for example with `+=`. Invoking it calls each in order.\n> \n> ```csharp\n> var tenPercent = new Discount(0.10m);\n> PriceCalculator calc = tenPercent.Apply; // closed instance delegate: method Apply, target tenPercent\n> decimal total = calc(3, 20m);            // runs tenPercent.Apply: 54.00\n> \n> public delegate decimal PriceCalculator(int quantity, decimal unitPrice);\n> \n> public sealed class Discount\n> {\n>     private readonly decimal _rate;\n>     public Discount(decimal rate) => _rate = rate;\n>     public decimal Apply(int quantity, decimal unitPrice) => quantity * unitPrice * (1 - _rate);\n> }\n> ```\n>\n> Delegate values are immutable: adding or removing a method produces a new delegate. Lambdas and method groups convert to delegate types, which is how callbacks, LINQ operators and events pass behavior around.\n>\n> [Microsoft: delegates](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/) · [C# specification: delegates](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates) · [Microsoft: Delegate.CreateDelegate](https://learn.microsoft.com/en-us/dotnet/api/system.delegate.createdelegate?view=net-10.0)\n\n> [!qard]- In what order does a multicast delegate invoke its methods?\n> Synchronously, one after another, in invocation-list order. That is the order in which the methods were combined; a direct multicast invocation does not schedule them in parallel.\n>\n> [C# specification: delegates (delegate invocation)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates)\n\n> [!qard]- Which return value does a non-void multicast delegate expose?\n> Only the last invoked method's return value. Earlier return values are discarded:\n>\n> ```csharp\n> Func<int> f = () => 1;\n> f += () => 2;\n> f += () => 3;\n> int result = f(); // 3\n> ```\n>\n> Collecting every return value requires enumerating GetInvocationList(), invoking each entry, and storing its result.\n>\n> [C# specification: delegates (delegate invocation)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates)\n\n> [!qard]- What happens when a method in a multicast delegate throws?\n> The exception propagates to the caller and the remaining invocation-list entries are skipped. One event subscriber can therefore stop later subscribers from running. Isolating failures requires invoking entries from GetInvocationList() separately inside their own try/catch blocks.\n>\n> [C# specification: delegates (delegate invocation)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/delegates)\n\n> [!qard]- Why do callbacks from a `for` loop often observe the loop variable's final value?\n> The callbacks capture one shared variable, not a snapshot of its value at each assignment. When they run after the loop, they read the same storage containing its final value. Declaring a local inside the loop body gives each iteration separate storage; capturing that local preserves the intended value. A `Select(i => () => Use(i))` invocation instead has its own value parameter `i` for each call, so those callbacks do not share the for-loop variable. This distinction does not depend on the C#5 change to foreach iteration variables. [C# specification: anonymous function expressions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/expressions#1222-anonymous-function-expressions)\n\n# References\n\n- [C# language specification: Delegates](https://learn.microsoft.com/dotnet/csharp/language-reference/language-specification/delegates)\n- [Migrating delegate BeginInvoke calls for .NET Core](https://devblogs.microsoft.com/dotnet/migrating-delegate-begininvoke-calls-for-net-core/)\n",
+            "hash": "6c29fd3cac95137f54297946e87c3791ee298ab2a1381f0c3a279f45a3cc8ab8",
             "topic": "Programming",
             "violations": [],
             "needs_fixing_ids": [],
@@ -29901,149 +29901,247 @@
       },
       "proposal": {
         "version": 1,
-        "edits": [
-          {
-            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
-            "expected_hash": "d37bc748448467f0814404e4b54dac33f4aa2f7eb4a9d61afcb032e926786e3a",
-            "before": "- `where T : ISomeInterface` - `T` must implement a specific interface.\n",
-            "after": "- `where T : ISomeInterface` - `T` must implement a specific interface.\n- `where T : struct, Enum` - `T` must be an enum type. `System.Enum` as a base-class constraint is allowed in C# 7.3 and later.\n- `where T : allows ref struct` - an anti-constraint (C# 13, .NET 9) that permits `T` to be a `ref struct` such as `Span<T>`. It widens the accepted type arguments instead of narrowing them, so the generic code must obey ref-safety rules for every possible `T`: no boxing, no static fields of type `T`. It must come after all other constraints and cannot be combined with `class`.\n",
-            "reason": "Moves the constraint material into the Constraints list and adds the version condition.",
-            "kind": "note",
-            "learning_target": "same",
-            "essential_meanings": [
-              "allows ref struct is a C# 13 / .NET 9 anti-constraint",
-              "struct, Enum admits enum types"
-            ],
-            "sources": [
-              {
-                "url": "https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters",
-                "claim": "allows ref struct anti-constraint rules: ref safety, no boxing, no static fields, must follow all other constraints, not combinable with class.",
-                "version": "C# 13 / .NET 9"
-              },
-              {
-                "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-13",
-                "claim": "allows ref struct was introduced in C# 13, supported on .NET 9.",
-                "version": "C# 13"
-              }
-            ],
-            "feedback_keys": [],
-            "problem": "The constraint list omits `struct, Enum` and `allows ref struct`, which sit unversioned at the end of the reflection section.",
-            "reader_benefit": "Constraints are found in one place and the language-version requirement is explicit."
-          },
-          {
-            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
-            "expected_hash": "d37bc748448467f0814404e4b54dac33f4aa2f7eb4a9d61afcb032e926786e3a",
-            "before": "\n`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only. Code using that anti-constraint must obey the ref-safety rules for every possible `T`.\n",
-            "after": "",
-            "reason": "Removes the constraint sentence from the reflection section now that it lives under Constraints.",
-            "kind": "note",
-            "learning_target": "same",
-            "essential_meanings": [
-              "reflection section covers only MakeGenericType"
-            ],
-            "sources": [],
-            "feedback_keys": [],
-            "problem": "An off-topic constraint sentence ends the reflection section.",
-            "reader_benefit": "The reflection section stays focused on closing open generics."
-          }
-        ],
+        "edits": [],
         "dispositions": [
           {
-            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
-            "outcome": "changed",
-            "reason": "The constraint list now includes `struct, Enum` and the C# 13 / .NET 9 `allows ref struct` anti-constraint with its ref-safety conditions, and the reflection section no longer ends on an unrelated constraint sentence. The rest of the note and the cards were verified accurate and left unchanged."
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+            "outcome": "keep",
+            "reason": "Audited the whole note against the current text and my knowledge of the C# specification and .NET documentation. The opening definition (signature plus method plus optional target) and the PriceCalculator example are correct. The multicast details match the specification: handlers run in order, an exception stops later handlers, only the last return value is exposed, and -= removes the last matching entry. The variance examples are valid (Func<Dog> to Func<Animal>, Action<Animal> to Action<Dog>). The closure section correctly shows the shared for-variable and the per-iteration local fix. The allocation section is accurate: delegates are immutable, static lambdas arrived in C# 9, method-group conversion caching in C# 11, function pointers in C# 9, and BeginInvoke throws PlatformNotSupportedException on modern .NET. The Pitfalls section deliberately restates earlier points as a recall list, which is acceptable. The cards each test one gradeable task, with answers that cover mechanism and conditions. The state card is a dependent explanation and need not be split. There are no known violations. I found no factual or structural defect that justifies an edit, and rewording would be cosmetic churn."
           }
         ],
         "feedback": []
       },
       "source_hashes": {
-        "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md": "d37bc748448467f0814404e4b54dac33f4aa2f7eb4a9d61afcb032e926786e3a"
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md": "6c29fd3cac95137f54297946e87c3791ee298ab2a1381f0c3a279f45a3cc8ab8"
       },
       "feedback_keys": [],
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "repair_inputs": {
-        "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md": ""
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md": ""
       },
       "prepared_source_version": 1,
-      "prepared_at": "2026-11-12T20:15:34.347631Z",
-      "review_repair_key": "72cc9e9175e6a4def7187aea8020c81086ca05b35be30b49d8370b4d80ade9cb",
-      "repair_reserved": true,
-      "repair_review": {
+      "prepared_at": "2026-11-13T06:58:44.699593Z",
+      "review_evidence": {
+        "raw_review": {
+          "verdict": "CHANGES REQUIRED",
+          "overall_reason": "The keep is not justified for the whole note. The final Qard answer has a muddled tangent and a typo, and the Variance section omits the reference-type condition. The rest of the note is technically sound.",
+          "notes": [
+            {
+              "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+              "verdict": "CHANGES REQUIRED",
+              "summary": "Most of the note is accurate and well ordered: definition, built-ins, multicast, variance, closures, allocation and pitfalls. The last card's answer has a confusing tangent, and the Variance section omits the reference-type condition.",
+              "page_type": "Concept note; typed frontmatter, optional Questions and References are present; the qard-id is protected metadata.",
+              "current_text_evidence": [
+                {
+                  "quote": "A `Select(i => () => Use(i))` invocation instead has its own value parameter `i` for each call",
+                  "line_start": 140,
+                  "reason": "This tangent about Select and foreach (it follows the answer's core explanation) is hard to parse and blurs a card whose core answer is shared storage."
+                },
+                {
+                  "quote": "This distinction does not depend on the C#5 change to foreach iteration variables.",
+                  "line_start": 140,
+                  "reason": "It uses the typo 'C#5' and refers to a foreach change that the note never explains, which makes the answer harder to retrieve."
+                },
+                {
+                  "quote": "Delegate compatibility supports covariance for return values and contravariance for parameters:",
+                  "line_start": 66,
+                  "reason": "The section omits that variance applies only to reference-type conversions, so it can mislead for value types such as int to object."
+                },
+                {
+                  "quote": "-= removes the last matching handler from the invocation list.",
+                  "line_start": 58,
+                  "reason": "This matches the specification and was checked."
+                }
+              ],
+              "target_resolution": "UNRESOLVED",
+              "split_suggestion": "No split: the delegate topic, covering multicast, closures and allocation, is cohesive and not independently separable.",
+              "findings": [
+                {
+                  "severity": "Medium",
+                  "dimension": "Clarity / question quality",
+                  "location": "Final Qard answer (for-loop closure)",
+                  "evidence": "The answer adds a Select(i => () => Use(i)) tangent and says 'does not depend on the C#5 change to foreach iteration variables'.",
+                  "effect": "The tangent muddles the one-task recall answer, the foreach reference is unexplained, and 'C#5' is a typo.",
+                  "fix": "Keep the shared-storage explanation and the per-iteration local fix. Cut the Select digression, or state the foreach C# 5 difference in one clear sentence with 'C# 5'."
+                },
+                {
+                  "severity": "Medium",
+                  "dimension": "Accuracy",
+                  "location": "# Variance",
+                  "evidence": "Covariance and contravariance are stated without the reference-type condition.",
+                  "effect": "A reader may expect variance conversions to work for value-type parameters or returns.",
+                  "fix": "Add one sentence saying that variance conversions require reference types (an identity or implicit reference conversion)."
+                }
+              ],
+              "source_checks": [],
+              "rejection_equivalence": [],
+              "quality": {
+                "accuracy": "FAIL",
+                "clarity": "FAIL",
+                "question_quality": "PASS",
+                "identity_safety": "PASS",
+                "rules_compliance": "PASS"
+              }
+            }
+          ],
+          "change_checks": []
+        },
+        "bindings": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+            "citation_index": 0,
+            "reported_line_start": 140,
+            "resolved_line_start": 195
+          },
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+            "citation_index": 1,
+            "reported_line_start": 140,
+            "resolved_line_start": 195
+          },
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+            "citation_index": 2,
+            "reported_line_start": 66,
+            "resolved_line_start": 62
+          }
+        ],
+        "source_hashes": {
+          "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md": "6c29fd3cac95137f54297946e87c3791ee298ab2a1381f0c3a279f45a3cc8ab8"
+        },
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+      },
+      "completed_review": {
         "verdict": "CHANGES REQUIRED",
-        "overall_reason": "The keep is not justified. The note is largely accurate, but `allows ref struct` is misplaced and has no version condition.",
-        "change_checks": [],
+        "overall_reason": "The keep is not justified for the whole note. The final Qard answer has a muddled tangent and a typo, and the Variance section omits the reference-type condition. The rest of the note is technically sound.",
         "notes": [
           {
-            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
             "verdict": "CHANGES REQUIRED",
-            "summary": "The note is accurate and its cards are well formed. One concrete editorial defect remains: the C# 13 / .NET 9 `allows ref struct` anti-constraint is buried in the reflection section, has no version note, and is missing from the constraints list. The author's keep acknowledges this weakness but leaves it unfixed.",
-            "page_type": "Concept note under Programming/NET/CSharp/Fundamentals; Questions and References are optional and present, and the Qard IDs are protected.",
+            "summary": "Most of the note is accurate and well ordered: definition, built-ins, multicast, variance, closures, allocation and pitfalls. The last card's answer has a confusing tangent, and the Variance section omits the reference-type condition.",
+            "page_type": "Concept note; typed frontmatter, optional Questions and References are present; the qard-id is protected metadata.",
             "current_text_evidence": [
               {
-                "quote": "`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only.",
-                "line_start": 100,
-                "reason": "This sentence sits at the end of the reflection section, which is about `MakeGenericType`. It is a constraint topic and belongs under Constraints. It also gives no version note: `allows ref struct` requires C# 13 / .NET 9."
+                "quote": "A `Select(i => () => Use(i))` invocation instead has its own value parameter `i` for each call",
+                "line_start": 195,
+                "reason": "This tangent about Select and foreach (it follows the answer's core explanation) is hard to parse and blurs a card whose core answer is shared storage."
               },
               {
-                "quote": "- `where T : ISomeInterface` - `T` must implement a specific interface.",
-                "line_start": 42,
-                "reason": "The constraint list ends here and omits `struct, Enum` and `allows ref struct`, so the constraints section is incomplete."
+                "quote": "This distinction does not depend on the C#5 change to foreach iteration variables.",
+                "line_start": 195,
+                "reason": "It uses the typo 'C#5' and refers to a foreach change that the note never explains, which makes the answer harder to retrieve."
               },
               {
-                "quote": "Variance is supported on interfaces and delegates marked with `in`/`out`, and only for reference-type substitutions.",
-                "line_start": 51,
-                "reason": "This is accurate and consistent with the variance cards."
+                "quote": "Delegate compatibility supports covariance for return values and contravariance for parameters:",
+                "line_start": 62,
+                "reason": "The section omits that variance applies only to reference-type conversions, so it can mislead for value types such as int to object."
               },
               {
-                "quote": "`Cache<int>` and `Cache<string>` receive separate copies of a `static` field declared on `Cache<T>`.",
-                "line_start": 105,
-                "reason": "This is accurate and agrees with the static-fields card."
+                "quote": "-= removes the last matching handler from the invocation list.",
+                "line_start": 58,
+                "reason": "This matches the specification and was checked."
               }
             ],
             "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: generics, constraints, variance and their pitfalls form one coherent topic.",
+            "split_suggestion": "No split: the delegate topic, covering multicast, closures and allocation, is cohesive and not independently separable.",
             "findings": [
               {
                 "severity": "Medium",
-                "dimension": "Explanation order / version accuracy",
-                "location": "# Reflection over Generics, line 100",
-                "evidence": "`allows ref struct` and `struct, Enum` appear after the reflection code without a version note.",
-                "effect": "A reader looking for constraints will not find them in the Constraints section. The unversioned feature (C# 13 / .NET 9) can mislead about which language versions support it.",
-                "fix": "Move the `struct, Enum` and `allows ref struct` sentence into # Constraints as bullets, and mark `allows ref struct` as C# 13 / .NET 9+."
+                "dimension": "Clarity / question quality",
+                "location": "Final Qard answer (for-loop closure)",
+                "evidence": "The answer adds a Select(i => () => Use(i)) tangent and says 'does not depend on the C#5 change to foreach iteration variables'.",
+                "effect": "The tangent muddles the one-task recall answer, the foreach reference is unexplained, and 'C#5' is a typo.",
+                "fix": "Keep the shared-storage explanation and the per-iteration local fix. Cut the Select digression, or state the foreach C# 5 difference in one clear sentence with 'C# 5'."
+              },
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy",
+                "location": "# Variance",
+                "evidence": "Covariance and contravariance are stated without the reference-type condition.",
+                "effect": "A reader may expect variance conversions to work for value-type parameters or returns.",
+                "fix": "Add one sentence saying that variance conversions require reference types (an identity or implicit reference conversion)."
               }
             ],
             "source_checks": [],
             "rejection_equivalence": [],
             "quality": {
-              "accuracy": "PASS",
+              "accuracy": "FAIL",
               "clarity": "FAIL",
               "question_quality": "PASS",
               "identity_safety": "PASS",
               "rules_compliance": "PASS"
             }
           }
-        ]
+        ],
+        "change_checks": []
       },
-      "repair_previous_proposal": {
-        "version": 1,
-        "edits": [],
-        "dispositions": [
+      "blocked_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep is not justified for the whole note. The final Qard answer has a muddled tangent and a typo, and the Variance section omits the reference-type condition. The rest of the note is technically sound.",
+        "notes": [
           {
-            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
-            "outcome": "keep",
-            "reason": "I read the whole note against the current text and Microsoft's generics, constraints, variance and generic-math documentation. The opening separates the open generic `List<T>` from the closed `List<int>`. The constraint list is accurate, including the `unmanaged` caveat about blittable types. Variance is limited correctly to interfaces and delegates with reference-type arguments. The `INumber<T>` example matches the static abstract member mechanism of .NET 7 and later. The pitfalls section covers per-closed-type static state, `default(T)` and value-type specialization. The five Qards each test a single recall task and agree with the prose. The `default(T)` card has the correct `Nullable<T>` caveat, and the `out`/`in` card has a sound variance table. No factual error, unresolved violation or editorial defect was found. The one weakness is that the `allows ref struct` sentence sits in the reflection section without a language-version note. That is minor and not worth churn."
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "Most of the note is accurate and well ordered: definition, built-ins, multicast, variance, closures, allocation and pitfalls. The last card's answer has a confusing tangent, and the Variance section omits the reference-type condition.",
+            "page_type": "Concept note; typed frontmatter, optional Questions and References are present; the qard-id is protected metadata.",
+            "current_text_evidence": [
+              {
+                "quote": "A `Select(i => () => Use(i))` invocation instead has its own value parameter `i` for each call",
+                "line_start": 195,
+                "reason": "This tangent about Select and foreach (it follows the answer's core explanation) is hard to parse and blurs a card whose core answer is shared storage."
+              },
+              {
+                "quote": "This distinction does not depend on the C#5 change to foreach iteration variables.",
+                "line_start": 195,
+                "reason": "It uses the typo 'C#5' and refers to a foreach change that the note never explains, which makes the answer harder to retrieve."
+              },
+              {
+                "quote": "Delegate compatibility supports covariance for return values and contravariance for parameters:",
+                "line_start": 62,
+                "reason": "The section omits that variance applies only to reference-type conversions, so it can mislead for value types such as int to object."
+              },
+              {
+                "quote": "-= removes the last matching handler from the invocation list.",
+                "line_start": 58,
+                "reason": "This matches the specification and was checked."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the delegate topic, covering multicast, closures and allocation, is cohesive and not independently separable.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Clarity / question quality",
+                "location": "Final Qard answer (for-loop closure)",
+                "evidence": "The answer adds a Select(i => () => Use(i)) tangent and says 'does not depend on the C#5 change to foreach iteration variables'.",
+                "effect": "The tangent muddles the one-task recall answer, the foreach reference is unexplained, and 'C#5' is a typo.",
+                "fix": "Keep the shared-storage explanation and the per-iteration local fix. Cut the Select digression, or state the foreach C# 5 difference in one clear sentence with 'C# 5'."
+              },
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy",
+                "location": "# Variance",
+                "evidence": "Covariance and contravariance are stated without the reference-type condition.",
+                "effect": "A reader may expect variance conversions to work for value-type parameters or returns.",
+                "fix": "Add one sentence saying that variance conversions require reference types (an identity or implicit reference conversion)."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "FAIL",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
           }
         ],
-        "feedback": []
+        "change_checks": []
       },
-      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "feedback_snapshot": [],
-      "blocked_review": {
-        "stage": "deterministic_application",
-        "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-13"
-      },
-      "failed_at": "2026-11-12T20:15:39.968952Z"
+      "feedback_snapshot": []
     },
     "ai-ml-4edf0823": {
       "workload_id": "b9235098cfe341bd98cce55faa026472",
@@ -36318,6 +36416,176 @@
         ]
       },
       "feedback_snapshot": []
+    },
+    "ca1c0a1c0ab2f49ff25fdb6ac2ed1e5188a82bda79efb17d36df51a21fd8a879": {
+      "workload_id": "5589fab66fbd42d6ab4c1fac5fc35939",
+      "topic_id": "programming-e6aba2bd",
+      "batch": {
+        "topic": "Programming",
+        "topic_id": "programming-e6aba2bd",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"Type-safe, reusable code without duplicating logic per type, including constraints and variance.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Generics\"\nflashcard_uid: \"3fc98b91\"\ncreated: \"2026-02-18T20:04:43.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:14:17.325Z\"\n---\n\nGenerics parameterize code by type. `List<T>` can store any `T` while the compiler still checks every read and write. That is a stronger contract than accepting `object` and recovering the real type with casts. For value types, generic collections also avoid the boxing required by older object-based APIs.\n\n- `T` is a placeholder for a type chosen by the caller.\n- `List<T>` is an open generic type definition. `List<int>` is a closed constructed type.\n- Constraints (`where T : ...`) are capability contracts that unlock members safely.\n- The runtime specializes generic code for value-type arguments and can share code between reference-type arguments.\n\n# Use Cases\n\n- Collections preserve the element or key type throughout an API.\n- Algorithms can require only the operations they use, such as comparison or numeric operators.\n- Generic result and handler types can keep payload types explicit without duplicating infrastructure.\n\nA generic abstraction should still represent one real behavior. `IRepository<TEntity>` is not useful merely because every entity happens to support create, read, update, and delete operations. Different aggregates often need different contracts.\n\n# Constraints\n\nConstraints tell the compiler what operations are valid for `T`. They also document the smallest capability the algorithm expects.\n\n- `where T : class` - `T` must be a reference type.\n- `where T : struct` - `T` must be a non-nullable value type.\n- `where T : notnull` - nullable analysis warns when a nullable type argument is used.\n- `where T : unmanaged` - `T` is a non-nullable unmanaged type whose fields are also unmanaged. This is not identical to every platform's definition of blittable.\n- `where T : new()` - `T` must have a public parameterless constructor.\n- `where T : BaseType` - `T` must inherit from a specific base type.\n- `where T : ISomeInterface` - `T` must implement a specific interface.\n\n# Variance\n\nVariance controls safe assignment between constructed interface or delegate types when their type arguments are related by inheritance.\n\n- Invariance (default): `List<string>` is not assignable to `List<object>`.\n- Covariance (`out T`): allows a more derived type where a base type is expected for producer-only APIs (for example, `IEnumerable<string>` to `IEnumerable<object>`).\n- Contravariance (`in T`): allows a less derived type where a more derived type is expected for consumer-only APIs (for example, `IComparer<object>` as `IComparer<string>`).\n- Variance is supported on interfaces and delegates marked with `in`/`out`, and only for reference-type substitutions.\n\n```csharp\nIEnumerable<string> names = new List<string> { \"Ada\", \"Linus\" };\nIEnumerable<object> objects = names; // covariance\n\nAction<object> printAny = o => Console.WriteLine(o);\nAction<string> printString = printAny; // contravariance\n\nList<string> list = new();\n// List<object> invalid = list; // does not compile (invariance)\n```\n\n# Example\n\n```csharp\npublic static T CreateAndValidate<T>()\n    where T : EntityBase, IValidatable, new()\n{\n    var value = new T();\n    value.Validate();\n    return value;\n}\n```\n\n# Generic Math (.NET 7+)\n\nGeneric code once had no static contract for operators such as `+`. Static abstract interface members changed that. `INumber<T>` declares numeric operators and identities, so a `where T : INumber<T>` constraint makes arithmetic available on the type parameter.\n\n```csharp\npublic static T Sum<T>(ReadOnlySpan<T> values) where T : INumber<T>\n{\n    T total = T.Zero;\n    foreach (var v in values) total += v;   // operators resolved via the interface\n    return total;\n}\n```\n\nThe same static-member mechanism supports contracts such as `IParsable<TSelf>`, where parsing belongs to the type rather than an instance.\n\n# Reflection over Generics\n\nAn open generic such as `List<>` has unassigned type parameters and cannot be instantiated. Reflection can close it at runtime with `MakeGenericType`. Generic methods use `MakeGenericMethod`.\n\n```csharp\nType closed = typeof(List<>).MakeGenericType(itemType); // e.g. List<Order>\nvar list = Activator.CreateInstance(closed);\n```\n\n`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only. Code using that anti-constraint must obey the ref-safety rules for every possible `T`.\n\n# Pitfalls\n\n- An unconstrained `T` exposes only operations valid for every type. The smallest constraint that the algorithm actually needs makes the required operations available without internal casts.\n- **Static state belongs to each closed type.** `Cache<int>` and `Cache<string>` receive separate copies of a `static` field declared on `Cache<T>`.\n- **Value-type specialization can grow native code.** Separate value-type instantiations can produce separate JIT-compiled bodies. The specialization avoids the boxing that `object`-based storage requires and preserves value semantics, but many large instantiations increase startup and code-size costs.\n- `default(T)` is `null` for reference types and zero-initialized data for value types. Either result may look valid in a domain model, so absence should have an explicit contract.\n- A concrete base-class constraint couples the abstraction to one hierarchy. A behavioral interface avoids that coupling when inheritance is not itself part of the requirement.\n\n# Tradeoffs\n\n- **Generics versus `object`.** Non-generic collections box value types when storing them as `object`. `List<int>` keeps integers unboxed and removes casts at the read boundary.\n- **Generics versus inheritance.** A generic API carries a concrete type argument through compile-time checks. Inheritance allows one base reference to dispatch to different runtime implementations. The choice is about when variation is known, not a blanket performance rule.\n- **Specialization versus code sharing.** The CLR normally specializes code for value-type arguments and shares compatible code for reference-type arguments. This balances value-type performance against native code size.\n\n# Questions\n\n<!-- qard-id: 051626ec-488b-484a-affe-9b09e168fb5e -->\n> [!qard]- What do generics add to a C# API?\n> Generics let one implementation take a type as a parameter. The same code then works with many types, while the compiler still checks the type of every value that goes in or comes out.\n>\n> Compared with an API that accepts `object`:\n>\n> - **Type safety:** an `object`-based API needs casts on the way out, so a wrong type fails only at runtime. A `List<string>` instead rejects an `int` at compile time and returns strings without casts.\n> - **No storage boxing for value types:** an `object`-based collection boxes each `int` it stores, while `List<int>` stores the integers directly. Generic code can still box a value-type `T` through conversions, such as converting it to `object` or to an interface type.\n> \n> **Constraints** such as `where T : IComparable<T>` narrow which type arguments are allowed. In return, the generic code may use the members that the constraint guarantees, such as `CompareTo`.\n>\n> [Microsoft: generic types and methods](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft: constraints on type parameters](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters) · [C# specification: boxing conversions](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/conversions#1029-boxing-conversions)\n\n<!-- qard-id: 96d2fdb0-3c95-4eb1-91da-258a4574cde2 -->\n> [!qard]- Why does `IEnumerable<string>` assign to `IEnumerable<object>`, but `List<string>` does not assign to `List<object>`?\n> `IEnumerable<T>` declares its type parameter covariant (`out T`), so the conversion is allowed. `List<T>` is invariant, so it is not.\n>\n> - **`IEnumerable<string>` as `IEnumerable<object>`:** the interface only hands `T` values out. Every string read from the sequence is also an object, so reading strings as objects is safe.\n> - **`List<string>` as `List<object>`:** `List<T>` also takes `T` values in, for example through `Add`. If the conversion were allowed, code could add an `int` through the `List<object>` reference, and the original `List<string>` would then hold a non-string.\n> \n> Variance also has to be declared, and C# allows it only on generic interfaces and delegates. A generic class such as `List<T>` is therefore always invariant, whatever its members do.\n>\n> [Microsoft: covariance and contravariance](https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance)\n\n<!-- qard-id: 222e6ef2-bb7d-4c83-b731-ffd892537b23 -->\n> [!qard]- When should a generic interface type parameter be marked `out` or `in`?\n> A type parameter can be marked `out` when the interface only produces `T`, and `in` when it only consumes `T`. When `T` flows both in and out, it stays invariant.\n>\n> | Marking | Where `T` may appear | Conversion it enables |\n> |---|---|---|\n> | `out` (covariant) | Only in output positions, such as method return types | A more derived type argument can stand in for a less derived one: `IEnumerable<string>` converts to `IEnumerable<object>` |\n> | `in` (contravariant) | Only in input positions, such as method parameter types | A less derived type argument can stand in for a more derived one: `IComparer<object>` converts to `IComparer<string>` |\n> | None (invariant) | In both input and output positions | No conversion, because either direction would allow an unsafe read or write |\n>\n> The compiler enforces these positions, so it accepts a variant marking only when the interface's members keep it safe.\n>\n> Variance conversions work only when the type arguments are reference types. `IEnumerable<int>` does not convert to `IEnumerable<object>`, because a value-type argument makes the constructed type invariant.\n>\n> [Microsoft: covariance and contravariance](https://learn.microsoft.com/en-us/dotnet/standard/generics/covariance-and-contravariance)\n\n<!-- qard-id: dd86df45-1404-46cf-8c09-84cb046ef4f3 -->\n> [!qard]- A generic method uses `default(T)` as a fallback. Why can this be dangerous?\n> `default(T)` is not one fixed value. It is `null` when `T` is a reference type, and a zero-initialized value such as `0` or `false` when `T` is a value type. Those values can also be legitimate data, so returning `default(T)` to signal that nothing was found or that something failed makes absence look like a real result.\n>\n> For example, a `GetOrDefault<T>` method that returns `default(T)` for a missing key returns `0` when `T` is `int`. A caller then cannot tell a missing entry from a stored `0`.\n>\n> When that distinction matters, the API reports absence separately from the value:\n>\n> - **`Try` method:** returns `bool` for success and the value through an `out T` parameter.\n> - **Result type:** carries the success or failure state together with the value.\n> - **Nullable contract:** returns `T?`, with `null` meaning absence. This works only when `null` is never legitimate data and the return type can actually hold `null` for the type argument. For a value type that requires `Nullable<T>`, for example `T?` under a `where T : struct` constraint, whose `HasValue` separates a missing entry from a stored `0`. With an unconstrained `T`, `T?` adds no null state for a value-type argument, so `GetOrDefault<int>` would still return `0`.\n> \n> [Microsoft: default keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/default) · [Microsoft: nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types)\n\n> [!qard]- Do different closed forms of a generic type share its static fields?\n> No. `Cache<int>` and `Cache<string>` have separate copies of every static field declared on `Cache<T>`. Incrementing `Cache<int>.Count` leaves `Cache<string>.Count` unchanged. This separation follows type identity and does not depend on whether the CLR shares native method code between compatible instantiations. A per-type cache can use it deliberately; a process-wide total must live outside that generic type's per-instantiation state. [Microsoft: generic classes](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/generic-classes)\n\n# References\n\n- [Generics in C#](https://learn.microsoft.com/dotnet/csharp/programming-guide/generics/)\n- [Covariance and contravariance in C#](https://ericlippert.com/2007/10/16/covariance-and-contravariance-in-c-part-1/)\n",
+            "hash": "d37bc748448467f0814404e4b54dac33f4aa2f7eb4a9d61afcb032e926786e3a",
+            "topic": "Programming",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+            "expected_hash": "d37bc748448467f0814404e4b54dac33f4aa2f7eb4a9d61afcb032e926786e3a",
+            "before": "- `where T : ISomeInterface` - `T` must implement a specific interface.\n",
+            "after": "- `where T : ISomeInterface` - `T` must implement a specific interface.\n- `where T : struct, Enum` - `T` must be an enum type. `System.Enum` as a base-class constraint is allowed in C# 7.3 and later.\n- `where T : allows ref struct` - an anti-constraint (C# 13, .NET 9) that permits `T` to be a `ref struct` such as `Span<T>`. It widens the accepted type arguments instead of narrowing them, so the generic code must obey ref-safety rules for every possible `T`: no boxing, no static fields of type `T`. It must come after all other constraints and cannot be combined with `class`.\n",
+            "reason": "Moves the constraint material into the Constraints list and adds the version condition.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "allows ref struct is a C# 13 / .NET 9 anti-constraint",
+              "struct, Enum admits enum types"
+            ],
+            "sources": [
+              {
+                "url": "https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters",
+                "claim": "allows ref struct anti-constraint rules: ref safety, no boxing, no static fields, must follow all other constraints, not combinable with class.",
+                "version": "C# 13 / .NET 9"
+              },
+              {
+                "url": "https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-13",
+                "claim": "allows ref struct was introduced in C# 13, supported on .NET 9.",
+                "version": "C# 13"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The constraint list omits `struct, Enum` and `allows ref struct`, which sit unversioned at the end of the reflection section.",
+            "reader_benefit": "Constraints are found in one place and the language-version requirement is explicit."
+          },
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+            "expected_hash": "d37bc748448467f0814404e4b54dac33f4aa2f7eb4a9d61afcb032e926786e3a",
+            "before": "\n`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only. Code using that anti-constraint must obey the ref-safety rules for every possible `T`.\n",
+            "after": "",
+            "reason": "Removes the constraint sentence from the reflection section now that it lives under Constraints.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "reflection section covers only MakeGenericType"
+            ],
+            "sources": [],
+            "feedback_keys": [],
+            "problem": "An off-topic constraint sentence ends the reflection section.",
+            "reader_benefit": "The reflection section stays focused on closing open generics."
+          }
+        ],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+            "outcome": "changed",
+            "reason": "The constraint list now includes `struct, Enum` and the C# 13 / .NET 9 `allows ref struct` anti-constraint with its ref-safety conditions, and the reflection section no longer ends on an unrelated constraint sentence. The rest of the note and the cards were verified accurate and left unchanged."
+          }
+        ],
+        "feedback": []
+      },
+      "source_hashes": {
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md": "d37bc748448467f0814404e4b54dac33f4aa2f7eb4a9d61afcb032e926786e3a"
+      },
+      "feedback_keys": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-12T20:15:34.347631Z",
+      "review_repair_key": "72cc9e9175e6a4def7187aea8020c81086ca05b35be30b49d8370b4d80ade9cb",
+      "repair_reserved": true,
+      "repair_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep is not justified. The note is largely accurate, but `allows ref struct` is misplaced and has no version condition.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is accurate and its cards are well formed. One concrete editorial defect remains: the C# 13 / .NET 9 `allows ref struct` anti-constraint is buried in the reflection section, has no version note, and is missing from the constraints list. The author's keep acknowledges this weakness but leaves it unfixed.",
+            "page_type": "Concept note under Programming/NET/CSharp/Fundamentals; Questions and References are optional and present, and the Qard IDs are protected.",
+            "current_text_evidence": [
+              {
+                "quote": "`where T : struct, Enum` admits enum value types, while `allows ref struct` tells the compiler that a type argument may be stack-only.",
+                "line_start": 100,
+                "reason": "This sentence sits at the end of the reflection section, which is about `MakeGenericType`. It is a constraint topic and belongs under Constraints. It also gives no version note: `allows ref struct` requires C# 13 / .NET 9."
+              },
+              {
+                "quote": "- `where T : ISomeInterface` - `T` must implement a specific interface.",
+                "line_start": 42,
+                "reason": "The constraint list ends here and omits `struct, Enum` and `allows ref struct`, so the constraints section is incomplete."
+              },
+              {
+                "quote": "Variance is supported on interfaces and delegates marked with `in`/`out`, and only for reference-type substitutions.",
+                "line_start": 51,
+                "reason": "This is accurate and consistent with the variance cards."
+              },
+              {
+                "quote": "`Cache<int>` and `Cache<string>` receive separate copies of a `static` field declared on `Cache<T>`.",
+                "line_start": 105,
+                "reason": "This is accurate and agrees with the static-fields card."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: generics, constraints, variance and their pitfalls form one coherent topic.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Explanation order / version accuracy",
+                "location": "# Reflection over Generics, line 100",
+                "evidence": "`allows ref struct` and `struct, Enum` appear after the reflection code without a version note.",
+                "effect": "A reader looking for constraints will not find them in the Constraints section. The unversioned feature (C# 13 / .NET 9) can mislead about which language versions support it.",
+                "fix": "Move the `struct, Enum` and `allows ref struct` sentence into # Constraints as bullets, and mark `allows ref struct` as C# 13 / .NET 9+."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "repair_previous_proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+            "outcome": "keep",
+            "reason": "I read the whole note against the current text and Microsoft's generics, constraints, variance and generic-math documentation. The opening separates the open generic `List<T>` from the closed `List<int>`. The constraint list is accurate, including the `unmanaged` caveat about blittable types. Variance is limited correctly to interfaces and delegates with reference-type arguments. The `INumber<T>` example matches the static abstract member mechanism of .NET 7 and later. The pitfalls section covers per-closed-type static state, `default(T)` and value-type specialization. The five Qards each test a single recall task and agree with the prose. The `default(T)` card has the correct `Nullable<T>` caveat, and the `out`/`in` card has a sound variance table. No factual error, unresolved violation or editorial defect was found. The one weakness is that the `allows ref struct` sentence sits in the reflection section without a language-version note. That is minor and not worth churn."
+          }
+        ],
+        "feedback": []
+      },
+      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "feedback_snapshot": [],
+      "blocked_review": {
+        "stage": "deterministic_application",
+        "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-13"
+      },
+      "failed_at": "2026-11-12T20:15:39.968952Z"
     }
   },
   "completed_review_holds": {
@@ -37186,98 +37454,7 @@
     },
     "prepared_source_version": 1,
     "prepared_at": "2026-11-13T06:58:44.699593Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CHANGES REQUIRED",
-        "overall_reason": "The keep is not justified for the whole note. The final Qard answer has a muddled tangent and a typo, and the Variance section omits the reference-type condition. The rest of the note is technically sound.",
-        "notes": [
-          {
-            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
-            "verdict": "CHANGES REQUIRED",
-            "summary": "Most of the note is accurate and well ordered: definition, built-ins, multicast, variance, closures, allocation and pitfalls. The last card's answer has a confusing tangent, and the Variance section omits the reference-type condition.",
-            "page_type": "Concept note; typed frontmatter, optional Questions and References are present; the qard-id is protected metadata.",
-            "current_text_evidence": [
-              {
-                "quote": "A `Select(i => () => Use(i))` invocation instead has its own value parameter `i` for each call",
-                "line_start": 140,
-                "reason": "This tangent about Select and foreach (it follows the answer's core explanation) is hard to parse and blurs a card whose core answer is shared storage."
-              },
-              {
-                "quote": "This distinction does not depend on the C#5 change to foreach iteration variables.",
-                "line_start": 140,
-                "reason": "It uses the typo 'C#5' and refers to a foreach change that the note never explains, which makes the answer harder to retrieve."
-              },
-              {
-                "quote": "Delegate compatibility supports covariance for return values and contravariance for parameters:",
-                "line_start": 66,
-                "reason": "The section omits that variance applies only to reference-type conversions, so it can mislead for value types such as int to object."
-              },
-              {
-                "quote": "-= removes the last matching handler from the invocation list.",
-                "line_start": 58,
-                "reason": "This matches the specification and was checked."
-              }
-            ],
-            "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: the delegate topic, covering multicast, closures and allocation, is cohesive and not independently separable.",
-            "findings": [
-              {
-                "severity": "Medium",
-                "dimension": "Clarity / question quality",
-                "location": "Final Qard answer (for-loop closure)",
-                "evidence": "The answer adds a Select(i => () => Use(i)) tangent and says 'does not depend on the C#5 change to foreach iteration variables'.",
-                "effect": "The tangent muddles the one-task recall answer, the foreach reference is unexplained, and 'C#5' is a typo.",
-                "fix": "Keep the shared-storage explanation and the per-iteration local fix. Cut the Select digression, or state the foreach C# 5 difference in one clear sentence with 'C# 5'."
-              },
-              {
-                "severity": "Medium",
-                "dimension": "Accuracy",
-                "location": "# Variance",
-                "evidence": "Covariance and contravariance are stated without the reference-type condition.",
-                "effect": "A reader may expect variance conversions to work for value-type parameters or returns.",
-                "fix": "Add one sentence saying that variance conversions require reference types (an identity or implicit reference conversion)."
-              }
-            ],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "FAIL",
-              "clarity": "FAIL",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
-          "citation_index": 0,
-          "reported_line_start": 140,
-          "resolved_line_start": 195
-        },
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
-          "citation_index": 1,
-          "reported_line_start": 140,
-          "resolved_line_start": 195
-        },
-        {
-          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
-          "citation_index": 2,
-          "reported_line_start": 66,
-          "resolved_line_start": 62
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md": "6c29fd3cac95137f54297946e87c3791ee298ab2a1381f0c3a279f45a3cc8ab8"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
+    "blocked_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The keep is not justified for the whole note. The final Qard answer has a muddled tangent and a typo, and the Variance section omits the reference-type condition. The rest of the note is technically sound.",
       "notes": [
@@ -37340,6 +37517,85 @@
         }
       ],
       "change_checks": []
-    }
+    },
+    "repair_previous_proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against the current text and my knowledge of the C# specification and .NET documentation. The opening definition (signature plus method plus optional target) and the PriceCalculator example are correct. The multicast details match the specification: handlers run in order, an exception stops later handlers, only the last return value is exposed, and -= removes the last matching entry. The variance examples are valid (Func<Dog> to Func<Animal>, Action<Animal> to Action<Dog>). The closure section correctly shows the shared for-variable and the per-iteration local fix. The allocation section is accurate: delegates are immutable, static lambdas arrived in C# 9, method-group conversion caching in C# 11, function pointers in C# 9, and BeginInvoke throws PlatformNotSupportedException on modern .NET. The Pitfalls section deliberately restates earlier points as a recall list, which is acceptable. The cards each test one gradeable task, with answers that cover mechanism and conditions. The state card is a dependent explanation and need not be split. There are no known violations. I found no factual or structural defect that justifies an edit, and rewording would be cosmetic churn."
+        }
+      ],
+      "feedback": []
+    },
+    "repair_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The keep is not justified for the whole note. The final Qard answer has a muddled tangent and a typo, and the Variance section omits the reference-type condition. The rest of the note is technically sound.",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "Most of the note is accurate and well ordered: definition, built-ins, multicast, variance, closures, allocation and pitfalls. The last card's answer has a confusing tangent, and the Variance section omits the reference-type condition.",
+          "page_type": "Concept note; typed frontmatter, optional Questions and References are present; the qard-id is protected metadata.",
+          "current_text_evidence": [
+            {
+              "quote": "A `Select(i => () => Use(i))` invocation instead has its own value parameter `i` for each call",
+              "line_start": 195,
+              "reason": "This tangent about Select and foreach (it follows the answer's core explanation) is hard to parse and blurs a card whose core answer is shared storage."
+            },
+            {
+              "quote": "This distinction does not depend on the C#5 change to foreach iteration variables.",
+              "line_start": 195,
+              "reason": "It uses the typo 'C#5' and refers to a foreach change that the note never explains, which makes the answer harder to retrieve."
+            },
+            {
+              "quote": "Delegate compatibility supports covariance for return values and contravariance for parameters:",
+              "line_start": 62,
+              "reason": "The section omits that variance applies only to reference-type conversions, so it can mislead for value types such as int to object."
+            },
+            {
+              "quote": "-= removes the last matching handler from the invocation list.",
+              "line_start": 58,
+              "reason": "This matches the specification and was checked."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the delegate topic, covering multicast, closures and allocation, is cohesive and not independently separable.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Clarity / question quality",
+              "location": "Final Qard answer (for-loop closure)",
+              "evidence": "The answer adds a Select(i => () => Use(i)) tangent and says 'does not depend on the C#5 change to foreach iteration variables'.",
+              "effect": "The tangent muddles the one-task recall answer, the foreach reference is unexplained, and 'C#5' is a typo.",
+              "fix": "Keep the shared-storage explanation and the per-iteration local fix. Cut the Select digression, or state the foreach C# 5 difference in one clear sentence with 'C# 5'."
+            },
+            {
+              "severity": "Medium",
+              "dimension": "Accuracy",
+              "location": "# Variance",
+              "evidence": "Covariance and contravariance are stated without the reference-type condition.",
+              "effect": "A reader may expect variance conversions to work for value-type parameters or returns.",
+              "fix": "Add one sentence saying that variance conversions require reference types (an identity or implicit reference conversion)."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "FAIL",
+            "clarity": "FAIL",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    },
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "review_repair_key": "2b19e4deeef71b517a07e1114a44a1db008dfc40121c87d5f36e56c31c7fe94d",
+    "author_repair_pending": true
   }
 }
