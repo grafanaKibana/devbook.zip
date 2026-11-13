@@ -13922,7 +13922,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 594.7631051000003,
+    "elapsed_seconds": 599.3947321000003,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -14182,7 +14182,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:07:52.784233Z",
+    "checkpoint_at": "2026-11-13T07:07:57.415860Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
