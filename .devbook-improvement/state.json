@@ -13870,15 +13870,16 @@
     "version": 1,
     "id": "2b8d0b6edd0c40dc8564a83316ed31b6",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 430.6521376000001,
+    "elapsed_seconds": 435.0130921000001,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md",
-      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md"
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+      "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -13971,10 +13972,103 @@
           "reason": "card edit must replace one complete active Qard block including adjacent metadata",
           "model_calls": 8
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+                "outcome": "keep",
+                "reason": "Read the whole note against current .NET/C# behavior. The following claims check out: immutability and reference-copy semantics, content-based == and Equals, literal interning (identity not contractual, NoStringInterning relaxation), string.Intern/IsInterned retention, compile-time constant folding, UTF-16 surrogate pairs with Rune, StringInfo and Normalize, string.Create, span parsing, interpolated string handlers (C# 10, StringBuilder.Append overload), ArrayPool caveats, and the guidance on ordinal versus culture comparison. The sections run in a sensible order from core properties through interning, StringBuilder, Unicode, low-allocation techniques, pitfalls and tradeoffs. The overlap between Pitfalls and Tradeoffs is small and each section adds a decision condition. The two Qards each test one task: the StringBuilder-versus-concatenation decision, and why ReferenceEquals can differ from ==. Their answers explain the mechanism and its limits, cite Microsoft Learn, and have no flagged defects. There are no known violations, so no edit is justified."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no factual, structural, question-quality or rule defects; the keep with no edits is justified.",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate and well ordered, from immutability through interning, StringBuilder, UTF-16 and low-allocation techniques to pitfalls and tradeoffs. Both Qards are single bounded tasks with mechanism-level answers and Microsoft Learn sources. No concrete defect was found, so leaving it unchanged is the right call.",
+                "page_type": "Concept — frontmatter intact, optional Questions/References present and valid, code fences have language identifiers, no Links section.",
+                "current_text_evidence": [
+                  {
+                    "quote": "`string` is the C# alias for the sealed reference type `System.String`.",
+                    "line_start": 17,
+                    "reason": "The opening states the operating idea (immutability and reference copy) before the details, so the topic is quick to re-enter."
+                  },
+                  {
+                    "quote": "Compilation can request `NoStringInterning`, and runtime behavior may still vary:",
+                    "line_start": 38,
+                    "reason": "Interning is correctly stated as non-contractual; the code comment repeats this and is consistent with the later Qard."
+                  },
+                  {
+                    "quote": "Interned entries are generally retained until the runtime terminates.",
+                    "line_start": 47,
+                    "reason": "Matches the String.Intern documentation and gives the engineering consequence (high-cardinality text is a poor fit)."
+                  },
+                  {
+                    "quote": "Characters outside the Basic Multilingual Plane use a surrogate pair, so `\"\uD83D\uDC4D\".Length == 2`",
+                    "line_start": 70,
+                    "reason": "The UTF-16 explanation is correct and separates code units, scalar values (Rune) and graphemes (StringInfo)."
+                  },
+                  {
+                    "quote": "The benefit applies only when the receiving overload accepts a handler, as `StringBuilder.Append` does.",
+                    "line_start": 80,
+                    "reason": "Version (C# 10) and condition are stated precisely; this is a real condition, not a vague claim."
+                  },
+                  {
+                    "quote": "Pooling is worthwhile only when buffer allocations show up in measurement.",
+                    "line_start": 81,
+                    "reason": "Gives the decision condition and a cost, not just a technique list."
+                  },
+                  {
+                    "quote": "Forcing dynamic values into the pool can save duplicates at the price of process-long retention",
+                    "line_start": 93,
+                    "reason": "Tradeoffs add a decision condition; the overlap with Pitfalls is small and does not need removal."
+                  },
+                  {
+                    "quote": "> [!qard]- When is `StringBuilder` a better choice than string concatenation?",
+                    "line_start": 98,
+                    "reason": "One decision task. The answer explains the immutability mechanism, the capacity caveat and the lack of a fixed threshold, and cites a primary source."
+                  },
+                  {
+                    "quote": "> [!qard]- Why can `ReferenceEquals(a, b)` be false when `a == b` is true for strings?",
+                    "line_start": 111,
+                    "reason": "One dependent behavior-and-why explanation. It covers explicit and automatic interning and cites the Microsoft Learn API pages."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the topics (immutability, interning, building, Unicode, comparison) are all facets of System.String behavior and share one mental model; length does not warrant separate notes.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 10
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:05:08.673264Z",
+    "checkpoint_at": "2026-11-13T07:05:13.034218Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
