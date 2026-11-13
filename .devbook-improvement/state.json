@@ -14150,16 +14150,17 @@
     "version": 1,
     "id": "ed9f729234e2405d9876ac4f5aa28fbd",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-13T20:03:30.781717Z",
-    "elapsed_seconds": 525.7872586999998,
+    "elapsed_seconds": 530.9492951999998,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
       "Vault/Home/Programming/NET/Runtime/Garbage Collector.md",
       "Vault/Home/Programming/NET/Runtime/Memory Leaks.md",
-      "Vault/Home/Programming/NET/Runtime/Runtime.md"
+      "Vault/Home/Programming/NET/Runtime/Runtime.md",
+      "Vault/Home/Programming/Programming.md"
     ],
     "accepted_records": [
       {
@@ -16815,10 +16816,78 @@
           },
           "model_calls": 8
         }
+      },
+      {
+        "path": "Vault/Home/Programming/Programming.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/Programming.md",
+                "outcome": "keep",
+                "reason": "Audited the whole folder note. The intro states the section's scope and its recurring judgment. The Datacore card map is protected and untouched. The API/SDK section is accurate. The manual HttpClient snippet (relative URI, bearer header, EnsureSuccessStatusCode, ReadFromJsonAsync) matches standard .NET usage. The comparison table gives the condition that changes each choice. Versioning is stated correctly: the API contract and the SDK package version independently. Retry guidance is correct: a GET is replay-safe, while a charge-creating POST needs an idempotency contract. The one reference is the real OpenAPI spec. The fence languages are set, there are no Questions cards to check, and the frontmatter and lifecycle are valid. No defect found, so no edit is warranted."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The single folder note was audited in full. No concrete defect was found, so the keep is justified. No edits or rejected proposals are involved.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/Programming.md",
+                "verdict": "CLEAN",
+                "summary": "The folder note has a clear scope intro, a protected card map, and an accurate API/SDK section. The section has a direct-call versus SDK comparison, a decision table, and correct versioning and retry guidance. Nothing needs fixing.",
+                "page_type": "FolderNote — keeps tags FolderNote and the protected Datacore map; Questions and References are optional. The single reference is a real primary spec.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The recurring judgment is where a responsibility belongs and which cost becomes visible when that boundary is wrong.",
+                    "line_start": 20,
+                    "reason": "The intro states the section's scope and its recurring engineering judgment, and the voice is impersonal and declarative."
+                  },
+                  {
+                    "quote": "The short call did not remove HTTP.",
+                    "line_start": 49,
+                    "reason": "The mechanism is kept visible: the SDK still does the base URL, credentials, serialization, error mapping and deserialization. The manual snippet is correct standard .NET."
+                  },
+                  {
+                    "quote": "Version the API contract and SDK package separately.",
+                    "line_start": 66,
+                    "reason": "This versioning guidance is accurate. It names the conditions that change the decision, and the table above it is consistent with it."
+                  },
+                  {
+                    "quote": "It must not silently replay a charge-creation `POST` unless the API defines an idempotency contract.",
+                    "line_start": 68,
+                    "reason": "The retry guidance is correct. A GET is replay-safe, while a non-idempotent POST needs an idempotency contract."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the API/SDK section is a single coherent topic. It could become its own concept note if more Programming topics are added, but length alone is no reason.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 10
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T20:12:16.568483Z",
+    "checkpoint_at": "2026-11-13T20:12:21.730521Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
