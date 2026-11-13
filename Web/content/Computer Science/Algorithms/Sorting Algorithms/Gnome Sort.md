@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-08-10T10:51:19.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-08-10T08:02:31.944Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Walks forward across ordered neighbors and steps backward after each ad
 level:
   - "4"
 priority: Low
-status: Not-Started
+status: New
 ---
 
 Gnome sort maintains a sorted prefix with a single index. An ordered pair, `a[i-1] <= a[i]`, moves the index forward. An inverted pair swaps, then the index steps back so the displaced value can keep moving toward its insertion point. At the front of the array, the scan resumes from index `1`.

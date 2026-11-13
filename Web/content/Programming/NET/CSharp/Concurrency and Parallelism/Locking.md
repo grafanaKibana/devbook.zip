@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-14T20:57:52.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-15T06:00:17.802Z
 topic:
   - Programming
@@ -11,7 +11,7 @@ summary: "The default in-process mutual-exclusion primitive: one thread in the c
 level:
   - "4"
 priority: High
-status: Creation
+status: New
 qard-deck: Programming
 qard-topic: NET/CSharp/Concurrency and Parallelism/Locking
 flashcard_uid: 15275eaf

@@ -22,6 +22,8 @@ Web/public/  →  devbook.zip
 - **Commit** staged vault changes — the pre-commit hook waits for Quartz Syncer to render in-note Datacore/Bases to static HTML, verifies publication and cleanup, and stages generated output into that same commit. Treat `Web/content/` as generated output; edit notes in `Vault/`.
 - **Build & deploy** — Vercel runs the Quartz build from `Web/` on each push; production deploys from `main`.
 
+Before vault maintenance and export, pre-commit refreshes `Vault/Home/Changelog.md` from all published GitHub Releases and stages it in the same commit. This runs under the existing export lock after source/output guards; source-free and Obsidian-settings-only commits skip it. Python 3 and an authenticated GitHub CLI (`gh auth login`) are required. A failed release fetch blocks the commit without replacing the existing changelog; restore connectivity/authentication and retry. Unchanged release content is not rewritten, and source `created`/`modified`/`published` dates are preserved for the existing date tooling. A staged deletion of the page is respected. A newly published release appears on the next vault-source commit, then reaches the site through the normal `stage` → `main` promotion.
+
 ## Local development
 
 After cloning, run one setup command from the repository root:
@@ -34,7 +36,7 @@ It installs the locked npm dependencies in `Web/`, enables this checkout’s Git
 
 **Manual prerequisites before running setup:**
 
-1. Install Git, Bash, the pinned .NET SDK 10.0.100, Node 22 with npm, and Obsidian desktop. Activate Node 22 in the shell; `Web/.node-version` records the project version. The `.scripts/global.json` SDK pin applies when commands run inside `.scripts`.
+1. Install Git, Bash, Python 3, GitHub CLI, the pinned .NET SDK 10.0.100, Node 22 with npm, and Obsidian desktop. Activate Node 22 in the shell; `Web/.node-version` records the project version. The `.scripts/global.json` SDK pin applies when commands run inside `.scripts`.
 2. Open this checkout’s `Vault/` folder in Obsidian and allow community plugins. Enable the bundled Quartz Syncer and Datacore plugins, and Git for commits inside Obsidian. Keep the bundled Syncer build described below.
 3. Enable **Settings → General → Command line interface** and follow Obsidian’s registration prompt. Keep the vault open while setup runs. See the [Obsidian CLI setup guide](https://obsidian.md/help/cli).
 
@@ -109,6 +111,10 @@ The Questions page has one web renderer. Syncer may freeze the in-note Datacore 
 ## Deploy
 
 Vercel builds from the repo-root `vercel.json`:
+
+Automatic Git deployments are limited to `main` and `stage`. Vercel's native GitHub integration records them as **Production** and **Preview**, respectively; keep its **Git → `deployment_status` Events** enabled. The preview for `stage` is also available at `https://stage.devbook.zip`; keep that Vercel domain assigned to the `stage` branch with its recommended CNAME configured at the authoritative DNS provider. Restrict the GitHub **Production** environment to the `main` branch and **Preview** to `stage`. Improvement jobs use `deployment: false` on their credential environment so maintenance runs do not appear as site deployments.
+
+`.github/workflows/preview-deployment-link.yml` updates the existing native Preview record's link to `https://stage.devbook.zip` after a successful Vercel deployment of the current `stage` commit. It preserves the individual build log URL and creates no deployments. Deployment-status events run against the deployed commit, so the workflow must be present in the `stage` commit being deployed.
 
 ```text
 installCommand:  cd Web && npm ci

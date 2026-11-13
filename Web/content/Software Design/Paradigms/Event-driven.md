@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-15T15:01:57.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.400Z
 topic:
   - Software Design
@@ -11,7 +11,7 @@ summary: Systems built around immutable events and reactions, decoupling produce
 level:
   - "3"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 Event-driven systems move work forward by representing that something happened and letting handlers react. An order service can publish `OrderPlaced` without calling inventory directly. Inventory handles the event under its own delivery and retry rules. The event should be treated as an immutable fact once published, even if its serialized payload is technically mutable.

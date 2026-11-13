@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-09-29T12:13:16.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-09-21T08:43:52.494Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Stores results at each RAG stage to cut latency and cost, scoped by aut
 level:
   - "2"
 priority: High
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Context Engineering/RAG/RAG Caching
 flashcard_uid: e2208d57

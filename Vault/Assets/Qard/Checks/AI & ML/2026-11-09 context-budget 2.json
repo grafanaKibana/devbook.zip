@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "createdAt": 1794246786470,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "context-budget",
+  "title": "Allocate a finite context budget across instructions, history, retrieved evidence, and tool traffic while preserving provenance and isolating untrusted material",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "prompt": "An agent repeatedly receives large tool results, although only a few fields from each result matter to its next decision. Its instructions, conversation history and retrieved evidence remain in context. Why should the runtime trim these results before the context window fills?",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Tool results accumulate within the same finite context budget as instructions, history, evidence and reserved output space.",
+          "marks": 1
+        },
+        {
+          "point": "Trimming unnecessary fields preserves room for needed context and output, reducing the risk of overflow or truncation removing important information.",
+          "marks": 1
+        }
+      ],
+      "model": "Tool results accumulate in the shared context budget. Trimming unused fields preserves room for necessary instructions, evidence and output before overflow forces truncation.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
+        "heading": "The Context Budget"
+      },
+      "objective": "context-budget",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "mcq",
+      "prompt": "A retrieved document contains useful evidence alongside text telling an agent to ignore application rules. During history compaction, both are copied into a “decisions and rules” summary without source or trust labels. Why does this create a risk on later turns?",
+      "marks": 1,
+      "options": [
+        "Compaction makes the document's factual claims impossible to verify, even if the original remains available.",
+        "Moving document text into a shorter summary gives that text greater formal authority than application rules.",
+        "The summary can make an untrusted directive appear to be an established instruction when replayed.",
+        "The shorter summary consumes more context than the original because it combines evidence and instructions."
+      ],
+      "answer": 2,
+      "rubric": [
+        {
+          "point": "Identifies that losing source and trust distinctions can cause an untrusted directive to be replayed as an established instruction.",
+          "marks": 1
+        }
+      ],
+      "model": "The summary can make an untrusted directive appear to be an established instruction when replayed.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
+        "heading": "Context Poisoning"
+      },
+      "objective": "context-budget",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

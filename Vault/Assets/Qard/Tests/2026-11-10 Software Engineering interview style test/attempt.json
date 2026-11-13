@@ -1,0 +1,343 @@
+{
+  "version": 1,
+  "startedAt": 1794351295071,
+  "answers": {
+    "q1": {
+      "choice": 0,
+      "confidence": "sure"
+    },
+    "q2": {
+      "choice": 1,
+      "confidence": "unsure"
+    },
+    "q3": {
+      "choice": 2,
+      "confidence": "unsure"
+    },
+    "q4": {
+      "text": "I would go with Abstract factory which is aimed to support family of objects, in this case it is family of operations per provider.",
+      "confidence": "unsure"
+    },
+    "q5": {
+      "text": "A: State state, which changes implementation based on the state of the object\nB: Strategy that changes implementation based on the strategy that was selected for this object",
+      "confidence": "sure"
+    },
+    "q6": {
+      "blanks": {
+        "translate": "adapter",
+        "add": "decorator",
+        "control": "facade"
+      },
+      "confidence": "sure"
+    },
+    "q7": {
+      "unknown": true
+    },
+    "q8": {
+      "text": "1. ",
+      "unknown": true
+    },
+    "q9": {
+      "text": "I would accept observer here, first of all because it would remove responsibility of telling external services that status updated, and there will eb no need to maintain the list of things that should be notidied, if some new entity will be added, which supports Open/Closed principle. \n\nFor the first fact, i would make async io be be observer of the status update, and be observable for the shipping notification alert, so notification alert would not happen before io\nFor the second fact it looks like there is a memory leak, when subscription is not unsubscribed or doesnt have unsubscribe condition",
+      "confidence": "unsure"
+    },
+    "q10": {
+      "unknown": true
+    }
+  },
+  "marks": {
+    "q1": {
+      "score": 1,
+      "awarded": [
+        true
+      ],
+      "annotations": [],
+      "mistake": "none",
+      "feedback": "Correct."
+    },
+    "q2": {
+      "score": 1,
+      "awarded": [
+        true
+      ],
+      "annotations": [],
+      "mistake": "none",
+      "feedback": "Correct."
+    },
+    "q3": {
+      "score": 1,
+      "awarded": [
+        true
+      ],
+      "annotations": [],
+      "mistake": "none",
+      "feedback": "Correct."
+    },
+    "q7": {
+      "score": 0,
+      "awarded": [
+        false,
+        false,
+        false
+      ],
+      "annotations": [],
+      "mistake": "unknown",
+      "feedback": "You said you didn't know. The model answer shows what was needed."
+    },
+    "q8": {
+      "score": 0,
+      "awarded": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "annotations": [],
+      "mistake": "unknown",
+      "feedback": "You said you didn't know. The model answer shows what was needed."
+    },
+    "q10": {
+      "score": 0,
+      "awarded": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "annotations": [],
+      "mistake": "unknown",
+      "feedback": "You said you didn't know. The model answer shows what was needed."
+    },
+    "q4": {
+      "score": 0,
+      "awarded": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "Abstract factory",
+          "kind": "wrong",
+          "note": "You identify a pattern for creating related objects, but Bridge addresses the independently growing operation and provider dimensions here."
+        },
+        {
+          "quote": "family of operations per provider",
+          "kind": "vague",
+          "note": "You notice both operations and providers, but do not explain their independent variation or the current providers × operations duplication."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to explain that an operation hierarchy holds a gateway interface and delegates through composition."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to explain that one new gateway implementation supports every existing operation."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to explain that an operation using existing gateway primitives needs one new operation class and works across providers."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to distinguish provider injection, which varies one dimension, from Bridge's separate operation hierarchy."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed one limit, such as a new gateway primitive requiring changes to every provider."
+        }
+      ],
+      "mistake": "misconception",
+      "feedback": "You chose Abstract Factory; Bridge separates operations from providers through composition and requires explaining both extension costs, the DI distinction and a limit."
+    },
+    "q5": {
+      "score": 2,
+      "awarded": [
+        true,
+        true,
+        false,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "A: State state",
+          "kind": "correct",
+          "note": "You correctly identify Design A as State."
+        },
+        {
+          "quote": "B: Strategy",
+          "kind": "correct",
+          "note": "You correctly identify Design B as Strategy."
+        },
+        {
+          "quote": "changes implementation based on the state of the object",
+          "kind": "vague",
+          "note": "You identify state-dependent behavior, but need to explain that the delegate represents an internal lifecycle mode whose transitions belong to the context or states."
+        },
+        {
+          "quote": "strategy that was selected for this object",
+          "kind": "vague",
+          "note": "You mention selection, but need to identify an interchangeable algorithm selected externally as policy and explain that intent distinguishes the patterns."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You name both patterns correctly, but need to distinguish internally managed lifecycle transitions from externally selected algorithms."
+    },
+    "q6": {
+      "score": 2,
+      "awarded": [
+        true,
+        true,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "adapter",
+          "kind": "correct",
+          "note": "You correctly identify Adapter as translating an incompatible interface."
+        },
+        {
+          "quote": "decorator",
+          "kind": "correct",
+          "note": "You correctly identify Decorator as adding stackable responsibilities."
+        },
+        {
+          "quote": "facade",
+          "kind": "wrong",
+          "note": "You needed Proxy for controlling access to the real object; Facade provides a simpler interface to a subsystem."
+        }
+      ],
+      "mistake": "misconception",
+      "feedback": "You correctly identify Adapter and Decorator, but access control, lazy loading and caching describe Proxy."
+    },
+    "q9": {
+      "score": 1,
+      "awarded": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "there will eb no need to maintain the list",
+          "kind": "correct",
+          "note": "You explain that Observer lets new subscribers receive status updates without editing the publisher, supporting Open/Closed."
+        },
+        {
+          "quote": "notification alert would not happen before io",
+          "kind": "vague",
+          "note": "You propose chaining notifications to express a dependency, but do not establish that warehouse I/O completes before shipping starts. You needed awaited sequencing or a workflow that explicitly guarantees completion order."
+        },
+        {
+          "quote": "a memory leak",
+          "kind": "missing",
+          "note": "You recognize the leak, but needed to explain that the publisher's delegate list holds references that keep closed views reachable."
+        },
+        {
+          "quote": "subscription is not unsubscribed or doesnt have unsubscribe condition",
+          "kind": "vague",
+          "note": "You recognize missing unsubscription, but need to say that the view unsubscribes when it closes, using -= with the same delegate instance."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to explain the synchronous C# event invocation problem and use Task-returning observers so asynchronous completion and failures remain observable."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed an explicit failure policy: decide whether a subscriber failure stops the operation, is isolated or is aggregated."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to identify when direct calls are clearer, such as one required dependent or a small fixed set that always runs."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You explain extensibility and recognize ordering and unsubscription concerns, but need precise completion guarantees, observable async failures, delegate retention, lifetime cleanup and an overkill case."
+    }
+  },
+  "review": {},
+  "sections": {
+    "s1": {
+      "status": "marked"
+    },
+    "s2": {
+      "status": "marked"
+    },
+    "s3": {
+      "status": "marked"
+    }
+  },
+  "finishedAt": 1794352695808,
+  "wrapup": {
+    "fixes": [
+      {
+        "questionId": "q5",
+        "title": "State and Strategy differ by intent",
+        "body": "State models the object's own lifecycle mode: the same call behaves differently as the order moves between states, and the context or states own the transitions. Strategy is an interchangeable algorithm for one step, chosen from outside as policy, so the class diagram alone cannot tell them apart."
+      },
+      {
+        "questionId": "q8",
+        "title": "Static singletons and captive DbContext dependencies",
+        "body": "`RateLimitConfig.Instance` hides a dependency and shares global state across tests, so register a plain class with `AddSingleton` and inject it through the constructor. A singleton cache that holds a scoped `DbContext` is a captive dependency; it also needs a thread-safe, size-bounded store. Create a scope for each load (`IServiceScopeFactory`) or make the cache scoped."
+      },
+      {
+        "questionId": "q4",
+        "title": "Bridge splits two independently growing dimensions",
+        "body": "When operations and providers both grow, an operation hierarchy holds an `IPaymentGateway` and delegates to it. A new provider then needs one new gateway, and a new operation needs one new class, instead of a new method for every provider × operation pair. Injecting one gateway varies only the provider dimension, which is ordinary Strategy or polymorphism."
+      }
+    ],
+    "cards": [
+      {
+        "questionId": "q4",
+        "front": "Why is Bridge more than injecting one `IPaymentGateway` through DI, and what is one limit of Bridge?",
+        "back": "DI with one interface varies only one dimension, the provider. Bridge adds a second hierarchy on the abstraction side (operations such as Charge or PartialRefund) that holds the gateway and delegates to it. A new provider is one gateway class, and a new operation is one operation class. Shared retry and logging can live in the abstraction. Limit: a genuinely new primitive changes the gateway interface and every provider. Bridge is also premature when only one dimension varies."
+      },
+      {
+        "questionId": "q8",
+        "front": "An `AddSingleton` cache takes a scoped EF Core `DbContext` and stores entries in a plain `Dictionary`. Name three problems and their fixes.",
+        "back": "1) Captive dependency: the scoped `DbContext` outlives its scope, and scope validation rejects this. Fix: create and dispose a scope per load with `IServiceScopeFactory`, or make the cache scoped. 2) Thread safety: concurrent requests share one `Dictionary`. Fix: use `ConcurrentDictionary` or a lock. 3) Unbounded memory: the cache lives as long as the provider. Fix: add a size or expiry bound, or use `IMemoryCache`."
+      },
+      {
+        "questionId": "q9",
+        "front": "What are the Observer pitfalls with async server subscribers that must run in order, and with C# event leaks in a desktop UI?",
+        "back": "Server: C# events are synchronous and lead to `async void`, so use a Task-returning observer interface. Define a failure policy (fail the operation, isolate or aggregate). Make ordering explicit with an awaited sequential loop or a workflow; never rely on subscription order or `Task.WhenAll`. UI: the publisher's delegate list references each subscriber, so a long-lived view model keeps closed views alive. Fix: unsubscribe with `-=` using the same delegate when the view closes; use weak events only as a fallback. Observer is overkill for one required dependent or a small fixed set; use a direct call."
+      },
+      {
+        "questionId": "q10",
+        "front": "GRASP: where do `Order` total, persistence and email go, and why?",
+        "back": "Total goes on `Order` (Information Expert): it owns the line items and the invariant, so callers stop reaching into its internals. Persistence goes in a repository and email in an email gateway (Pure Fabrication), keeping I/O out of the domain object (Low Coupling, High Cohesion). Information Expert names a strong candidate, not an automatic winner: the principles conflict, and the dominant pressure decides."
+      },
+      {
+        "questionId": "q7",
+        "front": "Template Method vs Strategy: what favors Strategy for report formatting?",
+        "back": "Strategy is a composed object passed to the context. It can be picked per request and reused by any class without inheriting from the base, so it does not use up the single base-class slot. Template Method fixes the variant in a subclass, set per object and coupled to the hook order. It fits a stable, base-owned workflow whose variants differ only in a few hooks."
+      },
+      {
+        "questionId": "q6",
+        "front": "Adapter, Decorator, Proxy, Facade: which wrapper controls whether, when or how a call reaches the real object?",
+        "back": "Proxy: same interface as the real object, used for lazy loading, caching or authorization. Decorator has the same interface and adds stackable responsibilities. Adapter translates to an interface the client expects. Facade gives a simpler new interface over a whole subsystem, not a single wrapped object."
+      }
+    ]
+  }
+}

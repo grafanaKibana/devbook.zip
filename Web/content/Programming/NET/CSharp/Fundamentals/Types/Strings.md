@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.328Z
 topic:
   - Programming
@@ -11,7 +11,7 @@ summary: An immutable C# reference type where any text change creates a new valu
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Types/Strings
 flashcard_uid: d65a72cc

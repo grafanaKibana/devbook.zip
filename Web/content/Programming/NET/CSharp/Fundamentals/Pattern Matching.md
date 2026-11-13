@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-11-02T09:03:54.806Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-11-02T09:04:02.378Z
 topic:
   - Programming
@@ -11,7 +11,7 @@ summary: Selects behavior by an input's type, value, properties, or sequence sha
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 qard-deck: Programming
 qard-topic: NET/CSharp/Fundamentals/Pattern Matching
 ---

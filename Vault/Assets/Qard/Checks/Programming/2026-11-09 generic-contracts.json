@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "createdAt": 1794246254222,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "generic-contracts",
+  "title": "Choose generic type parameters and constraints without replacing type safety with object casts",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "prompt": "A C# helper returns the value passed to it:\n```csharp\nstatic T Keep<T>(T value) => value;\n```\nAn alternative accepts `object` and returns `object`. Explain how choosing `Keep<int>` changes compile-time checking of the argument and the returned value compared with the `object` version.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Keep<int> requires an argument compatible with int, whereas the object version accepts unrelated types as well.",
+          "marks": 1
+        },
+        {
+          "point": "Keep<int> returns int directly; the object version exposes only object, so recovering an int requires a cast that can fail at runtime if the value has the wrong type.",
+          "marks": 1
+        }
+      ],
+      "model": "`Keep<int>` requires an `int`-compatible argument and returns `int` without a cast. The `object` version accepts unrelated types and returns `object`; casting its result to `int` can fail at runtime.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+        "heading": "Tradeoffs"
+      },
+      "objective": "generic-contracts",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "short",
+      "prompt": "In C#, `IValidatable` declares an instance method `void Validate()`. A factory must construct a new value of type `T`, validate it, and return it:\n```csharp\nstatic T Build<T>() where T : IValidatable\n{\n    T value = new T();\n    value.Validate();\n    return value;\n}\n```\nExplain why the existing constraint is insufficient and how adding `new()` to the constraints makes this implementation valid.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "IValidatable guarantees Validate(), but does not guarantee that T can be constructed using new T().",
+          "marks": 1
+        },
+        {
+          "point": "The new() constraint guarantees public parameterless construction, allowing new T(); the interface constraint continues to make Validate() available.",
+          "marks": 1
+        }
+      ],
+      "model": "`IValidatable` guarantees `Validate()`, but not parameterless construction. Using `where T : IValidatable, new()` guarantees both operations, so the factory can construct and validate `T`.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+        "heading": "Constraints"
+      },
+      "objective": "generic-contracts",
+      "goal": "explain"
+    }
+  ],
+  "answers": {
+    "c1": {
+      "text": "generic ensures that input and output will be the same type with the same capabilities, while object can hide the actual type that was turned into object just to support the contract. For example we can pass object(int) but method can return suddenly object(string), which can break the code",
+      "confidence": "unsure"
+    },
+    "c2": {
+      "text": "The code calls parameterless contructure, which is not enforced for now. new() will enforce type to have it, so Build will always be able to call new T();",
+      "confidence": "sure"
+    }
+  },
+  "marks": {
+    "c1": {
+      "awarded": [
+        false,
+        true
+      ],
+      "annotations": [
+        {
+          "quote": "generic ensures that input and output will be the same type",
+          "kind": "vague",
+          "note": "You say input and output share a type, but you don't state that `Keep<int>` makes the compiler reject arguments that aren't `int`-compatible, while `object` accepts anything."
+        },
+        {
+          "quote": "object can hide the actual type that was turned into object",
+          "kind": "correct",
+          "note": "You correctly say `object` hides the real type, so the caller loses compile-time type information."
+        },
+        {
+          "quote": "method can return suddenly object(string), which can break the code",
+          "kind": "correct",
+          "note": "You show that an `object` version can return a different type than was passed, which can break the code. This matches the point that recovering an `int` needs a cast that can fail at runtime."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to say that `Keep<int>` returns `int` directly with no cast, and that the `object` version needs a cast to get an `int` back."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You explained the return-side risk, but you didn't say that `Keep<int>` restricts the argument at compile time.",
+      "score": 1
+    },
+    "c2": {
+      "awarded": [
+        true,
+        true
+      ],
+      "annotations": [
+        {
+          "quote": "The code calls parameterless contructure, which is not enforced for now.",
+          "kind": "correct",
+          "note": "You identified that `new T()` needs a parameterless constructor and that the existing `IValidatable` constraint doesn't guarantee one."
+        },
+        {
+          "quote": "new() will enforce type to have it, so Build will always be able to call new T();",
+          "kind": "correct",
+          "note": "You explained that `new()` guarantees construction, which makes `new T()` valid. `Validate()` stays available through the interface constraint."
+        }
+      ],
+      "mistake": "none",
+      "feedback": "Full marks: you identified the missing construction guarantee and showed that `new()` supplies it.",
+      "score": 2
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1794301509164
+}

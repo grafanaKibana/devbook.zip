@@ -4,13 +4,13 @@ subtopic: [Patterns]
 summary: "Creates new objects by copying an existing instance rather than constructing from scratch, with the prototype knowing how to clone itself."
 level: ["2"]
 priority: High
-status: Done
+status: In Progress
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Prototype"
 flashcard_uid: "e5ac3c19"
 created: "2026-03-05T22:12:38.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.450Z"
 ---
 

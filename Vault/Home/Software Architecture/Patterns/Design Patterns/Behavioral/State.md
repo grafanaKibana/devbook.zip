@@ -4,13 +4,13 @@ subtopic: [Patterns]
 summary: "Extracts state-specific behavior into separate classes. The context delegates to its current state, which drives transitions."
 level: ["3"]
 priority: High
-status: Done
+status: In Progress
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/State"
 flashcard_uid: "79f8c824"
 created: "2026-03-05T22:12:46.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.446Z"
 ---
 

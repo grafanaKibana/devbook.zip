@@ -4,13 +4,13 @@ subtopic: [Application Architecture]
 summary: "Organizes software so business policy is protected from technical details via the Dependency Rule: source dependencies point inward toward business rules."
 level: ["3"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "Application Architecture/Clean Architecture"
 flashcard_uid: "1f408830"
 created: "2026-03-06T22:43:56.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.365Z"
 ---
 

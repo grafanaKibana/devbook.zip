@@ -4,10 +4,10 @@ subtopic: [Algorithms]
 summary: "Repeatedly swaps adjacent out-of-order elements. A slow teaching baseline for why better sorts exist."
 level: ["4"]
 priority: Low
-status: Ready to Repeat
+status: In Progress
 publish: true
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.340Z"
 ---
 

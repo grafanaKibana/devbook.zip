@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "createdAt": 1793901965178,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "demonstration-effects",
+  "title": "Choose and order demonstrations to establish the task and label space without leaking evaluation answers or wasting the context budget",
+  "goal": "explain",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "long",
+      "goal": "explain",
+      "objective": "demonstration-effects",
+      "marks": 4,
+      "prompt": "A team builds a few-shot prompt that classifies support tickets as `Billing`, `Bug` or `Feature`. They pick 8 demonstrations, all clear `Bug` tickets with the same wording style, and put them in the prompt. The model then labels almost everything `Bug`, and ordering the examples differently changes results.\n\nExplain what the demonstrations failed to establish, and how you would rebuild the set. Say what you would check before finalising it.",
+      "rubric": [
+        {
+          "point": "Demonstrations should establish the task and label space; this set never shows Billing or Feature, so the model has no evidence those labels are in play.",
+          "marks": 1
+        },
+        {
+          "point": "Set should cover real decision boundaries, including easily confused classes, rather than many near-duplicate easy examples.",
+          "marks": 1
+        },
+        {
+          "point": "Keep format consistent (separators, casing, field order) and use a few representative examples rather than many, to save context budget.",
+          "marks": 1
+        },
+        {
+          "point": "Test more than one ordering, since later examples (recency) can pull outputs toward their label; evaluate on a representative set.",
+          "marks": 1
+        }
+      ],
+      "model": "The 8 examples show only one label, so the model never sees `Billing` or `Feature` demonstrated, and the label space and class boundaries are not established. Repeated easy `Bug` cases add tokens but no information, and the last examples pull the output toward `Bug` (recency effect), which is why order matters.\n\nRebuild: use a few representative examples, covering each label and especially the confusable boundaries (e.g. a billing complaint that mentions an error). Keep separators, casing and field order identical. Before finalising, test several orderings on the same evaluation set and keep the set only if it beats the zero-shot baseline."
+    },
+    {
+      "id": "c2",
+      "type": "long",
+      "goal": "explain",
+      "objective": "demonstration-effects",
+      "marks": 3,
+      "prompt": "You are few-shot prompting a model on a benchmark of 500 question-answer pairs, and you also want to measure how well it does. Someone proposes taking the demonstrations straight from the benchmark's own items, and filling the rest of the context window with as many extra examples as will fit.\n\nGive two distinct reasons this is a bad plan.",
+      "rubric": [
+        {
+          "point": "Leakage: demonstrations drawn from the evaluation items (or their answers) let the model copy or be primed on the answers, so the score is inflated and no longer measures generalisation; use held-out examples.",
+          "marks": 1
+        },
+        {
+          "point": "Context budget: every demonstration consumes context on every request, leaving less room for the actual input and output, risking truncation or lost instructions.",
+          "marks": 1
+        },
+        {
+          "point": "Extra examples have diminishing returns: near-duplicates add tokens without information; add shots only for measured gaps, and reserve room for the largest input and output.",
+          "marks": 1
+        }
+      ],
+      "model": "First, leakage: if demonstrations come from the evaluation set, the model sees those inputs and answers in the prompt. It can copy them, so the score is inflated and tells you nothing about unseen cases. Demonstrations should come from a separate held-out pool.\n\nSecond, wasted context budget: each example costs tokens on every request and leaves less space for the real question and answer, which can cause truncation or weaker attention to the instructions. Filling the window adds mostly near-duplicate examples with little new information. Use a few representative ones and add more only when evaluation shows a specific gap."
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

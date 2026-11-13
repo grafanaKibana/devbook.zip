@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-13T18:58:50.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-13T18:59:43.328Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: Designing control flow, stopping, verification, and recovery across rep
 level:
   - "3"
 priority: Medium
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Loop Engineering/Loop Engineering
 flashcard_uid: 3d544ed9

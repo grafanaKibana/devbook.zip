@@ -1,0 +1,447 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/AI & ML/LLM/LLM.md",
+      "text": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"A routing hub for model foundations, generation, adaptation, prompting, context, evaluation, and agent runtimes.\"\ntags: [FolderNote]\npublish: true\nlevel: [\"3\"]\npriority: High\nstatus: Creation\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/LLM\"\nflashcard_uid: \"1eb55a0b\"\ncreated: \"2026-02-10T16:03:55.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:28:37.410Z\"\n---\n\nA large language model (LLM) is a neural language model trained at enough scale to handle a broad range of language tasks. The name says little about the exact architecture. Decoder-only models continue text causally, encoder-decoder models generate from an encoded source, and encoder-only models produce contextual representations instead of open-ended text.\n\nModel output is probabilistic and untrusted from a system-design perspective. A prompt conditions behavior, context supplies current evidence, and the harness exposes actions. The loop controls iteration and stopping. Evaluation then measures whether those pieces work together. Fluent output remains a candidate result until grounding and validation support it.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Engineering Routes\n\nFour inference-time disciplines form the runtime around a model call:\n\n```mermaid\nflowchart LR\n    P[Prompt Engineering<br>instruction] --> C[Context Engineering<br>evidence and budget]\n    C --> H[Harness Engineering<br>tools and environment]\n    H --> L[Loop Engineering<br>iteration and stopping]\n```\n\n| Route | Unit of design | Question |\n| --- | --- | --- |\n| [[Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering\\|Prompt Engineering]] | One instruction | How should this task be specified and demonstrated? |\n| [[Home/AI & ML/LLM/Context Engineering/Context Engineering\\|Context Engineering]] | The whole context window | Which evidence enters the window, in what order, and at what cost? |\n| [[Home/AI & ML/LLM/Harness Engineering/Harness Engineering\\|Harness Engineering]] | Tools and execution boundary | What can the model do, and through which constrained interface? |\n| [[Home/AI & ML/LLM/Loop Engineering/Loop Engineering\\|Loop Engineering]] | Runtime across turns | How does work iterate, verify, recover, and stop? |\n\n[[Home/AI & ML/LLM/Evaluation/Evaluation|Evaluation]] and [[Home/AI & ML/LLM/Safety/Safety|Safety]] span every route. Model-level choices sit underneath them: [[Home/AI & ML/LLM/Generation|generation]] controls decoding, [[Home/AI & ML/LLM/Embeddings|embeddings]] represent inputs for retrieval, [[Home/AI & ML/LLM/Fine-tuning|fine-tuning]] adapts behavior, and [[Home/AI & ML/LLM/Model Selection and Routing|model selection and routing]] chooses which model serves a request.\n\nAt the application level, these disciplines become connected runtime subsystems rather than isolated techniques. This intentionally broad sketch shows one possible composition of request routing, retrieval, shared model access, agents, memory, tools, ingestion, and cross-cutting controls.\n\n![[Assets/Excalidraw/Imaginary AI System Architecture.excalidraw|1200|center]]\n\n# Transformer Foundations and Training\n\nAn LLM checkpoint comes from one architecture, tokenizer, objective, and training pipeline. Its weights are not a self-describing program. A compatible runtime must rebuild the expected computation graph, interpret the stored tensors correctly, apply the matching tokenization rules, and provide every operator required by the architecture and quantization scheme.\n\n## Transformer Families\n\n| Family | Training and attention boundary | Output path | Typical use |\n| --- | --- | --- | --- |\n| Encoder-only | Bidirectional contextual encoding. BERT pretrains with masked-token prediction and sentence-level objectives | One contextual vector per input token or a pooled representation | Classification, extraction, reranking, embeddings |\n| Encoder-decoder | Encoder reads the source bidirectionally. Decoder generates target tokens autoregressively while attending to encoder output | Generated target sequence | Translation, summarization, text-to-text tasks |\n| Decoder-only | Causal attention exposes only earlier tokens during next-token prediction | Generated continuation | Chat, code, completion, tool-call generation |\n\n**BERT** is encoder-only. It predicts masked tokens during pretraining and exposes contextual representations to a task head. It has no autoregressive decoder for open-ended generation.\n\n**T5** is a generative encoder-decoder. It pretrains with a span-corruption text-to-text objective: the encoder consumes corrupted input, and the decoder autoregressively generates missing target spans.\n\n**GPT-style models** are decoder-only. A causal mask makes each position predict from earlier positions, so the same stack can continue a prompt one token at a time.\n\n## Checkpoint is More than Weights\n\nLoading is trustworthy only when several contracts agree:\n\n- **Architecture and configuration** define the layer count, hidden size, attention layout, positional encoding, normalization, activation, vocabulary size, and expert topology.\n- **Tensor contract** covers parameter names, shapes, axis layout, serialization, numerical type, sharding, and any fused or transposed representation.\n- **Tokenizer contract** includes the vocabulary, normalization, splitting and merge rules, byte fallback, and special-token identifiers.\n- **Adaptation and quantization metadata** record adapter targets and scaling alongside quantization groups, scales, zero points, and calibration assumptions.\n- **Runtime operators** must implement compatible attention, position logic, expert routing, normalization, quantized matrix work, and cache layout on the target hardware.\n\nA `.safetensors` file provides a safe tensor container, not a model class or tokenizer. Llama-shaped tensors do not fit a GPT-2 graph. A wrong tokenizer is harder to spot: tensor dimensions still match while the same text maps to different IDs, silently changing behavior.\n\nPortable graph formats such as ONNX make operators and tensor interfaces explicit. The target runtime still needs the graph's operator versions, data types, custom operators, and hardware kernels. Parsing the file proves less than a known-answer inference test against the source runtime.\n\n## Training Pipeline\n\n```text\nbase checkpoint = architecture + tokenizer + pretrained tensors + configuration\ninstruction model = compatible base checkpoint + SFT + optional preference/reward stage\ndeployable artifact = model bundle + runtime + release evaluation\n```\n\n![[AI & ML/AI & ML-LLM-18120000.png|theme-aware]]\n\n1. **Pretraining** fits the architecture’s language objective over a large corpus. The output is a base checkpoint, not automatically a conversational assistant.\n2. **Supervised fine-tuning (SFT)** trains on instruction-response or task examples. [[Home/AI & ML/LLM/Fine-tuning|Fine-tuning]] covers full and parameter-efficient updates, data contracts, preference alignment, GRPO, and evaluation.\n3. **Preference or reward optimization** uses comparisons or verifiable rewards to favor some outputs over others. It remains a separate training stage even when documented in the same canonical note as fine-tuning.\n\nDeployment depends on training provenance. The release record needs the base revision, data version, tokenizer files, configuration, adapters, quantization recipe, runtime version, and evaluation result. A model name alone cannot reproduce an output or explain a regression.\n\n## Failure Modes\n\n- **Architecture mismatch** — tensor names or shapes fail during load, or a permissive loader leaves expected parameters uninitialized.\n- **Tokenizer mismatch** — loading appears successful, but prompts use different token IDs, special markers, or normalization and quality collapses.\n- **Runtime mismatch** — unsupported operators, cache layout, precision, or quantization kernels cause load failure, numerical drift, or a slow fallback path.\n- **Training-stage ambiguity** — benchmark results for a base checkpoint are compared with an instruction or preference-aligned variant as though they were the same model.\n\n# Mixture-of-experts\n\nA sparse mixture-of-experts (MoE) model replaces some dense feed-forward layers with expert networks and a learned router. The router activates only a small subset for each token, then combines their outputs. This adds total parameter capacity without evaluating every expert on every token. It is an internal architecture choice, separate from application-level [[Home/AI & ML/LLM/Model Selection and Routing|model selection and routing]].\n\n## Token Routing\n\n```text\ntoken hidden state\n    → router scores experts\n    → select top-k experts\n    → dispatch token\n    → combine weighted expert outputs\n```\n\nWhen too many tokens choose one expert, its device becomes a bottleneck while others sit idle. Implementations counter this with capacity limits, balancing objectives or biases, token rerouting, and deliberate expert placement.\n\n## What Sparse Activation Saves\n\nSparse activation saves feed-forward arithmetic compared with evaluating every expert. The rest of the transformer still runs, and the full parameter set still affects deployment.\n\nThree measurements describe different costs:\n\n- **Total parameters** affect checkpoint storage and expert placement across device memory.\n- **Active parameters per token** approximate part of the arithmetic executed for a token.\n- **Measured throughput and latency** include router work, token dispatch, all-to-all communication, batching, precision, kernels, and load imbalance.\n\nA dense model can beat a sparse model with a similar advertised active count when expert traffic is communication-bound. Careful expert placement can give an MoE more learned capacity at manageable per-token compute. Parameter counts alone cannot predict either result.\n\n## Capacity and Communication\n\nAn expert capacity factor reserves headroom above the average token share. Too little capacity drops or reroutes tokens. Too much wastes memory and compute. In distributed training or serving, tokens cross device boundaries to reach experts, so interconnect topology and placement become part of model latency.\n\nBatch shape changes that tradeoff. Large batches can spread tokens across experts efficiently, while small low-latency batches expose imbalance and communication overhead. Training throughput is not a substitute for measurement on the intended serving workload.\n\n## Routed and Shared Experts in DeepSeek-V3\n\nThe DeepSeek-V3 report describes routed experts, shared experts, and an auxiliary-loss-free load-balancing strategy. DeepSeek-R1 uses that base architecture, while [[Home/AI & ML/LLM/Fine-tuning#GRPO|GRPO]] belongs to post-training. Token routing and policy optimization solve different problems. Price, hardware, and benchmark comparisons are meaningful only when hardware, precision, prompts, and model versions match.\n\n# Minimal Vocabulary\n\n- **Token** — the integer-id unit produced by a specific tokenizer. Tokenizer choice affects sequence length and must match the checkpoint.\n- **Context window** — the token budget visible to one model invocation, including instructions, history, evidence, tool results, and output allowance.\n- **Inference** — executing a trained model to produce representations or generated tokens. [[Home/AI & ML/LLM/Generation|generation]] covers sampling controls for generative models.\n- **Embedding** — a vector representation used for similarity or downstream prediction. Covered in [[Home/AI & ML/LLM/Embeddings|embeddings]].\n\n# Questions\n\n> [!qard]- How do encoder-only, encoder-decoder, and decoder-only transformers differ?\n> The three families differ in which transformer stacks they use, and therefore in how attention sees the input and what the model produces. Encoder-only models build contextual representations of an input. Decoder-only models generate a continuation one token at a time. Encoder-decoder models read a source sequence and generate a separate target sequence.\n>\n> | Aspect | Encoder-only (BERT) | Encoder-decoder (T5) | Decoder-only (GPT-style) |\n> |---|---|---|---|\n> | Attention | Bidirectional: every token can attend to the whole input | The encoder reads the source bidirectionally; the decoder attends causally to its own earlier tokens and to the encoder's output | Causal: each position attends only to earlier positions |\n> | Pretraining objective | Predict masked tokens from the context on both sides | The encoder reads input with spans removed, and the decoder generates the missing spans | Predict the next token |\n> | Output | One contextual vector per token, or a pooled vector, passed to a task head | A generated target sequence | A generated continuation of the prompt |\n> | Typical use | Classification, extraction, reranking, embeddings | Translation, summarization and other text-to-text tasks | Chat, code, completion, tool-call generation |\n>\n> An encoder-only model has no autoregressive decoder, so it is not used for open-ended generation. The causal mask is what lets one decoder-only stack train on next-token prediction and then continue a prompt token by token. The typical uses describe common fits, not hard limits.\n>\n> Sources: [Attention Is All You Need](https://arxiv.org/abs/1706.03762) · [BERT](https://arxiv.org/abs/1810.04805) · [T5: Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683) · [Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)\n\n<!-- qard-id: 25714b3e-c167-44ee-b9ad-aa5e3144b4dd -->\n> [!qard]- How should prompting, RAG, and fine-tuning be chosen for an LLM system?\n> The choice follows the gap that evaluation reveals. A behavior gap is first addressed with clearer instructions and examples. A knowledge gap is closed by putting the facts into context. Small, stable facts can be written directly into the prompt. Large, private or changing facts are retrieved per request with RAG. Fine-tuning addresses behavior that stays inconsistent after prompt work. The techniques solve different problems and can be combined.\n>\n> | Technique | What it changes | Fits when | Main limit |\n> |---|---|---|---|\n> | Prompting | The instructions, examples and any fixed reference text sent with each request | The model can do the task but needs a clearer specification, output format or examples, or the facts it needs are few and stable enough to write into the prompt | Instructions alone add no knowledge. Facts written into the prompt are fixed in advance and add tokens to every call, so this approach does not scale to large or changing knowledge |\n> | RAG | The evidence selected and placed in the context at request time | Answers depend on current, private or citable information that is too large or changeable to include in every prompt | Answer quality is limited by retrieval quality, and retrieved text does not reliably teach a new format or style |\n> | Fine-tuning | The model's weights, through training on examples | Format, style or task behavior remains inconsistent after prompt work | It needs training data and evaluation, and facts stored in weights are harder to update than retrieved documents |\n>\n> Prompting is the usual starting point because it is the cheapest to iterate, but this is a diagnostic default, not a mandatory sequence. A fine-tuned model can still use RAG: training shapes behavior while retrieval supplies changing facts. Each change is compared on the same representative evaluation set, so an improvement can be attributed to that change.\n>\n> Source: [OpenAI: Optimizing LLM accuracy](https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy)\n\n> [!qard]- How does a sparse mixture-of-experts model work, and what does sparse activation actually save?\n> A sparse mixture-of-experts (MoE) model replaces some dense feed-forward layers with several expert networks and a learned router. Each token is processed by only a few selected experts. Compared with evaluating every expert on every token, this saves feed-forward arithmetic, so total parameter capacity can grow while per-token computation stays roughly constant. It does not shrink the parameter footprint: every expert still has to be stored and placed in device memory, and the rest of the transformer still runs for every token.\n>\n> Routing a token through an MoE layer:\n>\n> 1. The router scores every expert for the token's hidden state.\n> 2. The top-k experts are selected.\n> 3. The token is dispatched to those experts, possibly on other devices.\n> 4. Their outputs are combined using the router's weights.\n>\n> | Measure | What it reflects |\n> |---|---|\n> | Total parameters | Checkpoint size and the device memory needed to hold every expert |\n> | Active parameters per token | Part of the arithmetic performed for each token |\n> | Measured latency and throughput | Arithmetic plus router work, cross-device dispatch, load imbalance, batching and kernels |\n>\n> If many tokens choose the same expert, its device becomes a bottleneck while others sit idle. Capacity limits and load-balancing objectives counter this. Depending on the implementation, tokens beyond an expert's capacity are dropped or rerouted.\n>\n> The saving is relative to evaluating all experts. It is not a guaranteed advantage over every alternative. A dense model with a similar number of active parameters can be faster than an MoE when expert traffic is communication-bound, because the MoE also pays for routing, dispatch and imbalance. Parameter counts alone cannot predict either outcome. Only measurement on the intended serving workload shows the real cost.\n>\n> MoE routing happens inside one model and is separate from application-level routing between different models.\n>\n> Source: [Switch Transformers](https://jmlr.org/papers/v23/21-0998.html)\n\n# References\n\n- [Attention Is All You Need](https://arxiv.org/abs/1706.03762)\n- [BERT](https://arxiv.org/abs/1810.04805)\n- [Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683)\n- [Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)\n- [Training language models to follow instructions with human feedback](https://arxiv.org/abs/2203.02155)\n- [Switch Transformers](https://jmlr.org/papers/v23/21-0998.html)\n- [DeepSeek-V3 Technical Report](https://arxiv.org/abs/2412.19437)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1794224512785,
+  "topic": "Distinguish transformer families, pretraining and adaptation, inference context, and sparse-expert routing without equating fluent output with verified reasoning",
+  "notes": [
+    "Home/AI & ML/LLM/LLM.md"
+  ],
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "llm-mechanics",
+  "steps": [
+    {
+      "title": "Causal versus bidirectional attention",
+      "explain": "A model reads a sequence of token IDs. Attention is how each position collects information from other positions. An **attention mask** decides which positions each token may look at.\n\n**Bidirectional attention** (no restriction): every position can attend to every position in the input, both earlier and later.\n\n**Causal attention**: position $i$ can attend only to positions $1 \\dots i$, meaning itself and everything before it. Later positions are blocked.\n\nExample with the four tokens `the cat sat down` at positions 1–4:\n\n| Query position | Bidirectional sees | Causal sees |\n|---|---|---|\n| 1 `the` | 1, 2, 3, 4 | 1 |\n| 2 `cat` | 1, 2, 3, 4 | 1, 2 |\n| 3 `sat` | 1, 2, 3, 4 | 1, 2, 3 |\n| 4 `down` | 1, 2, 3, 4 | 1, 2, 3, 4 |\n\n**Why next-token prediction needs the causal mask.** In training the whole sentence goes in at once, and each position is trained to predict the token that comes after it. Position 2 (`cat`) must predict `sat`. Under bidirectional attention, position 2 can see position 3, which holds `sat`. The answer is then part of its input, so a copying shortcut is available. This is called **target leakage**. Training loss can drop because the model reads the answer, not because it predicts well, so a low loss no longer tells you how well it predicts. The shortcut also disappears at generation time: when the model writes text one token at a time, the next token does not exist yet, so there is nothing to copy.\n\nThe causal mask hides everything after position $i$, so each position must predict its target from earlier tokens alone. All positions still train in parallel, and none of them can see its own answer. Training then matches what generation can actually provide.\n\nThe general rule: leakage happens whenever the token a position must predict sits inside the set of positions it is allowed to see. The causal mask prevents this for next-token prediction because the target ($i+1$) lies just outside $1 \\dots i$.\n\nBidirectional attention is not wrong. It suits tasks where the whole input is already given and nothing hidden needs predicting from what came earlier. The next step covers which objectives fit it.\n\nYour notes put it this way: a causal mask \"makes each position predict from earlier positions\" ([[Home/AI & ML/LLM/LLM#Transformer Families|Transformer Families]]).",
+      "connect": "You know a token is an ID at a position in a sequence. This step sets which positions each token may read, and that visibility rule decides which training objectives (step 2) and which model families (step 3) make sense.",
+      "checkFirst": false,
+      "check": {
+        "id": "k1",
+        "type": "mcq",
+        "goal": "apply",
+        "objective": "llm-mechanics",
+        "prompt": "A team keeps a standard **causal** mask (position $i$ attends to positions $1 \\dots i$) but changes the training target: each position $i$ is now trained to output **the token at position $i$ itself**, not the next token. The whole sentence is fed in at once.\n\nIs a copying shortcut available to the model during this training, and why?",
+        "options": [
+          "No — the causal mask blocks every position from seeing its own target, whatever position that target sits at.",
+          "No — under causal attention position $i$ sees only positions before $i$, so its own token stays hidden.",
+          "Yes — position $i$ can see positions $1 \\dots i$, which includes position $i$, so its target is already in its input.",
+          "Yes — causal attention lets position $i$ see the token at $i+1$, and that later token reveals the target."
+        ],
+        "answer": 2,
+        "marks": 1,
+        "rubric": [
+          {
+            "point": "Chooses the option stating that a shortcut exists because the causal visible range $1 \\dots i$ includes position $i$, which holds the target.",
+            "marks": 1
+          }
+        ],
+        "model": "Yes — position $i$ can see positions $1 \\dots i$, which includes position $i$, so its target is already in its input.",
+        "source": {
+          "path": "Home/AI & ML/LLM/LLM.md",
+          "heading": "Transformer Families"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Chooses that the causal mask always prevents the model seeing its target.",
+          "reteach": "The causal mask is not a general anti-leak device. It hides only positions after $i$. It works for next-token prediction because the target, $i+1$, is just outside $1 \\dots i$. Move the target to position $i$ and it falls inside the visible range, so the answer is readable."
+        },
+        {
+          "signs": "Chooses that position $i$ sees only positions strictly before $i$.",
+          "reteach": "Causal attention covers $1 \\dots i$: earlier positions **and the position itself**. In the `the cat sat down` table, position 2 sees 1 and 2. So a target stored at position $i$ is visible to position $i$."
+        },
+        {
+          "signs": "Chooses that causal attention lets position $i$ see position $i+1$.",
+          "reteach": "That describes bidirectional attention, or a leaky mask. A causal mask blocks every later position, including $i+1$. The shortcut here exists for a different reason: the target moved to position $i$, which the mask always allows."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Objectives that follow from visibility",
+      "explain": "From step 1: under a **causal** mask, a position sees itself and earlier positions only. Under **bidirectional** attention, it sees the whole input, both left and right.\n\nA pretraining objective works like a fill-in game. The model gets an input and guesses a target token, and the loss scores the guess. The guess only exercises inference from context if **the target is hidden from the position making the guess**. If the target is visible, the model has a shortcut: it can copy it. Low loss then no longer shows that the model learned to predict from context. The two objectives hide the target in different places, and that decides which visibility fits.\n\n**Example sentence:** `the cat sat on the mat`\n\n**Next-token prediction (target = the token after the current position).** At the position of `cat`, the target is `sat`. The input is left intact, so `sat` is still in the sequence, one step to the right.\n- With bidirectional attention, the `cat` position could attend to `sat`. The target leaks, and copying becomes an available shortcut to low loss.\n- With a causal mask, the `cat` position sees only `the cat`. The mask hides the target. Every position can be trained in parallel on its own next token, and no future target leaks.\n\n**Masked-token prediction (target = a token removed from the input).** The input becomes `the cat [MASK] on the mat`. The target is hidden because it was **replaced in the input**, not because of the attention pattern.\n- With bidirectional attention, the `[MASK]` position uses evidence from both sides: `the cat` on the left and `on the mat` on the right. Both sides constrain the missing word.\n- A causal mask would also be safe here, because nothing leaks. But it would discard `on the mat`, which is useful evidence.\n\nSo hiding happens in one of two places. Next-token prediction leaves the input intact, so the **attention mask** must hide the future. Masked-token prediction hides the target **in the input**, so attention can be fully bidirectional and use both sides. That is why the notes pair masked-token pretraining with bidirectional encoders, and next-token prediction with causal attention: [[Home/AI & ML/LLM/LLM#Transformer Families|Transformer Families]].",
+      "connect": "Step 1 set out what each mask lets a position see. This step shows the pairing that follows. Bidirectional attention lets a model reconstruct a hidden token from both sides once the input hides it. Causal attention stops future targets leaking in next-token prediction. Step 3 uses these pairings to tell BERT, T5 and GPT-style models apart.",
+      "checkFirst": false,
+      "check": {
+        "id": "k2",
+        "type": "short",
+        "goal": "apply",
+        "objective": "llm-mechanics",
+        "prompt": "An encoder is pretrained with **bidirectional attention**: every position can attend to every position in the input, including itself. In each training sentence, some positions are chosen as targets, and the model is trained to output the original token at each chosen position.\n\nBecause of a bug, the chosen tokens are **left unchanged in the input**. They are never replaced with `[MASK]`.\n\nThe training loss on the chosen positions turns out to be low. Does this low loss show that the model has learned to infer tokens from their surrounding context? Give your verdict and explain it in terms of what each chosen position can see.",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "Verdict: no, the low loss does not demonstrate that the model learned to infer tokens from context",
+            "marks": 1
+          },
+          {
+            "point": "Mechanism: each target token is still in the input and visible to its own position (and others) through bidirectional attention, so copying it is an available shortcut that can lower the loss without using context",
+            "marks": 1
+          }
+        ],
+        "model": "No. Each chosen token is still in the input, and bidirectional attention lets its position see it. Copying the visible token is an available shortcut to low loss, so the low loss does not show that the model predicts from context.",
+        "source": {
+          "path": "Home/AI & ML/LLM/LLM.md",
+          "heading": "Transformer Families"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Says yes: low loss shows the model learned context, because bidirectional attention gives it both sides of every token.",
+          "reteach": "Bidirectional context only tests inference when the target is hidden. Here the target is in the input, and its position can attend to it directly. Copying is an available route to low loss, so low loss cannot tell you whether the model used context or copied. Seeing both sides counts as evidence **only when** the target has been removed."
+        },
+        {
+          "signs": "Says the problem is that bidirectional attention lets positions see future tokens, so a causal mask would make the low loss trustworthy.",
+          "reteach": "In masked-token prediction the target is meant to be hidden **in the input**, by replacing it with `[MASK]`. A causal mask does not close this leak, because a position can still attend to itself, and its own token is the target. Restoring the replacement fixes the bug and keeps both sides of context available."
+        },
+        {
+          "signs": "Says the model definitely learned nothing about context, or that the loss must be near zero, treating the shortcut as a certain outcome.",
+          "reteach": "The point is narrower. A visible target makes copying **available**, so low loss stops being evidence of contextual prediction. The model might still pick up some context use. You just cannot tell from this loss, because both explanations fit it."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Encoder-only, encoder-decoder, decoder-only",
+      "explain": "Steps 1–2 gave you two pairings. **Bidirectional** attention means every token sees the whole input, and it suits **masked-token prediction**. **Causal** attention means each token sees only earlier tokens, and it suits **next-token prediction**.\n\nA transformer family is defined by its stacks: whether the model has an encoder, a decoder or both. That choice sets which positions each stack can see and what kind of output the model produces. The training objective is a separate choice made when the model is pretrained. The family does not dictate it. The three standard examples below each use a different objective: masked-token prediction for BERT, span corruption for T5 and next-token prediction for GPT-style models.\n\n| Family (example) | Stacks and attention | The example's pretraining objective | Output |\n|---|---|---|---|\n| Encoder-only (BERT) | One encoder, bidirectional | Masked-token prediction (BERT also uses sentence-level objectives) | One contextual vector per token, or a pooled vector. No open-ended text |\n| Encoder-decoder (T5) | The encoder reads the source bidirectionally. The decoder is causal over its own earlier tokens and also attends to the encoder output | Span corruption: the encoder reads input with spans removed, and the decoder generates the missing spans | A generated target sequence, separate from the source |\n| Decoder-only (GPT-style) | One decoder, causal | Next-token prediction | A continuation of the prompt, one token at a time |\n\n**Example: the same input in all three families.** The input is \"The cat sat on the mat.\"\n\n- **Encoder-only:** \"cat\" can attend to \"mat\" as well as to \"The\", so its vector uses context from both sides. A task head reads those vectors and, for example, labels the sentence. No new text is written, because there is no autoregressive decoder.\n- **Encoder-decoder:** the encoder builds bidirectional vectors for the whole sentence. The decoder then writes a *different* sequence, such as a French translation. Each new target token sees the target tokens already written plus the full encoded source.\n- **Decoder-only:** the sentence is the prompt. The model predicts the next token from everything before it, appends that token and repeats. GPT-style training already used the causal mask, so the same stack can generate text without any change.\n\nTwo boundaries matter. First, \"generates text\" does not mean decoder-only: an encoder-decoder also generates, but from a separately encoded source. Second, the typical uses (classification for BERT, translation for T5, chat for GPT) are common fits, not hard limits. See [[Home/AI & ML/LLM/LLM#Transformer Families|Transformer Families]].",
+      "connect": "Step 2 matched each kind of visibility to an objective. Here, the stacks a model has and the attention each stack uses define the three families, and BERT, T5 and GPT show which objective each example uses. Step 4 uses these families to choose one for a new task.",
+      "checkFirst": false,
+      "check": {
+        "id": "k3",
+        "type": "cloze",
+        "goal": "recognise",
+        "objective": "llm-mechanics",
+        "prompt": "A hypothetical transformer model turns a bug report into a short title. It has two stacks. The first stack reads the whole bug report, and every position can attend to every other position in the report. The second stack writes the title one token at a time. Each title token attends causally to the title tokens already written and also attends to the first stack's output.\n\nFill in the blank with the transformer family this model belongs to: encoder-only, encoder-decoder or decoder-only.\n\nThe model is {{family}}.",
+        "marks": 1,
+        "blanks": [
+          {
+            "id": "family",
+            "answers": [
+              "encoder-decoder",
+              "encoder decoder",
+              "an encoder-decoder model",
+              "encoder-decoder model",
+              "encoder–decoder"
+            ]
+          }
+        ],
+        "rubric": [
+          {
+            "point": "Identifies the model as encoder-decoder",
+            "marks": 1
+          }
+        ],
+        "model": "The model is **encoder-decoder**.",
+        "source": {
+          "path": "Home/AI & ML/LLM/LLM.md",
+          "heading": "Transformer Families"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Answers decoder-only because the model writes the title one token at a time.",
+          "reteach": "Both generative families write output one token at a time with a causal decoder. The difference is where the source comes from. In this model, the decoder attends to the output of a *separate* bidirectional stack that read the bug report. That separate stack is an encoder, so the model is encoder-decoder. A decoder-only model has a single causal stack, and the prompt is simply its earliest tokens."
+        },
+        {
+          "signs": "Answers encoder-only because one stack reads the whole report bidirectionally.",
+          "reteach": "Bidirectional reading is the encoder half. An encoder-only model stops there: it returns one vector per token, or a pooled vector, for a task head to use, and it writes no new tokens. This model also has a second stack that generates title tokens while attending to the encoder output. An encoder plus a generating decoder makes it encoder-decoder."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Apply families, weights and context to a new case",
+      "explain": "You already know that only further training changes a model's weights. Two more questions decide most design choices.\n\n**1. Which family?** Pick the family by the output the task needs, not by which model is most popular ([[Home/AI & ML/LLM/LLM#Transformer Families|Transformer Families]]):\n- You need a label, a score or an embedding for an input you already have. An **encoder-only** model (BERT-style) fits, because bidirectional attention lets every token use the whole input.\n- You need a new text generated from a separate source text, such as a translation or a summary. An **encoder-decoder** model (T5-style) fits.\n- You need an open-ended continuation, such as a chat reply, code or a tool call. A **decoder-only** model (GPT-style) fits, because its causal mask lets it generate one token at a time.\n\n**2. Does this change alter the weights or only the context?** The **context window** is the token budget visible to one model call: instructions, history, evidence, tool results and room for the output ([[Home/AI & ML/LLM/LLM#Minimal Vocabulary|Minimal Vocabulary]]). Anything you put in the prompt conditions *that call only*. The weights stay as they were. Pretraining, supervised fine-tuning and preference optimisation are training stages, so they do change the weights ([[Home/AI & ML/LLM/LLM#Training Pipeline|Training Pipeline]]).\n\n**Example: a policy assistant.** Staff ask questions about an internal policy handbook that changes every month.\n- First, the system has to decide which handbook passages are relevant. Scoring passages against a question is a scoring task, so an encoder-only reranker fits.\n- Next, it has to write an answer in prose. That is open-ended generation, so a decoder-only model fits.\n- On each request, the current passages are pasted into the prompt. That is inference context. When the handbook changes, no retraining is needed: the next request simply carries the new text.\n- Fine-tuning the model on example answers would change its weights. That can make the style more consistent, but facts stored in weights are harder to update than retrieved text.\n- The answer may read smoothly and still misstate a rule. The model produces likely-sounding tokens, not checked facts. So the answer stays a candidate until it is checked against the retrieved passage ([[Home/AI & ML/LLM/LLM|LLM]]: \"Fluent output remains a candidate result until grounding and validation support it\").",
+      "connect": "Steps 1–3 showed how the mask and the pretraining objective define each family. This step uses that to choose a model for a task. It also separates changes to the weights from changes to the context, and treats fluent output as unverified, which completes the lesson goal.",
+      "checkFirst": false,
+      "check": {
+        "id": "k4",
+        "type": "short",
+        "goal": "apply",
+        "objective": "llm-mechanics",
+        "prompt": "A team uses a deployed decoder-only model to sort support tickets into categories. No training or fine-tuning is run. For request A, the prompt contains three example tickets with their correct categories, followed by a new ticket. The model labels the new ticket correctly. Each request is a separate model call. Request B, sent afterwards, contains only a new ticket with no examples.\n\nPredict whether the model's behaviour on request B benefits from the examples in request A, and explain why.",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "Predicts that request B does not benefit from the examples: the model behaves as if it had never seen them.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that the examples were only inference context for request A's call. Prompts do not update weights; only training does, so nothing carries over to a separate call.",
+            "marks": 1
+          }
+        ],
+        "model": "No. Request B gets no benefit from request A's examples. Those examples were only part of request A's context window. They conditioned that one call and did not change the weights, because only training updates weights. Request B is a separate call without the examples, so the model behaves as it did before request A.",
+        "source": {
+          "path": "Home/AI & ML/LLM/LLM.md",
+          "heading": "Minimal Vocabulary"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Says the model \"learned\" the categories from request A and will now classify better, as if prompting were a form of training.",
+          "reteach": "Learning that lasts lives in the weights, and weights change only during training stages such as pretraining, fine-tuning or preference optimisation. A prompt is read during inference. The weights are fixed for that call and are not written back afterwards. For the examples to help request B, they must either be put into request B's prompt again or be used as fine-tuning data."
+        },
+        {
+          "signs": "Says request B benefits because the model \"remembers\" earlier requests or keeps the conversation in its context.",
+          "reteach": "The context window covers one model invocation. A chat interface only seems to remember because the application resends earlier messages inside the next prompt. In this case, request B's prompt contains only the new ticket, so request A's examples are not visible to the model."
+        },
+        {
+          "signs": "Argues that because request A's answer was correct, the examples have been validated and can be trusted for later tickets.",
+          "reteach": "One correct, fluent answer is a single candidate result. It does not show that the model has reliably learned the categories, and it does not change the model. Reliability is measured with evaluation over many tickets. Each call's output still needs checking."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "unknown": true
+      },
+      "mark": {
+        "score": 0,
+        "awarded": [
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "reply": "No problem. Read the explanation, then look at the model answer."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "unknown": true
+      },
+      "mark": {
+        "score": 0,
+        "awarded": [
+          false,
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "reply": "No problem. Read the explanation, then look at the model answer."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "unknown": true
+      },
+      "mark": {
+        "score": 0,
+        "awarded": [
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "reply": "No problem. Read the explanation, then look at the model answer."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "unknown": true
+      },
+      "mark": {
+        "score": 0,
+        "awarded": [
+          false,
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "reply": "No problem. Read the explanation, then look at the model answer."
+    }
+  ],
+  "current": 3,
+  "probe": {
+    "questions": [
+      {
+        "id": "p1",
+        "type": "mcq",
+        "prompt": "A language model reads text as **tokens**. What is a token?",
+        "options": [
+          "An integer ID for a piece of text, produced by a specific tokenizer",
+          "One whole word, the same in every model",
+          "A vector that one model layer outputs for each sentence",
+          "A single character, encoded the same way in every model"
+        ],
+        "answer": 0,
+        "marks": 1,
+        "rubric": [
+          {
+            "point": "Picks the integer ID produced by a specific tokenizer",
+            "marks": 1
+          }
+        ],
+        "model": "An integer ID for a piece of text, produced by a specific tokenizer.",
+        "source": {
+          "path": "Home/AI & ML/LLM/LLM.md",
+          "heading": "Minimal Vocabulary"
+        },
+        "goal": "recall"
+      },
+      {
+        "id": "p2",
+        "type": "mcq",
+        "prompt": "In a transformer, **attention** lets each token position take information from other positions. A **causal mask** is applied during next-token prediction. Which positions can token position 5 attend to under a causal mask?",
+        "options": [
+          "Positions 1–5 only, so nothing later than itself",
+          "All positions in the input, earlier and later",
+          "Positions 6 onward only, so nothing earlier",
+          "Only position 4, the one directly before it"
+        ],
+        "answer": 0,
+        "marks": 1,
+        "rubric": [
+          {
+            "point": "Picks positions 1–5 (itself and earlier positions only)",
+            "marks": 1
+          }
+        ],
+        "model": "Positions 1–5 only. A causal mask hides later tokens, so the model cannot see the answer it is trying to predict.",
+        "source": {
+          "path": "Home/AI & ML/LLM/LLM.md",
+          "heading": "Transformer Families"
+        },
+        "goal": "explain"
+      },
+      {
+        "id": "p3",
+        "type": "mcq",
+        "prompt": "A team has a trained language model. Which change alters the model's **weights** (its learned parameters)?",
+        "options": [
+          "Training it further on example instruction–response pairs",
+          "Adding retrieved documents to the prompt for each request",
+          "Rewriting the system instructions sent with each request",
+          "Lowering the sampling temperature when generating output"
+        ],
+        "answer": 0,
+        "marks": 1,
+        "rubric": [
+          {
+            "point": "Picks further training on examples as the only change that updates weights",
+            "marks": 1
+          }
+        ],
+        "model": "Training it further on instruction–response pairs. The other options change only the input or the decoding at inference time; the weights stay the same.",
+        "source": {
+          "path": "Home/AI & ML/LLM/LLM.md",
+          "heading": "Training Pipeline"
+        },
+        "goal": "recognise"
+      }
+    ],
+    "answers": {
+      "p1": {
+        "choice": 0,
+        "confidence": "sure"
+      },
+      "p2": {
+        "choice": 1,
+        "confidence": "guess"
+      },
+      "p3": {
+        "choice": 0,
+        "confidence": "sure"
+      }
+    },
+    "note": "These questions check three basics the lesson depends on: what a token is, what a causal attention mask does, and the difference between changing a model's weights and changing its input at inference time.",
+    "submitted": true,
+    "marks": {
+      "p1": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      },
+      "p2": {
+        "score": 0,
+        "awarded": [
+          false
+        ],
+        "annotations": [],
+        "mistake": "misconception",
+        "feedback": "The answer is “Positions 1–5 only, so nothing later than itself”."
+      },
+      "p3": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      }
+    },
+    "findings": "You know what a token is and that further training is what changes weights. You guessed on causal masking and chose bidirectional attention."
+  },
+  "map": {
+    "title": "Attention visibility and transformer families",
+    "plan": "You already know tokens and weight updates, so we start at the gap: which positions each attention type can see. Then we link that to pretraining objectives and the three families. We finish by applying the families and the inference-versus-training split to a new case, treating fluent output as unverified.",
+    "mermaid": "graph TD\nA[\"Token = tokenizer ID; training changes weights\"] --> B[\"Causal vs bidirectional attention\"]\nB --> C[\"Objective follows visibility: masked vs next-token\"]\nC --> D[\"Encoder-only, encoder-decoder, decoder-only\"]\nD --> E[\"Pick a family and separate weights, context, output trust\"]",
+    "objective": "llm-mechanics",
+    "steps": [
+      {
+        "title": "Causal versus bidirectional attention",
+        "why": "You should state which positions a token can attend to under each mask and why causal masking is needed for next-token prediction. It builds on knowing a token is an ID in a sequence and introduces masking only, not families."
+      },
+      {
+        "title": "Objectives that follow from visibility",
+        "why": "You should explain why bidirectional context fits masked-token prediction while causal context fits next-token prediction. It needs step 1 and leaves the family comparison to the next step."
+      },
+      {
+        "title": "Encoder-only, encoder-decoder, decoder-only",
+        "why": "You should distinguish BERT, T5 and GPT-style models by attention, objective and output, using steps 1–2. Sparse-expert routing belongs to a later lesson."
+      },
+      {
+        "title": "Apply families, weights and context to a new case",
+        "why": "You should choose a family for a task. You should also say whether a change alters weights or only inference context, and why fluent output is still unverified. This exercises the goal using your demonstrated weights knowledge."
+      }
+    ]
+  },
+  "stepsFor": "[\"Attention visibility and transformer families\",\"You already know tokens and weight updates, so we start at the gap: which positions each attention type can see. Then we link that to pretraining objectives and the three families. We finish by applying the families and the inference-versus-training split to a new case, treating fluent output as unverified.\",[[\"Causal versus bidirectional attention\",\"You should state which positions a token can attend to under each mask and why causal masking is needed for next-token prediction. It builds on knowing a token is an ID in a sequence and introduces masking only, not families.\"],[\"Objectives that follow from visibility\",\"You should explain why bidirectional context fits masked-token prediction while causal context fits next-token prediction. It needs step 1 and leaves the family comparison to the next step.\"],[\"Encoder-only, encoder-decoder, decoder-only\",\"You should distinguish BERT, T5 and GPT-style models by attention, objective and output, using steps 1–2. Sparse-expert routing belongs to a later lesson.\"],[\"Apply families, weights and context to a new case\",\"You should choose a family for a task. You should also say whether a change alters weights or only inference context, and why fluent output is still unverified. This exercises the goal using your demonstrated weights knowledge.\"]]]",
+  "accepted": true,
+  "finishedAt": 1794298974707,
+  "close": {
+    "summary": "Lesson built from the gap in the probe: what each attention type lets a position see. Causal attention lets a position attend only to earlier tokens. Bidirectional attention lets every token attend to the whole input. Visibility decides the pretraining objective. Causal attention pairs with next-token prediction. Bidirectional attention pairs with masked-token prediction, as in BERT, or with T5-style span corruption, where the encoder reads the corrupted input and the decoder generates the missing spans. Those pairings give the three families. Encoder-only models produce representations. Encoder-decoder models generate a target from an encoded source. Decoder-only models generate a continuation. The lesson then separated training, which changes weights, from inference, where the prompt and context only condition a fixed model. It placed MoE routing inside one model, not as a choice between models. Fluent output was treated as unverified.\n\n**What the student showed:** they answered \"didn't know\" on all four steps (0/6 checks). The probe also showed a reversed idea: they picked bidirectional attention for next-token generation. Everything here needs early review, starting with how causal masking links to next-token prediction.",
+    "cards": [
+      {
+        "front": "In causal attention versus bidirectional attention, which positions can a token attend to?",
+        "back": "Causal: only earlier positions (and itself), because a mask hides later tokens. Bidirectional: every position in the input, on both sides."
+      },
+      {
+        "front": "Why does a decoder-only model such as GPT use causal attention rather than bidirectional attention?",
+        "back": "It trains on next-token prediction. If a position could see later tokens, it would see the answer. The causal mask also lets the same stack continue a prompt one token at a time at inference."
+      },
+      {
+        "front": "Give the attention pattern, pretraining objective and output of the encoder-only, encoder-decoder and decoder-only families.",
+        "back": "Encoder-only (BERT): bidirectional attention, masked-token prediction, contextual representations. Encoder-decoder (T5): a bidirectional encoder plus a causal decoder that attends to the encoder; span corruption; a generated target sequence. Decoder-only (GPT): causal attention, next-token prediction, a generated continuation."
+      },
+      {
+        "front": "Does putting examples or documents in an LLM's prompt change its weights? What does?",
+        "back": "No. At inference the context only conditions a fixed model. Weights change only through further training, such as fine-tuning. Fluent output from that context still needs checking."
+      }
+    ],
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-09 Distinguish transformer families, pretraining and adaptation.md",
+    "nextCheck": "2026-11-13"
+  }
+}

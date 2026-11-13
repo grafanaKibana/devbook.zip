@@ -4,10 +4,10 @@ subtopic: [Distributed Systems]
 summary: "Health checks expose bounded service signals whose consumers decide when to restart, stop routing, degrade, or alert."
 level: ["3"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 publish: true
 created: "2026-07-18T11:06:07.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-18T09:50:37.022Z"
 ---
 

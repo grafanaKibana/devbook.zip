@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "createdAt": 1794246338444,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "delegate-contracts",
+  "title": "Trace delegate invocation and captured state, including lifetime and multicast failure behavior",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "prompt": "Consider this C# code:\n\n```csharp\nstatic Func<int> MakeCounter()\n{\n    int count = 0;\n    return () => ++count;\n}\n\nvar next = MakeCounter();\n```\n\nWhy do successive calls to `next()` keep increasing the same counter even though `MakeCounter()` has returned?",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Explains that the returned delegate retains captured storage for count, allowing it to outlive the method call.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that successive invocations update the same captured variable rather than receiving a fresh copy or reinitializing it.",
+          "marks": 1
+        }
+      ],
+      "model": "The delegate keeps the captured storage for `count` alive after the method returns. Each invocation increments that same variable.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+        "heading": "Closures"
+      },
+      "objective": "delegate-contracts",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "mcq",
+      "prompt": "A C# multicast `Action` contains three handlers in this order: `Save`, `Notify`, and `Audit`. `Save` completes normally. `Notify` throws an exception that it does not catch. The caller invokes the delegate once inside a `try/catch`, catches the exception, and continues after the catch block.\n\nWhy does `Audit` not run during this invocation?",
+      "marks": 1,
+      "options": [
+        "The exception ends the multicast invocation; the caller's catch does not resume its remaining handlers.",
+        "The exception removes later handlers from the delegate; the caller's catch preserves the shortened list.",
+        "The exception rolls back earlier handlers; the caller's catch must commit them before later handlers run.",
+        "The exception pauses the multicast invocation; the caller's catch must invoke it again to resume at Audit."
+      ],
+      "answer": 0,
+      "rubric": [
+        {
+          "point": "Identifies that an uncaught handler exception terminates the multicast invocation, and catching it outside does not resume later entries.",
+          "marks": 1
+        }
+      ],
+      "model": "The exception ends the multicast invocation; the caller's catch does not resume its remaining handlers.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+        "heading": "Multicast Delegates"
+      },
+      "objective": "delegate-contracts",
+      "goal": "explain"
+    }
+  ],
+  "answers": {
+    "c1": {
+      "text": "We return func to increate count variable which is baked into the function",
+      "confidence": "unsure"
+    },
+    "c2": {
+      "choice": 0,
+      "confidence": "guess"
+    }
+  },
+  "marks": {
+    "c2": {
+      "score": 1,
+      "awarded": [
+        true
+      ],
+      "annotations": [],
+      "mistake": "none",
+      "feedback": "Correct."
+    },
+    "c1": {
+      "awarded": [
+        true,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "which is baked into the function",
+          "kind": "correct",
+          "note": "You recognise that the returned function carries the `count` variable with it. That covers the idea that the delegate retains captured storage."
+        },
+        {
+          "quote": "We return func to increate count variable",
+          "kind": "vague",
+          "note": "This doesn't say whether each call increments the same variable or a copy. You need to say that every call updates one shared captured variable, not a fresh one."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You didn't say that successive calls update the same variable instead of reinitializing it or using a copy."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You correctly said the variable is carried with the function, but you didn't explain that every call updates that same variable rather than a fresh copy.",
+      "score": 1
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1794301702095
+}

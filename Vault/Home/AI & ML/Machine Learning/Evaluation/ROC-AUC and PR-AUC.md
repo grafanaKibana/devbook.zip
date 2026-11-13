@@ -4,13 +4,13 @@ subtopic: [Machine Learning]
 summary: "Threshold-free ranking views: ROC-AUC for pairwise class ranking, PR-AUC for positive-alert quality when positives are rare."
 level: ["2"]
 priority: Medium
-status: Done
+status: In Progress
 publish: true
 qard-deck: "AI & ML"
 qard-topic: "Machine Learning/Evaluation/ROC-AUC and PR-AUC"
 flashcard_uid: "f1d9f3dc"
 created: "2026-02-17T23:29:46.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:28:37.418Z"
 ---
 

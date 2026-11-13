@@ -2,7 +2,7 @@
 publish: true
 title: Software Architecture Patterns
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-15T11:47:54.862Z
 tags:
   - FolderNote
@@ -14,7 +14,7 @@ summary: Reusable solutions to recurring design problems around boundaries, depe
 priority: High
 level:
   - "4"
-status: Done
+status: In Progress
 qard-deck: Software Architecture
 qard-topic: Patterns/Patterns
 flashcard_uid: cfaa4058

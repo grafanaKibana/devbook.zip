@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "createdAt": 1794246699363,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "demonstration-effects",
+  "title": "Choose and order demonstrations to establish the task and label space without leaking evaluation answers or wasting the context budget",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "mcq",
+      "prompt": "A model must classify messages as Request, Complaint, or Praise. Instructions already define these labels and the output format, but the model confuses requests with complaints. Context is tight, and evaluation messages and their answers must remain held out. Which demonstration strategy has the strongest justification?",
+      "marks": 1,
+      "options": [
+        "Use many easy, correctly labelled development examples because repetition makes label frequency more useful than boundary coverage.",
+        "Use a few correctly labelled evaluation messages because matching the measured cases makes their demonstrations more informative.",
+        "Use a compact development set covering all labels and the confusing boundary because it supplies relevant patterns while preserving input space.",
+        "Use only difficult complaint examples because concentrating on one confused label teaches the complete distinction most efficiently."
+      ],
+      "answer": 2,
+      "rubric": [
+        {
+          "point": "Selects the compact development set, which demonstrates the label space and confusing boundary without exposing evaluation answers or using excessive context.",
+          "marks": 1
+        }
+      ],
+      "model": "Use a compact development set covering all labels and the confusing boundary because it supplies relevant patterns while preserving input space.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
+        "heading": "Building a Demonstration Set"
+      },
+      "objective": "demonstration-effects",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "short",
+      "prompt": "A model classifies messages as Routine or Urgent. Two prompts contain identical instructions and correctly labelled demonstrations, but in different orders. On the same unseen messages, the order ending with an unusual Urgent example produces more Urgent predictions. Explain how demonstration order could cause this difference without any model weight updates.",
+      "marks": 1,
+      "rubric": [
+        {
+          "point": "Explains that later demonstrations can exert disproportionate influence on the next-token prediction, so the final Urgent example can bias predictions toward that label through prompt conditioning.",
+          "marks": 1
+        }
+      ],
+      "model": "Later demonstrations can influence predictions more strongly, so the final Urgent example can pull responses toward Urgent through prompt conditioning, without changing weights.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md",
+        "heading": "Recency Bias in Example Ordering"
+      },
+      "objective": "demonstration-effects",
+      "goal": "explain"
+    }
+  ],
+  "answers": {
+    "c1": {
+      "choice": 2,
+      "confidence": "sure"
+    },
+    "c2": {
+      "text": "It is recency bias which happens because of trasffromer alocatel stronger attention weights to the near tokens, and last example always closer to the first generated token.",
+      "confidence": "sure"
+    }
+  },
+  "marks": {
+    "c1": {
+      "score": 1,
+      "awarded": [
+        true
+      ],
+      "annotations": [],
+      "mistake": "none",
+      "feedback": "Correct."
+    },
+    "c2": {
+      "awarded": [
+        true
+      ],
+      "annotations": [
+        {
+          "quote": "It is recency bias",
+          "kind": "correct",
+          "note": "You identified recency bias: the final Urgent example has extra influence on the next prediction, which matches the core claim."
+        },
+        {
+          "quote": "last example always closer to the first generated token",
+          "kind": "insight",
+          "note": "Proximity to the generation point is a sound reason for the effect. 'Always' overstates it, but this does not change the mechanism."
+        }
+      ],
+      "mistake": "none",
+      "feedback": "Recency bias from the final Urgent example, with no weight change, is the expected explanation.",
+      "score": 1
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1794300320675
+}

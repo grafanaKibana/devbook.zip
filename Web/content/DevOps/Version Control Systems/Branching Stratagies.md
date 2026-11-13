@@ -2,7 +2,7 @@
 publish: true
 title: Branching Strategies
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.511Z
 topic:
   - DevOps
@@ -12,7 +12,7 @@ summary: How a team uses Git branches for parallel development, releases, and ho
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 A branching strategy is a coordination contract: where integration happens, how long work may diverge, which checks gate a merge, and how releases are cut. The fit follows release topology, review latency, and the team's ability to keep the integration branch healthy.

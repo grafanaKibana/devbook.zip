@@ -4,10 +4,10 @@ subtopic: [Algorithms]
 summary: "Builds a minimum spanning tree in parallel rounds by adding each component's cheapest outgoing edge."
 level: ["4"]
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 publish: true
 created: "2026-07-11T16:12:59.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-12T14:27:20.402Z"
 ---
 

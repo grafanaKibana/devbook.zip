@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-09T18:37:04.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T14:39:34.307Z
 tags:
   - FolderNote
@@ -13,7 +13,7 @@ summary: Priority-queue structures with an O(1) root peek, differing on meld and
 level:
   - "4"
 priority: Medium
-status: Done
+status: In Progress
 ---
 
 Heap-like structures share one contract: a **partial order** in which each parent outranks its children. Sibling order is unspecified. Peek is O(1) with a single-root layout or a maintained global-min pointer. Otherwise a forest must scan its roots.

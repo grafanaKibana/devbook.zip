@@ -4,13 +4,13 @@ subtopic: [NoSQL]
 summary: "How Elasticsearch maps and analyzes documents into Lucene segments, distributes shards, and serves search and aggregations."
 level: ["3"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Data Persistence"
 qard-topic: "NoSQL/Elasticsearch"
 flashcard_uid: "97b928ee"
 created: "2026-07-18T07:07:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-16T14:10:17.836Z"
 ---
 

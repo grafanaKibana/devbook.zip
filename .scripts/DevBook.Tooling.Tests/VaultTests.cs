@@ -9,7 +9,116 @@ namespace DevBook.Tooling.Tests;
 
 public sealed class VaultTests
 {
-    private const string VaultFrontmatter = "---\ntopic: [Programming]\nsubtopic: [NET]\nlevel: [\"2\"]\npriority: Medium\nstatus: Creation\npublish: false\n---\n";
+    private const string VaultFrontmatter = "---\ntopic: [Programming]\nsubtopic: [NET]\nlevel: [\"2\"]\npriority: Medium\nstatus: In Progress\npublish: false\n---\n";
+
+    [Theory]
+    [InlineData("New")]
+    [InlineData("In Progress")]
+    [InlineData("Established")]
+    public void FrontmatterAcceptsMaterialReadinessStatuses(string status)
+    {
+        // Arrange
+        NoteDocument note = NoteDocument.Parse(VaultFrontmatter.Replace("In Progress", status), "Vault/Home/Programming/Note.md");
+
+        // Act
+        IReadOnlyList<Issue> issues = Validation.ValidateFrontmatter(note);
+
+        // Assert
+        issues.Should().BeEmpty();
+    }
+
+    [Theory]
+    [InlineData("Not-Started")]
+    [InlineData("Creation")]
+    [InlineData("Ready to Repeat")]
+    [InlineData("Repetition")]
+    [InlineData("Done")]
+    public void FrontmatterRejectsRetiredStatuses(string status)
+    {
+        // Arrange
+        NoteDocument note = NoteDocument.Parse(VaultFrontmatter.Replace("In Progress", status), "Vault/Home/Programming/Note.md");
+
+        // Act
+        IReadOnlyList<Issue> issues = Validation.ValidateFrontmatter(note);
+
+        // Assert
+        issues.Should().ContainSingle(issue => issue.Code == "frontmatter.status");
+    }
+
+    [Theory]
+    [InlineData("In Progress", "New", "In Progress")]
+    [InlineData("Established", "New", "New")]
+    [InlineData("Established", "Established", "Established")]
+    public void FolderRollupUsesMaterialReadinessStatuses(string first, string second, string expected)
+    {
+        // Arrange
+        using var vault = new RollupRollupVault();
+        vault.Write("Programming/Programming.md", "---\ntags: [FolderNote]\nstatus: unknown\npriority: High\nlevel: [\"2\"]\n---\nFolder body.\n");
+        vault.Write("Programming/First.md", VaultFrontmatter.Replace("In Progress", first));
+        vault.Write("Programming/Second.md", VaultFrontmatter.Replace("In Progress", second));
+
+        // Act
+        FolderRollupResult result = FolderRollup.Plan(vault.Home, vault.Root);
+
+        // Assert
+        result.Changes.Should().ContainSingle();
+        result.Changes[0].Content.Should().Contain($"status: {expected}\n").And.EndWith("Folder body.\n");
+    }
+
+    [Theory]
+    [InlineData("New")]
+    [InlineData("In Progress")]
+    [InlineData("Established")]
+    public void ForcedFolderRollupPreservesExplicitStatusAndRecomputesPriorityAndLevel(string status)
+    {
+        // Arrange
+        using var vault = new RollupRollupVault();
+        vault.Write("Programming/Programming.md", $"---\ntags: [FolderNote]\nstatus: {status}\npriority: Low\nlevel: [\"1\"]\n---\nFolder body.\n");
+        vault.Write("Programming/First.md", VaultFrontmatter);
+
+        // Act
+        FolderRollupResult result = FolderRollup.Sync(vault.Home, write: true, force: true, repoRoot: vault.Root);
+
+        // Assert
+        result.Changes.Should().ContainSingle();
+        result.Changes[0].Details.Should().Equal("priority: Low -> Medium", "level: 1 -> 2");
+        string current = File.ReadAllText(Path.Combine(vault.Home, "Programming/Programming.md"));
+        current.Should().Contain($"status: {status}\n").And.Contain("priority: Medium\n").And.Contain("level:\n  - \"2\"\n")
+            .And.EndWith("Folder body.\n");
+        if (status != "Established")
+        {
+            current.Should().NotContain("Established");
+        }
+    }
+
+    [Theory]
+    [InlineData("Established", "Established", "4")]
+    [InlineData("Established", "In Progress", "2")]
+    [InlineData("In Progress", "New", "1")]
+    public void RoadmapAggregatesMaterialReadinessAndShowsThreeStageLegend(string first, string second, string color)
+    {
+        // Arrange
+        using var vault = new RollupRollupVault();
+        vault.Write("Programming/Programming.md", "---\ntags: [FolderNote]\nstatus: Established\n---\n");
+        vault.Write("Programming/First.md", VaultFrontmatter.Replace("In Progress", first));
+        vault.Write("Programming/Second.md", VaultFrontmatter.Replace("In Progress", second));
+
+        // Act
+        RoadmapResult result = Roadmap.Generate(vault.Root);
+
+        // Assert
+        result.InvalidStatuses.Should().BeEmpty();
+        JsonObject[] nodes = result.Canvas["nodes"]!.AsArray().OfType<JsonObject>().ToArray();
+        nodes.Single(node => node["text"]?.GetValue<string>().StartsWith("# [[Home/Programming/", StringComparison.Ordinal) == true)
+            ["color"]!.GetValue<string>().Should().Be(color);
+        string[] legend = nodes.Select(node => node["text"]?.GetValue<string>() ?? "")
+            .Where(text => text.StartsWith("New:", StringComparison.Ordinal)
+                || text.StartsWith("In Progress:", StringComparison.Ordinal)
+                || text.StartsWith("Established:", StringComparison.Ordinal)).ToArray();
+        legend.Should().HaveCount(3);
+        legend.Should().Contain($"{(color == "1" ? "New" : color == "2" ? "In Progress" : "Established")}: 1");
+        nodes.Single(node => node["type"]?.GetValue<string>() == "group")["height"]!.GetValue<int>().Should().Be(378);
+    }
 
     [Fact]
     public void Shared_parser_preserves_native_card_identity_and_ignores_documented_cards()

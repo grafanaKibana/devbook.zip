@@ -4,10 +4,10 @@ subtopic: [Data Structures]
 summary: "A self-balancing search tree with page-sized many-key nodes, keeping disk-resident indexes shallow."
 level: ["4"]
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 publish: true
 created: "2026-07-09T18:37:04.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-10T14:39:34.306Z"
 ---
 

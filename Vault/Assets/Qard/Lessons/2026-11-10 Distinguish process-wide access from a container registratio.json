@@ -1,0 +1,409 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md",
+      "text": "---\ntopic: [Software Architecture]\nsubtopic: [Patterns]\nsummary: \"Uses a container-managed singleton lifetime when one shared, thread-safe instance should serve a provider boundary.\"\nlevel: [\"2\"]\npriority: High\nstatus: Done\npublish: true\nqard-deck: \"Software Architecture\"\nqard-topic: \"Patterns/Design Patterns/Creational/Singleton\"\nflashcard_uid: \"12bb55c5\"\ncreated: \"2026-03-05T22:12:38.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.451Z\"\n---\n\nSingleton combines two decisions: keep one instance within a defined boundary and provide access to it. The boundary is easy to miss. A classical static implementation owns a process-level access point, while `.AddSingleton<T>()` reuses one instance for subsequent resolutions from a particular root service provider and registration. A second provider or direct construction can still create another instance.\n\nApplication services normally need container-managed lifetime rather than global static access. Constructor injection keeps the dependency visible, lets the container dispose it, and exposes lifetime mistakes during validation. The classical form remains relevant when a library genuinely owns a single access point without a DI container.\n\n```mermaid\nflowchart TD\n    subgraph Classical Singleton\n        PrivateCtor[\"private constructor\"] --> StaticInstance[\"static instance field\"]\n        StaticInstance --> GlobalAccess[\"global access point\"]\n    end\n    subgraph Modern DI Singleton\n        Registration[\"AddSingleton of T\"] --> Container[\"DI Container\"]\n        Container -->|manages lifetime| SingleInstance[\"single instance\"]\n        Container -->|injects into| ServiceA[\"Service A\"]\n        Container -->|injects into| ServiceB[\"Service B\"]\n    end\n```\n\n# Problem\n\nThe classical form below enforces access through `AppConfig.Instance`, but it also hides the dependency from every consumer:\n\n```csharp\n// Classical Singleton — the pattern most tutorials show\npublic class AppConfig\n{\n    private static AppConfig? _instance;\n    private static readonly object _lock = new();\n\n    // ⚠️ Private constructor prevents DI container from creating instances\n    private AppConfig()\n    {\n        ConnectionString = Environment.GetEnvironmentVariable(\"DB_CONNECTION\")!;\n        MaxOrdersPerHour = int.Parse(Environment.GetEnvironmentVariable(\"MAX_ORDERS\") ?? \"100\");\n    }\n\n    // ⚠️ Double-checked locking — easy to get wrong, unnecessary with Lazy<T>\n    public static AppConfig Instance\n    {\n        get\n        {\n            if (_instance is null)\n            {\n                lock (_lock)\n                {\n                    _instance ??= new AppConfig();\n                }\n            }\n            return _instance;\n        }\n    }\n\n    public string ConnectionString { get; }\n    public int MaxOrdersPerHour { get; }\n}\n\npublic class OrderService\n{\n    public async Task PlaceOrderAsync(Order order)\n    {\n        // ⚠️ Hidden dependency — not visible in constructor, can't be mocked in tests\n        var config = AppConfig.Instance;\n        if (await GetOrderCountLastHourAsync(order.Customer.Id) >= config.MaxOrdersPerHour)\n            throw new RateLimitException(\"Order rate limit exceeded\");\n        // ...\n    }\n}\n```\n\n`OrderService` can no longer declare or replace the configuration it uses. Tests inherit environment access and shared state, and lifetime policy is fixed inside the dependency instead of at the composition root.\n\n# Solution\n\nA normal service registered with singleton lifetime is injected into its consumers. The container controls creation and disposal. The consumer only knows its contract.\n\n```csharp\n// ✅ Plain class — no static members, no private constructor\npublic interface IAppConfig\n{\n    string ConnectionString { get; }\n    int MaxOrdersPerHour { get; }\n}\n\npublic class AppConfig : IAppConfig\n{\n    public string ConnectionString { get; init; }\n    public int MaxOrdersPerHour { get; init; }\n\n    public AppConfig(IConfiguration configuration)\n    {\n        ConnectionString = configuration.GetConnectionString(\"Default\")\n            ?? throw new InvalidOperationException(\"DB connection string not configured\");\n        MaxOrdersPerHour = configuration.GetValue<int>(\"RateLimiting:MaxOrdersPerHour\", 100);\n    }\n}\n\n// ✅ Register as singleton in DI — one instance for this service contract\nbuilder.Services.AddSingleton<IAppConfig, AppConfig>();\n\n// ✅ OrderService declares its dependency explicitly\npublic class OrderService(IAppConfig config, IOrderRepository repository)\n{\n    public async Task PlaceOrderAsync(Order order)\n    {\n        // ✅ config is injected — can be mocked in tests\n        if (await repository.GetOrderCountLastHourAsync(order.Customer.Id) >= config.MaxOrdersPerHour)\n            throw new RateLimitException(\"Order rate limit exceeded\");\n        await repository.SaveAsync(order);\n    }\n}\n\n// ✅ Test: inject a mock config with controlled values\n[Fact]\npublic async Task PlaceOrder_ExceedsRateLimit_Throws()\n{\n    var config = Substitute.For<IAppConfig>();\n    config.MaxOrdersPerHour.Returns(5);\n    var repository = Substitute.For<IOrderRepository>();\n    repository.GetOrderCountLastHourAsync(Arg.Any<Guid>()).Returns(5);\n\n    var service = new OrderService(config, repository);\n    await Assert.ThrowsAsync<RateLimitException>(() =>\n        service.PlaceOrderAsync(new Order { Customer = new Customer { Id = Guid.NewGuid() } }));\n}\n\n// When lazy initialization is genuinely needed (e.g., expensive resource):\npublic class ExpensiveConnectionPool\n{\n    // ✅ Lazy<T> is thread-safe by default, no manual locking needed\n    private static readonly Lazy<ExpensiveConnectionPool> _instance =\n        new(() => new ExpensiveConnectionPool());\n\n    public static ExpensiveConnectionPool Instance => _instance.Value;\n    private ExpensiveConnectionPool() { /* expensive initialization */ }\n}\n```\n\n# Singleton Lifetime in .NET\n\n**`services.AddSingleton<T>()`** caches one service instance in the root provider and returns it for later resolutions. This is a lifetime rule, not proof that no other instance can exist.\n\n**`Lazy<T>`** supplies thread-safe deferred initialization for a classical implementation. It removes hand-written double-checked locking, but it does not remove global state or hidden dependencies.\n\nSingleton services may be stateless or hold shared state. Either way, their implementations and any mutable dependencies must be safe for concurrent callers.\n\n# Pitfalls\n\n**Captive dependency.** A singleton that constructor-injects a scoped service keeps that instance beyond its intended scope. Scope validation rejects this graph. Work that genuinely needs scoped state either creates and disposes an explicit scope for the operation or moves to a scoped service.\n\n**Shared mutable state.** One instance may serve concurrent requests. The container makes resolution thread-safe. It does not make the service's fields or dependencies thread-safe.\n\n**Oversized lifetime.** A singleton retains its dependency graph until the provider is disposed. Large caches, failed state, or request-specific data can then survive far longer than intended.\n\n**Multiple roots.** Calling `BuildServiceProvider` during registration creates another container and therefore another singleton set. The sound structure keeps one composition root and avoids static service locators.\n\n# Questions\n\n<!-- qard-id: 3ccef885-1fa9-4646-9ab0-8a9a97b1da4e -->\n> [!qard]- How does a DI singleton differ from the classical Singleton pattern?\n> A classical Singleton enforces a single instance inside the class itself and exposes it through a global static access point. A DI singleton is an ordinary class that the container creates once per root provider and injects into consumers, so its single instance is a container lifetime rule rather than a property of the type.\n>\n> | Aspect | Classical Singleton | DI singleton |\n> |---|---|---|\n> | Who enforces one instance | The type itself, through a private constructor and a static instance field, often initialized with `Lazy<T>`. | The container: after `AddSingleton<T>()`, the root provider creates the instance on first request and returns the same one for later resolutions. |\n> | How consumers get it | Through a static access point such as `AppConfig.Instance`, so the dependency is hidden inside method bodies. | Through constructor injection, so the dependency is visible in the consumer's constructor. |\n> | How far the single instance extends | Every caller of the static access point shares it. | One root provider and registration. A second provider, such as one created by calling `BuildServiceProvider` again, or direct construction with `new` produces another instance. |\n> | Testing and replacement | Consumers cannot be handed a substitute, and tests share the static state. | Tests pass a fake or substitute to the consumer's constructor. |\n> | Creation and disposal | Controlled by the type. | Controlled by the container, which disposes instances it created when the provider is disposed. |\n>\n> In both forms, one instance serves concurrent callers, so the instance's own state must be thread-safe.\n>\n> [Microsoft: Service lifetimes](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/service-lifetimes) · [Microsoft: .NET dependency injection](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview) · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Problem|Classical Singleton problem]] · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Singleton Lifetime in .NET|Singleton lifetime in .NET]]\n\n<!-- qard-id: 8f445829-cfc8-4081-9059-c663ca0a2d49 -->\n> [!qard]- What must be true before choosing singleton lifetime for mutable state?\n> Singleton lifetime suits mutable state only when four conditions hold: sharing is intended, concurrent access is safe, retained memory is bounded, and no scoped state is captured. One instance serves every caller of its provider until the provider is disposed, usually at application shutdown, so each condition guards against a specific failure.\n>\n> - **Sharing is intended:** every request and user resolved from that provider sees the same state. If the data really belongs to one request or one user, it leaks between callers.\n> - **Concurrent access is safe:** one instance serves concurrent requests. The container makes resolving the service thread-safe, but not the service's fields or dependencies, so unsynchronized mutation causes races and corrupted state.\n> - **Retained memory is bounded:** the singleton and its dependency graph live as long as the provider. An unbounded cache keeps growing, and failed or stale state survives far longer than intended.\n> - **No scoped state is captured:** a singleton that holds a scoped service keeps that instance beyond its intended scope. This is a captive dependency. When scope validation is enabled, it rejects constructor-injecting a scoped service into a singleton.\n>\n> When any condition fails, a shorter lifetime such as scoped or transient fits better, or the state needs a different owner. Singleton work that genuinely needs scoped services can create and dispose an explicit scope for each operation.\n>\n> [Microsoft: Dependency injection guidelines](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines) · [Microsoft: Service lifetimes](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/service-lifetimes) · [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Pitfalls|Singleton pitfalls]]\n\n# References\n\n- [Singleton pattern](https://refactoring.guru/design-patterns/singleton)\n- [Singleton Pattern — Christopher Okhravi](https://www.youtube.com/watch?v=hUE_j6q0LTQ&list=PLrhzvIcii6GNjpARdnO4ueTUAVR9eMBpc&index=6)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1794341324351,
+  "topic": "Distinguish process-wide access from a container registration lifetime and account for concurrency, disposal, and hidden global dependencies",
+  "notes": [
+    "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md"
+  ],
+  "mastery": "Assets/Qard/Courses/Software Architecture Mastery.md",
+  "course": "Software Architecture",
+  "objective": "singleton-scope",
+  "steps": [
+    {
+      "title": "Process-wide access vs registration lifetime",
+      "explain": "Both forms are called \"singleton\", but they answer different questions. One asks **who can reach the instance**. The other asks **who caches it, and for how long**. You already know how a scope bounds one instance. A singleton registration has the same kind of boundary, just a wider one.\n\n**Classical (static) singleton.** The type stores its own instance in a `static` field and exposes it as `Instance`, with a private constructor. Any code in the process that reads `Clock.Instance` gets the same object. The type enforces this itself, and no container is involved.\n\n**Container singleton.** `services.AddSingleton<Clock>()` is a lifetime rule. The **root provider** (the `ServiceProvider` built from the registrations) creates `Clock` on the first request, caches it, and returns that cached object for later resolutions *from that provider and that registration*. Nothing stops another instance from existing elsewhere.\n\n```csharp\nvar services = new ServiceCollection();\nservices.AddSingleton<Clock>();          // Clock has a public constructor\n\nvar rootA = services.BuildServiceProvider();\nvar rootB = services.BuildServiceProvider();\n\nConsole.WriteLine(object.ReferenceEquals(\n    rootA.GetRequiredService<Clock>(), rootA.GetRequiredService<Clock>())); // True: same provider\nConsole.WriteLine(object.ReferenceEquals(\n    rootA.GetRequiredService<Clock>(), rootB.GetRequiredService<Clock>())); // False: each root has its own cache\nConsole.WriteLine(object.ReferenceEquals(\n    new Clock(), rootA.GetRequiredService<Clock>()));                        // False: new bypasses the container\n```\n\n`object.ReferenceEquals` checks whether two references point to the same object, so the output shows object identity directly.\n\nSo the rule is \"one per root provider and registration\", not \"one per process\". A second provider (for example, from calling `BuildServiceProvider` again) or a direct `new` creates another object. The static form gives one per process because the type owns creation and the access point. See [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton|Singleton]] and [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Singleton Lifetime in .NET|Singleton lifetime in .NET]] (\"a lifetime rule, not proof that no other instance can exist\"). The [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Pitfalls|Multiple roots pitfall]] covers the same case.\n\nTo find the instance count, ask **where the object is actually created**. If the container constructs it, count the root providers. If something outside the container creates it, follow that code.",
+      "connect": "This builds on scoped lifetime: a singleton registration is also bounded, by the root provider instead of the scope. The next step uses the same distinction to show who disposes each form and why a static access point hides a dependency.",
+      "checkFirst": false,
+      "check": {
+        "id": "k1",
+        "type": "mcq",
+        "goal": "apply",
+        "objective": "singleton-scope",
+        "prompt": "`AppConfig` is a classical singleton. It has a private constructor and a static `AppConfig.Instance` property that always returns the same object once it has been created.\n\nAn application builds **two separate root providers**. Each one comes from its own `ServiceCollection` with this factory registration:\n\n```csharp\nservices.AddSingleton<AppConfig>(_ => AppConfig.Instance);\n```\n\nCode then resolves `AppConfig` several times from each provider. How many distinct `AppConfig` objects exist, and why?",
+        "options": [
+          "One: both providers call a factory that returns the same static `AppConfig.Instance`, so the static access point decides the count.",
+          "Two: each root provider caches its own singleton, so each provider holds a separate `AppConfig` object.",
+          "One per resolution: a factory registration skips caching, so every resolution calls the factory and builds a new `AppConfig`.",
+          "Two: the container constructs `AppConfig` itself for each provider and ignores the object the factory returns."
+        ],
+        "answer": 0,
+        "rubric": [
+          {
+            "point": "Chooses one instance, because each provider caches whatever its factory returns, and both factories return the same process-level static object.",
+            "marks": 1
+          }
+        ],
+        "marks": 1,
+        "model": "**One.** Each root provider calls its factory once and caches the result, but both factories return the same static `AppConfig.Instance`. Both caches therefore hold a reference to the same object.",
+        "source": {
+          "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md",
+          "heading": "Singleton Lifetime in .NET"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Chooses \"Two: each root provider caches its own singleton\".",
+          "reteach": "\"One per root provider\" counts **cache slots**, not objects. Each provider caches whatever its registration produces. Here the registration does not construct anything. It returns `AppConfig.Instance`, which is the same static object every time. Two caches holding one reference still means one object. To count instances, look at where the object is created, not at how many providers cache it."
+        },
+        {
+          "signs": "Chooses \"one per resolution\", treating a factory registration as transient.",
+          "reteach": "The lifetime comes from the method you call, not from whether you pass a factory. `AddSingleton(factory)` runs the factory once per root provider and returns the cached result on later resolutions. Only `AddTransient` would call it every time. Even then, this factory would keep returning the same static object."
+        },
+        {
+          "signs": "Chooses \"the container constructs AppConfig itself and ignores the factory\".",
+          "reteach": "When you register a factory, the container calls the factory and caches what it returns. It does not call the type's constructor itself. In this case it couldn't anyway, because `AppConfig`'s constructor is private. The object comes from `AppConfig.Instance`, so the static access point decides how many exist."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Disposal and hidden dependencies",
+      "explain": "You already distinguish lifetimes by how long an instance is reused. Cleanup adds another question: **who owns the instance?**\n\nWith Microsoft’s built-in DI container, `AddSingleton<IAppConfig, AppConfig>()` lets the container create the configuration. If that instance implements `IDisposable`, disposing the root provider disposes it. Consumers use the shared instance without disposing it themselves. An existing instance supplied through `AddSingleton(existingInstance)` remains the caller’s disposal responsibility. The note describes container-owned cleanup in [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Questions|the singleton comparison]].\n\nA static `AppConfig.Instance` has no automatic connection to provider disposal. If it owns a resource requiring cleanup, its owning library or application must arrange that cleanup explicitly. The note’s current `AppConfig` only holds configuration values; this disposal concern applies if it acquires disposable resources.\n\nConsider `OrderService` checking an order limit. When its method reads `AppConfig.Instance.MaxOrdersPerHour`, configuration affects its behaviour even though its constructor declares no configuration dependency. A test cannot pass a substitute to that access point; it inherits the shared configuration and its environment-based initialization. This is the [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Problem|hidden dependency in the classical example]].\n\nWith `OrderService(IAppConfig config, IOrderRepository repository)`, the constructor exposes what the service needs. Production can receive the container’s shared configuration, while a test supplies a fake configuration with a controlled limit. Sharing remains possible without requiring global access, as shown in [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Solution|the injected solution]].",
+      "connect": "The previous step separated a static access point from a provider’s reuse rule. That distinction now explains why disposal ownership and visible dependencies must be designed separately from instance sharing.",
+      "checkFirst": false,
+      "check": {
+        "id": "k2",
+        "type": "short",
+        "prompt": "An application uses Microsoft’s built-in DI container. `AppConfig.Instance` is a static instance that implements `IDisposable` and owns an open file handle. It is never registered with the container.\n\nThe application registers `OrderService` with `AddSingleton<OrderService>()`. Its constructor takes no parameters; its methods obtain configuration through `AppConfig.Instance`. `OrderService` has no cleanup logic, and no other code disposes the configuration.\n\nA developer claims: “Disposing the root provider will dispose `AppConfig.Instance`, because the container created `OrderService`.” Is this claim correct? Explain why.",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "Rejects the claim: disposing the provider will not dispose AppConfig.Instance in this setup.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that OrderService's static access does not give the container ownership of AppConfig; creating the consumer does not make the provider responsible for an unregistered object it accesses.",
+            "marks": 1
+          }
+        ],
+        "model": "No. `OrderService` accesses an independently owned static object; creating the consumer does not give the container ownership of that object’s disposal.",
+        "source": {
+          "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md",
+          "heading": "Questions"
+        },
+        "objective": "singleton-scope",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "The provider disposes every object used by a service it created.",
+          "reteach": "Container ownership does not spread through arbitrary method calls. Reading `AppConfig.Instance` does not register that object or transfer responsibility for its cleanup."
+        },
+        {
+          "signs": "Implementing IDisposable guarantees automatic disposal.",
+          "reteach": "`IDisposable` supplies a cleanup operation. An owner must still call it; static access does not arrange that call."
+        },
+        {
+          "signs": "Registering OrderService makes its configuration dependency explicit and replaceable.",
+          "reteach": "The method still chooses `AppConfig.Instance` internally. Accepting `IAppConfig` through the constructor would expose that dependency and let a test supply a substitute."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Concurrency duty of a shared instance",
+      "explain": "You already know the lost-update race. Two threads read the same field, both add one, and one write overwrites the other. Singleton lifetime alone does not cause that race. It becomes possible when one instance serves concurrent callers **and** those callers perform unsynchronized conflicting operations on shared mutable state, such as two writes, or a read and a write, to the same field. A stateless or immutable singleton can be shared safely.\n\nThe container guarantees less than it may seem to. If two requests resolve a singleton at the same moment, the container still creates only one instance and gives that same object to both. This is **thread-safe resolution**, and it ends once the object has been handed over. After that, both requests call methods on the same object, and the container does not lock or serialize those calls.\n\n```csharp\nbuilder.Services.AddSingleton<VisitCounter>();\n\npublic class VisitCounter\n{\n    private int _count;\n    public void Record() => _count++;   // read, add, write: not atomic\n}\n```\n\nHere `_count` is shared mutable state. If two requests call `Record()` together, both can read 41 and both can write 42. One visit is lost, even though the container resolved the counter correctly. Protecting this state is the class's job. It can use `Interlocked.Increment(ref _count)` or a lock, keep its state immutable, or avoid shared mutable state altogether. The same duty covers anything the singleton holds: a non-thread-safe object stored in a singleton field is shared by every caller too. See [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Pitfalls|Singleton pitfalls]].\n\n**Captive dependency.** Now suppose the singleton receives a *scoped* service through its constructor. A scoped service is meant to live for one request scope. Constructor injection runs only once, when the singleton is created, and the scoped instance passed in at that moment stays in the singleton's field. With Microsoft's default container and scope validation turned off, the app starts. The singleton is built from the root provider, so the captured service is resolved from the root scope and lives until the root provider is disposed, usually at application shutdown. Nothing has to crash for this to be wrong. The service's lifetime has been stretched far beyond what its registration intended. Every later request, including concurrent ones, also uses that one object instead of getting a fresh one. Scoped services such as a `DbContext` are usually not thread-safe, so the stretched lifetime also creates the sharing risk above. With scope validation turned on, the container rejects this dependency graph.\n\nThere are two sound fixes. One is to make the consumer scoped. The other is for the singleton to create a scope for each operation, resolve the scoped service inside it, and dispose the scope when the operation ends. See [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Singleton Lifetime in .NET|Singleton lifetime in .NET]].",
+      "connect": "Step 1 showed that one singleton instance serves everything resolved from its provider, and step 2 covered who disposes that instance and how callers reach it. This step adds the remaining duty: any mutable state the shared instance holds must be safe for concurrent callers, and it must not capture a scoped service in a field (a transient it keeps must itself suit a shared, long lifetime and concurrent use). Step 4 combines all three in a new design.",
+      "checkFirst": false,
+      "check": {
+        "id": "k3",
+        "type": "mcq",
+        "goal": "apply",
+        "objective": "singleton-scope",
+        "prompt": "An ASP.NET Core app registers `ReportScheduler` with `AddSingleton`. `ReportScheduler` injects `IServiceScopeFactory`, which can create new DI scopes. For each call to `Run()`, it does the following in order:\n\n1. Creates a new scope.\n2. Resolves `IUnitOfWork` from that scope. `IUnitOfWork` is registered with `AddScoped`. Each resolution creates its own database context, which is not thread-safe and is used only inside that one `Run()` call; no context is shared with other calls.\n3. Uses the unit of work.\n4. Disposes the scope.\n5. Executes `_runs++` on a private `int` field of the scheduler, with no lock or `Interlocked`.\n\nMany requests call `Run()` on the scheduler at the same time. Which statement correctly predicts the concurrency risk?",
+        "options": [
+          "Nothing races: each call gets its own unit of work, and the container serializes calls into the singleton's `Run()` method.",
+          "Each call uses its own unit of work, so that is safe, but `_runs++` on the shared scheduler can still lose updates.",
+          "The unit of work is still captive: because the scheduler is a singleton, every unit of work it resolves is shared by all calls.",
+          "Nothing races: each new scope also gives each call its own copy of the scheduler, so `_runs` is never shared."
+        ],
+        "answer": 1,
+        "marks": 1,
+        "rubric": [
+          {
+            "point": "Selects the option stating that the unit of work is isolated per operation, while the unsynchronized `_runs++` on the single shared scheduler can still lose updates.",
+            "marks": 1
+          }
+        ],
+        "model": "**B.** Each `Run()` resolves `IUnitOfWork` from its own scope, with its own database context used only in that call, and disposes it afterwards, so no unit of work or context is captured or shared. The scheduler is still one shared instance, though, and `_runs` is shared mutable state. Concurrent `_runs++` calls are unsynchronized read-add-write operations on that field, so updates can be lost. The container's thread-safe resolution does not cover calls into the scheduler.",
+        "source": {
+          "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md",
+          "heading": "Pitfalls"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Chooses A: believes thread-safe singleton resolution also serializes calls into the singleton.",
+          "reteach": "Thread-safe resolution only means that concurrent requests get **one** instance instead of two. Once each request holds the reference, the container is no longer involved. Two threads can then run `Run()` on the same object at the same time and both execute `_runs++` on the shared field, which is the lost-update setup you already know. That field needs protection in the class, for example `Interlocked`, a lock, or a design without shared mutable state."
+        },
+        {
+          "signs": "Chooses C: treats any scoped service used by a singleton as a captive dependency.",
+          "reteach": "A dependency becomes captive when the singleton **stores** a scoped instance it received once, usually through its constructor. Here the scheduler stores only the scope factory. Each `Run()` creates a fresh scope, resolves a new `IUnitOfWork` with its own context, and disposes it at the end, so no unit of work outlives its operation or is shared between calls. This per-operation scope is the recommended fix for a captive dependency."
+        },
+        {
+          "signs": "Chooses D: thinks creating a scope produces a new instance of the singleton as well.",
+          "reteach": "A scope affects only **scoped** registrations. Singletons are shared across all scopes from the same root provider, so every request uses the same `ReportScheduler` and the same `_runs` field. The unit of work is isolated per operation, but the counter is not. Because the counter is shared mutable state written without synchronization, it still needs protection, such as `Interlocked` or a lock."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Judge a new design",
+      "explain": "You already know that concurrent updates can race. To judge a singleton design, also trace which instance each caller reaches and which owner controls its lifetime.\n\nSuppose startup registers a cache with `AddSingleton<Cache>()`, builds a temporary root provider, and fills its cache. The application then builds another root provider from those registrations and resolves its cache. These are two container-created instances: warming the temporary provider's cache does not warm the application's cache. Each provider disposes the disposable instance it created when that provider is disposed. See [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Pitfalls|multiple roots and lifetime pitfalls]] and [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Questions|creation and disposal ownership]].\n\nOne application provider gives consumers a shared instance, but its mutable operations still need synchronization, its retained memory needs bounds, and it must not capture scoped state. Constructor injection makes that dependency visible. A method that reads a static cache instead can silently use a different instance, regardless of what its constructor receives. See [[Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton#Problem|hidden static dependencies]].",
+      "connect": "The previous step established that safe resolution does not make shared state safe. This step combines that boundary with instance identity, disposal ownership, and the dependency the consumer actually uses.",
+      "checkFirst": false,
+      "check": {
+        "id": "k4",
+        "type": "short",
+        "prompt": "An application registers a disposable `Cache` with `AddSingleton<Cache>()`. Startup performs these operations in order:\n\n1. Builds a temporary root provider, resolves its cache, and stores that instance in the static property `CacheAccess.Current`.\n2. Disposes the temporary provider.\n3. Builds the application's root provider from the same registrations and resolves its cache. This provider remains alive.\n4. Constructs a handler, passing the application's cache into its constructor.\n\nThe handler stores its constructor argument, but its `Read` method calls `CacheAccess.Current.Get(key)`. Nothing reassigns `CacheAccess.Current`. Every cache operation is synchronized, and `Get` throws `ObjectDisposedException` when called on a disposed cache.\n\nWill the handler's cache read succeed after startup? Give the outcome and explain which instance determines it.",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "Predicts that the read throws ObjectDisposedException.",
+            "marks": 1
+          },
+          {
+            "point": "Explains that Read reaches the temporary provider's disposed cache through the static property; receiving the application's live cache in the constructor does not replace that reference.",
+            "marks": 1
+          }
+        ],
+        "model": "It throws `ObjectDisposedException`. `Read` uses the temporary provider's disposed cache through `CacheAccess.Current`, regardless of the live cache passed into the constructor.",
+        "source": {
+          "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md",
+          "heading": "Pitfalls"
+        },
+        "objective": "singleton-scope",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "The read succeeds because both providers resolve the same singleton.",
+          "reteach": "`AddSingleton` shares an instance within a root provider and registration. The application's provider creates a different cache; it does not revive the temporary provider's disposed instance."
+        },
+        {
+          "signs": "The read succeeds because the handler receives a live cache through its constructor.",
+          "reteach": "Follow the reference used by `Read`. It accesses `CacheAccess.Current`, so the injected cache does not determine this operation's outcome."
+        },
+        {
+          "signs": "Synchronization makes the read safe despite disposal.",
+          "reteach": "Synchronization protects concurrent operations. It does not extend an object's lifetime or make a disposed resource usable."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "unknown": true
+      },
+      "mark": {
+        "score": 0,
+        "awarded": [
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "reply": "No problem. Read the explanation, then look at the model answer."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "unknown": true
+      },
+      "mark": {
+        "score": 0,
+        "awarded": [
+          false,
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "reply": "No problem. Read the explanation, then look at the model answer."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "choice": 2,
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "every unit of work it resolves is shared by all calls",
+            "kind": "wrong",
+            "note": "You treat every scoped service used by a singleton as shared. A separate scope is created for each call, so consider what that means for the resolved unit of work."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "Creating a scope for each operation prevents the unit of work from being captured by the singleton.",
+        "score": 0
+      },
+      "reply": "A scoped service becomes captive when the singleton retains an instance beyond its intended scope. Here, each call creates and disposes its own scope. What state still belongs to the single shared scheduler?",
+      "reteach": "A dependency becomes captive when the singleton **stores** a scoped instance it received once, usually through its constructor. Here the scheduler stores only the scope factory. Each `Run()` creates a fresh scope, resolves a new `IUnitOfWork` with its own context, and disposes it at the end, so no unit of work outlives its operation or is shared between calls. This per-operation scope is the recommended fix for a captive dependency."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "unknown": true
+      }
+    }
+  ],
+  "current": 3,
+  "probe": {
+    "questions": [
+      {
+        "id": "p1",
+        "type": "mcq",
+        "goal": "recognise",
+        "prompt": "In .NET dependency injection, the built-in container offers three service lifetimes: transient, scoped and singleton. In an ASP.NET Core web app, which statement correctly describes **scoped** lifetime?",
+        "options": [
+          "One instance is created per HTTP request scope and shared by everything resolved within that request.",
+          "A new instance is created every time the service is resolved, even within the same request.",
+          "One instance is created for the whole application and shared by every request.",
+          "One instance is created per thread and shared by all code running on that thread."
+        ],
+        "answer": 0,
+        "marks": 1,
+        "rubric": [
+          {
+            "point": "Selects the option stating one instance per request scope, shared within that request.",
+            "marks": 1
+          }
+        ],
+        "model": "One instance per HTTP request scope, shared by everything resolved within that request.",
+        "source": {
+          "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md",
+          "heading": "Pitfalls"
+        }
+      },
+      {
+        "id": "p2",
+        "type": "short",
+        "goal": "explain",
+        "prompt": "A single C# object is shared by many web requests running at the same time. Its method does `_count = _count + 1;` on a plain `int` field with no lock or atomic operation. Explain why the final count can end up lower than the number of calls.",
+        "marks": 1,
+        "rubric": [
+          {
+            "point": "Explains that concurrent read-modify-write steps interleave, so two threads read the same old value and one update overwrites the other (lost update / race condition).",
+            "marks": 1
+          }
+        ],
+        "model": "The increment is a separate read, add and write. Two threads can read the same old value, each add 1, and write back the same result, so one increment is lost — a race condition.",
+        "source": {
+          "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md",
+          "heading": "Pitfalls"
+        }
+      }
+    ],
+    "answers": {
+      "p1": {
+        "choice": 0,
+        "confidence": "sure"
+      },
+      "p2": {
+        "text": "I think there is a state where 2 request happened in the same time, captured the same count and both increased and assigned it, because there is no locking.",
+        "confidence": "guess"
+      }
+    },
+    "note": "Checks the two prerequisites the lesson rests on: what DI scoped lifetime means and why one shared instance with mutable state races under concurrency.",
+    "submitted": true,
+    "marks": {
+      "p1": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      },
+      "p2": {
+        "awarded": [
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "captured the same count and both increased and assigned it",
+            "kind": "correct",
+            "note": "You described two requests reading the same old value, each incrementing, and writing back, so one update is lost. That is the lost-update race."
+          },
+          {
+            "quote": "because there is no locking",
+            "kind": "correct",
+            "note": "You tied the cause to missing synchronization, which is the right condition for the race."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "Correct: interleaved read-modify-write steps lose an update when nothing synchronizes them.",
+        "score": 1
+      }
+    },
+    "findings": "You know scoped lifetime and can explain the lost-update race, so concurrency on shared state is not a gap. Not yet shown: how a classical static singleton differs from a container singleton, and the disposal and hidden-dependency consequences."
+  },
+  "map": {
+    "title": "Singleton: access point versus container lifetime",
+    "plan": "You already know scoped lifetime and why unsynchronized shared state races, so the lesson skips both. It starts by separating a static access point from a container registration, which is the idea you haven't shown yet. It then covers who disposes the instance and why a static access point hides a dependency. The last step applies all of this to a new case.",
+    "mermaid": "graph TD\nA[\"Known: scoped lifetime and lost-update races\"] --> B[\"Static access point vs root-provider registration\"]\nB --> C[\"Disposal ownership and hidden global dependency\"]\nC --> D[\"Concurrency duty of any shared instance\"]\nD --> E[\"Judge a new singleton design\"]",
+    "objective": "singleton-scope",
+    "steps": [
+      {
+        "title": "Process-wide access vs registration lifetime",
+        "why": "Explain that a static Instance gives every caller one process-level instance, while AddSingleton gives one instance per root provider and registration, so a second provider or new creates another; builds on your scope knowledge, and disposal comes next."
+      },
+      {
+        "title": "Disposal and hidden dependencies",
+        "why": "Explain who disposes each form and how a static access point hides a dependency from the constructor and from tests, using OrderService and AppConfig; relies on step 1 and leaves concurrency to the next step."
+      },
+      {
+        "title": "Concurrency duty of a shared instance",
+        "why": "Apply your lost-update reasoning to show that the container makes resolution thread-safe but not the singleton's fields or dependencies, and add the captive-dependency limit; relies on steps 1 and 2."
+      },
+      {
+        "title": "Judge a new design",
+        "why": "Given an unfamiliar case, such as a cache registered as a singleton that is also created through BuildServiceProvider, decide whether the lifetime is sound and name the instance count, disposal and concurrency risks; exercises the whole objective."
+      }
+    ]
+  },
+  "stepsFor": "[\"Singleton: access point versus container lifetime\",\"You already know scoped lifetime and why unsynchronized shared state races, so the lesson skips both. It starts by separating a static access point from a container registration, which is the idea you haven't shown yet. It then covers who disposes the instance and why a static access point hides a dependency. The last step applies all of this to a new case.\",[[\"Process-wide access vs registration lifetime\",\"Explain that a static Instance gives every caller one process-level instance, while AddSingleton gives one instance per root provider and registration, so a second provider or new creates another; builds on your scope knowledge, and disposal comes next.\"],[\"Disposal and hidden dependencies\",\"Explain who disposes each form and how a static access point hides a dependency from the constructor and from tests, using OrderService and AppConfig; relies on step 1 and leaves concurrency to the next step.\"],[\"Concurrency duty of a shared instance\",\"Apply your lost-update reasoning to show that the container makes resolution thread-safe but not the singleton's fields or dependencies, and add the captive-dependency limit; relies on steps 1 and 2.\"],[\"Judge a new design\",\"Given an unfamiliar case, such as a cache registered as a singleton that is also created through BuildServiceProvider, decide whether the lifetime is sound and name the instance count, disposal and concurrency risks; exercises the whole objective.\"]]]",
+  "accepted": true,
+  "finishedAt": 1794350873719,
+  "close": {
+    "summary": "The lesson distinguished a classical static access point from a DI singleton lifetime, then covered disposal ownership, hidden dependencies, and using a scoped unit of work inside a singleton.\n\nEarlier probing showed understanding of scoped lifetime and lost-update races. The lesson checks did not yet demonstrate the static-versus-container distinction (0/1), disposal ownership, or dependency visibility (0/2). The scoped-operation check also scored 0/1: creating and disposing a scope per operation prevents the singleton from retaining the unit of work; it does not synchronize shared state. The final design question was unanswered, so applying these ideas to a new design remains unverified.",
+    "cards": [
+      {
+        "front": "How does a classical static singleton differ from a DI singleton registration?",
+        "back": "A classical singleton controls creation and exposes a global static access point. A DI singleton shares one instance per registration per root provider through injection. Separate root providers can create separate instances."
+      },
+      {
+        "front": "Who owns disposal of a singleton instance?",
+        "back": "The root provider disposes a singleton it creates when the provider is disposed. A classical static singleton needs an explicit disposal owner. An existing instance supplied to the container remains the caller’s disposal responsibility."
+      },
+      {
+        "front": "Why does static singleton access hide a dependency?",
+        "back": "A method accesses the singleton without declaring that dependency in the constructor. Constructor injection makes the dependency visible and lets tests supply a replacement."
+      },
+      {
+        "front": "How can a singleton use a scoped unit of work without capturing it?",
+        "back": "Create a scope per operation, resolve the unit of work from it, await all work, then dispose the scope. Retain neither the scope nor its services. This controls lifetime; it does not synchronize the singleton’s shared state."
+      }
+    ],
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-10 Distinguish process-wide access from a container registratio.md",
+    "nextCheck": "2026-11-13"
+  }
+}

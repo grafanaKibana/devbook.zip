@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "createdAt": 1794384476642,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "workload-cases",
+  "title": "Build representative, versioned evaluation cases with references, rubrics, and failure segments while preventing leakage and misleading synthetic coverage",
+  "goal": "apply",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "goal": "apply",
+      "objective": "workload-cases",
+      "source": {
+        "path": "Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+        "heading": "Synthetic Generation"
+      },
+      "prompt": "An internal IT helpdesk assistant answers employee questions from a knowledge base. Before launch, the team built a 1,500-case evaluation set by asking an LLM to read each knowledge-base article and write questions the article fully answers. Each case stores the article it came from. The assistant scored 94% on this set.\n\nOne month after launch, production logs show many failures on vague or multi-part requests, such as \"VPN broke again after the update, also can't print\". These requests rarely use the wording of any article.\n\nNow that production logs are available, what one change should the team make to the evaluation set, and why does it close the gap that let the 94% overstate quality?",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Proposes a change that brings the underrepresented input shapes into the set, such as adding real or human-reviewed production cases (including vague, multi-part or messy requests) or replacing synthetic cases with them.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that the generated cases, written from single articles in the generator's phrasing, underrepresented the vague or multi-part request types common in production, so the 94% reflected a different input mix from real traffic and overstated how well it predicted production quality.",
+          "marks": 1
+        }
+      ],
+      "model": "Add real cases sampled from production logs, including vague and multi-part requests, with reviewed labels, and let them replace synthetic cases over time.\n\nThe synthetic questions were each written from one article in the generator's phrasing, so vague or multi-part requests like those in production were underrepresented. The 94% measured a different mix of requests from real traffic, so it overstated production quality; adding real cases makes the set's mix match the workload."
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

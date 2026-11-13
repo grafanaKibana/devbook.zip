@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-15T08:20:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-15T08:11:32.112Z
 topic:
   - Data Persistence
@@ -11,7 +11,7 @@ summary: A write-optimized storage engine that buffers writes in memory and flus
 level:
   - "4"
 priority: High
-status: Creation
+status: New
 ---
 
 A [[Computer Science/Data Structures/Trees/B-tree|B-tree]] keeps keys ordered in pages and updates those pages in place. That gives point and range reads a short search path, but small updates can become scattered page writes alongside write-ahead-log records.

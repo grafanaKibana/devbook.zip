@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-20T23:50:18.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-12T14:27:20.410Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Matches patterns by comparing rolling hashes of consecutive text window
 level:
   - "4"
 priority: Medium
-status: Done
+status: In Progress
 ---
 
 Searching a text `T` of length `n` for a pattern `P` of length `m` creates `n − m + 1` candidate windows. Rabin–Karp hashes `P` once and maintains the hash of the current window. A different hash rejects the window with one integer comparison.

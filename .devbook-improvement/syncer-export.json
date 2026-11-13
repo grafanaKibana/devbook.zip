@@ -297,6 +297,62 @@
       "sha": "f5ec13b5a409e7c641b4ce569b85b95f117ee62a",
       "mode": "100644"
     },
+    "Vault/Assets/Qard/Checks/AI & ML/2026-11-05 demonstration-effects.json": {
+      "sha": "cec8e04e4d840184f228e1106dbef47cdc77b359",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/AI & ML/2026-11-05 generation-contract.json": {
+      "sha": "9523a08ee49ad48da654022ab549bade85b518f0",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/AI & ML/2026-11-05 llm-mechanics.json": {
+      "sha": "7b231c946439e0752572159dd72c6c63d09c8880",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/AI & ML/2026-11-05 prompt-interface.json": {
+      "sha": "54eb4372902d313cea776d0218900648f1c441ab",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/AI & ML/2026-11-09 context-budget 2.json": {
+      "sha": "44a9e23d54559ed8aa0cb6bdaf7df7951ca63010",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/AI & ML/2026-11-09 demonstration-effects.json": {
+      "sha": "568a4589b500d82bd1c200e3dc37a202f640d797",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/AI & ML/2026-11-09 executable-contracts 2.json": {
+      "sha": "3fd85a453593dda54339031118fa643233656c3a",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/AI & ML/2026-11-09 generation-contract.json": {
+      "sha": "522ca9e56768d6d29ced9c8cf6b24999b9df4af3",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/AI & ML/2026-11-09 prompt-interface.json": {
+      "sha": "68cb8a5db7170d5976c891a9dfc251ec6f85de04",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/AI & ML/2026-11-09 reasoning-budget.json": {
+      "sha": "1a228d9fc4deecf909677ca81317c0b3880a0c82",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/AI & ML/2026-11-09 workload-cases.json": {
+      "sha": "4d2b8b61c5861f19426a39c7b677384ccbcbc8eb",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/AI & ML/2026-11-10 llm-mechanics.json": {
+      "sha": "028f59b8e69a334149368038f0d953c5244faadb",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/AI & ML/2026-11-10 semantic-geometry.json": {
+      "sha": "7dc5ef513e31f45e35273bee0a7dca6b1bc3fff7",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/AI & ML/2026-11-11 workload-cases.json": {
+      "sha": "7c6d9b74b06b0d548fcffdfc73f49c4a58810e29",
+      "mode": "100644"
+    },
     "Vault/Assets/Qard/Checks/Programming/2026-10-31 generic-contracts.json": {
       "sha": "d752035af9463f59f85638d20984486001b5362f",
       "mode": "100644"
@@ -313,56 +369,112 @@
       "sha": "307c7bacef627daf7f8ecd9905903a3718f93b3c",
       "mode": "100644"
     },
-    "Vault/Assets/Qard/Checks/Programming/2026-11-03 type-shapes.json": {
-      "sha": "f6a57d02c3c98d41dbc00f413bf9e8d81de7e424",
+    "Vault/Assets/Qard/Checks/Programming/2026-11-04 generic-contracts.json": {
+      "sha": "d55769eaa11e9659f7067a37e67793c2a74fa5e3",
       "mode": "100644"
     },
-    "Vault/Assets/Qard/Checks/Programming/2026-11-04 parameter-passing.json": {
-      "sha": "d674870ef99d108e04db41dfb9fe2662ba4f19e1",
+    "Vault/Assets/Qard/Checks/Programming/2026-11-05 delegate-contracts.json": {
+      "sha": "c1ee89be1298df965c7b15c0001e03bd5bdb43ed",
       "mode": "100644"
     },
-    "Vault/Assets/Qard/Checks/Programming/2026-11-04 value-semantics.json": {
-      "sha": "b4b1dc334db1bfac9ed753a6e6d56b9038f34394",
+    "Vault/Assets/Qard/Checks/Programming/2026-11-05 iteration-contracts.json": {
+      "sha": "e050a2b9c09a6e0d850b215479e305ebddccf1ed",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Programming/2026-11-05 text-semantics.json": {
+      "sha": "7ca6220899c9bbe2c6f66cf694f4b890e7c5b622",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Programming/2026-11-09 delegate-contracts.json": {
+      "sha": "c2e344866b5bd2e25e4bc0b598089053a1f048cc",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Programming/2026-11-09 generic-contracts.json": {
+      "sha": "8cffe20bc5162523bf543a789f30e638606c0567",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Programming/2026-11-09 iteration-contracts.json": {
+      "sha": "0d957713bb028638eb6556faf78cdeed568d5825",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Programming/2026-11-09 parameter-passing.json": {
+      "sha": "f76127dd2ee8a3ad9f8e0e1dd1bd84aae88b6da5",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Programming/2026-11-09 text-semantics.json": {
+      "sha": "125c0d33d3c7e82028c1856825c5c74c050a8c7b",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Programming/2026-11-09 type-shapes.json": {
+      "sha": "add0d7ecd9ebc834de35a2e0704d149b2a5e707d",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Programming/2026-11-09 value-semantics.json": {
+      "sha": "9b0706a26e75304dbfd00d52dbbc5bda79e7cfff",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Programming/2026-11-10 delegate-contracts.json": {
+      "sha": "01d31f8a0a0a59a0af96fb71cd579afbc8d6a96f",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Programming/2026-11-10 generic-contracts.json": {
+      "sha": "ea84e050e4a0b3b63d8f234311b962f3ef8e8ee8",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Programming/2026-11-10 parameter-passing.json": {
+      "sha": "eda069cc93ed1d4bc275366d66b6dda35b544f03",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Programming/2026-11-10 type-shapes.json": {
+      "sha": "6dee6cd1cbbc54ee64ce4581ddf78af46aabceab",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Software Architecture/2026-11-10 pattern-selection.json": {
+      "sha": "208d742ac6bb665b8b92de835c4591aa6ef242cb",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Checks/Software Architecture/2026-11-10 singleton-scope.json": {
+      "sha": "8300683e34abe0e7ed00dd04eefb2590a8cd2403",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Courses/AI & ML Mastery.md": {
-      "sha": "5689c99770958679f7cc6877847bdbbf5afb2235",
+      "sha": "08b614fae4995d4c91b1c61753af0be429f17c68",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Courses/Cloud Mastery.md": {
-      "sha": "a24589d1c8f966f2438daf539fbb9f1e2c072b0f",
+      "sha": "d0d0e0e82886f74716cf3ce375cf07220544cd1f",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Courses/Computer Science Mastery.md": {
-      "sha": "530dcf352dd28bbd154f42b40b5cf63e0892912b",
+      "sha": "f0949b03610a408c94656e1bcb83f76980f68a35",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Courses/Data Persistence Mastery.md": {
-      "sha": "02df8b877e206c19212b0edf07c0bee5d37c80b2",
+      "sha": "a6d4f834ea77771f3ccbf67d79485fa85a50a3c3",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Courses/DevOps Mastery.md": {
-      "sha": "261f6cf54d85769cd4170ae37a5417c83f4240f1",
+      "sha": "6352ae9df351c8028c7619ee45dd945727bd04ba",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Courses/Networks Mastery.md": {
-      "sha": "1673d2d9934cc80d757fc2e248ba76cd89b43671",
+      "sha": "25d8b8fb4c56778e9fd2505ee0a4e6ff692460d2",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Courses/Programming Mastery.md": {
-      "sha": "3a1da37a731a93c26bab55718e3592fe716126ec",
+      "sha": "48a4796efcf6402b4d67e42990dbd7db2421fe5e",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Courses/Security Mastery.md": {
-      "sha": "31e913ca129d038fad1aece2dfdc290fedf52ce2",
+      "sha": "1d29494b97e3abf99357fd43d381af19581ce5e6",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Courses/Software Architecture Mastery.md": {
-      "sha": "0c2081ad24ab7ff21a187188ff8d19301f4c0f7b",
+      "sha": "f9d362fad551ff73ac019126cb16da78977fe172",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Courses/Software Design Mastery.md": {
-      "sha": "6bb067ae3ea89ec963220e0dc4ddc562b8a2da8b",
+      "sha": "930db3f659159451ebf2b15473f3ce1717a427bf",
       "mode": "100644"
     },
     "Vault/Assets/Qard/Figures/csharp/csharp-inheritance-default-and-copy-constraints.svg": {
@@ -417,8 +529,148 @@
       "sha": "d007c04e615cc033323703908709a25dd2e14c20",
       "mode": "100644"
     },
+    "Vault/Assets/Qard/Lessons/2026-11-04 Choose generic type parameters and constraints without repla.json": {
+      "sha": "427a5a2e03a3b9b32ee44678f99132cce79fcf50",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-04 Choose generic type parameters and constraints without repla.md": {
+      "sha": "164a26c48663efcc3d6318101c775e444613fe86",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-05 Choose and order demonstrations to establish the task and la.json": {
+      "sha": "9ba453725c31c66d31683316cd71cf970e9e2f71",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-05 Choose and order demonstrations to establish the task and la.md": {
+      "sha": "da4c3edaa0045fd6e577e0c3d4da92ef35887988",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-05 Distinguish transformer families, pretraining and adaptation.json": {
+      "sha": "6a248132917e0579239be5928edd77be2fda2198",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-05 Distinguish transformer families, pretraining and adaptation.md": {
+      "sha": "dc7da90b34bd1c54df880f1fc3aa310ab8efe9ce",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-05 Predict string allocation and equality behavior and distingu.json": {
+      "sha": "01fcaf154b0a2a982517252a16450f44914d12e1",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-05 Predict string allocation and equality behavior and distingu.md": {
+      "sha": "64a80009305411075e298f40d0e0bb782f774595",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-05 Specify instructions, inputs, constraints, and expected outp.json": {
+      "sha": "82662243b6f53ea01a0445b94c5adb29d4b2fc12",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-05 Specify instructions, inputs, constraints, and expected outp.md": {
+      "sha": "20d9375555d76df985232ebcffa615e29c2f3599",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-05 Trace delegate invocation and captured state, including life.json": {
+      "sha": "8c89e71432c58e7b9a8b5041c3085d7e7e86d2fb",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-05 Trace delegate invocation and captured state, including life.md": {
+      "sha": "e3846603013563d29ee95918b97cb8f7a3eb3b06",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-05 Trace enumeration, deferred iterator execution and enumerato.json": {
+      "sha": "28f741637ffbc6542910ae3f40af91bf9845d911",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-05 Trace enumeration, deferred iterator execution and enumerato.md": {
+      "sha": "b847fbb756f35ce73089b8e352960dbb99fc75b4",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-08 Build representative, versioned evaluation cases with refere.json": {
+      "sha": "3ad9933e13f076358be581769800c68dc526348f",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-08 Build representative, versioned evaluation cases with refere.md": {
+      "sha": "95bc4ca81ca6f18526fab40a6b253affb3cf939f",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-08 Enforce schema, required fields, tool permissions, and input.json": {
+      "sha": "656ca99c03179185424e4b9997114192f33817af",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-08 Enforce schema, required fields, tool permissions, and input.md": {
+      "sha": "a16be2abeca3f9e695ed2d873e4a4630888bc418",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-09 Allocate a finite context budget across instructions, histor.json": {
+      "sha": "3b59b8cfe23126cf3442825fbddce19f49f69ccf",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-09 Allocate a finite context budget across instructions, histor.md": {
+      "sha": "81cc0b663673ffd96ea0f0bf9aa85619fe79fe97",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-09 Distinguish transformer families, pretraining and adaptation.json": {
+      "sha": "5744335ff257657a016bd7768862aa20a09058c6",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-09 Distinguish transformer families, pretraining and adaptation.md": {
+      "sha": "74c9a9465ebbdd48acb00b28122a7e85f5b5d4ed",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-10 Choose an embedding model and similarity measure for domain .json": {
+      "sha": "0478f01d76de9de25a2f14dbb967f269737ec012",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-10 Choose an embedding model and similarity measure for domain .md": {
+      "sha": "f8c774ca9112366ed7ef7875522d7b9600ea2a32",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-10 Distinguish process-wide access from a container registratio.json": {
+      "sha": "e92f54dc55c2a340e24da6b3803d431de2616826",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-10 Distinguish process-wide access from a container registratio.md": {
+      "sha": "0e5da3c0b9325450840dd2cbaee5d48a81ef4068",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-10 Justify a design pattern from a recurring problem, constrain.json": {
+      "sha": "fdb2daafb4c4fd9517feb82f3c6f2d60670c84ab",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Lessons/2026-11-10 Justify a design pattern from a recurring problem, constrain.md": {
+      "sha": "f5e80d9dcea8cefd541c204dce095f89e7b20025",
+      "mode": "100644"
+    },
     "Vault/Assets/Qard/Qard.md": {
-      "sha": "a6d9f2a1d2f8b43f53b3234746468e99e18cd98b",
+      "sha": "664c9a03923aeb87e68b44ce4f72e4185f6b18fc",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Tests/2026-11-10 Software Engineering interview style test/attempt.json": {
+      "sha": "42d262d54f8d902ac044de4c90bff314242d07f3",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Tests/2026-11-10 Software Engineering interview style test/plan.json": {
+      "sha": "0f5b4caf7d334837121e4ae8d692b9c6d068296c",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Tests/2026-11-10 Software Engineering interview style test/request.json": {
+      "sha": "c422e2ca0e9bed357166b38c7f94b3f4a07c9e79",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Tests/2026-11-10 Software Engineering interview style test/test.json": {
+      "sha": "b41459496bbf50d4fc9c6a8ca7155d3c5f6c6d08",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Tests/_profile.md": {
+      "sha": "1df320c616ad93a734702c567953f828191d7ac9",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Trials/2026-11-06 GPT lesson reference assignment.md": {
+      "sha": "77daf331f10316075ec0fb93978f0c44be589c5b",
+      "mode": "100644"
+    },
+    "Vault/Assets/Qard/Trials/2026-11-06 GPT lesson results.md": {
+      "sha": "45fc4f7a89ed3441327e91d41d12c68dec56a8e1",
       "mode": "100644"
     },
     "Vault/Assets/Security/Security-Authentication-18120000-1.png": {
@@ -654,267 +906,267 @@
       "mode": "100644"
     },
     "Vault/Home/AI & ML/AI & ML.md": {
-      "sha": "a085b991d2598a58ad902245e36b170842239b92",
+      "sha": "34516e8ebfaf9338cc513c7cc893a0e9e58692be",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Agents/Agents.md": {
-      "sha": "8502b3c06558089aa3a341ad1098f5b9af2e042a",
+      "sha": "e5949492703ac9bcc89209508e3657207eeb0e93",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md": {
-      "sha": "3e5d51673efe234795c7d7c594ab79db66a953bb",
+      "sha": "7b1a88a145f6e812c9866bb60ef2bfc60580bed6",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md": {
-      "sha": "bda52361627532a1142e96f25b08c6b353ba7796",
+      "sha": "aa036e620d416c156831c232a2d54551c09c0a00",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": {
-      "sha": "ed63691e97b25d77fe602fdbab5df2a4e85e1c3a",
+      "sha": "832367c6e23a3652f10b64255c4c650927ebfe12",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": {
-      "sha": "18be0a4c16dd9fd05e644304caffdddfbb5432f3",
+      "sha": "1f49b0361652421612019d1be9dffcbddf6386a0",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md": {
-      "sha": "c538d8f53250924a987c2edb344e57439225e9f1",
+      "sha": "980e8a89cf9d729013da0a1de4c78c376eb2f928",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md": {
-      "sha": "00f8359a52945d9a6771e31dbf03fad424ef58f8",
+      "sha": "5b677056f01ff16b18754b59f51fd18dab550ac6",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md": {
-      "sha": "e88be6ed53c94bd9b1b360d50460691d7f772fac",
+      "sha": "5bb5978e44c99cc53c2fcb458ef7ed44c9dcf86a",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md": {
-      "sha": "f55b1b4445cd0c5651b4c6610317babe6a991ee0",
+      "sha": "55cd749d6500f19e3e9c77a3a34245ce8abf1d5a",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md": {
-      "sha": "1442d36098b50875191a7517bf3d641a25a84b1e",
+      "sha": "f88ca9b2b79d9e448477b34206ea94fee0def943",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md": {
-      "sha": "69f0c3a424cdf3ce90f4d7db612e67d50eccfb33",
+      "sha": "439e4ff2e77ba635b10e5ef4c6086be3eaa0e8eb",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md": {
-      "sha": "dfa99e4ae2ca099b9d45793688d45be9e8b78e06",
+      "sha": "68dcf44607f234d7dd3ec516afa8e01e13067cba",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md": {
-      "sha": "01ae9fb7f9a9b4228bd4f667e5132f3fe6fd5175",
+      "sha": "804c72c0859016ce23948b0369113265780b7197",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md": {
-      "sha": "61fe7aab7d3f02edc09cb6ef2f15b5c578e69b3e",
+      "sha": "0ccd2922db01383028dfd1b0be8679a453f0f154",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md": {
-      "sha": "586d4b919b9fea0018377041ea514c03bf3bbbb1",
+      "sha": "9b0fa9ebb8ef83818179eabbb7fa21c9838f716c",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md": {
-      "sha": "4e31e2dd86ee4b4c166ec93e874ec856895cc9f0",
+      "sha": "80b01f84b2d7642ec51491cd9297aad1c726d635",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md": {
-      "sha": "94ff9e90cdba3ba7ce5d91ed4f72333c6c29beab",
+      "sha": "297f1144cd12261fad963c49afaeeb653f04cb3c",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md": {
-      "sha": "adc6eece134ae229f0c0dbb74eff1fdcb9b65f84",
+      "sha": "fa0ae2225fe2e6a9f73fb26c2b65d53d8bf554df",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md": {
-      "sha": "ed047f8369a6242bf88cd1a4015d2196bf375294",
+      "sha": "10c874fdae4aa03305db6aa1cf2c9f97773c1a50",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md": {
-      "sha": "170668eb2480c33357dc828a1813563dfad545b2",
+      "sha": "f18c480daecf02a7a87461653c1c387b98414ae3",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Embeddings.md": {
-      "sha": "195762dbb74d01ab6389597ed0190e4e6527364b",
+      "sha": "28fb458a6c8e3f7a6675637a5f480afa1ec8ddba",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md": {
-      "sha": "cfe3e332d913b48ce8fc74000a6ed65317a70141",
+      "sha": "c62c1b253fc676de26a5d61492f046c760266f07",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md": {
-      "sha": "1c7919125a3ed2157818766ff1dc12b4857e4be1",
+      "sha": "8582e418a906fb6a1207cb0ed0630535ad72f2a3",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md": {
-      "sha": "838189e472f5cd53e2df0800c3a3ab1299b7502e",
+      "sha": "62f99bb0e54f5b6c5db5fc7226aea8abc29d3d5c",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md": {
-      "sha": "c9dce54a31765d5ec0d098c1fb49bcde1cff2d67",
+      "sha": "d15ec5500b9a3cfa59a01df7a4c9ea3c184dfc6c",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md": {
-      "sha": "6b34259c6435880fe42511b547c6781d20b48f9a",
+      "sha": "3a140b4cd4d3d1286be4504dd727065eb4202577",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md": {
-      "sha": "3a76fc3316abe621ed547864d43a89e0ed4d8098",
+      "sha": "34984731ed8ffd9489cedb656f90d951f3b03d53",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Fine-tuning.md": {
-      "sha": "c5608db19548e6b881b62b13299bb2114afa50f6",
+      "sha": "e05391715fc577b57b7c19d02c694b4824880545",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Generation.md": {
-      "sha": "ea6702fc76d8777d8edbd76bc4d1e55115afc2b3",
+      "sha": "a2c57c39b5f16ef6fa0afb32b49c40b484594568",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Graph Engineering.md": {
-      "sha": "384c7eca0e0f6f11149ac4b28b7c7a75861d5f06",
+      "sha": "3de616f1a5d0d8f1beda23feb5fd8aa6400d6554",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md": {
-      "sha": "bb27c4e593a5553793776828e85bc9e6f43a135f",
+      "sha": "ecb25e32bbfec1ba6e0a547ff16441987f85e84f",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md": {
-      "sha": "670db34471efc4bab0ba717e7dcbc9e658b505e2",
+      "sha": "5567b0f9006fb1b65d4b77c72eaf163c53bf6593",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md": {
-      "sha": "891969fa5a422070eb830bc9608e7cab77e42702",
+      "sha": "75528c5a8ccd291053cbe86ffacbcdc101d7f63d",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md": {
-      "sha": "067284d29b37306f2f7c4f96779b3ab9957fee78",
+      "sha": "2b2b0eb9f998936c4c98878127a30769a3f31018",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md": {
-      "sha": "875dd4b62ff264be3c7da49656689fe3e84fa50c",
+      "sha": "bb07f3eedcf461c74b52c1cef16d2e8829adb522",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md": {
-      "sha": "0544a2b4ac7fd13ba3e69ff77d43ad58fd2d39fa",
+      "sha": "990ada89c0ae8071eb88fc1b2c50f55588c4a91b",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md": {
-      "sha": "531f9d935041c7052ecd1f1f59d15fa686ec305f",
+      "sha": "e3f4c78c1624c1627a788852017250afcd523c56",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md": {
-      "sha": "54786af827ff8b7e4c36afa1bcc78ee256a30bc6",
+      "sha": "9acdd93985b44daf3164c58eb593f78772f79329",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md": {
-      "sha": "93537e709a9a963c3603b98341e3e2b3c72ce049",
+      "sha": "241de5566a1ee94582e3e8fd16135f1a3a2fe745",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/LLM Caching.md": {
-      "sha": "bf963fff2936de5b8dc4f140fdbb5ded1bb5bd57",
+      "sha": "054126a28cf55aa41dc0ad8dd6137d3f833593a3",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/LLM.md": {
-      "sha": "9c3eef7d4929c55711161c2e923ce99368a23697",
+      "sha": "d2c1adcafeb0c841bac0347d85f290564c2fb4c9",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md": {
-      "sha": "debcdb786a6aaf549b8891373e5e3822d63e30b9",
+      "sha": "584972ff2bc82af7708b5852ba0766154567568e",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md": {
-      "sha": "f2108b07f1b572a0f9007f952d1095b1092b1519",
+      "sha": "98683859e7cfc47678cafce1a0e57f518cfbaf0f",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md": {
-      "sha": "d08a97a7a3d6857f97be7f25bb1b94e4515cd021",
+      "sha": "90b6f0022ec272460aa976a63767cdb97a70b519",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Model Selection and Routing.md": {
-      "sha": "36144f947abc03778cda0e1ee5bb44a256441767",
+      "sha": "515467682117edee7b3fd7723db991af0d9b9cc8",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md": {
-      "sha": "b105a89b2debdebd9d2f19b5804f63ed621ff5d6",
+      "sha": "a6af74553d8395a1160b2e696110c758dc04083e",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md": {
-      "sha": "0d981cda4b86774aea3ed6b13b94057d79249cf0",
+      "sha": "4232b1375ebf76a57f9a63cbae34a1a35c195528",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md": {
-      "sha": "bab08bba175ba156558ea85347ae6d4861b0a444",
+      "sha": "4eb92250fc020dc2defdfd842e28938b8aae9cfc",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md": {
-      "sha": "3dd909aa1d9d6ab4ad508d6ba368e5f415e06845",
+      "sha": "e2c5f0570b62047c476df4508ea65d4a55f16ed8",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md": {
-      "sha": "f9ddafd2dc94bee9b34ece79ea60ea360f116611",
+      "sha": "f52469eb4026fc18c6140bc377b24331ed299d32",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Safety/Guardrails.md": {
-      "sha": "af306c738e64aa8ceb0c7d278eef56471e680390",
+      "sha": "a2a4772375fd19477132c91099eeae8a5f8d2ac2",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md": {
-      "sha": "36913d97d4d5d64d537126b61d201c4c7700633e",
+      "sha": "c7036040191eed761f349707e0f392fa6224cf2e",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": {
-      "sha": "c28440f79b4dadc9f009aead444be55a83431b87",
+      "sha": "545d177986e271a961af915b75538364cb8bf05a",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md": {
-      "sha": "0f9a0264b655f47f786c057ba40fc719111d9c8a",
+      "sha": "6485bbb34d77f99176a708fd0db8f78cfd0feb70",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/LLM/Safety/Safety.md": {
-      "sha": "b7018989d9a07adb06f5d84c23b327df337c09ca",
+      "sha": "c8db661320762d0c3f637f6de647660e646b519b",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/Machine Learning/Data Drift.md": {
-      "sha": "720460ba3d4ea2ceb5cf5a8d7f671f20e0ff66bf",
+      "sha": "8705f740cfc6f64706d084f3388e3c39f6178541",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": {
-      "sha": "ec5000e2f236ea268606beff710b77160c1e114a",
+      "sha": "2d4949869230d905d7a04fa5628919c8e7719f88",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md": {
-      "sha": "2de468eaf7168f79b89c006dfd6de4e839ee5cff",
+      "sha": "e49ba5b8e80eda8fca5e24680a76acc6b06fe2b0",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md": {
-      "sha": "5c46a1158c830e697e0120797b077418160ba675",
+      "sha": "514417e8d8d15d1387029d7ff1c5cf0f24d3e7ae",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md": {
-      "sha": "bc66c0e397def60b2a01ac2d312830f743c64f08",
+      "sha": "88b2460c3406354ce1f894dfd2f4405e233c5703",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/Machine Learning/Machine Learning.md": {
-      "sha": "4e6538ae107600d6acd2794a594fab9d32d9de31",
+      "sha": "776dedeef9e2d346206314fbf031c1727f97acd3",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md": {
-      "sha": "af3d610b3209d49af69d0792ab44e5d6add0de61",
+      "sha": "39521798a52d5a78658de09695c192217280153b",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md": {
-      "sha": "ed9c1d1527222fe68ee5057191fe125a267ad554",
+      "sha": "26087977fa7993a698116aadb1ea5735d352c824",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/Machine Learning/Types/Types.md": {
-      "sha": "d6ea1bd861d902500f9bc9203344601a839745fc",
+      "sha": "8aca5d9d538658beda0390983028fde97ebdaa49",
       "mode": "100644"
     },
     "Vault/Home/AI & ML/Responsible AI.md": {
-      "sha": "a0dcc6274dc6134661c4e1a3a478530f273e787f",
+      "sha": "119b64e98706b058db16c0075e4425e068da3437",
       "mode": "100644"
     },
     "Vault/Home/About.md": {
@@ -922,891 +1174,891 @@
       "mode": "100644"
     },
     "Vault/Home/Changelog.md": {
-      "sha": "9e44ed7d466febf99114e1822ce3182f166bdaff",
+      "sha": "cedd7abf6eef358fd0c6a0000e7c566f52e24e08",
       "mode": "100644"
     },
     "Vault/Home/Cloud/Cloud Cost Management.md": {
-      "sha": "9a2ed012bfecf1e3576af9b9f764d28683f61811",
+      "sha": "33d19c7c80555060b6836b3609dc57cb22be9592",
       "mode": "100644"
     },
     "Vault/Home/Cloud/Cloud.md": {
-      "sha": "328cc245583c99d45829e3a974d024ccd88e62ae",
+      "sha": "3767dbfd5d6e3b3b14a89966f000f4b7e04818fc",
       "mode": "100644"
     },
     "Vault/Home/Cloud/Disaster Recovery.md": {
-      "sha": "c39a5824a7d9bf8d53e5597866c8b74be25fc3bd",
+      "sha": "cd3b4bc2acd26e57bd5ae8166474225ffacdb7f5",
       "mode": "100644"
     },
     "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md": {
-      "sha": "61342236177f97942d10f2320d5eb2ae382050ce",
+      "sha": "ff00f338e4414bbf82845a9baa995471efa0dcf0",
       "mode": "100644"
     },
     "Vault/Home/Cloud/Providers.md": {
-      "sha": "7867056afd37c08972da37487d349919bb372be9",
+      "sha": "b079420f1b9c4d8fad8843be10ddda93cebb15b3",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Algorithms.md": {
-      "sha": "1027bfc77cb4b90ec2181d6dd6354186ca6a6fd3",
+      "sha": "5b58cbc72578ab0daf82833aa2fc7903571d917b",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/A-Star Search.md": {
-      "sha": "533fe568cc6e4d52b175e6ba232202d180ef69e1",
+      "sha": "2bd5199c40d1a194f45d848b44493dfeacc44915",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md": {
-      "sha": "976bd64264f752075efdcd429221270b94da60d1",
+      "sha": "6af5f0cea1831e51507c2db3b6c9f5b4b1730470",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford.md": {
-      "sha": "010f14c48ca77f3d5365da53bb482354f0fb1345",
+      "sha": "e4e9c46be14915d51a792f8ae3b185d83bed55da",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search.md": {
-      "sha": "f3be8b8ff3d1566f8c13c5cddeed9739a70bf9a4",
+      "sha": "6f35d7d84c495405bb25afc123d75e3ad1b5fd49",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm.md": {
-      "sha": "ed2a85554eb2a18ad9fa8a090ebafd67df5dd3fd",
+      "sha": "3e0d1dff619e0d87ba3fb0f6dbfe9b03ae0691f8",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Connected Components.md": {
-      "sha": "6d3fc102c09cea9349dff7ca738f913c70983ad6",
+      "sha": "8fbf189ad765cb65d822322e535df94e8dd918d1",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/DFS BFS.md": {
-      "sha": "5c2faf557cff6e335998cef3feb49951ca6aa95f",
+      "sha": "9cf7426a7b09a0e4798cd8149383b35f326aa88b",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Dijkstra.md": {
-      "sha": "2034ece78dbf32d2c5fd336c4f2e583357431282",
+      "sha": "2c804e43fe921dcb090a18b8bbac033fe2e201c3",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md": {
-      "sha": "8fec37e7620ecdc01598be14fa7b8878760ca434",
+      "sha": "103190af0565a7d2e9d6d65b792ba35bc65bf2b0",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md": {
-      "sha": "e8de6f6834739c161c164fe3141df5ba468420be",
+      "sha": "3f0f2206253f9826caefa9da791001471c333df2",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": {
-      "sha": "f3c3e8ac622d7ff201392cdcc46b177e5cc85cd6",
+      "sha": "0b4bc317bb4105fee233fb045942161206009014",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search.md": {
-      "sha": "d937e4e351f4235d2bc26395fe5d458135f2149f",
+      "sha": "d7ce66502b473a2aa827f0bbcf7530b400e31b8b",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md": {
-      "sha": "0de182477ee8123245b3097ca75d931e1f027ce5",
+      "sha": "249f88047d9e67176aba9c354e16c28ccc39c6e1",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Kruskal's Algorithm.md": {
-      "sha": "553cedcf079f7708036a3040d9925b8b99140305",
+      "sha": "33a1b949416a27d0bce1b0af5326f62cf7b674c9",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Maximum Flow.md": {
-      "sha": "8634ee1addeea33769370692f7c160ebb7a97b2e",
+      "sha": "d1ce3664393c3a2cbbed1ae6328163e209ebdb9b",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md": {
-      "sha": "4f702dccc8312adca10938f71fa3dca7eb62f921",
+      "sha": "131f36e39949b2fccd8bc3675feccab8c84c3042",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components.md": {
-      "sha": "1ef683b403e354ce4e91e16b99f2285f15f5c3ce",
+      "sha": "7bc030680c8e81893236c360cfb840a7046b71f8",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": {
-      "sha": "373619e83fb3f8d8c0d667949b37b64f188e2660",
+      "sha": "ad5aef86c064264abeaa309b920782e50c9e10ba",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md": {
-      "sha": "b307e9cc29a05378195713a6acaabd8baf454c64",
+      "sha": "9c383a908ecfa15c8d2ccb5fbb12830590e84fda",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Paradigms/Backtracking.md": {
-      "sha": "add60c7d3ce01c2ab991ae562281413136e94d9d",
+      "sha": "d5be05d076c9045327ebc456abef51af846ce400",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Paradigms/Branch and Bound.md": {
-      "sha": "34263e7d82e4cc656f07faf12bae8844055a6c14",
+      "sha": "02d3ba4acb1fc4062b9b38eddfacdaf5d6fcae92",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Paradigms/Divide and Conquer.md": {
-      "sha": "005d48590bc09c27f06dd75a4f1761ca7608763d",
+      "sha": "1bc2e169cca22507dad0b3f5a381b209cdd57105",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Paradigms/Dynamic Programming.md": {
-      "sha": "fd1a418699b3bd976add987170bce80921175265",
+      "sha": "59db9634fab0a4fc4a9fd07567a1a08d4ea6ecc2",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Paradigms/Greedy Algorithms.md": {
-      "sha": "86c69c979337f76731a5aa02adb07a6cf7600659",
+      "sha": "194f0801b6f0be07a39499047ef98ada4f2c96f2",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Paradigms/Memoization.md": {
-      "sha": "f731f1b70740a2fe660443e8d0f708ed64856d82",
+      "sha": "3c0dd1dbb0571ec1bdc5ad0ecfef0d0e3a38f610",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Paradigms/Paradigms.md": {
-      "sha": "287c3fb862ef2c9d575c2dfc66e42a6f9d0720c9",
+      "sha": "a66522a2cb68bd872d44e278d0c1d175c6ceda49",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Patterns/Binary Search on Answer.md": {
-      "sha": "a195e96c06ce1ebf9537d484926e387bade4c674",
+      "sha": "5451e4a47772e9481c3e3be485a693f401aee81b",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Patterns/Bit Manipulation.md": {
-      "sha": "b21136a67e5062a258f618eab14745ee773fd848",
+      "sha": "161171e8abb3d27dee1b4a7db7285e90f3b9dfa6",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Patterns/Cyclic Sort.md": {
-      "sha": "1b605fa0417f56298e4f70417b43e7c70e03088c",
+      "sha": "c723f0cc0afefc04218fe9ef63b6de4ffec5f1e3",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Patterns/Fast and Slow Pointers.md": {
-      "sha": "559613cbad4dd23495524b45d0ab8cd61f532dcc",
+      "sha": "adb3ca708365b9a8b72623f939c671ee2248d1cc",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Patterns/Merge Intervals.md": {
-      "sha": "de154f2cc9131e1147f51eefd41dc1a778041587",
+      "sha": "fbf48c992fac6ae6a221dadd48361737190c14f6",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Patterns/Monotonic Stack and Queue.md": {
-      "sha": "61ad83f095d5af9f47899527dc12e1992d86c0ea",
+      "sha": "6d4ecf772ada07ca6fd6ebd21d8b51b8ee8dcefd",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Patterns/Patterns.md": {
-      "sha": "5f415c58b088c3490f1ae44ee8b63d6922ff31ae",
+      "sha": "f60597937ba336e966ff1da7b18a5bc42404f492",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Patterns/Prefix Sum.md": {
-      "sha": "2c761de7a1fa99dbeb4c8df18defd9588de96909",
+      "sha": "1466a8c1c17d822411f58ab09e982e3cde341038",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Patterns/Sliding Window.md": {
-      "sha": "1613f49250c9890fbb0030678d5fc9ed49fa7d34",
+      "sha": "a3f182d6eaab15feac664f1540e3d1e8226e1cbd",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md": {
-      "sha": "c739d2e4d29fb365abecac4f073038d1e644fb79",
+      "sha": "a4a9686f0597f274f81de4b6a4b27f0565d83413",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Patterns/Two Heaps.md": {
-      "sha": "d5bfb0ee1ada13cc3c39b9418fa94425ac665652",
+      "sha": "65ba7e450ab7b8fceb80f46cf68366edb9064fea",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Patterns/Two Pointers.md": {
-      "sha": "c7e82c193aab800acb72dc82bc624d432a3c730a",
+      "sha": "c6067f99f2e36b682ff6da2bf9f79df73df8837b",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Search Algorithms/Binary Search.md": {
-      "sha": "870dcab800322d4e2c0565f38bfe8ab355c47d69",
+      "sha": "7c94ac29aa8fe8055570bc1183dde609cee6f5ef",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md": {
-      "sha": "c7b4c20b704a0a1ec0df25452bc53210c82f7235",
+      "sha": "2faf9bafbe49db4344345d5be9529706cf3f55b1",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Search Algorithms/Fibonacci Search.md": {
-      "sha": "31defa45893e48e9c690a048a5a6432fd88ac238",
+      "sha": "c6b217a713e84a3966257205700e209a546c8e7d",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md": {
-      "sha": "3849b92b20c8479e6fdba6bf9572c6b518d27ab5",
+      "sha": "7b9946304583a49d1261bd6de95e31402613de14",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Search Algorithms/Jump Search.md": {
-      "sha": "10cc340742ebb0a25c9cb2c9291af01eb41c0362",
+      "sha": "03283df9bc15f5fa562c4cbe30b7224584550dec",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Search Algorithms/Linear Search.md": {
-      "sha": "7e070e2568783951923abcee24a25f75ddc8a864",
+      "sha": "800831ae8443873f6a520ee0faeb7152c72f0eea",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Search Algorithms/Search Algorithms.md": {
-      "sha": "3d1f3d916b44b7fe5162d60f1fe9f67c2dc28f77",
+      "sha": "f14074897e4eb049b93484fa7e53aec70b573841",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Aho-Corasick.md": {
-      "sha": "522e05568208dbe64ef8987dfb6e541faea1def0",
+      "sha": "a0368978bf237db52f3b3aeda1c1ab53a4c66655",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Boyer-Moore.md": {
-      "sha": "0ce68018fc54edc58eb6dfebca391f8dd7387014",
+      "sha": "537b4ccd76a71cd20e8b110ec2a8567c5aeb4591",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/KMP (Knuth-Morris-Pratt) Algorithm.md": {
-      "sha": "9bc0f465025ad402b73a40ff09683f5e9066510d",
+      "sha": "493848f348d267b61b7d1252f2233b251dbdff5e",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Rabin Karp Search.md": {
-      "sha": "7ff608b38108510e95d17c3ea499e698c2054730",
+      "sha": "273bbec9a666a74fbade78f72dc9efc30946627c",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/String Matching.md": {
-      "sha": "0e7626f6ed9ac4e192f23cf19b1d5a9644b151c8",
+      "sha": "55ff852d8c0badc7b0a12130b66883463ae2ac99",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Search Algorithms/String Matching/Z-Algorithm.md": {
-      "sha": "be96ecc64138c0aa223ce046a4ed7f2682aaf7a5",
+      "sha": "b461cadf70c11bf4afd974ec5f299ff46adf45ce",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Search Algorithms/Ternary Search.md": {
-      "sha": "5422c322d78cfba67a1e42fefeaa4695fa622f70",
+      "sha": "979b21f39d8b415389f361c953502cd08e891060",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Bogo Sort.md": {
-      "sha": "4be8b3c75af095f6b178e8db766587786bcc5a6f",
+      "sha": "fc8275bb4998bfff449bec015b78454eb9531810",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md": {
-      "sha": "6403e69bcafc1d19f756aa40dda80f4caaaa59a0",
+      "sha": "c69a1d2cbbfda0dce25b7cd1bf466095fc54ddba",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Bucket Sort.md": {
-      "sha": "f93785cfe7d074f054a59058d478029eabf3c2fc",
+      "sha": "2d773e88215625b81b764706985c1308a9369f9c",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Cocktail Shaker Sort.md": {
-      "sha": "2676454d7b4ad394c68b00b1b417ad4e297d28b5",
+      "sha": "e385a924f5b2a78bc3dc0c99ad67febcd458ffaa",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Comb Sort.md": {
-      "sha": "c8444484ddd3793605660071b340c727d7fd20b6",
+      "sha": "85960b2158de5595d6d53d5f34a90d5cd6618425",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Counting Sort.md": {
-      "sha": "c2ceb52c56c92cac10a79aba27a075ab7dc6478c",
+      "sha": "c9dda4aaf690e6f519ca3def6c497333cba60eb7",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Cycle Sort.md": {
-      "sha": "18c7cde80d33e626d9edbfea2826f32a202ea243",
+      "sha": "c3e8615698b5a178be032c632cb3bba8b303cae8",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Gnome Sort.md": {
-      "sha": "05357bef9542ff66a66c6673c86dcbce2d0bc958",
+      "sha": "d6f03acc3ec075ce9a8dc6e799e849d99ba0bae9",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Heap Sort.md": {
-      "sha": "5d1a39ab5119f64acd343fe4eab60a1654e9e920",
+      "sha": "a457841ca785228e187dade8df7fa88a8db54864",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort.md": {
-      "sha": "c17eec6b204652810770a3ffa40bfb331eb0825c",
+      "sha": "38f4e1b4455afcf940c5b783dc4b481151d21781",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Introsort.md": {
-      "sha": "fc6e3c7f6cbe40d32c9f195661699cc32a9efe46",
+      "sha": "2eaeb0fbc5c132d9940df122b0defb535ee6294e",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Merge Sort.md": {
-      "sha": "824b38043596911f33f1f3d7783850071116d022",
+      "sha": "7fdd69adc8bc6a3238c7a8d90f8714ea616268d5",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Odd-Even Sort.md": {
-      "sha": "2e76371c830101f5cf5521853ed9c7369e2da4db",
+      "sha": "a1c2388fc8bd423c6a95b704136e7410ac3397c0",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Pancake Sort.md": {
-      "sha": "e1752f5077f1ef9fbbe0d04c35da50b9a64abb19",
+      "sha": "92cdb85044b6eb8c54b9856ee5df7b918b15e69a",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md": {
-      "sha": "6264f4c3de0c539d66b6cbedfedad57823b52451",
+      "sha": "ac116df0885cb4a96ae2dfae533db0df48cc035c",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Radix Sort.md": {
-      "sha": "4b7fe44691100f290271afd122d9f4a380465aba",
+      "sha": "8606d88aada19a7597deb10e85a608923996b0c3",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Selection Sort.md": {
-      "sha": "f0ac89a5ef93c14fc273464eedd5841816176f4a",
+      "sha": "57097b46864586e25f1ec32ca7bdc0fae69631a8",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Shell Sort.md": {
-      "sha": "9b9ad2b0a09101bd06952929f17fbf0f02d774d0",
+      "sha": "7dd2f5ebbe7f6b8a2a208100d381a17cc1445b08",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md": {
-      "sha": "dfb51953d03f496154b8c77a4bb2e60f2dac0baa",
+      "sha": "390c2d30ea67af244ee318efeda97b5297f06c2d",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Stooge Sort.md": {
-      "sha": "9994506204af705ba13b63140f9d94eb749507ae",
+      "sha": "f7682f7d34fe5b9802730b9f21f81a1cf260c690",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Algorithms/Sorting Algorithms/Tim Sort.md": {
-      "sha": "2fd98d0b5a88e947d81e920200bad98139c1621e",
+      "sha": "dfd28ce42420ec1e7255e1d865626c159b56b630",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Big O Notation.md": {
-      "sha": "c59fb5c1e61cbbd15560177e6a14268500dfe2eb",
+      "sha": "f01de67e7b293d6228af80a9353a38b97e43d8cc",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Computer Science.md": {
-      "sha": "058c9dad8637f3244dfc6c479b35d25ba32e5eb6",
+      "sha": "fa02bd23798b9a2a280aae9c75c12b635ca7649c",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Composite Structures/Composite Structures.md": {
-      "sha": "1013fd26299b823eac03b63d80c5cd401895e74b",
+      "sha": "860a4f5df837471686b2217f6fdf1fcda9215d3a",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Composite Structures/LRU Cache.md": {
-      "sha": "17425e40e2aee6f4386ab93b998df6e4be2f12a2",
+      "sha": "fb3f2366d762e9f95d29b630e2b06423192dcbfd",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Data Structures.md": {
-      "sha": "51e5a14ec00dc6176ea5084dfbf2ce3d7dd9bc97",
+      "sha": "d5ca29f4bdd6852fd3a4646d92a0db073e15f3d1",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Geohash.md": {
-      "sha": "78b9f943f3054626798ba78492abb25bd37b7f8c",
+      "sha": "761d6cb94a7055129192862f36c96693dc9397f9",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Graph Structures/Disjoint Set.md": {
-      "sha": "29318423b450af3db42bcf04972fdbffe7938da7",
+      "sha": "1779a918db64b4a3c8a203d92083bcb235f51ecc",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Graph Structures/Graph Structures.md": {
-      "sha": "e5ebb16743a022c22f8b350648042eb429099202",
+      "sha": "af861f0d1fbc5523db0015b17198a50c75ac5dc8",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Graph Structures/Graph.md": {
-      "sha": "8cdbf1d367b4ac01b89932f5be866c85b10c247c",
+      "sha": "434185deb68331078aaad4dc517f842ccf9b1d3e",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Graph Structures/Union-Find.md": {
-      "sha": "3848881c97d78649e4c267a178b032c58c5476ad",
+      "sha": "6f64e101d6a20a74065f9a33bd717834ba6a8e30",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Bloom Filter.md": {
-      "sha": "50dc38ac4d382f02a5b7ca406cdd394b8880e893",
+      "sha": "0c430d1084fc1a939dba05a23a30d332d41261ce",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Collision Resolution.md": {
-      "sha": "876500bc45669e252f85abb58cab98a4bc93cf51",
+      "sha": "959d29c21ae0db3828bf7d4eaba58f5d2cf14785",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Hash Set.md": {
-      "sha": "4805471cb545f6da0c275c8689d3b0739c9f967e",
+      "sha": "fadc5b37e55cd6fa3fe5c9aaae168463dac8b97f",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Hash-based Structures/Hash-based Structures.md": {
-      "sha": "458435b30add91b1154f69b6cb7c0ba806a91fe6",
+      "sha": "1772863a231c96cf28443ce32632b3817f86f57a",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Hash-based Structures/HashMap.md": {
-      "sha": "84c14fdf6f0e5019801319c6306b6e8025c30364",
+      "sha": "a847f871dcb3fb34ca4af6c422e953c10333d6a2",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Linear Structures/Arrays.md": {
-      "sha": "2460f412a7726aab8754a50e15b3c837c298207f",
+      "sha": "25b972c281a625db8de4e97b764174234298fcfe",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Linear Structures/Circular Buffer.md": {
-      "sha": "7372dd412cfce7055d3a0ecf074d914ee1570e22",
+      "sha": "5f09e2e71edca1ae3ca18312bfafa91b1c722889",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Linear Structures/Deque.md": {
-      "sha": "d9be6b645f22c70e5d08a3f15d9dca4a91d9cdc4",
+      "sha": "7aae5220a0dcf010024dd02aa222445c32ea1dc9",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Linear Structures/Dynamic Array.md": {
-      "sha": "f987f6b14b7da75611a6e3b5fa49062efdd33d58",
+      "sha": "6e1a72a095ec5fb1f01e7099c111a5958724e0a9",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Linear Structures/Linear Structures.md": {
-      "sha": "3a98ccb34094f357d997a10ff511c452fdfbdc79",
+      "sha": "3856c3f9f38f6f78bfc62d75e8c55ebb60866d1e",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Linear Structures/LinkedList.md": {
-      "sha": "fe5c85ee40a9f846a0bfbc71a824a95c61fda679",
+      "sha": "48eb5c72ceb6a7ada7b84470f89a434f04466840",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Linear Structures/Queue.md": {
-      "sha": "1120f94b65129f8889a238f58c244efab279ddef",
+      "sha": "74660c72db15b91e61164c4177a1f4ae8a927a50",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Linear Structures/Span.md": {
-      "sha": "19a7fae9cc18a4005a9e666f7edf6fdb3a434b9a",
+      "sha": "4f92410cb0b0d1ce391273336b31bc1726e136d5",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Linear Structures/Stack.md": {
-      "sha": "b312536c6ab3b74748d62e4935e6bd092fa0c6bc",
+      "sha": "20f289345e7ef1659c002c880047bcb05ab14969",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/AVL Tree.md": {
-      "sha": "7178addfba95511f6351ef556aa66b8ee8bd99a8",
+      "sha": "aa815e6a44ce9ad0b57bdd5d2a1ecaae9476ef22",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/B+ Tree.md": {
-      "sha": "60dd6a60e5140a3ea8a2df2b1f18195b87021343",
+      "sha": "d7ebcc95ef1680f88848506a7c68e33bd1ee43a2",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/B-tree.md": {
-      "sha": "41035a5ce235ceb4df9eeb011b38a26bebf7a742",
+      "sha": "dbf000dc6e159d9a97cefb6804fd48dee70a131f",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/Binary Search Tree.md": {
-      "sha": "e7eb448694d30181c685492a13e029ae95ea7470",
+      "sha": "0b48a5af36f9d4131c0ed0e7832187d56eb925ff",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/Fenwick Tree.md": {
-      "sha": "3538ab85e4b7330913c104a366b8734bdeffe03f",
+      "sha": "32b726e01243b85d83eddbc37a85709766eb1218",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Binomial Queues.md": {
-      "sha": "032270f4d5ad73762e341ae18dbdd95dc6a6843d",
+      "sha": "c16c97eb06ec640b5078518c67eede7c54fe68a0",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Fibonacci Heaps.md": {
-      "sha": "cf477b107841ea186cfec8999e98e612c00ef168",
+      "sha": "dbe6b692ca434fe82c33a17bc55ec6f3c3422d80",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Heap-like.md": {
-      "sha": "9e9fa90c7b9a37733a2ae439d1fe9c1b0bfb9509",
+      "sha": "7196777bd65a8b4ac00f4bbef00c891e56c2d388",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Heap.md": {
-      "sha": "c220376d4c7e61359190ddcf5c035d4eab9e4f39",
+      "sha": "c02c6f1178c3160dc83d232de8ca42092ac28907",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Leftist Heaps.md": {
-      "sha": "f1b1bace093f8dbfa8321576a4fcb9eeef8006f3",
+      "sha": "ff6d2719e1da87017b39837dc499633148fb9bc0",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/Heap-like/Skew Heaps.md": {
-      "sha": "56f90150a374731581c0c6d72000779c9120921e",
+      "sha": "941c9731a3a198ee76fad56bfc053faee267d4ae",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/Quadtree.md": {
-      "sha": "0061c532bcccf572f85383e85a0572e52381d759",
+      "sha": "0d1fd613bd906604a441f5b36925a796fda7106c",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/Red-Black Tree.md": {
-      "sha": "79573c535dcba2e6bf0a8d69919a323dfa957704",
+      "sha": "c0fab11137149ec4ff16c29e56b7957c73dd6bfb",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/Segment Tree.md": {
-      "sha": "d6cd9e23b77af918228d30934a9f14f4b0c117a3",
+      "sha": "b2e9d2b0ac2bf8fcd06c63fd84a447ece8369621",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/Splay Tree.md": {
-      "sha": "2f77e4153ef9a532b548572974459c6603db57d3",
+      "sha": "a0a5ff586a7309f36fc0a2bf5a5c1303825006ef",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/Ternary Search Tree.md": {
-      "sha": "3584cc7529a2ad739eceb46d7b44361f1e6b9a56",
+      "sha": "4a4870350e6344f7f9fb77f110546ce4221b7ad5",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/Trees.md": {
-      "sha": "921efae951763838ab975967c453c27cc8f7554f",
+      "sha": "2b4975eaa94e0003a5789a3e78e2df09188ae4ca",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Data Structures/Trees/Trie.md": {
-      "sha": "dd9245a1cf3b00102f0d991d90bb6f9b269d7295",
+      "sha": "55a1d5955af2aae0a7713c6cc18ca17984834fb6",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Endianness.md": {
-      "sha": "200bd10d92eeb917ca860fbfdc46b5357042b1bf",
+      "sha": "0656e6d08d4608f82355df8158455ff273bf87ce",
       "mode": "100644"
     },
     "Vault/Home/Computer Science/Memory Hierarchy.md": {
-      "sha": "5303495859bc188e2666ed438e1f6d94be0dfc32",
+      "sha": "a8b3a811fad2307f0371f602db115c1a7927e7bb",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/ACID.md": {
-      "sha": "5fecafb88617c50cbef6fa510c12860e5c6c0cfe",
+      "sha": "643141131a3a64b8f84a0d81f7f486ffb995a1ab",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/Caching.md": {
-      "sha": "d6231b6dcb88f1009478413111c81318a165e852",
+      "sha": "78e5d86efec3eacbaff7ff7c03ab3d48373b6aff",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/Connection Pooling.md": {
-      "sha": "7efe92539f73ca17c86764896b308055607f73df",
+      "sha": "0ef2dcc41f9dae68e983d98c61911cd7dfde33e1",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/Data Persistence.md": {
-      "sha": "a76e770edf0b74e809295d0c4d08916604b1cacc",
+      "sha": "e4adc6a3b160b05e45b396125d45c1c3ce52c7e8",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/Erasure Coding.md": {
-      "sha": "f8d4306e5ae915003aeaf4b77ed13a9d6620c956",
+      "sha": "5cf719b8792a75bf15fb16b41890e97b5aa5bbe6",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md": {
-      "sha": "554c1746503f9a71e9c51c3740321f806cc8877c",
+      "sha": "b99f20f02948aa8fa505a5d3fe70423d729de909",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/NoSQL/LSM-Tree.md": {
-      "sha": "c0661a86b89e0dd27bdf876b82cf414f2153fdf6",
+      "sha": "5ab63f0a2dfb201e637863f8d87314184ceb414d",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md": {
-      "sha": "5f14a730fa5e9711f917eb5f8c1cb7739466e351",
+      "sha": "fb83aba7fef4263cb8f26df25e3a40ee42f89e6a",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/NoSQL/NoSQL.md": {
-      "sha": "9a34bb6da5677c01715a1053de1645796fab5dcd",
+      "sha": "65262391c8f47fc06807418281aa132cbc07dd55",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/NoSQL/Redis.md": {
-      "sha": "2939f7034ab39c1e839d2a351f50d165515e6110",
+      "sha": "a23666ae3f3764769b94339efcf812c49b9068ce",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md": {
-      "sha": "549924ade23b363e53f3972c7a3ba2b276f85423",
+      "sha": "dc8a8a85d09f461b4e5a2e75c6caf27891a39e46",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/ORMs/Entity Framework.md": {
-      "sha": "58f812923350bf1bf416492746ed2e91e53b73ce",
+      "sha": "c4e4e45c8864251e170523994a95ab11e6b5aaa0",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/ORMs/ORMs.md": {
-      "sha": "1d9ac80859e81d7359c416737b0e731800d03853",
+      "sha": "ca80c30a483c05ba3238f62e4b7e5f45a9e925ba",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/Object Storage.md": {
-      "sha": "ee8e98ee38e079b213780c8262d93d67157cc249",
+      "sha": "32545a64d79c1a744f9096514099bd9b702fa8e6",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/SQL/Database Locks.md": {
-      "sha": "2aaffd24ff7f81c2d93610eb079dc6ed677c9f94",
+      "sha": "c025fa682b4163ff6a47b1201f76f07e8c308a15",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/SQL/Indexes.md": {
-      "sha": "db1a60a97114261fd62cc06f910f1e193565b602",
+      "sha": "ff1727fa58187e95ff85332aea570a7c86e2a4a8",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/SQL/Normalization Denormalization.md": {
-      "sha": "83ace710399dc92f7f5beff942c46fa248f4524f",
+      "sha": "18e612c1109b53eb96c26ab094c8fba26325a8cc",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/SQL/Replication.md": {
-      "sha": "309139c52d54a9d4daf5c70827a16ea78a96365b",
+      "sha": "58deccc5f4ea2fdb584ebdd023844dd51a3f01e3",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/SQL/SQL.md": {
-      "sha": "677308fcf9cc7a5bb3e70f4ba522898fdf42e290",
+      "sha": "8cd111891bf725c7d860ec622b1fd7a2276fd8c6",
       "mode": "100644"
     },
     "Vault/Home/Data Persistence/SQL/Sharding.md": {
-      "sha": "bb1b6c99e5ba04435e67395db231e83566fe5486",
+      "sha": "13ec0ad0928330e788b67493290c68ce0b36676f",
       "mode": "100644"
     },
     "Vault/Home/DevOps/CI CD tools.md": {
-      "sha": "95648b6956ccf76cb22decb542bb7a3f5f2f7bc8",
+      "sha": "1a2258565896e52ca237cd24222eb998d4a7b00c",
       "mode": "100644"
     },
     "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md": {
-      "sha": "70640852461b67b2a19acc37014896080be1930a",
+      "sha": "6d26038179ccd20fa37790cef544fb538b193602",
       "mode": "100644"
     },
     "Vault/Home/DevOps/DevOps.md": {
-      "sha": "53856307523e61af771016e10c600ffaf877ea39",
+      "sha": "046515a54b0e2a0c31f9aa6b684c5a27a105dddb",
       "mode": "100644"
     },
     "Vault/Home/DevOps/Docker.md": {
-      "sha": "1fd56404bb9f4fef980738f51317305893a136f0",
+      "sha": "c7840683266fa84c35eb45982bf7f7207686c81e",
       "mode": "100644"
     },
     "Vault/Home/DevOps/Infrastructure as Code.md": {
-      "sha": "8afab2a3324a7442c784dd2d1e8b10c335521c3a",
+      "sha": "6a7d9bb37ab5b91729890c1cfde93259ba678f62",
       "mode": "100644"
     },
     "Vault/Home/DevOps/Kubernetes.md": {
-      "sha": "de62709d5786c4c49a06f860c3b5a985886de99c",
+      "sha": "5e5cad173d3f0333d1e1d84aa1276b32246cc151",
       "mode": "100644"
     },
     "Vault/Home/DevOps/Observability.md": {
-      "sha": "c5813d5437c2f6fae387bf6f09a4e5b5cfe9f4bb",
+      "sha": "a1fd3c93bb3485448f2a660a2875a21c87749d57",
       "mode": "100644"
     },
     "Vault/Home/DevOps/Version Control Systems/Branching Stratagies.md": {
-      "sha": "9b7ce3b6e848522486cc28ee9f8234ef07d713a2",
+      "sha": "62e38cc5c1d94ff792ad835ed89d0ebcff968fcf",
       "mode": "100644"
     },
     "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md": {
-      "sha": "2802322a62d0e3a605846e410bd8a96a3e9e4609",
+      "sha": "f88eb2fdd8eaca9b0d086653dfd9bce90ee066a5",
       "mode": "100644"
     },
     "Vault/Home/Networks/Architecture & Ops/Architecture & Ops.md": {
-      "sha": "71fbcf7370d10281b64309de0ddf509059f4d6b8",
+      "sha": "ad7d9a190ed9bd336a98955924eb1f2f3de40f0d",
       "mode": "100644"
     },
     "Vault/Home/Networks/Architecture & Ops/CDN.md": {
-      "sha": "7736873f738d677857246127990a114ad7931f1e",
+      "sha": "ae7eeb867c08ea0f7fe40199826739bed26843aa",
       "mode": "100644"
     },
     "Vault/Home/Networks/Architecture & Ops/Forward and Reverse Proxies.md": {
-      "sha": "e60cdd45dd4e9886cc679adbefc23a74959ec21f",
+      "sha": "c06465814707dad6d6193b8f60352b0a3a015810",
       "mode": "100644"
     },
     "Vault/Home/Networks/Architecture & Ops/Nginx.md": {
-      "sha": "84bdf0564ad75d038eb670de5b69528fa4a5e073",
+      "sha": "5fd47313308307dc07c23934d8ed8e6a1fe551cf",
       "mode": "100644"
     },
     "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md": {
-      "sha": "24b97178a47c59c5264138df316f34310e84970a",
+      "sha": "d923bae511c8d8d27b8f94f2e0b074329a6398d0",
       "mode": "100644"
     },
     "Vault/Home/Networks/Architecture & Ops/VPN.md": {
-      "sha": "39138ce03006a6d8f174cd61a6de7892c2b998ef",
+      "sha": "aa56709cfcb8a156f00026ab720246ece0e8d218",
       "mode": "100644"
     },
     "Vault/Home/Networks/Network Data Path.md": {
-      "sha": "12f73dc29086bad110f8c8950c33a202de314af5",
+      "sha": "789853217ed16d30f6ca7831aa696d799c4867d9",
       "mode": "100644"
     },
     "Vault/Home/Networks/Networks.md": {
-      "sha": "9d190a1a0d28cf49548f893956fe8e94faa7900c",
+      "sha": "57d0860a784ace8789e96dcd7a44c36af3bb3b7b",
       "mode": "100644"
     },
     "Vault/Home/Networks/OSI Model.md": {
-      "sha": "443f7d0af5f013128403670f8af8e50b829b4c39",
+      "sha": "69e5658cbbe237e828acd082cf5b29e54fdf5824",
       "mode": "100644"
     },
     "Vault/Home/Networks/Protocols/DNS.md": {
-      "sha": "b42f5e1b39ded40792aff36268b2f0cec9765d66",
+      "sha": "643a33487c4af6010a067e0d3b66fb9608e7f41f",
       "mode": "100644"
     },
     "Vault/Home/Networks/Protocols/GraphQL.md": {
-      "sha": "81acdedae0e86f032fe23a07c553503addc62b39",
+      "sha": "928a698bb94be482daeb2994e1aceddbbd6053d4",
       "mode": "100644"
     },
     "Vault/Home/Networks/Protocols/HTTP 2.md": {
-      "sha": "ce03bb116b846801011fcd356cb0898ed08ba39a",
+      "sha": "42f8568a7d7be9dfe6b7e219359349b97d3d1c5c",
       "mode": "100644"
     },
     "Vault/Home/Networks/Protocols/HTTP.md": {
-      "sha": "870a7a6c840511591a36c6daadc9d0751b0997ae",
+      "sha": "f71728815ca139bd20efd88e9fe1e93731375fd6",
       "mode": "100644"
     },
     "Vault/Home/Networks/Protocols/Live Streaming.md": {
-      "sha": "bc6a56108228af82a47eec9b09e0a2809ef105bd",
+      "sha": "af9978d654d4c0f6de7c2e27d638c6537267c00b",
       "mode": "100644"
     },
     "Vault/Home/Networks/Protocols/Ports.md": {
-      "sha": "984b802d0145ddec133d66b2fbe0c2858f9ba7c5",
+      "sha": "ae725ec8a227488f88d05ace4ac0c9ff505d345f",
       "mode": "100644"
     },
     "Vault/Home/Networks/Protocols/Protocols.md": {
-      "sha": "5ce8260ec00189d7e881aa38e28ec6b6dc2f5109",
+      "sha": "ddbb311534abbf69012c4e4ed1de773582e7ef96",
       "mode": "100644"
     },
     "Vault/Home/Networks/Protocols/REST.md": {
-      "sha": "3ad1d7debdc82eb5c356a9a230b2952d87154d3f",
+      "sha": "2591f3c0fde81ccb238d65a8ab6cb94ab60457ed",
       "mode": "100644"
     },
     "Vault/Home/Networks/Protocols/RPC.md": {
-      "sha": "4c551ab3a26d0ee2b4fa82a115097040123f1610",
+      "sha": "21677b8b6079dd4d9bed1746b2c946f851687c0c",
       "mode": "100644"
     },
     "Vault/Home/Networks/Protocols/SMTP.md": {
-      "sha": "856e9102c8992703fa7fa84103a767fb8b188006",
+      "sha": "66c540358cc8cdd7a877fafcee07785cea6df984",
       "mode": "100644"
     },
     "Vault/Home/Networks/Protocols/SSH.md": {
-      "sha": "fda1059411ac668b3100fa1bc02dc41c4a0e2bd1",
+      "sha": "534ad875df0c7e879b55762ed41c0a361e208cbc",
       "mode": "100644"
     },
     "Vault/Home/Networks/Protocols/URL.md": {
-      "sha": "a9e50923bf675bafd0f24568c511b711d9729aee",
+      "sha": "225f25834523c18e412250fe476d60f78b75b624",
       "mode": "100644"
     },
     "Vault/Home/Networks/Protocols/WebSockets.md": {
-      "sha": "faf4e7f74dd6b090f21abb47af4ad80151256043",
+      "sha": "d6877449acddebcf6cf837e84bc559f965f10d10",
       "mode": "100644"
     },
     "Vault/Home/Networks/Protocols/gRPC.md": {
-      "sha": "4fb9daeda34f5b412ca3b11d8631440df196353b",
+      "sha": "6970e027536eee9b75c98483d233775d1b0c8086",
       "mode": "100644"
     },
     "Vault/Home/Networks/Transport & Sockets/Sockets.md": {
-      "sha": "bea86997d7f3edb20a167df39d88c2598ba91cb3",
+      "sha": "fd016b94d5e83fdc0ffdc239a3d75b9cca243109",
       "mode": "100644"
     },
     "Vault/Home/Networks/Transport & Sockets/TCP IP.md": {
-      "sha": "0a9c0170d439b2295b2505e25fb90ea281388cce",
+      "sha": "9c562f755a51ca2e856cc09111c741433ab68c38",
       "mode": "100644"
     },
     "Vault/Home/Networks/Transport & Sockets/Transport & Sockets.md": {
-      "sha": "6f7667cc135ca00565c2ee979b4ac0d3b733480a",
+      "sha": "bdf6b4fc6e1cd3d5edd5e028601ca810a95652a4",
       "mode": "100644"
     },
     "Vault/Home/Networks/Transport & Sockets/UDP.md": {
-      "sha": "8324663dbca26a0f3b4381d9e02c35c29d9a4182",
+      "sha": "a32888f4ce8832d2bddbd309d77abe8e428f2378",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md": {
-      "sha": "da4d2d87adc4bbd8f4f26f0d35c9f2a6066cc9f0",
+      "sha": "246e2f750d96b9983115b8295932c919c8403f5e",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/ASP NET Web API/Authentication.md": {
-      "sha": "a8529cf3fffb0f1d7578bb6a69f79e044ab62505",
+      "sha": "efa189724a8e04b057fe2c531510144a20afa3ff",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md": {
-      "sha": "2492476523ff76e7344e323a3845e83ffdabeb6c",
+      "sha": "f7315c8679cfe3515583b86267da3626b815b4df",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/ASP NET Web API/CORS.md": {
-      "sha": "b1b87263c9989b474942fe4f19285c287af9f474",
+      "sha": "218f2c0551068ac26aae6d9779b3fcdfe8e937fc",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/ASP NET Web API/Dependency Injection.md": {
-      "sha": "5bd02d895eafb727a6d1170d63469c875a22ea77",
+      "sha": "c45209c0dd704aa8de2f4df7c63833d154149de4",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/ASP NET Web API/Filters.md": {
-      "sha": "604b2f1932464061a02a4d4f74645720b7892e4f",
+      "sha": "4fa95595d9843794f131719d106bf0cf3082dc02",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/ASP NET Web API/Middlewares.md": {
-      "sha": "87267fe224db1b0edef3cd1fd7efd0a6714d37de",
+      "sha": "605ebff2a65aef03599b66327b3c18ea557d93af",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/CSharp.md": {
-      "sha": "1c318f295b706cb256b4be1832e10f4c8b661ab8",
+      "sha": "5cb2430bdabb88e14353d3cf07cf10cbe6b5729d",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Async Await.md": {
-      "sha": "fbba02d66d61ab66766e1c0b0f42e26d084e8d65",
+      "sha": "f31e04aa67ef70780b0857bbbc47c593420c6863",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md": {
-      "sha": "0e7097d4d42ef9ce7317575b641e089c9fa54d25",
+      "sha": "593cf93bd13240ff8addaaddb9bddc5b66405e46",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Channels.md": {
-      "sha": "da246ff3e93491838eda884d2c0fca1becae5bba",
+      "sha": "1fe8f324ea72ecab39cc90999bcb5cf53e9bf816",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism.md": {
-      "sha": "9480ae696c51f53a87dbe99900a106e545536092",
+      "sha": "eca5760148261923d7f679b81df6a3cbfc9687b0",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md": {
-      "sha": "dd428cf718ce55acbddd57a18dc6249caa545112",
+      "sha": "c85c8a3cd8327dfea5355cd80a5e08559dc4238c",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md": {
-      "sha": "244aed05e2c73828c110dd3715e864d107192d3c",
+      "sha": "87241733e5d55b530e1a04070022239fcdbf5192",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md": {
-      "sha": "ec114df8a5190bd4c7e1512e1162345e2e364402",
+      "sha": "77a2bd902e4e50000bf05da0bd3991f082248c9e",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md": {
-      "sha": "f20accdad1e29bc83afbebb34a5d7874efb4ec19",
+      "sha": "ccda5218c24355f3159034160d2bcdd47b5317e4",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md": {
-      "sha": "038cb736f6a788f3336419058c6e84cd1a087874",
+      "sha": "098db93aaca2c4a2bf0b2200c326b3945f7100f1",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md": {
-      "sha": "7d7ef56b773ead9911a0d8d0d9cd3bf1c5367258",
+      "sha": "1a6637486ac29b827f4c57aed1deffd988fab050",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md": {
-      "sha": "8d2ab0dde281ac9c2d2c20f715b3c540d40b5186",
+      "sha": "5416692581e38745fe03607a8c404d527a6453c6",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md": {
-      "sha": "e20d55f3802671d48a3080296e7e88f4e1f165c5",
+      "sha": "0cf0e787ab7d84d2afa47fc991f5a66fd4ea1f6b",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Foreach.md": {
-      "sha": "b595c23c3743308f54f7f5e8102bd4b8e0bdf8fd",
+      "sha": "c37d0553934c6cd85b8b3e8319ea1f222e6e78b2",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Fundamentals.md": {
-      "sha": "e8c30c37c21c7acec87b9aaf398bf069ce43a2e3",
+      "sha": "f25681a71ba2e81112acea718ec912df265f4b20",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Generics.md": {
-      "sha": "feeff7b2ab4d34c9a620f3e33e425435dee4ecf3",
+      "sha": "ab69e1dd2d998ca8925757fc8062ecbeec06fd9b",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Methods.md": {
-      "sha": "2e157607c86c71e8f0e8f971826f2991c84d4b88",
+      "sha": "ef1e5bd49d0b5785148b6650f3e42b0518756b6c",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Namespaces.md": {
-      "sha": "56e5c578fbc87b3cbf536a79b04a3bdeb65319ee",
+      "sha": "159ac567190c608e5207fddccfcd640af97f089a",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Pattern Matching.md": {
-      "sha": "5efd478b8d9909a7b0bac7017225007ab7df3cf6",
+      "sha": "f877ba8b997511b9a76b3bc29ad5eee81837cb5b",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Reflection.md": {
-      "sha": "db86a886e964e9afdb3161af0b91cff35b0b905f",
+      "sha": "3e4f965356affd7622702af812c5579e6ae1a903",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Classes.md": {
-      "sha": "ece27589aef5be6de90eb25dbd61fad54a3d2e95",
+      "sha": "40582527b58b9ed14f059e8f607eda89283d3755",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md": {
-      "sha": "b8596b7d405f642c8ad38227ad07ef7f34763845",
+      "sha": "0daab4dede3dc3d057992af915fa719da4536284",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md": {
-      "sha": "98edf215498bf353d986a35fdb36cd57359e8d58",
+      "sha": "981dd4e7a1b23263e9e05f9825a0baa55917e66d",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md": {
-      "sha": "aef4eef983688556b033e280aac84e3611301c88",
+      "sha": "2623d6f209b036ee17bed5567f627ec98024d2e9",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md": {
-      "sha": "f37b55472223b2dab34abe4520b2380ff311dd09",
+      "sha": "75f14b2c0ba6310d1f7bcf89ae436f76d60bc991",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Structs.md": {
-      "sha": "beae76ef45b4a628292bb409b62631f51403f17e",
+      "sha": "109f138f6f5fa8640a98810223ed6493ff7d2968",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Types.md": {
-      "sha": "5c2c69b3def09860f97d26c22f2f3cc94934da94",
+      "sha": "764509d8481e220df24cfeabefa3f09d72bd76c3",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/NET Standart.md": {
-      "sha": "1b384c0600557784104d589914eb9a547468e5b6",
+      "sha": "3e98badd326806acee33dc4f88c7b92287d903a2",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/NET.md": {
-      "sha": "c7463ad7c56436757dc3d0e7fd12fa306872a9ed",
+      "sha": "08b41d75d0d806db97cb1baeaba3e8e3bfffa961",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md": {
-      "sha": "c03fcfe4278a231c1ce5e904d9662953a068d7fc",
+      "sha": "8ca39b3cb27e8106bf1bfee06c561ea927cb4992",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/Runtime/Garbage Collector.md": {
-      "sha": "f05475db502fd2268706eeb454656158a1839632",
+      "sha": "b204f8f1520a532bd572f714792c62c218f8c029",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/Runtime/Memory Leaks.md": {
-      "sha": "c59fddaf067be3569b8fe5672725a02cd57be1fc",
+      "sha": "a3b70bbfd8b7b121c01f38bfe3785b2180960b42",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/Runtime/Runtime.md": {
-      "sha": "0e08a93f26db4f170c02c44aa46146d891ea774a",
+      "sha": "f66a90e552ee9eb9a399f9f766269754bde78a41",
       "mode": "100644"
     },
     "Vault/Home/Programming/Programming.md": {
-      "sha": "0515a6fa60703c675f4f8b45847ab7ebad2ff23a",
+      "sha": "f0dc656ec65f64eaf55b7bac467bd1c1421b6c04",
       "mode": "100644"
     },
     "Vault/Home/Programming/WebAssembly.md": {
-      "sha": "267e85cc2ca432447e42c47a2915b0dc4751f296",
+      "sha": "a82aed3e4e030ed632a27e03bbccc82372bcd288",
       "mode": "100644"
     },
     "Vault/Home/Questions.md": {
@@ -1814,451 +2066,451 @@
       "mode": "100644"
     },
     "Vault/Home/Roadmap.canvas": {
-      "sha": "1625dab4352d6584485a96338064d55d6e073a99",
+      "sha": "ba3525d5d8039fd73f991185d8052b9c2b6a89a2",
       "mode": "100644"
     },
     "Vault/Home/Security/Authentication/Authentication.md": {
-      "sha": "848ffa6a2996ab4ff91bcac6a4789e805fecad78",
+      "sha": "f7fc00ff8a3136b1bed6fab184d46ee954f7e714",
       "mode": "100644"
     },
     "Vault/Home/Security/Authentication/Basic Auth.md": {
-      "sha": "42b561ed032ef706788535f0d9597ac11027a80c",
+      "sha": "5f222ab6d0a788b4ac0dbb8f8f896f42a564c0e0",
       "mode": "100644"
     },
     "Vault/Home/Security/Authentication/Oauth OIDC (OpenId Connect).md": {
-      "sha": "6e23c06c9044ac95f6117d63b0dbaa4335339e6a",
+      "sha": "9e98296b4fddfecf511c6ab67d96c2198bcbbea7",
       "mode": "100644"
     },
     "Vault/Home/Security/Authentication/Resource-based Auth.md": {
-      "sha": "958baf1fef88484f1abdb9d1f3ac4746957e26d5",
+      "sha": "3feec8f35d317d3fbad153381caa62911c757662",
       "mode": "100644"
     },
     "Vault/Home/Security/Authentication/SSO (Single Sign-On).md": {
-      "sha": "f8604a0407b9262e99cb4f712c58cabc3a212179",
+      "sha": "e6895ec07b90705759a86f4b2cf444d0f98cb92e",
       "mode": "100644"
     },
     "Vault/Home/Security/Authentication/TOTP.md": {
-      "sha": "6ab955f7f034f4c7c3ef676c9c362187e2d149e4",
+      "sha": "c422a43faeba7ee3248b4161ebc7783845f5024e",
       "mode": "100644"
     },
     "Vault/Home/Security/Authentication/Two-Factor Auth.md": {
-      "sha": "994751a72b2a665a75030f202739bbfb7302bd77",
+      "sha": "16d3799852a8d5b0e6729bcb2c00d156272ed34a",
       "mode": "100644"
     },
     "Vault/Home/Security/Authorization Models.md": {
-      "sha": "80e582839d0b81fcb908fb671116147820a293d9",
+      "sha": "ed9184a63e499bb1ec1cef680f0c8679d50800f3",
       "mode": "100644"
     },
     "Vault/Home/Security/Block-chain.md": {
-      "sha": "160f6576f0340181f5611015fe08716d99d05740",
+      "sha": "fdcbaf1d9922fe0a1f1a0db4e89ae6adb835227b",
       "mode": "100644"
     },
     "Vault/Home/Security/Digital Signature.md": {
-      "sha": "52691a997bd970c951c88059f73e6c8b84f1e2c2",
+      "sha": "e066b7548a6800dc95c2311ff0f3ab96f97178cc",
       "mode": "100644"
     },
     "Vault/Home/Security/Encryption.md": {
-      "sha": "11049412c8dd3817ae0aee9cf857155282a38476",
+      "sha": "b484e200500cabbe6fb13a83ad90ac565c33c36e",
       "mode": "100644"
     },
     "Vault/Home/Security/Firewall.md": {
-      "sha": "1859d85949ce0cfc7a7f6087b3bd1d82d18448f1",
+      "sha": "82bbdf884704c07eedf78db9d6d088d9721376f8",
       "mode": "100644"
     },
     "Vault/Home/Security/Hashing.md": {
-      "sha": "4634aa92f2183e7b007342e550fa8037c4e20c3c",
+      "sha": "9d67945df16bf880f1a36c8a785487986633251d",
       "mode": "100644"
     },
     "Vault/Home/Security/JWT Bearer.md": {
-      "sha": "55295dbd527b990d7b528f411c9082d018ac08f0",
+      "sha": "2f2b1a6b0a0a7c369764a35edb5ea6bb3bce72f5",
       "mode": "100644"
     },
     "Vault/Home/Security/OWASP.md": {
-      "sha": "64a60e1bf96a5cdcee4ba334918266ff36e010d8",
+      "sha": "5f2dcc2fd518fcaff935c15832f434a6ba77eb0c",
       "mode": "100644"
     },
     "Vault/Home/Security/Password Storage.md": {
-      "sha": "1770ce3886196bb944f94a20c251e44a464c0d2d",
+      "sha": "104049a3c9702fc494c1158795c3112bc4b740d8",
       "mode": "100644"
     },
     "Vault/Home/Security/Secrets Management.md": {
-      "sha": "6794ab5f66a5469aecb62dc0ce26ba97a76c9632",
+      "sha": "5a2de3068c9f469a63acb32633623cdb212fa821",
       "mode": "100644"
     },
     "Vault/Home/Security/Security.md": {
-      "sha": "d0cd8a0c18807cbba43e3dee3b290f13e3620c55",
+      "sha": "52480a85866c572d105339b9d5f2a093eddc6472",
       "mode": "100644"
     },
     "Vault/Home/Security/Sensitive Data.md": {
-      "sha": "c0eb1c78ecafc7201646aab80c05a06504a9efdf",
+      "sha": "273be753fd8398b52da103b2c944589168d59dbe",
       "mode": "100644"
     },
     "Vault/Home/Security/Web Vulnerabilities.md": {
-      "sha": "1a257bb4d4c71eece04a4e57042c32bb852c1ba7",
+      "sha": "36edbae69e10196b56160c89963335088526b4cf",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Application Architecture/Application Architecture.md": {
-      "sha": "37c1b8eb9bfa467724ccb5470ca353b5bf65eeec",
+      "sha": "81e2835df4e2f020bfabb742fbffeb4f85c7e512",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Application Architecture/Clean Architecture.md": {
-      "sha": "fcfea4817f4a4d4eafb9aa6c52999eaab48ef1b6",
+      "sha": "38b97edcb5d8fbd0ed96197d9016ed2e2b582c9a",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Application Architecture/Layered Architecture.md": {
-      "sha": "519ac8683f91e5dca4ea3db27d6aa690d895ee14",
+      "sha": "73885bc008c6a085a784332e4220f40ef1bfdb04",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Application Architecture/Plug-in Architecture (MicroKernel).md": {
-      "sha": "d357e2fd6f46fce3db5aa9718c04096dc1b28495",
+      "sha": "35fe2630e3d0f00b587549e7af1483fd094ecd4d",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Application Architecture/Presentation Architecture Variants.md": {
-      "sha": "167f47b14e2e416622f85a5b0eb63c8e437181f1",
+      "sha": "33a4b911f3c81e4d9f36a24fc5418c789ee0e45f",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/API Gateway.md": {
-      "sha": "22de970f97d8dbb36b44fdc609ed3f92838b52cf",
+      "sha": "d4a7c0055c20e930993b732899d9bb8ff4ca1e15",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/CAP theorem.md": {
-      "sha": "cd8d5ca938447753bdcd3cc6f52d6075efb6ea4f",
+      "sha": "a19422df684d943db196ae6b8e41959e124446fd",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Choreography.md": {
-      "sha": "9830f8e91fbde59e380352bc3d199ee1a8267aba",
+      "sha": "e5fcef8bb0a6c36eba56943a407482d0fa786fc7",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Distributed Locks.md": {
-      "sha": "8f420f956975f1fb0fba2e907feb9e71a1571a78",
+      "sha": "d5bcda249a47ed34008cdfb09ecd4f130243ef33",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Distributed Systems.md": {
-      "sha": "657ad231c4942a1f28752fa3a3942add2cfe5c50",
+      "sha": "257a156add94da2e95f15d66073800009b2094b3",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Distributed Transactions.md": {
-      "sha": "b2173e262bac22057160635a6451d04f0e2cd520",
+      "sha": "ce831dd94e8ed4f5faad44a881c68032637b370e",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Health Checks.md": {
-      "sha": "d4fb1bdf37a54c08b85af3683519d622af5fa0dc",
+      "sha": "961fd684100abb701a3dfc3c26ca11f39004fb84",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/High Availability.md": {
-      "sha": "973706198497ca6acb4fb020f048752e4958e8c6",
+      "sha": "c6bec35a0d81017d909ab340005b71aaf4f1db68",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Idempotency.md": {
-      "sha": "d84a3cf835a8c1dc064700fbe7d6c1fb9b3ced4b",
+      "sha": "4f9e13224bbfbd41de4d55666b18100762ecaafe",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Load Balancing.md": {
-      "sha": "75d034d1cadd4d4d0d0cb37d79164b1f7d2cb346",
+      "sha": "b3acda610379438a52adf8cf50a120eb48dca98f",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Message Queues/Kafka.md": {
-      "sha": "218f3a65b4693bf255f3e01740566620e88595d9",
+      "sha": "b3ca37e69de1b7a8ec4b6ce64d64cfcae449b412",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Message Queues/Message Queues.md": {
-      "sha": "b6bad0ce748c969ebe35008778b06c7de037ceac",
+      "sha": "db56ff0eb22b24a6ad10a402c40e5e8f06bfeb76",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Message Queues/RabbitMQ.md": {
-      "sha": "f001d18f11036d04e12bfda96901e965414d1443",
+      "sha": "db75cf98e3ec26881e595ab0b2f70cf0d7c9e1fd",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Orchestration.md": {
-      "sha": "e16fc6ad7bf739338e6f739488373589cd26135d",
+      "sha": "a1dbd81e5823ece2a813a152512a03b5dc408fdf",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Scalability Patterns/Horizontal Scaling.md": {
-      "sha": "d763efee8ac37a45a8ead07e272f1e6c6b9017ee",
+      "sha": "ca7c08a2e0d70b50a10cabacb1462aec06cc2725",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns.md": {
-      "sha": "0cfe435e9524a1004da1ade8fd02b36d4aed26eb",
+      "sha": "404f92b1ed37be33104b32f8ceb792a00484b32b",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Scalability Patterns/Vertical Scaling.md": {
-      "sha": "e6e88537c66889f0a5b14d1375e62a7ffeb81192",
+      "sha": "32a7a571df591d34ce72c0c96e9b02eb48f861bb",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/System Design Examples.md": {
-      "sha": "c7dec682a3c35d12c1cc2b4f93a001065fc2d2e8",
+      "sha": "b6dcf0fb197a2dcb6f1ce4ed2dfb84b9d1fa65f9",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Unique ID Generation.md": {
-      "sha": "88146eb9e015ccfc40feab0234d5cc3d1d7c690b",
+      "sha": "aa47f24f315e1dc4060797ca0f091a9852245e7d",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Distributed Systems/Webhooks.md": {
-      "sha": "5148d16af012dc32d057d5ddc75060d554b22962",
+      "sha": "10268afe221a71fa43bf5be945368b6eecb8fe12",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Architectural Patterns/Architectural Patterns.md": {
-      "sha": "463fa25f0ec821f6fa42030d14235f688070b416",
+      "sha": "c68db621cbd7d2a53dd2970a0b217ae14f98fdcc",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Architectural Patterns/CQRS.md": {
-      "sha": "7becf577f07bdf50e21570eab754a9cab9592b4b",
+      "sha": "8fa0c8ff56fc5c82227eae52251aa90a32f9b51d",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Architectural Patterns/Domain-Driven Design.md": {
-      "sha": "84426979a3bd36b2baa8c923740d822b06f06347",
+      "sha": "1484e2dcb065974538139c3de5392c942276c649",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Architectural Patterns/Event Sourcing.md": {
-      "sha": "f90c7e90907d2fd72b91895218b4834d8f1027c7",
+      "sha": "03a1a629a6e72ce9c1db24f78f289bbb1ca5cf0d",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/CQS.md": {
-      "sha": "6ae4fbc023d4bb3caf02014211d6bfb8ad30af8b",
+      "sha": "2e2d599c71b38e2ed40ca31ef106b3d4c05efbfb",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Dependency Injection.md": {
-      "sha": "aad9e1fccadc72e9c22dc0c779c19f106f58445a",
+      "sha": "67253a22928c5f3e77f45eb2813549012158f9df",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Behavioral/Behavioral.md": {
-      "sha": "223e90a0c01f4a88216da54557df43da1535ba8f",
+      "sha": "9fda46a6fb277a1edc055a797fe61a70b7a6e8d5",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Behavioral/Chain of Responsibility.md": {
-      "sha": "596ef56c84d4ff41174d2eabdc5771e35cd0f46e",
+      "sha": "f9bf9fcb3a39860a692135cb740b9f42ca163c47",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Behavioral/Command.md": {
-      "sha": "e88fb3739b55ef2903f2f1284b9370c2c6a40394",
+      "sha": "430bdfc16a796e9fe32068c86f7e2f05c2f6aa8c",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Behavioral/Interpreter.md": {
-      "sha": "98b2e59e1f5b3afccec4e6599e5d6981aa4a5fd9",
+      "sha": "9e3b23a7abe28ca163e5cec5c2c21bd3eeeebbc5",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Behavioral/Iterator.md": {
-      "sha": "9acac2a9ddcfea2942a3451b0d0b7345f47624f0",
+      "sha": "532b1f4b45615e7a7944cc41b6be862ea01fe9ae",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Behavioral/Mediator.md": {
-      "sha": "250c47a5310752b6ea9969cfa532c44db8a1763e",
+      "sha": "030bfe3f84a90b99872392d9fd4a8d80ac36931a",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Behavioral/Memento.md": {
-      "sha": "8dfabe69a481da001e46507eac2abcdc31c33e45",
+      "sha": "d9654a70c82ebe84dac58a8a8d5473607e7660ec",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Behavioral/Observer.md": {
-      "sha": "b286865fd7df045583cffee0a3759e808c9e27b0",
+      "sha": "00d261085cac80bb3b667e82df4edb9cbd78b42a",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Behavioral/State.md": {
-      "sha": "c0627d205771a432de30ee78ec2b2704d59d88e2",
+      "sha": "f7b29495bfa0202215b4cdbfd5c3cd3a6da3512c",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Behavioral/Strategy.md": {
-      "sha": "e21a2444420e7221013da6c3031bf3d1c03f8d4a",
+      "sha": "dcf84ec607f18a34bd520a262be65401aa9715f7",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Behavioral/Template Method.md": {
-      "sha": "176c5208ecaf8771082e91e4b46c921f291856c8",
+      "sha": "f94a72f19ad730cdc65e1608272b6aee2073b2b9",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Behavioral/Visitor.md": {
-      "sha": "395d449eb148aa9915749c0349f742e7f0f748b7",
+      "sha": "fe2adf5f8ac4a911f8308c55a606d1edc0c9dc87",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Creational/Abstract Factory.md": {
-      "sha": "fdb94d692bc007bf9cdaa02f304c59c25f5f22a0",
+      "sha": "0abc820f88a1ce5e8a7ab8f34ac5f31178f7d96b",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Creational/Builder.md": {
-      "sha": "7268e430589575787aa840727b77ae038bec46f8",
+      "sha": "6f9c9448da46abd9276addfc066f9957fa09e788",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Creational/Creational.md": {
-      "sha": "563a3586405b183968c11fbc00014055a47a2e41",
+      "sha": "16b451d81b05b13cee17886f8ababb2efd4aa285",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Creational/Factory Method.md": {
-      "sha": "2f67fa956c8c8fdde95c7478db3bbd91761bbd25",
+      "sha": "bb7621d04d7af9ce7640d93839b35f56eb506a7a",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Creational/Prototype.md": {
-      "sha": "21f41319fd008687e905c728298d07eabadd4b19",
+      "sha": "0faf5b7a9c7f3ce46f56c111c912920adf29dcaf",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md": {
-      "sha": "d3748feee252f023c7ab7b4fb4c121b59fc7b868",
+      "sha": "d980bf17e773a455022028250104091e36b54502",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Design Patterns.md": {
-      "sha": "db1132d2021e4369a438b475af4dd2989ee3f680",
+      "sha": "806d41ae315bbe6a5e58e303e6ae05092710f762",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/GRASP.md": {
-      "sha": "65d642e096585489178ed4acd065108f723e0acc",
+      "sha": "6f82786627da3061de821f4969c44abd5a5bde05",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Structural/Adapter.md": {
-      "sha": "c3d6d329e54fbc6fdd57162330bfd1746d1e17d5",
+      "sha": "cbd49dfbdce178edc7e46566d51543367be662e3",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Structural/Bridge.md": {
-      "sha": "e1d53e4b41f4a763c1d26dc7cc073015ea67db46",
+      "sha": "95ae64d1e369d505ecf7478d3502b95bbd0ad18f",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Structural/Composite.md": {
-      "sha": "4100b459c2f564a45125b9c09a6f9538e6548087",
+      "sha": "606050c72eed93327a215d8f550621f75457b69a",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Structural/Decorator.md": {
-      "sha": "1b9a87ceea6ab474d0d929f54835b512413dcc0f",
+      "sha": "47bf382555dc4942245a649c5f5a95a9bfa4d906",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Structural/Facade.md": {
-      "sha": "b0515f1f4fa5430b24333ed5fa630b5afb90fa8f",
+      "sha": "c8a3b90367c51592139445b6f601c1a883f309dc",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Structural/Flyweight.md": {
-      "sha": "5df1330fd7a71ce963f135d32951acfbfa008f12",
+      "sha": "ed53ba6c4ba8d92b3c23c9dc15ec996075dd0297",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Structural/Proxy.md": {
-      "sha": "a7bae672bc65b8f62e2b5df672400ea43d9f8a27",
+      "sha": "525a91a9e0a57e33127011da73aaf5f7759213b9",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Design Patterns/Structural/Structural.md": {
-      "sha": "bf4bf4ba1b349aedbc747c005ca121c8c1f14ad9",
+      "sha": "776d9c16ee07c9b392a260ef46dc3062a7ec45f0",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Event Bus.md": {
-      "sha": "bfa7e25c5d1a87acf2f4e7a788947c7655306c7d",
+      "sha": "2ba497ab51d5dee31b043e08361f1ffb76dd9bac",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Patterns.md": {
-      "sha": "3a317c280c9161c986c4c04955a04590a33d3f88",
+      "sha": "1d8a8f4f4d7709aeae2d421c22604da0af10513e",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Repository & UoW.md": {
-      "sha": "51d041f9f903b302aabdf51dcec220b329e9aff5",
+      "sha": "1797d7743e8386f56dab45d7c3ab1ba96837c887",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Resilience Patterns/Circuit Breaker.md": {
-      "sha": "fb5d6346f3f58b2a5779d52cdd6eb25b2967dddd",
+      "sha": "bc147e5f87885c34e46b462a3830b26b4eae171d",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Resilience Patterns/Rate Limiting.md": {
-      "sha": "6dee5b9e780685367e21ec1cb6eda08edffe2fe3",
+      "sha": "412e8c2bd9012a485fabff29d412618df79bcc44",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Resilience Patterns/Resilience Patterns.md": {
-      "sha": "592d5be53c90b7fa114c3c87334aa3551a2bb750",
+      "sha": "597c2823b9a7058b7d13522e27df1b31e137bb49",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Patterns/Resilience Patterns/Retry and Timeout Patterns.md": {
-      "sha": "bccc65d80eddc2f4f84b84760943aeec3f638839",
+      "sha": "99451d45e061643a67ee315d9f02ba71ed1e629c",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/Software Architecture.md": {
-      "sha": "53b5ee30701ab77087ba222456d9e2f938a3aab4",
+      "sha": "8d35ebfd94cfc7fc47378740a59ff61382209e63",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/System Architecture/Event-Driven Architecture.md": {
-      "sha": "442e06e3ca913b2b5f02827000604579e03aadcb",
+      "sha": "872f3d6b2ca2abd58d6ff8a08e463d51012f3e93",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/System Architecture/Microservices.md": {
-      "sha": "8754f7b07d07ad7b5ffe2d86999cbb27ee8cedf2",
+      "sha": "a225a283c1f8fa892a062de509438fbcc39b613e",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/System Architecture/Modular Monolith.md": {
-      "sha": "41d8231feebaf29aa3911758d195be27604bd64f",
+      "sha": "9af93f8eb18a55296cfc3656b863394cb7ecf550",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/System Architecture/Monolith Architecture.md": {
-      "sha": "f2ee7bcf3b2c98f60257bafebd45849d471b1546",
+      "sha": "3466fdfe74ff66e4a9892d9fecd8bcbcc073bc93",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/System Architecture/Serverless Architecture.md": {
-      "sha": "9529f575029d90602a220aed0a548944791059d7",
+      "sha": "8736e13d657e57887ef4e6821403b4cc4d45fe32",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/System Architecture/Service-Oriented Architecture.md": {
-      "sha": "5770b72e53bb844c7504a10eb8ed453921d2d57f",
+      "sha": "605183de6f92aff9fdccfd9f2347382b1c4c5dac",
       "mode": "100644"
     },
     "Vault/Home/Software Architecture/System Architecture/System Architecture.md": {
-      "sha": "6da6229208a0029a1f557c983e35d556c5897ca2",
+      "sha": "69a47177a419591ce00a6e18b998f96df31767a0",
       "mode": "100644"
     },
     "Vault/Home/Software Design/Paradigms/Event-driven.md": {
-      "sha": "e89a6a294256ce68b4dda4898bc88e202d229d09",
+      "sha": "90db54092ab0ab96fa0036564619a8f87b5efa4a",
       "mode": "100644"
     },
     "Vault/Home/Software Design/Paradigms/Functional Programming.md": {
-      "sha": "c30878ba3f48188087a63ddb50dfa875366ad401",
+      "sha": "c16b32dd5480f49d3aa9e2f44041dde1a54e5c8a",
       "mode": "100644"
     },
     "Vault/Home/Software Design/Paradigms/OOP.md": {
-      "sha": "cfa33496cb330f3709fdd0b72e072292e1f3b86d",
+      "sha": "37f2c3fde44d744f2e2210a302e98ff81d85c126",
       "mode": "100644"
     },
     "Vault/Home/Software Design/Paradigms/Paradigms.md": {
-      "sha": "c0f140d1b064ec684128a53ea30bde5c92205d3f",
+      "sha": "cf6ad1e2d998bca35a2c7e970117c942005be286",
       "mode": "100644"
     },
     "Vault/Home/Software Design/Principles/DRY, IoC, and YAGNI.md": {
-      "sha": "a6a6d64ff9f97a6dff5c03c2def644eab833f4dd",
+      "sha": "5cbf7f1244a2c0c8ead7c7843ee20e8ab835922d",
       "mode": "100644"
     },
     "Vault/Home/Software Design/Principles/KISS.md": {
-      "sha": "e133d95ac6b49002322faaef95a382bbc7ea747b",
+      "sha": "882a8c9acdd23cbf83b4f76cd1b4a6da2bf0e76f",
       "mode": "100644"
     },
     "Vault/Home/Software Design/Principles/Principles.md": {
-      "sha": "0fb300785f066a93d7e8cd57d424b87091a52248",
+      "sha": "2a4373c28f5c525c1d64a3e1ae9ee0a606eca4f1",
       "mode": "100644"
     },
     "Vault/Home/Software Design/Principles/SOLID.md": {
-      "sha": "fd20ae9dcf848e2584ad1d6b9fc009ce261a8686",
+      "sha": "468845db1916cccd1bcb7237e9b119887ca784bc",
       "mode": "100644"
     },
     "Vault/Home/Software Design/Software Design.md": {
-      "sha": "87f6a6e5273c5cf49342f5164aa109b8d789b642",
+      "sha": "5b6c157d2b4f1b9786e78de1b532f3b91e5f306d",
       "mode": "100644"
     },
     "Vault/Home/Software Design/Testing/Integration Testing.md": {
-      "sha": "a9676219e256e5d1d908af4dca0a98201cd0789c",
+      "sha": "2975b175d5dd4e64f59b2dc8241f78489fa80a81",
       "mode": "100644"
     },
     "Vault/Home/Software Design/Testing/Test-Driven Development.md": {
-      "sha": "b0cb3388abf81ee41fd3e669c7ff6acb0eced995",
+      "sha": "dfc305460d75f89b8f15ca265b4b5a9465cd9a26",
       "mode": "100644"
     },
     "Vault/Home/Software Design/Testing/Testing Pyramid.md": {
-      "sha": "110b8ec5fcfc5f67ba407c3dbf246a045038bb40",
+      "sha": "805bbf2931e3072b8c6cc6beaa46202d76fa6baa",
       "mode": "100644"
     },
     "Vault/Home/Software Design/Testing/Testing.md": {
-      "sha": "ad87ced802ec396f01a2b0d86ad76b6c916437f4",
+      "sha": "d026c53bf0decb5286ea8d7e1fa0cdfedada82b5",
       "mode": "100644"
     },
     "Vault/Home/Software Design/Testing/Unit Testing.md": {
-      "sha": "e37c7addf0a33977c45c1b78b78378b7300dfbfa",
+      "sha": "beb518e85e08c228a78b5ab44f599e1fc074c776",
       "mode": "100644"
     },
     "Vault/Home/Software Design/UML Class Diagrams.md": {
-      "sha": "b6b806637e92c3b9f899f778f4b1186847d19aad",
+      "sha": "6c83536f27277826a8eb3ecd1f25e054ec1baa6f",
       "mode": "100644"
     },
     "Vault/Home/Topics.base": {
-      "sha": "cddef0b8840a94952554bc2d517d9e5bbc228027",
+      "sha": "2c0e51339bef6d1f47ad3debbac229ea11e0e6fd",
       "mode": "100644"
     },
     "Vault/Home/index.md": {
-      "sha": "9109246d0e8743394b5b2f4a81d70c9bd4c7b922",
+      "sha": "100cbf8cf114a939cb44df008298303c13375882",
       "mode": "100644"
     },
     "Vault/Qard/Card improvements.json": {
@@ -2266,7 +2518,7 @@
       "mode": "100644"
     },
     "Vault/Qard/Source links.json": {
-      "sha": "4445d4599cc6eed31a72e861376bae2f95b81476",
+      "sha": "cf8e8090796df30b4cd1e9ba44b926266c740e0e",
       "mode": "100644"
     },
     "Vault/Templates/Blocks/Template - Callout.md": {
@@ -2282,285 +2534,285 @@
       "mode": "100644"
     },
     "Vault/Templates/Pages/Template - Algorithm Page.md": {
-      "sha": "613d8ae3f12287cd3329488b93469ff06ac2a877",
+      "sha": "e9db4553f74bbb1e9be48fe6eeb2527c57666db0",
       "mode": "100644"
     },
     "Vault/Templates/Pages/Template - Concept Page.md": {
-      "sha": "231834d31ad68883f79a4075ef191aaf23e33aa0",
+      "sha": "aa8d1ba71d301ee52b8108eb056d6c24af287c30",
       "mode": "100644"
     },
     "Vault/Templates/Pages/Template - Data Structure Page.md": {
-      "sha": "6e65f564ca18660c5360bf419e5a3d07750749ad",
+      "sha": "3725b6db171cd4359a8669817fa14495fe8b9d17",
       "mode": "100644"
     },
     "Vault/Templates/Pages/Template - Index.md": {
-      "sha": "5c8dce47ae9fe7843affb0909e70fe62623df31a",
+      "sha": "e30d71f87fa8a2472702f3c6a4cb4beede38aebc",
       "mode": "100644"
     }
   },
   "outputs": {
     "Web/content/AI & ML/AI & ML.md": {
-      "sha": "f131fbf00e5b7583858a875102a5415840e9cffb",
+      "sha": "232e01f7f208d5f915fa90650efa2b6a01efb7a2",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Agents/Agents.md": {
-      "sha": "ccaaa9bb5eada77cecedfcdef14a8288597c6c12",
+      "sha": "ae31957d1b9253031a22f74d7ed2567924817d5b",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md": {
-      "sha": "2f3c73bfb9714cf2b3408077999f9a71323982ac",
+      "sha": "635b643265201593aba1a84cdecf32aae6149835",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Agents/Evaluation/Evaluation.md": {
-      "sha": "19750ab4f00c33eb01cb8dc50fa046c6f211e9a2",
+      "sha": "d51523bf8179d09e094c24c16658c6c8c78c434a",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": {
-      "sha": "1ae6b11ed3d23cfbd225d02671082b352469674c",
+      "sha": "3c428121f6f988e267cf1165ce50738b3af02c6d",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": {
-      "sha": "81d302206ee4f1c95d952e9b15b394255d0feb38",
+      "sha": "79d02249fbe1220c0350b2ce3aeb578af7f81a7d",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Agents/Workflow Patterns.md": {
-      "sha": "1ffcff14082c9b9b528d8e94804ef692336b7a21",
+      "sha": "63d7da5eb677a502b0eed3343cf3959b17899ed2",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Context Engineering/Context Engineering.md": {
-      "sha": "a1a4c291347fa034d7c8ed2bfe4a5bccc4ed5070",
+      "sha": "da4bcc49fcc2a581c3443e4ebf7463a4ea579c8e",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Context Engineering/RAG/Chunking.md": {
-      "sha": "12c7c652bcbbc330b857d31d954f6ddd2f63f6d2",
+      "sha": "c73bd7a46ae56fbc1d78008046ab08e31e5ec38e",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md": {
-      "sha": "7deff67d34ddf7d98556ba7a1246d9be66dd5f6e",
+      "sha": "bd4025c39396651fb85eb0e26fdaf501cf3241d8",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md": {
-      "sha": "0513334f0d1e1cd8063489fb41fbc3d7ed66b1a9",
+      "sha": "041dbf7684fd285ca5a2fd2a3b7c9d536b231050",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md": {
-      "sha": "119bbeac7676214c848e37302a8d3ee2d058a2b7",
+      "sha": "20a8b1f69c0057d67842234af3cff83378549d50",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md": {
-      "sha": "3a7fa5d5f50ea196d184106ab155325899d05b4a",
+      "sha": "1ca6e0ddeb1cdbcef8fe68b8d6887b0c8c85f314",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Context Engineering/RAG/Monitoring.md": {
-      "sha": "58cc62af2461ef6d004681c1544840610ec9325f",
+      "sha": "b407eb4a0887770e65b3fc6898f5ff583b047a4e",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Context Engineering/RAG/Query Translation.md": {
-      "sha": "94db36ac4acae2b6c38d55e831f990979c4e2144",
+      "sha": "567d3f4b2a90607521d08f27aaa5c964dc593b72",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md": {
-      "sha": "5af7bd6b5b068236dc17ff3b1da78ff6aa93e14f",
+      "sha": "4d01acca26ddcd6d6e8573f9b5ac1a30318b90d3",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md": {
-      "sha": "16ca5ebb0b949140bfdf84d1722354d4a6debdfe",
+      "sha": "5fc36bca8538add9da98643b81bdc14f2cf06ca7",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Context Engineering/RAG/RAG.md": {
-      "sha": "22823df82287c257738b7463c05326002049e122",
+      "sha": "6e4f75d2e5f4308a96452fb9e884f428f4c149a3",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md": {
-      "sha": "97faa7fbc6b412aa128862fc8af4cbd79e052d57",
+      "sha": "493f7ef54dc0264facec44a58f3ac2e7f00f9727",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Context Engineering/RAG/Retrieval.md": {
-      "sha": "37e9fc4ac9c6b550f9e6d9bdef40627ef9a22980",
+      "sha": "72b0f5a12a346ae121c428a76c00eaa325e316bd",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md": {
-      "sha": "ebed13a0d79218f639ca7e46d395e92b35686b24",
+      "sha": "cf8482f157218f7815d977bfbe9132769d408c26",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Embeddings.md": {
-      "sha": "d28563c17d6fb0fccf0d8f7a6e44e0f949c4fb1e",
+      "sha": "c779406e119aba25cfc25b7fcbf60ffae658bdd7",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Evaluation/Building an Evaluation Set.md": {
-      "sha": "24c710c331e81c5f59edd4fed5ccc0dd9f3a0548",
+      "sha": "5cfb262271b9feb01edc6db8c5024e0c245f2fb4",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Evaluation/Deterministic Checks.md": {
-      "sha": "f85abe5d02bf273bf75f14c1a80fc5c3c0f2c1fc",
+      "sha": "4355d61686b2faaaaf67ba5d3bd9477e72047366",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Evaluation/Evaluation.md": {
-      "sha": "37c9c408bb1630df9bd59fbfe97380a15b60a8d1",
+      "sha": "65abc3e2fe6da7924d279ec9beec26d917bbc622",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md": {
-      "sha": "024baa61cfa6b05ae22338751d521456f8da83c7",
+      "sha": "332a5cdc103d9243782a6c21f29878d999b1f7d2",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md": {
-      "sha": "5582e5771b1267eee09eede729e7f101b3614640",
+      "sha": "92492a2cb9380306e1234e3eeb5504bc6f4f8a86",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md": {
-      "sha": "4c11ff2a28c3a281e5a99a1426a3014802ebf245",
+      "sha": "e8db9d1faad45755e91f71a4fafac7fc77211935",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Fine-tuning.md": {
-      "sha": "332c34135308a3b7d511389eea9f45bc0f45af25",
+      "sha": "98c92536344e18eec67db838f3ac233926323817",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Generation.md": {
-      "sha": "5a8348175a9be67331e5c623124472f67de9e821",
+      "sha": "e248ae76e1f39e39060ea65a9eb48e5994d5d728",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Graph Engineering.md": {
-      "sha": "4a8640b2a5739809613ca789282a34bc28e98fc1",
+      "sha": "98064f3d86724503358f3ba393e0961fc430cdd0",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Harness Engineering/Harness Engineering.md": {
-      "sha": "e2d5a07ef419afeb2c59f8b4fb69db41dadebdde",
+      "sha": "65f04e0d03b96f1000bf8cc545442649d8b63c4c",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Harness Engineering/Model Context Protocol.md": {
-      "sha": "504ae0f042ea3087b17069eb6051d434786e3d34",
+      "sha": "a4af393b43b175cf424e79007fe657b9da5fa39c",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md": {
-      "sha": "f639872c761522877dfa5fe45bb4f54bedd7f867",
+      "sha": "47b2616ef7d83e05f66877748bfe8909283f76d8",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md": {
-      "sha": "3aed41148f6b1271180abcca1bacf0b5a20cf3b8",
+      "sha": "a082ce7c0374fb4bdf469e02cd7c407c9a3cda8f",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md": {
-      "sha": "2e33729941a249ef527a64045ca1d69057ee83e6",
+      "sha": "583a97851d14b4d980dfce4436ce31348c22dadd",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md": {
-      "sha": "a958810e89d52a6d6b79901f15602e6b090f29c8",
+      "sha": "3c6eb032b04e8101ad8f7b60a0e4c052a8d77ba0",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Harness Engineering/Tooling/Skills.md": {
-      "sha": "58f749ac2b36f0afe2abbab54b65376124f7d70d",
+      "sha": "a653ccfc998d1e7a3030e1bbc50541d48f39996a",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md": {
-      "sha": "fcb558d689cefa3254171654d11e5b14424dae2f",
+      "sha": "e9210ef0ff881253af22d5d6d82b56b3559a45c7",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md": {
-      "sha": "9cb800fc7825a6862ce5735f67974b61c94f8d96",
+      "sha": "c3315b7d1bc1901cb9bdf97037174595f670c375",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/LLM Caching.md": {
-      "sha": "a015808b0ff54b9e1aefcced0f4c13b2a0d3693e",
+      "sha": "628a1795bff94c241aec76ea5a41293506e33588",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/LLM.md": {
-      "sha": "bb3a5b6053016b563438c036d1f43fd5815c75cd",
+      "sha": "e71f7b0f59cba9f04658e10969d26eebb28c997f",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Loop Engineering/Agent Loop.md": {
-      "sha": "7e7e25d89226b18ed6d8fe8bccbfdd1311084026",
+      "sha": "03f4229b8346590803e0dc04563ca182d74f00ee",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Loop Engineering/Loop Engineering.md": {
-      "sha": "68e0f36126898b8aa250211d3acae2d6700a43bd",
+      "sha": "f8bf489127670f530aecd45e68bedca8abc478a5",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md": {
-      "sha": "415f1a58cb50c95623cf81612a0aacb6e9e8f57c",
+      "sha": "38cc7ab9e01d0c59056e6b4fe81bb6e3741b2b6f",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Model Selection and Routing.md": {
-      "sha": "ddba7e8e78c0000f1a4a4c04f38731ce12f4430b",
+      "sha": "130ab448f80bcabbb3e06b24ebd5bc7642b3baeb",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md": {
-      "sha": "0bb70cd15891db4d34463f1aa0c00ab8bd4ac46d",
+      "sha": "ebd91408b6cd9de95ef103b7ddefcb06d58c42db",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Prompt Engineering/In-Context Learning.md": {
-      "sha": "72cf3a3b9b7f6763719c77989f4dedaad8b9cf16",
+      "sha": "449118c8026bb154b2bee6e9c5ff7690b4fe6774",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Prompt Engineering/Prompt Composition.md": {
-      "sha": "91db9acecac167e289f609b51f05550482ec72fc",
+      "sha": "670cd481c0e4361f1a442d2aba490c2f650b2c7d",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md": {
-      "sha": "6edff36ba81649b73d70e0d8db166b26efb0c526",
+      "sha": "853825c63676525f6eb7e5840e85481ba8117b8b",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md": {
-      "sha": "0a9993beefda3cea93515706e0277f312655205d",
+      "sha": "fa1220d58917b7473917a6d5660e477799a09c7e",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Safety/Guardrails.md": {
-      "sha": "ca7a9fc4c217de4bd8714c0df20ba8327783799b",
+      "sha": "b410fc826be5993e6a43e69057f0800b8122c727",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Safety/Hallucinations.md": {
-      "sha": "1ebf086b514bbafdca8a2e9741d7704c8cf988be",
+      "sha": "112420fe0b997ab478eec902cb4ed3e07d8f984c",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Safety/LLM Watermarking.md": {
-      "sha": "0a75df34ec08865f98493c6746f7530ceb2c0ac9",
+      "sha": "875a9b35ecfbf5ae5975184aa2789719a9589064",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md": {
-      "sha": "15e0988c885d34c313cd9f60013c8378613f61ff",
+      "sha": "e60427e293344eec5ce38c30da60906699c032e5",
       "mode": "100644"
     },
     "Web/content/AI & ML/LLM/Safety/Safety.md": {
-      "sha": "eb97d7b8ce0dfb3d6637cc5e15cbdca4fa16ab8c",
+      "sha": "021b9a7c168b085850576b83854b9fa2965b46ad",
       "mode": "100644"
     },
     "Web/content/AI & ML/Machine Learning/Data Drift.md": {
-      "sha": "f8e0b7aaeddf668cc3945b9317f51e0af92eb8a4",
+      "sha": "680b31d9f6ae103b6b1815679acd3c12070179ed",
       "mode": "100644"
     },
     "Web/content/AI & ML/Machine Learning/Evaluation/Calibration.md": {
-      "sha": "f29b5f8398814e786be26ae2924b7be9b8c2b326",
+      "sha": "08ee48c3e5a0f57c7ccfde25c7bad2e09f3d3c14",
       "mode": "100644"
     },
     "Web/content/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md": {
-      "sha": "0ce7b1e8782082560f9713e10957ae9f2676ae88",
+      "sha": "e75f43a99ab46d3a79dd5295b03add476af72cae",
       "mode": "100644"
     },
     "Web/content/AI & ML/Machine Learning/Evaluation/Evaluation.md": {
-      "sha": "1eae0b0195bd8c1ceac51dbc9384c52da489b152",
+      "sha": "0f9229993133194fde08c92d37d727700789f1ab",
       "mode": "100644"
     },
     "Web/content/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md": {
-      "sha": "823e287d565a388c5484682b0c26da4b57306949",
+      "sha": "72598936ecad62f6b037e3a3b802c0a93c24b3a8",
       "mode": "100644"
     },
     "Web/content/AI & ML/Machine Learning/Machine Learning.md": {
-      "sha": "b5325b6467c646790fec5d8a4e0cd7f6f771cac1",
+      "sha": "488ef6828e65264ce882d00b5c5446691eb08a14",
       "mode": "100644"
     },
     "Web/content/AI & ML/Machine Learning/Natural Language Processing.md": {
-      "sha": "36a0c6e61ac2065adc458c888736a35a0bc04daa",
+      "sha": "b0dafb02e27bf054e71ab149e1eb6322f7c8a913",
       "mode": "100644"
     },
     "Web/content/AI & ML/Machine Learning/Spectrum Of Automations.md": {
-      "sha": "8f5e2a89331fa538cd0a61d165ce10edbf04e1b7",
+      "sha": "614511544b83afd91c56607f57f5383b85ae9d7f",
       "mode": "100644"
     },
     "Web/content/AI & ML/Machine Learning/Types/Types.md": {
-      "sha": "d59e250982cc9c5c05b4dbf8fa1ff937c42dad09",
+      "sha": "c79988f36a1ebc4432afca823707a55380fecbb0",
       "mode": "100644"
     },
     "Web/content/AI & ML/Responsible AI.md": {
-      "sha": "efd11731466e40f2e3c4d17e54ba4cfe71bc5f7e",
+      "sha": "eac306e6df67d0f25db5a0a6af4f223f20bfb1b4",
       "mode": "100644"
     },
     "Web/content/About.md": {
@@ -2908,1347 +3160,1347 @@
       "mode": "100644"
     },
     "Web/content/Changelog.md": {
-      "sha": "d4beaa8e946940547851ddd469f0655feb373f53",
+      "sha": "900bc1facc61317c0f692c0c2870846ef3acddb9",
       "mode": "100644"
     },
     "Web/content/Cloud/Cloud Cost Management.md": {
-      "sha": "9bedeff75123fed5380ddcc285d7dffe36d28f18",
+      "sha": "adfedaab63b5b3c199a1ecde6e68c39361258363",
       "mode": "100644"
     },
     "Web/content/Cloud/Cloud.md": {
-      "sha": "b54e1c7809fe9b08926e9a649445a464a2e10815",
+      "sha": "1f91a7af1412c8c0f77de44342067525a5d2ba0f",
       "mode": "100644"
     },
     "Web/content/Cloud/Disaster Recovery.md": {
-      "sha": "3b8ae2f5d4adaff00460101d1c56443e7af3aae9",
+      "sha": "9bdf9d8e99935684916fce0c52ab66f9de44064e",
       "mode": "100644"
     },
     "Web/content/Cloud/IaaS, PaaS, SaaS, CaaS.md": {
-      "sha": "cf49f4119d65b9135f6454fa7f75cf873704a4c3",
+      "sha": "707cd5a315064605c45465d9228213073e76b7c1",
       "mode": "100644"
     },
     "Web/content/Cloud/Providers.md": {
-      "sha": "2c5090b80348bc7876b4126fe5d2d2a36882f642",
+      "sha": "da395534707f20b0c2c7e6e8216951fe8e755625",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Algorithms.md": {
-      "sha": "b96b604664cf4714151aed1dca26f38b0a1c22f9",
+      "sha": "e1a47b9dc944e95bcb9a1e84661f4c963e9ee123",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/A-Star Search.md": {
-      "sha": "f98256cc6b0df4325696f5a3f828ad0afc459654",
+      "sha": "e9ef29775793577db27fdb5e1477a1de0c2b9268",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Articulation Points and Bridges.md": {
-      "sha": "d04a3193494bd51369b1b62010b6801ce673d68b",
+      "sha": "6f38d0d51ccd1783552813ea3b3942a2bef7dd41",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Bellman-Ford.md": {
-      "sha": "4ce54842c51ff2ff8cfaa4914cea42115425b546",
+      "sha": "80e17427e10432e394e8fec438f1b7c36f98bdf2",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Bidirectional Search.md": {
-      "sha": "74030b2cf26af9d68b1c38ff94fde2a988bad0f3",
+      "sha": "f14ddf25b06e94338abe31dd186562685d6ab36b",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Borůvka's Algorithm.md": {
-      "sha": "c588c275c90589be945e53b0e69ab1402b822e52",
+      "sha": "d0507f5746b0481d750254c30706511eb9373999",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Connected Components.md": {
-      "sha": "55beec40f1f0a3b1c90cb24c43ec1611b8cd9ff6",
+      "sha": "e5677144c53b235dfeaf3d3038e0681eca672805",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/DFS BFS.md": {
-      "sha": "53ef1c9e49a48cc63645d8ca848175622b325f39",
+      "sha": "dc757a2ce2410e28292421e81e04c2b40d75396e",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Dijkstra.md": {
-      "sha": "b7bfdf463726bea1f5cd200be0ea4419c42fba84",
+      "sha": "e5ca5aa863c3fbc0d55d1c8868c566577777bb56",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Directed Acyclic Graph.md": {
-      "sha": "c6cd3ad9ef6aebaa88a7907961d37745899ba5fe",
+      "sha": "7933b96c83a88c5b6159c1c990ec728d58aa0dfd",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Floyd-Warshall.md": {
-      "sha": "2ab982fe6fb3881c20ad4da0482dae38c8b3a1b4",
+      "sha": "1bd290a7d45dd0d22578bac3ca5a39f18e126751",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Graph Algorithms.md": {
-      "sha": "121d4c09e581d08c32838b7e8f2aacd73e53d130",
+      "sha": "11128a23879494dbf38d3cd29f768bb14ccaf9cd",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Greedy Best-First Search.md": {
-      "sha": "5a348953e3094a7c9ac53aaffe1eb34d63684be4",
+      "sha": "3bb93d3c3b45a773e9f9d413de401acf087d9993",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Hamiltonian Cycle.md": {
-      "sha": "b03395110f46270e3c681e62632f5cce6cb88153",
+      "sha": "643db5ce90baed65c244c72583cf2a4a8087346b",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Kruskal's Algorithm.md": {
-      "sha": "5e9ec028262164b5a6dd9fb4abfc6f1fbe9efa3c",
+      "sha": "e69beeb5f1d96b99a89c91025e1428aad2a90a1b",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Maximum Flow.md": {
-      "sha": "81e933ab354f42a27d0ab16ed779f657b4d8df8b",
+      "sha": "d63d3ee0972f66aaaa763c20c2fafcd9350de5ca",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Minimum Spanning Tree.md": {
-      "sha": "cd47a6c45d1dbfbe5bb43a036fc5841050e17aff",
+      "sha": "fdd1054730309b4f001b6e53005b663fd8ee77e1",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Strongly Connected Components.md": {
-      "sha": "a1eb316ecf4ccfc982214412c8f8e7deb07d06d6",
+      "sha": "e3fe928a2a95a0dd1ec0a333682232321c88f65f",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": {
-      "sha": "b36091f2e3da68068309de8a78d83224d1fcb7dc",
+      "sha": "a4c15b891d8754767b83fcc38783c6aa98ea2550",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Graph Algorithms/Topological Sort.md": {
-      "sha": "8fd64496692518c284f443c4e6f18cea87048829",
+      "sha": "cf7d03c3c3a31fa35c8bebc90b3b585aaa79d184",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Paradigms/Backtracking.md": {
-      "sha": "8987d05696cd73e2cda616332aeaca15511b981e",
+      "sha": "34153f9568b630ac72ab5d4767954b0c9a2737d0",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Paradigms/Branch and Bound.md": {
-      "sha": "490f81682402ae1654927f123e9f995e38b0613f",
+      "sha": "fb62cc53a547a91131ce1f978391cf69f8b0ce54",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Paradigms/Divide and Conquer.md": {
-      "sha": "a9738cd807f7539f7c21fe50f73bac93fd75b51e",
+      "sha": "bad92b5d72ebefd314bf4052de01571b0fdec342",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Paradigms/Dynamic Programming.md": {
-      "sha": "97223b429a3bb04484dbea2f64e4f27db8a5c0f6",
+      "sha": "c4fc9e9ef00c5aa202c908c57d25f474c1d43843",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Paradigms/Greedy Algorithms.md": {
-      "sha": "93fcce006c50402ad8c384c1b5a06605a04c90ae",
+      "sha": "81a9234da5953bfa04f4df805a9c839afe1f0f0d",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Paradigms/Memoization.md": {
-      "sha": "65e7436a8818f6c1b2946fd21472265196734f82",
+      "sha": "0a318ad6bb2d3715b7c7f0659342a3a9c3011bd5",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Paradigms/Paradigms.md": {
-      "sha": "935051ee2f22cb847c5534e61e5cd09cd289c0af",
+      "sha": "7e7e9b2c6567ed973d61da4dca047f938dc9b789",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Patterns/Binary Search on Answer.md": {
-      "sha": "963811b20f90543e7d84fb5c97c5de645f81f656",
+      "sha": "07f03221b365020410fd7dfc8bcef60cf86bfa97",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Patterns/Bit Manipulation.md": {
-      "sha": "6beb70c499f7f04ad7dd9e58a414a48dcd20bba2",
+      "sha": "ebcadf8b9fa57d7594e75131fc88de5bd52a868c",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Patterns/Cyclic Sort.md": {
-      "sha": "c339e08a43f03b19013a5be7e6ddf5a826866d0b",
+      "sha": "65f82855b9e263e6ca9cd9a2dd11cebca35de759",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Patterns/Fast and Slow Pointers.md": {
-      "sha": "60d3ab6d229912491767d8e83d85174f1bd3e00d",
+      "sha": "d3c88c93e4a4316725d6b59f6ec766be5f2faf55",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Patterns/Merge Intervals.md": {
-      "sha": "75f90117c3a1dbb6f41a095fb6e1ea218b2923c0",
+      "sha": "8dfad592bc275a38c4eff310da66e0f5836cca7e",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Patterns/Monotonic Stack and Queue.md": {
-      "sha": "1991ff11e1f526d9be5eeefee6d8334381f76de0",
+      "sha": "3170edda959b6ce6384d22db918bc07c00e7c11d",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Patterns/Patterns.md": {
-      "sha": "104bade7fea38055ea32a2c02678c0caf2e7a911",
+      "sha": "12252db7f1de2abb9b6627fd4de70dfff6302ed4",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Patterns/Prefix Sum.md": {
-      "sha": "1f4030fc7909699eca21d8ce9c32e06623d62db3",
+      "sha": "23d47634e12a4f891d45be8d6b2469162d9e015b",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Patterns/Sliding Window.md": {
-      "sha": "634f1429693745f08d61ab2bcf3c51c6a80778df",
+      "sha": "732b465029812dc37fc118207b2eab81535f21ad",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Patterns/Top-K Elements.md": {
-      "sha": "fa54a359515d927e88e9f60326001abecc9c2bf0",
+      "sha": "e69ec0f0e91e47c9cfd652fa2dc66d170958146b",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Patterns/Two Heaps.md": {
-      "sha": "d3b61f06666eb495d132d8d3db7740e79b467659",
+      "sha": "e52a2d13bcd027ace7c714997c997813a518bf66",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Patterns/Two Pointers.md": {
-      "sha": "d57a81592e6ee6ddab299508c9656ac3e8bab819",
+      "sha": "22ffd5b14ea52de1bdfdd5cda5a56ad8dc940b90",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Search Algorithms/Binary Search.md": {
-      "sha": "1cfdb93effa424f7fa282498a0d2526ef0d93a1e",
+      "sha": "c868500ed09aeb1a99651b2025c0901f61a51c3b",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Search Algorithms/Exponential Search.md": {
-      "sha": "fc2e0c5664f7282a55fc436f6eec61c27c59d233",
+      "sha": "f3325918fa4719d23150f9e47b18043c57ba5d80",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Search Algorithms/Fibonacci Search.md": {
-      "sha": "377b7014e964da7e9712ab2b62165a4b23801be0",
+      "sha": "5d3efde71f6e45b003fcf561bc724214b81dd84c",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md": {
-      "sha": "4eba9c996a7f3b77a4740c030e8faa5d6393f4d2",
+      "sha": "21d5a2b679252766cac3146ace8f4df5ee168379",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Search Algorithms/Jump Search.md": {
-      "sha": "ce08ee0a0fd86d8c0b74464158ad1c9f6cf3e5d9",
+      "sha": "b54645465bd6b888e5643e16a24bc522746511d3",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Search Algorithms/Linear Search.md": {
-      "sha": "7f2f0a14bdd5fdcd9ab1de375c90f4b310ff44ff",
+      "sha": "093851d65060345600e909a156526bc838a7f155",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Search Algorithms/Search Algorithms.md": {
-      "sha": "93e3fdf5df14c47dc65ece996b84dcabcef15313",
+      "sha": "9212464c54787b83b7702f6603af9822eef7ce27",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Search Algorithms/String Matching/Aho-Corasick.md": {
-      "sha": "55a2aaaf1d1b13a37abbcb2ac52a4e3b39d401d6",
+      "sha": "7cb8aaa9f0f122178d3fb654b684dd8ec313d470",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Search Algorithms/String Matching/Boyer-Moore.md": {
-      "sha": "28fbc2e635e322f0bec95f1af8e99a46280343f0",
+      "sha": "9df27a57493d913309e180e3b71be5e408b19de1",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Search Algorithms/String Matching/KMP (Knuth-Morris-Pratt) Algorithm.md": {
-      "sha": "3b722298ab9270e99de60657621f1b2697ff472c",
+      "sha": "6f58867e62c7e03169ebb3466238c8a9f0d56fc8",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Search Algorithms/String Matching/Rabin Karp Search.md": {
-      "sha": "494775225338ec525b925ed22ae9212042057a68",
+      "sha": "ca1f8569dae095e6b7185d66cad65cd9fa880b3f",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Search Algorithms/String Matching/String Matching.md": {
-      "sha": "86f76560a3e56fb9560d8adeb71263c5070185ce",
+      "sha": "662c6a5ef4c5f9abdb468fba880bf942290222e9",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Search Algorithms/String Matching/Z-Algorithm.md": {
-      "sha": "4395827ea14b53f5d7bda39bde60ea28d38cc840",
+      "sha": "f931e9aa9ad6084fb1fe2c8ce175bb134df1d1cd",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Search Algorithms/Ternary Search.md": {
-      "sha": "68cf2f14660f72a3265851d25f7fcb83d8861fef",
+      "sha": "d077401a7f4edcad8b69edaa3b14eaad3c09d37a",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Bogo Sort.md": {
-      "sha": "3cbd837b1be43daf0d720692d1d81aed090e6db0",
+      "sha": "9056e21dd5002ff8c712f5d8d865daff6f24a0eb",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Bubble Sort.md": {
-      "sha": "823c5a53b944442a9a994f7ef09a88ddad3b3cb1",
+      "sha": "5f06ebbe86ad6c1132a7e0f1ce8ce016da3d0cad",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Bucket Sort.md": {
-      "sha": "f2715049dfa60afb09fba32f46aff0de623ec527",
+      "sha": "0ae710eedcafbf0a3ba8e038936e97eb48026c7d",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Cocktail Shaker Sort.md": {
-      "sha": "8d04f067cf30293ca782f4eb02c29b74b138ff7e",
+      "sha": "a8f598c3fc22a4d353743d74cc0d5837b167ad6d",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Comb Sort.md": {
-      "sha": "790a5c95487c7f2d88e9dce6410540db25597574",
+      "sha": "dc87aed225b06d95119d9fbe56dd3eb0b86f099c",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Counting Sort.md": {
-      "sha": "5aedd8a94b93c9b15a6757a71e5786ed4667f7d3",
+      "sha": "a74e2fcfe7bef2288bf074242d9400b16e7fd54b",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Cycle Sort.md": {
-      "sha": "221163b617f1a5b6698c47db2290f28e948d2e69",
+      "sha": "d4cad534645050681053a6bef88289f990e16c5d",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Gnome Sort.md": {
-      "sha": "928a3c9f3da29cb69f93b55ed2f33b2f5a76b660",
+      "sha": "732e3fa94fa92b9c5a09305ae97d80e80391da37",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Heap Sort.md": {
-      "sha": "3a981382bfb94bfb775bcf8f6ab1f2af91259dd7",
+      "sha": "000de3618d22f1b481d792ac9abc6645bcea9a14",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Insertion Sort.md": {
-      "sha": "765bb36d357023c5ad3d2868f30b2ac278c0f64c",
+      "sha": "57311a9b7caa700c8abcaea963a86c8416a40e9d",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Introsort.md": {
-      "sha": "03eece5eece8cb33a14ac7bc54cb13fc4f3c12ce",
+      "sha": "4e31376dfa1270566cec511f48a8dc5d8d75b02e",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Merge Sort.md": {
-      "sha": "e7b99e2d2ff315e71392bbec9a06628625e6a27e",
+      "sha": "9379aafd1345504e1a3185b730d9b80eac42e014",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Odd-Even Sort.md": {
-      "sha": "a0ded2f5941549669a7e83d3f624c1ec0d54d30d",
+      "sha": "f28bf114d6e6d3a907e0076cae13673f3caf29d4",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Pancake Sort.md": {
-      "sha": "d656ba0b05ce1d9ad0281e23d550c299bb7e9d9f",
+      "sha": "e32fad3d57205ff7165927f9680fa7b12e0ba4f7",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Quick Sort.md": {
-      "sha": "f4a11d90a4fbcc579b7a6570332a0c0a32256427",
+      "sha": "a2b48a6f8a985f0e455c5ed0340540330c09ca42",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Radix Sort.md": {
-      "sha": "761febd1ff12bcc1d60c15316506bccf7e8a54cd",
+      "sha": "d86a61f5dcfe1b02b7a2d92bd00aa634a8a28c96",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Selection Sort.md": {
-      "sha": "a8e54f774a960887a32616b8bc068968e442c098",
+      "sha": "0e1aa2a01660c8f3f383388b73a8d496c94f1917",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Shell Sort.md": {
-      "sha": "05eec7539ddbc7771669ff9af070377183fa3828",
+      "sha": "885b06e4cd71f385a79d58336483ac2caf434e2b",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Sorting Algorithms.md": {
-      "sha": "7e995597855cd61327a1bf272e34fa2b54cfbab7",
+      "sha": "a9e4992641f3664011f1b00607fbdadff5f01626",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Stooge Sort.md": {
-      "sha": "e3b93ab755778b4ed9fdf4e97570a5afafc1914f",
+      "sha": "49406853253749da1a22c4b7e40790da82ad6a7f",
       "mode": "100644"
     },
     "Web/content/Computer Science/Algorithms/Sorting Algorithms/Tim Sort.md": {
-      "sha": "2d529509e1260130e7de59d61b6debc1ef50bf39",
+      "sha": "6652864ecf2929838ec60cc19330695340c275f1",
       "mode": "100644"
     },
     "Web/content/Computer Science/Big O Notation.md": {
-      "sha": "3a877891fdc66cc5f66c7f58f11ec842254b497d",
+      "sha": "72bf5f24bda6ce16248265bca33548d674956488",
       "mode": "100644"
     },
     "Web/content/Computer Science/Computer Science.md": {
-      "sha": "202f691f2d0fa5367832a008e74e97fea5f6da72",
+      "sha": "1f2cdffc5b75caaf4eaf4684a21b66c2d460ec80",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Composite Structures/Composite Structures.md": {
-      "sha": "ea7140ef0381b3caa4305212f1e81cefe862e6fe",
+      "sha": "f84783ab7d93b2bf7f67152378eac2d3e3c4d5fa",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Composite Structures/LRU Cache.md": {
-      "sha": "7977e1ce7e0915925d7e6fc3617512769613c63c",
+      "sha": "3cb3ed3eba76fe80b5ee265fd02665ff9ee371a5",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Data Structures.md": {
-      "sha": "27445b08e8511efec01495283c9879c487c20815",
+      "sha": "9cedeca33442d296486aa948f8acda033d451fbe",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Geohash.md": {
-      "sha": "cc642e2b543e5f9824bb02939746d4d5fbebc3ed",
+      "sha": "157c7597af96fd06b862409055830e34e54dba58",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Graph Structures/Disjoint Set.md": {
-      "sha": "a0d07b49d19fc00c148b87e033f34ce74dbeec0a",
+      "sha": "a9ad47d79f753bb853634c61f40f7f879500f844",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Graph Structures/Graph Structures.md": {
-      "sha": "0a3945052e67c6e515c103a29ac340201662091f",
+      "sha": "6490148dcdfa9229d919074afbc116d2a126a055",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Graph Structures/Graph.md": {
-      "sha": "bd03f868f922714e3286db4d9e7878df475e8704",
+      "sha": "af8a9d1323735e032d89fb498156803aa3175433",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Graph Structures/Union-Find.md": {
-      "sha": "89807dadc8610a453d75fe714bd68a7740ba4b82",
+      "sha": "ce6cfd32773726ceeb9df6d8db149108e7904b79",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Hash-based Structures/Bloom Filter.md": {
-      "sha": "bf410174258cef9b9cffd8aef895577013b8ce1b",
+      "sha": "578f205fdb906d2a03b0dff5b532eabe8a6fba10",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Hash-based Structures/Collision Resolution.md": {
-      "sha": "4847faf10068720d4d0cfde4e6fdecc8029543ef",
+      "sha": "e6540ee74e60c092bfda1262694c57563163b902",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Hash-based Structures/Hash Set.md": {
-      "sha": "4ca329ddcc9dc0e4660e1892e69b3992d908032e",
+      "sha": "6e5a6a1afd8e13b823a1a8db208e91dcf3a576af",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Hash-based Structures/Hash-based Structures.md": {
-      "sha": "8b7f77195aac0a1e2f988f9eef1343dd6152d9b2",
+      "sha": "ab8edffe83a774974ac6daa827ad0c1fdf8c03fb",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Hash-based Structures/HashMap.md": {
-      "sha": "1afe5086f81e840c6ff86ea988eabedc3d70cf07",
+      "sha": "c8d74457c46949006f18f318360cfedd3c8e34fc",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Linear Structures/Arrays.md": {
-      "sha": "9bbd7984c51c7b56e30eb4ab6683e0e08ca57cc8",
+      "sha": "b722c2217cbad121de4375a513ef4101a8ddb2d7",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Linear Structures/Circular Buffer.md": {
-      "sha": "f27f87f04654b28fa781ed4f56931f3f70fff7bc",
+      "sha": "620a6781b38696c242e7c731cb8ee2ebd5aafb8c",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Linear Structures/Deque.md": {
-      "sha": "02740061be3ed8cc53e2b14cf616d25741ebfd1a",
+      "sha": "e583386b4897287986a1104e809b4b2bba7db8c6",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Linear Structures/Dynamic Array.md": {
-      "sha": "64e7ccd2bfb0cc2137bf84b3ad161762206c1cb2",
+      "sha": "06f6adf2b3341f08d0d5e715729c290981cb98cd",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Linear Structures/Linear Structures.md": {
-      "sha": "f49feea2ac9194fef75c3c9550e8206fc7063f03",
+      "sha": "ec66accc9e3c45b13664d81330c15192e83e964b",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Linear Structures/LinkedList.md": {
-      "sha": "b00674599b1f5e36fb606bf5be7e2f584d551e3c",
+      "sha": "923fda3f399c4a95a8c08620f3de11ba024ee5dc",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Linear Structures/Queue.md": {
-      "sha": "83e6761196654eb291ba0b04be7ea3ee145126af",
+      "sha": "707bfb5c1c9a7ee6517e7f38c7fe0ab080c3be62",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Linear Structures/Span.md": {
-      "sha": "fe6a9913dd3e4d107b53ebc13fb5ecd6438fa026",
+      "sha": "607ac79a6ab0f5dfcb610ffc70f91001681a37bc",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Linear Structures/Stack.md": {
-      "sha": "4a6bb08550da50bcc1bded6ce25bea5917ca4e6d",
+      "sha": "641c400046c5204e8aa1cbf845b7c8042b2fef24",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/AVL Tree.md": {
-      "sha": "fe6f7865ad5aa3b46c6d6cbff3800e97129906ae",
+      "sha": "4a99254911e72553c54926354ef52b9dda1d12f6",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/B+ Tree.md": {
-      "sha": "cbf4dd77a9ae61257e78006ecc3cc71d3c3ed9a5",
+      "sha": "523fea2064a1b1ce5b187a5ce3fab140f6c368f0",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/B-tree.md": {
-      "sha": "e95a1ca146cdf7b47285c8acba1516c56f34a834",
+      "sha": "269a489fea5e9bab4ede7000552556b8e1506b73",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/Binary Search Tree.md": {
-      "sha": "401c5792d98849ee98e1e7669523318b65a6d344",
+      "sha": "71a9c821cf658782426c509d07a89a6ff98e0213",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/Fenwick Tree.md": {
-      "sha": "631c5da5bdcf8f8e759d743b573923b0cb840d86",
+      "sha": "92fda929369c253785490e4a52c8c3ddd39b0f8e",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/Heap-like/Binomial Queues.md": {
-      "sha": "310a4d203103ef3821c943cfd4a2459e98828ae4",
+      "sha": "38b1cadef4b3262b54dca76c2fe78c759dc66a5c",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/Heap-like/Fibonacci Heaps.md": {
-      "sha": "662fe49563fd7faede68db1bf7e239eea96a958b",
+      "sha": "e5cceea4118182db4de8b08b56455fb11e341f29",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/Heap-like/Heap-like.md": {
-      "sha": "617d7093ad4738a5644a8a603cc88dfabed5f803",
+      "sha": "30009ef9039164bcc252cb2c315c9e10b736ab6e",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/Heap-like/Heap.md": {
-      "sha": "467caf3e28b1111a3e496080ca23c8037390aab8",
+      "sha": "0cb54fd37676121d96324bc90720fe8660b19472",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/Heap-like/Leftist Heaps.md": {
-      "sha": "0ff7b4f2045d2e6c482b4cc994d4009dc5bd2dc8",
+      "sha": "7210c4fe845cfe7c878ad0f9a87c3c710d46e4a1",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/Heap-like/Skew Heaps.md": {
-      "sha": "4714bd64ec531e5b4cdb3494dec2d047c24d3585",
+      "sha": "c70e0ceb5860dc521495ad9a3edca26f50de17ca",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/Quadtree.md": {
-      "sha": "b5801dabe0ab8dbbbcf2d685ecf9218b709a5000",
+      "sha": "8473c940c5c6d85e69c7ed7d90fce253245583e6",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/Red-Black Tree.md": {
-      "sha": "f90da083e65f67b2372b3ffae98700320edbf49f",
+      "sha": "fa99926547a7c0810ed0768b41d6378e91911929",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/Segment Tree.md": {
-      "sha": "c5f1ec3c39e5c923a8bbaff15a17faa35d06a24e",
+      "sha": "91f1fc9143b759d1bc8d9a1996a395d1d652e17e",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/Splay Tree.md": {
-      "sha": "456773e421ee1c4ef140df7f7785f9ae42b6ffae",
+      "sha": "6ecd0756194885e0dd52df5cd9803d2fc45ede78",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/Ternary Search Tree.md": {
-      "sha": "6343f7d4020d4af88c6cd7fe818946636cbb1eb0",
+      "sha": "c9e46e6089f7c787c95ff802b278ef2e00efc162",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/Trees.md": {
-      "sha": "9a4b44261ccfb5deb3a24753d12bd68e369c3555",
+      "sha": "afd41d54a4a6980442ecfe910420980570a92db2",
       "mode": "100644"
     },
     "Web/content/Computer Science/Data Structures/Trees/Trie.md": {
-      "sha": "75db327d23daae0b9f5848263756dd7f929e5fe1",
+      "sha": "a2a21f1cae94cc5ceb6dbb71a89d2306e852be67",
       "mode": "100644"
     },
     "Web/content/Computer Science/Endianness.md": {
-      "sha": "025041809e9db284f2010ef2b47a42c5062f478f",
+      "sha": "1b4937abc67fd08921cfb054f58310324a0be2ff",
       "mode": "100644"
     },
     "Web/content/Computer Science/Memory Hierarchy.md": {
-      "sha": "1d10200925a1bd852cafa40c473ec2afe9a4df55",
+      "sha": "5e3dc67ccabb1e05c9413374290d810abe0cd282",
       "mode": "100644"
     },
     "Web/content/Data Persistence/ACID.md": {
-      "sha": "6abd5821c9f6287d9c3e0e54e54d7995bcfa05d0",
+      "sha": "04c8fdeffa35a7a4b42f6cd4ffea228a2769def0",
       "mode": "100644"
     },
     "Web/content/Data Persistence/Caching.md": {
-      "sha": "6d1c25756db55aa0f7ee310672143057225f762c",
+      "sha": "5c592d22a2ca1e0b4287a26d744146ae33612449",
       "mode": "100644"
     },
     "Web/content/Data Persistence/Connection Pooling.md": {
-      "sha": "ad72bb82d1d152b6149a551c7302b530c223dcbb",
+      "sha": "774565f6e5103133acebc278e75d967d59e8b298",
       "mode": "100644"
     },
     "Web/content/Data Persistence/Data Persistence.md": {
-      "sha": "b412aff74f44a81e0092026b44012899c3668b40",
+      "sha": "d7a99de8d660c3010745b9c200c5a15793ce6b90",
       "mode": "100644"
     },
     "Web/content/Data Persistence/Erasure Coding.md": {
-      "sha": "444021c5c1571a18253ce6b6386cee061d72e933",
+      "sha": "30575a872fda5604a2821c9ccdfa7f9e31176786",
       "mode": "100644"
     },
     "Web/content/Data Persistence/NoSQL/Elasticsearch.md": {
-      "sha": "01399399c5338b049cbb754444f116d1cafdb142",
+      "sha": "d4d2eea7118f4269c636a2d13f768a422ddc288b",
       "mode": "100644"
     },
     "Web/content/Data Persistence/NoSQL/LSM-Tree.md": {
-      "sha": "b8666ffff95477151ed235f96366616e338b6a91",
+      "sha": "df993cc359863fe8c792c62b7f602d2cd5c2c470",
       "mode": "100644"
     },
     "Web/content/Data Persistence/NoSQL/NoSQL Database Types.md": {
-      "sha": "9b5432fd824b0e840d07948cacbf00c0f8b013c4",
+      "sha": "c7b2589e3fdde31d8cc57c3a8f4cbde3a07b0f29",
       "mode": "100644"
     },
     "Web/content/Data Persistence/NoSQL/NoSQL.md": {
-      "sha": "0e5c7f6f190b9ac756d1252b4e15d75671a9f8b4",
+      "sha": "e3c335dd2642cbf7208c0db1686d22609555a52c",
       "mode": "100644"
     },
     "Web/content/Data Persistence/NoSQL/Redis.md": {
-      "sha": "858b599270ca5391a60194c5990df6d8af26c101",
+      "sha": "c71cff2260145cad3a5ed8cfe12d98d18a1be7bd",
       "mode": "100644"
     },
     "Web/content/Data Persistence/NoSQL/Time-Series Databases.md": {
-      "sha": "d8b39e4aced105feeae8290855c1fd13cb26cf7d",
+      "sha": "521feeac263c8a3cf3dc125ce87ac4652576ef48",
       "mode": "100644"
     },
     "Web/content/Data Persistence/ORMs/Entity Framework.md": {
-      "sha": "f8767fe2b896ea173b3fc6ac306008bc1768aea3",
+      "sha": "149ccd9cd0e047554fb1ac5a6ac57458db7b68c6",
       "mode": "100644"
     },
     "Web/content/Data Persistence/ORMs/ORMs.md": {
-      "sha": "933e73f9d8d84a488147f66654b7aaaecbf5be82",
+      "sha": "47f5d4b28d98bf182188a3f310467ed92d5f4773",
       "mode": "100644"
     },
     "Web/content/Data Persistence/Object Storage.md": {
-      "sha": "7609cb0908c562e3838dda1ba8298441709003af",
+      "sha": "2d247ba601c17e4099168ac25f3769858d92b911",
       "mode": "100644"
     },
     "Web/content/Data Persistence/SQL/Database Locks.md": {
-      "sha": "207b2fc364f7420943b788ab2ab1270d1ba994fc",
+      "sha": "dd09d3b57d1d09db8928c35562e9ba1dd820ac3a",
       "mode": "100644"
     },
     "Web/content/Data Persistence/SQL/Indexes.md": {
-      "sha": "47b03b59323521ea37b7acb0480c486ab99f4af3",
+      "sha": "96559480af2e27346210231d53b28795ca5ed9dc",
       "mode": "100644"
     },
     "Web/content/Data Persistence/SQL/Normalization Denormalization.md": {
-      "sha": "3fd327fa5e7f02098ba4d01628be1498878da140",
+      "sha": "2ba2633c697722ba15d2258bc6919fea1ec01243",
       "mode": "100644"
     },
     "Web/content/Data Persistence/SQL/Replication.md": {
-      "sha": "65dd8ef35b235dfeae24a355282766fcb0166d09",
+      "sha": "a782ac765634f8043775dce2b2977299a966a853",
       "mode": "100644"
     },
     "Web/content/Data Persistence/SQL/SQL.md": {
-      "sha": "7501cb53b23089e8d3ed27064a05fe7a3410a66a",
+      "sha": "172a0dd96eac58354a7efb3840bfe21d0a534db0",
       "mode": "100644"
     },
     "Web/content/Data Persistence/SQL/Sharding.md": {
-      "sha": "87b1f1856f07b007a24ce258e7b14d5625bab4a5",
+      "sha": "4fbd93d006c8b37c3648ceab93c42dad39967c88",
       "mode": "100644"
     },
     "Web/content/DevOps/CI CD tools.md": {
-      "sha": "c797d9ba3d7f5325e77d954f511f37823710c0dc",
+      "sha": "31d6b44a015d5b7072fdb04c1a091438a490ce08",
       "mode": "100644"
     },
     "Web/content/DevOps/Deployment Strategies/Deployment Strategies.md": {
-      "sha": "20d33ff6ed9feacb6162f5c22494dc95e25b0b80",
+      "sha": "e6b052670590283447987c8a9e9f0f86d9d8a78f",
       "mode": "100644"
     },
     "Web/content/DevOps/DevOps.md": {
-      "sha": "77fad65f315addbc8b2854aa1545cdd2f0a007cb",
+      "sha": "fb05eb28a127e31cf3b3c28af3a825c18bd9a433",
       "mode": "100644"
     },
     "Web/content/DevOps/Docker.md": {
-      "sha": "590d77a8a416fa982b7893196f168c3e47326567",
+      "sha": "c49bfbdac0800c94cbd40c2b4ab381c797681bfe",
       "mode": "100644"
     },
     "Web/content/DevOps/Infrastructure as Code.md": {
-      "sha": "b3727c5a6a6b37c5f20cda456ef3656ab9afc948",
+      "sha": "57d226595e13b8a27a7f4efdf2657ff45c6ce6fc",
       "mode": "100644"
     },
     "Web/content/DevOps/Kubernetes.md": {
-      "sha": "3c2a744a1ce47d3027e99090d48c5554cc7d21e9",
+      "sha": "61be5f51bdcf4e70b1a5f3ae1b22acb27ccea650",
       "mode": "100644"
     },
     "Web/content/DevOps/Observability.md": {
-      "sha": "7187e6f929dad6f674e3b14b3810364d15270eda",
+      "sha": "a2600e18e742258a2fc8a96e92b876432a60e05a",
       "mode": "100644"
     },
     "Web/content/DevOps/Version Control Systems/Branching Stratagies.md": {
-      "sha": "8f57a3fff39b2ac43bf459eb883c20e6b2286b5f",
+      "sha": "0a0d45a2ad7c6a780973b5d98917146b9ab70c4d",
       "mode": "100644"
     },
     "Web/content/DevOps/Version Control Systems/Version Control Systems.md": {
-      "sha": "b0208ad6d2318974636c7433e89469c402c5baa6",
+      "sha": "5ed9d51f633c6bcb73d9e3558a19aabe986420d8",
       "mode": "100644"
     },
     "Web/content/Networks/Architecture & Ops/Architecture & Ops.md": {
-      "sha": "f01083c146e4c880665079a07f587757b4f8bd98",
+      "sha": "d6709960248af6c445cd0c0828c7c35a304fe821",
       "mode": "100644"
     },
     "Web/content/Networks/Architecture & Ops/CDN.md": {
-      "sha": "841838cdb73bc12707be231faeea25cd7040621f",
+      "sha": "48de26705351535969594fb8e78aef83d14ca2a7",
       "mode": "100644"
     },
     "Web/content/Networks/Architecture & Ops/Forward and Reverse Proxies.md": {
-      "sha": "4221937f290f0cbefa4c2eea8af0e4e54b230f71",
+      "sha": "7d947c2021dfbb364f1b80042793cd730cc475fa",
       "mode": "100644"
     },
     "Web/content/Networks/Architecture & Ops/Nginx.md": {
-      "sha": "6525b0b7e11ebe101213ba83823e7774bcc44e17",
+      "sha": "3a5cbf176aecf4f8be5ebc3b752064f38a528f9b",
       "mode": "100644"
     },
     "Web/content/Networks/Architecture & Ops/Peer-2-Peer.md": {
-      "sha": "5eb74c1f014cbac9087a05bf2704e1645d682fcd",
+      "sha": "d112366deb7af5c127f21f8c0dd183f754947f01",
       "mode": "100644"
     },
     "Web/content/Networks/Architecture & Ops/VPN.md": {
-      "sha": "1b08b6842ff868004ddffd0268916851a6873d27",
+      "sha": "ee08415e736509583473ab7ed062e33577db74b4",
       "mode": "100644"
     },
     "Web/content/Networks/Network Data Path.md": {
-      "sha": "13de79401e2fb02dce3b49cfefa2e3b7f4fa6ae7",
+      "sha": "004a318fb7ea33034f2125fa32c6d9cd80b7c0fd",
       "mode": "100644"
     },
     "Web/content/Networks/Networks.md": {
-      "sha": "ffcd334e6883232297375c4eb4757d0370247955",
+      "sha": "619f312b92673fdd054e66acce32a14a0f1a1d83",
       "mode": "100644"
     },
     "Web/content/Networks/OSI Model.md": {
-      "sha": "1fe8107a69ee240aea650f038f4808962b865f34",
+      "sha": "4c2126ae4d3d8b38c8741503a79cca58dca8ef7c",
       "mode": "100644"
     },
     "Web/content/Networks/Protocols/DNS.md": {
-      "sha": "ff38552a2535cbd145f0580a478593bacb892201",
+      "sha": "cebef94c3ade8e56ce526abe8fe0963d9b9a4072",
       "mode": "100644"
     },
     "Web/content/Networks/Protocols/GraphQL.md": {
-      "sha": "5a2e464516c7f5acc131434c81399e58c7e7dfcc",
+      "sha": "2e4f5d5c45bf45505a745693ebca1464ebf85b5b",
       "mode": "100644"
     },
     "Web/content/Networks/Protocols/HTTP 2.md": {
-      "sha": "822ecaa11dfa31b9e9a1402cfe5cc91855ea5df2",
+      "sha": "9054693c3368c53b50a304b2387e148a9fb6a069",
       "mode": "100644"
     },
     "Web/content/Networks/Protocols/HTTP.md": {
-      "sha": "c0d8cfd5be57a22d9d3bf356490d2ff4b8e98eac",
+      "sha": "db59def71cfcc5fd86933c87c79f173b0d27981f",
       "mode": "100644"
     },
     "Web/content/Networks/Protocols/Live Streaming.md": {
-      "sha": "72296a421a9a1521b80e9a139fb0271e37e746e4",
+      "sha": "349f28f9fa708ff7cddb5ae3d05ecb5004bc859e",
       "mode": "100644"
     },
     "Web/content/Networks/Protocols/Ports.md": {
-      "sha": "c8d95f5d5ba2a69abff043dff4a8801846532fb6",
+      "sha": "076afc5367a7c64cf19745d172b22276bd7ad6c5",
       "mode": "100644"
     },
     "Web/content/Networks/Protocols/Protocols.md": {
-      "sha": "63d5b4f696aca92797265d89f2761d00de891acc",
+      "sha": "3e10bc58d5059ac2ce783e0d119004632e49fe90",
       "mode": "100644"
     },
     "Web/content/Networks/Protocols/REST.md": {
-      "sha": "d6f2a2845c1de75c295c7925b994360db6c7f6e4",
+      "sha": "0354efa48174e1962120eb8b23415747f215cd99",
       "mode": "100644"
     },
     "Web/content/Networks/Protocols/RPC.md": {
-      "sha": "42a9d5f8b71cfa3a6e86c22e209742416fcc9cad",
+      "sha": "73b768f4a29ce1580defc9fdfbaa592275dbb157",
       "mode": "100644"
     },
     "Web/content/Networks/Protocols/SMTP.md": {
-      "sha": "71dcf425ddb48796778544c497abe47b6dea23be",
+      "sha": "0b0b07ebe02086cebbc49f9e0da620ff2f5e45e2",
       "mode": "100644"
     },
     "Web/content/Networks/Protocols/SSH.md": {
-      "sha": "fdb523e173d150b9ad06ee844dace6ebe5c9f79e",
+      "sha": "565b623c8e8f1a9e857a534945c44cb281051b1d",
       "mode": "100644"
     },
     "Web/content/Networks/Protocols/URL.md": {
-      "sha": "9f8b64b02ee49f1631a222f98289b52a11f8707a",
+      "sha": "df65010609ec690f781658fd87cc48922781ab5d",
       "mode": "100644"
     },
     "Web/content/Networks/Protocols/WebSockets.md": {
-      "sha": "6495a9a567217a0ad5afeceef2cb6b6a5640c6e1",
+      "sha": "c8c376a094bcd4fcef72cb30733834cd3c2388dc",
       "mode": "100644"
     },
     "Web/content/Networks/Protocols/gRPC.md": {
-      "sha": "7d5423687c26c032ad567654605febb4a54d8760",
+      "sha": "2820fbec4ebbfe1c12da53030e2d627079bb0394",
       "mode": "100644"
     },
     "Web/content/Networks/Transport & Sockets/Sockets.md": {
-      "sha": "12bb017f9c965318d17598db9b5d003a22b9b126",
+      "sha": "be6da6b65c75c9a480a1e8393416ab578d37debe",
       "mode": "100644"
     },
     "Web/content/Networks/Transport & Sockets/TCP IP.md": {
-      "sha": "7084ec855acda364195546e8d65bf02bf74a0307",
+      "sha": "396686a3ff66b9481b4f25f8e2c62a83adc7e294",
       "mode": "100644"
     },
     "Web/content/Networks/Transport & Sockets/Transport & Sockets.md": {
-      "sha": "532a94d8bd860d75ec0ea435ead4c6b650afa42c",
+      "sha": "6dc68c8613cc3709879da6214b6e54efe4c1d17b",
       "mode": "100644"
     },
     "Web/content/Networks/Transport & Sockets/UDP.md": {
-      "sha": "0e6a08c935f99ea82846f11def8ae1c2838d49fe",
+      "sha": "3dd0e93d15dd3940bdfe63870a63df1502bef782",
       "mode": "100644"
     },
     "Web/content/Programming/NET/ASP NET Web API/ASP NET Web API.md": {
-      "sha": "e76d3902dbcfdb169fe70d224bf1d350fc00b4f0",
+      "sha": "d05f33ddb440e4be5ceb6762582ba8727d4cccfe",
       "mode": "100644"
     },
     "Web/content/Programming/NET/ASP NET Web API/Authentication.md": {
-      "sha": "7f9ac526b03ca400984f63246ad200805938fbd6",
+      "sha": "3b4be2c70c5a1f3f6bc9ea109aa059e37b3d430c",
       "mode": "100644"
     },
     "Web/content/Programming/NET/ASP NET Web API/Authorization.md": {
-      "sha": "e079dbb88c81bec25f8d3d42552bb010cd250e0b",
+      "sha": "e1061e9177b7299d8a4bf3cc1f7010bb5fc9a25a",
       "mode": "100644"
     },
     "Web/content/Programming/NET/ASP NET Web API/CORS.md": {
-      "sha": "96a742cdaa06e5e9ebf2cb251653cb7e483e4cfe",
+      "sha": "92b71e33429f28440d905ac36af891451aa8e8ac",
       "mode": "100644"
     },
     "Web/content/Programming/NET/ASP NET Web API/Dependency Injection.md": {
-      "sha": "8ec29f8cd9b5a2c3910e7d6580ddc07963113062",
+      "sha": "59c0f4a1624c2857a3ce9823e78a37b9ff0dcdac",
       "mode": "100644"
     },
     "Web/content/Programming/NET/ASP NET Web API/Filters.md": {
-      "sha": "9263d4dbe56eee49fec7162759e7ac719e2c8058",
+      "sha": "ed176dfe256bb6f088210c4aefc9378f95cf7485",
       "mode": "100644"
     },
     "Web/content/Programming/NET/ASP NET Web API/Middlewares.md": {
-      "sha": "62c0eaa724e8f1efcbc537e7ec04df7885419bcb",
+      "sha": "f5d2c0d04a1594bbe812a37261b97f1a5e250a76",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/CSharp.md": {
-      "sha": "8eea77ea93741679f57636b7f267d35a57eb3cb6",
+      "sha": "3176b2595e003aaca8751b65c48ccc4c7dad1849",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Concurrency and Parallelism/Async Await.md": {
-      "sha": "6704eb8fa76af2e14e0892e1991c769a25c1e7c0",
+      "sha": "e4fb913d18581c92a8f127af67b2ce298816421a",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Concurrency and Parallelism/CancellationToken.md": {
-      "sha": "8ad0a0873ee112e5b23a5780af3b36d91ca12a95",
+      "sha": "980dbc7ac5dbfa3e941aa8fddce3dea42b3ce3fc",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Concurrency and Parallelism/Channels.md": {
-      "sha": "d1ccb9163213fc2e7d29544c3c8467e8772726e4",
+      "sha": "58876462b31e27ce4c5da4549dfc1ef92ba88add",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Concurrency and Parallelism/Concurrency and Parallelism.md": {
-      "sha": "e9a502ad5fea1019627dab2b10e4c356a4ab89c7",
+      "sha": "aae541c46d293491f624e41f60cf2b76ef3db72b",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Concurrency and Parallelism/Deadlocks.md": {
-      "sha": "efe948330814055e2f5ecff2301b19d9c4f1d500",
+      "sha": "3abedb379de67ece80668e4a2ae4784cdc84a799",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Concurrency and Parallelism/Locking.md": {
-      "sha": "8c3a9378c4dd56807af20501b4cb27a803fd2d16",
+      "sha": "56ba596691f7bd2d3fac680b9ecd8ca2a97aca45",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Concurrency and Parallelism/Mutex.md": {
-      "sha": "cee4219e9eaa1e6450973a4c27b24f6c9ce52976",
+      "sha": "a2d51754ed09a71bdd24ba961b9f62beabaaa80e",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Concurrency and Parallelism/Parallelism.md": {
-      "sha": "aad9baa33a266b6b2d92e00624deb162368ab923",
+      "sha": "8d000c33afd8958b54e1ac474e3ae13fa8771078",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Concurrency and Parallelism/Semaphore.md": {
-      "sha": "696b7f08d0cac65d488f4f2f1bdda5faf7dab523",
+      "sha": "7f94fce277bdeb13668d06b894e9f66a232006f6",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Concurrency and Parallelism/Tasks.md": {
-      "sha": "88c6c5f7019d2254ccf15ec6d1738c021843b872",
+      "sha": "fd8dc78f70e925c59e947ee61434a3af5c047e09",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Concurrency and Parallelism/ThreadPool.md": {
-      "sha": "556d96ba99bb4ae2950ac481a016ffa13fcfc5c8",
+      "sha": "3878922384935ff0ada5bde3d3fe95d55ae369bd",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Exception Handling.md": {
-      "sha": "81bfb4fff43032b2f339b8a11ec1442932febbe6",
+      "sha": "e8faffb9080e380d0b3d4483d7d1c919f2a4a85a",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Foreach.md": {
-      "sha": "54e1fd1568b84ae323c97352367e482d74c5afbd",
+      "sha": "75dec5e5ce3d33a81b95e63d8112d2517a59490e",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Fundamentals.md": {
-      "sha": "27bd39e7aa94ea52cd504f349614babf8dbd193f",
+      "sha": "e5c127fab4e121bc69c0b3c70fd92d2a4b764eb7",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Generics.md": {
-      "sha": "11af79fac546f7e6d8dc04824d65201a178e8e2a",
+      "sha": "067d19cfe2b903d2086ff482a694075b784c49d0",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Methods.md": {
-      "sha": "6115111f495dea35532fe15afb51dd934b1b8061",
+      "sha": "f74f17f73a9a3028f989bc52eb5d8c67f5ed8bcc",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Namespaces.md": {
-      "sha": "521bbd1528c360e9b5c64a8b772abc334029745e",
+      "sha": "070cd991a8b36eff921af8d83a939d0a939dc487",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Pattern Matching.md": {
-      "sha": "db29f0f72d36312b57090fdc31130911e383e96a",
+      "sha": "e78c2f710785ee5cb06d44f3ecf0f5d69e6f2654",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Reflection.md": {
-      "sha": "ee71324888a23d67a242c5baae4cf9b00b8aec82",
+      "sha": "bea6a648dd17274fe9ddf00079933da125947acc",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Types/Classes.md": {
-      "sha": "6441fbdc21cd0e6b00cc5ea54310d9bf2b58b942",
+      "sha": "2158bd4fc23343c412b902dc5877bdca849c6fc2",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Types/Delegates.md": {
-      "sha": "734339178377dc5dd1f73ef5a0f0f073d0f5e38a",
+      "sha": "1b56dba86ed262a47ee83f69cc7a3b4c748ddc34",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Types/Events.md": {
-      "sha": "3a8c489748bfb58546379752d94a7d7cfbef3448",
+      "sha": "ee13c324f82cbb1507acf1a08506817f55b08c2b",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Types/Records.md": {
-      "sha": "0f070e85ffdf19f90d39e1add1f10f2900059fec",
+      "sha": "b986d0e1770409f5ead8611f1f6003be3673fdbf",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Types/Strings.md": {
-      "sha": "ad94d7c1777b968f3aa2a9459517d3951059260e",
+      "sha": "d7d42226d85c4982414a65c4cae7b116681a6aeb",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Types/Structs.md": {
-      "sha": "28190f5f91df95de252df213b5aee36d257a72f4",
+      "sha": "f5facb4fd5054adb6ad152ec4664356988185036",
       "mode": "100644"
     },
     "Web/content/Programming/NET/CSharp/Fundamentals/Types/Types.md": {
-      "sha": "db2ecbc0bba9f58793f15993513ed5baf7282bd1",
+      "sha": "4a8bc8a4bce8daa4731e3df32ddadf8570600fb4",
       "mode": "100644"
     },
     "Web/content/Programming/NET/NET Standart.md": {
-      "sha": "ab4531b303f7d11f96ffc52819ae0c277ffa1119",
+      "sha": "e4bdeac8678b9af803ff82325738154dbeb8ad1b",
       "mode": "100644"
     },
     "Web/content/Programming/NET/NET.md": {
-      "sha": "344d1008ef19c2ef547c70d18d74eb5363c7df2b",
+      "sha": "965534f2ec6c717f12300030c555aa749bf1ea74",
       "mode": "100644"
     },
     "Web/content/Programming/NET/Runtime/Common Language Runtime.md": {
-      "sha": "aab46a1229d24acb4fb2f0f65b88bae65df05d8d",
+      "sha": "f671e3a1eb1eea83682a5a48604e8ec6d33039a0",
       "mode": "100644"
     },
     "Web/content/Programming/NET/Runtime/Garbage Collector.md": {
-      "sha": "5fc757ae19fc1eac24b851ece5686510d46739c6",
+      "sha": "94ac99fca47f686fa5970d3af890558b90ab2856",
       "mode": "100644"
     },
     "Web/content/Programming/NET/Runtime/Memory Leaks.md": {
-      "sha": "f4f2006238826a680b48c6742f6894b33e569ad3",
+      "sha": "493b0c4b340654b3eeabe89f3e500ed22665daae",
       "mode": "100644"
     },
     "Web/content/Programming/NET/Runtime/Runtime.md": {
-      "sha": "721fdae05618368a93249062d52d94a3bbe1b2fb",
+      "sha": "789f4a52e026463851bd5b0ad5b961192c5c0c96",
       "mode": "100644"
     },
     "Web/content/Programming/Programming.md": {
-      "sha": "4d244c7014e32cae2b5866ba4f4b7de2e0d05e04",
+      "sha": "e6dbe2fe3bd68196716b0040564bc8265b71f40b",
       "mode": "100644"
     },
     "Web/content/Programming/WebAssembly.md": {
-      "sha": "9aa22b4b0433c69f50c660086c9f76c3dfaef09c",
+      "sha": "24bcd9025d5c27f576dd3f4e2bc23ddc765658bd",
       "mode": "100644"
     },
     "Web/content/Questions.md": {
-      "sha": "534bf03b4297d1d8331689fab1c2a8bba38f0db0",
+      "sha": "83f69fc6448a96449f543d9b8fb5b1500ff93b40",
       "mode": "100644"
     },
     "Web/content/Roadmap.canvas": {
-      "sha": "1625dab4352d6584485a96338064d55d6e073a99",
+      "sha": "ba3525d5d8039fd73f991185d8052b9c2b6a89a2",
       "mode": "100644"
     },
     "Web/content/Security/Authentication/Authentication.md": {
-      "sha": "b675ea3e19d45e5b667915501d306931022471f0",
+      "sha": "cafedeeb7fdcd05434b4d9843b953d011c8351ce",
       "mode": "100644"
     },
     "Web/content/Security/Authentication/Basic Auth.md": {
-      "sha": "5a4680c7601a57562b5d053f206f29e9bf5e561f",
+      "sha": "e618be31b98fcee651c2e21751c9f9023c3078cb",
       "mode": "100644"
     },
     "Web/content/Security/Authentication/Oauth OIDC (OpenId Connect).md": {
-      "sha": "75013a97d1fee8bd92e85461810ddf9652af6aee",
+      "sha": "16dc941eff42d239b2ab858753262bfaf9afc81c",
       "mode": "100644"
     },
     "Web/content/Security/Authentication/Resource-based Auth.md": {
-      "sha": "eb898c362e703e6d5f52ca2d565536e28f08d89b",
+      "sha": "3a70a07640137e1cb6d2bac9988cb3c74e82c334",
       "mode": "100644"
     },
     "Web/content/Security/Authentication/SSO (Single Sign-On).md": {
-      "sha": "e866a774fc34ba3fb5f640c3f8c2849974df8152",
+      "sha": "fb16865204ef4413ab37fb4ac1cfd3daa3dfae72",
       "mode": "100644"
     },
     "Web/content/Security/Authentication/TOTP.md": {
-      "sha": "550c115e695b9e8129ca80386a900acb4be989e8",
+      "sha": "6ae9c587bfa12bcfd79e5bfc9706d33496460315",
       "mode": "100644"
     },
     "Web/content/Security/Authentication/Two-Factor Auth.md": {
-      "sha": "f289499b6b057495a7062bbdaa269b94880308e0",
+      "sha": "95f8cca301d1e5b72a6cad56f6fa3d8f50a7eb15",
       "mode": "100644"
     },
     "Web/content/Security/Authorization Models.md": {
-      "sha": "a3ce16b9b5e1eb7e5ca67fe950ca042ea6314388",
+      "sha": "e33a6aa5850d646bcc5e52de89445f25bf2a5e91",
       "mode": "100644"
     },
     "Web/content/Security/Block-chain.md": {
-      "sha": "f579c920a97a1ac928db8e8c8a0a95513c770235",
+      "sha": "07bd15feb86cbdd12b762bba48e82852e0bbe7fb",
       "mode": "100644"
     },
     "Web/content/Security/Digital Signature.md": {
-      "sha": "bc6df7a3a020c22f6813a075dffe4ecedd36bec6",
+      "sha": "032236da5717f99c1aad45ae46db17d1e50105e8",
       "mode": "100644"
     },
     "Web/content/Security/Encryption.md": {
-      "sha": "6d36aa20b627f0261a717cb68c07d089e3651915",
+      "sha": "ff8072461867e729b53c8e2699867b259084c3d0",
       "mode": "100644"
     },
     "Web/content/Security/Firewall.md": {
-      "sha": "02b80cb4cd39917e7de7d07e3d705a5a83644bf8",
+      "sha": "5e11ecca11d63f9eaa4ae0f64a990adc6c91046a",
       "mode": "100644"
     },
     "Web/content/Security/Hashing.md": {
-      "sha": "f4abb4fe99c5ecb7fe4944f4de568494c6083c45",
+      "sha": "dc7da37e05d9bd83188637fde91f6a1a4b947d42",
       "mode": "100644"
     },
     "Web/content/Security/JWT Bearer.md": {
-      "sha": "de5753ed870045d05c59ad6f1da45b76fdb40970",
+      "sha": "f1e5aee223a2a49f2525c9bd6b4b3a4d01ecdf84",
       "mode": "100644"
     },
     "Web/content/Security/OWASP.md": {
-      "sha": "83767165417a29bbe92bcfca8b995ef5502380fd",
+      "sha": "fb0c3dfec7b0f9596b2f76fb67dfae284172875d",
       "mode": "100644"
     },
     "Web/content/Security/Password Storage.md": {
-      "sha": "2a3ff7ec52c19500d26208b9ef51c9be43055209",
+      "sha": "c6c5a8a2150df2158fba421616df5b029bfd6377",
       "mode": "100644"
     },
     "Web/content/Security/Secrets Management.md": {
-      "sha": "4329c3b064afa7f317f2bdde2626d9393e73e5f1",
+      "sha": "cb818a2d163155078384f85937937e4d87af0ea9",
       "mode": "100644"
     },
     "Web/content/Security/Security.md": {
-      "sha": "67f8db769744405b687a75611088e3e2cf78207e",
+      "sha": "e6cf77b102ef70b28a1ad19ea37b056a0d5c4984",
       "mode": "100644"
     },
     "Web/content/Security/Sensitive Data.md": {
-      "sha": "51885199eb3f99f8b974f7585a4174fff242140b",
+      "sha": "663fbd00b246ffdb8bea1eb23b80acf73e17fe24",
       "mode": "100644"
     },
     "Web/content/Security/Web Vulnerabilities.md": {
-      "sha": "ef089b00d49f591714be91882690d2c476556745",
+      "sha": "049da029dbe4683a9ae85a054cba050ee045bd23",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Application Architecture/Application Architecture.md": {
-      "sha": "22842dd14a949fb60e8fd5650dec160df63a4099",
+      "sha": "4be805afe0ff7c644e26b65289634de050810c08",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Application Architecture/Clean Architecture.md": {
-      "sha": "629bc1a6fa3f56f655b2e87ebbf90b13df84a430",
+      "sha": "262fd523e4912146cf528d0153b3ef70baef73ab",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Application Architecture/Layered Architecture.md": {
-      "sha": "8f347998b4aca106c6ee091216392a4307d0a1d6",
+      "sha": "352c70da9d4243db70c5692e03d8c16993311029",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Application Architecture/Plug-in Architecture (MicroKernel).md": {
-      "sha": "7839d5e959a670e5be5fe7955ad19e9184b3d723",
+      "sha": "7e67898609444cb5f4a378025756edbdb60a1f34",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Application Architecture/Presentation Architecture Variants.md": {
-      "sha": "e43b0d632c57ac2e6d7eba26f165abc31089686d",
+      "sha": "8ae00ac754fe69c00a1aaa08d6f6e4962ba8a22b",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/API Gateway.md": {
-      "sha": "c0a911cc6b34ed3fcfd61e0d4adb1f4d4a3f49a4",
+      "sha": "6246a4c5b988ff6dd8dc08a734fbd199505ff2a5",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/CAP theorem.md": {
-      "sha": "dd18181950a554854555309bbd82e930876b1b89",
+      "sha": "9806cdb575f8fe621d89977d6297c44643996b62",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Choreography.md": {
-      "sha": "0d839ceec375f6a2175b3f206cd08f423033d787",
+      "sha": "631c493f8fe6ccc7ac3178d4959d9ef75ea9cc53",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Distributed Locks.md": {
-      "sha": "6c39acb3edd6fa0c1e36c155dacd8180353b9bdb",
+      "sha": "1c9c245d75d2796c077919d69a1d097c773389bf",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Distributed Systems.md": {
-      "sha": "bf5de504efb7f263fc385b75078c6b9b103ccad8",
+      "sha": "6b4329f68b7db7b4a432d0ae883925cfac315a02",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Distributed Transactions.md": {
-      "sha": "b3579f59c0ba944d99fc35648be877c2e6c75d6d",
+      "sha": "026c0f0bd0a32a6f0b5e8cc78b05f3d81167d8de",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Health Checks.md": {
-      "sha": "6c158c0c839fd53702e09c4189004c36efda88c4",
+      "sha": "42e7aa26d88519bba3c8e071c4b33a06e13f9bae",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/High Availability.md": {
-      "sha": "753d7a9650bcaacf57c41c0152f53e74953aa392",
+      "sha": "defa4eeaaa8abb5f0867369c57d4e4b1c870530e",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Idempotency.md": {
-      "sha": "fa7f6d95d7dee21d2e8dfdc125ddb293e0232cc1",
+      "sha": "ec5d2dc4068a842e332e3965f205ff924691a446",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Load Balancing.md": {
-      "sha": "bb8779dc305186c4e85ad2e9772cedd2d63f4aab",
+      "sha": "a71072e00b5f79b7d0f54e2eb7f3f2f480902e4e",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Message Queues/Kafka.md": {
-      "sha": "641504d6475bfe918d61641f05e35f0f745e096b",
+      "sha": "4e773c8de7ef09b26a771dcc862c8472f23359fe",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Message Queues/Message Queues.md": {
-      "sha": "f6093c4724403ac25e3d7bda4f26579477632bae",
+      "sha": "48d6578b116a97df61a879b59a30690dd9c8e23a",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Message Queues/RabbitMQ.md": {
-      "sha": "3232fc9de9a8d229eed80e66b031939248ec0bfe",
+      "sha": "4c447a4bd47110333e4b264daf6762feec2382ce",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Orchestration.md": {
-      "sha": "2073bddecd91a9a369da2c5240184c130389addf",
+      "sha": "179c846045d9d507179d6b1fdd8f88ddba2987bc",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Scalability Patterns/Horizontal Scaling.md": {
-      "sha": "bae766c5baa0be6ef764623d3908e9908d50d0bb",
+      "sha": "857a4c78cf9cd7fda84465c30ad44a03333e3813",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Scalability Patterns/Scalability Patterns.md": {
-      "sha": "6b872c17c2fc53617796dba9fa6084ee40e45906",
+      "sha": "4ab6c94af3f03b75a826e61e8e57aad79c59621f",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Scalability Patterns/Vertical Scaling.md": {
-      "sha": "26efc530caae17805bd2d114cc4c517ac4d0fc64",
+      "sha": "cebba64a08c6775204209870fef9b4385128cc6e",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/System Design Examples.md": {
-      "sha": "4cfd32375a036a37e3831eeda227d5b2729cea85",
+      "sha": "f6d1d15523dfd9ea37324099e2f6dbd44c1c87d8",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Unique ID Generation.md": {
-      "sha": "3b5e52ed763c111cb7afafebb9b0e2693b568dd1",
+      "sha": "6267b6ba1cf8b6455c45868c585dba2acd18646b",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Distributed Systems/Webhooks.md": {
-      "sha": "3372f4fdd8372c098111fe9c51fe4ef1dec9d16f",
+      "sha": "6a39342d36dcbeb9ef6c771ce1cd70876906464d",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Architectural Patterns/Architectural Patterns.md": {
-      "sha": "aa8ecfa3be46da8a694a7c36da008eda0b26a9bf",
+      "sha": "d3fa68e4d56081de8ccd58d1ffaa64c30cf70609",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Architectural Patterns/CQRS.md": {
-      "sha": "12547cbeb9cc867aebb79e2ddf38a216b1613260",
+      "sha": "3bb73f397e00efbacb09d391aebdd521e057b3ec",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Architectural Patterns/Domain-Driven Design.md": {
-      "sha": "a61516b41bf7be931d76d92e259160d868c07bda",
+      "sha": "1b5ed9eb24f15b2e9b7a7b5ed40a9b9c49b538c7",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Architectural Patterns/Event Sourcing.md": {
-      "sha": "39c42e326aa318028ad5062cc6b54022440dc6ea",
+      "sha": "808fa13355c5c599ac230f52991fe6548f44d8c3",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/CQS.md": {
-      "sha": "517e5ca660c7608d613309121ebf7ab05597f0d5",
+      "sha": "530d4ea93e94edaadd634732269a08bb86009092",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Dependency Injection.md": {
-      "sha": "d2e0ad5d5df5d5c5571742b28dba03b7bff01b86",
+      "sha": "717235eb650724ec9f39e9027b29a6bfbdf48d9e",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Behavioral/Behavioral.md": {
-      "sha": "d7905a36f09382d39ed387078d7bb01cff4082ce",
+      "sha": "164c04efd881498e845b7284c35ab1e1d01729a0",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Behavioral/Chain of Responsibility.md": {
-      "sha": "e88955ea0fbc267704fcd47c85b23db6e5c0b2f9",
+      "sha": "95e0acdc114c843461f7b738eaf6745dd08e1399",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Behavioral/Command.md": {
-      "sha": "e88622f2cf5542071835444221ea8e12a413b592",
+      "sha": "633a517fbac5a06385a957e2d3a96e66c3daa607",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Behavioral/Interpreter.md": {
-      "sha": "6a1fae252e69649f447b78f0dc106a507b70a2c2",
+      "sha": "4fb60c27ba997fa09bc701f2c28349985ff04448",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Behavioral/Iterator.md": {
-      "sha": "93eb26ba733f1f831d9ac4ce20a8aab949b00496",
+      "sha": "79998ec8024c8a6bcc4d9a19e73b78d5cd913e33",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Behavioral/Mediator.md": {
-      "sha": "dd2830180da86e8278d674356d4868225243f8bb",
+      "sha": "d06f9b026f5d61b91847433fcf56ffbb76b55f41",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Behavioral/Memento.md": {
-      "sha": "143a500f79aa05bc8bc32e13dc8e4ea9ff7601a0",
+      "sha": "fb12727c620244639779d3d59ffc19baabb973cd",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Behavioral/Observer.md": {
-      "sha": "b7914c8ea7853e0d0fcfc3b75a2a9b842106ed7a",
+      "sha": "f71ca00122a34c5aa36bab4740e0a647ed1fd462",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Behavioral/State.md": {
-      "sha": "afad787f3104729de042186fe82e57c3120b686d",
+      "sha": "749176b311415fbf423be87f917a8fbf3667c2a6",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Behavioral/Strategy.md": {
-      "sha": "88ce576f5eed52739e161dda1ee9b6cc815e9eb2",
+      "sha": "5e0faae55c8091c9793ced5b4be6eb5011be7b2b",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Behavioral/Template Method.md": {
-      "sha": "50fadf55bb1630160120213781d92f11d5553de4",
+      "sha": "a44062516328cb7c25d1a63d734a72f97fe39bce",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Behavioral/Visitor.md": {
-      "sha": "c41497b28e3f2fdc46b1c4b666ee3ac137d251a5",
+      "sha": "46c1dbfd393f0e2672b564da375bb26bbe76cc70",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Creational/Abstract Factory.md": {
-      "sha": "1edf55c57741e269bc03a1e39be4ba13810dadd7",
+      "sha": "925927657f3b55f1736309ac156a9b9b2444300e",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Creational/Builder.md": {
-      "sha": "86071cda9c6b87df1c49ee0b7c90ae1812f2033b",
+      "sha": "e94e86a24750f794f9ccc3c536ab250bd1b7c868",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Creational/Creational.md": {
-      "sha": "de592f420d30d5c731ffdb7875aa5bc7f6feb5cb",
+      "sha": "e842d252a7518326c6d3b295ddd9d5f110256636",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Creational/Factory Method.md": {
-      "sha": "ad450227c4e5a7bf9f41554af7f43d02306843e8",
+      "sha": "dec26be9f4411ccb6a8f7e6687ecb98a08fb9ddd",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Creational/Prototype.md": {
-      "sha": "105215772fcb8407128515f1bea1bcc5e2ea809e",
+      "sha": "e8434bc0f09fc9a4fb0b8d137c119ba70d4db4b0",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md": {
-      "sha": "fd7cb9fdaecfefd47e1e4902877c47e5834e80b3",
+      "sha": "416c36c92fb7e5bd59735019fa3cc7503c67f3cd",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Design Patterns.md": {
-      "sha": "b56153ec49d32d9e5a7d11f0171a4443c41bdcac",
+      "sha": "1555bc5770f95aff3e02997b4209a3c2c2d64039",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/GRASP.md": {
-      "sha": "eeb80723843d25893eeaf5cd7ea6d3ccf19db80c",
+      "sha": "62f4af08444962301a70c505f525925336b8a1fd",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Structural/Adapter.md": {
-      "sha": "f8b42199733474e6087769583fd4d56c6a34b725",
+      "sha": "b4dca001f08c28e4429c1c55975b195a1795c4cd",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Structural/Bridge.md": {
-      "sha": "3f4d3a8411aa26ee4862298b279f16b3970e46b7",
+      "sha": "98b14621a7fe1aef94e89952126131e6cf8eeb04",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Structural/Composite.md": {
-      "sha": "c4fd102049c4c9da059c034e55a1d5e107548046",
+      "sha": "c8e0a8db0126079a5e5d112b074cbc2101a9ecf5",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Structural/Decorator.md": {
-      "sha": "7ea0dda4c3abb1f15d315fb36c4ee4f7c09a8db0",
+      "sha": "a62465033f030278f67258f8e4aad9b5f03ecf7a",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Structural/Facade.md": {
-      "sha": "17c0787b33780eb3acf931f1ea749c4ee6503001",
+      "sha": "49de3e5a3bf47c5041ba9321af298580d2a57f34",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Structural/Flyweight.md": {
-      "sha": "fbbdaf54130daea26dcc5b4f4e0aaabd41dd06f3",
+      "sha": "4c2d51b1acd95e4a9a7b96ff53cf5d28be29866f",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Structural/Proxy.md": {
-      "sha": "37df2a691d1d023aaa78915db9f3e860ea285810",
+      "sha": "c20b877c24a3c2ae69d6c530b20854fb4b7273f4",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Design Patterns/Structural/Structural.md": {
-      "sha": "10d7a2ad1e6f5c84038e929f6d3f6c544620e9ed",
+      "sha": "0ff990d115d4d903a2dfe4477f4b10bd4221b028",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Event Bus.md": {
-      "sha": "21c01807eef43ecd7b6115f06243bcd00064a4ad",
+      "sha": "47699843f0c0525f886d2a9da510ab577f4df5a7",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Patterns.md": {
-      "sha": "0e9e9d5f9136fe13763752e8b714fcc3261e32a5",
+      "sha": "9a844a3c2780a1eaadd2081c48111813bcb2dae4",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Repository & UoW.md": {
-      "sha": "8baca64c107f30a6b2de354feb1e7521811abfe2",
+      "sha": "e50c68f05837a7c37bb88e19ff4025f2d61e9589",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Resilience Patterns/Circuit Breaker.md": {
-      "sha": "2f84c8fdb1b4650f3a2fc426cec16ef91e0b25f5",
+      "sha": "816aa4d75ce308ba10456668e2a3f3bedecdda2e",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Resilience Patterns/Rate Limiting.md": {
-      "sha": "c7226ec0429bc890e30bce1284bed913c942b140",
+      "sha": "854e7e3a1a195997450eea47e7a7f6331deeeb04",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Resilience Patterns/Resilience Patterns.md": {
-      "sha": "75d25c08314d11dd81640298880a32826e74d3bb",
+      "sha": "607c700e07d191efd0a8a20e7bce8bcb8a86b263",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Patterns/Resilience Patterns/Retry and Timeout Patterns.md": {
-      "sha": "102f4d011ec14cbf2eb9f5197c0288c128607142",
+      "sha": "d2d7fcf7f984a47481df62627d9af0216896fbb9",
       "mode": "100644"
     },
     "Web/content/Software Architecture/Software Architecture.md": {
-      "sha": "36c9a96159a668d4dd190cb8a53ec6fedba8a982",
+      "sha": "1e3b407894bbde92c1962c23467f433c32fe9d44",
       "mode": "100644"
     },
     "Web/content/Software Architecture/System Architecture/Event-Driven Architecture.md": {
-      "sha": "f30c7007e648cbaf0c96624f975c4423d4940005",
+      "sha": "6d183d788ce6483a26d37aaf21a0f05f37516be0",
       "mode": "100644"
     },
     "Web/content/Software Architecture/System Architecture/Microservices.md": {
-      "sha": "9052445ab6a07100aabea496f32416e4b12a744f",
+      "sha": "a046231e0b46048e2d6ee509c7620712f4fc14b4",
       "mode": "100644"
     },
     "Web/content/Software Architecture/System Architecture/Modular Monolith.md": {
-      "sha": "d5bfd698dd49bc8d9c106e0a3760854342277f80",
+      "sha": "f0fa5114a44919fccbdc5e2a3bb089686bb00650",
       "mode": "100644"
     },
     "Web/content/Software Architecture/System Architecture/Monolith Architecture.md": {
-      "sha": "33b6ad86240beb63d94f0d1a037c834ca516cc47",
+      "sha": "4e73b61880483dffdd63eca895303ffd0beb7c03",
       "mode": "100644"
     },
     "Web/content/Software Architecture/System Architecture/Serverless Architecture.md": {
-      "sha": "643b60604afb19bcd130b966c45732f1ff3ecad1",
+      "sha": "08c5c3b24f4fbbc421d2c5d3104f0ef51a051cf9",
       "mode": "100644"
     },
     "Web/content/Software Architecture/System Architecture/Service-Oriented Architecture.md": {
-      "sha": "fa64d5e6e2ccbc65d23a964bb7f462cbcd085d44",
+      "sha": "8ede2f041e8357beb57d38ac9a3f6df425140ea3",
       "mode": "100644"
     },
     "Web/content/Software Architecture/System Architecture/System Architecture.md": {
-      "sha": "8b1ccf28dd4948c930a37b9e78f8e5aadf7d6afc",
+      "sha": "9058b24e7996c310eacd58e413010d2cbfd1dee6",
       "mode": "100644"
     },
     "Web/content/Software Design/Paradigms/Event-driven.md": {
-      "sha": "c3dc536d0f9ab9fe8ccf122441cf2fb3d1da7862",
+      "sha": "7b36eead783419f9117b9ee41c4acbf4bfaead60",
       "mode": "100644"
     },
     "Web/content/Software Design/Paradigms/Functional Programming.md": {
-      "sha": "f265b7c4cef35633d024d898e941c280290ce635",
+      "sha": "8cb960f5f1c294816c23fb7ca386a0e13e0f7dbe",
       "mode": "100644"
     },
     "Web/content/Software Design/Paradigms/OOP.md": {
-      "sha": "9f484bf8a4019967a67872d98a59967cd7e342fe",
+      "sha": "704704071fc99510ecb5c6695408bcc43e76ff2e",
       "mode": "100644"
     },
     "Web/content/Software Design/Paradigms/Paradigms.md": {
-      "sha": "96f74c2b98da8744b6e7e7c1e23c540dd9e7fbec",
+      "sha": "a2f8b959b86311bb0e2817e429e9521af34bda5e",
       "mode": "100644"
     },
     "Web/content/Software Design/Principles/DRY, IoC, and YAGNI.md": {
-      "sha": "f7b488480061a270bcae34fa0719baf808870e84",
+      "sha": "59e7a23595e94918f8c46cd7cb36fb3471012b39",
       "mode": "100644"
     },
     "Web/content/Software Design/Principles/KISS.md": {
-      "sha": "92b02ac18342431fcd33a5058b2ccd38006c32df",
+      "sha": "1cee9ab40586ae618ffb90691c955b292dbcc470",
       "mode": "100644"
     },
     "Web/content/Software Design/Principles/Principles.md": {
-      "sha": "fb05e67f581df577ebdd9de597a1651689edad95",
+      "sha": "38048851e05b2de15b8871b99827ce1cdd309af2",
       "mode": "100644"
     },
     "Web/content/Software Design/Principles/SOLID.md": {
-      "sha": "964fffc689cf511e7d08c45ed4028664a0a44f11",
+      "sha": "63ff3ae09ee79e9c26d6022335437dd956c27cac",
       "mode": "100644"
     },
     "Web/content/Software Design/Software Design.md": {
-      "sha": "f67a4f533b8af1810793f1eb28f88102f66da683",
+      "sha": "07cb2f98a8bc5216ce31cdd45070fc4fbce8dc60",
       "mode": "100644"
     },
     "Web/content/Software Design/Testing/Integration Testing.md": {
-      "sha": "d487c2fc813d5e79c461d6ccdd16c306a0e75222",
+      "sha": "e7e46f112a658512bb48bda985d541402eb3396e",
       "mode": "100644"
     },
     "Web/content/Software Design/Testing/Test-Driven Development.md": {
-      "sha": "168059108f44d44886cc1c57cac049f5892de1f7",
+      "sha": "7f206c61cae121088f781985d6fdf5965518e6f5",
       "mode": "100644"
     },
     "Web/content/Software Design/Testing/Testing Pyramid.md": {
-      "sha": "12b1b9f90ff825e1dc83f82ca5daafb83424d888",
+      "sha": "03478d86a6301d91795a9379bf411d8a7351ee16",
       "mode": "100644"
     },
     "Web/content/Software Design/Testing/Testing.md": {
-      "sha": "89b86fad3b6310036efc6e1bb80dc34704eeed68",
+      "sha": "1e99b826414deb8ef51efde9e9344ccf9d865ff6",
       "mode": "100644"
     },
     "Web/content/Software Design/Testing/Unit Testing.md": {
-      "sha": "b28ca90c2376c7f7ddb7c5db78092d475b761a69",
+      "sha": "5d94f99d89e209e0a8fe3e21f7a8cf5578c23b4e",
       "mode": "100644"
     },
     "Web/content/Software Design/UML Class Diagrams.md": {
-      "sha": "dcc0fd2029faa54a536fefa85d2007f2917784c4",
+      "sha": "0ed8979fd45cf0d37e9365696f4b71b78c00d66a",
       "mode": "100644"
     },
     "Web/content/Topics.base": {
-      "sha": "cddef0b8840a94952554bc2d517d9e5bbc228027",
+      "sha": "2c0e51339bef6d1f47ad3debbac229ea11e0e6fd",
       "mode": "100644"
     },
     "Web/content/index.md": {
-      "sha": "726b3fec416879b5519cb129703a80f5dd53bff9",
+      "sha": "42b4739482906fc100bf9a5ad87fb7f96765f57b",
       "mode": "100644"
     },
     "Web/quartz/styles/custom.scss": {
-      "sha": "889a54d869c8092412825d39ffdb39cf64a92568",
+      "sha": "01f5aa524345c45c76ec20c1d17d803db7faa9bb",
       "mode": "100644"
     },
     "Web/quartz/styles/syncer/_datacore.scss": {
@@ -4274,7 +4526,7 @@
       "mode": "100644"
     },
     ".scripts/DevBook.Tooling/Export/Fixture.cs": {
-      "sha": "d6aeaca2a6814cbdd277e454e8d31f94f89d9885",
+      "sha": "5e24cd2bc0881a79197a9b3bfa9fe692565c238e",
       "mode": "100644"
     },
     ".scripts/DevBook.Tooling/Export/Receipt.cs": {
@@ -4306,7 +4558,7 @@
       "mode": "100644"
     },
     ".scripts/DevBook.Tooling/Improvement/Demo.cs": {
-      "sha": "4f84d54da2bb2857e23013e54b8f07b82d24d105",
+      "sha": "0a567f293df32ef7c4e2741279d326cc8d88e6c6",
       "mode": "100644"
     },
     ".scripts/DevBook.Tooling/Improvement/DemoApi.cs": {
@@ -4354,7 +4606,7 @@
       "mode": "100644"
     },
     ".scripts/DevBook.Tooling/Improvement/Proposal.cs": {
-      "sha": "985ebcf0ac3fddad3c22b171741e944845e32d8f",
+      "sha": "5d3cef744a4211b01733bcd24c944fb129d90320",
       "mode": "100644"
     },
     ".scripts/DevBook.Tooling/Improvement/Provider.cs": {
@@ -4458,7 +4710,7 @@
       "mode": "100644"
     },
     ".scripts/DevBook.Tooling/Vault/FolderRollup.cs": {
-      "sha": "905575cbeec4988321646c149281b8711195bb05",
+      "sha": "cd8f22ac6b6895a997cc8e898c99591acbc39c9d",
       "mode": "100644"
     },
     ".scripts/DevBook.Tooling/Vault/Markdown.cs": {
@@ -4478,11 +4730,11 @@
       "mode": "100644"
     },
     ".scripts/DevBook.Tooling/Vault/Roadmap.cs": {
-      "sha": "cbeb1752f132e2fabfdcd7f67e5195bb230dec9c",
+      "sha": "2d8af83a76ad001dddcf08809d3121699ba58713",
       "mode": "100644"
     },
     ".scripts/DevBook.Tooling/Vault/Validation.cs": {
-      "sha": "877617964c284a0357359ba8d2d0e459b230772c",
+      "sha": "a434f25a5dbec601335361e6a1991c448f580e67",
       "mode": "100644"
     },
     ".scripts/global.json": {
@@ -4506,15 +4758,15 @@
       "mode": "100644"
     },
     "Vault/.obsidian/plugins/obsidian-excalidraw-plugin/main.js": {
-      "sha": "af001d3b9fceb18551ad7d447f0eaf7ed88398ea",
+      "sha": "e71ccd61b14c1877ca225fff766eafd5041e09e5",
       "mode": "100644"
     },
     "Vault/.obsidian/plugins/obsidian-excalidraw-plugin/manifest.json": {
-      "sha": "f78437d5b7232e260b8e2d924c4a806e4f150467",
+      "sha": "da35db36de5be8d44653b09ea5ae9f61422658a1",
       "mode": "100644"
     },
     "Vault/.obsidian/plugins/obsidian-excalidraw-plugin/styles.css": {
-      "sha": "8a2fa851d000b2d9585290b6a40c8e5633229767",
+      "sha": "17957207fff44d9b42cd1e8b444dcfed77907872",
       "mode": "100644"
     },
     "Vault/.obsidian/plugins/quartz-syncer/build-info.json": {

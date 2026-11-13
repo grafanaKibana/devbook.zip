@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-06-12T18:21:46.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.413Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Retrieval, generation, and end-to-end metrics each answer a different q
 level:
   - "2"
 priority: High
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics
 flashcard_uid: a6155222

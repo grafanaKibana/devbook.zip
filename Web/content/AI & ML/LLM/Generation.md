@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-27T18:09:30.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.409Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: Producing reliable, grounded, correctly formatted output by controlling
 level:
   - "2"
 priority: High
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Generation
 flashcard_uid: b145e45f

@@ -6,9 +6,9 @@ tags: [FolderNote]
 publish: true
 priority: High
 level: ["4"]
-status: Not-Started
+status: New
 created: "2026-07-15T12:08:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-15T11:53:22.637Z"
 ---
 

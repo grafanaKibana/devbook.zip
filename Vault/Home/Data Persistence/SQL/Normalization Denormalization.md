@@ -4,14 +4,14 @@ subtopic: [SQL]
 summary: "Structuring a relational schema to remove redundancy, trading read performance for fewer anomalies."
 level: ["4"]
 priority: High
-status: Done
+status: In Progress
 
 publish: true
 qard-deck: "Data Persistence"
 qard-topic: "SQL/Normalization Denormalization"
 flashcard_uid: "ab5a8eb2"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.353Z"
 ---
 

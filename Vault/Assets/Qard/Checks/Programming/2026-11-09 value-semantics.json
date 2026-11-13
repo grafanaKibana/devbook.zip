@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "createdAt": 1794384551977,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "value-semantics",
+  "title": "Explain what value-type and reference-type assignment copy, including shared reference fields",
+  "goal": "apply",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "cloze",
+      "prompt": "`Playlist` is a C# **class** with one public field: `string[] Tracks`. Arrays are reference types.\n\n```csharp\nvar p = new Playlist { Tracks = new[] { \"intro\", \"theme\" } };\nvar q = p;\nvar saved = p.Tracks;\nq.Tracks = new[] { \"remix\" };\nq.Tracks[0] = \"live\";\n```\n\nAfter all five lines run, `p.Tracks[0]` is {{pTrack}} and `saved[0]` is {{savedTrack}}.",
+      "marks": 2,
+      "blanks": [
+        {
+          "id": "pTrack"
+        },
+        {
+          "id": "savedTrack"
+        }
+      ],
+      "rubric": [
+        {
+          "point": "`p.Tracks[0]` is \"live\": `p` and `q` refer to the same `Playlist` object, so replacing its `Tracks` field through `q` is seen through `p`, and the element change then applies to that new array.",
+          "marks": 1
+        },
+        {
+          "point": "`saved[0]` is \"intro\": `saved` holds a reference to the original array, which was never modified; replacing the field only repointed the object's field.",
+          "marks": 1
+        }
+      ],
+      "model": "`p.Tracks[0]` is **\"live\"**, `saved[0]` is **\"intro\"**.\n\nOptional explanation: `var q = p` copies the object reference, so there is one `Playlist`. Assigning `q.Tracks` replaces that shared object's field, so `p.Tracks` now points to the new array too. `saved` copied the reference to the first array, which nothing changed.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+        "heading": "Copy and Storage Boundaries"
+      },
+      "objective": "value-semantics",
+      "goal": "apply"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

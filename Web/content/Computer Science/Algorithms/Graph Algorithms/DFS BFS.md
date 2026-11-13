@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-20T23:50:18.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-12T14:27:20.402Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: "The two fundamental graph traversals: BFS gives distance ordering by l
 level:
   - "4"
 priority: Medium
-status: Done
+status: In Progress
 ---
 
 Reachability, fewest-hop paths, cycle detection, and component labelling all build on graph traversal. The central decision is which discovered vertex should be expanded next. A queue picks the oldest frontier entry, so breadth-first search widens one distance layer at a time. A stack picks the newest, so depth-first search follows one branch until it runs out and then backtracks. Both use a visited set and a frontier. Their ordering produces different guarantees.

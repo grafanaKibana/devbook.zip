@@ -48,7 +48,7 @@ views:
     filters:
       and:
         - 'file.path.startsWith("Home/")'
-        - 'status == "Ready to Repeat" || status == "Repetition"'
+        - 'status == "Established"'
     groupBy:
       property: formula.study_area
       direction: ASC
@@ -71,29 +71,7 @@ views:
     filters:
       and:
         - 'file.path.startsWith("Home/")'
-        - 'status == "Creation" || status == "Not-Started"'
-    groupBy:
-      property: formula.study_area
-      direction: ASC
-    order:
-      - file.name
-      - formula.study_area
-      - subtopic
-      - status
-      - priority
-    sort:
-      - property: formula.study_area
-        direction: ASC
-      - property: file.folder
-        direction: ASC
-      - property: file.name
-        direction: ASC
-  - type: table
-    name: Previously learned
-    filters:
-      and:
-        - 'file.path.startsWith("Home/")'
-        - 'status == "Done"'
+        - 'status == "In Progress" || status == "New"'
     groupBy:
       property: formula.study_area
       direction: ASC

@@ -19,7 +19,7 @@ internal sealed class WorkloadFixture : IDisposable
         for (var index = 0; index < count; index++)
         {
             string path = $"Vault/Home/Programming/NET/Note{index:00}.md";
-            Notes.Add(DomainFixtures.NoteRecord(path, DomainFixtures.Note.Replace("stable_1", "stable_" + LegacyIdentity.Digest(path)[..8]).Replace("status: Creation", "created: \"2026-01-01T00:00:00.000Z\"\nmodified: \"2026-01-01T00:00:00.000Z\"\nstatus: Creation")));
+            Notes.Add(DomainFixtures.NoteRecord(path, DomainFixtures.Note.Replace("stable_1", "stable_" + LegacyIdentity.Digest(path)[..8]).Replace("status: In Progress", "created: \"2026-01-01T00:00:00.000Z\"\nmodified: \"2026-01-01T00:00:00.000Z\"\nstatus: In Progress")));
         }
         if (otherTopic) Notes.Add(DomainFixtures.NoteRecord("Vault/Home/ZZNetworks/Other.md"));
     }

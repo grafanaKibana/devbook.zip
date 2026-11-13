@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "createdAt": 1794300573055,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "type-shapes",
+  "title": "Choose class, struct or record semantics from identity, equality, copying and inheritance requirements",
+  "goal": "apply",
+  "questionPolicy": 1,
+  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "mcq",
+      "marks": 1,
+      "objective": "type-shapes",
+      "goal": "apply",
+      "prompt": "A C# warehouse app models a `Shipment`. A scheduler, a tracking service and a billing service all hold the same shipment object. When the tracking service changes its `Status`, the other two must see that change immediately. Two shipments created separately must stay distinct even when every field has the same value, such as two identical pallets sent on the same day. Nothing inherits from `Shipment`.\n\nWhich type declaration fits these requirements best?",
+      "options": [
+        "`public record class Shipment`, because generated value equality lets every service compare shipments by their contents",
+        "`public readonly record struct Shipment`, because it is immutable, so a status change cannot be lost between services",
+        "`public sealed class Shipment`, because services share one instance and equality stays based on references",
+        "`public struct Shipment`, because copying the value gives each service its own up-to-date shipment state"
+      ],
+      "answer": 2,
+      "rubric": [
+        {
+          "point": "Chooses `sealed class`: a reference type gives shared identity, so all services see one object's mutations, and the default reference equality keeps separately created shipments with equal fields distinct.",
+          "marks": 1
+        }
+      ],
+      "model": "**`public sealed class Shipment`.** Assignment and passing copy a reference, so all three services point at the same object and see the status change. Class equality compares references by default, so two separately created shipments with identical fields still compare unequal. `sealed` fits because nothing inherits from it.\n\n*Why the others fail:* a `record class` makes the two identical pallets compare equal. A struct or record struct copies the value, so each service would hold its own copy and would not see the change. A `readonly` type cannot change its status in place at all.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Classes.md",
+        "heading": "Tradeoffs"
+      }
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

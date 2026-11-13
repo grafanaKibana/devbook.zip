@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-03-06T22:43:56.000Z
-modified: 2026-11-02T09:03:54.806Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.460Z
 topic:
   - Software Architecture
@@ -11,7 +11,7 @@ summary: A single deployable application intentionally split into strict modules
 level:
   - "3"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Software Architecture
 qard-topic: System Architecture/Modular Monolith
 flashcard_uid: 63d5a8b8

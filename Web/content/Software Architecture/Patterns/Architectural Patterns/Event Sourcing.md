@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.426Z
 topic:
   - Software Architecture
@@ -11,7 +11,7 @@ summary: Event Sourcing stores each aggregate's state as an ordered stream of do
 level:
   - "2"
 priority: High
-status: Done
+status: In Progress
 ---
 
 Event Sourcing makes an aggregate's ordered event stream the source of truth. Current state is rebuilt by applying those events rather than loading one mutable row. The history supports audit and point-in-time reconstruction, but its real cost appears in event compatibility, projection recovery, and day-to-day operations. It fits domains where that history has product or regulatory value. [[Software Architecture/Patterns/Architectural Patterns/CQRS]] often supplies separate read models, though it is not required.

@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T08:56:49.582Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: Finds the greatest s-to-t throughput in a capacitated network by repeat
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 A directed network carries a divisible resource such as water or bandwidth from a source `s` to a sink `t`. Every edge `u → v` has a **capacity** that bounds what it can carry. A valid flow stays within those capacities, and every vertex other than `s` and `t` sends out exactly what it receives. The **maximum-flow** problem asks for the greatest total rate leaving `s` and reaching `t`.

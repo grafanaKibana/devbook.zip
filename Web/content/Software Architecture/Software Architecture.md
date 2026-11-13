@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-15T11:49:57.319Z
 tags:
   - FolderNote
@@ -15,7 +15,7 @@ summary: Structuring software with clear boundaries and explicit tradeoffs so it
 priority: High
 level:
   - "4"
-status: Creation
+status: New
 qard-deck: Software Architecture
 qard-topic: Software Architecture
 flashcard_uid: bffcd2eb

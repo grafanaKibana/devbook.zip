@@ -4,10 +4,10 @@ subtopic: [Distributed Systems]
 summary: "Applying the same logical operation multiple times produces the same final state as applying it once, making retries safe."
 level: ["2"]
 priority: High
-status: Ready to Repeat
+status: In Progress
 publish: true
 created: "2026-03-06T22:43:56.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:28:37.387Z"
 ---
 

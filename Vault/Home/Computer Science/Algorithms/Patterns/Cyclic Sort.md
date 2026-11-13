@@ -4,10 +4,10 @@ subtopic: [Algorithms]
 summary: "Sorts a permutation of 1..n by swapping each value directly to its home index."
 level: ["4"]
 priority: Medium
-status: Creation
+status: New
 publish: true
 created: "2026-07-10T06:24:36.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-10T05:58:42.295Z"
 ---
 

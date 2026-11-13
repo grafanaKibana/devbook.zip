@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "createdAt": 1793802634366,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "generic-contracts",
+  "title": "Choose generic type parameters and constraints without replacing type safety with object casts",
+  "goal": "explain",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "long",
+      "prompt": "A conversion helper must accept a value and a conversion function, then return the function's result. One use converts a `string` into an `int`; another converts a `DateTime` into a `string`.\n\nConsider this contract:\n```csharp\nTOutput Convert<TInput, TOutput>(\n    TInput value,\n    Func<TInput, TOutput> converter);\n```\nExplain why it uses two type parameters, how they let the compiler check the conversion, and what protection would be lost if the value, function input and result all used `object`.",
+      "marks": 3,
+      "rubric": [
+        {
+          "point": "Explains that input and output can have different types; using one shared T would require them to be the same type.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that the function accepts TInput and returns TOutput, linking the supplied value and returned result through compiler-checked types.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that an object-based contract loses these specific type relationships, requiring casts that can fail at runtime.",
+          "marks": 1
+        }
+      ],
+      "model": "`TInput` and `TOutput` represent separate roles because a conversion can change the type, such as from `string` to `int`. One shared `T` would require the input and result to have the same type.\n\n`Func<TInput, TOutput>` connects the converter's input to the value's type and its output to the helper's return type. The compiler checks those relationships, and the caller receives a typed result without a cast.\n\nWith `object` throughout, the signature does not express which input type the converter needs or which result type it produces. A converter might cast its input to `string` even though the helper accepts an integer. Such casts can compile and then fail at runtime.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+        "heading": "Use Cases"
+      },
+      "objective": "generic-contracts",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "long",
+      "prompt": "A factory creates a fresh value of the caller's chosen type. Its entire implementation is:\n```csharp\nstatic T Make<T>() where T : new()\n{\n    return new T();\n}\n```\nExplain what `new()` guarantees. Why would replacing it with `class` fail to justify the method body? Why would adding `class` alongside `new()` unnecessarily restrict this factory?",
+      "marks": 3,
+      "rubric": [
+        {
+          "point": "States that new() requires a non-abstract type with a public parameterless constructor, allowing new T().",
+          "marks": 1
+        },
+        {
+          "point": "Explains that class guarantees only a reference type, not an accessible parameterless constructor, so it does not permit new T().",
+          "marks": 1
+        },
+        {
+          "point": "Explains that adding class excludes structs even though they can satisfy new() and the implementation does not require reference-type behavior.",
+          "marks": 1
+        }
+      ],
+      "model": "`new()` requires a non-abstract type with a public parameterless constructor. That gives the compiler the guarantee needed for `new T()`.\n\n`class` only requires a reference type. A class might have only constructors with arguments, so `class` alone does not make `new T()` legal.\n\nAdding `class` to `new()` would exclude structs. Structs can satisfy `new()`, and this factory only needs to construct and return a value; it has no requirement for reference-type behavior.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Generics.md",
+        "heading": "Constraints"
+      },
+      "objective": "generic-contracts",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

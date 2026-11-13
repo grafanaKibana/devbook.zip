@@ -4,13 +4,13 @@ subtopic: [System Architecture]
 summary: "Structures a system as loosely coupled services communicating over standardized protocols, historically integrated through an Enterprise Service Bus."
 level: ["3"]
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Software Architecture"
 qard-topic: "System Architecture/Service-Oriented Architecture"
 flashcard_uid: "fad3bcad"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-10-28T12:33:42.000Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:28:37.399Z"
 ---
 

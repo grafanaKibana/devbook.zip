@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.509Z
 topic:
   - DevOps
@@ -10,7 +10,7 @@ summary: Packages an application and its dependencies into an isolated, portable
 level:
   - "2"
 priority: High
-status: Ready to Repeat
+status: In Progress
 ---
 
 Docker builds an OCI-compatible image containing an application and its filesystem dependencies, then starts isolated processes from that image. The image is portable; the complete runtime is not. The host kernel and CPU architecture, networking, mounts, resource limits, injected configuration, security policy, and external services remain environmental inputs.

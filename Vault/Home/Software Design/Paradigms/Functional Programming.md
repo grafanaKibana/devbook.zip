@@ -4,13 +4,13 @@ subtopic: [Paradigms]
 summary: "Models computation as the evaluation of pure functions over immutable data."
 level: ["3"]
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 publish: true
 qard-deck: "Software Design"
 qard-topic: "Paradigms/Functional Programming"
 flashcard_uid: "76f68e02"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-02T09:03:54.806Z"
+modified: "2026-11-12T10:29:34.513Z"
 published: "2026-07-08T13:14:17.463Z"
 ---
 

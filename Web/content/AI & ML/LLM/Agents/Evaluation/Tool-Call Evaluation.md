@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-06-12T18:50:14.000Z
-modified: 2026-11-04T06:47:28.050Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:28:37.404Z
 topic:
   - AI & ML
@@ -11,7 +11,7 @@ summary: "Scoring each agent tool call on four axes: right tool, correct argumen
 level:
   - "3"
 priority: High
-status: Done
+status: In Progress
 qard-deck: AI & ML
 qard-topic: LLM/Agents/Evaluation/Tool-Call Evaluation
 flashcard_uid: 1d83d54c

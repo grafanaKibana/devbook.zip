@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-06-20T05:33:50.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-10T14:39:34.309Z
 topic:
   - Computer Science
@@ -11,7 +11,7 @@ summary: A prefix tree that stores strings as character paths for exact and pref
 level:
   - "4"
 priority: Medium
-status: Ready to Repeat
+status: In Progress
 ---
 
 An autocomplete box must answer more than exact membership. Given the fragment `lap`, it needs every stored key that begins there. A [[Computer Science/Data Structures/Hash-based Structures/HashMap|hash map]] hashes the whole key and has no location for a shared prefix, so this query scans all `n` keys. A trie keys the set by the _sequence_ of characters. The prefix becomes a node in the structure rather than a filter over every entry.

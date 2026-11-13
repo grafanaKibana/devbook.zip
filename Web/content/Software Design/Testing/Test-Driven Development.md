@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-07-08T13:14:17.465Z
 topic:
   - Software Design
@@ -11,7 +11,7 @@ summary: Writing a failing test before the code, using Red-Green-Refactor as a d
 level:
   - "4"
 priority: High
-status: Ready to Repeat
+status: In Progress
 qard-deck: Software Design
 qard-topic: Testing/Test-Driven Development
 flashcard_uid: 007a0cef
