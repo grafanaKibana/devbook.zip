@@ -15004,10 +15004,10 @@
   "focused_workload": {
     "version": 1,
     "id": "96aead5381054b1abb39c96a9d812838",
-    "status": "active",
-    "phase": "selecting",
+    "status": "sealed",
+    "phase": "sealed",
     "started_at": "2026-11-13T22:21:42.093452Z",
-    "elapsed_seconds": 132.42228599999999,
+    "elapsed_seconds": 136.23993099999998,
     "calls_reserved": 2,
     "responses_received": 2,
     "attempted_paths": [
@@ -17926,7 +17926,7 @@
       }
     ],
     "feedback_pr": 220,
-    "checkpoint_at": "2026-11-13T22:23:54.515267Z",
+    "checkpoint_at": "2026-11-13T22:23:58.332913Z",
     "feedback_scope_id": "a01574a861c817a06504feab2e349362e3335205b6f574ab9ffb1b1bb370e74b",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
@@ -20326,7 +20326,9 @@
         "check": "npm --prefix Web run test -- custom/transformers/publishing.test.ts",
         "result": "passed"
       }
-    ]
+    ],
+    "stop_reason": "feedback_scope_complete",
+    "sealed_at": "2026-11-13T22:23:58.332925Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
