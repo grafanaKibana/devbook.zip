@@ -15005,16 +15005,16 @@
     "version": 1,
     "id": "96aead5381054b1abb39c96a9d812838",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-13T22:21:42.093452Z",
-    "elapsed_seconds": 46.617557899999994,
+    "elapsed_seconds": 63.1628584,
     "calls_reserved": 2,
-    "responses_received": 1,
+    "responses_received": 2,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 220,
-    "checkpoint_at": "2026-11-13T22:22:28.710541Z",
+    "checkpoint_at": "2026-11-13T22:22:45.255840Z",
     "feedback_scope_id": "a01574a861c817a06504feab2e349362e3335205b6f574ab9ffb1b1bb370e74b",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
@@ -40841,6 +40841,59 @@
       "Vault/Home/Networks/Network Data Path.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-13T22:22:25.417490Z"
+    "prepared_at": "2026-11-13T22:22:25.417490Z",
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/Networks/Network Data Path.md",
+          "verdict": "CLEAN",
+          "summary": "The note was audited in full and is accurate, well ordered and compact. The single edit answers the owner's comprehension feedback. It replaces an abstract sentence with a plain statement of the window rule and keeps the point that queues still add delay.",
+          "page_type": "Concept — authorable prose; References present and topic-specific; no Questions section; one text fence with a language identifier; no special-page rules apply.",
+          "current_text_evidence": [
+            {
+              "quote": "The sender can never have more unacknowledged data in flight than the receiver's window allows, yet queues at every layer can still add delay.",
+              "line_start": 47,
+              "reason": "This is the edited sentence. It states the receive-window cap directly and keeps the residual-delay caveat, which answers the owner's request for wording that is easier to understand and remember. The claim is correct: the receiver window is an upper bound on bytes in flight, and the congestion window can lower it further."
+            },
+            {
+              "quote": "Success means the kernel accepted them, not that the peer received them.",
+              "line_start": 22,
+              "reason": "Step 1 states the key boundary clearly and keeps the mechanism and the blocking/EAGAIN condition."
+            },
+            {
+              "quote": "With a 1500-byte Ethernet MTU, IPv4 and TCP headers often leave an MSS near 1460 bytes, so TCP sends several segments.",
+              "line_start": 32,
+              "reason": "The MSS arithmetic and its caveats (TCP options, tunnels, IPv6, smaller downstream MTU) are accurate and well placed."
+            },
+            {
+              "quote": "Small requests work, but larger responses stall: a classic PMTU black hole.",
+              "line_start": 53,
+              "reason": "The failure trace gives symptom, diagnosis (capture shows retransmissions, clean counters) and repair, and it links back to the MTU and MSS explanation."
+            }
+          ],
+          "target_resolution": "RESOLVED",
+          "split_suggestion": "No split: the note follows one write through the stack, with backpressure and the PMTU failure as direct consequences of that path. Splitting would break the narrative.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The note is accurate and coherent. The only change is a justified simplification that meets the owner's feedback and keeps the technical meaning. There are no unsupported claims, no rejected or reconsidered decisions to verify, and no remaining findings.",
+      "change_checks": [
+        {
+          "edit_index": 0,
+          "verdict": "WORTHWHILE",
+          "reason": "The owner found the original sentence harder to comprehend and remember. The new sentence states the receiver-window cap on in-flight data plainly and keeps the caveat that queues still add delay. The change is accurate, minimal and meaning-preserving."
+        }
+      ]
+    }
   }
 }
