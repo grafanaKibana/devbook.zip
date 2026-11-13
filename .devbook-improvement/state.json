@@ -14432,9 +14432,9 @@
     "version": 1,
     "id": "ed9f729234e2405d9876ac4f5aa28fbd",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-13T20:03:30.781717Z",
-    "elapsed_seconds": 945.4365362999997,
+    "elapsed_seconds": 950.3068384999997,
     "calls_reserved": 20,
     "responses_received": 20,
     "attempted_paths": [
@@ -14446,7 +14446,8 @@
       "Vault/Home/Programming/WebAssembly.md",
       "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md",
       "Vault/Home/Programming/NET/ASP NET Web API/Authentication.md",
-      "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md"
+      "Vault/Home/Programming/NET/ASP NET Web API/Authorization.md",
+      "Vault/Home/Programming/NET/ASP NET Web API/CORS.md"
     ],
     "accepted_records": [
       {
@@ -17467,10 +17468,88 @@
           },
           "model_calls": 18
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/ASP NET Web API/CORS.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/CORS.md",
+                "outcome": "keep",
+                "reason": "Read the whole note against the Fetch CORS protocol and the ASP.NET Core CORS documentation. The origin definition and the browser-enforced, non-authorization framing are correct. The safelisted-request rules (GET/HEAD/POST and three content types) and the preflight example are correct. Custom response headers need WithExposedHeaders. AllowCredentials applies to cookies and client certificates, not to merely allowing an Authorization header. ASP.NET Core rejects AllowAnyOrigin combined with AllowCredentials. UseCors belongs after routing and before authorization. The pitfalls and tradeoffs explain the mechanisms and the conditions that change the decision. The code fences have language identifiers and the references are relevant primary sources. There are no cards and no known violations. The 'NEVER in production' comment on the AllowAll policy is a deliberately conservative remark, and the Tradeoffs section already covers the public-wildcard exception. No edit is warranted."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note's technical claims match the Fetch CORS protocol and the ASP.NET Core CORS documentation. It has no known violations and no concrete defect that calls for an edit, so the keep is justified.",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/CORS.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole note and found it accurate, well ordered and compact. It covers the mechanism (origin, browser-enforced, preflight), the ASP.NET Core configuration, and the main pitfalls and tradeoffs. No concrete error or essential learning gap justifies an edit.",
+                "page_type": "Concept — authorable prose with no Questions section. References are optional and present, and every code fence has a language identifier.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The server publishes its decision through `Access-Control-*` response headers. The browser enforces it.",
+                    "line_start": 14,
+                    "reason": "The opening states the operating idea and who enforces CORS, which is the key boundary."
+                  },
+                  {
+                    "quote": "This is not an API authorization boundary.",
+                    "line_start": 16,
+                    "reason": "It states the main misconception immediately and correctly, with concrete non-browser examples after it."
+                  },
+                  {
+                    "quote": "Merely allowing an `Authorization` request header is controlled by the allowed-header policy and does not, by itself, require credential mode.",
+                    "line_start": 78,
+                    "reason": "This is a precise and correct distinction between allowed headers and credentialed requests."
+                  },
+                  {
+                    "quote": "ASP.NET Core rejects a policy that combines `AllowAnyOrigin()` with `AllowCredentials()`.",
+                    "line_start": 87,
+                    "reason": "The pitfall is correct, and the next paragraph gives the protocol reason for it."
+                  },
+                  {
+                    "quote": "CORS belongs after routing and before authorization so it can use endpoint metadata and handle preflights",
+                    "line_start": 97,
+                    "reason": "The middleware order matches the Microsoft guidance, and the note explains why it matters."
+                  },
+                  {
+                    "quote": "a longer preflight lifetime removes network round trips. It also delays browser uptake of a tightened policy",
+                    "line_start": 105,
+                    "reason": "The tradeoff names the condition that changes the decision, so brevity does not lose the mechanism."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one coherent topic, with the CORS protocol and its ASP.NET Core configuration closely linked.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 20
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T20:19:16.217766Z",
+    "checkpoint_at": "2026-11-13T20:19:21.088068Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
