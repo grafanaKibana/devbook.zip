@@ -15007,14 +15007,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-13T22:21:42.093452Z",
-    "elapsed_seconds": 5.4841171,
+    "elapsed_seconds": 9.765076,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 220,
-    "checkpoint_at": "2026-11-13T22:21:47.577097Z"
+    "checkpoint_at": "2026-11-13T22:21:51.858055Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
