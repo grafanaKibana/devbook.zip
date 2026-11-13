@@ -13735,11 +13735,11 @@
     "version": 1,
     "id": "2b8d0b6edd0c40dc8564a83316ed31b6",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 183.55352450000004,
+    "elapsed_seconds": 204.39966740000006,
     "calls_reserved": 5,
-    "responses_received": 4,
+    "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md"
     ],
@@ -13758,7 +13758,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:01:01.574649Z",
+    "checkpoint_at": "2026-11-13T07:01:22.420791Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -37816,6 +37816,53 @@
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-13T07:00:57.512885Z"
+    "prepared_at": "2026-11-13T07:00:57.512885Z",
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The note is accurate and compact, both Qards are single-task with primary sources, and no native violation or concrete defect justifies an edit. The keep is justified.",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Events.md",
+          "verdict": "CLEAN",
+          "summary": "The whole note was read and found accurate. The access restriction, the standard pattern, the thread-safety nuance, the leak mechanism and the async void caveat are all correct and ordered sensibly. The Qards are bounded and sourced. The keep is justified.",
+          "page_type": "Concept — typed frontmatter retained, optional Questions and References present, code fences carry language identifiers, and the [[Async Await]] link is explained in prose.",
+          "current_text_evidence": [
+            {
+              "quote": "it cannot raise the event or replace its invocation list",
+              "line_start": 17,
+              "reason": "States the core access restriction up front, which is the correct and decisive boundary."
+            },
+            {
+              "quote": "The `event` keyword blocks all three operations outside the declaring type.",
+              "line_start": 54,
+              "reason": "Explains why events are preferred over delegate fields, with the three blocked operations listed immediately above."
+            },
+            {
+              "quote": "the language does not require a particular locking or compare-exchange implementation",
+              "line_start": 80,
+              "reason": "This version-safe thread-safety caveat is accurate, and it separates subscription from raising."
+            },
+            {
+              "quote": "exceptions after an `await` do not flow back through the event invocation",
+              "line_start": 86,
+              "reason": "Correct async void mechanism, with a pointer to the owning note."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: delegate events, their pitfalls and their tradeoffs form one cohesive, compact topic.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
