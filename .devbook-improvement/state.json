@@ -13790,9 +13790,9 @@
     "version": 1,
     "id": "2b8d0b6edd0c40dc8564a83316ed31b6",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "evaluating",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 321.8102723000001,
+    "elapsed_seconds": 325.19254890000013,
     "calls_reserved": 7,
     "responses_received": 7,
     "attempted_paths": [
@@ -13882,7 +13882,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:03:19.831396Z",
+    "checkpoint_at": "2026-11-13T07:03:23.213673Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
