@@ -13922,7 +13922,7 @@
     "status": "active",
     "phase": "author_completed",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 648.9699333000002,
+    "elapsed_seconds": 652.4431092000002,
     "calls_reserved": 15,
     "responses_received": 15,
     "attempted_paths": [
@@ -14182,7 +14182,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:08:46.991061Z",
+    "checkpoint_at": "2026-11-13T07:08:50.464237Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -30339,12 +30339,54 @@
       },
       "proposal": {
         "version": 1,
-        "edits": [],
+        "edits": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "expected_hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
+            "before": "- `netstandard2.1` adds APIs, but .NET Framework does not implement it.\n- .NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
+            "after": "- `netstandard2.1` adds APIs, but .NET Framework does not implement it.",
+            "reason": "The end-of-2.1 fact is stated fully in 'Why it Ended'; removing the duplicate bullet keeps one home for it.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "netstandard2.1 is not implemented by .NET Framework"
+            ],
+            "sources": [],
+            "feedback_keys": [],
+            "problem": "The fact that no .NET Standard version follows 2.1 is repeated in the key mechanics, in 'Why it Ended' and in the Qard.",
+            "reader_benefit": "Less repetition; the fact is read once where its reason is explained."
+          },
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "expected_hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
+            "before": "> Targeting .NET Standard is justified when one library build must be usable on more than one .NET implementation, which in practice usually means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it is the target that keeps that reach. When every consumer runs modern .NET, a modern `netX.0` target is the better default.\n>\n> .NET Standard is a versioned API contract, not a runtime, and meeting the contract does not by itself guarantee that a library runs on a given host. Targeting a version fixes the baseline reference API surface the library compiles against. Each .NET implementation supports particular .NET Standard versions starting from particular releases, so a consumer can use the library only on an implementation release that supports the targeted version. Compatible NuGet packages can add APIs beyond that baseline, and every package dependency must then also support the consumer's platform. After .NET 5 unified the target frameworks, no new .NET Standard versions are planned beyond 2.1.\n>\n> | Target | Consumers that can use it | Cost |\n> |---|---|---|\n> | `netstandard2.0` only | Releases of .NET Framework, .NET Core, Mono, Xamarin and modern .NET that implement 2.0 | Limited to the 2.0 baseline plus APIs from compatible packages, with no modern-target APIs or optimizations |\n> | `netstandard2.1` | Implementations and releases that support 2.1, including modern .NET, but not .NET Framework | Gives up .NET Framework reach without the full modern API set |\n> | Modern `netX.0` only | Apps on that .NET version or later | .NET Framework and older runtimes cannot load it |\n> | Multi-target, such as `net8.0;netstandard2.0` | Both groups, each receiving the assembly built for it | More builds, tests, conditional code and package metadata, justified only when distinct consumer groups need distinct assets |\n>\n> Modern .NET implements .NET Standard 2.1 and earlier, so an existing `netstandard2.0` library can keep serving modern consumers, provided its package dependencies also support those runtimes. Retargeting is worthwhile when the library needs APIs or features that only a newer target provides.",
+            "after": "> Targeting .NET Standard is justified when one library build must run on more than one .NET implementation, which in practice means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it keeps that reach, while `netstandard2.1` would drop it. When every consumer runs modern .NET, a modern `netX.0` target is the better default. When both groups matter and the library needs modern APIs, multi-targeting such as `net8.0;netstandard2.0` gives each group an assembly built for it.\n>\n> .NET Standard is a versioned API contract, not a runtime. A consumer can use the library only on an implementation release that supports the targeted version, and every NuGet package dependency must also support that platform. Modern .NET implements 2.1 and earlier, so an existing `netstandard2.0` library keeps serving modern consumers. Retargeting is worthwhile only when the library needs APIs that a newer target provides.",
+            "reason": "Shortens the answer to the justification, the 2.0 reach and the condition for a modern target; the dropped table duplicated the Tradeoffs section.",
+            "kind": "rewrite",
+            "learning_target": "same",
+            "essential_meanings": [
+              "Justified when .NET Framework or multiple implementations must be supported",
+              "netstandard2.0 is the highest version .NET Framework can consume",
+              "Modern netX.0 is the default when all consumers run modern .NET",
+              "Package dependencies must also support the host"
+            ],
+            "sources": [
+              {
+                "url": "https://learn.microsoft.com/en-us/dotnet/standard/net-standard",
+                "claim": "netstandard2.0 is the highest version .NET Framework supports; 2.1 is not supported by .NET Framework; modern .NET implements 2.1 and earlier.",
+                "version": ".NET Standard 2.1"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The Qard answer is overloaded: it restates the Tradeoffs section as a table and repeats the end-of-2.1 fact.",
+            "reader_benefit": "A concise answer that is easier to retrieve and grade."
+          }
+        ],
         "dispositions": [
           {
             "path": "Vault/Home/Programming/NET/NET Standart.md",
-            "outcome": "keep",
-            "reason": "I read the whole note and its single Qard against Microsoft's .NET Standard documentation and the \"future of .NET Standard\" post, which the note already cites. I found no factual error. The note says .NET Standard is a versioned API contract and not a runtime. It says netstandard2.0 is the highest version .NET Framework can consume. It says 2.1 is not implemented by .NET Framework. It says .NET 5 unified the target framework monikers (TFMs) and that no version after 2.1 is planned. It says modern .NET supports 2.1 and earlier. The sections on resolution through reference assemblies, netstandard.dll and type forwarding, package shims, and language version versus TFM are correct. The three XML and C# examples are valid. The pitfalls and tradeoffs name the condition that changes each decision. The Qard has one gradeable task, which is when .NET Standard is still justified. Its table and its caveats about package dependencies and implementation releases are accurate. The References are real primary sources. Some repetition remains: the statement that no version follows 2.1 appears three times. This is minor and each occurrence supports its local explanation, so an edit would be cosmetic churn. No native violations are listed."
+            "outcome": "changed",
+            "reason": "Facts were verified as accurate against the cited Microsoft sources; the edits remove repetition of the end-of-2.1 fact and shorten the Qard answer, whose table duplicated the Tradeoffs section, so the card is easier to recall."
           }
         ],
         "feedback": []
@@ -30359,8 +30401,10 @@
         "Vault/Home/Programming/NET/NET Standart.md": ""
       },
       "prepared_source_version": 1,
-      "prepared_at": "2026-11-13T07:07:14.670234Z",
-      "completed_review": {
+      "prepared_at": "2026-11-13T07:08:46.991041Z",
+      "review_repair_key": "4af78065872b17475859092c2fc88854d9a8f91dd2c095ddecdb7d02e4d42821",
+      "repair_reserved": true,
+      "repair_review": {
         "verdict": "CHANGES REQUIRED",
         "overall_reason": "The facts hold, but the single Qard answer is overloaded and restates the body. The \"no version after 2.1\" fact repeats across the note, and the proposal made no edits to fix this.",
         "notes": [
@@ -30416,63 +30460,25 @@
         ],
         "change_checks": []
       },
+      "repair_previous_proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "outcome": "keep",
+            "reason": "I read the whole note and its single Qard against Microsoft's .NET Standard documentation and the \"future of .NET Standard\" post, which the note already cites. I found no factual error. The note says .NET Standard is a versioned API contract and not a runtime. It says netstandard2.0 is the highest version .NET Framework can consume. It says 2.1 is not implemented by .NET Framework. It says .NET 5 unified the target framework monikers (TFMs) and that no version after 2.1 is planned. It says modern .NET supports 2.1 and earlier. The sections on resolution through reference assemblies, netstandard.dll and type forwarding, package shims, and language version versus TFM are correct. The three XML and C# examples are valid. The pitfalls and tradeoffs name the condition that changes each decision. The Qard has one gradeable task, which is when .NET Standard is still justified. Its table and its caveats about package dependencies and implementation releases are accurate. The References are real primary sources. Some repetition remains: the statement that no version follows 2.1 appears three times. This is minor and each occurrence supports its local explanation, so an edit would be cosmetic churn. No native violations are listed."
+          }
+        ],
+        "feedback": []
+      },
+      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "feedback_snapshot": [],
       "blocked_review": {
-        "verdict": "CHANGES REQUIRED",
-        "overall_reason": "The facts hold, but the single Qard answer is overloaded and restates the body. The \"no version after 2.1\" fact repeats across the note, and the proposal made no edits to fix this.",
-        "notes": [
-          {
-            "path": "Vault/Home/Programming/NET/NET Standart.md",
-            "verdict": "CHANGES REQUIRED",
-            "summary": "Technically accurate, but the retrieval value of the one Qard is weak. Its answer runs to several paragraphs and a table that duplicate the Pitfalls and Tradeoffs sections. Several sections also repeat the end-of-2.1 fact. Keeping the note unchanged leaves these defects unresolved.",
-            "page_type": "Concept — optional Questions and References present; single Qard with a protected ID; the note has no generated whats-next navigation.",
-            "current_text_evidence": [
-              {
-                "quote": ".NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
-                "line_start": 32,
-                "reason": "The end-of-2.1 fact first appears here."
-              },
-              {
-                "quote": ".NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants",
-                "line_start": 42,
-                "reason": "The 'Why it Ended' section restates the same fact, and the Qard answer states it a third time, so the body is repetitive."
-              },
-              {
-                "quote": "> [!qard]- When is targeting .NET Standard still justified?",
-                "line_start": 91,
-                "reason": "The question asks for one decision. Its answer then adds contract semantics, a four-row table and a retargeting note, which duplicate the Tradeoffs section and make the answer hard to retrieve under pressure."
-              },
-              {
-                "quote": "- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.",
-                "line_start": 84,
-                "reason": "This restates the tradeoff content that the Qard table repeats, so two places cover the same comparison."
-              }
-            ],
-            "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: the topic is compact and coherent, and the content belongs in a single note.",
-            "findings": [
-              {
-                "severity": "Medium",
-                "dimension": "Question quality / repetition",
-                "location": "Qard answer (lines 92-103) and sections at lines 32, 42, 84-86",
-                "evidence": "The answer to 'When is targeting .NET Standard still justified?' adds contract semantics, a full target table and a retargeting note. The table duplicates the Tradeoffs bullets, and the end-of-2.1 fact is repeated in the key-mechanics bullet, in 'Why it Ended' and in the Qard.",
-                "effect": "The answer is too long to retrieve under pressure, and the body repeats itself, which lowers learning value.",
-                "fix": "Tighten the Qard answer to the justification, the netstandard2.0 reach and the condition for choosing a modern target. Drop the table or move it to the body. Merge the repeated end-of-2.1 statements into one."
-              }
-            ],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "FAIL",
-              "question_quality": "FAIL",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "change_checks": []
+        "stage": "deterministic_application",
+        "reason": "card edit must replace one complete active Qard block including adjacent metadata"
       },
-      "feedback_snapshot": []
+      "failed_at": "2026-11-13T07:08:50.463769Z"
     },
     "ai-ml-4edf0823": {
       "workload_id": "b9235098cfe341bd98cce55faa026472",
@@ -38130,6 +38136,334 @@
         "reason": "card edit must replace one complete active Qard block including adjacent metadata"
       },
       "failed_at": "2026-11-13T07:03:52.187556Z"
+    },
+    "c9e20ed7251db428157139fa1397fa77a4f73c07828fa0b1878734f8d5520e1a": {
+      "workload_id": "2b8d0b6edd0c40dc8564a83316ed31b6",
+      "topic_id": "programming-e6aba2bd",
+      "batch": {
+        "topic": "Programming",
+        "topic_id": "programming-e6aba2bd",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"A specification of .NET APIs that multiple runtimes agree to implement.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/NET Standart\"\nflashcard_uid: \"60a3e364\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.329Z\"\n---\n\n.NET Standard is a versioned API specification implemented by several .NET runtimes. It was the compatibility bridge among .NET Framework, .NET Core, Mono, and Xamarin. Modern libraries normally target the current .NET TFM directly. `netstandard2.0` remains useful when a library must also serve .NET Framework or older consumers.\n\n# How It Works\n\n- Targeting `netstandard2.0` selects that contract as the compile-time reference surface.\n- Targeting a modern `netX.0` TFM selects the APIs and runtime assumptions for that .NET release.\n- Multi-targeting lets one package compile separate assemblies for consumers with different capabilities.\n\nThis target choice constrains the baseline reference API surface. NuGet packages can add APIs, but runtime compatibility then depends on those package requirements too.\n\nKey mechanics to remember:\n\n- .NET Standard is a versioned API contract, not a runtime.\n- `netstandard2.0` is the highest .NET Standard version that .NET Framework can consume.\n- `netstandard2.1` adds APIs, but .NET Framework does not implement it.\n- .NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.\n\n## How the Contract Resolves at Runtime\n\nCompilation uses .NET Standard reference assemblies, including `netstandard.dll`, to constrain which contract members are available. At runtime, assembly unification and type forwarding bind those references to implementations supplied by the host. Compatibility therefore has two tests: the host must implement the target standard, and every additional package must support that host.\n\nThe 2.0-to-2.1 gap is the practical fault line. Some APIs associated with newer contracts can be supplied to a `netstandard2.0` target by packages such as `System.Memory` or `Microsoft.Bcl.AsyncInterfaces`, but a package is not proof that every runtime behavior is equivalent. Language version is a separate choice from TFM. Modern syntax can compile for an older target only when its required runtime types and members are available, sometimes through small compiler-support shims.\n\n## Why it Ended\n\n.NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants for APIs tied to an operating system or application model. No .NET Standard version is planned after 2.1. The older contract remains a compatibility tool rather than the default target for new code.\n\n## Example\n\nLibrary that wants maximum compatibility:\n\n```xml\n<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>netstandard2.0</TargetFramework>\n  </PropertyGroup>\n</Project>\n```\n\nLibrary that ships for modern .NET and still supports older apps:\n\n```xml\n<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFrameworks>net8.0;netstandard2.0</TargetFrameworks>\n  </PropertyGroup>\n</Project>\n```\n\nConditional code for modern-only APIs while keeping compatibility target:\n\n```csharp\n#if NET8_0_OR_GREATER\nSpan<byte> buffer = stackalloc byte[256];\n#else\nvar buffer = new byte[256];\n#endif\n```\n\n# Pitfalls\n\n- A library targeting only `netstandard2.0` can miss newer APIs and platform-specific optimizations needed by modern consumers, which often pushes teams into awkward workarounds. Adding a modern target (for example `net8.0`) mitigates this, with conditional compilation limited to places where it creates measurable value.\n- Moving to `netstandard2.1` \"for more APIs\" can break .NET Framework consumers immediately because .NET Framework does not implement 2.1. Validating consumer TFM inventory before changing targets detects this risk, and `net8.0;netstandard2.0` is the choice when broad reach is still required.\n- Multi-targeting without a concrete compatibility requirement increases package/test complexity and can introduce behavior drift between targets. A small target set, CI enforced for each TFM, and removal of legacy targets once downstream constraints are gone keep that complexity and drift contained.\n\n# Tradeoffs\n\n- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.\n- **Modern `netX.0` only:** simpler testing and access to the current platform, but older consumers cannot load it.\n- **Multi-targeted:** a modern implementation plus a compatibility asset, paid for with more builds, tests, conditionals, and package metadata.\n\n# Questions\n\n<!-- qard-id: bec5a750-95b9-4d12-a09a-76e78858812c -->\n> [!qard]- When is targeting .NET Standard still justified?\n> Targeting .NET Standard is justified when one library build must be usable on more than one .NET implementation, which in practice usually means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it is the target that keeps that reach. When every consumer runs modern .NET, a modern `netX.0` target is the better default.\n>\n> .NET Standard is a versioned API contract, not a runtime, and meeting the contract does not by itself guarantee that a library runs on a given host. Targeting a version fixes the baseline reference API surface the library compiles against. Each .NET implementation supports particular .NET Standard versions starting from particular releases, so a consumer can use the library only on an implementation release that supports the targeted version. Compatible NuGet packages can add APIs beyond that baseline, and every package dependency must then also support the consumer's platform. After .NET 5 unified the target frameworks, no new .NET Standard versions are planned beyond 2.1.\n>\n> | Target | Consumers that can use it | Cost |\n> |---|---|---|\n> | `netstandard2.0` only | Releases of .NET Framework, .NET Core, Mono, Xamarin and modern .NET that implement 2.0 | Limited to the 2.0 baseline plus APIs from compatible packages, with no modern-target APIs or optimizations |\n> | `netstandard2.1` | Implementations and releases that support 2.1, including modern .NET, but not .NET Framework | Gives up .NET Framework reach without the full modern API set |\n> | Modern `netX.0` only | Apps on that .NET version or later | .NET Framework and older runtimes cannot load it |\n> | Multi-target, such as `net8.0;netstandard2.0` | Both groups, each receiving the assembly built for it | More builds, tests, conditional code and package metadata, justified only when distinct consumer groups need distinct assets |\n>\n> Modern .NET implements .NET Standard 2.1 and earlier, so an existing `netstandard2.0` library can keep serving modern consumers, provided its package dependencies also support those runtimes. Retargeting is worthwhile when the library needs APIs or features that only a newer target provides.\n>\n> Sources: [Microsoft Learn: .NET Standard](https://learn.microsoft.com/en-us/dotnet/standard/net-standard) · [.NET Blog: The future of .NET Standard](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/)\n\n# References\n\n- [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard)\n- [The future of .NET Standard](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/)\n",
+            "hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
+            "topic": "Programming",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "expected_hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
+            "before": "- `netstandard2.1` adds APIs, but .NET Framework does not implement it.\n- .NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
+            "after": "- `netstandard2.1` adds APIs, but .NET Framework does not implement it.",
+            "reason": "The end-of-2.1 fact is stated fully in 'Why it Ended'; removing the duplicate bullet keeps one home for it.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "netstandard2.1 is not implemented by .NET Framework"
+            ],
+            "sources": [],
+            "feedback_keys": [],
+            "problem": "The fact that no .NET Standard version follows 2.1 is repeated in the key mechanics, in 'Why it Ended' and in the Qard.",
+            "reader_benefit": "Less repetition; the fact is read once where its reason is explained."
+          },
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "expected_hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
+            "before": "> Targeting .NET Standard is justified when one library build must be usable on more than one .NET implementation, which in practice usually means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it is the target that keeps that reach. When every consumer runs modern .NET, a modern `netX.0` target is the better default.\n>\n> .NET Standard is a versioned API contract, not a runtime, and meeting the contract does not by itself guarantee that a library runs on a given host. Targeting a version fixes the baseline reference API surface the library compiles against. Each .NET implementation supports particular .NET Standard versions starting from particular releases, so a consumer can use the library only on an implementation release that supports the targeted version. Compatible NuGet packages can add APIs beyond that baseline, and every package dependency must then also support the consumer's platform. After .NET 5 unified the target frameworks, no new .NET Standard versions are planned beyond 2.1.\n>\n> | Target | Consumers that can use it | Cost |\n> |---|---|---|\n> | `netstandard2.0` only | Releases of .NET Framework, .NET Core, Mono, Xamarin and modern .NET that implement 2.0 | Limited to the 2.0 baseline plus APIs from compatible packages, with no modern-target APIs or optimizations |\n> | `netstandard2.1` | Implementations and releases that support 2.1, including modern .NET, but not .NET Framework | Gives up .NET Framework reach without the full modern API set |\n> | Modern `netX.0` only | Apps on that .NET version or later | .NET Framework and older runtimes cannot load it |\n> | Multi-target, such as `net8.0;netstandard2.0` | Both groups, each receiving the assembly built for it | More builds, tests, conditional code and package metadata, justified only when distinct consumer groups need distinct assets |\n>\n> Modern .NET implements .NET Standard 2.1 and earlier, so an existing `netstandard2.0` library can keep serving modern consumers, provided its package dependencies also support those runtimes. Retargeting is worthwhile when the library needs APIs or features that only a newer target provides.",
+            "after": "> Targeting .NET Standard is justified when one library build must run on more than one .NET implementation, which in practice means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it keeps that reach, while `netstandard2.1` would drop it. When every consumer runs modern .NET, a modern `netX.0` target is the better default. When both groups matter and the library needs modern APIs, multi-targeting such as `net8.0;netstandard2.0` gives each group an assembly built for it.\n>\n> .NET Standard is a versioned API contract, not a runtime. A consumer can use the library only on an implementation release that supports the targeted version, and every NuGet package dependency must also support that platform. Modern .NET implements 2.1 and earlier, so an existing `netstandard2.0` library keeps serving modern consumers. Retargeting is worthwhile only when the library needs APIs that a newer target provides.",
+            "reason": "Shortens the answer to the justification, the 2.0 reach and the condition for a modern target; the dropped table duplicated the Tradeoffs section.",
+            "kind": "rewrite",
+            "learning_target": "same",
+            "essential_meanings": [
+              "Justified when .NET Framework or multiple implementations must be supported",
+              "netstandard2.0 is the highest version .NET Framework can consume",
+              "Modern netX.0 is the default when all consumers run modern .NET",
+              "Package dependencies must also support the host"
+            ],
+            "sources": [
+              {
+                "url": "https://learn.microsoft.com/en-us/dotnet/standard/net-standard",
+                "claim": "netstandard2.0 is the highest version .NET Framework supports; 2.1 is not supported by .NET Framework; modern .NET implements 2.1 and earlier.",
+                "version": ".NET Standard 2.1"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The Qard answer is overloaded: it restates the Tradeoffs section as a table and repeats the end-of-2.1 fact.",
+            "reader_benefit": "A concise answer that is easier to retrieve and grade."
+          }
+        ],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "outcome": "changed",
+            "reason": "Facts were verified as accurate against the cited Microsoft sources; the edits remove repetition of the end-of-2.1 fact and shorten the Qard answer, whose table duplicated the Tradeoffs section, so the card is easier to recall."
+          }
+        ],
+        "feedback": []
+      },
+      "source_hashes": {
+        "Vault/Home/Programming/NET/NET Standart.md": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383"
+      },
+      "feedback_keys": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/Programming/NET/NET Standart.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-13T07:08:46.991041Z",
+      "review_repair_key": "4af78065872b17475859092c2fc88854d9a8f91dd2c095ddecdb7d02e4d42821",
+      "repair_reserved": true,
+      "repair_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The facts hold, but the single Qard answer is overloaded and restates the body. The \"no version after 2.1\" fact repeats across the note, and the proposal made no edits to fix this.",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "Technically accurate, but the retrieval value of the one Qard is weak. Its answer runs to several paragraphs and a table that duplicate the Pitfalls and Tradeoffs sections. Several sections also repeat the end-of-2.1 fact. Keeping the note unchanged leaves these defects unresolved.",
+            "page_type": "Concept — optional Questions and References present; single Qard with a protected ID; the note has no generated whats-next navigation.",
+            "current_text_evidence": [
+              {
+                "quote": ".NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
+                "line_start": 32,
+                "reason": "The end-of-2.1 fact first appears here."
+              },
+              {
+                "quote": ".NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants",
+                "line_start": 42,
+                "reason": "The 'Why it Ended' section restates the same fact, and the Qard answer states it a third time, so the body is repetitive."
+              },
+              {
+                "quote": "> [!qard]- When is targeting .NET Standard still justified?",
+                "line_start": 91,
+                "reason": "The question asks for one decision. Its answer then adds contract semantics, a four-row table and a retargeting note, which duplicate the Tradeoffs section and make the answer hard to retrieve under pressure."
+              },
+              {
+                "quote": "- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.",
+                "line_start": 84,
+                "reason": "This restates the tradeoff content that the Qard table repeats, so two places cover the same comparison."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the topic is compact and coherent, and the content belongs in a single note.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Question quality / repetition",
+                "location": "Qard answer (lines 92-103) and sections at lines 32, 42, 84-86",
+                "evidence": "The answer to 'When is targeting .NET Standard still justified?' adds contract semantics, a full target table and a retargeting note. The table duplicates the Tradeoffs bullets, and the end-of-2.1 fact is repeated in the key-mechanics bullet, in 'Why it Ended' and in the Qard.",
+                "effect": "The answer is too long to retrieve under pressure, and the body repeats itself, which lowers learning value.",
+                "fix": "Tighten the Qard answer to the justification, the netstandard2.0 reach and the condition for choosing a modern target. Drop the table or move it to the body. Merge the repeated end-of-2.1 statements into one."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "FAIL",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "repair_previous_proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "outcome": "keep",
+            "reason": "I read the whole note and its single Qard against Microsoft's .NET Standard documentation and the \"future of .NET Standard\" post, which the note already cites. I found no factual error. The note says .NET Standard is a versioned API contract and not a runtime. It says netstandard2.0 is the highest version .NET Framework can consume. It says 2.1 is not implemented by .NET Framework. It says .NET 5 unified the target framework monikers (TFMs) and that no version after 2.1 is planned. It says modern .NET supports 2.1 and earlier. The sections on resolution through reference assemblies, netstandard.dll and type forwarding, package shims, and language version versus TFM are correct. The three XML and C# examples are valid. The pitfalls and tradeoffs name the condition that changes each decision. The Qard has one gradeable task, which is when .NET Standard is still justified. Its table and its caveats about package dependencies and implementation releases are accurate. The References are real primary sources. Some repetition remains: the statement that no version follows 2.1 appears three times. This is minor and each occurrence supports its local explanation, so an edit would be cosmetic churn. No native violations are listed."
+          }
+        ],
+        "feedback": []
+      },
+      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "feedback_snapshot": [],
+      "blocked_review": {
+        "stage": "deterministic_application",
+        "reason": "card edit must replace one complete active Qard block including adjacent metadata"
+      },
+      "failed_at": "2026-11-13T07:08:50.463769Z"
+    },
+    "dba208fbeef72ef5e85be0a00a7d6be012fd7551246b10cef575bfc6e67bd4a2": {
+      "workload_id": "2b8d0b6edd0c40dc8564a83316ed31b6",
+      "topic_id": "programming-e6aba2bd",
+      "batch": {
+        "topic": "Programming",
+        "topic_id": "programming-e6aba2bd",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"A specification of .NET APIs that multiple runtimes agree to implement.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/NET Standart\"\nflashcard_uid: \"60a3e364\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.329Z\"\n---\n\n.NET Standard is a versioned API specification implemented by several .NET runtimes. It was the compatibility bridge among .NET Framework, .NET Core, Mono, and Xamarin. Modern libraries normally target the current .NET TFM directly. `netstandard2.0` remains useful when a library must also serve .NET Framework or older consumers.\n\n# How It Works\n\n- Targeting `netstandard2.0` selects that contract as the compile-time reference surface.\n- Targeting a modern `netX.0` TFM selects the APIs and runtime assumptions for that .NET release.\n- Multi-targeting lets one package compile separate assemblies for consumers with different capabilities.\n\nThis target choice constrains the baseline reference API surface. NuGet packages can add APIs, but runtime compatibility then depends on those package requirements too.\n\nKey mechanics to remember:\n\n- .NET Standard is a versioned API contract, not a runtime.\n- `netstandard2.0` is the highest .NET Standard version that .NET Framework can consume.\n- `netstandard2.1` adds APIs, but .NET Framework does not implement it.\n- .NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.\n\n## How the Contract Resolves at Runtime\n\nCompilation uses .NET Standard reference assemblies, including `netstandard.dll`, to constrain which contract members are available. At runtime, assembly unification and type forwarding bind those references to implementations supplied by the host. Compatibility therefore has two tests: the host must implement the target standard, and every additional package must support that host.\n\nThe 2.0-to-2.1 gap is the practical fault line. Some APIs associated with newer contracts can be supplied to a `netstandard2.0` target by packages such as `System.Memory` or `Microsoft.Bcl.AsyncInterfaces`, but a package is not proof that every runtime behavior is equivalent. Language version is a separate choice from TFM. Modern syntax can compile for an older target only when its required runtime types and members are available, sometimes through small compiler-support shims.\n\n## Why it Ended\n\n.NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants for APIs tied to an operating system or application model. No .NET Standard version is planned after 2.1. The older contract remains a compatibility tool rather than the default target for new code.\n\n## Example\n\nLibrary that wants maximum compatibility:\n\n```xml\n<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>netstandard2.0</TargetFramework>\n  </PropertyGroup>\n</Project>\n```\n\nLibrary that ships for modern .NET and still supports older apps:\n\n```xml\n<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFrameworks>net8.0;netstandard2.0</TargetFrameworks>\n  </PropertyGroup>\n</Project>\n```\n\nConditional code for modern-only APIs while keeping compatibility target:\n\n```csharp\n#if NET8_0_OR_GREATER\nSpan<byte> buffer = stackalloc byte[256];\n#else\nvar buffer = new byte[256];\n#endif\n```\n\n# Pitfalls\n\n- A library targeting only `netstandard2.0` can miss newer APIs and platform-specific optimizations needed by modern consumers, which often pushes teams into awkward workarounds. Adding a modern target (for example `net8.0`) mitigates this, with conditional compilation limited to places where it creates measurable value.\n- Moving to `netstandard2.1` \"for more APIs\" can break .NET Framework consumers immediately because .NET Framework does not implement 2.1. Validating consumer TFM inventory before changing targets detects this risk, and `net8.0;netstandard2.0` is the choice when broad reach is still required.\n- Multi-targeting without a concrete compatibility requirement increases package/test complexity and can introduce behavior drift between targets. A small target set, CI enforced for each TFM, and removal of legacy targets once downstream constraints are gone keep that complexity and drift contained.\n\n# Tradeoffs\n\n- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.\n- **Modern `netX.0` only:** simpler testing and access to the current platform, but older consumers cannot load it.\n- **Multi-targeted:** a modern implementation plus a compatibility asset, paid for with more builds, tests, conditionals, and package metadata.\n\n# Questions\n\n<!-- qard-id: bec5a750-95b9-4d12-a09a-76e78858812c -->\n> [!qard]- When is targeting .NET Standard still justified?\n> Targeting .NET Standard is justified when one library build must be usable on more than one .NET implementation, which in practice usually means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it is the target that keeps that reach. When every consumer runs modern .NET, a modern `netX.0` target is the better default.\n>\n> .NET Standard is a versioned API contract, not a runtime, and meeting the contract does not by itself guarantee that a library runs on a given host. Targeting a version fixes the baseline reference API surface the library compiles against. Each .NET implementation supports particular .NET Standard versions starting from particular releases, so a consumer can use the library only on an implementation release that supports the targeted version. Compatible NuGet packages can add APIs beyond that baseline, and every package dependency must then also support the consumer's platform. After .NET 5 unified the target frameworks, no new .NET Standard versions are planned beyond 2.1.\n>\n> | Target | Consumers that can use it | Cost |\n> |---|---|---|\n> | `netstandard2.0` only | Releases of .NET Framework, .NET Core, Mono, Xamarin and modern .NET that implement 2.0 | Limited to the 2.0 baseline plus APIs from compatible packages, with no modern-target APIs or optimizations |\n> | `netstandard2.1` | Implementations and releases that support 2.1, including modern .NET, but not .NET Framework | Gives up .NET Framework reach without the full modern API set |\n> | Modern `netX.0` only | Apps on that .NET version or later | .NET Framework and older runtimes cannot load it |\n> | Multi-target, such as `net8.0;netstandard2.0` | Both groups, each receiving the assembly built for it | More builds, tests, conditional code and package metadata, justified only when distinct consumer groups need distinct assets |\n>\n> Modern .NET implements .NET Standard 2.1 and earlier, so an existing `netstandard2.0` library can keep serving modern consumers, provided its package dependencies also support those runtimes. Retargeting is worthwhile when the library needs APIs or features that only a newer target provides.\n>\n> Sources: [Microsoft Learn: .NET Standard](https://learn.microsoft.com/en-us/dotnet/standard/net-standard) · [.NET Blog: The future of .NET Standard](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/)\n\n# References\n\n- [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard)\n- [The future of .NET Standard](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/)\n",
+            "hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
+            "topic": "Programming",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "outcome": "keep",
+            "reason": "I read the whole note and its single Qard against Microsoft's .NET Standard documentation and the \"future of .NET Standard\" post, which the note already cites. I found no factual error. The note says .NET Standard is a versioned API contract and not a runtime. It says netstandard2.0 is the highest version .NET Framework can consume. It says 2.1 is not implemented by .NET Framework. It says .NET 5 unified the target framework monikers (TFMs) and that no version after 2.1 is planned. It says modern .NET supports 2.1 and earlier. The sections on resolution through reference assemblies, netstandard.dll and type forwarding, package shims, and language version versus TFM are correct. The three XML and C# examples are valid. The pitfalls and tradeoffs name the condition that changes each decision. The Qard has one gradeable task, which is when .NET Standard is still justified. Its table and its caveats about package dependencies and implementation releases are accurate. The References are real primary sources. Some repetition remains: the statement that no version follows 2.1 appears three times. This is minor and each occurrence supports its local explanation, so an edit would be cosmetic churn. No native violations are listed."
+          }
+        ],
+        "feedback": []
+      },
+      "source_hashes": {
+        "Vault/Home/Programming/NET/NET Standart.md": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383"
+      },
+      "feedback_keys": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/Programming/NET/NET Standart.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-13T07:07:14.670234Z",
+      "completed_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The facts hold, but the single Qard answer is overloaded and restates the body. The \"no version after 2.1\" fact repeats across the note, and the proposal made no edits to fix this.",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "Technically accurate, but the retrieval value of the one Qard is weak. Its answer runs to several paragraphs and a table that duplicate the Pitfalls and Tradeoffs sections. Several sections also repeat the end-of-2.1 fact. Keeping the note unchanged leaves these defects unresolved.",
+            "page_type": "Concept — optional Questions and References present; single Qard with a protected ID; the note has no generated whats-next navigation.",
+            "current_text_evidence": [
+              {
+                "quote": ".NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
+                "line_start": 32,
+                "reason": "The end-of-2.1 fact first appears here."
+              },
+              {
+                "quote": ".NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants",
+                "line_start": 42,
+                "reason": "The 'Why it Ended' section restates the same fact, and the Qard answer states it a third time, so the body is repetitive."
+              },
+              {
+                "quote": "> [!qard]- When is targeting .NET Standard still justified?",
+                "line_start": 91,
+                "reason": "The question asks for one decision. Its answer then adds contract semantics, a four-row table and a retargeting note, which duplicate the Tradeoffs section and make the answer hard to retrieve under pressure."
+              },
+              {
+                "quote": "- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.",
+                "line_start": 84,
+                "reason": "This restates the tradeoff content that the Qard table repeats, so two places cover the same comparison."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the topic is compact and coherent, and the content belongs in a single note.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Question quality / repetition",
+                "location": "Qard answer (lines 92-103) and sections at lines 32, 42, 84-86",
+                "evidence": "The answer to 'When is targeting .NET Standard still justified?' adds contract semantics, a full target table and a retargeting note. The table duplicates the Tradeoffs bullets, and the end-of-2.1 fact is repeated in the key-mechanics bullet, in 'Why it Ended' and in the Qard.",
+                "effect": "The answer is too long to retrieve under pressure, and the body repeats itself, which lowers learning value.",
+                "fix": "Tighten the Qard answer to the justification, the netstandard2.0 reach and the condition for choosing a modern target. Drop the table or move it to the body. Merge the repeated end-of-2.1 statements into one."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "FAIL",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "blocked_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The facts hold, but the single Qard answer is overloaded and restates the body. The \"no version after 2.1\" fact repeats across the note, and the proposal made no edits to fix this.",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "Technically accurate, but the retrieval value of the one Qard is weak. Its answer runs to several paragraphs and a table that duplicate the Pitfalls and Tradeoffs sections. Several sections also repeat the end-of-2.1 fact. Keeping the note unchanged leaves these defects unresolved.",
+            "page_type": "Concept — optional Questions and References present; single Qard with a protected ID; the note has no generated whats-next navigation.",
+            "current_text_evidence": [
+              {
+                "quote": ".NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
+                "line_start": 32,
+                "reason": "The end-of-2.1 fact first appears here."
+              },
+              {
+                "quote": ".NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants",
+                "line_start": 42,
+                "reason": "The 'Why it Ended' section restates the same fact, and the Qard answer states it a third time, so the body is repetitive."
+              },
+              {
+                "quote": "> [!qard]- When is targeting .NET Standard still justified?",
+                "line_start": 91,
+                "reason": "The question asks for one decision. Its answer then adds contract semantics, a four-row table and a retargeting note, which duplicate the Tradeoffs section and make the answer hard to retrieve under pressure."
+              },
+              {
+                "quote": "- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.",
+                "line_start": 84,
+                "reason": "This restates the tradeoff content that the Qard table repeats, so two places cover the same comparison."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the topic is compact and coherent, and the content belongs in a single note.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Question quality / repetition",
+                "location": "Qard answer (lines 92-103) and sections at lines 32, 42, 84-86",
+                "evidence": "The answer to 'When is targeting .NET Standard still justified?' adds contract semantics, a full target table and a retargeting note. The table duplicates the Tradeoffs bullets, and the end-of-2.1 fact is repeated in the key-mechanics bullet, in 'Why it Ended' and in the Qard.",
+                "effect": "The answer is too long to retrieve under pressure, and the body repeats itself, which lowers learning value.",
+                "fix": "Tighten the Qard answer to the justification, the netstandard2.0 reach and the condition for choosing a modern target. Drop the table or move it to the body. Merge the repeated end-of-2.1 statements into one."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "FAIL",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "feedback_snapshot": []
     }
   },
   "completed_review_holds": {
@@ -38950,166 +39284,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "2b8d0b6edd0c40dc8564a83316ed31b6",
-    "topic_id": "programming-e6aba2bd",
-    "batch": {
-      "topic": "Programming",
-      "topic_id": "programming-e6aba2bd",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/NET Standart.md",
-          "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"A specification of .NET APIs that multiple runtimes agree to implement.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/NET Standart\"\nflashcard_uid: \"60a3e364\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.329Z\"\n---\n\n.NET Standard is a versioned API specification implemented by several .NET runtimes. It was the compatibility bridge among .NET Framework, .NET Core, Mono, and Xamarin. Modern libraries normally target the current .NET TFM directly. `netstandard2.0` remains useful when a library must also serve .NET Framework or older consumers.\n\n# How It Works\n\n- Targeting `netstandard2.0` selects that contract as the compile-time reference surface.\n- Targeting a modern `netX.0` TFM selects the APIs and runtime assumptions for that .NET release.\n- Multi-targeting lets one package compile separate assemblies for consumers with different capabilities.\n\nThis target choice constrains the baseline reference API surface. NuGet packages can add APIs, but runtime compatibility then depends on those package requirements too.\n\nKey mechanics to remember:\n\n- .NET Standard is a versioned API contract, not a runtime.\n- `netstandard2.0` is the highest .NET Standard version that .NET Framework can consume.\n- `netstandard2.1` adds APIs, but .NET Framework does not implement it.\n- .NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.\n\n## How the Contract Resolves at Runtime\n\nCompilation uses .NET Standard reference assemblies, including `netstandard.dll`, to constrain which contract members are available. At runtime, assembly unification and type forwarding bind those references to implementations supplied by the host. Compatibility therefore has two tests: the host must implement the target standard, and every additional package must support that host.\n\nThe 2.0-to-2.1 gap is the practical fault line. Some APIs associated with newer contracts can be supplied to a `netstandard2.0` target by packages such as `System.Memory` or `Microsoft.Bcl.AsyncInterfaces`, but a package is not proof that every runtime behavior is equivalent. Language version is a separate choice from TFM. Modern syntax can compile for an older target only when its required runtime types and members are available, sometimes through small compiler-support shims.\n\n## Why it Ended\n\n.NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants for APIs tied to an operating system or application model. No .NET Standard version is planned after 2.1. The older contract remains a compatibility tool rather than the default target for new code.\n\n## Example\n\nLibrary that wants maximum compatibility:\n\n```xml\n<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>netstandard2.0</TargetFramework>\n  </PropertyGroup>\n</Project>\n```\n\nLibrary that ships for modern .NET and still supports older apps:\n\n```xml\n<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFrameworks>net8.0;netstandard2.0</TargetFrameworks>\n  </PropertyGroup>\n</Project>\n```\n\nConditional code for modern-only APIs while keeping compatibility target:\n\n```csharp\n#if NET8_0_OR_GREATER\nSpan<byte> buffer = stackalloc byte[256];\n#else\nvar buffer = new byte[256];\n#endif\n```\n\n# Pitfalls\n\n- A library targeting only `netstandard2.0` can miss newer APIs and platform-specific optimizations needed by modern consumers, which often pushes teams into awkward workarounds. Adding a modern target (for example `net8.0`) mitigates this, with conditional compilation limited to places where it creates measurable value.\n- Moving to `netstandard2.1` \"for more APIs\" can break .NET Framework consumers immediately because .NET Framework does not implement 2.1. Validating consumer TFM inventory before changing targets detects this risk, and `net8.0;netstandard2.0` is the choice when broad reach is still required.\n- Multi-targeting without a concrete compatibility requirement increases package/test complexity and can introduce behavior drift between targets. A small target set, CI enforced for each TFM, and removal of legacy targets once downstream constraints are gone keep that complexity and drift contained.\n\n# Tradeoffs\n\n- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.\n- **Modern `netX.0` only:** simpler testing and access to the current platform, but older consumers cannot load it.\n- **Multi-targeted:** a modern implementation plus a compatibility asset, paid for with more builds, tests, conditionals, and package metadata.\n\n# Questions\n\n<!-- qard-id: bec5a750-95b9-4d12-a09a-76e78858812c -->\n> [!qard]- When is targeting .NET Standard still justified?\n> Targeting .NET Standard is justified when one library build must be usable on more than one .NET implementation, which in practice usually means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it is the target that keeps that reach. When every consumer runs modern .NET, a modern `netX.0` target is the better default.\n>\n> .NET Standard is a versioned API contract, not a runtime, and meeting the contract does not by itself guarantee that a library runs on a given host. Targeting a version fixes the baseline reference API surface the library compiles against. Each .NET implementation supports particular .NET Standard versions starting from particular releases, so a consumer can use the library only on an implementation release that supports the targeted version. Compatible NuGet packages can add APIs beyond that baseline, and every package dependency must then also support the consumer's platform. After .NET 5 unified the target frameworks, no new .NET Standard versions are planned beyond 2.1.\n>\n> | Target | Consumers that can use it | Cost |\n> |---|---|---|\n> | `netstandard2.0` only | Releases of .NET Framework, .NET Core, Mono, Xamarin and modern .NET that implement 2.0 | Limited to the 2.0 baseline plus APIs from compatible packages, with no modern-target APIs or optimizations |\n> | `netstandard2.1` | Implementations and releases that support 2.1, including modern .NET, but not .NET Framework | Gives up .NET Framework reach without the full modern API set |\n> | Modern `netX.0` only | Apps on that .NET version or later | .NET Framework and older runtimes cannot load it |\n> | Multi-target, such as `net8.0;netstandard2.0` | Both groups, each receiving the assembly built for it | More builds, tests, conditional code and package metadata, justified only when distinct consumer groups need distinct assets |\n>\n> Modern .NET implements .NET Standard 2.1 and earlier, so an existing `netstandard2.0` library can keep serving modern consumers, provided its package dependencies also support those runtimes. Retargeting is worthwhile when the library needs APIs or features that only a newer target provides.\n>\n> Sources: [Microsoft Learn: .NET Standard](https://learn.microsoft.com/en-us/dotnet/standard/net-standard) · [.NET Blog: The future of .NET Standard](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/)\n\n# References\n\n- [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard)\n- [The future of .NET Standard](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/)\n",
-          "hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
-          "topic": "Programming",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [
-        {
-          "path": "Vault/Home/Programming/NET/NET Standart.md",
-          "expected_hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
-          "before": "- `netstandard2.1` adds APIs, but .NET Framework does not implement it.\n- .NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
-          "after": "- `netstandard2.1` adds APIs, but .NET Framework does not implement it.",
-          "reason": "The end-of-2.1 fact is stated fully in 'Why it Ended'; removing the duplicate bullet keeps one home for it.",
-          "kind": "note",
-          "learning_target": "same",
-          "essential_meanings": [
-            "netstandard2.1 is not implemented by .NET Framework"
-          ],
-          "sources": [],
-          "feedback_keys": [],
-          "problem": "The fact that no .NET Standard version follows 2.1 is repeated in the key mechanics, in 'Why it Ended' and in the Qard.",
-          "reader_benefit": "Less repetition; the fact is read once where its reason is explained."
-        },
-        {
-          "path": "Vault/Home/Programming/NET/NET Standart.md",
-          "expected_hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
-          "before": "> Targeting .NET Standard is justified when one library build must be usable on more than one .NET implementation, which in practice usually means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it is the target that keeps that reach. When every consumer runs modern .NET, a modern `netX.0` target is the better default.\n>\n> .NET Standard is a versioned API contract, not a runtime, and meeting the contract does not by itself guarantee that a library runs on a given host. Targeting a version fixes the baseline reference API surface the library compiles against. Each .NET implementation supports particular .NET Standard versions starting from particular releases, so a consumer can use the library only on an implementation release that supports the targeted version. Compatible NuGet packages can add APIs beyond that baseline, and every package dependency must then also support the consumer's platform. After .NET 5 unified the target frameworks, no new .NET Standard versions are planned beyond 2.1.\n>\n> | Target | Consumers that can use it | Cost |\n> |---|---|---|\n> | `netstandard2.0` only | Releases of .NET Framework, .NET Core, Mono, Xamarin and modern .NET that implement 2.0 | Limited to the 2.0 baseline plus APIs from compatible packages, with no modern-target APIs or optimizations |\n> | `netstandard2.1` | Implementations and releases that support 2.1, including modern .NET, but not .NET Framework | Gives up .NET Framework reach without the full modern API set |\n> | Modern `netX.0` only | Apps on that .NET version or later | .NET Framework and older runtimes cannot load it |\n> | Multi-target, such as `net8.0;netstandard2.0` | Both groups, each receiving the assembly built for it | More builds, tests, conditional code and package metadata, justified only when distinct consumer groups need distinct assets |\n>\n> Modern .NET implements .NET Standard 2.1 and earlier, so an existing `netstandard2.0` library can keep serving modern consumers, provided its package dependencies also support those runtimes. Retargeting is worthwhile when the library needs APIs or features that only a newer target provides.",
-          "after": "> Targeting .NET Standard is justified when one library build must run on more than one .NET implementation, which in practice means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it keeps that reach, while `netstandard2.1` would drop it. When every consumer runs modern .NET, a modern `netX.0` target is the better default. When both groups matter and the library needs modern APIs, multi-targeting such as `net8.0;netstandard2.0` gives each group an assembly built for it.\n>\n> .NET Standard is a versioned API contract, not a runtime. A consumer can use the library only on an implementation release that supports the targeted version, and every NuGet package dependency must also support that platform. Modern .NET implements 2.1 and earlier, so an existing `netstandard2.0` library keeps serving modern consumers. Retargeting is worthwhile only when the library needs APIs that a newer target provides.",
-          "reason": "Shortens the answer to the justification, the 2.0 reach and the condition for a modern target; the dropped table duplicated the Tradeoffs section.",
-          "kind": "rewrite",
-          "learning_target": "same",
-          "essential_meanings": [
-            "Justified when .NET Framework or multiple implementations must be supported",
-            "netstandard2.0 is the highest version .NET Framework can consume",
-            "Modern netX.0 is the default when all consumers run modern .NET",
-            "Package dependencies must also support the host"
-          ],
-          "sources": [
-            {
-              "url": "https://learn.microsoft.com/en-us/dotnet/standard/net-standard",
-              "claim": "netstandard2.0 is the highest version .NET Framework supports; 2.1 is not supported by .NET Framework; modern .NET implements 2.1 and earlier.",
-              "version": ".NET Standard 2.1"
-            }
-          ],
-          "feedback_keys": [],
-          "problem": "The Qard answer is overloaded: it restates the Tradeoffs section as a table and repeats the end-of-2.1 fact.",
-          "reader_benefit": "A concise answer that is easier to retrieve and grade."
-        }
-      ],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Programming/NET/NET Standart.md",
-          "outcome": "changed",
-          "reason": "Facts were verified as accurate against the cited Microsoft sources; the edits remove repetition of the end-of-2.1 fact and shorten the Qard answer, whose table duplicated the Tradeoffs section, so the card is easier to recall."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Programming/NET/NET Standart.md": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383"
-    },
-    "feedback_keys": [],
-    "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Programming/NET/NET Standart.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-13T07:08:46.991041Z",
-    "review_repair_key": "4af78065872b17475859092c2fc88854d9a8f91dd2c095ddecdb7d02e4d42821",
-    "repair_reserved": true,
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The facts hold, but the single Qard answer is overloaded and restates the body. The \"no version after 2.1\" fact repeats across the note, and the proposal made no edits to fix this.",
-      "notes": [
-        {
-          "path": "Vault/Home/Programming/NET/NET Standart.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "Technically accurate, but the retrieval value of the one Qard is weak. Its answer runs to several paragraphs and a table that duplicate the Pitfalls and Tradeoffs sections. Several sections also repeat the end-of-2.1 fact. Keeping the note unchanged leaves these defects unresolved.",
-          "page_type": "Concept — optional Questions and References present; single Qard with a protected ID; the note has no generated whats-next navigation.",
-          "current_text_evidence": [
-            {
-              "quote": ".NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
-              "line_start": 32,
-              "reason": "The end-of-2.1 fact first appears here."
-            },
-            {
-              "quote": ".NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants",
-              "line_start": 42,
-              "reason": "The 'Why it Ended' section restates the same fact, and the Qard answer states it a third time, so the body is repetitive."
-            },
-            {
-              "quote": "> [!qard]- When is targeting .NET Standard still justified?",
-              "line_start": 91,
-              "reason": "The question asks for one decision. Its answer then adds contract semantics, a four-row table and a retargeting note, which duplicate the Tradeoffs section and make the answer hard to retrieve under pressure."
-            },
-            {
-              "quote": "- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.",
-              "line_start": 84,
-              "reason": "This restates the tradeoff content that the Qard table repeats, so two places cover the same comparison."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the topic is compact and coherent, and the content belongs in a single note.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Question quality / repetition",
-              "location": "Qard answer (lines 92-103) and sections at lines 32, 42, 84-86",
-              "evidence": "The answer to 'When is targeting .NET Standard still justified?' adds contract semantics, a full target table and a retargeting note. The table duplicates the Tradeoffs bullets, and the end-of-2.1 fact is repeated in the key-mechanics bullet, in 'Why it Ended' and in the Qard.",
-              "effect": "The answer is too long to retrieve under pressure, and the body repeats itself, which lowers learning value.",
-              "fix": "Tighten the Qard answer to the justification, the netstandard2.0 reach and the condition for choosing a modern target. Drop the table or move it to the body. Merge the repeated end-of-2.1 statements into one."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "FAIL",
-            "question_quality": "FAIL",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "repair_previous_proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Programming/NET/NET Standart.md",
-          "outcome": "keep",
-          "reason": "I read the whole note and its single Qard against Microsoft's .NET Standard documentation and the \"future of .NET Standard\" post, which the note already cites. I found no factual error. The note says .NET Standard is a versioned API contract and not a runtime. It says netstandard2.0 is the highest version .NET Framework can consume. It says 2.1 is not implemented by .NET Framework. It says .NET 5 unified the target framework monikers (TFMs) and that no version after 2.1 is planned. It says modern .NET supports 2.1 and earlier. The sections on resolution through reference assemblies, netstandard.dll and type forwarding, package shims, and language version versus TFM are correct. The three XML and C# examples are valid. The pitfalls and tradeoffs name the condition that changes each decision. The Qard has one gradeable task, which is when .NET Standard is still justified. Its table and its caveats about package dependencies and implementation releases are accurate. The References are real primary sources. Some repetition remains: the statement that no version follows 2.1 appears three times. This is minor and each occurrence supports its local explanation, so an edit would be cosmetic churn. No native violations are listed."
-        }
-      ],
-      "feedback": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-  }
+  "parked_author_proposals": {}
 }
