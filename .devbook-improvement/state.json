@@ -13982,7 +13982,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 796.0190373000004,
+    "elapsed_seconds": 799.8917705000003,
     "calls_reserved": 19,
     "responses_received": 19,
     "attempted_paths": [
@@ -14328,7 +14328,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:11:14.040167Z",
+    "checkpoint_at": "2026-11-13T07:11:17.912900Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -30467,9 +30467,9 @@
         "topic_id": "programming-e6aba2bd",
         "notes": [
           {
-            "path": "Vault/Home/Programming/NET/NET Standart.md",
-            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"A specification of .NET APIs that multiple runtimes agree to implement.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/NET Standart\"\nflashcard_uid: \"60a3e364\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.329Z\"\n---\n\n.NET Standard is a versioned API specification implemented by several .NET runtimes. It was the compatibility bridge among .NET Framework, .NET Core, Mono, and Xamarin. Modern libraries normally target the current .NET TFM directly. `netstandard2.0` remains useful when a library must also serve .NET Framework or older consumers.\n\n# How It Works\n\n- Targeting `netstandard2.0` selects that contract as the compile-time reference surface.\n- Targeting a modern `netX.0` TFM selects the APIs and runtime assumptions for that .NET release.\n- Multi-targeting lets one package compile separate assemblies for consumers with different capabilities.\n\nThis target choice constrains the baseline reference API surface. NuGet packages can add APIs, but runtime compatibility then depends on those package requirements too.\n\nKey mechanics to remember:\n\n- .NET Standard is a versioned API contract, not a runtime.\n- `netstandard2.0` is the highest .NET Standard version that .NET Framework can consume.\n- `netstandard2.1` adds APIs, but .NET Framework does not implement it.\n- .NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.\n\n## How the Contract Resolves at Runtime\n\nCompilation uses .NET Standard reference assemblies, including `netstandard.dll`, to constrain which contract members are available. At runtime, assembly unification and type forwarding bind those references to implementations supplied by the host. Compatibility therefore has two tests: the host must implement the target standard, and every additional package must support that host.\n\nThe 2.0-to-2.1 gap is the practical fault line. Some APIs associated with newer contracts can be supplied to a `netstandard2.0` target by packages such as `System.Memory` or `Microsoft.Bcl.AsyncInterfaces`, but a package is not proof that every runtime behavior is equivalent. Language version is a separate choice from TFM. Modern syntax can compile for an older target only when its required runtime types and members are available, sometimes through small compiler-support shims.\n\n## Why it Ended\n\n.NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants for APIs tied to an operating system or application model. No .NET Standard version is planned after 2.1. The older contract remains a compatibility tool rather than the default target for new code.\n\n## Example\n\nLibrary that wants maximum compatibility:\n\n```xml\n<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>netstandard2.0</TargetFramework>\n  </PropertyGroup>\n</Project>\n```\n\nLibrary that ships for modern .NET and still supports older apps:\n\n```xml\n<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFrameworks>net8.0;netstandard2.0</TargetFrameworks>\n  </PropertyGroup>\n</Project>\n```\n\nConditional code for modern-only APIs while keeping compatibility target:\n\n```csharp\n#if NET8_0_OR_GREATER\nSpan<byte> buffer = stackalloc byte[256];\n#else\nvar buffer = new byte[256];\n#endif\n```\n\n# Pitfalls\n\n- A library targeting only `netstandard2.0` can miss newer APIs and platform-specific optimizations needed by modern consumers, which often pushes teams into awkward workarounds. Adding a modern target (for example `net8.0`) mitigates this, with conditional compilation limited to places where it creates measurable value.\n- Moving to `netstandard2.1` \"for more APIs\" can break .NET Framework consumers immediately because .NET Framework does not implement 2.1. Validating consumer TFM inventory before changing targets detects this risk, and `net8.0;netstandard2.0` is the choice when broad reach is still required.\n- Multi-targeting without a concrete compatibility requirement increases package/test complexity and can introduce behavior drift between targets. A small target set, CI enforced for each TFM, and removal of legacy targets once downstream constraints are gone keep that complexity and drift contained.\n\n# Tradeoffs\n\n- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.\n- **Modern `netX.0` only:** simpler testing and access to the current platform, but older consumers cannot load it.\n- **Multi-targeted:** a modern implementation plus a compatibility asset, paid for with more builds, tests, conditionals, and package metadata.\n\n# Questions\n\n<!-- qard-id: bec5a750-95b9-4d12-a09a-76e78858812c -->\n> [!qard]- When is targeting .NET Standard still justified?\n> Targeting .NET Standard is justified when one library build must be usable on more than one .NET implementation, which in practice usually means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it is the target that keeps that reach. When every consumer runs modern .NET, a modern `netX.0` target is the better default.\n>\n> .NET Standard is a versioned API contract, not a runtime, and meeting the contract does not by itself guarantee that a library runs on a given host. Targeting a version fixes the baseline reference API surface the library compiles against. Each .NET implementation supports particular .NET Standard versions starting from particular releases, so a consumer can use the library only on an implementation release that supports the targeted version. Compatible NuGet packages can add APIs beyond that baseline, and every package dependency must then also support the consumer's platform. After .NET 5 unified the target frameworks, no new .NET Standard versions are planned beyond 2.1.\n>\n> | Target | Consumers that can use it | Cost |\n> |---|---|---|\n> | `netstandard2.0` only | Releases of .NET Framework, .NET Core, Mono, Xamarin and modern .NET that implement 2.0 | Limited to the 2.0 baseline plus APIs from compatible packages, with no modern-target APIs or optimizations |\n> | `netstandard2.1` | Implementations and releases that support 2.1, including modern .NET, but not .NET Framework | Gives up .NET Framework reach without the full modern API set |\n> | Modern `netX.0` only | Apps on that .NET version or later | .NET Framework and older runtimes cannot load it |\n> | Multi-target, such as `net8.0;netstandard2.0` | Both groups, each receiving the assembly built for it | More builds, tests, conditional code and package metadata, justified only when distinct consumer groups need distinct assets |\n>\n> Modern .NET implements .NET Standard 2.1 and earlier, so an existing `netstandard2.0` library can keep serving modern consumers, provided its package dependencies also support those runtimes. Retargeting is worthwhile when the library needs APIs or features that only a newer target provides.\n>\n> Sources: [Microsoft Learn: .NET Standard](https://learn.microsoft.com/en-us/dotnet/standard/net-standard) · [.NET Blog: The future of .NET Standard](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/)\n\n# References\n\n- [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard)\n- [The future of .NET Standard](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/)\n",
-            "hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
+            "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
+            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \".NET's execution engine compiling IL to native code and managing memory and types.\"\nlevel: [\"4\"]\npriority: High\nstatus: Ready to Repeat\n\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/Runtime/Common Language Runtime\"\nflashcard_uid: \"e98a40ab\"\ncreated: \"2026-02-10T16:03:55.000Z\"\nmodified: \"2026-11-02T09:03:54.806Z\"\npublished: \"2026-07-08T13:14:17.331Z\"\n---\n\nThe Common Language Runtime (CLR) is .NET's managed execution engine. It loads assemblies, establishes their types, executes managed methods, and supplies services such as garbage collection, exception handling, threading, and native interoperability.\n\nMost .NET language builds produce assemblies containing Common Intermediate Language (CIL, usually called IL) and metadata. A normal runtime deployment turns executable IL into machine code with a just-in-time compiler. ReadyToRun adds native code for many methods while retaining IL, and Native AOT produces a platform-specific native application at publish time.\n\nThe runtime, libraries, and standardized assembly/type model make cross-language and cross-platform execution possible. A source language alone does not guarantee either property. Native AOT also retains runtime services even though the deployed application has no JIT compiler.\n\n# How It Works\n\n```mermaid\nflowchart TB\n  subgraph SOURCE[Source code]\n    direction LR\n    CS[C# source] --> CSC[Roslyn compiler] --> IL[Assembly with IL and metadata]\n    FS[F# source] --> FSC[F# compiler] --> IL\n  end\n\n  subgraph CLR[Common Language Runtime]\n    direction TB\n    LOAD[Assembly loader] --> VERIFY[Type verifier]\n    VERIFY --> JIT[JIT compiler]\n    JIT --> NATIVE[Native machine code]\n    NATIVE --> GC[Garbage Collector]\n    NATIVE --> EH[Exception handling]\n    NATIVE --> THREAD[Thread management]\n  end\n\n  IL --> LOAD\n  NATIVE --> OS[Operating System]\n```\n\nThe diagram is a conceptual JIT path. The arrows from native code to the GC, exception handling, and thread management show runtime services participating during execution. They are not later pipeline stages or outputs of native code. Assembly loading, validation, code generation, and dependency resolution happen incrementally. Verification depends on the loaded and executed path and on how code is produced, so the runtime does not eagerly verify or compile the whole application before its entry point runs.\n\n**Typical startup path:**\n\n1. A native host resolves the runtime configuration and starts a compatible runtime.\n2. The loader locates the entry assembly and dependencies, reads metadata as needed, and binds type and method references.\n3. Executed methods use available ReadyToRun code or are JIT-compiled. Tiered compilation may replace an earlier native body later.\n4. Runtime services such as the GC and thread pool initialize and expand according to demand.\n\n**Core runtime responsibilities:**\n\n| Subsystem | What it does |\n|---|---|\n| JIT compiler | Produces native method bodies and can recompile hot code at higher tiers |\n| Garbage collector | Allocates managed objects and reclaims unreachable graphs |\n| Type system and loader | Bind metadata, enforce runtime type rules, and support reflection |\n| Exception handling | Finds handlers and unwinds managed frames while running cleanup |\n| Thread pool | Schedules worker and I/O-completion work and adapts its thread supply |\n| Interop | Marshals calls and data across managed and native boundaries |\n\n# Managed Vs Unmanaged Code\n\nManaged code executes with runtime metadata and services. Garbage collection owns managed object storage, while the type system and exception machinery remain involved in execution. An `unsafe` C# block can use pointers without turning the containing method into unmanaged code.\n\nUnmanaged code is native code outside those managed lifetime rules. It may use manual allocation, RAII, reference counting, or another native ownership model. The GC cannot prove when a native handle or buffer should be released, so the managed boundary needs an explicit ownership contract, usually `SafeHandle` or deterministic disposal.\n\nThis example is Windows-specific P/Invoke:\n\n```csharp\nusing System.Runtime.InteropServices;\n\n[DllImport(\"kernel32.dll\", SetLastError = true)]\nstatic extern bool Beep(uint dwFreq, uint dwDuration);\n\nBeep(440, 500); // A4 note for 500ms\n```\n\n# JIT Vs AOT\n\n| Mode | Code available at startup | Runtime adaptation | Main cost |\n|---|---|---|---|\n| JIT | IL. Native code is produced when needed | Tiering and profile data can optimize executed paths for the current machine | First-use compilation and a runtime JIT |\n| ReadyToRun | IL plus precompiled native code for many methods | The JIT can still compile unsupported methods and replace hot ReadyToRun bodies | Larger assemblies and target-specific publishing |\n| Native AOT | A self-contained native application | No runtime JIT or dynamic code generation | Trimming and AOT-compatibility constraints. Target-specific output |\n\nJIT is the flexible default when dynamic loading, runtime code generation, or warm steady-state optimization matters. ReadyToRun is a middle path for reducing first-use compilation while retaining the JIT. Native AOT fits startup- and footprint-sensitive deployments whose dependencies pass AOT analysis. Measurements decide whether the publish-time tradeoff helps a particular application.\n\n## Tiered Compilation\n\nTiered compilation does not promise exactly two compilations for every method. A method may begin with quickly generated Tier 0 code, a ReadyToRun body, or a more optimized initial body, depending on runtime policy and method shape. Frequently executed code can move through additional instrumented and optimized tiers.\n\n- **Tier 0** favors low compilation cost and fast availability.\n- **Tier 1** spends more time optimizing code that has proved hot.\n- **On-Stack Replacement (OSR)** can transfer a running loop to optimized code without waiting for a later method call.\n- **Dynamic PGO**, enabled by default starting with .NET 8, feeds observed types and branch behavior into later optimization. ReadyToRun methods can also be replaced through tiering.\n\n## Assembly Loading and the Type System\n\nCurrent .NET applications use an **`AssemblyLoadContext`** to locate, load, and cache managed assemblies and their dependencies. A collectible context supports plugin-style unloading, but unloading is cooperative: the context and every object, type, method, or thread rooted through it must first become unreachable. Type identity therefore includes the loaded assembly instance, not only a namespace-qualified name.\n\nCoreCLR commonly shares JIT-generated generic code across reference-type arguments and specializes code for value-type arguments. That strategy preserves value layout and avoids boxing while limiting duplicate native code. The exact sharing strategy is a runtime implementation detail. [[Generics]] defines the language-facing constraints.\n\n## Memory Model and Exceptions\n\nThe .NET memory model constrains how reads and writes become visible across threads. `volatile`, `Interlocked`, locks, and explicit barriers provide different ordering and atomicity guarantees. They are not interchangeable performance hints.\n\nManaged exception dispatch uses two logical passes. The search pass walks frames and evaluates filters while the stack is intact. Once a handler is selected, the unwind pass runs intervening `finally` and fault cleanup before control enters that handler.\n\n# Pitfalls\n\n**Treating first-use cost as random latency.** JIT, assembly loading, static initialization, and connection setup can all appear on an early request. Traces should identify the actual source before ReadyToRun, Native AOT, or warm-up is introduced.\n\n**Blocking shared worker threads.** Sustained synchronous waits can consume the available thread-pool supply faster than its control loop adds threads. Async I/O removes that wait from a worker only when the underlying operation is genuinely asynchronous.\n\n**Using finalization as normal cleanup.** An unreachable object whose finalization remains registered stays alive until its finalizer is scheduled and run, then normally needs a later collection for reclamation. A successful dispose path normally releases the resource and calls `GC.SuppressFinalize`, avoiding that pending-finalization lifetime. `IDisposable` and `SafeHandle` make resource release explicit. A finalizer remains a narrow fallback for missed disposal.\n\n# Questions\n\n<!-- qard-id: 1df86558-fa6b-4e81-85a8-817e1ea6a4b7 -->\n> [!qard]- How do managed and unmanaged code differ?\n> Managed code runs under the CLR and relies on its services, such as garbage collection of managed objects, exception handling and the runtime type system. Unmanaged (native) code runs outside those services. It follows a native platform ABI and its own ownership rules, such as explicit freeing or reference counting.\n>\n>\n> Interop declarations must also match the native ABI, including calling convention and data layout; that determines call correctness rather than resource lifetime.\n>\n> [Microsoft: Native interoperability ABI support](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/abi-support) · [Microsoft: SafeHandle class](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle)\n\n> [!qard]- Why does interop require explicit resource lifetime management?\n> Interop needs careful lifetime management because the GC manages only one side of the boundary:\n>\n> - The GC tracks managed objects only. It cannot tell when a native handle or buffer is no longer needed.\n> - A native resource is released only when code calls its native cleanup. Disposal does this deterministically when ownership ends. A finalizer on the managed wrapper can do it later, as a fallback, if disposal was missed.\n> - `SafeHandle` is the usual managed owner for a native handle. It releases the handle when disposed, or during finalization if disposal never happened.\n> \n> If no code clearly owns a native resource, nothing may release it, and it leaks. Interop declarations must also match the native ABI, such as calling convention and data layout. That requirement affects whether a call works correctly, not how long a resource lives.\n>\n> [Microsoft: Native interoperability ABI support](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/abi-support) · [Microsoft: SafeHandle class](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle)\n\n<!-- qard-id: 58941e73-5fa8-4d3c-bbdf-87e201b3d6d8 -->\n> [!qard]- How does .NET turn IL into machine code?\n> Assemblies normally contain IL, which the processor cannot run directly. By default the runtime's JIT compiler turns each method into machine code when it is first needed. ReadyToRun moves part of that work to publish time while keeping the JIT. Native AOT moves all of it to publish time and ships no JIT.\n>\n> | Aspect | JIT | ReadyToRun | Native AOT |\n> |---|---|---|---|\n> | When machine code is produced | At run time, as methods are first used. Tiered compilation can later recompile hot methods with more optimization. | At publish time for many methods. The JIT still compiles methods without usable precompiled code and can re-optimize hot ones. | Entirely at publish time. The app runs without a JIT. |\n> | Startup | Early calls pay for compilation. | Less compilation work at startup. | No JIT work at startup. |\n> | Runtime flexibility | Dynamic loading and runtime code generation work. | Same as JIT, because the IL is kept. | Restricted: no runtime code generation, and code must work with trimming. |\n> | Main cost | Compilation time on first use. | Larger assemblies built for a specific target. | Compatibility constraints and platform-specific output. |\n>\n>\n> [Microsoft: .NET application publishing overview](https://learn.microsoft.com/en-us/dotnet/core/deploying/) · [Microsoft: Native AOT deployment](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/)\n\n> [!qard]- When do JIT, ReadyToRun, and Native AOT each fit?\n> JIT is the flexible default, especially when an app loads code dynamically or generates code at run time. ReadyToRun reduces startup compilation without giving up the JIT. Native AOT fits startup- and footprint-sensitive deployments whose code and dependencies work with AOT and trimming. ReadyToRun trades larger assemblies for less startup compilation, while Native AOT trades runtime flexibility for startup and footprint benefits, so the choice rests on measured startup and footprint needs and on the runtime features the app requires. Native AOT is not a universal upgrade.\n>\n> [Microsoft: .NET application publishing overview](https://learn.microsoft.com/en-us/dotnet/core/deploying/) · [Microsoft: Native AOT deployment](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/)\n\n# References\n\n- [Managed execution process](https://learn.microsoft.com/en-us/dotnet/standard/managed-execution-process)\n",
+            "hash": "9a51f4d51594dcee6627c0ca5a8a7dcf1b75efd03144403aa8d273d2844d98ea",
             "topic": "Programming",
             "violations": [],
             "needs_fixing_ids": [],
@@ -30485,146 +30485,220 @@
       },
       "proposal": {
         "version": 1,
-        "edits": [
-          {
-            "path": "Vault/Home/Programming/NET/NET Standart.md",
-            "expected_hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
-            "before": "- `netstandard2.1` adds APIs, but .NET Framework does not implement it.\n- .NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
-            "after": "- `netstandard2.1` adds APIs, but .NET Framework does not implement it.",
-            "reason": "The end-of-2.1 fact is stated fully in 'Why it Ended'; removing the duplicate bullet keeps one home for it.",
-            "kind": "note",
-            "learning_target": "same",
-            "essential_meanings": [
-              "netstandard2.1 is not implemented by .NET Framework"
-            ],
-            "sources": [],
-            "feedback_keys": [],
-            "problem": "The fact that no .NET Standard version follows 2.1 is repeated in the key mechanics, in 'Why it Ended' and in the Qard.",
-            "reader_benefit": "Less repetition; the fact is read once where its reason is explained."
-          },
-          {
-            "path": "Vault/Home/Programming/NET/NET Standart.md",
-            "expected_hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
-            "before": "> Targeting .NET Standard is justified when one library build must be usable on more than one .NET implementation, which in practice usually means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it is the target that keeps that reach. When every consumer runs modern .NET, a modern `netX.0` target is the better default.\n>\n> .NET Standard is a versioned API contract, not a runtime, and meeting the contract does not by itself guarantee that a library runs on a given host. Targeting a version fixes the baseline reference API surface the library compiles against. Each .NET implementation supports particular .NET Standard versions starting from particular releases, so a consumer can use the library only on an implementation release that supports the targeted version. Compatible NuGet packages can add APIs beyond that baseline, and every package dependency must then also support the consumer's platform. After .NET 5 unified the target frameworks, no new .NET Standard versions are planned beyond 2.1.\n>\n> | Target | Consumers that can use it | Cost |\n> |---|---|---|\n> | `netstandard2.0` only | Releases of .NET Framework, .NET Core, Mono, Xamarin and modern .NET that implement 2.0 | Limited to the 2.0 baseline plus APIs from compatible packages, with no modern-target APIs or optimizations |\n> | `netstandard2.1` | Implementations and releases that support 2.1, including modern .NET, but not .NET Framework | Gives up .NET Framework reach without the full modern API set |\n> | Modern `netX.0` only | Apps on that .NET version or later | .NET Framework and older runtimes cannot load it |\n> | Multi-target, such as `net8.0;netstandard2.0` | Both groups, each receiving the assembly built for it | More builds, tests, conditional code and package metadata, justified only when distinct consumer groups need distinct assets |\n>\n> Modern .NET implements .NET Standard 2.1 and earlier, so an existing `netstandard2.0` library can keep serving modern consumers, provided its package dependencies also support those runtimes. Retargeting is worthwhile when the library needs APIs or features that only a newer target provides.",
-            "after": "> Targeting .NET Standard is justified when one library build must run on more than one .NET implementation, which in practice means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it keeps that reach, while `netstandard2.1` would drop it. When every consumer runs modern .NET, a modern `netX.0` target is the better default. When both groups matter and the library needs modern APIs, multi-targeting such as `net8.0;netstandard2.0` gives each group an assembly built for it.\n>\n> .NET Standard is a versioned API contract, not a runtime. A consumer can use the library only on an implementation release that supports the targeted version, and every NuGet package dependency must also support that platform. Modern .NET implements 2.1 and earlier, so an existing `netstandard2.0` library keeps serving modern consumers. Retargeting is worthwhile only when the library needs APIs that a newer target provides.",
-            "reason": "Shortens the answer to the justification, the 2.0 reach and the condition for a modern target; the dropped table duplicated the Tradeoffs section.",
-            "kind": "rewrite",
-            "learning_target": "same",
-            "essential_meanings": [
-              "Justified when .NET Framework or multiple implementations must be supported",
-              "netstandard2.0 is the highest version .NET Framework can consume",
-              "Modern netX.0 is the default when all consumers run modern .NET",
-              "Package dependencies must also support the host"
-            ],
-            "sources": [
-              {
-                "url": "https://learn.microsoft.com/en-us/dotnet/standard/net-standard",
-                "claim": "netstandard2.0 is the highest version .NET Framework supports; 2.1 is not supported by .NET Framework; modern .NET implements 2.1 and earlier.",
-                "version": ".NET Standard 2.1"
-              }
-            ],
-            "feedback_keys": [],
-            "problem": "The Qard answer is overloaded: it restates the Tradeoffs section as a table and repeats the end-of-2.1 fact.",
-            "reader_benefit": "A concise answer that is easier to retrieve and grade."
-          }
-        ],
+        "edits": [],
         "dispositions": [
           {
-            "path": "Vault/Home/Programming/NET/NET Standart.md",
-            "outcome": "changed",
-            "reason": "Facts were verified as accurate against the cited Microsoft sources; the edits remove repetition of the end-of-2.1 fact and shorten the Qard answer, whose table duplicated the Tradeoffs section, so the card is easier to recall."
+            "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
+            "outcome": "keep",
+            "reason": "Audited the whole note against its text and Microsoft's managed-execution, ReadyToRun and Native AOT documentation. The opening defines the CLR and the IL, ReadyToRun and Native AOT paths. The diagram is explicitly caveated as conceptual and incremental. The subsystem table, JIT/ReadyToRun/AOT comparison and tiering section are accurate, including Dynamic PGO on by default from .NET 8, OSR, and the two-pass exception dispatch. The assembly-loading section correctly states cooperative unloading of collectible contexts. The pitfalls are consistent with the finalization and dispose cards in sibling notes. The three cards each test one gradeable task, with sources on the answer side, and they do not duplicate nearby GC or startup cards. The only open point is the 'Type verifier' box in the diagram. It is a conceptual simplification for CoreCLR and the prose already hedges it, and I could not establish a better wording from a primary source, so it is left unchanged. No native violations are known."
           }
         ],
         "feedback": []
       },
       "source_hashes": {
-        "Vault/Home/Programming/NET/NET Standart.md": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383"
+        "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md": "9a51f4d51594dcee6627c0ca5a8a7dcf1b75efd03144403aa8d273d2844d98ea"
       },
       "feedback_keys": [],
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "repair_inputs": {
-        "Vault/Home/Programming/NET/NET Standart.md": ""
+        "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md": ""
       },
       "prepared_source_version": 1,
-      "prepared_at": "2026-11-13T07:08:46.991041Z",
-      "review_repair_key": "4af78065872b17475859092c2fc88854d9a8f91dd2c095ddecdb7d02e4d42821",
-      "repair_reserved": true,
-      "repair_review": {
+      "prepared_at": "2026-11-13T07:10:48.245696Z",
+      "review_evidence": {
+        "raw_review": {
+          "verdict": "CHANGES REQUIRED",
+          "notes": [
+            {
+              "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
+              "verdict": "CHANGES REQUIRED",
+              "summary": "The note is strong overall, but the diagram and the verification sentence still present an IL \"Type verifier\" stage as part of the modern CLR path. Current .NET (CoreCLR) does not perform IL verification, so this stays inaccurate. The keep disposition left it open without resolving it.",
+              "page_type": "Concept — typed frontmatter; Questions and References optional; Qard callouts with protected IDs; voice of a senior engineer at a whiteboard.",
+              "current_text_evidence": [
+                {
+                  "quote": "LOAD[Assembly loader] --> VERIFY[Type verifier]",
+                  "line_start": 36,
+                  "reason": "The diagram shows a verifier stage between loading and JIT. Current CoreCLR has no IL verifier, so the stage misleads a reader about the runtime path."
+                },
+                {
+                  "quote": "Verification depends on the loaded and executed path and on how code is produced",
+                  "line_start": 48,
+                  "reason": "The prose hedges the verifier but still implies that verification takes place. It should state that CoreCLR does not verify IL, or the stage should be removed or renamed."
+                },
+                {
+                  "quote": "Interop declarations must also match the native ABI, including calling convention and data layout; that determines call correctness rather than resource lifetime.",
+                  "line_start": 96,
+                  "reason": "A side point in the managed-versus-unmanaged answer. It repeats in the next card and makes the answer wander."
+                }
+              ],
+              "target_resolution": "UNRESOLVED",
+              "split_suggestion": "No split: the runtime execution, JIT/AOT and interop topics form one coherent CLR overview, and a split would not make any part more useful.",
+              "findings": [
+                {
+                  "severity": "Medium",
+                  "dimension": "Accuracy",
+                  "location": "Mermaid diagram (line 36) and the paragraph at line 48",
+                  "evidence": "\"LOAD[Assembly loader] --> VERIFY[Type verifier]\" and \"Verification depends on the loaded and executed path\"",
+                  "effect": "A reader concludes that the modern .NET runtime verifies IL. .NET Core and later do not perform IL verification; the JIT only does limited validity checks. The inaccuracy remains in an audited note.",
+                  "fix": "Remove the verifier box or rename it to type loading and binding. State in the prose that CoreCLR does not verify IL, and that verification belonged to the .NET Framework security model."
+                },
+                {
+                  "severity": "Medium",
+                  "dimension": "Question quality",
+                  "location": "First Qard, 'How do managed and unmanaged code differ?'",
+                  "evidence": "The answer ends with a paragraph on ABI and calling convention, with stray double blank lines.",
+                  "effect": "Off-question trivia and repetition: the ABI point is repeated in the second card, and the answer is no longer a clean contrast.",
+                  "fix": "Remove the ABI paragraph from the first card and keep it in the interop card only if it is wanted. Retain the existing card ID."
+                }
+              ],
+              "source_checks": [],
+              "rejection_equivalence": [],
+              "quality": {
+                "accuracy": "FAIL",
+                "clarity": "PASS",
+                "question_quality": "FAIL",
+                "identity_safety": "PASS",
+                "rules_compliance": "PASS"
+              }
+            }
+          ],
+          "overall_reason": "The keep disposition leaves a known inaccurate \\\"Type verifier\\\" stage in the diagram and the verification prose unresolved. One Qard also carries off-topic ABI content. The note is therefore not clean.",
+          "change_checks": []
+        },
+        "bindings": [
+          {
+            "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
+            "citation_index": 2,
+            "reported_line_start": 96,
+            "resolved_line_start": 131
+          }
+        ],
+        "source_hashes": {
+          "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md": "9a51f4d51594dcee6627c0ca5a8a7dcf1b75efd03144403aa8d273d2844d98ea"
+        },
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+      },
+      "completed_review": {
         "verdict": "CHANGES REQUIRED",
-        "overall_reason": "The facts hold, but the single Qard answer is overloaded and restates the body. The \"no version after 2.1\" fact repeats across the note, and the proposal made no edits to fix this.",
         "notes": [
           {
-            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
             "verdict": "CHANGES REQUIRED",
-            "summary": "Technically accurate, but the retrieval value of the one Qard is weak. Its answer runs to several paragraphs and a table that duplicate the Pitfalls and Tradeoffs sections. Several sections also repeat the end-of-2.1 fact. Keeping the note unchanged leaves these defects unresolved.",
-            "page_type": "Concept — optional Questions and References present; single Qard with a protected ID; the note has no generated whats-next navigation.",
+            "summary": "The note is strong overall, but the diagram and the verification sentence still present an IL \"Type verifier\" stage as part of the modern CLR path. Current .NET (CoreCLR) does not perform IL verification, so this stays inaccurate. The keep disposition left it open without resolving it.",
+            "page_type": "Concept — typed frontmatter; Questions and References optional; Qard callouts with protected IDs; voice of a senior engineer at a whiteboard.",
             "current_text_evidence": [
               {
-                "quote": ".NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
-                "line_start": 32,
-                "reason": "The end-of-2.1 fact first appears here."
+                "quote": "LOAD[Assembly loader] --> VERIFY[Type verifier]",
+                "line_start": 36,
+                "reason": "The diagram shows a verifier stage between loading and JIT. Current CoreCLR has no IL verifier, so the stage misleads a reader about the runtime path."
               },
               {
-                "quote": ".NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants",
-                "line_start": 42,
-                "reason": "The 'Why it Ended' section restates the same fact, and the Qard answer states it a third time, so the body is repetitive."
+                "quote": "Verification depends on the loaded and executed path and on how code is produced",
+                "line_start": 48,
+                "reason": "The prose hedges the verifier but still implies that verification takes place. It should state that CoreCLR does not verify IL, or the stage should be removed or renamed."
               },
               {
-                "quote": "> [!qard]- When is targeting .NET Standard still justified?",
-                "line_start": 91,
-                "reason": "The question asks for one decision. Its answer then adds contract semantics, a four-row table and a retargeting note, which duplicate the Tradeoffs section and make the answer hard to retrieve under pressure."
-              },
-              {
-                "quote": "- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.",
-                "line_start": 84,
-                "reason": "This restates the tradeoff content that the Qard table repeats, so two places cover the same comparison."
+                "quote": "Interop declarations must also match the native ABI, including calling convention and data layout; that determines call correctness rather than resource lifetime.",
+                "line_start": 131,
+                "reason": "A side point in the managed-versus-unmanaged answer. It repeats in the next card and makes the answer wander."
               }
             ],
             "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: the topic is compact and coherent, and the content belongs in a single note.",
+            "split_suggestion": "No split: the runtime execution, JIT/AOT and interop topics form one coherent CLR overview, and a split would not make any part more useful.",
             "findings": [
               {
                 "severity": "Medium",
-                "dimension": "Question quality / repetition",
-                "location": "Qard answer (lines 92-103) and sections at lines 32, 42, 84-86",
-                "evidence": "The answer to 'When is targeting .NET Standard still justified?' adds contract semantics, a full target table and a retargeting note. The table duplicates the Tradeoffs bullets, and the end-of-2.1 fact is repeated in the key-mechanics bullet, in 'Why it Ended' and in the Qard.",
-                "effect": "The answer is too long to retrieve under pressure, and the body repeats itself, which lowers learning value.",
-                "fix": "Tighten the Qard answer to the justification, the netstandard2.0 reach and the condition for choosing a modern target. Drop the table or move it to the body. Merge the repeated end-of-2.1 statements into one."
+                "dimension": "Accuracy",
+                "location": "Mermaid diagram (line 36) and the paragraph at line 48",
+                "evidence": "\"LOAD[Assembly loader] --> VERIFY[Type verifier]\" and \"Verification depends on the loaded and executed path\"",
+                "effect": "A reader concludes that the modern .NET runtime verifies IL. .NET Core and later do not perform IL verification; the JIT only does limited validity checks. The inaccuracy remains in an audited note.",
+                "fix": "Remove the verifier box or rename it to type loading and binding. State in the prose that CoreCLR does not verify IL, and that verification belonged to the .NET Framework security model."
+              },
+              {
+                "severity": "Medium",
+                "dimension": "Question quality",
+                "location": "First Qard, 'How do managed and unmanaged code differ?'",
+                "evidence": "The answer ends with a paragraph on ABI and calling convention, with stray double blank lines.",
+                "effect": "Off-question trivia and repetition: the ABI point is repeated in the second card, and the answer is no longer a clean contrast.",
+                "fix": "Remove the ABI paragraph from the first card and keep it in the interop card only if it is wanted. Retain the existing card ID."
               }
             ],
             "source_checks": [],
             "rejection_equivalence": [],
             "quality": {
-              "accuracy": "PASS",
-              "clarity": "FAIL",
+              "accuracy": "FAIL",
+              "clarity": "PASS",
               "question_quality": "FAIL",
               "identity_safety": "PASS",
               "rules_compliance": "PASS"
             }
           }
         ],
+        "overall_reason": "The keep disposition leaves a known inaccurate \\\"Type verifier\\\" stage in the diagram and the verification prose unresolved. One Qard also carries off-topic ABI content. The note is therefore not clean.",
         "change_checks": []
       },
-      "repair_previous_proposal": {
-        "version": 1,
-        "edits": [],
-        "dispositions": [
+      "blocked_review": {
+        "verdict": "CHANGES REQUIRED",
+        "notes": [
           {
-            "path": "Vault/Home/Programming/NET/NET Standart.md",
-            "outcome": "keep",
-            "reason": "I read the whole note and its single Qard against Microsoft's .NET Standard documentation and the \"future of .NET Standard\" post, which the note already cites. I found no factual error. The note says .NET Standard is a versioned API contract and not a runtime. It says netstandard2.0 is the highest version .NET Framework can consume. It says 2.1 is not implemented by .NET Framework. It says .NET 5 unified the target framework monikers (TFMs) and that no version after 2.1 is planned. It says modern .NET supports 2.1 and earlier. The sections on resolution through reference assemblies, netstandard.dll and type forwarding, package shims, and language version versus TFM are correct. The three XML and C# examples are valid. The pitfalls and tradeoffs name the condition that changes each decision. The Qard has one gradeable task, which is when .NET Standard is still justified. Its table and its caveats about package dependencies and implementation releases are accurate. The References are real primary sources. Some repetition remains: the statement that no version follows 2.1 appears three times. This is minor and each occurrence supports its local explanation, so an edit would be cosmetic churn. No native violations are listed."
+            "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is strong overall, but the diagram and the verification sentence still present an IL \"Type verifier\" stage as part of the modern CLR path. Current .NET (CoreCLR) does not perform IL verification, so this stays inaccurate. The keep disposition left it open without resolving it.",
+            "page_type": "Concept — typed frontmatter; Questions and References optional; Qard callouts with protected IDs; voice of a senior engineer at a whiteboard.",
+            "current_text_evidence": [
+              {
+                "quote": "LOAD[Assembly loader] --> VERIFY[Type verifier]",
+                "line_start": 36,
+                "reason": "The diagram shows a verifier stage between loading and JIT. Current CoreCLR has no IL verifier, so the stage misleads a reader about the runtime path."
+              },
+              {
+                "quote": "Verification depends on the loaded and executed path and on how code is produced",
+                "line_start": 48,
+                "reason": "The prose hedges the verifier but still implies that verification takes place. It should state that CoreCLR does not verify IL, or the stage should be removed or renamed."
+              },
+              {
+                "quote": "Interop declarations must also match the native ABI, including calling convention and data layout; that determines call correctness rather than resource lifetime.",
+                "line_start": 131,
+                "reason": "A side point in the managed-versus-unmanaged answer. It repeats in the next card and makes the answer wander."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the runtime execution, JIT/AOT and interop topics form one coherent CLR overview, and a split would not make any part more useful.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy",
+                "location": "Mermaid diagram (line 36) and the paragraph at line 48",
+                "evidence": "\"LOAD[Assembly loader] --> VERIFY[Type verifier]\" and \"Verification depends on the loaded and executed path\"",
+                "effect": "A reader concludes that the modern .NET runtime verifies IL. .NET Core and later do not perform IL verification; the JIT only does limited validity checks. The inaccuracy remains in an audited note.",
+                "fix": "Remove the verifier box or rename it to type loading and binding. State in the prose that CoreCLR does not verify IL, and that verification belonged to the .NET Framework security model."
+              },
+              {
+                "severity": "Medium",
+                "dimension": "Question quality",
+                "location": "First Qard, 'How do managed and unmanaged code differ?'",
+                "evidence": "The answer ends with a paragraph on ABI and calling convention, with stray double blank lines.",
+                "effect": "Off-question trivia and repetition: the ABI point is repeated in the second card, and the answer is no longer a clean contrast.",
+                "fix": "Remove the ABI paragraph from the first card and keep it in the interop card only if it is wanted. Retain the existing card ID."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "FAIL",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
           }
         ],
-        "feedback": []
+        "overall_reason": "The keep disposition leaves a known inaccurate \\\"Type verifier\\\" stage in the diagram and the verification prose unresolved. One Qard also carries off-topic ABI content. The note is therefore not clean.",
+        "change_checks": []
       },
-      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "feedback_snapshot": [],
-      "blocked_review": {
-        "stage": "deterministic_application",
-        "reason": "card edit must replace one complete active Qard block including adjacent metadata"
-      },
-      "failed_at": "2026-11-13T07:08:50.463769Z"
+      "feedback_snapshot": []
     },
     "ai-ml-4edf0823": {
       "workload_id": "b9235098cfe341bd98cce55faa026472",
@@ -38610,6 +38684,173 @@
         "change_checks": []
       },
       "feedback_snapshot": []
+    },
+    "e66a8d79a6d63ffc29c04bb3553f26c4cdee9fcbf618ec91449e9361d610aa4b": {
+      "workload_id": "2b8d0b6edd0c40dc8564a83316ed31b6",
+      "topic_id": "programming-e6aba2bd",
+      "batch": {
+        "topic": "Programming",
+        "topic_id": "programming-e6aba2bd",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"A specification of .NET APIs that multiple runtimes agree to implement.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/NET Standart\"\nflashcard_uid: \"60a3e364\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.329Z\"\n---\n\n.NET Standard is a versioned API specification implemented by several .NET runtimes. It was the compatibility bridge among .NET Framework, .NET Core, Mono, and Xamarin. Modern libraries normally target the current .NET TFM directly. `netstandard2.0` remains useful when a library must also serve .NET Framework or older consumers.\n\n# How It Works\n\n- Targeting `netstandard2.0` selects that contract as the compile-time reference surface.\n- Targeting a modern `netX.0` TFM selects the APIs and runtime assumptions for that .NET release.\n- Multi-targeting lets one package compile separate assemblies for consumers with different capabilities.\n\nThis target choice constrains the baseline reference API surface. NuGet packages can add APIs, but runtime compatibility then depends on those package requirements too.\n\nKey mechanics to remember:\n\n- .NET Standard is a versioned API contract, not a runtime.\n- `netstandard2.0` is the highest .NET Standard version that .NET Framework can consume.\n- `netstandard2.1` adds APIs, but .NET Framework does not implement it.\n- .NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.\n\n## How the Contract Resolves at Runtime\n\nCompilation uses .NET Standard reference assemblies, including `netstandard.dll`, to constrain which contract members are available. At runtime, assembly unification and type forwarding bind those references to implementations supplied by the host. Compatibility therefore has two tests: the host must implement the target standard, and every additional package must support that host.\n\nThe 2.0-to-2.1 gap is the practical fault line. Some APIs associated with newer contracts can be supplied to a `netstandard2.0` target by packages such as `System.Memory` or `Microsoft.Bcl.AsyncInterfaces`, but a package is not proof that every runtime behavior is equivalent. Language version is a separate choice from TFM. Modern syntax can compile for an older target only when its required runtime types and members are available, sometimes through small compiler-support shims.\n\n## Why it Ended\n\n.NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants for APIs tied to an operating system or application model. No .NET Standard version is planned after 2.1. The older contract remains a compatibility tool rather than the default target for new code.\n\n## Example\n\nLibrary that wants maximum compatibility:\n\n```xml\n<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>netstandard2.0</TargetFramework>\n  </PropertyGroup>\n</Project>\n```\n\nLibrary that ships for modern .NET and still supports older apps:\n\n```xml\n<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFrameworks>net8.0;netstandard2.0</TargetFrameworks>\n  </PropertyGroup>\n</Project>\n```\n\nConditional code for modern-only APIs while keeping compatibility target:\n\n```csharp\n#if NET8_0_OR_GREATER\nSpan<byte> buffer = stackalloc byte[256];\n#else\nvar buffer = new byte[256];\n#endif\n```\n\n# Pitfalls\n\n- A library targeting only `netstandard2.0` can miss newer APIs and platform-specific optimizations needed by modern consumers, which often pushes teams into awkward workarounds. Adding a modern target (for example `net8.0`) mitigates this, with conditional compilation limited to places where it creates measurable value.\n- Moving to `netstandard2.1` \"for more APIs\" can break .NET Framework consumers immediately because .NET Framework does not implement 2.1. Validating consumer TFM inventory before changing targets detects this risk, and `net8.0;netstandard2.0` is the choice when broad reach is still required.\n- Multi-targeting without a concrete compatibility requirement increases package/test complexity and can introduce behavior drift between targets. A small target set, CI enforced for each TFM, and removal of legacy targets once downstream constraints are gone keep that complexity and drift contained.\n\n# Tradeoffs\n\n- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.\n- **Modern `netX.0` only:** simpler testing and access to the current platform, but older consumers cannot load it.\n- **Multi-targeted:** a modern implementation plus a compatibility asset, paid for with more builds, tests, conditionals, and package metadata.\n\n# Questions\n\n<!-- qard-id: bec5a750-95b9-4d12-a09a-76e78858812c -->\n> [!qard]- When is targeting .NET Standard still justified?\n> Targeting .NET Standard is justified when one library build must be usable on more than one .NET implementation, which in practice usually means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it is the target that keeps that reach. When every consumer runs modern .NET, a modern `netX.0` target is the better default.\n>\n> .NET Standard is a versioned API contract, not a runtime, and meeting the contract does not by itself guarantee that a library runs on a given host. Targeting a version fixes the baseline reference API surface the library compiles against. Each .NET implementation supports particular .NET Standard versions starting from particular releases, so a consumer can use the library only on an implementation release that supports the targeted version. Compatible NuGet packages can add APIs beyond that baseline, and every package dependency must then also support the consumer's platform. After .NET 5 unified the target frameworks, no new .NET Standard versions are planned beyond 2.1.\n>\n> | Target | Consumers that can use it | Cost |\n> |---|---|---|\n> | `netstandard2.0` only | Releases of .NET Framework, .NET Core, Mono, Xamarin and modern .NET that implement 2.0 | Limited to the 2.0 baseline plus APIs from compatible packages, with no modern-target APIs or optimizations |\n> | `netstandard2.1` | Implementations and releases that support 2.1, including modern .NET, but not .NET Framework | Gives up .NET Framework reach without the full modern API set |\n> | Modern `netX.0` only | Apps on that .NET version or later | .NET Framework and older runtimes cannot load it |\n> | Multi-target, such as `net8.0;netstandard2.0` | Both groups, each receiving the assembly built for it | More builds, tests, conditional code and package metadata, justified only when distinct consumer groups need distinct assets |\n>\n> Modern .NET implements .NET Standard 2.1 and earlier, so an existing `netstandard2.0` library can keep serving modern consumers, provided its package dependencies also support those runtimes. Retargeting is worthwhile when the library needs APIs or features that only a newer target provides.\n>\n> Sources: [Microsoft Learn: .NET Standard](https://learn.microsoft.com/en-us/dotnet/standard/net-standard) · [.NET Blog: The future of .NET Standard](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/)\n\n# References\n\n- [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard)\n- [The future of .NET Standard](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/)\n",
+            "hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
+            "topic": "Programming",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "expected_hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
+            "before": "- `netstandard2.1` adds APIs, but .NET Framework does not implement it.\n- .NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
+            "after": "- `netstandard2.1` adds APIs, but .NET Framework does not implement it.",
+            "reason": "The end-of-2.1 fact is stated fully in 'Why it Ended'; removing the duplicate bullet keeps one home for it.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "netstandard2.1 is not implemented by .NET Framework"
+            ],
+            "sources": [],
+            "feedback_keys": [],
+            "problem": "The fact that no .NET Standard version follows 2.1 is repeated in the key mechanics, in 'Why it Ended' and in the Qard.",
+            "reader_benefit": "Less repetition; the fact is read once where its reason is explained."
+          },
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "expected_hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
+            "before": "> Targeting .NET Standard is justified when one library build must be usable on more than one .NET implementation, which in practice usually means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it is the target that keeps that reach. When every consumer runs modern .NET, a modern `netX.0` target is the better default.\n>\n> .NET Standard is a versioned API contract, not a runtime, and meeting the contract does not by itself guarantee that a library runs on a given host. Targeting a version fixes the baseline reference API surface the library compiles against. Each .NET implementation supports particular .NET Standard versions starting from particular releases, so a consumer can use the library only on an implementation release that supports the targeted version. Compatible NuGet packages can add APIs beyond that baseline, and every package dependency must then also support the consumer's platform. After .NET 5 unified the target frameworks, no new .NET Standard versions are planned beyond 2.1.\n>\n> | Target | Consumers that can use it | Cost |\n> |---|---|---|\n> | `netstandard2.0` only | Releases of .NET Framework, .NET Core, Mono, Xamarin and modern .NET that implement 2.0 | Limited to the 2.0 baseline plus APIs from compatible packages, with no modern-target APIs or optimizations |\n> | `netstandard2.1` | Implementations and releases that support 2.1, including modern .NET, but not .NET Framework | Gives up .NET Framework reach without the full modern API set |\n> | Modern `netX.0` only | Apps on that .NET version or later | .NET Framework and older runtimes cannot load it |\n> | Multi-target, such as `net8.0;netstandard2.0` | Both groups, each receiving the assembly built for it | More builds, tests, conditional code and package metadata, justified only when distinct consumer groups need distinct assets |\n>\n> Modern .NET implements .NET Standard 2.1 and earlier, so an existing `netstandard2.0` library can keep serving modern consumers, provided its package dependencies also support those runtimes. Retargeting is worthwhile when the library needs APIs or features that only a newer target provides.",
+            "after": "> Targeting .NET Standard is justified when one library build must run on more than one .NET implementation, which in practice means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it keeps that reach, while `netstandard2.1` would drop it. When every consumer runs modern .NET, a modern `netX.0` target is the better default. When both groups matter and the library needs modern APIs, multi-targeting such as `net8.0;netstandard2.0` gives each group an assembly built for it.\n>\n> .NET Standard is a versioned API contract, not a runtime. A consumer can use the library only on an implementation release that supports the targeted version, and every NuGet package dependency must also support that platform. Modern .NET implements 2.1 and earlier, so an existing `netstandard2.0` library keeps serving modern consumers. Retargeting is worthwhile only when the library needs APIs that a newer target provides.",
+            "reason": "Shortens the answer to the justification, the 2.0 reach and the condition for a modern target; the dropped table duplicated the Tradeoffs section.",
+            "kind": "rewrite",
+            "learning_target": "same",
+            "essential_meanings": [
+              "Justified when .NET Framework or multiple implementations must be supported",
+              "netstandard2.0 is the highest version .NET Framework can consume",
+              "Modern netX.0 is the default when all consumers run modern .NET",
+              "Package dependencies must also support the host"
+            ],
+            "sources": [
+              {
+                "url": "https://learn.microsoft.com/en-us/dotnet/standard/net-standard",
+                "claim": "netstandard2.0 is the highest version .NET Framework supports; 2.1 is not supported by .NET Framework; modern .NET implements 2.1 and earlier.",
+                "version": ".NET Standard 2.1"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The Qard answer is overloaded: it restates the Tradeoffs section as a table and repeats the end-of-2.1 fact.",
+            "reader_benefit": "A concise answer that is easier to retrieve and grade."
+          }
+        ],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "outcome": "changed",
+            "reason": "Facts were verified as accurate against the cited Microsoft sources; the edits remove repetition of the end-of-2.1 fact and shorten the Qard answer, whose table duplicated the Tradeoffs section, so the card is easier to recall."
+          }
+        ],
+        "feedback": []
+      },
+      "source_hashes": {
+        "Vault/Home/Programming/NET/NET Standart.md": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383"
+      },
+      "feedback_keys": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/Programming/NET/NET Standart.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-13T07:08:46.991041Z",
+      "review_repair_key": "4af78065872b17475859092c2fc88854d9a8f91dd2c095ddecdb7d02e4d42821",
+      "repair_reserved": true,
+      "repair_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The facts hold, but the single Qard answer is overloaded and restates the body. The \"no version after 2.1\" fact repeats across the note, and the proposal made no edits to fix this.",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "Technically accurate, but the retrieval value of the one Qard is weak. Its answer runs to several paragraphs and a table that duplicate the Pitfalls and Tradeoffs sections. Several sections also repeat the end-of-2.1 fact. Keeping the note unchanged leaves these defects unresolved.",
+            "page_type": "Concept — optional Questions and References present; single Qard with a protected ID; the note has no generated whats-next navigation.",
+            "current_text_evidence": [
+              {
+                "quote": ".NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
+                "line_start": 32,
+                "reason": "The end-of-2.1 fact first appears here."
+              },
+              {
+                "quote": ".NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants",
+                "line_start": 42,
+                "reason": "The 'Why it Ended' section restates the same fact, and the Qard answer states it a third time, so the body is repetitive."
+              },
+              {
+                "quote": "> [!qard]- When is targeting .NET Standard still justified?",
+                "line_start": 91,
+                "reason": "The question asks for one decision. Its answer then adds contract semantics, a four-row table and a retargeting note, which duplicate the Tradeoffs section and make the answer hard to retrieve under pressure."
+              },
+              {
+                "quote": "- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.",
+                "line_start": 84,
+                "reason": "This restates the tradeoff content that the Qard table repeats, so two places cover the same comparison."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the topic is compact and coherent, and the content belongs in a single note.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Question quality / repetition",
+                "location": "Qard answer (lines 92-103) and sections at lines 32, 42, 84-86",
+                "evidence": "The answer to 'When is targeting .NET Standard still justified?' adds contract semantics, a full target table and a retargeting note. The table duplicates the Tradeoffs bullets, and the end-of-2.1 fact is repeated in the key-mechanics bullet, in 'Why it Ended' and in the Qard.",
+                "effect": "The answer is too long to retrieve under pressure, and the body repeats itself, which lowers learning value.",
+                "fix": "Tighten the Qard answer to the justification, the netstandard2.0 reach and the condition for choosing a modern target. Drop the table or move it to the body. Merge the repeated end-of-2.1 statements into one."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "FAIL",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "repair_previous_proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "outcome": "keep",
+            "reason": "I read the whole note and its single Qard against Microsoft's .NET Standard documentation and the \"future of .NET Standard\" post, which the note already cites. I found no factual error. The note says .NET Standard is a versioned API contract and not a runtime. It says netstandard2.0 is the highest version .NET Framework can consume. It says 2.1 is not implemented by .NET Framework. It says .NET 5 unified the target framework monikers (TFMs) and that no version after 2.1 is planned. It says modern .NET supports 2.1 and earlier. The sections on resolution through reference assemblies, netstandard.dll and type forwarding, package shims, and language version versus TFM are correct. The three XML and C# examples are valid. The pitfalls and tradeoffs name the condition that changes each decision. The Qard has one gradeable task, which is when .NET Standard is still justified. Its table and its caveats about package dependencies and implementation releases are accurate. The References are real primary sources. Some repetition remains: the statement that no version follows 2.1 appears three times. This is minor and each occurrence supports its local explanation, so an edit would be cosmetic churn. No native violations are listed."
+          }
+        ],
+        "feedback": []
+      },
+      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "feedback_snapshot": [],
+      "blocked_review": {
+        "stage": "deterministic_application",
+        "reason": "card edit must replace one complete active Qard block including adjacent metadata"
+      },
+      "failed_at": "2026-11-13T07:08:50.463769Z"
     }
   },
   "completed_review_holds": {
@@ -39478,81 +39719,7 @@
     },
     "prepared_source_version": 1,
     "prepared_at": "2026-11-13T07:10:48.245696Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CHANGES REQUIRED",
-        "notes": [
-          {
-            "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
-            "verdict": "CHANGES REQUIRED",
-            "summary": "The note is strong overall, but the diagram and the verification sentence still present an IL \"Type verifier\" stage as part of the modern CLR path. Current .NET (CoreCLR) does not perform IL verification, so this stays inaccurate. The keep disposition left it open without resolving it.",
-            "page_type": "Concept — typed frontmatter; Questions and References optional; Qard callouts with protected IDs; voice of a senior engineer at a whiteboard.",
-            "current_text_evidence": [
-              {
-                "quote": "LOAD[Assembly loader] --> VERIFY[Type verifier]",
-                "line_start": 36,
-                "reason": "The diagram shows a verifier stage between loading and JIT. Current CoreCLR has no IL verifier, so the stage misleads a reader about the runtime path."
-              },
-              {
-                "quote": "Verification depends on the loaded and executed path and on how code is produced",
-                "line_start": 48,
-                "reason": "The prose hedges the verifier but still implies that verification takes place. It should state that CoreCLR does not verify IL, or the stage should be removed or renamed."
-              },
-              {
-                "quote": "Interop declarations must also match the native ABI, including calling convention and data layout; that determines call correctness rather than resource lifetime.",
-                "line_start": 96,
-                "reason": "A side point in the managed-versus-unmanaged answer. It repeats in the next card and makes the answer wander."
-              }
-            ],
-            "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: the runtime execution, JIT/AOT and interop topics form one coherent CLR overview, and a split would not make any part more useful.",
-            "findings": [
-              {
-                "severity": "Medium",
-                "dimension": "Accuracy",
-                "location": "Mermaid diagram (line 36) and the paragraph at line 48",
-                "evidence": "\"LOAD[Assembly loader] --> VERIFY[Type verifier]\" and \"Verification depends on the loaded and executed path\"",
-                "effect": "A reader concludes that the modern .NET runtime verifies IL. .NET Core and later do not perform IL verification; the JIT only does limited validity checks. The inaccuracy remains in an audited note.",
-                "fix": "Remove the verifier box or rename it to type loading and binding. State in the prose that CoreCLR does not verify IL, and that verification belonged to the .NET Framework security model."
-              },
-              {
-                "severity": "Medium",
-                "dimension": "Question quality",
-                "location": "First Qard, 'How do managed and unmanaged code differ?'",
-                "evidence": "The answer ends with a paragraph on ABI and calling convention, with stray double blank lines.",
-                "effect": "Off-question trivia and repetition: the ABI point is repeated in the second card, and the answer is no longer a clean contrast.",
-                "fix": "Remove the ABI paragraph from the first card and keep it in the interop card only if it is wanted. Retain the existing card ID."
-              }
-            ],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "FAIL",
-              "clarity": "PASS",
-              "question_quality": "FAIL",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The keep disposition leaves a known inaccurate \\\"Type verifier\\\" stage in the diagram and the verification prose unresolved. One Qard also carries off-topic ABI content. The note is therefore not clean.",
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
-          "citation_index": 2,
-          "reported_line_start": 96,
-          "resolved_line_start": 131
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md": "9a51f4d51594dcee6627c0ca5a8a7dcf1b75efd03144403aa8d273d2844d98ea"
-      },
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
+    "blocked_review": {
       "verdict": "CHANGES REQUIRED",
       "notes": [
         {
@@ -39610,6 +39777,80 @@
       ],
       "overall_reason": "The keep disposition leaves a known inaccurate \\\"Type verifier\\\" stage in the diagram and the verification prose unresolved. One Qard also carries off-topic ABI content. The note is therefore not clean.",
       "change_checks": []
-    }
+    },
+    "repair_previous_proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against its text and Microsoft's managed-execution, ReadyToRun and Native AOT documentation. The opening defines the CLR and the IL, ReadyToRun and Native AOT paths. The diagram is explicitly caveated as conceptual and incremental. The subsystem table, JIT/ReadyToRun/AOT comparison and tiering section are accurate, including Dynamic PGO on by default from .NET 8, OSR, and the two-pass exception dispatch. The assembly-loading section correctly states cooperative unloading of collectible contexts. The pitfalls are consistent with the finalization and dispose cards in sibling notes. The three cards each test one gradeable task, with sources on the answer side, and they do not duplicate nearby GC or startup cards. The only open point is the 'Type verifier' box in the diagram. It is a conceptual simplification for CoreCLR and the prose already hedges it, and I could not establish a better wording from a primary source, so it is left unchanged. No native violations are known."
+        }
+      ],
+      "feedback": []
+    },
+    "repair_review": {
+      "verdict": "CHANGES REQUIRED",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The note is strong overall, but the diagram and the verification sentence still present an IL \"Type verifier\" stage as part of the modern CLR path. Current .NET (CoreCLR) does not perform IL verification, so this stays inaccurate. The keep disposition left it open without resolving it.",
+          "page_type": "Concept — typed frontmatter; Questions and References optional; Qard callouts with protected IDs; voice of a senior engineer at a whiteboard.",
+          "current_text_evidence": [
+            {
+              "quote": "LOAD[Assembly loader] --> VERIFY[Type verifier]",
+              "line_start": 36,
+              "reason": "The diagram shows a verifier stage between loading and JIT. Current CoreCLR has no IL verifier, so the stage misleads a reader about the runtime path."
+            },
+            {
+              "quote": "Verification depends on the loaded and executed path and on how code is produced",
+              "line_start": 48,
+              "reason": "The prose hedges the verifier but still implies that verification takes place. It should state that CoreCLR does not verify IL, or the stage should be removed or renamed."
+            },
+            {
+              "quote": "Interop declarations must also match the native ABI, including calling convention and data layout; that determines call correctness rather than resource lifetime.",
+              "line_start": 131,
+              "reason": "A side point in the managed-versus-unmanaged answer. It repeats in the next card and makes the answer wander."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the runtime execution, JIT/AOT and interop topics form one coherent CLR overview, and a split would not make any part more useful.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Accuracy",
+              "location": "Mermaid diagram (line 36) and the paragraph at line 48",
+              "evidence": "\"LOAD[Assembly loader] --> VERIFY[Type verifier]\" and \"Verification depends on the loaded and executed path\"",
+              "effect": "A reader concludes that the modern .NET runtime verifies IL. .NET Core and later do not perform IL verification; the JIT only does limited validity checks. The inaccuracy remains in an audited note.",
+              "fix": "Remove the verifier box or rename it to type loading and binding. State in the prose that CoreCLR does not verify IL, and that verification belonged to the .NET Framework security model."
+            },
+            {
+              "severity": "Medium",
+              "dimension": "Question quality",
+              "location": "First Qard, 'How do managed and unmanaged code differ?'",
+              "evidence": "The answer ends with a paragraph on ABI and calling convention, with stray double blank lines.",
+              "effect": "Off-question trivia and repetition: the ABI point is repeated in the second card, and the answer is no longer a clean contrast.",
+              "fix": "Remove the ABI paragraph from the first card and keep it in the interop card only if it is wanted. Retain the existing card ID."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "FAIL",
+            "clarity": "PASS",
+            "question_quality": "FAIL",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The keep disposition leaves a known inaccurate \\\"Type verifier\\\" stage in the diagram and the verification prose unresolved. One Qard also carries off-topic ABI content. The note is therefore not clean.",
+      "change_checks": []
+    },
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "review_repair_key": "6c07ede9b9e90afed000835362667fb23282cdbfb9a5334e7930b307a4e2a029",
+    "author_repair_pending": true
   }
 }
