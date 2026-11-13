@@ -14150,10 +14150,10 @@
     "version": 1,
     "id": "ed9f729234e2405d9876ac4f5aa28fbd",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-13T20:03:30.781717Z",
-    "elapsed_seconds": 564.4251835999999,
-    "calls_reserved": 10,
+    "elapsed_seconds": 568.7252070999998,
+    "calls_reserved": 11,
     "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md",
@@ -16887,7 +16887,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T20:12:55.206409Z",
+    "checkpoint_at": "2026-11-13T20:12:59.506432Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -16912,7 +16912,7 @@
       "pr": null
     },
     "base_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
-    "reservation_deadline": "2026-11-13T20:26:55.998502Z",
+    "reservation_deadline": "2026-11-13T20:27:59.167809Z",
     "last_request": {
       "topic": "programming-e6aba2bd",
       "generation": 3,
