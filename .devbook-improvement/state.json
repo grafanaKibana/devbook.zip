@@ -13922,7 +13922,7 @@
     "status": "active",
     "phase": "evaluating",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 618.3546890000002,
+    "elapsed_seconds": 621.9400166000003,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -14182,7 +14182,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:08:16.375817Z",
+    "checkpoint_at": "2026-11-13T07:08:19.961144Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -31197,7 +31197,8 @@
     "51b6c28e082f05a03f815f56ece6eda07bac17203db0d983435a03418056a31c": 1,
     "72cc9e9175e6a4def7187aea8020c81086ca05b35be30b49d8370b4d80ade9cb": 1,
     "2b19e4deeef71b517a07e1114a44a1db008dfc40121c87d5f36e56c31c7fe94d": 1,
-    "a97533098caaad8c2592cc61a744179a778ff1c7223c194a3d57360df6c8282c": 1
+    "a97533098caaad8c2592cc61a744179a778ff1c7223c194a3d57360df6c8282c": 1,
+    "4af78065872b17475859092c2fc88854d9a8f91dd2c095ddecdb7d02e4d42821": 1
   },
   "invalid_proposals": {
     "9fee84ff84d9689d5dfad3c6fe703f665c86a6d2a18f6f2293d1638835cd347c": {
@@ -39123,6 +39124,7 @@
     },
     "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
     "review_repair_key": "4af78065872b17475859092c2fc88854d9a8f91dd2c095ddecdb7d02e4d42821",
-    "author_repair_pending": true
+    "author_repair_pending": true,
+    "repair_reserved": true
   }
 }
