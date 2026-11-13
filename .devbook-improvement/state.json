@@ -13870,10 +13870,10 @@
     "version": 1,
     "id": "2b8d0b6edd0c40dc8564a83316ed31b6",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "review_reserved",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 477.9927653000001,
-    "calls_reserved": 11,
+    "elapsed_seconds": 482.1864470000001,
+    "calls_reserved": 12,
     "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
@@ -14068,7 +14068,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:05:56.013892Z",
+    "checkpoint_at": "2026-11-13T07:06:00.207574Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -14093,7 +14093,7 @@
       "pr": null
     },
     "base_sha": "33eb965ee906ea62194f845aabf6eae0c840c9f3",
-    "reservation_deadline": "2026-11-13T07:20:44.360357Z"
+    "reservation_deadline": "2026-11-13T07:20:59.878853Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
