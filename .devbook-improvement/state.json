@@ -13922,7 +13922,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-13T06:57:58.021761Z",
-    "elapsed_seconds": 584.8720795000002,
+    "elapsed_seconds": 588.4707744000002,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -14182,7 +14182,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T07:07:42.893207Z",
+    "checkpoint_at": "2026-11-13T07:07:46.491902Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
@@ -30321,9 +30321,9 @@
         "topic_id": "programming-e6aba2bd",
         "notes": [
           {
-            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
-            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"Data-centric C# types with generated value equality, ToString, and with-expressions.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Types/Records\"\nflashcard_uid: \"c03985b0\"\ncreated: \"2026-02-18T19:18:52.000Z\"\nmodified: \"2026-11-03T09:52:48.695Z\"\npublished: \"2026-07-08T13:14:17.328Z\"\n---\n\nRecords are C# types for models whose contents define equality. The compiler supplies value-based equality and a useful `ToString`. Positional records also get properties and deconstruction. A `with` expression creates a copy with selected members changed. This fits DTOs, messages, and other data that should compare by value instead of object identity.\n\n# Synthesized Members\n\n## What the Compiler Generates\n\nFor a positional record:\n\n```csharp\npublic record Person(string Name, int Age);\n```\n\nThe compiler produces:\n\n- A primary constructor with `Name` and `Age` parameters.\n- `init`-only properties `Name` and `Age` (for `record class`; `get`/`set` for `record struct`).\n- `Equals(Person)` and `Equals(object)` comparing the runtime type and each instance field, using each field type's own equality.\n- `GetHashCode()` combining the hashes of the same components.\n- `operator ==` and `operator !=` delegating to `Equals`.\n- `ToString()` returning `Person { Name = Alice, Age = 30 }`.\n- `Deconstruct(out string name, out int age)`.\n- A protected copy constructor and `<Clone>$` method powering `with` expressions.\n- A virtual `EqualityContract` property (for record classes) returning `typeof(T)`.\n\nThe copy-constructor and clone-method bullet applies only to record classes. Record structs use value copying for `with` expressions and do not synthesize that copy constructor or clone path.\n\nThese members can be customized, but equality and hashing must stay consistent. A member added to a record may affect synthesized equality through its backing field, while a computed property without storage does not become a new equality component.\n\n## Positional Vs Nominal Syntax\n\n```csharp\n// Positional — primary constructor, auto-generated properties and Deconstruct\npublic record Order(int Id, string Customer, decimal Total);\n\n// Nominal — explicit properties, no Deconstruct unless one is declared by hand\npublic record Order\n{\n    public int Id { get; init; }\n    public string Customer { get; init; } = string.Empty;\n    public decimal Total { get; init; }\n}\n```\n\nBoth forms get the record equality and formatting machinery. Positional syntax is compact and exposes constructor parameters as properties. Nominal syntax makes validation, custom accessors, and construction rules easier to see.\n\n## With-expressions\n\nA `with` expression copies a record and then applies the listed member initializers:\n\n```csharp\nvar p1 = new Person(\"Alice\", 30);\nvar p2 = p1 with { Age = 31 };\n\nConsole.WriteLine(p1); // Person { Name = Alice, Age = 30 }\nConsole.WriteLine(p2); // Person { Name = Alice, Age = 31 }\nConsole.WriteLine(ReferenceEquals(p1, p2)); // False\n```\n\nFor a record class, the compiler-generated clone operation invokes a copy constructor and preserves the runtime record type. A record struct is copied as a value. Both are shallow copies: referenced objects remain shared unless the copy logic replaces them.\n\n# Record Variants\n\n## Record Class (Default)\n\n`record` and `record class` declare a reference type with generated value equality.\n\n```csharp\nvar p1 = new Person(\"Alice\", 30);\nvar p2 = new Person(\"Alice\", 30);\nConsole.WriteLine(p1 == p2);                // True — value-based equality\nConsole.WriteLine(ReferenceEquals(p1, p2)); // False — different heap objects\n\npublic record Person(string Name, int Age);\n```\n\nPositional properties use `get`/`init` by default. That prevents later property assignment, but it does not make referenced objects immutable.\n\n## Abstract Record\n\nAn abstract record cannot be instantiated. It defines the shared state and behavior of a record hierarchy while leaving abstract members to derived records.\n\n```csharp\npublic abstract record Vehicle(string Make)\n{\n    public abstract decimal CalculateInsurance();\n}\n\npublic record Car(string Make, int Doors) : Vehicle(Make)\n{\n    public override decimal CalculateInsurance() => 500m * Doors;\n}\n\npublic record Truck(string Make, double PayloadTons) : Vehicle(Make)\n{\n    public override decimal CalculateInsurance() => 1000m * (decimal)PayloadTons;\n}\n\n// Vehicle v = new Vehicle(\"Toyota\");  // Compile error\n```\n\nThe `EqualityContract` in each derived record ensures that a `Car` and `Truck` with the same `Make` are never considered equal.\n\n## Sealed Record\n\nA sealed record closes the inheritance hierarchy. This is useful for leaf types whose equality contract should not acquire another derived shape.\n\n```csharp\npublic sealed record ApiKey(string Value, DateTime CreatedAt);\n// record DerivedKey(...) : ApiKey(...) { }  // Compile error\n```\n\n## Record Struct\n\nA record struct is a value type. Its positional properties use `get`/`set` by default, so the generated data carrier is mutable unless declared `readonly`.\n\n```csharp\npublic record struct Coord(double Lat, double Lon);\n\nvar c = new Coord(50.45, 30.52);\nc.Lat = 51.50;  // Allowed — record struct positional properties are mutable\n```\n\nA record struct fits when value-copy semantics and generated equality match the model. Storage follows the containing context: the value may be a local, live inline inside a heap object or array, or be boxed.\n\n## Readonly Record Struct\n\nA readonly record struct prevents mutation through its instance. Positional properties become `get`/`init`.\n\n```csharp\npublic readonly record struct Color(byte R, byte G, byte B);\n\nvar red = new Color(255, 0, 0);\n// red.R = 128;  // Compile error — init-only\nvar pink = red with { R = 255, G = 182, B = 193 };\n```\n\nThis is a strong default for a small value-like data carrier. It prevents accidental mutation, though referenced fields can still point to mutable heap objects and boxing can still allocate.\n\n## Partial Record\n\nA partial record can span files, which lets generated members and handwritten behavior share one type without sharing one source file.\n\n```csharp\n// UserDto.cs\npublic partial record UserDto(string Name, string Email);\n\n// UserDto.Validation.cs — generated or hand-written\npublic partial record UserDto\n{\n    public bool IsValid() => !string.IsNullOrWhiteSpace(Name) && Email.Contains('@');\n}\n```\n\n## Modifier Compatibility\n\n| Modifier combination | record class | record struct |\n|---|---|---|\n| `abstract` | Yes | No |\n| `sealed` | Yes | Implicit |\n| `static` | No | No |\n| `partial` | Yes | Yes |\n| `readonly` | N/A | Yes (`readonly record struct`) |\n| `ref` | No | No |\n\n# Record Inheritance\n\nOnly record classes support record inheritance, and their base class must also be a record class (apart from the implicit `object` base):\n\n```csharp\npublic record Entity(int Id);\npublic record Person(int Id, string Name) : Entity(Id);\npublic sealed record Employee(int Id, string Name, string Dept) : Person(Id, Name);\n```\n\nKey rules:\n\n- A record can only inherit from another record (not from a class).\n- A class cannot inherit from a record.\n- Each record in the hierarchy gets its own `EqualityContract` returning its own `typeof(T)`.\n- `with`-expressions preserve the runtime record type through the compiler-generated clone operation.\n- Positional parameters from the base must be forwarded in the derived constructor.\n\n# Records Vs C# 12 Primary Constructors\n\nC# 12 primary constructors make plain class and struct declarations look similar to positional records, but the generated surface is different:\n\n- `record Person(string Name)` → generates a **public `init` property** `Name`, plus value equality, `ToString`, `Deconstruct`, and `with`.\n- `class Person(string name)` → `name` remains in scope throughout the type body. The compiler synthesizes storage only when an instance member uses `name` and capture is required. It does **not** generate a record property, value equality, `ToString`, `Deconstruct`, or `with`.\n\nA record fits when value equality and data-carrier members are part of the contract. A primary constructor on a plain class or struct makes its parameters available throughout the type body without otherwise turning the type into a record.\n\n# `required` and Validation\n\n- Records combine with **`required`** to force initialization of a nominal property without a positional parameter: `public record User { public required string Email { get; init; } }`.\n- Validation can run in a property initializer that reads the positional parameter:\n\n  ```csharp\n  public record Email(string Value)\n  {\n      public string Value { get; } = string.IsNullOrWhiteSpace(Value)\n          ? throw new ArgumentException(\"Email required\") : Value;\n  }\n  ```\n\n- **System.Text.Json** binds JSON to a record's primary constructor by parameter name (`[JsonConstructor]` disambiguates when there are multiple constructors).\n\n# Pitfalls\n\n1. **Mutable record structs.** Positional properties on a record struct use setters. Mutation is easy to lose across value-copy boundaries, so `readonly record struct` is the safer starting point unless mutation is deliberate.\n\n2. **Runtime type participates in record-class equality.** Records from different points in a hierarchy do not compare equal merely because their shared properties match. `EqualityContract` prevents a base-shaped comparison from discarding derived state.\n\n3. **A reference member keeps its own equality semantics.** Two records holding separate `List<string>` instances compare unequal even when the lists contain the same strings, because `List<T>` uses reference equality. Element-wise comparison therefore requires either a collection with the required equality semantics or explicitly implemented record equality.\n\n4. **Shallow `with` copies.** Reference members are copied as references. Mutating a nested object through one record can therefore affect its copy:\n\n```csharp\nvar a = new Wrapper(new List<int> { 1, 2 });\nvar b = a with { };\nb.Items.Add(3);\nConsole.WriteLine(a.Items.Count); // 3 — same list instance\n\npublic record Wrapper(List<int> Items);\n```\n\n5. **Generated formatting is still work.** Record `ToString` calls synthesized `PrintMembers` code. It does not rely on reflection simply because the build is Debug. Formatting can still allocate and traverse members, so hot-path logging should avoid creating the string when the log level is disabled.\n\n# Questions\n\n> [!qard]- What is a C# record?\n> A record is a class or struct declared with record whose generated equality compares data rather than object identity. `record` alone means record class, a reference type that can inherit from another record class; record struct is a value type. Records fit data carriers such as DTOs, messages, and value objects. Identity-rich entities, such as typical Entity Framework entities, usually fit conventional classes.\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)\n\n> [!qard]- Which members does the compiler synthesize for a positional record?\n> - **Value equality and hashing:** `Equals` and `==` compare the runtime type and field values, using each field type's equality; `!=` negates equality. `GetHashCode` computes a compatible hash, so equal records have equal hashes. Separately created `record class` instances with equal data can therefore compare equal.\n> - **Nondestructive mutation:** `p with { Age = 31 }` copies the record and changes the listed members. The copy is shallow, so referenced objects are shared.\n> - **Readable `ToString`:** prints the type name and public members, such as `Person { Name = Alice, Age = 30 }`.\n> - **Positional members:** `record Person(string Name, int Age)` also generates a primary constructor, a public property for each parameter and `Deconstruct`. These properties are init-only for `record class` and `readonly record struct`, but settable for a plain `record struct`.\n>\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)\n\n<!-- qard-id: 40d90777-69d9-4746-901b-68d334cae949 -->\n> [!qard]- In `record Wrapper(List<int> Items)`, if `var b = a with { };` and an item is added to `b.Items`, does `a` observe the change, and why?\n> Yes. A `with` expression makes a shallow copy: it copies each field of `a` into the new record, and for a reference-type field that copies the reference, not the object it points to. `a.Items` and `b.Items` therefore refer to the same `List<int>`, so an item added through `b.Items` is visible through `a.Items`.\n>\n> ```csharp\n> var a = new Wrapper(new List<int> { 1, 2 });\n> var b = a with { };\n> b.Items.Add(3);\n> Console.WriteLine(a.Items.Count); // 3\n> ```\n>\n> An independent copy needs its own list, for example `a with { Items = new List<int>(a.Items) }`.\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)\n<!-- qard-id: 003b8f0c-ee5e-4a60-ac02-067b2fcef925 -->\n> [!qard]- Given `record Wrapper(List<int> Items)` and `var b = a with { };`, are `a` and `b` equal before and after an item is added to `b.Items`? Why?\n> They are equal both before and after the item is added. Generated record equality compares the runtime type and each field using that field's own equality, and `List<int>` compares by reference. Because `with` copied the reference, `a.Items` and `b.Items` refer to the same list. Adding an item changes that list in place without replacing it. The comparison therefore sees the same reference both times and never looks at the list's contents.\n>\n> The converse follows from the same rule: two `Wrapper` instances holding separate lists with identical items compare unequal.\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)\n<!-- qard-id: 13eb1fca-847d-4f86-8bf6-c4720c859178 -->\n> [!qard]- How can a record compare a collection member by its elements instead of by reference?\n> There are two ways: override the record's equality so it compares the collection's elements, or store the elements in a type whose own `Equals` compares elements. Generated record equality compares each field with that field type's equality, and `List<T>` compares references, so the default never looks at the elements.\n>\n> Overriding equality in the record replaces the generated `Equals(T?)` and keeps `GetHashCode` consistent with it:\n>\n> ```csharp\n> public sealed record Basket(string Owner, List<string> Items)\n> {\n>     public bool Equals(Basket? other) =>\n>         other is not null\n>         && Owner == other.Owner\n>         && Items.SequenceEqual(other.Items); // element-wise and order-sensitive\n> \n>     public override int GetHashCode()\n>     {\n>         var hash = new HashCode();\n>         hash.Add(Owner);\n>         foreach (var item in Items) hash.Add(item);\n>         return hash.ToHashCode();\n>     }\n> }\n> ```\n>\n> The generated `==` and `!=` call this `Equals`, so they also compare elements. `GetHashCode` hashes the same components that `Equals` compares, so records that compare equal produce equal hash codes, as hash-based collections require.\n>\n> Trade-offs:\n>\n> - **Cost:** `SequenceEqual` compares elements pairwise in order and stops at the first mismatch, so a comparison examines up to all n items, O(n), instead of comparing one reference. The `GetHashCode` shown always visits every item, so it is O(n).\n> - **Mutation:** this equality and hash read the list's current contents. If the list changes while the record is stored in a `HashSet<T>` or used as a dictionary key, the record's current hash can stop matching the hash the collection recorded, and its equality can change, so lookups become unreliable. A different hash and a failed lookup are both possible but not guaranteed, because different contents can produce the same hash code. This equality therefore fits collections that are not changed while the record serves as a key.\n> - **Immutability alone is not enough:** an immutable collection prevents such changes, but its type's own `Equals` still decides whether elements are compared.\n> \n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: define value equality](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type) · [Microsoft: Object.GetHashCode](https://learn.microsoft.com/en-us/dotnet/api/system.object.gethashcode?view=net-10.0) · [Microsoft: Dictionary<TKey,TValue>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2?view=net-10.0) · [.NET runtime: SequenceEqual source](https://github.com/dotnet/dotnet/blob/b0f34d51fccc69fd334253924abd8d6853fad7aa/src/runtime/src/libraries/System.Linq/src/System/Linq/SequenceEqual.cs)\n\n<!-- qard-id: 6ceafb8f-9a7c-4ebf-8ae5-7739e4e828aa -->\n> [!qard]- When is `record class` a better choice than `readonly record struct`?\n> A `record class` is the better choice when the value is large, needs inheritance, uses `null` as an ordinary 'no value' state, or is frequently handled as `object` or an interface. A `readonly record struct` fits small immutable values where avoiding a separate heap object matters more than those features. Both generate value equality and support `with`, so equality alone does not decide.\n>\n> | Aspect | `record class` | `readonly record struct` |\n> |---|---|---|\n> | Assignment and passing | Copies a reference, so the cost is the same however many fields the record has. | Copies every field, which is cheap for a few small fields and grows with the size of the value. |\n> | Storage | Each instance is a separate heap object that the garbage collector must track. | Stored inline in its variable, field or array element. Converting it to `object` or an interface boxes it into a heap copy. |\n> | Absence | A variable of the type can be `null`. | Needs `Nullable<T>` (`T?`) to represent a missing value. |\n> | Inheritance | Can derive from another record class, and equality accounts for the runtime type. | Cannot take part in inheritance: it neither derives from a record nor can be derived from. |\n>\n> When inheritance or `null` as absence decides the choice, no measurement is needed. When the justification rests on performance, the size at which copying outweighs allocation depends on the workload, so allocation and copy costs drive the decision only when measurement shows they matter.\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types) · [Microsoft: boxing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing)\n\n<!-- qard-id: 3a52f8c2-f1a4-4c9e-960f-6461e184a661 -->\n> [!qard]- If record equality is customized, why must `GetHashCode` stay consistent with it?\n> Hash-based collections such as `Dictionary<TKey,TValue>` and `HashSet<T>` use `GetHashCode` to decide where to look, and then call `Equals` only on entries with a matching hash code. Objects that are equal must therefore return the same hash code. Otherwise a lookup never reaches `Equals` for the matching entry.\n>\n> For example, suppose a custom `Equals` ignores an `UpdatedAt` property, but the generated `GetHashCode` still includes every field:\n>\n> 1. Record `a` is added to a `HashSet` under a hash code that includes `a.UpdatedAt`.\n> 2. Record `b` differs only in `UpdatedAt`, so `a.Equals(b)` is `true`, but `b`'s hash code is computed from a different `UpdatedAt`.\n> 3. A lookup for `b` searches by `b`'s hash code and never compares it with `a`. `Contains(b)` returns `false`, and `Add(b)` stores a second entry equal to the first, unless the two hash codes happen to collide.\n> \n> `GetHashCode` therefore must not depend on anything that can differ between two equal records, such as a property that `Equals` ignores. Hashing exactly the components that `Equals` compares is the usual choice. A coarser hash over a subset of them is also valid, because equal records agree on that subset; it only causes more collisions. The reverse is not required: unequal objects may share a hash code, which only costs extra `Equals` calls. For records, the compiler reports CS8851 when a record defines its own `Equals` but not `GetHashCode`.\n>\n> [Microsoft: Object.GetHashCode](https://learn.microsoft.com/en-us/dotnet/api/system.object.gethashcode?view=net-10.0) · [Microsoft: record declaration errors](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/record-declaration-errors) · [Microsoft: define value equality](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type)\n\n<!-- qard-id: 7c90c152-1919-4c74-84a3-c9cb621d3255 -->\n> [!qard]- Can a record struct be used safely as a `Dictionary` key, and what can make it unsafe?\n> Yes, as long as the equality and hash code the dictionary actually uses cannot change while the key is stored. That is either the key type's own equality or the `IEqualityComparer<TKey>` supplied to the dictionary. A dictionary stores its own copy of a struct key, so later assignments to the original variable do not affect the stored key. The risk comes from referenced objects: copying a struct copies references, not the objects they point to. Suppose the effective equality or a supplied comparer observes a referenced object's mutable state. Changing that object can make the key's current hash differ from the hash the dictionary recorded and can change its equality. The dictionary does not notice, so lookups for the entry can fail.\n>\n> ```csharp\n> var tag = new Tag { Name = \"a\" };\n> var map = new Dictionary<Key, string> { [new Key(1, tag)] = \"x\" };\n> \n> tag.Name = \"b\";                                       // changes state inside the stored key\n> map.ContainsKey(new Key(1, tag));                    // false unless the \"a\" and \"b\" key hashes collide\n> map.ContainsKey(new Key(1, new Tag { Name = \"a\" })); // false: Equals now sees \"b\"\n> \n> public record Tag { public string Name { get; set; } = \"\"; }\n> public readonly record struct Key(int Id, Tag Label);\n> ```\n>\n> `readonly` prevents reassigning the struct's own fields but does not freeze the objects they reference. A reference member compared by reference, such as a `List<T>` under the default comparer, stays stable when its contents change, because its identity does not. That holds only while the effective comparer also compares it by reference. A supplied comparer that compares the list's elements makes the key depend on mutable state again. A record struct key is therefore safe when every component that the effective equality and hash observe is immutable or compared by reference.\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types) · [Microsoft: Dictionary<TKey,TValue>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2?view=net-10.0) · [Microsoft: Object.GetHashCode](https://learn.microsoft.com/en-us/dotnet/api/system.object.gethashcode?view=net-10.0)\n\n> [!qard]- How do a positional `record struct` and a positional `readonly record struct` differ, and why does the difference matter?\n> The plain `record struct` generates `get`/`set` positional properties, so `c.Lat = 51.5` compiles. The `readonly` form generates `get`/`init` properties and requires every instance field to be readonly, so the same assignment is a compile error and a changed value comes from `with`. Both are value types with the same generated equality, `ToString`, `Deconstruct`, and `with` support.\n>\n> ```csharp\n> public record struct Coord(double Lat, double Lon);            // Lat { get; set; }\n> public readonly record struct FixedCoord(double Lat, double Lon); // Lat { get; init; }\n> ```\n>\n> The plain form is the outlier among positional records: a `record class` also gets init-only properties. A settable value type invites mutating a local copy taken from a property or method while the stored value stays unchanged. The `readonly` form also lets the compiler call any member through an `in` parameter or `readonly` field without a defensive copy; in the plain form only members declared `readonly` avoid it, including auto-property getters, which are implicitly readonly.\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct)\n\n> [!qard]- How does a positional record such as `record Person(string Name)` differ from a class with a C# 12 primary constructor such as `class Person(string name)`?\n> The record turns `Name` into a public init-only property and adds value equality (`Equals`, `GetHashCode`, `==`, `!=`), a `ToString` that prints member values, `Deconstruct`, and `with`. The class primary constructor only puts `name` in scope throughout the type body. It is not a property, not public, and remains assignable inside the type. The compiler stores it in a hidden field only when an instance member body references it; a parameter used only in field or property initializers needs no storage. Equality stays reference-based, and the class gets no `ToString` override, `Deconstruct`, or `with`.\n>\n> A class primary constructor is a construction shortcut for dependencies or initial state; a positional record is a data-carrier contract. Exposing the class's state still requires a declared property, such as `public string Name { get; } = name;`.\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: primary constructors](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/instance-constructors#primary-constructors)\n\n# References\n\n- [Records](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/record)\n",
-            "hash": "a19b632f9182b8cf016c6c2234ae9495c690cbfb4fc3e3ae2a4624722b8e85bd",
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"A specification of .NET APIs that multiple runtimes agree to implement.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/NET Standart\"\nflashcard_uid: \"60a3e364\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-10-28T12:33:42.000Z\"\npublished: \"2026-07-08T13:14:17.329Z\"\n---\n\n.NET Standard is a versioned API specification implemented by several .NET runtimes. It was the compatibility bridge among .NET Framework, .NET Core, Mono, and Xamarin. Modern libraries normally target the current .NET TFM directly. `netstandard2.0` remains useful when a library must also serve .NET Framework or older consumers.\n\n# How It Works\n\n- Targeting `netstandard2.0` selects that contract as the compile-time reference surface.\n- Targeting a modern `netX.0` TFM selects the APIs and runtime assumptions for that .NET release.\n- Multi-targeting lets one package compile separate assemblies for consumers with different capabilities.\n\nThis target choice constrains the baseline reference API surface. NuGet packages can add APIs, but runtime compatibility then depends on those package requirements too.\n\nKey mechanics to remember:\n\n- .NET Standard is a versioned API contract, not a runtime.\n- `netstandard2.0` is the highest .NET Standard version that .NET Framework can consume.\n- `netstandard2.1` adds APIs, but .NET Framework does not implement it.\n- .NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.\n\n## How the Contract Resolves at Runtime\n\nCompilation uses .NET Standard reference assemblies, including `netstandard.dll`, to constrain which contract members are available. At runtime, assembly unification and type forwarding bind those references to implementations supplied by the host. Compatibility therefore has two tests: the host must implement the target standard, and every additional package must support that host.\n\nThe 2.0-to-2.1 gap is the practical fault line. Some APIs associated with newer contracts can be supplied to a `netstandard2.0` target by packages such as `System.Memory` or `Microsoft.Bcl.AsyncInterfaces`, but a package is not proof that every runtime behavior is equivalent. Language version is a separate choice from TFM. Modern syntax can compile for an older target only when its required runtime types and members are available, sometimes through small compiler-support shims.\n\n## Why it Ended\n\n.NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants for APIs tied to an operating system or application model. No .NET Standard version is planned after 2.1. The older contract remains a compatibility tool rather than the default target for new code.\n\n## Example\n\nLibrary that wants maximum compatibility:\n\n```xml\n<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFramework>netstandard2.0</TargetFramework>\n  </PropertyGroup>\n</Project>\n```\n\nLibrary that ships for modern .NET and still supports older apps:\n\n```xml\n<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <TargetFrameworks>net8.0;netstandard2.0</TargetFrameworks>\n  </PropertyGroup>\n</Project>\n```\n\nConditional code for modern-only APIs while keeping compatibility target:\n\n```csharp\n#if NET8_0_OR_GREATER\nSpan<byte> buffer = stackalloc byte[256];\n#else\nvar buffer = new byte[256];\n#endif\n```\n\n# Pitfalls\n\n- A library targeting only `netstandard2.0` can miss newer APIs and platform-specific optimizations needed by modern consumers, which often pushes teams into awkward workarounds. Adding a modern target (for example `net8.0`) mitigates this, with conditional compilation limited to places where it creates measurable value.\n- Moving to `netstandard2.1` \"for more APIs\" can break .NET Framework consumers immediately because .NET Framework does not implement 2.1. Validating consumer TFM inventory before changing targets detects this risk, and `net8.0;netstandard2.0` is the choice when broad reach is still required.\n- Multi-targeting without a concrete compatibility requirement increases package/test complexity and can introduce behavior drift between targets. A small target set, CI enforced for each TFM, and removal of legacy targets once downstream constraints are gone keep that complexity and drift contained.\n\n# Tradeoffs\n\n- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.\n- **Modern `netX.0` only:** simpler testing and access to the current platform, but older consumers cannot load it.\n- **Multi-targeted:** a modern implementation plus a compatibility asset, paid for with more builds, tests, conditionals, and package metadata.\n\n# Questions\n\n<!-- qard-id: bec5a750-95b9-4d12-a09a-76e78858812c -->\n> [!qard]- When is targeting .NET Standard still justified?\n> Targeting .NET Standard is justified when one library build must be usable on more than one .NET implementation, which in practice usually means .NET Framework consumers remain. `netstandard2.0` is the highest version .NET Framework can consume, so it is the target that keeps that reach. When every consumer runs modern .NET, a modern `netX.0` target is the better default.\n>\n> .NET Standard is a versioned API contract, not a runtime, and meeting the contract does not by itself guarantee that a library runs on a given host. Targeting a version fixes the baseline reference API surface the library compiles against. Each .NET implementation supports particular .NET Standard versions starting from particular releases, so a consumer can use the library only on an implementation release that supports the targeted version. Compatible NuGet packages can add APIs beyond that baseline, and every package dependency must then also support the consumer's platform. After .NET 5 unified the target frameworks, no new .NET Standard versions are planned beyond 2.1.\n>\n> | Target | Consumers that can use it | Cost |\n> |---|---|---|\n> | `netstandard2.0` only | Releases of .NET Framework, .NET Core, Mono, Xamarin and modern .NET that implement 2.0 | Limited to the 2.0 baseline plus APIs from compatible packages, with no modern-target APIs or optimizations |\n> | `netstandard2.1` | Implementations and releases that support 2.1, including modern .NET, but not .NET Framework | Gives up .NET Framework reach without the full modern API set |\n> | Modern `netX.0` only | Apps on that .NET version or later | .NET Framework and older runtimes cannot load it |\n> | Multi-target, such as `net8.0;netstandard2.0` | Both groups, each receiving the assembly built for it | More builds, tests, conditional code and package metadata, justified only when distinct consumer groups need distinct assets |\n>\n> Modern .NET implements .NET Standard 2.1 and earlier, so an existing `netstandard2.0` library can keep serving modern consumers, provided its package dependencies also support those runtimes. Retargeting is worthwhile when the library needs APIs or features that only a newer target provides.\n>\n> Sources: [Microsoft Learn: .NET Standard](https://learn.microsoft.com/en-us/dotnet/standard/net-standard) · [.NET Blog: The future of .NET Standard](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/)\n\n# References\n\n- [.NET Standard](https://learn.microsoft.com/dotnet/standard/net-standard)\n- [The future of .NET Standard](https://devblogs.microsoft.com/dotnet/the-future-of-net-standard/)\n",
+            "hash": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383",
             "topic": "Programming",
             "violations": [],
             "needs_fixing_ids": [],
@@ -30339,179 +30339,140 @@
       },
       "proposal": {
         "version": 1,
-        "edits": [
-          {
-            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
-            "expected_hash": "a19b632f9182b8cf016c6c2234ae9495c690cbfb4fc3e3ae2a4624722b8e85bd",
-            "kind": "note",
-            "learning_target": "same",
-            "before": "- `Equals(Person)` and `Equals(object)` comparing the runtime type and each instance field, using each field type's own equality.",
-            "after": "- `Equals(Person)` and `Equals(object)` comparing each instance field with that field type's own equality. A record class also requires matching runtime types through `EqualityContract`; a record struct has no such check.",
-            "reason": "Runtime-type comparison applies only to record classes; a record struct has no EqualityContract.",
-            "essential_meanings": [
-              "record class equality includes runtime type",
-              "record struct equality compares fields only"
-            ],
-            "sources": [
-              {
-                "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record",
-                "claim": "Record class equality requires matching runtime types via EqualityContract; record structs compare fields by value without that contract.",
-                "version": "C# 12 / .NET 8"
-              }
-            ],
-            "feedback_keys": [],
-            "problem": "The synthesized-members list attributes a runtime-type comparison to all records, although EqualityContract exists only for record classes.",
-            "reader_benefit": "The list is consistent with the EqualityContract bullet and record struct behavior."
-          },
-          {
-            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
-            "expected_hash": "a19b632f9182b8cf016c6c2234ae9495c690cbfb4fc3e3ae2a4624722b8e85bd",
-            "kind": "rewrite",
-            "learning_target": "same",
-            "before": "> [!qard]- Which members does the compiler synthesize for a positional record?\n> - **Value equality and hashing:** `Equals` and `==` compare the runtime type and field values, using each field type's equality; `!=` negates equality. `GetHashCode` computes a compatible hash, so equal records have equal hashes. Separately created `record class` instances with equal data can therefore compare equal.",
-            "after": "> [!qard]- Which members does the compiler synthesize for a positional record?\n> - **Value equality and hashing:** `Equals` and `==` compare field values, using each field type's equality; a record class also requires the same runtime type, while a record struct has no such check. `!=` negates equality. `GetHashCode` computes a compatible hash, so equal records have equal hashes. Separately created `record class` instances with equal data can therefore compare equal.",
-            "reason": "The card repeated the runtime-type claim for all records; it now matches the corrected body.",
-            "essential_meanings": [
-              "equality compares fields with each field type's equality",
-              "runtime type check only for record classes",
-              "equal records have equal hashes"
-            ],
-            "sources": [
-              {
-                "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record",
-                "claim": "Runtime-type equality via EqualityContract applies to record classes only.",
-                "version": "C# 12 / .NET 8"
-              }
-            ],
-            "feedback_keys": [],
-            "problem": "The card states runtime-type comparison for every positional record, contradicting record struct behavior.",
-            "reader_benefit": "Learners recall the correct record class versus record struct equality rule."
-          }
-        ],
+        "edits": [],
         "dispositions": [
           {
-            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
-            "outcome": "changed",
-            "reason": "Whole-note audit against Microsoft record documentation found the runtime-type equality claim wrongly stated for all records in both the synthesized-members list and the first card. Both are now limited to record classes; the rest of the note was checked and kept."
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "outcome": "keep",
+            "reason": "I read the whole note and its single Qard against Microsoft's .NET Standard documentation and the \"future of .NET Standard\" post, which the note already cites. I found no factual error. The note says .NET Standard is a versioned API contract and not a runtime. It says netstandard2.0 is the highest version .NET Framework can consume. It says 2.1 is not implemented by .NET Framework. It says .NET 5 unified the target framework monikers (TFMs) and that no version after 2.1 is planned. It says modern .NET supports 2.1 and earlier. The sections on resolution through reference assemblies, netstandard.dll and type forwarding, package shims, and language version versus TFM are correct. The three XML and C# examples are valid. The pitfalls and tradeoffs name the condition that changes each decision. The Qard has one gradeable task, which is when .NET Standard is still justified. Its table and its caveats about package dependencies and implementation releases are accurate. The References are real primary sources. Some repetition remains: the statement that no version follows 2.1 appears three times. This is minor and each occurrence supports its local explanation, so an edit would be cosmetic churn. No native violations are listed."
           }
         ],
         "feedback": []
       },
       "source_hashes": {
-        "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md": "a19b632f9182b8cf016c6c2234ae9495c690cbfb4fc3e3ae2a4624722b8e85bd"
+        "Vault/Home/Programming/NET/NET Standart.md": "7450b5e0519c6ed3406106bc2970e89c44b9f59639f3447fa99f6986e1cb4383"
       },
       "feedback_keys": [],
       "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "repair_inputs": {
-        "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md": ""
+        "Vault/Home/Programming/NET/NET Standart.md": ""
       },
       "prepared_source_version": 1,
-      "prepared_at": "2026-11-13T07:03:48.388524Z",
-      "review_repair_key": "a97533098caaad8c2592cc61a744179a778ff1c7223c194a3d57360df6c8282c",
-      "repair_reserved": true,
-      "repair_review": {
+      "prepared_at": "2026-11-13T07:07:14.670234Z",
+      "completed_review": {
         "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The facts hold, but the single Qard answer is overloaded and restates the body. The \"no version after 2.1\" fact repeats across the note, and the proposal made no edits to fix this.",
         "notes": [
           {
-            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
             "verdict": "CHANGES REQUIRED",
-            "summary": "The proposed edit correctly fixes the synthesized-members bullet, but the same runtime-type error remains in the 'Which members does the compiler synthesize' card. The note is therefore still internally inconsistent.",
-            "page_type": "Concept note with Questions and References",
+            "summary": "Technically accurate, but the retrieval value of the one Qard is weak. Its answer runs to several paragraphs and a table that duplicate the Pitfalls and Tradeoffs sections. Several sections also repeat the end-of-2.1 fact. Keeping the note unchanged leaves these defects unresolved.",
+            "page_type": "Concept — optional Questions and References present; single Qard with a protected ID; the note has no generated whats-next navigation.",
             "current_text_evidence": [
               {
-                "quote": "comparing each instance field with that field type's own equality. A record class also requires matching runtime types through `EqualityContract`; a record struct has no such check.",
-                "line_start": 33,
-                "reason": "The edited bullet is accurate: the Microsoft documentation limits runtime-type equality to record classes."
+                "quote": ".NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
+                "line_start": 32,
+                "reason": "The end-of-2.1 fact first appears here."
               },
               {
-                "quote": "Records are C# types for models whose contents define equality.",
-                "line_start": 17,
-                "reason": "The opening is concise and accurate, and the rest of the note was kept as sound."
+                "quote": ".NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants",
+                "line_start": 42,
+                "reason": "The 'Why it Ended' section restates the same fact, and the Qard answer states it a third time, so the body is repetitive."
+              },
+              {
+                "quote": "> [!qard]- When is targeting .NET Standard still justified?",
+                "line_start": 91,
+                "reason": "The question asks for one decision. Its answer then adds contract semantics, a four-row table and a retargeting note, which duplicate the Tradeoffs section and make the answer hard to retrieve under pressure."
+              },
+              {
+                "quote": "- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.",
+                "line_start": 84,
+                "reason": "This restates the tradeoff content that the Qard table repeats, so two places cover the same comparison."
               }
             ],
             "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: the note covers one coherent topic, C# records, and its variants, inheritance and pitfalls depend on each other.",
+            "split_suggestion": "No split: the topic is compact and coherent, and the content belongs in a single note.",
             "findings": [
               {
                 "severity": "Medium",
-                "dimension": "Accuracy",
-                "location": "Question card 'Which members does the compiler synthesize for a positional record?', first bullet",
-                "evidence": "The card says '`Equals` and `==` compare the runtime type and field values'. This is the same claim the edit removes from the body, and it is still stated for every positional record, including record structs.",
-                "effect": "The card contradicts the corrected body list. A learner recalling the card would believe record structs check runtime type, which they do not.",
-                "fix": "Reword the card bullet to match the body: compare field values using each field type's equality, with an additional runtime-type check for record classes only. Keep the card's ID unchanged."
+                "dimension": "Question quality / repetition",
+                "location": "Qard answer (lines 92-103) and sections at lines 32, 42, 84-86",
+                "evidence": "The answer to 'When is targeting .NET Standard still justified?' adds contract semantics, a full target table and a retargeting note. The table duplicates the Tradeoffs bullets, and the end-of-2.1 fact is repeated in the key-mechanics bullet, in 'Why it Ended' and in the Qard.",
+                "effect": "The answer is too long to retrieve under pressure, and the body repeats itself, which lowers learning value.",
+                "fix": "Tighten the Qard answer to the justification, the netstandard2.0 reach and the condition for choosing a modern target. Drop the table or move it to the body. Merge the repeated end-of-2.1 statements into one."
               }
             ],
-            "source_checks": [
-              {
-                "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record",
-                "claim": "Record class equality requires matching runtime types via EqualityContract; record structs compare fields by value without that contract.",
-                "result": "SUPPORTED",
-                "reason": "The 'Equality in inheritance hierarchies' section applies the runtime-type rule and EqualityContract to record class types, not record struct types."
-              }
-            ],
+            "source_checks": [],
             "rejection_equivalence": [],
             "quality": {
-              "accuracy": "FAIL",
-              "clarity": "PASS",
-              "question_quality": "PASS",
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "FAIL",
               "identity_safety": "PASS",
               "rules_compliance": "PASS"
             }
           }
         ],
-        "overall_reason": "The body edit is correct, but the unchanged card still states the runtime-type comparison for all records. That leaves a factual inconsistency in the note, so the audit target is unresolved.",
-        "change_checks": [
-          {
-            "edit_index": 0,
-            "verdict": "WORTHWHILE",
-            "reason": "It corrects a real inaccuracy in the body. Runtime-type equality via EqualityContract applies only to record classes, and the Microsoft documentation supports this."
-          }
-        ]
+        "change_checks": []
       },
-      "repair_previous_proposal": {
-        "version": 1,
-        "edits": [
+      "blocked_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The facts hold, but the single Qard answer is overloaded and restates the body. The \"no version after 2.1\" fact repeats across the note, and the proposal made no edits to fix this.",
+        "notes": [
           {
-            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
-            "expected_hash": "a19b632f9182b8cf016c6c2234ae9495c690cbfb4fc3e3ae2a4624722b8e85bd",
-            "before": "- `Equals(Person)` and `Equals(object)` comparing the runtime type and each instance field, using each field type's own equality.",
-            "after": "- `Equals(Person)` and `Equals(object)` comparing each instance field with that field type's own equality. A record class also requires matching runtime types through `EqualityContract`; a record struct has no such check.",
-            "reason": "The bullet claimed a runtime-type comparison for every record, but a record struct is a value type with no EqualityContract; the type check belongs to record classes only.",
-            "kind": "note",
-            "learning_target": "same",
-            "essential_meanings": [
-              "record class equality includes runtime type",
-              "record struct equality compares fields only"
-            ],
-            "sources": [
+            "path": "Vault/Home/Programming/NET/NET Standart.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "Technically accurate, but the retrieval value of the one Qard is weak. Its answer runs to several paragraphs and a table that duplicate the Pitfalls and Tradeoffs sections. Several sections also repeat the end-of-2.1 fact. Keeping the note unchanged leaves these defects unresolved.",
+            "page_type": "Concept — optional Questions and References present; single Qard with a protected ID; the note has no generated whats-next navigation.",
+            "current_text_evidence": [
               {
-                "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record",
-                "claim": "Record class equality requires matching runtime types via EqualityContract; record structs compare fields by value without that contract.",
-                "version": "C# 12 / .NET 8"
+                "quote": ".NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
+                "line_start": 32,
+                "reason": "The end-of-2.1 fact first appears here."
+              },
+              {
+                "quote": ".NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants",
+                "line_start": 42,
+                "reason": "The 'Why it Ended' section restates the same fact, and the Qard answer states it a third time, so the body is repetitive."
+              },
+              {
+                "quote": "> [!qard]- When is targeting .NET Standard still justified?",
+                "line_start": 91,
+                "reason": "The question asks for one decision. Its answer then adds contract semantics, a four-row table and a retargeting note, which duplicate the Tradeoffs section and make the answer hard to retrieve under pressure."
+              },
+              {
+                "quote": "- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.",
+                "line_start": 84,
+                "reason": "This restates the tradeoff content that the Qard table repeats, so two places cover the same comparison."
               }
             ],
-            "feedback_keys": [],
-            "problem": "The synthesized-members list attributes a runtime-type comparison to all records, although the note elsewhere says EqualityContract exists only for record classes.",
-            "reader_benefit": "The generated-members list is now consistent with the EqualityContract bullet and with record struct behavior."
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the topic is compact and coherent, and the content belongs in a single note.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Question quality / repetition",
+                "location": "Qard answer (lines 92-103) and sections at lines 32, 42, 84-86",
+                "evidence": "The answer to 'When is targeting .NET Standard still justified?' adds contract semantics, a full target table and a retargeting note. The table duplicates the Tradeoffs bullets, and the end-of-2.1 fact is repeated in the key-mechanics bullet, in 'Why it Ended' and in the Qard.",
+                "effect": "The answer is too long to retrieve under pressure, and the body repeats itself, which lowers learning value.",
+                "fix": "Tighten the Qard answer to the justification, the netstandard2.0 reach and the condition for choosing a modern target. Drop the table or move it to the body. Merge the repeated end-of-2.1 statements into one."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "FAIL",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
           }
         ],
-        "dispositions": [
-          {
-            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
-            "outcome": "changed",
-            "reason": "Audited the full note, including synthesized members, variants, modifier table, inheritance, primary-constructor comparison, pitfalls and all cards, against Microsoft record documentation. One inaccuracy found: the runtime-type equality claim was stated for all records, though it applies only to record classes. The fix removes that contradiction; the rest is accurate and kept."
-          }
-        ],
-        "feedback": []
+        "change_checks": []
       },
-      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "feedback_snapshot": [],
-      "blocked_review": {
-        "stage": "deterministic_application",
-        "reason": "card edit must replace one complete active Qard block including adjacent metadata"
-      },
-      "failed_at": "2026-11-13T07:03:52.187556Z"
+      "feedback_snapshot": []
     },
     "ai-ml-4edf0823": {
       "workload_id": "b9235098cfe341bd98cce55faa026472",
@@ -37968,6 +37929,206 @@
         ]
       },
       "feedback_snapshot": []
+    },
+    "d565b6d432420ee644f5f6ea950b39ab9f9c3403985cc9ebcdaf086d3d80fdb3": {
+      "workload_id": "2b8d0b6edd0c40dc8564a83316ed31b6",
+      "topic_id": "programming-e6aba2bd",
+      "batch": {
+        "topic": "Programming",
+        "topic_id": "programming-e6aba2bd",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+            "content": "---\ntopic: [Programming]\nsubtopic: [NET]\nsummary: \"Data-centric C# types with generated value equality, ToString, and with-expressions.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: Ready to Repeat\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Types/Records\"\nflashcard_uid: \"c03985b0\"\ncreated: \"2026-02-18T19:18:52.000Z\"\nmodified: \"2026-11-03T09:52:48.695Z\"\npublished: \"2026-07-08T13:14:17.328Z\"\n---\n\nRecords are C# types for models whose contents define equality. The compiler supplies value-based equality and a useful `ToString`. Positional records also get properties and deconstruction. A `with` expression creates a copy with selected members changed. This fits DTOs, messages, and other data that should compare by value instead of object identity.\n\n# Synthesized Members\n\n## What the Compiler Generates\n\nFor a positional record:\n\n```csharp\npublic record Person(string Name, int Age);\n```\n\nThe compiler produces:\n\n- A primary constructor with `Name` and `Age` parameters.\n- `init`-only properties `Name` and `Age` (for `record class`; `get`/`set` for `record struct`).\n- `Equals(Person)` and `Equals(object)` comparing the runtime type and each instance field, using each field type's own equality.\n- `GetHashCode()` combining the hashes of the same components.\n- `operator ==` and `operator !=` delegating to `Equals`.\n- `ToString()` returning `Person { Name = Alice, Age = 30 }`.\n- `Deconstruct(out string name, out int age)`.\n- A protected copy constructor and `<Clone>$` method powering `with` expressions.\n- A virtual `EqualityContract` property (for record classes) returning `typeof(T)`.\n\nThe copy-constructor and clone-method bullet applies only to record classes. Record structs use value copying for `with` expressions and do not synthesize that copy constructor or clone path.\n\nThese members can be customized, but equality and hashing must stay consistent. A member added to a record may affect synthesized equality through its backing field, while a computed property without storage does not become a new equality component.\n\n## Positional Vs Nominal Syntax\n\n```csharp\n// Positional — primary constructor, auto-generated properties and Deconstruct\npublic record Order(int Id, string Customer, decimal Total);\n\n// Nominal — explicit properties, no Deconstruct unless one is declared by hand\npublic record Order\n{\n    public int Id { get; init; }\n    public string Customer { get; init; } = string.Empty;\n    public decimal Total { get; init; }\n}\n```\n\nBoth forms get the record equality and formatting machinery. Positional syntax is compact and exposes constructor parameters as properties. Nominal syntax makes validation, custom accessors, and construction rules easier to see.\n\n## With-expressions\n\nA `with` expression copies a record and then applies the listed member initializers:\n\n```csharp\nvar p1 = new Person(\"Alice\", 30);\nvar p2 = p1 with { Age = 31 };\n\nConsole.WriteLine(p1); // Person { Name = Alice, Age = 30 }\nConsole.WriteLine(p2); // Person { Name = Alice, Age = 31 }\nConsole.WriteLine(ReferenceEquals(p1, p2)); // False\n```\n\nFor a record class, the compiler-generated clone operation invokes a copy constructor and preserves the runtime record type. A record struct is copied as a value. Both are shallow copies: referenced objects remain shared unless the copy logic replaces them.\n\n# Record Variants\n\n## Record Class (Default)\n\n`record` and `record class` declare a reference type with generated value equality.\n\n```csharp\nvar p1 = new Person(\"Alice\", 30);\nvar p2 = new Person(\"Alice\", 30);\nConsole.WriteLine(p1 == p2);                // True — value-based equality\nConsole.WriteLine(ReferenceEquals(p1, p2)); // False — different heap objects\n\npublic record Person(string Name, int Age);\n```\n\nPositional properties use `get`/`init` by default. That prevents later property assignment, but it does not make referenced objects immutable.\n\n## Abstract Record\n\nAn abstract record cannot be instantiated. It defines the shared state and behavior of a record hierarchy while leaving abstract members to derived records.\n\n```csharp\npublic abstract record Vehicle(string Make)\n{\n    public abstract decimal CalculateInsurance();\n}\n\npublic record Car(string Make, int Doors) : Vehicle(Make)\n{\n    public override decimal CalculateInsurance() => 500m * Doors;\n}\n\npublic record Truck(string Make, double PayloadTons) : Vehicle(Make)\n{\n    public override decimal CalculateInsurance() => 1000m * (decimal)PayloadTons;\n}\n\n// Vehicle v = new Vehicle(\"Toyota\");  // Compile error\n```\n\nThe `EqualityContract` in each derived record ensures that a `Car` and `Truck` with the same `Make` are never considered equal.\n\n## Sealed Record\n\nA sealed record closes the inheritance hierarchy. This is useful for leaf types whose equality contract should not acquire another derived shape.\n\n```csharp\npublic sealed record ApiKey(string Value, DateTime CreatedAt);\n// record DerivedKey(...) : ApiKey(...) { }  // Compile error\n```\n\n## Record Struct\n\nA record struct is a value type. Its positional properties use `get`/`set` by default, so the generated data carrier is mutable unless declared `readonly`.\n\n```csharp\npublic record struct Coord(double Lat, double Lon);\n\nvar c = new Coord(50.45, 30.52);\nc.Lat = 51.50;  // Allowed — record struct positional properties are mutable\n```\n\nA record struct fits when value-copy semantics and generated equality match the model. Storage follows the containing context: the value may be a local, live inline inside a heap object or array, or be boxed.\n\n## Readonly Record Struct\n\nA readonly record struct prevents mutation through its instance. Positional properties become `get`/`init`.\n\n```csharp\npublic readonly record struct Color(byte R, byte G, byte B);\n\nvar red = new Color(255, 0, 0);\n// red.R = 128;  // Compile error — init-only\nvar pink = red with { R = 255, G = 182, B = 193 };\n```\n\nThis is a strong default for a small value-like data carrier. It prevents accidental mutation, though referenced fields can still point to mutable heap objects and boxing can still allocate.\n\n## Partial Record\n\nA partial record can span files, which lets generated members and handwritten behavior share one type without sharing one source file.\n\n```csharp\n// UserDto.cs\npublic partial record UserDto(string Name, string Email);\n\n// UserDto.Validation.cs — generated or hand-written\npublic partial record UserDto\n{\n    public bool IsValid() => !string.IsNullOrWhiteSpace(Name) && Email.Contains('@');\n}\n```\n\n## Modifier Compatibility\n\n| Modifier combination | record class | record struct |\n|---|---|---|\n| `abstract` | Yes | No |\n| `sealed` | Yes | Implicit |\n| `static` | No | No |\n| `partial` | Yes | Yes |\n| `readonly` | N/A | Yes (`readonly record struct`) |\n| `ref` | No | No |\n\n# Record Inheritance\n\nOnly record classes support record inheritance, and their base class must also be a record class (apart from the implicit `object` base):\n\n```csharp\npublic record Entity(int Id);\npublic record Person(int Id, string Name) : Entity(Id);\npublic sealed record Employee(int Id, string Name, string Dept) : Person(Id, Name);\n```\n\nKey rules:\n\n- A record can only inherit from another record (not from a class).\n- A class cannot inherit from a record.\n- Each record in the hierarchy gets its own `EqualityContract` returning its own `typeof(T)`.\n- `with`-expressions preserve the runtime record type through the compiler-generated clone operation.\n- Positional parameters from the base must be forwarded in the derived constructor.\n\n# Records Vs C# 12 Primary Constructors\n\nC# 12 primary constructors make plain class and struct declarations look similar to positional records, but the generated surface is different:\n\n- `record Person(string Name)` → generates a **public `init` property** `Name`, plus value equality, `ToString`, `Deconstruct`, and `with`.\n- `class Person(string name)` → `name` remains in scope throughout the type body. The compiler synthesizes storage only when an instance member uses `name` and capture is required. It does **not** generate a record property, value equality, `ToString`, `Deconstruct`, or `with`.\n\nA record fits when value equality and data-carrier members are part of the contract. A primary constructor on a plain class or struct makes its parameters available throughout the type body without otherwise turning the type into a record.\n\n# `required` and Validation\n\n- Records combine with **`required`** to force initialization of a nominal property without a positional parameter: `public record User { public required string Email { get; init; } }`.\n- Validation can run in a property initializer that reads the positional parameter:\n\n  ```csharp\n  public record Email(string Value)\n  {\n      public string Value { get; } = string.IsNullOrWhiteSpace(Value)\n          ? throw new ArgumentException(\"Email required\") : Value;\n  }\n  ```\n\n- **System.Text.Json** binds JSON to a record's primary constructor by parameter name (`[JsonConstructor]` disambiguates when there are multiple constructors).\n\n# Pitfalls\n\n1. **Mutable record structs.** Positional properties on a record struct use setters. Mutation is easy to lose across value-copy boundaries, so `readonly record struct` is the safer starting point unless mutation is deliberate.\n\n2. **Runtime type participates in record-class equality.** Records from different points in a hierarchy do not compare equal merely because their shared properties match. `EqualityContract` prevents a base-shaped comparison from discarding derived state.\n\n3. **A reference member keeps its own equality semantics.** Two records holding separate `List<string>` instances compare unequal even when the lists contain the same strings, because `List<T>` uses reference equality. Element-wise comparison therefore requires either a collection with the required equality semantics or explicitly implemented record equality.\n\n4. **Shallow `with` copies.** Reference members are copied as references. Mutating a nested object through one record can therefore affect its copy:\n\n```csharp\nvar a = new Wrapper(new List<int> { 1, 2 });\nvar b = a with { };\nb.Items.Add(3);\nConsole.WriteLine(a.Items.Count); // 3 — same list instance\n\npublic record Wrapper(List<int> Items);\n```\n\n5. **Generated formatting is still work.** Record `ToString` calls synthesized `PrintMembers` code. It does not rely on reflection simply because the build is Debug. Formatting can still allocate and traverse members, so hot-path logging should avoid creating the string when the log level is disabled.\n\n# Questions\n\n> [!qard]- What is a C# record?\n> A record is a class or struct declared with record whose generated equality compares data rather than object identity. `record` alone means record class, a reference type that can inherit from another record class; record struct is a value type. Records fit data carriers such as DTOs, messages, and value objects. Identity-rich entities, such as typical Entity Framework entities, usually fit conventional classes.\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)\n\n> [!qard]- Which members does the compiler synthesize for a positional record?\n> - **Value equality and hashing:** `Equals` and `==` compare the runtime type and field values, using each field type's equality; `!=` negates equality. `GetHashCode` computes a compatible hash, so equal records have equal hashes. Separately created `record class` instances with equal data can therefore compare equal.\n> - **Nondestructive mutation:** `p with { Age = 31 }` copies the record and changes the listed members. The copy is shallow, so referenced objects are shared.\n> - **Readable `ToString`:** prints the type name and public members, such as `Person { Name = Alice, Age = 30 }`.\n> - **Positional members:** `record Person(string Name, int Age)` also generates a primary constructor, a public property for each parameter and `Deconstruct`. These properties are init-only for `record class` and `readonly record struct`, but settable for a plain `record struct`.\n>\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)\n\n<!-- qard-id: 40d90777-69d9-4746-901b-68d334cae949 -->\n> [!qard]- In `record Wrapper(List<int> Items)`, if `var b = a with { };` and an item is added to `b.Items`, does `a` observe the change, and why?\n> Yes. A `with` expression makes a shallow copy: it copies each field of `a` into the new record, and for a reference-type field that copies the reference, not the object it points to. `a.Items` and `b.Items` therefore refer to the same `List<int>`, so an item added through `b.Items` is visible through `a.Items`.\n>\n> ```csharp\n> var a = new Wrapper(new List<int> { 1, 2 });\n> var b = a with { };\n> b.Items.Add(3);\n> Console.WriteLine(a.Items.Count); // 3\n> ```\n>\n> An independent copy needs its own list, for example `a with { Items = new List<int>(a.Items) }`.\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)\n<!-- qard-id: 003b8f0c-ee5e-4a60-ac02-067b2fcef925 -->\n> [!qard]- Given `record Wrapper(List<int> Items)` and `var b = a with { };`, are `a` and `b` equal before and after an item is added to `b.Items`? Why?\n> They are equal both before and after the item is added. Generated record equality compares the runtime type and each field using that field's own equality, and `List<int>` compares by reference. Because `with` copied the reference, `a.Items` and `b.Items` refer to the same list. Adding an item changes that list in place without replacing it. The comparison therefore sees the same reference both times and never looks at the list's contents.\n>\n> The converse follows from the same rule: two `Wrapper` instances holding separate lists with identical items compare unequal.\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)\n<!-- qard-id: 13eb1fca-847d-4f86-8bf6-c4720c859178 -->\n> [!qard]- How can a record compare a collection member by its elements instead of by reference?\n> There are two ways: override the record's equality so it compares the collection's elements, or store the elements in a type whose own `Equals` compares elements. Generated record equality compares each field with that field type's equality, and `List<T>` compares references, so the default never looks at the elements.\n>\n> Overriding equality in the record replaces the generated `Equals(T?)` and keeps `GetHashCode` consistent with it:\n>\n> ```csharp\n> public sealed record Basket(string Owner, List<string> Items)\n> {\n>     public bool Equals(Basket? other) =>\n>         other is not null\n>         && Owner == other.Owner\n>         && Items.SequenceEqual(other.Items); // element-wise and order-sensitive\n> \n>     public override int GetHashCode()\n>     {\n>         var hash = new HashCode();\n>         hash.Add(Owner);\n>         foreach (var item in Items) hash.Add(item);\n>         return hash.ToHashCode();\n>     }\n> }\n> ```\n>\n> The generated `==` and `!=` call this `Equals`, so they also compare elements. `GetHashCode` hashes the same components that `Equals` compares, so records that compare equal produce equal hash codes, as hash-based collections require.\n>\n> Trade-offs:\n>\n> - **Cost:** `SequenceEqual` compares elements pairwise in order and stops at the first mismatch, so a comparison examines up to all n items, O(n), instead of comparing one reference. The `GetHashCode` shown always visits every item, so it is O(n).\n> - **Mutation:** this equality and hash read the list's current contents. If the list changes while the record is stored in a `HashSet<T>` or used as a dictionary key, the record's current hash can stop matching the hash the collection recorded, and its equality can change, so lookups become unreliable. A different hash and a failed lookup are both possible but not guaranteed, because different contents can produce the same hash code. This equality therefore fits collections that are not changed while the record serves as a key.\n> - **Immutability alone is not enough:** an immutable collection prevents such changes, but its type's own `Equals` still decides whether elements are compared.\n> \n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: define value equality](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type) · [Microsoft: Object.GetHashCode](https://learn.microsoft.com/en-us/dotnet/api/system.object.gethashcode?view=net-10.0) · [Microsoft: Dictionary<TKey,TValue>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2?view=net-10.0) · [.NET runtime: SequenceEqual source](https://github.com/dotnet/dotnet/blob/b0f34d51fccc69fd334253924abd8d6853fad7aa/src/runtime/src/libraries/System.Linq/src/System/Linq/SequenceEqual.cs)\n\n<!-- qard-id: 6ceafb8f-9a7c-4ebf-8ae5-7739e4e828aa -->\n> [!qard]- When is `record class` a better choice than `readonly record struct`?\n> A `record class` is the better choice when the value is large, needs inheritance, uses `null` as an ordinary 'no value' state, or is frequently handled as `object` or an interface. A `readonly record struct` fits small immutable values where avoiding a separate heap object matters more than those features. Both generate value equality and support `with`, so equality alone does not decide.\n>\n> | Aspect | `record class` | `readonly record struct` |\n> |---|---|---|\n> | Assignment and passing | Copies a reference, so the cost is the same however many fields the record has. | Copies every field, which is cheap for a few small fields and grows with the size of the value. |\n> | Storage | Each instance is a separate heap object that the garbage collector must track. | Stored inline in its variable, field or array element. Converting it to `object` or an interface boxes it into a heap copy. |\n> | Absence | A variable of the type can be `null`. | Needs `Nullable<T>` (`T?`) to represent a missing value. |\n> | Inheritance | Can derive from another record class, and equality accounts for the runtime type. | Cannot take part in inheritance: it neither derives from a record nor can be derived from. |\n>\n> When inheritance or `null` as absence decides the choice, no measurement is needed. When the justification rests on performance, the size at which copying outweighs allocation depends on the workload, so allocation and copy costs drive the decision only when measurement shows they matter.\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types) · [Microsoft: boxing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing)\n\n<!-- qard-id: 3a52f8c2-f1a4-4c9e-960f-6461e184a661 -->\n> [!qard]- If record equality is customized, why must `GetHashCode` stay consistent with it?\n> Hash-based collections such as `Dictionary<TKey,TValue>` and `HashSet<T>` use `GetHashCode` to decide where to look, and then call `Equals` only on entries with a matching hash code. Objects that are equal must therefore return the same hash code. Otherwise a lookup never reaches `Equals` for the matching entry.\n>\n> For example, suppose a custom `Equals` ignores an `UpdatedAt` property, but the generated `GetHashCode` still includes every field:\n>\n> 1. Record `a` is added to a `HashSet` under a hash code that includes `a.UpdatedAt`.\n> 2. Record `b` differs only in `UpdatedAt`, so `a.Equals(b)` is `true`, but `b`'s hash code is computed from a different `UpdatedAt`.\n> 3. A lookup for `b` searches by `b`'s hash code and never compares it with `a`. `Contains(b)` returns `false`, and `Add(b)` stores a second entry equal to the first, unless the two hash codes happen to collide.\n> \n> `GetHashCode` therefore must not depend on anything that can differ between two equal records, such as a property that `Equals` ignores. Hashing exactly the components that `Equals` compares is the usual choice. A coarser hash over a subset of them is also valid, because equal records agree on that subset; it only causes more collisions. The reverse is not required: unequal objects may share a hash code, which only costs extra `Equals` calls. For records, the compiler reports CS8851 when a record defines its own `Equals` but not `GetHashCode`.\n>\n> [Microsoft: Object.GetHashCode](https://learn.microsoft.com/en-us/dotnet/api/system.object.gethashcode?view=net-10.0) · [Microsoft: record declaration errors](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/record-declaration-errors) · [Microsoft: define value equality](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type)\n\n<!-- qard-id: 7c90c152-1919-4c74-84a3-c9cb621d3255 -->\n> [!qard]- Can a record struct be used safely as a `Dictionary` key, and what can make it unsafe?\n> Yes, as long as the equality and hash code the dictionary actually uses cannot change while the key is stored. That is either the key type's own equality or the `IEqualityComparer<TKey>` supplied to the dictionary. A dictionary stores its own copy of a struct key, so later assignments to the original variable do not affect the stored key. The risk comes from referenced objects: copying a struct copies references, not the objects they point to. Suppose the effective equality or a supplied comparer observes a referenced object's mutable state. Changing that object can make the key's current hash differ from the hash the dictionary recorded and can change its equality. The dictionary does not notice, so lookups for the entry can fail.\n>\n> ```csharp\n> var tag = new Tag { Name = \"a\" };\n> var map = new Dictionary<Key, string> { [new Key(1, tag)] = \"x\" };\n> \n> tag.Name = \"b\";                                       // changes state inside the stored key\n> map.ContainsKey(new Key(1, tag));                    // false unless the \"a\" and \"b\" key hashes collide\n> map.ContainsKey(new Key(1, new Tag { Name = \"a\" })); // false: Equals now sees \"b\"\n> \n> public record Tag { public string Name { get; set; } = \"\"; }\n> public readonly record struct Key(int Id, Tag Label);\n> ```\n>\n> `readonly` prevents reassigning the struct's own fields but does not freeze the objects they reference. A reference member compared by reference, such as a `List<T>` under the default comparer, stays stable when its contents change, because its identity does not. That holds only while the effective comparer also compares it by reference. A supplied comparer that compares the list's elements makes the key depend on mutable state again. A record struct key is therefore safe when every component that the effective equality and hash observe is immutable or compared by reference.\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types) · [Microsoft: Dictionary<TKey,TValue>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2?view=net-10.0) · [Microsoft: Object.GetHashCode](https://learn.microsoft.com/en-us/dotnet/api/system.object.gethashcode?view=net-10.0)\n\n> [!qard]- How do a positional `record struct` and a positional `readonly record struct` differ, and why does the difference matter?\n> The plain `record struct` generates `get`/`set` positional properties, so `c.Lat = 51.5` compiles. The `readonly` form generates `get`/`init` properties and requires every instance field to be readonly, so the same assignment is a compile error and a changed value comes from `with`. Both are value types with the same generated equality, `ToString`, `Deconstruct`, and `with` support.\n>\n> ```csharp\n> public record struct Coord(double Lat, double Lon);            // Lat { get; set; }\n> public readonly record struct FixedCoord(double Lat, double Lon); // Lat { get; init; }\n> ```\n>\n> The plain form is the outlier among positional records: a `record class` also gets init-only properties. A settable value type invites mutating a local copy taken from a property or method while the stored value stays unchanged. The `readonly` form also lets the compiler call any member through an `in` parameter or `readonly` field without a defensive copy; in the plain form only members declared `readonly` avoid it, including auto-property getters, which are implicitly readonly.\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct)\n\n> [!qard]- How does a positional record such as `record Person(string Name)` differ from a class with a C# 12 primary constructor such as `class Person(string name)`?\n> The record turns `Name` into a public init-only property and adds value equality (`Equals`, `GetHashCode`, `==`, `!=`), a `ToString` that prints member values, `Deconstruct`, and `with`. The class primary constructor only puts `name` in scope throughout the type body. It is not a property, not public, and remains assignable inside the type. The compiler stores it in a hidden field only when an instance member body references it; a parameter used only in field or property initializers needs no storage. Equality stays reference-based, and the class gets no `ToString` override, `Deconstruct`, or `with`.\n>\n> A class primary constructor is a construction shortcut for dependencies or initial state; a positional record is a data-carrier contract. Exposing the class's state still requires a declared property, such as `public string Name { get; } = name;`.\n>\n> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft: primary constructors](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/instance-constructors#primary-constructors)\n\n# References\n\n- [Records](https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/record)\n",
+            "hash": "a19b632f9182b8cf016c6c2234ae9495c690cbfb4fc3e3ae2a4624722b8e85bd",
+            "topic": "Programming",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+            "expected_hash": "a19b632f9182b8cf016c6c2234ae9495c690cbfb4fc3e3ae2a4624722b8e85bd",
+            "kind": "note",
+            "learning_target": "same",
+            "before": "- `Equals(Person)` and `Equals(object)` comparing the runtime type and each instance field, using each field type's own equality.",
+            "after": "- `Equals(Person)` and `Equals(object)` comparing each instance field with that field type's own equality. A record class also requires matching runtime types through `EqualityContract`; a record struct has no such check.",
+            "reason": "Runtime-type comparison applies only to record classes; a record struct has no EqualityContract.",
+            "essential_meanings": [
+              "record class equality includes runtime type",
+              "record struct equality compares fields only"
+            ],
+            "sources": [
+              {
+                "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record",
+                "claim": "Record class equality requires matching runtime types via EqualityContract; record structs compare fields by value without that contract.",
+                "version": "C# 12 / .NET 8"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The synthesized-members list attributes a runtime-type comparison to all records, although EqualityContract exists only for record classes.",
+            "reader_benefit": "The list is consistent with the EqualityContract bullet and record struct behavior."
+          },
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+            "expected_hash": "a19b632f9182b8cf016c6c2234ae9495c690cbfb4fc3e3ae2a4624722b8e85bd",
+            "kind": "rewrite",
+            "learning_target": "same",
+            "before": "> [!qard]- Which members does the compiler synthesize for a positional record?\n> - **Value equality and hashing:** `Equals` and `==` compare the runtime type and field values, using each field type's equality; `!=` negates equality. `GetHashCode` computes a compatible hash, so equal records have equal hashes. Separately created `record class` instances with equal data can therefore compare equal.",
+            "after": "> [!qard]- Which members does the compiler synthesize for a positional record?\n> - **Value equality and hashing:** `Equals` and `==` compare field values, using each field type's equality; a record class also requires the same runtime type, while a record struct has no such check. `!=` negates equality. `GetHashCode` computes a compatible hash, so equal records have equal hashes. Separately created `record class` instances with equal data can therefore compare equal.",
+            "reason": "The card repeated the runtime-type claim for all records; it now matches the corrected body.",
+            "essential_meanings": [
+              "equality compares fields with each field type's equality",
+              "runtime type check only for record classes",
+              "equal records have equal hashes"
+            ],
+            "sources": [
+              {
+                "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record",
+                "claim": "Runtime-type equality via EqualityContract applies to record classes only.",
+                "version": "C# 12 / .NET 8"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The card states runtime-type comparison for every positional record, contradicting record struct behavior.",
+            "reader_benefit": "Learners recall the correct record class versus record struct equality rule."
+          }
+        ],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+            "outcome": "changed",
+            "reason": "Whole-note audit against Microsoft record documentation found the runtime-type equality claim wrongly stated for all records in both the synthesized-members list and the first card. Both are now limited to record classes; the rest of the note was checked and kept."
+          }
+        ],
+        "feedback": []
+      },
+      "source_hashes": {
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md": "a19b632f9182b8cf016c6c2234ae9495c690cbfb4fc3e3ae2a4624722b8e85bd"
+      },
+      "feedback_keys": [],
+      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-13T07:03:48.388524Z",
+      "review_repair_key": "a97533098caaad8c2592cc61a744179a778ff1c7223c194a3d57360df6c8282c",
+      "repair_reserved": true,
+      "repair_review": {
+        "verdict": "CHANGES REQUIRED",
+        "notes": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The proposed edit correctly fixes the synthesized-members bullet, but the same runtime-type error remains in the 'Which members does the compiler synthesize' card. The note is therefore still internally inconsistent.",
+            "page_type": "Concept note with Questions and References",
+            "current_text_evidence": [
+              {
+                "quote": "comparing each instance field with that field type's own equality. A record class also requires matching runtime types through `EqualityContract`; a record struct has no such check.",
+                "line_start": 33,
+                "reason": "The edited bullet is accurate: the Microsoft documentation limits runtime-type equality to record classes."
+              },
+              {
+                "quote": "Records are C# types for models whose contents define equality.",
+                "line_start": 17,
+                "reason": "The opening is concise and accurate, and the rest of the note was kept as sound."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the note covers one coherent topic, C# records, and its variants, inheritance and pitfalls depend on each other.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy",
+                "location": "Question card 'Which members does the compiler synthesize for a positional record?', first bullet",
+                "evidence": "The card says '`Equals` and `==` compare the runtime type and field values'. This is the same claim the edit removes from the body, and it is still stated for every positional record, including record structs.",
+                "effect": "The card contradicts the corrected body list. A learner recalling the card would believe record structs check runtime type, which they do not.",
+                "fix": "Reword the card bullet to match the body: compare field values using each field type's equality, with an additional runtime-type check for record classes only. Keep the card's ID unchanged."
+              }
+            ],
+            "source_checks": [
+              {
+                "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record",
+                "claim": "Record class equality requires matching runtime types via EqualityContract; record structs compare fields by value without that contract.",
+                "result": "SUPPORTED",
+                "reason": "The 'Equality in inheritance hierarchies' section applies the runtime-type rule and EqualityContract to record class types, not record struct types."
+              }
+            ],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The body edit is correct, but the unchanged card still states the runtime-type comparison for all records. That leaves a factual inconsistency in the note, so the audit target is unresolved.",
+        "change_checks": [
+          {
+            "edit_index": 0,
+            "verdict": "WORTHWHILE",
+            "reason": "It corrects a real inaccuracy in the body. Runtime-type equality via EqualityContract applies only to record classes, and the Microsoft documentation supports this."
+          }
+        ]
+      },
+      "repair_previous_proposal": {
+        "version": 1,
+        "edits": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+            "expected_hash": "a19b632f9182b8cf016c6c2234ae9495c690cbfb4fc3e3ae2a4624722b8e85bd",
+            "before": "- `Equals(Person)` and `Equals(object)` comparing the runtime type and each instance field, using each field type's own equality.",
+            "after": "- `Equals(Person)` and `Equals(object)` comparing each instance field with that field type's own equality. A record class also requires matching runtime types through `EqualityContract`; a record struct has no such check.",
+            "reason": "The bullet claimed a runtime-type comparison for every record, but a record struct is a value type with no EqualityContract; the type check belongs to record classes only.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "record class equality includes runtime type",
+              "record struct equality compares fields only"
+            ],
+            "sources": [
+              {
+                "url": "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record",
+                "claim": "Record class equality requires matching runtime types via EqualityContract; record structs compare fields by value without that contract.",
+                "version": "C# 12 / .NET 8"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The synthesized-members list attributes a runtime-type comparison to all records, although the note elsewhere says EqualityContract exists only for record classes.",
+            "reader_benefit": "The generated-members list is now consistent with the EqualityContract bullet and with record struct behavior."
+          }
+        ],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+            "outcome": "changed",
+            "reason": "Audited the full note, including synthesized members, variants, modifier table, inheritance, primary-constructor comparison, pitfalls and all cards, against Microsoft record documentation. One inaccuracy found: the runtime-type equality claim was stated for all records, though it applies only to record classes. The fix removes that contradiction; the rest is accurate and kept."
+          }
+        ],
+        "feedback": []
+      },
+      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "feedback_snapshot": [],
+      "blocked_review": {
+        "stage": "deterministic_application",
+        "reason": "card edit must replace one complete active Qard block including adjacent metadata"
+      },
+      "failed_at": "2026-11-13T07:03:52.187556Z"
     }
   },
   "completed_review_holds": {
@@ -38836,7 +38997,7 @@
     },
     "prepared_source_version": 1,
     "prepared_at": "2026-11-13T07:07:14.670234Z",
-    "completed_review": {
+    "blocked_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The facts hold, but the single Qard answer is overloaded and restates the body. The \"no version after 2.1\" fact repeats across the note, and the proposal made no edits to fix this.",
       "notes": [
@@ -38891,6 +39052,77 @@
         }
       ],
       "change_checks": []
-    }
+    },
+    "repair_previous_proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Programming/NET/NET Standart.md",
+          "outcome": "keep",
+          "reason": "I read the whole note and its single Qard against Microsoft's .NET Standard documentation and the \"future of .NET Standard\" post, which the note already cites. I found no factual error. The note says .NET Standard is a versioned API contract and not a runtime. It says netstandard2.0 is the highest version .NET Framework can consume. It says 2.1 is not implemented by .NET Framework. It says .NET 5 unified the target framework monikers (TFMs) and that no version after 2.1 is planned. It says modern .NET supports 2.1 and earlier. The sections on resolution through reference assemblies, netstandard.dll and type forwarding, package shims, and language version versus TFM are correct. The three XML and C# examples are valid. The pitfalls and tradeoffs name the condition that changes each decision. The Qard has one gradeable task, which is when .NET Standard is still justified. Its table and its caveats about package dependencies and implementation releases are accurate. The References are real primary sources. Some repetition remains: the statement that no version follows 2.1 appears three times. This is minor and each occurrence supports its local explanation, so an edit would be cosmetic churn. No native violations are listed."
+        }
+      ],
+      "feedback": []
+    },
+    "repair_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The facts hold, but the single Qard answer is overloaded and restates the body. The \"no version after 2.1\" fact repeats across the note, and the proposal made no edits to fix this.",
+      "notes": [
+        {
+          "path": "Vault/Home/Programming/NET/NET Standart.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "Technically accurate, but the retrieval value of the one Qard is weak. Its answer runs to several paragraphs and a table that duplicate the Pitfalls and Tradeoffs sections. Several sections also repeat the end-of-2.1 fact. Keeping the note unchanged leaves these defects unresolved.",
+          "page_type": "Concept — optional Questions and References present; single Qard with a protected ID; the note has no generated whats-next navigation.",
+          "current_text_evidence": [
+            {
+              "quote": ".NET 5+ unified platform development. No new .NET Standard versions are planned after 2.1.",
+              "line_start": 32,
+              "reason": "The end-of-2.1 fact first appears here."
+            },
+            {
+              "quote": ".NET 5 introduced the unified `netX.0` TFM family, with platform-specific variants",
+              "line_start": 42,
+              "reason": "The 'Why it Ended' section restates the same fact, and the Qard answer states it a third time, so the body is repetitive."
+            },
+            {
+              "quote": "> [!qard]- When is targeting .NET Standard still justified?",
+              "line_start": 91,
+              "reason": "The question asks for one decision. Its answer then adds contract semantics, a four-row table and a retargeting note, which duplicate the Tradeoffs section and make the answer hard to retrieve under pressure."
+            },
+            {
+              "quote": "- **`netstandard2.0` only:** one broad asset, but no modern target-specific surface or optimization opportunities.",
+              "line_start": 84,
+              "reason": "This restates the tradeoff content that the Qard table repeats, so two places cover the same comparison."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the topic is compact and coherent, and the content belongs in a single note.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Question quality / repetition",
+              "location": "Qard answer (lines 92-103) and sections at lines 32, 42, 84-86",
+              "evidence": "The answer to 'When is targeting .NET Standard still justified?' adds contract semantics, a full target table and a retargeting note. The table duplicates the Tradeoffs bullets, and the end-of-2.1 fact is repeated in the key-mechanics bullet, in 'Why it Ended' and in the Qard.",
+              "effect": "The answer is too long to retrieve under pressure, and the body repeats itself, which lowers learning value.",
+              "fix": "Tighten the Qard answer to the justification, the netstandard2.0 reach and the condition for choosing a modern target. Drop the table or move it to the body. Merge the repeated end-of-2.1 statements into one."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "FAIL",
+            "question_quality": "FAIL",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    },
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "review_repair_key": "4af78065872b17475859092c2fc88854d9a8f91dd2c095ddecdb7d02e4d42821",
+    "author_repair_pending": true
   }
 }
