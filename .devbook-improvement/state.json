@@ -14268,9 +14268,9 @@
     "version": 1,
     "id": "ed9f729234e2405d9876ac4f5aa28fbd",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-13T20:03:30.781717Z",
-    "elapsed_seconds": 682.9128219999999,
+    "elapsed_seconds": 687.3658028999998,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -14279,7 +14279,8 @@
       "Vault/Home/Programming/NET/Runtime/Memory Leaks.md",
       "Vault/Home/Programming/NET/Runtime/Runtime.md",
       "Vault/Home/Programming/Programming.md",
-      "Vault/Home/Programming/WebAssembly.md"
+      "Vault/Home/Programming/WebAssembly.md",
+      "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md"
     ],
     "accepted_records": [
       {
@@ -17076,10 +17077,88 @@
           },
           "model_calls": 12
         }
+      },
+      {
+        "path": "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md",
+                "outcome": "keep",
+                "reason": "Audited the whole folder note against ASP.NET Core 10 web API behavior. The opening states the operating idea (ordered pipeline ending at a selected endpoint) and the placement decision (middleware versus endpoint-level concerns). The Request Flow section correctly says the response unwinds through middleware in reverse, so registration order matters. The sequence diagram matches that flow. Both C# examples are valid: the Minimal API uses WebApplication.CreateBuilder and MapGet, and the controller uses [ApiController], [Route] and [HttpGet] with ControllerBase. The Datacore folder map is protected and kept. The fence languages are set, there is a single relevant Microsoft reference, and the note has no cards, so there are no question defects. No known violations are reported. The note is compact and complete for a hub page, so edits would only be cosmetic."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The single folder note is accurate, compact and self-contained for a hub page. It has no known violations, no edits are proposed, and the keep disposition is supported by the current text.",
+            "notes": [
+              {
+                "path": "Vault/Home/Programming/NET/ASP NET Web API/ASP NET Web API.md",
+                "verdict": "CLEAN",
+                "summary": "The hub note states the pipeline model and the middleware-versus-endpoint placement decision, then gives a matching flow diagram and two valid endpoint snippets. The prose is direct and non-repetitive, and no accuracy, structure or protected-block issue was found, so keeping it unchanged is justified.",
+                "page_type": "FolderNote — keeps tags: [FolderNote] and the protected Datacore folder map. Questions are optional and absent. One References bullet is a bare descriptive link.",
+                "current_text_evidence": [
+                  {
+                    "quote": "An ASP.NET Core API is an ordered HTTP pipeline ending at a selected endpoint.",
+                    "line_start": 16,
+                    "reason": "The opening gives the operating idea quickly, and it is accurate."
+                  },
+                  {
+                    "quote": "Authentication, exception handling, and request logging usually sit in middleware.",
+                    "line_start": 18,
+                    "reason": "This gives the concrete placement decision, contrasted with endpoint-level concerns such as authorization metadata, binding and validation. The split is correct for ASP.NET Core."
+                  },
+                  {
+                    "quote": "The response then unwinds through the same middleware in reverse order, which is why registration order affects both request and response behavior.",
+                    "line_start": 27,
+                    "reason": "This states the mechanism and its consequence correctly."
+                  },
+                  {
+                    "quote": "Endpoint->>Middleware: Result",
+                    "line_start": 39,
+                    "reason": "The diagram matches the described unwinding. It is a simplified but not misleading flow."
+                  },
+                  {
+                    "quote": "app.MapGet(\"/health\", () => Results.Ok(new { status = \"ok\" }));",
+                    "line_start": 50,
+                    "reason": "The Minimal API snippet is valid, and its fence has a language identifier."
+                  },
+                  {
+                    "quote": "public sealed class OrdersController : ControllerBase",
+                    "line_start": 60,
+                    "reason": "The controller snippet correctly uses [ApiController], [Route] and [HttpGet] on a ControllerBase subclass. Its fence is typed."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note is one compact hub topic. The pipeline model and the two endpoint styles are interdependent, and there is no separately useful subtopic.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 14
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-13T20:14:53.694049Z",
+    "checkpoint_at": "2026-11-13T20:14:58.147030Z",
     "topic": "Programming",
     "topic_id": "programming-e6aba2bd",
     "current_batch": {
