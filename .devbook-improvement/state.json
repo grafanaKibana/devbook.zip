@@ -14639,11 +14639,11 @@
     "version": 1,
     "id": "40a68853698f42388f6dd5882c679ad4",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-14T18:18:47.082551Z",
-    "elapsed_seconds": 520.0852516999998,
+    "elapsed_seconds": 539.8453536999998,
     "calls_reserved": 17,
-    "responses_received": 16,
+    "responses_received": 17,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
@@ -15186,7 +15186,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T18:27:27.167275Z",
+    "checkpoint_at": "2026-11-14T18:27:46.927377Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -44309,6 +44309,63 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T18:27:23.530525Z"
+    "prepared_at": "2026-11-14T18:27:23.530525Z",
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The note is accurate and coherent, and it has no concrete violations. The keep disposition is supported and no edits are proposed.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md",
+          "verdict": "CLEAN",
+          "summary": "The whole note was read. The opening explains the vocabulary-mismatch mechanism. Each technique has a mechanism and a failure mode, the latency arithmetic is consistent, and the table agrees with the prose. The four cards are each one gradeable task, and the existing IDs are intact.",
+          "page_type": "Concept note. Optional Questions and References are present and valid. No standalone Links section. Mermaid and code-fence languages are fine.",
+          "current_text_evidence": [
+            {
+              "quote": "Translation searches more of that space without changing the corpus or the [[Embeddings|embedding model]].",
+              "line_start": 17,
+              "reason": "The opening states the operating idea and its boundary quickly."
+            },
+            {
+              "quote": "RRF does not reject a drifted variant or its documents: a result ranked highly by one bad rewrite can still survive the cutoff.",
+              "line_start": 63,
+              "reason": "The RRF explanation states the mechanism and its limit accurately. It sums 1/(rank+k) with k=60, as in the cited RAG-Fusion paper."
+            },
+            {
+              "quote": "Once that constraint disappears, retrieval returns generic async guidance and the synthesis step cannot recover the lost specificity.",
+              "line_start": 95,
+              "reason": "The decomposition failure mode is concrete and carries a mitigation."
+            },
+            {
+              "quote": "Even with concurrent searches, the translation-and-retrieval portion of latency is the translator plus the slowest search.",
+              "line_start": 113,
+              "reason": "The latency reasoning is correct and consistent with the RAG-Fusion section and the table."
+            },
+            {
+              "quote": "A technique stays only when it beats direct retrieval for its target query class within the latency budget.",
+              "line_start": 142,
+              "reason": "The closing section gives a clear decision rule, which supports engineering judgment."
+            },
+            {
+              "quote": "What is the scope of query translation in a RAG retrieval pipeline?",
+              "line_start": 147,
+              "reason": "The card is a direct, bounded concept question. Its answer has sources and keeps its qard-id."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the techniques, failure modes and selection table are one coherent topic. They are not independently separable.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
