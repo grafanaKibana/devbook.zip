@@ -14961,10 +14961,10 @@
   "focused_workload": {
     "version": 1,
     "id": "5fe9ecfcc7344982bcd2cdfba7482c21",
-    "status": "active",
-    "phase": "selecting",
+    "status": "sealed",
+    "phase": "sealed",
     "started_at": "2026-11-14T22:36:29.240304Z",
-    "elapsed_seconds": 289.8765800999999,
+    "elapsed_seconds": 294.2244403999999,
     "calls_reserved": 9,
     "responses_received": 9,
     "attempted_paths": [
@@ -15283,7 +15283,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T22:41:19.116524Z",
+    "checkpoint_at": "2026-11-14T22:41:23.464384Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
@@ -15308,7 +15308,9 @@
       "pr": null
     },
     "base_sha": "4c28a0295ce7c4697ea2adcea1e919f008c6b755",
-    "reservation_deadline": "2026-11-14T22:55:42.053276Z"
+    "reservation_deadline": "2026-11-14T22:55:42.053276Z",
+    "stop_reason": "topic_exhausted",
+    "sealed_at": "2026-11-14T22:41:23.464390Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
