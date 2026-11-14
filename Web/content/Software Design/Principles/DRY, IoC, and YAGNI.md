@@ -6,7 +6,7 @@ aliases:
   - IoC (Holywood Principle)
   - IoC (Hollywood Principle)
 created: 2026-08-10T10:51:19.000Z
-modified: 2026-10-28T12:33:42.000Z
+modified: 2026-11-12T10:29:34.513Z
 published: 2026-08-10T08:06:35.019Z
 topic:
   - Software Design

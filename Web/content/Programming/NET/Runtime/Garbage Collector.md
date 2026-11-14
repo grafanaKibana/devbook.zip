@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-02-10T16:03:55.000Z
-modified: 2026-11-12T10:29:34.513Z
+modified: 2026-11-13T20:06:59.454Z
 published: 2026-07-08T13:14:17.331Z
 topic:
   - Programming
@@ -32,10 +32,7 @@ The managed heap is virtual memory reserved and committed by the runtime for man
 Allocation on the Small Object Heap is usually a bump-pointer operation: advance the allocation pointer and initialize the object. The expensive part is retaining too much data or allocating fast enough to force frequent collections, not the pointer increment itself.
 
 > [!INFO]
-> **Segments and regions.** GC implementation details have changed across runtime versions and modes. Current runtimes can manage heap memory in smaller regions rather than relying only on a fixed segment layout. Generations, the SOH, the LOH, and the pinned object heap remain the stable application-level model. Segment or region size is not an application contract.
-
-> [!TIP]
-> Segment and region sizes are implementation-dependent. Performance decisions should use runtime counters and traces rather than inferred heap geometry.
+> **Segments and regions.** GC implementation details have changed across runtime versions and modes. Current runtimes can manage heap memory in smaller regions rather than relying only on a fixed segment layout. Generations, the SOH, the LOH, and the pinned object heap remain the stable application-level model. Segment or region size is not an application contract, so performance decisions should rely on runtime counters and traces rather than inferred heap geometry.
 
 Reducing temporary allocation can reduce generation 0 collection frequency. Reducing retained graphs matters more for full collections because every reachable object must still be considered. A low allocation rate does not compensate for an unbounded cache.
 
