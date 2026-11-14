@@ -470,6 +470,29 @@ public static partial class Worker
             string merged = Runtime.MergeManagedSection(pr.Str("body"), updatedBody, request.Str("topic_id"));
             await api.RequestAsync("PATCH", $"/pulls/{request.Int("pr_number")}", new JsonObject { ["body"] = merged }, cancellationToken: cancellationToken);
         }
+        pr = await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken);
+        if (pr is null)
+        {
+            return await MarkStaleAsync(store, request, owner, "Managed head changed before delivery for review.", cancellationToken);
+        }
+        await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
+        string deliveredNode = pr.Str("node_id");
+        await Runtime.EnsureReadyForReviewAsync(api, pr, cancellationToken);
+        pr = await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken);
+        if (pr is null)
+        {
+            JsonObject changed = await Runtime.ObjectAsync(api, "GET", $"/pulls/{request.Int("pr_number")}", cancellationToken: cancellationToken);
+            if (changed.Str("node_id") == deliveredNode && Identity(changed, config, request.Int("pr_number"), request.Str("branch")))
+            {
+                await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
+                await Runtime.EnsureDraftForMutationAsync(api, changed, cancellationToken);
+            }
+            return await MarkStaleAsync(store, request, owner, "Managed head changed during delivery for review.", cancellationToken);
+        }
+        if (pr.Bool("draft", true))
+        {
+            throw new RuntimeFailure("Verified improvement PR is still draft; retain the export operation for delivery recovery.");
+        }
         StateSnapshot finalSnapshot = await store.ReadAsync(cancellationToken);
         AssertLease(finalSnapshot.State, owner);
         JsonObject final = finalSnapshot.State.Copy();

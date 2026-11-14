@@ -820,7 +820,7 @@ public sealed partial class ImprovementEngine
 
         if (prState.Str("review_started_head_sha").Length > 0)
         {
-            summary += "\nChanges after review require renewed review of this head. PR remains draft.\n";
+            summary += "\nChanges after review require renewed review of this head. Ready status follows verified export and checks.\n";
         }
 
         var response = new JsonObject
