@@ -24,4 +24,4 @@ An intermittent request failure rarely identifies its own layer. Application tra
 
 # References
 
-- [RFC 1122: Requirements for Internet Hosts](https://www.rfc-editor.org/rfc/rfc1122)
+- [RFC 7276: An Overview of Operations, Administration, and Maintenance (OAM) Tools](https://www.rfc-editor.org/rfc/rfc7276)
