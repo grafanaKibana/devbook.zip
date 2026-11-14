@@ -17971,637 +17971,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "1036754a634142d7a6f283117a763aa4",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 712.5979166999999,
-    "calls_reserved": 19,
-    "responses_received": 19,
-    "attempted_paths": [
-      "Vault/Home/AI & ML/LLM/Embeddings.md",
-      "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
-      "Vault/Home/AI & ML/AI & ML.md",
-      "Vault/Home/AI & ML/LLM/Agents/Agents.md",
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md"
-    ],
+    "id": "40a68853698f42388f6dd5882c679ad4",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-14T18:18:47.082551Z",
+    "elapsed_seconds": 0.0011607,
+    "calls_reserved": 0,
+    "responses_received": 0,
+    "attempted_paths": [],
     "accepted_records": [],
-    "outcomes": [
-      {
-        "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
-                "outcome": "keep",
-                "reason": "I read the whole note and found no verified defect. The opening gives the operating idea, and the Mermaid query-to-ANN flow matches the prose. Model families, dimensions and the MRL claims are internally consistent. The OpenAI `dimensions` parameter and the 256-dimension `text-embedding-3-large` versus `ada-002` MTEB result match OpenAI's published guidance as I recall it. I did not re-fetch them or the Databricks FinanceBench recall figures. The note scopes both claims correctly: they motivate testing, and corpus-specific Recall@k decides. The metric section handles the normalization conditions correctly: dot product equals cosine, and squared L2 equals 2 − 2·cosine, only for normalized vectors. The re-embedding cost arithmetic checks out: 10M chunks × 500 tokens is 5B tokens, which at $0.02/1M is $100. The pitfalls, the tradeoff table and the closing guidance (simplest baseline first, then fine-tune only after failure analysis) each add a distinct decision and do not repeat each other. The four cards each test one separable task: retrieval mechanism, MRL storage, validating a shorter dimension, and model-swap mismatch. The answers state conditions and cite sources. The ID-less dimension-validation card is permitted as an ID-less card, and the note has no native violations. Rewording would be cosmetic churn."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
-                "verdict": "CLEAN",
-                "summary": "I read the whole note and found no concrete defect. The mechanism, conditions and numbers hold together, and the four cards each test one task. Rewording would be cosmetic churn.",
-                "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, Mermaid fence has a language identifier, no standalone Links section.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Matryoshka Representation Learning (MRL) trains models so that prefixes of the full vector remain independently meaningful.",
-                    "line_start": 53,
-                    "reason": "The MRL claim comes with the condition that corpus-specific Recall@k decides the tradeoff, so it is not overstated."
-                  },
-                  {
-                    "quote": "For length-normalized vectors, squared L2 distance equals 2 − 2 × cosine similarity",
-                    "line_start": 65,
-                    "reason": "The identity is correct and is limited to normalized vectors. The unnormalized exception is stated in the next sentence."
-                  },
-                  {
-                    "quote": "for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100",
-                    "line_start": 83,
-                    "reason": "10M × 500 = 5B tokens, and at $0.02 per 1M tokens that is $100. The arithmetic is correct."
-                  },
-                  {
-                    "quote": "MTEB aggregates several task families.",
-                    "line_start": 87,
-                    "reason": "This pitfall gives a distinct, actionable rule: select on the Retrieval category, then test on a corpus-specific set."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note covers one coherent topic. Model selection, dimensionality, metrics and pitfalls all serve the same embedding choice, and none would be independently useful as its own note.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The note has no concrete native violations or factual defects. Cards 1, 2 and 4 keep their IDs. Card 3 is an ID-less card, which is allowed. The keep disposition is justified.",
-            "change_checks": []
-          },
-          "model_calls": 2
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note. The opening separates watermarking from AI-text classifiers. The five-step sampling walk-through and the Tournament sampling description with its score formula define T, m, r_t and g_ℓ. The quality/detectability trade-off and the Limits list are consistent with each other. I fetched the Anthropic page cited in References. It supports the claims about key-derived randomness, no added tokens or hidden characters, no user identity, short text, factual passages and code, light proofreading, full rewrites, translations, and the likelihood-only result. The SynthID-Text Nature paper is the cited basis for Tournament sampling and the quality findings. Frontmatter, References format and headings follow the contract, and there are no cards or known violations. I found no factual error or clarity gap that justifies an edit."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "No edits were proposed. My own read of the whole note found no factual error, structural violation or clarity gap, so keeping it unchanged is justified.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-                "verdict": "CLEAN",
-                "summary": "The note explains the keyed sampling mechanism, the Tournament sampling score formula, the quality/detectability trade-off and the limits in a sensible order. I found no inaccuracy, repetition or contract violation, so keeping it unchanged is justified.",
-                "page_type": "Concept — optional Questions are absent. The References section is bare descriptive links. There are no code fences, and the single wikilink uses a full path with an alias.",
-                "current_text_evidence": [
-                  {
-                    "quote": "This makes a watermark different from a general AI-text classifier.",
-                    "line_start": 16,
-                    "reason": "The opening sets the boundary against classifiers early, so the topic is introduced quickly and the main misconception is addressed."
-                  },
-                  {
-                    "quote": "SynthID-Text implements this with **Tournament sampling**.",
-                    "line_start": 28,
-                    "reason": "The generic five-step mechanism is followed by a concrete implementation. The formula's symbols (T, m, r_t, g_ℓ) are defined right after it."
-                  },
-                  {
-                    "quote": "**Higher-entropy choices.**",
-                    "line_start": 45,
-                    "reason": "The note gives the mechanism (entropy leaves room for the keyed preference) and the conditions for detection, not just the conclusion."
-                  },
-                  {
-                    "quote": "**Presence provides limited evidence.**",
-                    "line_start": 52,
-                    "reason": "The Limits section keeps the important conditions and exceptions, with a calibrated closing judgment about attribution versus authorship."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note covers one coherent topic. Mechanism, quality trade-off and limits depend on each other, and it is compact enough to re-enter.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 4
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
-        "outcome": "proposal_blocked",
-        "reason": "wikilink removal requires explicit target-specific semantic rationale",
-        "result": {
-          "status": "proposal_blocked",
-          "stage": "deterministic_application",
-          "reason": "wikilink removal requires explicit target-specific semantic rationale",
-          "model_calls": 5
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/AI & ML.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/AI & ML.md",
-                "outcome": "keep",
-                "reason": "I read the whole folder note. The opening paragraph states the scope, which runs from classic ML to LLM applications and tooling. It also states the key judgment: production results depend on data, evaluation and operations more than on model choice. The Datacore folder map is protected and was left alone. The single card tests one decision, when classic ML beats an LLM. Its answer names two conditions: task and data fit, then measured quality, latency, cost and maintenance on the real workload. It also says that fit alone does not decide, because LLMs can do classification and regression. That is consistent with Google's ML problem framing and Rules of ML guidance, which the card cites on the answer side. The card is a single dependent explanation, so it does not need splitting, and its qard-id is intact. The frontmatter is valid, the one reference is a real topic-specific bare link, and no violations are listed. A rewrite would only reword accurate prose, so I made no edit."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/AI & ML.md",
-                "verdict": "CLEAN",
-                "summary": "The folder note has a compact opening that states the scope and the key judgment: production results depend on data, evaluation and operations more than on model choice. It has one coherent decision card and one real reference. I found no concrete error, so keeping it unchanged is justified.",
-                "page_type": "FolderNote — keeps tags: [FolderNote], the protected datacorejsx folder map, and an optional Questions/References pair.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Model choice matters, but production results usually turn on the data and on how the system is evaluated and operated.",
-                    "line_start": 21,
-                    "reason": "States the operating idea and the engineering judgment of the folder. The following sentence about gradient-boosted trees and LLMs gives a concrete illustration without padding."
-                  },
-                  {
-                    "quote": "The first condition makes classic ML a strong candidate. Only the second decides.",
-                    "line_start": 32,
-                    "reason": "The card answer is ordered from its conditions to the deciding factor, which makes the decision rule recoverable."
-                  },
-                  {
-                    "quote": "generative models can also perform classification and regression, and an LLM can be the stronger option for some text-classification tasks",
-                    "line_start": 35,
-                    "reason": "Gives the exception that stops the answer from being a blanket rule that classic ML wins on labeled tasks."
-                  },
-                  {
-                    "quote": "[Microsoft AI for Beginners](https://microsoft.github.io/AI-For-Beginners/)",
-                    "line_start": 44,
-                    "reason": "The reference is a real, topic-specific bare link with no trailing annotation."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the folder note is short and holds a single topic, the overview of AI & ML. The child notes belong in the folder map.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The note is accurate and readable, and the single card tests one decision with its conditions and exception. The qard-id is intact, the Datacore block is untouched, and no violations are listed. No defect was found, so keeping it is justified.",
-            "change_checks": []
-          },
-          "model_calls": 7
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
-                "outcome": "keep",
-                "reason": "I read the whole note and found no defect that justifies an edit. The workflow/agent split, the simplest-design-first guidance, and the five workflow pattern names match Anthropic's 'Building Effective Agents'. The augmented-LLM section correctly divides work between the model and the harness. The autonomous-agent section ties compounding error to the loop and lists controls that contain it. The memory section is labelled as an architectural choice, not a standard. Its table of five memory kinds is internally consistent with the prose on supersession, invalidation, and checking authorization before ranking. The Questions are each a single gradeable task. The workflow-versus-agent card compares the two with a table. The error-compounding card and the controls card are separate tasks. The good-fit card is bounded. Each card cites a primary source. The wikilinks and the datacorejsx and mermaid fences are valid. The references are real primary sources. I found no stale claim, repetition, or voice problem that would make a rewrite an improvement."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
-                "verdict": "CLEAN",
-                "summary": "The complete note is accurate and coherent. It separates workflows from agents, orders its explanation sensibly, and keeps the memory design explicitly labelled as an architectural choice. Each Qard tests one task, and the unchanged keep is justified.",
-                "page_type": "FolderNote — hub with a protected datacorejsx folder map, an optional Questions section and an optional References section. Qard callouts and their IDs are protected.",
-                "current_text_evidence": [
-                  {
-                    "quote": "**Workflows** are systems where LLMs and tools are orchestrated through predefined code paths.",
-                    "line_start": 20,
-                    "reason": "The workflow/agent definition matches Anthropic's 'Building Effective Agents' and sets up the rest of the note."
-                  },
-                  {
-                    "quote": "Workflow orchestration belongs next, once a single call falls short.",
-                    "line_start": 23,
-                    "reason": "The simplest-design-first escalation order is stated with its condition."
-                  },
-                  {
-                    "quote": "This is an architectural choice, not a universal standard.",
-                    "line_start": 74,
-                    "reason": "The memory taxonomy is honestly scoped, so it does not overclaim."
-                  },
-                  {
-                    "quote": "Authorization scope must be checked before ranking. Relevance metadata cannot enforce access.",
-                    "line_start": 84,
-                    "reason": "This states a concrete mechanism and a security limit."
-                  },
-                  {
-                    "quote": "> [!qard]- Which controls contain error propagation during an autonomous agent run?",
-                    "line_start": 111,
-                    "reason": "This card is a separate gradeable task from the compounding-mechanism card. It correctly stays ID-less and ends with a bounded caveat."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the topics (augmented LLM, workflow patterns, autonomous agents, memory) are short and share one decision frame. Workflow Patterns already has its own note.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "I read the whole note and found no concrete defect. Facts match the primary source, the explanation order works, and there is no repetition or voice problem. The cards are single-task and direct, and references are valid. There are no edits, so the keep is justified.",
-            "change_checks": []
-          },
-          "model_calls": 9
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
-                "outcome": "keep",
-                "reason": "I read the whole note and found no verified defect. The opening says what a benchmark is and why a leaderboard cannot make the final selection. The table matches the cited papers: SWE-bench hidden tests, τ-bench pass^k with a simulated user, GAIA exact match, WebArena self-hosted web apps, AgentBench's 8 environments, and BFCL AST/executable accuracy including no-call cases. The leaderboard section keeps the needed conditions: the scaffold has to be fixed to isolate the model, pass^k differs from pass@1, contamination affects old public suites, and cost and latency are often missing. The worked example correctly treats the systems as not comparable. It does not declare a winner. The single card tests one dependent idea, why scaffold and run conditions change a benchmark result. Its τ-bench source is on the answer side. The wikilinks are consistent with the sibling notes. The remaining wording overlap, such as 'tau' versus 'τ' and the example's closing paragraph, is cosmetic. Editing it would add churn and not improve understanding."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
-                "verdict": "CLEAN",
-                "summary": "Whole-note audit found no accurate-content, structure, or card defects. The opening states the use and limit of benchmarks, the table matches the cited benchmarks, the leaderboard section carries the needed conditions, and the example correctly refuses to name a winner. Remaining overlap (tau vs τ, example closing paragraph) is cosmetic, so keeping the note unchanged is justified.",
-                "page_type": "Concept — authorable prose with optional Questions and References; no special-page protection.",
-                "current_text_evidence": [
-                  {
-                    "quote": "A leaderboard score cannot make the final selection.",
-                    "line_start": 19,
-                    "reason": "States the operating idea and key boundary early: score measures a whole system, so public suites only shortlist."
-                  },
-                  {
-                    "quote": "| AgentBench | 8 environments | Interactive tasks across OS, DB, web, games | per-environment success |",
-                    "line_start": 29,
-                    "reason": "Table facts (8 environments, per-environment success) match the AgentBench paper; the other rows likewise match their sources."
-                  },
-                  {
-                    "quote": "`pass^k` requires the task to succeed on every one of `k` attempts, so it exposes intermittent failures that an average hides.",
-                    "line_start": 37,
-                    "reason": "Correct mechanism distinction from average success, with the condition that changes the decision."
-                  },
-                  {
-                    "quote": "Human verification improves issue and test quality; it does not isolate public tasks from training.",
-                    "line_start": 38,
-                    "reason": "Precise, hedged contamination claim that separates curation from leakage."
-                  },
-                  {
-                    "quote": "The example exposes missing evidence rather than a winner.",
-                    "line_start": 62,
-                    "reason": "The worked example correctly concludes the systems are not comparable instead of choosing one."
-                  },
-                  {
-                    "quote": "> [!qard]- Why can one base model produce very different results on the same agent benchmark?",
-                    "line_start": 67,
-                    "reason": "A single dependent task (scaffold and run conditions affect score), a direct question with a finite answer, an answer-side tau-bench source, and a retained ID."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the benchmark table, leaderboard reading rules and worked example all serve one decision (using public scores to shortlist, not select), and the note is compact.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The note is accurate and clear, and its single card tests one dependent task. No proposed edits exist and no concrete defect remains, so the keep is justified.",
-            "change_checks": []
-          },
-          "model_calls": 11
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text. The opening separates outcome from process over a trajectory. The measurement list (task success, tool-call correctness, trajectory quality, efficiency, robustness) matches the mermaid diagram. The scorecard example is consistent: 4 steps against a budget of at most 6, and 5/5 runs giving pass^5 = 1.0. The pass^k explanation is accurate: it is the share of tasks solved on all k attempts, not the mean pass rate. The tradeoffs table and release-gating advice are coherent with the sibling notes on tool-call and trajectory evaluation. The LangSmith reference supports the reference-match and LLM-judge framing. The note has no cards and no known violations, and I found no factual or editorial defect worth an edit, so any change would be churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate, well ordered and compact. Opening, measurement list, scorecard and tradeoffs agree with each other. No concrete defect justifies an edit, so keeping it unchanged is correct.",
-                "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx card map. Questions are absent, which is optional. There is one reference, and its bullet has no trailing annotation.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Agent evaluation separates the **outcome** (was the task completed?) from the **process** (was the route sound and efficient?).",
-                    "line_start": 16,
-                    "reason": "The opening states the operating idea quickly: score the trajectory, with outcome and process kept separate."
-                  },
-                  {
-                    "quote": "report the share solved on *all* attempts, using a pass^k-style reliability metric alongside the mean pass rate",
-                    "line_start": 45,
-                    "reason": "This matches the pass^k definition: all k trials succeed. It is correctly distinguished from the mean pass rate, and the 6-of-10 example makes the point concrete."
-                  },
-                  {
-                    "quote": "Reliability: solved on 5/5 runs  (pass^5 = 1.0)",
-                    "line_start": 66,
-                    "reason": "The example is internally consistent. 4 steps, $0.011 and 3.2s all fall within the stated budget, and 5/5 gives pass^5 = 1.0."
-                  },
-                  {
-                    "quote": "Gate releases on **verifiable task success plus efficiency limits**.",
-                    "line_start": 78,
-                    "reason": "The decision rule follows from the tradeoffs table and states the condition that adds trajectory judgment."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: outcome, process, reliability and tradeoffs form one coherent topic. Tool-call, trajectory and benchmark detail already live in sibling notes.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "Independent read of the whole note found no factual, ordering, terminology, repetition or structural defect. The keep disposition is justified, and no edits are proposed.",
-            "change_checks": []
-          },
-          "model_calls": 13
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-                "outcome": "keep",
-                "reason": "Audited the full note. The opening defines the tool-call boundary and the four separately scored properties (validity, selection, arguments, necessity). The flowchart, bullets, metrics table and example agree with each other: order 4851 against 4815 is schema-valid but wrong, and the 95%/70% average of 82.5% is correct. The ground-truth section distinguishes reference-based from reference-free evaluation and states the limits of each. The tradeoffs table and the three pitfalls (exact matching on free text, order-sensitive scoring, schema-valid but wrong) give the condition that changes each decision. The existing card tests one dependent explanation, is self-contained, and states its limits, so it needs no split. The note is also consistent with the trajectory note's strict/unordered modes. The two references are real and relevant, and the known_violations list is empty. I found no factual error or readability weakness that would justify an edit."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
-                "verdict": "CLEAN",
-                "summary": "The whole note is accurate, internally consistent and readable. The four-axis framing, flowchart, metrics table, worked example, tradeoffs and pitfalls agree with each other, and the single card is one dependent explanation. No concrete defect justifies an edit.",
-                "page_type": "Concept — authorable prose with optional Questions and References; mermaid and text fences carry language identifiers; no generated navigation or special-page rules apply.",
-                "current_text_evidence": [
-                  {
-                    "quote": "A combined \"tool accuracy\" number hides which decision failed.",
-                    "line_start": 19,
-                    "reason": "The opening states the operating idea early and hedges the diagnosis as leads, not proven root causes."
-                  },
-                  {
-                    "quote": "Averaging them to 82.5% destroys that diagnosis.",
-                    "line_start": 53,
-                    "reason": "The arithmetic is correct: (95+70)/2 = 82.5. It matches the card's example."
-                  },
-                  {
-                    "quote": "`{\"order_id\": \"4851\"}` is valid JSON even when the conversation identifies order `4815`.",
-                    "line_start": 40,
-                    "reason": "The bullet text, mermaid flow and worked example use the same 4851 vs 4815 case, so the explanation order is coherent and not repetitive."
-                  },
-                  {
-                    "quote": "Order becomes part of correctness only when one call establishes a precondition for the next",
-                    "line_start": 96,
-                    "reason": "The pitfall states the exception that changes the scoring decision, so the condition is preserved."
-                  },
-                  {
-                    "quote": "> [!qard]- Why should tool selection and argument accuracy be measured separately?",
-                    "line_start": 105,
-                    "reason": "The card is one dependent behavior-and-why explanation. It is a direct, self-contained question, and its answer cites a primary source and keeps the hedge about root causes."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: validity, selection, arguments and necessity form one coherent evaluation topic. The scoring methods are tightly coupled to it, so a separate note would not be independently useful.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The independent whole-note audit found no factual, editorial, question-quality or rules defect. Keeping the note unchanged is justified, and no edits were proposed.",
-            "change_checks": []
-          },
-          "model_calls": 15
-        }
-      },
-      {
-        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
-                "outcome": "keep",
-                "reason": "I read the whole note against its text and the LangSmith trajectory-evals page it cites. The four match modes (strict, unordered, subset, superset) are described correctly, with the right direction of inclusion for subset and superset. The worked example is internally consistent: both paths pass the superset check, and the judge separates the wasteful one. The tradeoff table, the pitfalls (brittleness, long traces, outcome leakage) and the episode-versus-step explanation all follow from the earlier mechanisms. The single Qard asks one comparison task, and its answer matches the note. The References are real and relevant. I found no factual error, gap or redundancy that justifies an edit."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
-                "verdict": "CLEAN",
-                "summary": "Independent whole-note read found accurate mode semantics, a consistent worked example, a decision-oriented tradeoff table, and one coherent comparison card. No concrete defect justifies an edit, so the keep is sound.",
-                "page_type": "Concept — authorable prose with optional Questions and References; frontmatter and Qard ID metadata protected.",
-                "current_text_evidence": [
-                  {
-                    "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
-                    "line_start": 27,
-                    "reason": "Subset direction matches the LangSmith/agentevals semantics, and the safety use case follows from it."
-                  },
-                  {
-                    "quote": "**Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration.",
-                    "line_start": 28,
-                    "reason": "Superset direction is correct, and the note states that bloat can still pass."
-                  },
-                  {
-                    "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
-                    "line_start": 66,
-                    "reason": "The example is internally consistent: both paths contain all required calls, and the judge separates them by waste."
-                  },
-                  {
-                    "quote": "neither accepts `search` and `filter` in place of `query`",
-                    "line_start": 83,
-                    "reason": "The pitfall states what each mode tolerates and what it does not, which preserves the conditions."
-                  },
-                  {
-                    "quote": "> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?",
-                    "line_start": 96,
-                    "reason": "The card is one focused comparison with a finite answer. Its ID comment is retained, and the answer cites the primary source."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note covers one topic, trajectory scoring. Reference matching, judge scoring and step/episode granularity depend on each other.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The note is accurate, readable and well ordered, with sound card quality and real references. No concrete violation or error was found, and the keep disposition is justified.",
-            "change_checks": []
-          },
-          "model_calls": 17
-        }
-      }
-    ],
+    "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:56:05.223191Z",
-    "topic": "AI & ML",
-    "topic_id": "ai-ml-4edf0823",
-    "current_batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Five orchestration patterns — chaining, routing, parallelization, orchestrator-workers, evaluator-optimizer — from fixed pipelines to dynamic delegation.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: New\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Workflow Patterns\"\nflashcard_uid: \"27b2b0a4\"\ncreated: \"2026-07-13T19:23:03.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-13T19:05:02.499Z\"\n---\n\nFive workflow patterns cover the space between one [[Home/AI & ML/LLM/Agents/Agents|augmented LLM]] call and an autonomous loop. Application code still owns the outer control flow. The model handles bounded decisions inside it. This middle of the [[Home/AI & ML/LLM/Agents/Agents|agentic]] spectrum is usually easier to test and operate because the allowed paths remain visible.\n\nThe patterns differ in where the next step is chosen. Prompt chaining fixes every stage in code. Routing chooses among predefined branches. Parallelization fixes the work but runs it concurrently. Orchestrator-workers lets a model decide the decomposition at runtime, while evaluator-optimizer adds a feedback loop. The smallest pattern that solves the task is normally the most reliable one.\n\n## Prompt Chaining\n\n```mermaid\nflowchart LR\n    In[Input] --> S1[Step 1 LLM] --> G1{Gate} --> S2[Step 2 LLM] --> G2{Gate} --> Out[Output]\n```\n\nPrompt chaining passes one model output into the next fixed stage. Programmatic gates between calls reject a bad intermediate result before it contaminates later work.\n\nIt fits tasks with a stable sequence, such as drafting an outline, validating required sections, and expanding the accepted outline. Chaining adds latency, so it earns its place only when narrower calls or early gates improve reliability.\n\n## Routing\n\n```mermaid\nflowchart LR\n    In[Input] --> R[Router LLM]\n    R --> P1[Prompt or Model A]\n    R --> P2[Prompt or Model B]\n    R --> P3[Prompt or Model C]\n```\n\nRouting classifies the input and sends it to one predefined path. Each branch can use a different prompt, tool set, or model. A refund path can become stricter without changing general question answering. Applying the same decision to model choice produces [[Home/AI & ML/LLM/Model Selection and Routing|model routing]].\n\nIt fits distinct categories with different handling. General questions might use a small model, technical cases a larger one, and refunds a constrained workflow with explicit policy checks. The router now becomes a failure boundary: a perfect specialist cannot recover a request sent to the wrong branch.\n\n## Parallelization\n\n```mermaid\nflowchart LR\n    In[Input] --> A[LLM Call A] & B[LLM Call B] & C[LLM Call C]\n    A --> Agg[Aggregator]\n    B --> Agg\n    C --> Agg\n    Agg --> Out[Output]\n```\n\nParallelization starts several model calls together and combines their outputs. Sectioning assigns independent pieces of work to different calls. Voting runs the same decision more than once and aggregates the answers.\n\nIt reduces wall-clock time when subtasks are independent, for example separate code-review concerns. Voting can reduce variance when disagreement is meaningful. Both variants spend more tokens, and sectioning fails when workers silently depend on shared intermediate state.\n\n## Orchestrator-Workers\n\n```mermaid\nflowchart LR\n    In[Input] --> O[Orchestrator LLM]\n    O --> W1[Worker 1] & W2[Worker 2] & W3[Worker 3]\n    W1 --> S[Synthesize]\n    W2 --> S\n    W3 --> S\n    S --> Out[Output]\n```\n\nAn orchestrator reads the task, decides how to decompose it, delegates the pieces, and synthesizes the results. The worker count and assignments do not exist until runtime. That is the boundary from parallelization, where application code defines every branch in advance.\n\nAnthropic reports this design in its Research system: a lead agent starts three to five subagents in parallel and improved an internal research evaluation by 90.2% over a single-agent setup. The number belongs to that system and evaluation, not to the pattern in general. Runtime decomposition makes orchestrator-workers useful for complex coding or research, and it is the simplest pattern here that crosses into [[Multi-Agentic Systems]].\n\n## Evaluator-Optimizer\n\n```mermaid\nflowchart LR\n    In[Input] --> G[Generator LLM]\n    G --> D[Draft]\n    D --> E[Evaluator LLM]\n    E -->|Revise| G\n    E -->|Accepted| Out[Final Output]\n```\n\nOne model produces a draft and another evaluates it against explicit criteria. Rejected drafts return to the generator with feedback. Approval or an iteration cap ends the loop.\n\nThis pattern fits work where feedback improves the output and the evaluator can recognize improvement. Code review and policy checking often qualify. A vague rubric produces a confident loop with no stable stopping condition, so both criteria and the cap are part of the design.\n\n# Questions\n\n<!-- qard-id: 6d82467a-87cc-4efd-b831-9eeab32bdbc5 -->\n> [!qard]- How do prompt chaining, routing, parallelization, orchestrator-workers, and evaluator-optimizer differ in who controls the next step?\n> They differ in how much of the control flow code fixes in advance. In prompt chaining, routing and parallelization, application code defines every possible path, and a model at most picks one predefined branch. In orchestrator-workers, a model decides the subtasks at runtime. In evaluator-optimizer, a model's evaluation decides whether the loop repeats, within a cap set in code.\n>\n> | Pattern | Who decides the next step | What code fixes in advance |\n> |---|---|---|\n> | Prompt chaining | Code. Each step always follows the previous one, and programmatic gates can stop a bad intermediate result. | The whole sequence of steps. |\n> | Routing | A classifier, often an LLM, reads the input and picks one branch. | The set of branches and how each one is handled. |\n> | Parallelization | Code. It starts the calls together and aggregates them, either splitting independent sections or voting over repeated runs. | The subtasks and how their results are combined. |\n> | Orchestrator-workers | The orchestrator model decides how to split the task, what to delegate and how to synthesize the results. | Only the outer frame; worker count and assignments appear at runtime. |\n> | Evaluator-optimizer | An evaluator model decides whether a draft passes explicit criteria or returns to the generator with feedback. | The acceptance criteria and an iteration cap that ends the loop. |\n>\n> Each additional model-owned decision tends to make cost less predictable and failures harder to reproduce, so the simplest pattern that fits is usually the easiest to test.\n>\n> [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)\n\n<!-- qard-id: c1c8ac97-e367-45a7-9727-9a1da6e9a126 -->\n> [!qard]- Why is the orchestrator-workers pattern harder to operate than ordinary parallelization, even though both fan out work to several calls?\n> Orchestrator-workers is harder to operate because a model, not code, decides the structure of the fan-out. In ordinary parallelization, code defines the subtasks and the aggregation in advance. In orchestrator-workers, a model chooses the subtasks for each input at runtime and also synthesizes the results, so the set of calls is not known before the run.\n>\n> - **Ordinary parallelization:** application code starts a predefined set of independent calls, such as one per code-review concern, and aggregates their outputs programmatically. The split and aggregation rules can be read, reviewed and tested before any run.\n> - **Orchestrator-workers:** an orchestrator model reads the input, decides how to split it and what to delegate, then synthesizes the workers' results. The worker count and assignments exist only at runtime.\n> \n> Fixed rules make the structure inspectable, but they do not make outcomes repeatable. In both patterns, the workers are model calls whose outputs can differ between runs, and how well a split suits the task depends on the input. Orchestrator-workers adds model-chosen structure on top of that variability:\n>\n> - **Work and cost vary:** the number of workers, and therefore the calls and tokens spent, can change between inputs and even between runs on the same input.\n> - **The split itself can fail per run:** any fan-out can miss part of the task, duplicate work or combine results poorly. With a fixed fan-out, the split and aggregation rules can be checked before deployment. With orchestrator-workers, a flawed decomposition or synthesis exists only in a particular run's decisions. It cannot be reviewed in advance and can appear for some inputs or runs but not others. It is therefore harder to reproduce and to catch with a few fixed test cases.\n> \n> These are risks, not guaranteed outcomes. A trace of each run's decomposition and synthesis shows where a particular run went wrong.\n>\n> [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)\n\n# References\n\n- [Patterns for Basic Agent Workflows — cookbook (Anthropic)](https://platform.claude.com/cookbook/patterns-agents-basic-workflows)\n",
-          "hash": "586da4ffa96c83ea779d9f9b7dd2f9bcff9f8886a57181a4763f24c010ed9e74",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "base_sha": "2032b76ef1fbc6e01fc6e8d7861493b4a6b0859b",
-    "reservation_deadline": "2026-11-14T07:10:28.740613Z",
-    "stop_reason": "repair_pending",
-    "sealed_at": "2026-11-14T06:56:05.223193Z"
+    "checkpoint_at": "2026-11-14T18:18:47.083304Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -27290,7 +26671,642 @@
     "ed9f729234e2405d": true,
     "96aead5381054b1a": true
   },
-  "workload_history": {},
+  "workload_history": {
+    "1036754a634142d7a6f283117a763aa4": {
+      "version": 1,
+      "id": "1036754a634142d7a6f283117a763aa4",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-14T06:44:12.625827Z",
+      "elapsed_seconds": 712.5979166999999,
+      "calls_reserved": 19,
+      "responses_received": 19,
+      "attempted_paths": [
+        "Vault/Home/AI & ML/LLM/Embeddings.md",
+        "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+        "Vault/Home/AI & ML/AI & ML.md",
+        "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
+        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md"
+      ],
+      "accepted_records": [],
+      "outcomes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note and found no verified defect. The opening gives the operating idea, and the Mermaid query-to-ANN flow matches the prose. Model families, dimensions and the MRL claims are internally consistent. The OpenAI `dimensions` parameter and the 256-dimension `text-embedding-3-large` versus `ada-002` MTEB result match OpenAI's published guidance as I recall it. I did not re-fetch them or the Databricks FinanceBench recall figures. The note scopes both claims correctly: they motivate testing, and corpus-specific Recall@k decides. The metric section handles the normalization conditions correctly: dot product equals cosine, and squared L2 equals 2 − 2·cosine, only for normalized vectors. The re-embedding cost arithmetic checks out: 10M chunks × 500 tokens is 5B tokens, which at $0.02/1M is $100. The pitfalls, the tradeoff table and the closing guidance (simplest baseline first, then fine-tune only after failure analysis) each add a distinct decision and do not repeat each other. The four cards each test one separable task: retrieval mechanism, MRL storage, validating a shorter dimension, and model-swap mismatch. The answers state conditions and cite sources. The ID-less dimension-validation card is permitted as an ID-less card, and the note has no native violations. Rewording would be cosmetic churn."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+                  "verdict": "CLEAN",
+                  "summary": "I read the whole note and found no concrete defect. The mechanism, conditions and numbers hold together, and the four cards each test one task. Rewording would be cosmetic churn.",
+                  "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, Mermaid fence has a language identifier, no standalone Links section.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Matryoshka Representation Learning (MRL) trains models so that prefixes of the full vector remain independently meaningful.",
+                      "line_start": 53,
+                      "reason": "The MRL claim comes with the condition that corpus-specific Recall@k decides the tradeoff, so it is not overstated."
+                    },
+                    {
+                      "quote": "For length-normalized vectors, squared L2 distance equals 2 − 2 × cosine similarity",
+                      "line_start": 65,
+                      "reason": "The identity is correct and is limited to normalized vectors. The unnormalized exception is stated in the next sentence."
+                    },
+                    {
+                      "quote": "for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100",
+                      "line_start": 83,
+                      "reason": "10M × 500 = 5B tokens, and at $0.02 per 1M tokens that is $100. The arithmetic is correct."
+                    },
+                    {
+                      "quote": "MTEB aggregates several task families.",
+                      "line_start": 87,
+                      "reason": "This pitfall gives a distinct, actionable rule: select on the Retrieval category, then test on a corpus-specific set."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note covers one coherent topic. Model selection, dimensionality, metrics and pitfalls all serve the same embedding choice, and none would be independently useful as its own note.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The note has no concrete native violations or factual defects. Cards 1, 2 and 4 keep their IDs. Card 3 is an ID-less card, which is allowed. The keep disposition is justified.",
+              "change_checks": []
+            },
+            "model_calls": 2
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note. The opening separates watermarking from AI-text classifiers. The five-step sampling walk-through and the Tournament sampling description with its score formula define T, m, r_t and g_ℓ. The quality/detectability trade-off and the Limits list are consistent with each other. I fetched the Anthropic page cited in References. It supports the claims about key-derived randomness, no added tokens or hidden characters, no user identity, short text, factual passages and code, light proofreading, full rewrites, translations, and the likelihood-only result. The SynthID-Text Nature paper is the cited basis for Tournament sampling and the quality findings. Frontmatter, References format and headings follow the contract, and there are no cards or known violations. I found no factual error or clarity gap that justifies an edit."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "No edits were proposed. My own read of the whole note found no factual error, structural violation or clarity gap, so keeping it unchanged is justified.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains the keyed sampling mechanism, the Tournament sampling score formula, the quality/detectability trade-off and the limits in a sensible order. I found no inaccuracy, repetition or contract violation, so keeping it unchanged is justified.",
+                  "page_type": "Concept — optional Questions are absent. The References section is bare descriptive links. There are no code fences, and the single wikilink uses a full path with an alias.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "This makes a watermark different from a general AI-text classifier.",
+                      "line_start": 16,
+                      "reason": "The opening sets the boundary against classifiers early, so the topic is introduced quickly and the main misconception is addressed."
+                    },
+                    {
+                      "quote": "SynthID-Text implements this with **Tournament sampling**.",
+                      "line_start": 28,
+                      "reason": "The generic five-step mechanism is followed by a concrete implementation. The formula's symbols (T, m, r_t, g_ℓ) are defined right after it."
+                    },
+                    {
+                      "quote": "**Higher-entropy choices.**",
+                      "line_start": 45,
+                      "reason": "The note gives the mechanism (entropy leaves room for the keyed preference) and the conditions for detection, not just the conclusion."
+                    },
+                    {
+                      "quote": "**Presence provides limited evidence.**",
+                      "line_start": 52,
+                      "reason": "The Limits section keeps the important conditions and exceptions, with a calibrated closing judgment about attribution versus authorship."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note covers one coherent topic. Mechanism, quality trade-off and limits depend on each other, and it is compact enough to re-enter.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 4
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+          "outcome": "proposal_blocked",
+          "reason": "wikilink removal requires explicit target-specific semantic rationale",
+          "result": {
+            "status": "proposal_blocked",
+            "stage": "deterministic_application",
+            "reason": "wikilink removal requires explicit target-specific semantic rationale",
+            "model_calls": 5
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/AI & ML.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/AI & ML.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole folder note. The opening paragraph states the scope, which runs from classic ML to LLM applications and tooling. It also states the key judgment: production results depend on data, evaluation and operations more than on model choice. The Datacore folder map is protected and was left alone. The single card tests one decision, when classic ML beats an LLM. Its answer names two conditions: task and data fit, then measured quality, latency, cost and maintenance on the real workload. It also says that fit alone does not decide, because LLMs can do classification and regression. That is consistent with Google's ML problem framing and Rules of ML guidance, which the card cites on the answer side. The card is a single dependent explanation, so it does not need splitting, and its qard-id is intact. The frontmatter is valid, the one reference is a real topic-specific bare link, and no violations are listed. A rewrite would only reword accurate prose, so I made no edit."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/AI & ML.md",
+                  "verdict": "CLEAN",
+                  "summary": "The folder note has a compact opening that states the scope and the key judgment: production results depend on data, evaluation and operations more than on model choice. It has one coherent decision card and one real reference. I found no concrete error, so keeping it unchanged is justified.",
+                  "page_type": "FolderNote — keeps tags: [FolderNote], the protected datacorejsx folder map, and an optional Questions/References pair.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Model choice matters, but production results usually turn on the data and on how the system is evaluated and operated.",
+                      "line_start": 21,
+                      "reason": "States the operating idea and the engineering judgment of the folder. The following sentence about gradient-boosted trees and LLMs gives a concrete illustration without padding."
+                    },
+                    {
+                      "quote": "The first condition makes classic ML a strong candidate. Only the second decides.",
+                      "line_start": 32,
+                      "reason": "The card answer is ordered from its conditions to the deciding factor, which makes the decision rule recoverable."
+                    },
+                    {
+                      "quote": "generative models can also perform classification and regression, and an LLM can be the stronger option for some text-classification tasks",
+                      "line_start": 35,
+                      "reason": "Gives the exception that stops the answer from being a blanket rule that classic ML wins on labeled tasks."
+                    },
+                    {
+                      "quote": "[Microsoft AI for Beginners](https://microsoft.github.io/AI-For-Beginners/)",
+                      "line_start": 44,
+                      "reason": "The reference is a real, topic-specific bare link with no trailing annotation."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the folder note is short and holds a single topic, the overview of AI & ML. The child notes belong in the folder map.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The note is accurate and readable, and the single card tests one decision with its conditions and exception. The qard-id is intact, the Datacore block is untouched, and no violations are listed. No defect was found, so keeping it is justified.",
+              "change_checks": []
+            },
+            "model_calls": 7
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note and found no defect that justifies an edit. The workflow/agent split, the simplest-design-first guidance, and the five workflow pattern names match Anthropic's 'Building Effective Agents'. The augmented-LLM section correctly divides work between the model and the harness. The autonomous-agent section ties compounding error to the loop and lists controls that contain it. The memory section is labelled as an architectural choice, not a standard. Its table of five memory kinds is internally consistent with the prose on supersession, invalidation, and checking authorization before ranking. The Questions are each a single gradeable task. The workflow-versus-agent card compares the two with a table. The error-compounding card and the controls card are separate tasks. The good-fit card is bounded. Each card cites a primary source. The wikilinks and the datacorejsx and mermaid fences are valid. The references are real primary sources. I found no stale claim, repetition, or voice problem that would make a rewrite an improvement."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+                  "verdict": "CLEAN",
+                  "summary": "The complete note is accurate and coherent. It separates workflows from agents, orders its explanation sensibly, and keeps the memory design explicitly labelled as an architectural choice. Each Qard tests one task, and the unchanged keep is justified.",
+                  "page_type": "FolderNote — hub with a protected datacorejsx folder map, an optional Questions section and an optional References section. Qard callouts and their IDs are protected.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "**Workflows** are systems where LLMs and tools are orchestrated through predefined code paths.",
+                      "line_start": 20,
+                      "reason": "The workflow/agent definition matches Anthropic's 'Building Effective Agents' and sets up the rest of the note."
+                    },
+                    {
+                      "quote": "Workflow orchestration belongs next, once a single call falls short.",
+                      "line_start": 23,
+                      "reason": "The simplest-design-first escalation order is stated with its condition."
+                    },
+                    {
+                      "quote": "This is an architectural choice, not a universal standard.",
+                      "line_start": 74,
+                      "reason": "The memory taxonomy is honestly scoped, so it does not overclaim."
+                    },
+                    {
+                      "quote": "Authorization scope must be checked before ranking. Relevance metadata cannot enforce access.",
+                      "line_start": 84,
+                      "reason": "This states a concrete mechanism and a security limit."
+                    },
+                    {
+                      "quote": "> [!qard]- Which controls contain error propagation during an autonomous agent run?",
+                      "line_start": 111,
+                      "reason": "This card is a separate gradeable task from the compounding-mechanism card. It correctly stays ID-less and ends with a bounded caveat."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the topics (augmented LLM, workflow patterns, autonomous agents, memory) are short and share one decision frame. Workflow Patterns already has its own note.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "I read the whole note and found no concrete defect. Facts match the primary source, the explanation order works, and there is no repetition or voice problem. The cards are single-task and direct, and references are valid. There are no edits, so the keep is justified.",
+              "change_checks": []
+            },
+            "model_calls": 9
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note and found no verified defect. The opening says what a benchmark is and why a leaderboard cannot make the final selection. The table matches the cited papers: SWE-bench hidden tests, τ-bench pass^k with a simulated user, GAIA exact match, WebArena self-hosted web apps, AgentBench's 8 environments, and BFCL AST/executable accuracy including no-call cases. The leaderboard section keeps the needed conditions: the scaffold has to be fixed to isolate the model, pass^k differs from pass@1, contamination affects old public suites, and cost and latency are often missing. The worked example correctly treats the systems as not comparable. It does not declare a winner. The single card tests one dependent idea, why scaffold and run conditions change a benchmark result. Its τ-bench source is on the answer side. The wikilinks are consistent with the sibling notes. The remaining wording overlap, such as 'tau' versus 'τ' and the example's closing paragraph, is cosmetic. Editing it would add churn and not improve understanding."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+                  "verdict": "CLEAN",
+                  "summary": "Whole-note audit found no accurate-content, structure, or card defects. The opening states the use and limit of benchmarks, the table matches the cited benchmarks, the leaderboard section carries the needed conditions, and the example correctly refuses to name a winner. Remaining overlap (tau vs τ, example closing paragraph) is cosmetic, so keeping the note unchanged is justified.",
+                  "page_type": "Concept — authorable prose with optional Questions and References; no special-page protection.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "A leaderboard score cannot make the final selection.",
+                      "line_start": 19,
+                      "reason": "States the operating idea and key boundary early: score measures a whole system, so public suites only shortlist."
+                    },
+                    {
+                      "quote": "| AgentBench | 8 environments | Interactive tasks across OS, DB, web, games | per-environment success |",
+                      "line_start": 29,
+                      "reason": "Table facts (8 environments, per-environment success) match the AgentBench paper; the other rows likewise match their sources."
+                    },
+                    {
+                      "quote": "`pass^k` requires the task to succeed on every one of `k` attempts, so it exposes intermittent failures that an average hides.",
+                      "line_start": 37,
+                      "reason": "Correct mechanism distinction from average success, with the condition that changes the decision."
+                    },
+                    {
+                      "quote": "Human verification improves issue and test quality; it does not isolate public tasks from training.",
+                      "line_start": 38,
+                      "reason": "Precise, hedged contamination claim that separates curation from leakage."
+                    },
+                    {
+                      "quote": "The example exposes missing evidence rather than a winner.",
+                      "line_start": 62,
+                      "reason": "The worked example correctly concludes the systems are not comparable instead of choosing one."
+                    },
+                    {
+                      "quote": "> [!qard]- Why can one base model produce very different results on the same agent benchmark?",
+                      "line_start": 67,
+                      "reason": "A single dependent task (scaffold and run conditions affect score), a direct question with a finite answer, an answer-side tau-bench source, and a retained ID."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the benchmark table, leaderboard reading rules and worked example all serve one decision (using public scores to shortlist, not select), and the note is compact.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The note is accurate and clear, and its single card tests one dependent task. No proposed edits exist and no concrete defect remains, so the keep is justified.",
+              "change_checks": []
+            },
+            "model_calls": 11
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text. The opening separates outcome from process over a trajectory. The measurement list (task success, tool-call correctness, trajectory quality, efficiency, robustness) matches the mermaid diagram. The scorecard example is consistent: 4 steps against a budget of at most 6, and 5/5 runs giving pass^5 = 1.0. The pass^k explanation is accurate: it is the share of tasks solved on all k attempts, not the mean pass rate. The tradeoffs table and release-gating advice are coherent with the sibling notes on tool-call and trajectory evaluation. The LangSmith reference supports the reference-match and LLM-judge framing. The note has no cards and no known violations, and I found no factual or editorial defect worth an edit, so any change would be churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate, well ordered and compact. Opening, measurement list, scorecard and tradeoffs agree with each other. No concrete defect justifies an edit, so keeping it unchanged is correct.",
+                  "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx card map. Questions are absent, which is optional. There is one reference, and its bullet has no trailing annotation.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Agent evaluation separates the **outcome** (was the task completed?) from the **process** (was the route sound and efficient?).",
+                      "line_start": 16,
+                      "reason": "The opening states the operating idea quickly: score the trajectory, with outcome and process kept separate."
+                    },
+                    {
+                      "quote": "report the share solved on *all* attempts, using a pass^k-style reliability metric alongside the mean pass rate",
+                      "line_start": 45,
+                      "reason": "This matches the pass^k definition: all k trials succeed. It is correctly distinguished from the mean pass rate, and the 6-of-10 example makes the point concrete."
+                    },
+                    {
+                      "quote": "Reliability: solved on 5/5 runs  (pass^5 = 1.0)",
+                      "line_start": 66,
+                      "reason": "The example is internally consistent. 4 steps, $0.011 and 3.2s all fall within the stated budget, and 5/5 gives pass^5 = 1.0."
+                    },
+                    {
+                      "quote": "Gate releases on **verifiable task success plus efficiency limits**.",
+                      "line_start": 78,
+                      "reason": "The decision rule follows from the tradeoffs table and states the condition that adds trajectory judgment."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: outcome, process, reliability and tradeoffs form one coherent topic. Tool-call, trajectory and benchmark detail already live in sibling notes.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "Independent read of the whole note found no factual, ordering, terminology, repetition or structural defect. The keep disposition is justified, and no edits are proposed.",
+              "change_checks": []
+            },
+            "model_calls": 13
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+                  "outcome": "keep",
+                  "reason": "Audited the full note. The opening defines the tool-call boundary and the four separately scored properties (validity, selection, arguments, necessity). The flowchart, bullets, metrics table and example agree with each other: order 4851 against 4815 is schema-valid but wrong, and the 95%/70% average of 82.5% is correct. The ground-truth section distinguishes reference-based from reference-free evaluation and states the limits of each. The tradeoffs table and the three pitfalls (exact matching on free text, order-sensitive scoring, schema-valid but wrong) give the condition that changes each decision. The existing card tests one dependent explanation, is self-contained, and states its limits, so it needs no split. The note is also consistent with the trajectory note's strict/unordered modes. The two references are real and relevant, and the known_violations list is empty. I found no factual error or readability weakness that would justify an edit."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+                  "verdict": "CLEAN",
+                  "summary": "The whole note is accurate, internally consistent and readable. The four-axis framing, flowchart, metrics table, worked example, tradeoffs and pitfalls agree with each other, and the single card is one dependent explanation. No concrete defect justifies an edit.",
+                  "page_type": "Concept — authorable prose with optional Questions and References; mermaid and text fences carry language identifiers; no generated navigation or special-page rules apply.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "A combined \"tool accuracy\" number hides which decision failed.",
+                      "line_start": 19,
+                      "reason": "The opening states the operating idea early and hedges the diagnosis as leads, not proven root causes."
+                    },
+                    {
+                      "quote": "Averaging them to 82.5% destroys that diagnosis.",
+                      "line_start": 53,
+                      "reason": "The arithmetic is correct: (95+70)/2 = 82.5. It matches the card's example."
+                    },
+                    {
+                      "quote": "`{\"order_id\": \"4851\"}` is valid JSON even when the conversation identifies order `4815`.",
+                      "line_start": 40,
+                      "reason": "The bullet text, mermaid flow and worked example use the same 4851 vs 4815 case, so the explanation order is coherent and not repetitive."
+                    },
+                    {
+                      "quote": "Order becomes part of correctness only when one call establishes a precondition for the next",
+                      "line_start": 96,
+                      "reason": "The pitfall states the exception that changes the scoring decision, so the condition is preserved."
+                    },
+                    {
+                      "quote": "> [!qard]- Why should tool selection and argument accuracy be measured separately?",
+                      "line_start": 105,
+                      "reason": "The card is one dependent behavior-and-why explanation. It is a direct, self-contained question, and its answer cites a primary source and keeps the hedge about root causes."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: validity, selection, arguments and necessity form one coherent evaluation topic. The scoring methods are tightly coupled to it, so a separate note would not be independently useful.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The independent whole-note audit found no factual, editorial, question-quality or rules defect. Keeping the note unchanged is justified, and no edits were proposed.",
+              "change_checks": []
+            },
+            "model_calls": 15
+          }
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note against its text and the LangSmith trajectory-evals page it cites. The four match modes (strict, unordered, subset, superset) are described correctly, with the right direction of inclusion for subset and superset. The worked example is internally consistent: both paths pass the superset check, and the judge separates the wasteful one. The tradeoff table, the pitfalls (brittleness, long traces, outcome leakage) and the episode-versus-step explanation all follow from the earlier mechanisms. The single Qard asks one comparison task, and its answer matches the note. The References are real and relevant. I found no factual error, gap or redundancy that justifies an edit."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                  "verdict": "CLEAN",
+                  "summary": "Independent whole-note read found accurate mode semantics, a consistent worked example, a decision-oriented tradeoff table, and one coherent comparison card. No concrete defect justifies an edit, so the keep is sound.",
+                  "page_type": "Concept — authorable prose with optional Questions and References; frontmatter and Qard ID metadata protected.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                      "line_start": 27,
+                      "reason": "Subset direction matches the LangSmith/agentevals semantics, and the safety use case follows from it."
+                    },
+                    {
+                      "quote": "**Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration.",
+                      "line_start": 28,
+                      "reason": "Superset direction is correct, and the note states that bloat can still pass."
+                    },
+                    {
+                      "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+                      "line_start": 66,
+                      "reason": "The example is internally consistent: both paths contain all required calls, and the judge separates them by waste."
+                    },
+                    {
+                      "quote": "neither accepts `search` and `filter` in place of `query`",
+                      "line_start": 83,
+                      "reason": "The pitfall states what each mode tolerates and what it does not, which preserves the conditions."
+                    },
+                    {
+                      "quote": "> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?",
+                      "line_start": 96,
+                      "reason": "The card is one focused comparison with a finite answer. Its ID comment is retained, and the answer cites the primary source."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note covers one topic, trajectory scoring. Reference matching, judge scoring and step/episode granularity depend on each other.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The note is accurate, readable and well ordered, with sound card quality and real references. No concrete violation or error was found, and the keep disposition is justified.",
+              "change_checks": []
+            },
+            "model_calls": 17
+          }
+        }
+      ],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-14T06:56:05.223191Z",
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "current_batch": {
+        "topic": "AI & ML",
+        "topic_id": "ai-ml-4edf0823",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+            "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Five orchestration patterns — chaining, routing, parallelization, orchestrator-workers, evaluator-optimizer — from fixed pipelines to dynamic delegation.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: New\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Workflow Patterns\"\nflashcard_uid: \"27b2b0a4\"\ncreated: \"2026-07-13T19:23:03.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-13T19:05:02.499Z\"\n---\n\nFive workflow patterns cover the space between one [[Home/AI & ML/LLM/Agents/Agents|augmented LLM]] call and an autonomous loop. Application code still owns the outer control flow. The model handles bounded decisions inside it. This middle of the [[Home/AI & ML/LLM/Agents/Agents|agentic]] spectrum is usually easier to test and operate because the allowed paths remain visible.\n\nThe patterns differ in where the next step is chosen. Prompt chaining fixes every stage in code. Routing chooses among predefined branches. Parallelization fixes the work but runs it concurrently. Orchestrator-workers lets a model decide the decomposition at runtime, while evaluator-optimizer adds a feedback loop. The smallest pattern that solves the task is normally the most reliable one.\n\n## Prompt Chaining\n\n```mermaid\nflowchart LR\n    In[Input] --> S1[Step 1 LLM] --> G1{Gate} --> S2[Step 2 LLM] --> G2{Gate} --> Out[Output]\n```\n\nPrompt chaining passes one model output into the next fixed stage. Programmatic gates between calls reject a bad intermediate result before it contaminates later work.\n\nIt fits tasks with a stable sequence, such as drafting an outline, validating required sections, and expanding the accepted outline. Chaining adds latency, so it earns its place only when narrower calls or early gates improve reliability.\n\n## Routing\n\n```mermaid\nflowchart LR\n    In[Input] --> R[Router LLM]\n    R --> P1[Prompt or Model A]\n    R --> P2[Prompt or Model B]\n    R --> P3[Prompt or Model C]\n```\n\nRouting classifies the input and sends it to one predefined path. Each branch can use a different prompt, tool set, or model. A refund path can become stricter without changing general question answering. Applying the same decision to model choice produces [[Home/AI & ML/LLM/Model Selection and Routing|model routing]].\n\nIt fits distinct categories with different handling. General questions might use a small model, technical cases a larger one, and refunds a constrained workflow with explicit policy checks. The router now becomes a failure boundary: a perfect specialist cannot recover a request sent to the wrong branch.\n\n## Parallelization\n\n```mermaid\nflowchart LR\n    In[Input] --> A[LLM Call A] & B[LLM Call B] & C[LLM Call C]\n    A --> Agg[Aggregator]\n    B --> Agg\n    C --> Agg\n    Agg --> Out[Output]\n```\n\nParallelization starts several model calls together and combines their outputs. Sectioning assigns independent pieces of work to different calls. Voting runs the same decision more than once and aggregates the answers.\n\nIt reduces wall-clock time when subtasks are independent, for example separate code-review concerns. Voting can reduce variance when disagreement is meaningful. Both variants spend more tokens, and sectioning fails when workers silently depend on shared intermediate state.\n\n## Orchestrator-Workers\n\n```mermaid\nflowchart LR\n    In[Input] --> O[Orchestrator LLM]\n    O --> W1[Worker 1] & W2[Worker 2] & W3[Worker 3]\n    W1 --> S[Synthesize]\n    W2 --> S\n    W3 --> S\n    S --> Out[Output]\n```\n\nAn orchestrator reads the task, decides how to decompose it, delegates the pieces, and synthesizes the results. The worker count and assignments do not exist until runtime. That is the boundary from parallelization, where application code defines every branch in advance.\n\nAnthropic reports this design in its Research system: a lead agent starts three to five subagents in parallel and improved an internal research evaluation by 90.2% over a single-agent setup. The number belongs to that system and evaluation, not to the pattern in general. Runtime decomposition makes orchestrator-workers useful for complex coding or research, and it is the simplest pattern here that crosses into [[Multi-Agentic Systems]].\n\n## Evaluator-Optimizer\n\n```mermaid\nflowchart LR\n    In[Input] --> G[Generator LLM]\n    G --> D[Draft]\n    D --> E[Evaluator LLM]\n    E -->|Revise| G\n    E -->|Accepted| Out[Final Output]\n```\n\nOne model produces a draft and another evaluates it against explicit criteria. Rejected drafts return to the generator with feedback. Approval or an iteration cap ends the loop.\n\nThis pattern fits work where feedback improves the output and the evaluator can recognize improvement. Code review and policy checking often qualify. A vague rubric produces a confident loop with no stable stopping condition, so both criteria and the cap are part of the design.\n\n# Questions\n\n<!-- qard-id: 6d82467a-87cc-4efd-b831-9eeab32bdbc5 -->\n> [!qard]- How do prompt chaining, routing, parallelization, orchestrator-workers, and evaluator-optimizer differ in who controls the next step?\n> They differ in how much of the control flow code fixes in advance. In prompt chaining, routing and parallelization, application code defines every possible path, and a model at most picks one predefined branch. In orchestrator-workers, a model decides the subtasks at runtime. In evaluator-optimizer, a model's evaluation decides whether the loop repeats, within a cap set in code.\n>\n> | Pattern | Who decides the next step | What code fixes in advance |\n> |---|---|---|\n> | Prompt chaining | Code. Each step always follows the previous one, and programmatic gates can stop a bad intermediate result. | The whole sequence of steps. |\n> | Routing | A classifier, often an LLM, reads the input and picks one branch. | The set of branches and how each one is handled. |\n> | Parallelization | Code. It starts the calls together and aggregates them, either splitting independent sections or voting over repeated runs. | The subtasks and how their results are combined. |\n> | Orchestrator-workers | The orchestrator model decides how to split the task, what to delegate and how to synthesize the results. | Only the outer frame; worker count and assignments appear at runtime. |\n> | Evaluator-optimizer | An evaluator model decides whether a draft passes explicit criteria or returns to the generator with feedback. | The acceptance criteria and an iteration cap that ends the loop. |\n>\n> Each additional model-owned decision tends to make cost less predictable and failures harder to reproduce, so the simplest pattern that fits is usually the easiest to test.\n>\n> [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)\n\n<!-- qard-id: c1c8ac97-e367-45a7-9727-9a1da6e9a126 -->\n> [!qard]- Why is the orchestrator-workers pattern harder to operate than ordinary parallelization, even though both fan out work to several calls?\n> Orchestrator-workers is harder to operate because a model, not code, decides the structure of the fan-out. In ordinary parallelization, code defines the subtasks and the aggregation in advance. In orchestrator-workers, a model chooses the subtasks for each input at runtime and also synthesizes the results, so the set of calls is not known before the run.\n>\n> - **Ordinary parallelization:** application code starts a predefined set of independent calls, such as one per code-review concern, and aggregates their outputs programmatically. The split and aggregation rules can be read, reviewed and tested before any run.\n> - **Orchestrator-workers:** an orchestrator model reads the input, decides how to split it and what to delegate, then synthesizes the workers' results. The worker count and assignments exist only at runtime.\n> \n> Fixed rules make the structure inspectable, but they do not make outcomes repeatable. In both patterns, the workers are model calls whose outputs can differ between runs, and how well a split suits the task depends on the input. Orchestrator-workers adds model-chosen structure on top of that variability:\n>\n> - **Work and cost vary:** the number of workers, and therefore the calls and tokens spent, can change between inputs and even between runs on the same input.\n> - **The split itself can fail per run:** any fan-out can miss part of the task, duplicate work or combine results poorly. With a fixed fan-out, the split and aggregation rules can be checked before deployment. With orchestrator-workers, a flawed decomposition or synthesis exists only in a particular run's decisions. It cannot be reviewed in advance and can appear for some inputs or runs but not others. It is therefore harder to reproduce and to catch with a few fixed test cases.\n> \n> These are risks, not guaranteed outcomes. A trace of each run's decomposition and synthesis shows where a particular run went wrong.\n>\n> [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)\n\n# References\n\n- [Patterns for Basic Agent Workflows — cookbook (Anthropic)](https://platform.claude.com/cookbook/patterns-agents-basic-workflows)\n",
+            "hash": "586da4ffa96c83ea779d9f9b7dd2f9bcff9f8886a57181a4763f24c010ed9e74",
+            "topic": "AI & ML",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "changed"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "base_sha": "2032b76ef1fbc6e01fc6e8d7861493b4a6b0859b",
+      "reservation_deadline": "2026-11-14T07:10:28.740613Z",
+      "stop_reason": "repair_pending",
+      "sealed_at": "2026-11-14T06:56:05.223193Z"
+    }
+  },
   "feedback_workloads": {
     "fcd67e13bc430ba5facd6a87402a2d09e4ada2e8f17f6bc55ee28a8fc84d0cb7": {
       "id": "fcd67e13bc430ba5facd6a87402a2d09e4ada2e8f17f6bc55ee28a8fc84d0cb7",
