@@ -17973,11 +17973,11 @@
     "version": 1,
     "id": "1036754a634142d7a6f283117a763aa4",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 676.3563845999998,
+    "elapsed_seconds": 705.1783437999999,
     "calls_reserved": 19,
-    "responses_received": 18,
+    "responses_received": 19,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Embeddings.md",
       "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
@@ -18574,7 +18574,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:55:28.981661Z",
+    "checkpoint_at": "2026-11-14T06:55:57.803619Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -45873,6 +45873,171 @@
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T06:55:25.369524Z"
+    "prepared_at": "2026-11-14T06:55:25.369524Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The technical content of the note is accurate. Two issues remain unfixed: the lifecycle status is stale, and the 90.2% Research-system figure has no reference. The second card is also repetitive.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The five patterns, diagrams and cards are technically sound, but the note is published with status New. The Anthropic Research-system figure is not backed by any listed source, and the second card repeats itself.",
+            "page_type": "Concept — typed frontmatter, optional Questions and References, MD040 fences, Qard cards with protected IDs.",
+            "current_text_evidence": [
+              {
+                "quote": "status: New",
+                "line_start": 7,
+                "reason": "Under the contract, New means barely created. The note is fully developed and published, so the status is stale."
+              },
+              {
+                "quote": "Anthropic reports this design in its Research system: a lead agent starts three to five subagents in parallel",
+                "line_start": 74,
+                "reason": "The claim comes from Anthropic's multi-agent research system post. References lists only the cookbook, so the figure is not sourced in the note."
+              },
+              {
+                "quote": "Fixed rules make the structure inspectable, but they do not make outcomes repeatable.",
+                "line_start": 117,
+                "reason": "The second card restates the same point about run-to-run variability and fixed fan-out several times, which makes the answer harder to retrieve."
+              },
+              {
+                "quote": "The worker count and assignments do not exist until runtime.",
+                "line_start": 72,
+                "reason": "This is a clear statement of the boundary between orchestrator-workers and parallelization, and it is accurate."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the five patterns form one coherent comparison and are short enough to stay together.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Frontmatter lifecycle",
+                "location": "frontmatter, line 7",
+                "evidence": "status: New alongside publish: true and complete content",
+                "effect": "The note's development state is misreported. New means little content, and this note has a solid explanation.",
+                "fix": "Set status to Established, or In Progress if the owner still plans substantive work."
+              },
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy / sourcing",
+                "location": "## Orchestrator-Workers, line 74",
+                "evidence": "The 90.2% improvement and the three-to-five-subagent claim have no source in References.",
+                "effect": "A specific numeric claim cannot be verified from the note.",
+                "fix": "Add Anthropic's 'How we built our multi-agent research system' post to References, or cite it on the answer side."
+              },
+              {
+                "severity": "Medium",
+                "dimension": "Clarity / question quality",
+                "location": "second Qard answer",
+                "evidence": "The answer repeats the same variability and fixed-versus-runtime point in the intro, the bullets and the closing paragraph.",
+                "effect": "The answer is long and padded, so it is hard to recall under pressure.",
+                "fix": "Condense it to the model-chosen structure, the resulting variable cost and calls, the decomposition failure that cannot be reviewed beforehand, and the value of a trace."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "FAIL"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+          "citation_index": 1,
+          "reported_line_start": 74,
+          "resolved_line_start": 75
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+          "citation_index": 3,
+          "reported_line_start": 72,
+          "resolved_line_start": 73
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md": "586da4ffa96c83ea779d9f9b7dd2f9bcff9f8886a57181a4763f24c010ed9e74"
+      },
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The technical content of the note is accurate. Two issues remain unfixed: the lifecycle status is stale, and the 90.2% Research-system figure has no reference. The second card is also repetitive.",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The five patterns, diagrams and cards are technically sound, but the note is published with status New. The Anthropic Research-system figure is not backed by any listed source, and the second card repeats itself.",
+          "page_type": "Concept — typed frontmatter, optional Questions and References, MD040 fences, Qard cards with protected IDs.",
+          "current_text_evidence": [
+            {
+              "quote": "status: New",
+              "line_start": 7,
+              "reason": "Under the contract, New means barely created. The note is fully developed and published, so the status is stale."
+            },
+            {
+              "quote": "Anthropic reports this design in its Research system: a lead agent starts three to five subagents in parallel",
+              "line_start": 75,
+              "reason": "The claim comes from Anthropic's multi-agent research system post. References lists only the cookbook, so the figure is not sourced in the note."
+            },
+            {
+              "quote": "Fixed rules make the structure inspectable, but they do not make outcomes repeatable.",
+              "line_start": 117,
+              "reason": "The second card restates the same point about run-to-run variability and fixed fan-out several times, which makes the answer harder to retrieve."
+            },
+            {
+              "quote": "The worker count and assignments do not exist until runtime.",
+              "line_start": 73,
+              "reason": "This is a clear statement of the boundary between orchestrator-workers and parallelization, and it is accurate."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the five patterns form one coherent comparison and are short enough to stay together.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Frontmatter lifecycle",
+              "location": "frontmatter, line 7",
+              "evidence": "status: New alongside publish: true and complete content",
+              "effect": "The note's development state is misreported. New means little content, and this note has a solid explanation.",
+              "fix": "Set status to Established, or In Progress if the owner still plans substantive work."
+            },
+            {
+              "severity": "Medium",
+              "dimension": "Accuracy / sourcing",
+              "location": "## Orchestrator-Workers, line 74",
+              "evidence": "The 90.2% improvement and the three-to-five-subagent claim have no source in References.",
+              "effect": "A specific numeric claim cannot be verified from the note.",
+              "fix": "Add Anthropic's 'How we built our multi-agent research system' post to References, or cite it on the answer side."
+            },
+            {
+              "severity": "Medium",
+              "dimension": "Clarity / question quality",
+              "location": "second Qard answer",
+              "evidence": "The answer repeats the same variability and fixed-versus-runtime point in the intro, the bullets and the closing paragraph.",
+              "effect": "The answer is long and padded, so it is hard to recall under pressure.",
+              "fix": "Condense it to the model-chosen structure, the resulting variable cost and calls, the decomposition failure that cannot be reviewed beforehand, and the value of a trace."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "FAIL",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "FAIL"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
