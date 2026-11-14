@@ -17973,11 +17973,11 @@
     "version": 1,
     "id": "1036754a634142d7a6f283117a763aa4",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 661.2559283999997,
+    "elapsed_seconds": 672.7442579999997,
     "calls_reserved": 18,
-    "responses_received": 17,
+    "responses_received": 18,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Embeddings.md",
       "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
@@ -18574,7 +18574,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:55:13.881204Z",
+    "checkpoint_at": "2026-11-14T06:55:25.369533Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -45826,5 +45826,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "1036754a634142d7a6f283117a763aa4",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Five orchestration patterns — chaining, routing, parallelization, orchestrator-workers, evaluator-optimizer — from fixed pipelines to dynamic delegation.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: New\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Workflow Patterns\"\nflashcard_uid: \"27b2b0a4\"\ncreated: \"2026-07-13T19:23:03.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-13T19:05:02.499Z\"\n---\n\nFive workflow patterns cover the space between one [[Home/AI & ML/LLM/Agents/Agents|augmented LLM]] call and an autonomous loop. Application code still owns the outer control flow. The model handles bounded decisions inside it. This middle of the [[Home/AI & ML/LLM/Agents/Agents|agentic]] spectrum is usually easier to test and operate because the allowed paths remain visible.\n\nThe patterns differ in where the next step is chosen. Prompt chaining fixes every stage in code. Routing chooses among predefined branches. Parallelization fixes the work but runs it concurrently. Orchestrator-workers lets a model decide the decomposition at runtime, while evaluator-optimizer adds a feedback loop. The smallest pattern that solves the task is normally the most reliable one.\n\n## Prompt Chaining\n\n```mermaid\nflowchart LR\n    In[Input] --> S1[Step 1 LLM] --> G1{Gate} --> S2[Step 2 LLM] --> G2{Gate} --> Out[Output]\n```\n\nPrompt chaining passes one model output into the next fixed stage. Programmatic gates between calls reject a bad intermediate result before it contaminates later work.\n\nIt fits tasks with a stable sequence, such as drafting an outline, validating required sections, and expanding the accepted outline. Chaining adds latency, so it earns its place only when narrower calls or early gates improve reliability.\n\n## Routing\n\n```mermaid\nflowchart LR\n    In[Input] --> R[Router LLM]\n    R --> P1[Prompt or Model A]\n    R --> P2[Prompt or Model B]\n    R --> P3[Prompt or Model C]\n```\n\nRouting classifies the input and sends it to one predefined path. Each branch can use a different prompt, tool set, or model. A refund path can become stricter without changing general question answering. Applying the same decision to model choice produces [[Home/AI & ML/LLM/Model Selection and Routing|model routing]].\n\nIt fits distinct categories with different handling. General questions might use a small model, technical cases a larger one, and refunds a constrained workflow with explicit policy checks. The router now becomes a failure boundary: a perfect specialist cannot recover a request sent to the wrong branch.\n\n## Parallelization\n\n```mermaid\nflowchart LR\n    In[Input] --> A[LLM Call A] & B[LLM Call B] & C[LLM Call C]\n    A --> Agg[Aggregator]\n    B --> Agg\n    C --> Agg\n    Agg --> Out[Output]\n```\n\nParallelization starts several model calls together and combines their outputs. Sectioning assigns independent pieces of work to different calls. Voting runs the same decision more than once and aggregates the answers.\n\nIt reduces wall-clock time when subtasks are independent, for example separate code-review concerns. Voting can reduce variance when disagreement is meaningful. Both variants spend more tokens, and sectioning fails when workers silently depend on shared intermediate state.\n\n## Orchestrator-Workers\n\n```mermaid\nflowchart LR\n    In[Input] --> O[Orchestrator LLM]\n    O --> W1[Worker 1] & W2[Worker 2] & W3[Worker 3]\n    W1 --> S[Synthesize]\n    W2 --> S\n    W3 --> S\n    S --> Out[Output]\n```\n\nAn orchestrator reads the task, decides how to decompose it, delegates the pieces, and synthesizes the results. The worker count and assignments do not exist until runtime. That is the boundary from parallelization, where application code defines every branch in advance.\n\nAnthropic reports this design in its Research system: a lead agent starts three to five subagents in parallel and improved an internal research evaluation by 90.2% over a single-agent setup. The number belongs to that system and evaluation, not to the pattern in general. Runtime decomposition makes orchestrator-workers useful for complex coding or research, and it is the simplest pattern here that crosses into [[Multi-Agentic Systems]].\n\n## Evaluator-Optimizer\n\n```mermaid\nflowchart LR\n    In[Input] --> G[Generator LLM]\n    G --> D[Draft]\n    D --> E[Evaluator LLM]\n    E -->|Revise| G\n    E -->|Accepted| Out[Final Output]\n```\n\nOne model produces a draft and another evaluates it against explicit criteria. Rejected drafts return to the generator with feedback. Approval or an iteration cap ends the loop.\n\nThis pattern fits work where feedback improves the output and the evaluator can recognize improvement. Code review and policy checking often qualify. A vague rubric produces a confident loop with no stable stopping condition, so both criteria and the cap are part of the design.\n\n# Questions\n\n<!-- qard-id: 6d82467a-87cc-4efd-b831-9eeab32bdbc5 -->\n> [!qard]- How do prompt chaining, routing, parallelization, orchestrator-workers, and evaluator-optimizer differ in who controls the next step?\n> They differ in how much of the control flow code fixes in advance. In prompt chaining, routing and parallelization, application code defines every possible path, and a model at most picks one predefined branch. In orchestrator-workers, a model decides the subtasks at runtime. In evaluator-optimizer, a model's evaluation decides whether the loop repeats, within a cap set in code.\n>\n> | Pattern | Who decides the next step | What code fixes in advance |\n> |---|---|---|\n> | Prompt chaining | Code. Each step always follows the previous one, and programmatic gates can stop a bad intermediate result. | The whole sequence of steps. |\n> | Routing | A classifier, often an LLM, reads the input and picks one branch. | The set of branches and how each one is handled. |\n> | Parallelization | Code. It starts the calls together and aggregates them, either splitting independent sections or voting over repeated runs. | The subtasks and how their results are combined. |\n> | Orchestrator-workers | The orchestrator model decides how to split the task, what to delegate and how to synthesize the results. | Only the outer frame; worker count and assignments appear at runtime. |\n> | Evaluator-optimizer | An evaluator model decides whether a draft passes explicit criteria or returns to the generator with feedback. | The acceptance criteria and an iteration cap that ends the loop. |\n>\n> Each additional model-owned decision tends to make cost less predictable and failures harder to reproduce, so the simplest pattern that fits is usually the easiest to test.\n>\n> [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)\n\n<!-- qard-id: c1c8ac97-e367-45a7-9727-9a1da6e9a126 -->\n> [!qard]- Why is the orchestrator-workers pattern harder to operate than ordinary parallelization, even though both fan out work to several calls?\n> Orchestrator-workers is harder to operate because a model, not code, decides the structure of the fan-out. In ordinary parallelization, code defines the subtasks and the aggregation in advance. In orchestrator-workers, a model chooses the subtasks for each input at runtime and also synthesizes the results, so the set of calls is not known before the run.\n>\n> - **Ordinary parallelization:** application code starts a predefined set of independent calls, such as one per code-review concern, and aggregates their outputs programmatically. The split and aggregation rules can be read, reviewed and tested before any run.\n> - **Orchestrator-workers:** an orchestrator model reads the input, decides how to split it and what to delegate, then synthesizes the workers' results. The worker count and assignments exist only at runtime.\n> \n> Fixed rules make the structure inspectable, but they do not make outcomes repeatable. In both patterns, the workers are model calls whose outputs can differ between runs, and how well a split suits the task depends on the input. Orchestrator-workers adds model-chosen structure on top of that variability:\n>\n> - **Work and cost vary:** the number of workers, and therefore the calls and tokens spent, can change between inputs and even between runs on the same input.\n> - **The split itself can fail per run:** any fan-out can miss part of the task, duplicate work or combine results poorly. With a fixed fan-out, the split and aggregation rules can be checked before deployment. With orchestrator-workers, a flawed decomposition or synthesis exists only in a particular run's decisions. It cannot be reviewed in advance and can appear for some inputs or runs but not others. It is therefore harder to reproduce and to catch with a few fixed test cases.\n> \n> These are risks, not guaranteed outcomes. A trace of each run's decomposition and synthesis shows where a particular run went wrong.\n>\n> [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)\n\n# References\n\n- [Patterns for Basic Agent Workflows — cookbook (Anthropic)](https://platform.claude.com/cookbook/patterns-agents-basic-workflows)\n",
+          "hash": "586da4ffa96c83ea779d9f9b7dd2f9bcff9f8886a57181a4763f24c010ed9e74",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "changed"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+          "outcome": "keep",
+          "reason": "I read the whole note against Anthropic's Building Effective AI Agents taxonomy. The five patterns are described correctly: chaining with gates, routing, sectioning versus voting, runtime decomposition in orchestrator-workers, and evaluator-optimizer with criteria and an iteration cap. The 90.2% Research-system figure is scoped to that system and evaluation rather than presented as general. Both diagrams and prose agree. The existing cards each test one task: the control-flow comparison, and why orchestrator-workers is harder to operate. Their answers are accurate and cite the primary source. Frontmatter, wikilinks, code-fence language identifiers and References format are valid, and there are no known violations. The few stylistic nits do not justify churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md": "586da4ffa96c83ea779d9f9b7dd2f9bcff9f8886a57181a4763f24c010ed9e74"
+    },
+    "feedback_keys": [],
+    "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-14T06:55:25.369524Z"
+  }
 }
