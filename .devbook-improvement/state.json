@@ -17922,9 +17922,9 @@
     "version": 1,
     "id": "1036754a634142d7a6f283117a763aa4",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 558.4166708999996,
+    "elapsed_seconds": 562.6499333999997,
     "calls_reserved": 15,
     "responses_received": 15,
     "attempted_paths": [
@@ -17934,7 +17934,8 @@
       "Vault/Home/AI & ML/AI & ML.md",
       "Vault/Home/AI & ML/LLM/Agents/Agents.md",
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md"
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -18372,10 +18373,83 @@
           },
           "model_calls": 13
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+                "outcome": "keep",
+                "reason": "Audited the full note. The opening defines the tool-call boundary and the four separately scored properties (validity, selection, arguments, necessity). The flowchart, bullets, metrics table and example agree with each other: order 4851 against 4815 is schema-valid but wrong, and the 95%/70% average of 82.5% is correct. The ground-truth section distinguishes reference-based from reference-free evaluation and states the limits of each. The tradeoffs table and the three pitfalls (exact matching on free text, order-sensitive scoring, schema-valid but wrong) give the condition that changes each decision. The existing card tests one dependent explanation, is self-contained, and states its limits, so it needs no split. The note is also consistent with the trajectory note's strict/unordered modes. The two references are real and relevant, and the known_violations list is empty. I found no factual error or readability weakness that would justify an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+                "verdict": "CLEAN",
+                "summary": "The whole note is accurate, internally consistent and readable. The four-axis framing, flowchart, metrics table, worked example, tradeoffs and pitfalls agree with each other, and the single card is one dependent explanation. No concrete defect justifies an edit.",
+                "page_type": "Concept — authorable prose with optional Questions and References; mermaid and text fences carry language identifiers; no generated navigation or special-page rules apply.",
+                "current_text_evidence": [
+                  {
+                    "quote": "A combined \"tool accuracy\" number hides which decision failed.",
+                    "line_start": 19,
+                    "reason": "The opening states the operating idea early and hedges the diagnosis as leads, not proven root causes."
+                  },
+                  {
+                    "quote": "Averaging them to 82.5% destroys that diagnosis.",
+                    "line_start": 53,
+                    "reason": "The arithmetic is correct: (95+70)/2 = 82.5. It matches the card's example."
+                  },
+                  {
+                    "quote": "`{\"order_id\": \"4851\"}` is valid JSON even when the conversation identifies order `4815`.",
+                    "line_start": 40,
+                    "reason": "The bullet text, mermaid flow and worked example use the same 4851 vs 4815 case, so the explanation order is coherent and not repetitive."
+                  },
+                  {
+                    "quote": "Order becomes part of correctness only when one call establishes a precondition for the next",
+                    "line_start": 96,
+                    "reason": "The pitfall states the exception that changes the scoring decision, so the condition is preserved."
+                  },
+                  {
+                    "quote": "> [!qard]- Why should tool selection and argument accuracy be measured separately?",
+                    "line_start": 105,
+                    "reason": "The card is one dependent behavior-and-why explanation. It is a direct, self-contained question, and its answer cites a primary source and keeps the hedge about root causes."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: validity, selection, arguments and necessity form one coherent evaluation topic. The scoring methods are tightly coupled to it, so a separate note would not be independently useful.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The independent whole-note audit found no factual, editorial, question-quality or rules defect. Keeping the note unchanged is justified, and no edits were proposed.",
+            "change_checks": []
+          },
+          "model_calls": 15
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:53:31.041944Z",
+    "checkpoint_at": "2026-11-14T06:53:35.275208Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
