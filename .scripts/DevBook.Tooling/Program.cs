@@ -3,7 +3,7 @@ using DevBook.Tooling.Improvement;
 
 if (args.Length == 0 || args[0] is "--help" or "-h")
 {
-    Console.WriteLine("DevBook.Tooling improvement [options] | export <fixture|render|publish|finalize> [options]");
+    Console.WriteLine("DevBook.Tooling improvement [options] | export <fixture|render|publish|finalize> [options] | site <export|verify|preview> [options]");
     return 0;
 }
 
@@ -11,6 +11,7 @@ return args[0] switch
 {
     "improvement" => await EngineCommand.RunAsync(args[1..]),
     "export" => await Worker.RunAsync(args[1..]),
+    "site" => await SiteCommand.RunAsync(args[1..]),
     _ => UnknownCommand(args[0])
 };
 

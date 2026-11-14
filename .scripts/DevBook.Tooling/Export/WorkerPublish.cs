@@ -6,6 +6,7 @@ using DevBook.Tooling.Infrastructure;
 namespace DevBook.Tooling.Export;
 
 public sealed record ExportCheckWait(TimeProvider Clock, Func<TimeSpan, CancellationToken, Task> Delay);
+public sealed class ExpiredExportArtifact(string message) : RuntimeFailure(message);
 
 public static partial class Worker
 {
@@ -59,7 +60,7 @@ public static partial class Worker
         if (pr["draft"]?.GetValue<bool>() == false)
         {
             string reviewedHead = Bundle.ExactHead(pr.Obj("head").Str("sha"));
-            await RecordAsync(store, request, owner, "preserve owner review freeze before generated update", (state, _) =>
+            await RecordAsync(store, request, owner, "preserve owner review freeze before artifact validation", (state, _) =>
             {
                 JsonObject row = state.RequiredObject("prs").RequiredObject($"{request.Str("topic_id")}:{request.Int("generation")}");
                 row["frozen"] = true;
@@ -74,21 +75,73 @@ public static partial class Worker
     }
 
     public static async Task<JsonObject> PublishBundleAsync(IGitHubApi api, JsonObject config, JsonObject bundle,
-        JsonObject request, IStateStore store, string? owner = null, CancellationToken cancellationToken = default, ExportCheckWait? checkWait = null)
+        JsonObject request, IStateStore store, string? owner = null, CancellationToken cancellationToken = default,
+        ExportCheckWait? checkWait = null, JsonObject? provenance = null)
     {
-        IReadOnlyDictionary<string, byte[]?> files = Bundle.Decode(bundle);
+        _ = Bundle.Decode(bundle);
         ValidateRequest(request);
         if (api.Repo != config.Str("repo") || bundle.Int("pr_number") != request.Int("pr_number")
-            || bundle.Str("branch") != request.Str("branch") || bundle.Str("expected_head") != request.Str("expected_head"))
+            || bundle.Str("branch") != request.Str("branch") || bundle.Str("expected_head") != request.Str("expected_head")
+            || bundle.Obj("manifest").Str("repository") != api.Repo)
         {
             throw new UnsafeInput("Export bundle differs from its workflow request or repository.");
         }
+        provenance = provenance?.Copy() ?? throw new UnsafeInput("Export completion requires independent Actions artifact provenance.");
+        await ValidateTransportAsync(api, config, provenance, cancellationToken);
         owner ??= "export-" + Guid.NewGuid().ToString("N");
         var lease = new DurableLease(store, owner, ttlSeconds: 900);
         await lease.AcquireAsync(cancellationToken);
         try
         {
-            return await PublishWithLeaseAsync(api, config, bundle, files, request, store, owner, cancellationToken, checkWait);
+            await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
+            string artifactHash = LegacyIdentity.Fingerprint(bundle);
+            JsonObject state = (await store.ReadAsync(cancellationToken)).State;
+            JsonObject operation = BoundOperation(state, request);
+            if (state.Obj("finalized_exports")[request.Str("op_id")] is JsonObject finalized
+                && !operation.Obj("evidence").Bool("export_refresh_required"))
+            {
+                if (finalized.Str("artifact_hash") != artifactHash)
+                {
+                    throw new Conflict("Finalized export differs from the submitted artifact.");
+                }
+                return FinalizedResult(request, finalized);
+            }
+            JsonObject evidence = operation.Obj("evidence");
+            if (evidence.Str("export_artifact_hash").Length != 0
+                && (!evidence.Bool("export_refresh_required") || evidence.Bool("export_refresh_registered"))
+                && (evidence.Str("export_artifact_hash") != artifactHash
+                    || !JsonNode.DeepEquals(evidence["export_transport"], provenance)))
+            {
+                throw new Conflict("A different artifact already owns this reviewed-source operation.");
+            }
+            string head = request.Str("expected_head");
+            JsonObject? pr = await CurrentSourceAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken);
+            if (pr is null)
+            {
+                return await MarkStaleAsync(store, request, owner, "Reviewed source head, current base or PR lifecycle changed before artifact completion.", cancellationToken);
+            }
+            Dictionary<string, GitTreeEntry> source = await Bundle.TreeAsync(api, head, cancellationToken);
+            Bundle.ValidateInputs(bundle, source.Values);
+            if (state.Obj("finalized_exports")[request.Str("op_id")] is null)
+            {
+                await EnsureDraftForExportAsync(api, store, request, owner, pr, cancellationToken);
+            }
+            await RecordAsync(store, request, owner, "register verified native export artifact", (_, op) =>
+            {
+                JsonObject current = op.Obj("evidence");
+                current["export_artifact_hash"] = artifactHash;
+                current["export_source_sha"] = head;
+                current["export_inputs_hash"] = LegacyIdentity.Fingerprint(new JsonObject
+                {
+                    ["sources"] = bundle.Obj("manifest")["sources"]?.DeepClone(),
+                    ["policy"] = bundle.Obj("manifest")["policy"]?.DeepClone()
+                });
+                current["export_transport"] = provenance.Copy();
+                current["export_phase"] = "artifact_registered";
+                current["export_refresh_registered"] = current.Bool("export_refresh_required");
+                op["evidence"] = current;
+            }, cancellationToken);
+            return await FinalizeWithLeaseAsync(api, config, store, request, owner, cancellationToken, checkWait);
         }
         finally
         {
@@ -97,186 +150,98 @@ public static partial class Worker
         }
     }
 
-    private static async Task<JsonObject> PublishWithLeaseAsync(IGitHubApi api, JsonObject config, JsonObject bundle,
-        IReadOnlyDictionary<string, byte[]?> files, JsonObject request, IStateStore store, string owner, CancellationToken cancellationToken, ExportCheckWait? checkWait)
+    public static async Task ValidateTransportAsync(IGitHubApi api, JsonObject config, JsonObject provenance,
+        CancellationToken cancellationToken = default)
     {
-        await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
-        string artifactHash = LegacyIdentity.Fingerprint(bundle);
-        JsonObject state = (await store.ReadAsync(cancellationToken)).State;
-        JsonObject op = BoundOperation(state, request);
-        string priorHash = op.Obj("evidence").Str("export_artifact_hash");
-        if (priorHash.Length != 0 && priorHash != artifactHash)
+        static string Positive(string value) => Regex.IsMatch(value, "^[1-9][0-9]{0,18}$", RegexOptions.CultureInvariant)
+            && long.TryParse(value, out long number) && number > 0
+            ? value : throw new UnsafeInput("Invalid Actions artifact or workflow-run identity.");
+        string artifactId = Positive(provenance.Str("artifact_id"));
+        string runId = Positive(provenance.Str("run_id"));
+        string attempt = Positive(provenance.Str("run_attempt"));
+        string digest = provenance.Str("digest");
+        if (!Regex.IsMatch(digest, "^(?:sha256:)?[a-f0-9]{64}$", RegexOptions.CultureInvariant)
+            || !Regex.IsMatch(provenance.Str("bundle_sha256"), "^[a-f0-9]{64}$", RegexOptions.CultureInvariant))
         {
-            throw new Conflict("A different export bundle already owns this operation; preserve it rather than replacing its publication journal.");
+            throw new UnsafeInput("Export artifact lacks its independently recorded SHA-256 digests.");
         }
-        if (state.Obj("finalized_exports")[request.Str("op_id")] is JsonObject finalized)
+        JsonObject artifact = await Runtime.ObjectAsync(api, "GET", "/actions/artifacts/" + artifactId, cancellationToken: cancellationToken);
+        JsonObject run = await Runtime.ObjectAsync(api, "GET", "/actions/runs/" + runId + "/attempts/" + attempt, cancellationToken: cancellationToken);
+        string apiDigest = artifact.Str("digest").Replace("sha256:", "", StringComparison.Ordinal);
+        if (artifact.Bool("expired", true))
         {
-            return FinalizedResult(request, finalized);
+            throw new ExpiredExportArtifact("Native export artifact expired; rebuild the same authorized source with fresh validation.");
         }
-        string expected = request.Str("expected_head");
-        string branch = request.Str("branch");
-        int number = request.Int("pr_number");
-        Dictionary<string, GitTreeEntry> predicted = await Bundle.PredictAsync(api, expected, files, cancellationToken);
-        JsonObject? current = await CurrentPrAsync(api, config, number, branch, expected, cancellationToken);
-        if (current is null)
+        if (artifact.Str("name") != $"devbook-syncer-export-{runId}-{attempt}"
+            || artifact.Obj("workflow_run")["id"]?.ToString() != runId
+            || apiDigest != digest.Replace("sha256:", "", StringComparison.Ordinal)
+            || run["run_attempt"]?.ToString() != attempt
+            || run.Str("path").Split('@')[0] != ".github/workflows/devbook-improvement.yml"
+            || run.Str("head_branch") != config.Str("base_branch", "main")
+            || run.Obj("repository").Str("full_name") != api.Repo
+            || run.Str("event") is not ("schedule" or "workflow_dispatch" or "issue_comment" or "workflow_run"))
         {
-            string? applied = await RecognizeAppliedAsync(api, config, request, predicted, cancellationToken);
-            if (applied is null)
-            {
-                return await MarkStaleAsync(store, request, owner, "Source head changed or PR closed before generated publication.", cancellationToken);
-            }
-            await RecordAsync(store, request, owner, "recover applied generated export", (_, operation) =>
-            {
-                JsonObject evidence = operation.Obj("evidence");
-                evidence["export_artifact_hash"] = artifactHash;
-                evidence["export_commit_sha"] = applied;
-                evidence["export_phase"] = "branch_updated";
-                operation["evidence"] = evidence;
-            }, cancellationToken);
-            JsonObject resumed = await FinalizeWithLeaseAsync(api, config, store, request, owner, cancellationToken, checkWait);
-            resumed["resumed"] = true;
-            return resumed;
+            throw new Conflict("Actions artifact identity, digest, expiry or trusted workflow provenance differs from its handoff.");
         }
-        if (!await CurrentBaseAsync(api, config, current, expected, cancellationToken))
-        {
-            return await MarkStaleAsync(store, request, owner, "Topic branch requires the current base before export publication.", cancellationToken);
-        }
-        await RecordAsync(store, request, owner, "prepare generated export publication", (_, operation) =>
-        {
-            JsonObject evidence = operation.Obj("evidence");
-            evidence["export_artifact_hash"] = artifactHash;
-            evidence["export_phase"] = "prepared";
-            operation["evidence"] = evidence;
-        }, cancellationToken);
-        op = BoundOperation((await store.ReadAsync(cancellationToken)).State, request);
-        string commitSha = op.Obj("evidence").Str("export_commit_sha");
-        if (commitSha.Length == 0)
-        {
-            JsonObject parent = await Runtime.ObjectAsync(api, "GET", $"/git/commits/{expected}", cancellationToken: cancellationToken);
-            string treeSha = await TreeUpload.UploadAsync(api, parent.Obj("tree").Str("sha"), files,
-                token => AssertBoundLeaseAsync(store, request, owner, token), cancellationToken);
-            await RecordAsync(store, request, owner, "journal generated commit attempt", (_, operation) =>
-            {
-                JsonObject evidence = operation.Obj("evidence");
-                evidence["export_tree_sha"] = treeSha;
-                evidence["export_commit_attempted_at"] = Runtime.Iso();
-                operation["evidence"] = evidence;
-            }, cancellationToken);
-            JsonObject commit = await Runtime.ObjectAsync(api, "POST", "/git/commits", new JsonObject
-            {
-                ["message"] = ExportCommitMessage,
-                ["tree"] = treeSha,
-                ["parents"] = new JsonArray(expected)
-            }, cancellationToken);
-            commitSha = Bundle.ExactHead(commit.Str("sha"));
-            Dictionary<string, GitTreeEntry> createdTree = await Bundle.TreeAsync(api, commitSha, cancellationToken);
-            if (!Bundle.SameLeaves(createdTree.Values, predicted.Values))
-            {
-                throw new RuntimeFailure("Created export commit tree differs from the verified artifact.");
-            }
-            await RecordAsync(store, request, owner, "save generated export commit", (_, operation) =>
-            {
-                JsonObject evidence = operation.Obj("evidence");
-                evidence["export_commit_sha"] = commitSha;
-                evidence["export_phase"] = "commit_created";
-                operation["evidence"] = evidence;
-            }, cancellationToken);
-        }
-        else
-        {
-            JsonObject committed = await Runtime.ObjectAsync(api, "GET", $"/git/commits/{commitSha}", cancellationToken: cancellationToken);
-            if (!ExactExportCommit(committed, expected) || !Bundle.SameLeaves((await Bundle.TreeAsync(api, commitSha, cancellationToken)).Values, predicted.Values))
-            {
-                throw new Conflict("Journaled generated commit differs from its artifact.");
-            }
-        }
-        current = await CurrentPrAsync(api, config, number, branch, expected, cancellationToken);
-        if (current is null)
-        {
-            return await MarkStaleAsync(store, request, owner, "Source head changed during generated commit creation.", cancellationToken);
-        }
-        await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
-        await EnsureDraftForExportAsync(api, store, request, owner, current, cancellationToken);
-        if (await CurrentPrAsync(api, config, number, branch, expected, cancellationToken) is null)
-        {
-            return await MarkStaleAsync(store, request, owner, "Managed head changed while renewing draft review.", cancellationToken);
-        }
-        await RecordAsync(store, request, owner, "journal generated ref update", (_, operation) =>
-        {
-            JsonObject evidence = operation.Obj("evidence");
-            evidence["export_ref_update_attempted_at"] = Runtime.Iso();
-            operation["evidence"] = evidence;
-        }, cancellationToken);
-        await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
-        await api.RequestAsync("PATCH", "/git/refs/heads/" + Uri.EscapeDataString(branch), new JsonObject { ["sha"] = commitSha, ["force"] = false }, cancellationToken: cancellationToken);
-        (JsonObject? publishedPr, string propagationError) = await AwaitGeneratedHeadAsync(api, config, store, request, owner, commitSha, checkWait, cancellationToken);
-        if (publishedPr is null)
-        {
-            return await MarkStaleAsync(store, request, owner, propagationError, cancellationToken);
-        }
-        await RecordAsync(store, request, owner, "record generated branch update", (_, operation) =>
-        {
-            JsonObject evidence = operation.Obj("evidence");
-            evidence["export_phase"] = "branch_updated";
-            operation["evidence"] = evidence;
-        }, cancellationToken);
-        return await FinalizeWithLeaseAsync(api, config, store, request, owner, cancellationToken, checkWait);
     }
 
-    private static bool ExactExportCommit(JsonObject commit, string parent) => commit.Str("message") == ExportCommitMessage
-        && commit["parents"] is JsonArray { Count: 1 } parents && parents[0].Str("sha") == parent;
-
-    private static async Task<(JsonObject? Pr, string Error)> AwaitGeneratedHeadAsync(IGitHubApi api, JsonObject config,
-        IStateStore store, JsonObject request, string owner, string generatedHead, ExportCheckWait? wait, CancellationToken cancellationToken)
+    public static async Task<bool> ArtifactCurrentAsync(IGitHubApi api, JsonObject config, JsonObject state,
+        JsonObject row, string head, CancellationToken cancellationToken = default)
     {
-        const string timeout = "Timed out waiting for PR head propagation after the generated Git ref update; export paused for recovery.";
-        TimeProvider clock = wait?.Clock ?? TimeProvider.System;
-        Func<TimeSpan, CancellationToken, Task> delay = wait?.Delay ?? ((duration, token) => Task.Delay(duration, token));
-        DateTimeOffset deadline = clock.GetUtcNow().AddSeconds(30);
-        using var bounded = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        bounded.CancelAfter(TimeSpan.FromSeconds(30));
+        JsonObject operation = state.Obj("export_operations").Obj(row.Str("export_operation_id"));
+        JsonObject evidence = operation.Obj("evidence");
+        if (evidence.Str("export_source_sha") != head || evidence.Str("export_artifact_hash").Length == 0
+            || evidence.Obj("export_request").Int("version") != 2)
+        {
+            return false;
+        }
         try
         {
-            while (clock.GetUtcNow() < deadline)
-            {
-                await AssertBoundLeaseAsync(store, request, owner, bounded.Token);
-                JsonObject pr = await Runtime.ObjectAsync(api, "GET", $"/pulls/{request.Int("pr_number")}", cancellationToken: bounded.Token);
-                try
-                {
-                    if (!Identity(pr, config, request.Int("pr_number"), request.Str("branch")))
-                    {
-                        return (null, "Managed PR closed after generated ref update.");
-                    }
-                }
-                catch (UnsafeInput)
-                {
-                    return (null, "Managed PR identity changed after generated ref update.");
-                }
-                string prHead = pr.Obj("head").Str("sha");
-                if (prHead != generatedHead && prHead != request.Str("expected_head"))
-                {
-                    return (null, "Managed PR head changed after generated ref update.");
-                }
-                JsonObject reference = await Runtime.ObjectAsync(api, "GET", "/git/ref/heads/" + Uri.EscapeDataString(request.Str("branch")), cancellationToken: bounded.Token);
-                if (reference.Obj("object").Str("sha") != generatedHead)
-                {
-                    return (null, "Managed Git ref changed after generated ref update.");
-                }
-                if (prHead == generatedHead)
-                {
-                    return (pr, "");
-                }
-                TimeSpan remaining = deadline - clock.GetUtcNow();
-                if (remaining > TimeSpan.Zero)
-                {
-                    await delay(TimeSpan.FromSeconds(Math.Min(2, remaining.TotalSeconds)), bounded.Token);
-                }
-            }
+            await ValidateTransportAsync(api, config, evidence.Obj("export_transport"), cancellationToken);
         }
-        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested && bounded.IsCancellationRequested)
+        catch (ExpiredExportArtifact)
         {
+            return false;
         }
-        return (null, timeout);
+        catch (GitHubApiFailure error) when (error.Status == 404)
+        {
+            return false;
+        }
+        Dictionary<string, GitTreeEntry> source = await Bundle.TreeAsync(api, head, cancellationToken);
+        JsonObject current = SiteArtifact.Inputs(source.Values);
+        if (evidence.Str("export_inputs_hash") != LegacyIdentity.Fingerprint(current))
+        {
+            throw new Conflict("Recorded artifact inputs differ from the immutable source/policy tree.");
+        }
+        return true;
+    }
+
+    public static void RequestArtifactRefresh(JsonObject state, JsonObject row, string head)
+    {
+        JsonObject operation = state.Obj("export_operations").Obj(row.Str("export_operation_id"));
+        JsonObject evidence = operation.Obj("evidence");
+        if (evidence.Bool("export_refresh_required") || evidence.Str("export_source_sha") != head
+            || evidence.Str("export_artifact_hash").Length == 0 || evidence.Obj("export_request").Int("version") != 2)
+        {
+            return;
+        }
+        JsonArray history = evidence.Arr("export_artifact_history").Copy();
+        history.Add(new JsonObject
+        {
+            ["artifact_hash"] = evidence.Str("export_artifact_hash"), ["inputs_hash"] = evidence.Str("export_inputs_hash"),
+            ["transport"] = evidence["export_transport"]?.DeepClone(), ["expired_at"] = Runtime.Iso()
+        });
+        while (history.Count > 3) history.RemoveAt(0);
+        evidence["export_artifact_history"] = history;
+        evidence["export_refresh_required"] = true;
+        evidence["export_refresh_registered"] = false;
+        evidence["export_attempts"] = 0;
+        evidence["export_last_dispatch_at"] = null;
+        evidence["export_check_status"] = "pending";
+        evidence["export_error"] = "Artifact expired or was removed; rebuild the same reviewed source without changing its PR head.";
+        operation["evidence"] = evidence;
+        row["export_required"] = true;
+        row["export_check_status"] = "pending";
     }
 
     private static JsonObject FinalizedResult(JsonObject request, JsonObject finalized) => new()
@@ -287,26 +252,6 @@ public static partial class Worker
         ["model_calls"] = 0,
         ["resumed"] = true
     };
-
-    private static async Task<string?> RecognizeAppliedAsync(IGitHubApi api, JsonObject config, JsonObject request,
-        Dictionary<string, GitTreeEntry> predicted, CancellationToken cancellationToken)
-    {
-        int number = request.Int("pr_number");
-        string branch = request.Str("branch");
-        JsonObject pr = await Runtime.ObjectAsync(api, "GET", $"/pulls/{number}", cancellationToken: cancellationToken);
-        if (!Identity(pr, config, number, branch))
-        {
-            return null;
-        }
-        string head = Bundle.ExactHead(pr.Obj("head").Str("sha"));
-        if (await CurrentPrAsync(api, config, number, branch, head, cancellationToken) is null)
-        {
-            return null;
-        }
-        JsonObject commit = await Runtime.ObjectAsync(api, "GET", $"/git/commits/{head}", cancellationToken: cancellationToken);
-        return ExactExportCommit(commit, request.Str("expected_head"))
-            && Bundle.SameLeaves((await Bundle.TreeAsync(api, head, cancellationToken)).Values, predicted.Values) ? head : null;
-    }
 
     private static async Task<JsonObject> MarkStaleAsync(IStateStore store, JsonObject request, string owner, string reason, CancellationToken cancellationToken)
     {
@@ -343,95 +288,43 @@ public static partial class Worker
         await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
         JsonObject state = (await store.ReadAsync(cancellationToken)).State;
         JsonObject operation = BoundOperation(state, request);
-        if (state.Obj("finalized_exports")[request.Str("op_id")] is JsonObject finalizedExport)
+        bool previouslyFinalized = state.Obj("finalized_exports")[request.Str("op_id")] is JsonObject;
+        if (previouslyFinalized && operation.Obj("evidence").Bool("export_refresh_required")
+            && !operation.Obj("evidence").Bool("export_refresh_registered"))
         {
-            return FinalizedResult(request, finalizedExport);
+            return new JsonObject { ["status"] = "awaiting_export", ["commit_sha"] = request.Str("expected_head"), ["model_calls"] = 0 };
         }
-        string head = operation.Obj("evidence").Str("export_commit_sha");
-        if (head.Length == 0)
+        string head = request.Str("expected_head");
+        if (operation.Obj("evidence").Str("export_source_sha") != head
+            || operation.Obj("evidence").Str("export_artifact_hash").Length == 0)
         {
-            throw new Conflict("Export finalization lacks its generated commit; render the bound source request first.");
+            throw new Conflict("Export finalization lacks a verified source-bound artifact; render this versioned request first.");
         }
-        _ = Bundle.ExactHead(head);
-        JsonObject commit = await Runtime.ObjectAsync(api, "GET", $"/git/commits/{head}", cancellationToken: cancellationToken);
-        if (!ExactExportCommit(commit, request.Str("expected_head")))
+        JsonObject row = state.Obj("prs").Obj($"{request.Str("topic_id")}:{request.Int("generation")}");
+        if (!await ArtifactCurrentAsync(api, config, state, row, head, cancellationToken))
         {
-            throw new Conflict("Generated export commit parent differs from the reviewed source head.");
+            await RecordAsync(store, request, owner, "request expired native artifact refresh", (current, _) =>
+                RequestArtifactRefresh(current, current.Obj("prs").Obj($"{request.Str("topic_id")}:{request.Int("generation")}"), head), cancellationToken);
+            return new JsonObject { ["status"] = "awaiting_export", ["commit_sha"] = head, ["model_calls"] = 0 };
         }
-        RemoteExportReceipt receipt = await Receipt.RemoteAsync(api, head, cancellationToken);
-        if (!receipt.SourcesCurrent)
+        if (previouslyFinalized && !operation.Obj("evidence").Bool("export_refresh_required"))
         {
-            throw new Conflict("Generated export receipt does not bind the current source.");
+            return FinalizedResult(request, state.Obj("finalized_exports").Obj(request.Str("op_id")));
         }
-        JsonObject? pr = await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken);
+        JsonObject? pr = await CurrentSourceAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken);
         if (pr is null)
         {
-            JsonObject? sourcePr = await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), request.Str("expected_head"), cancellationToken);
-            if (sourcePr is null || !await CurrentBaseAsync(api, config, sourcePr, request.Str("expected_head"), cancellationToken))
-            {
-                return await MarkStaleAsync(store, request, owner, "Managed head or PR lifecycle changed before export checks.", cancellationToken);
-            }
-            Dictionary<string, GitTreeEntry> original = await Bundle.TreeAsync(api, request.Str("expected_head"), cancellationToken);
-            Dictionary<string, GitTreeEntry> generated = await Bundle.TreeAsync(api, head, cancellationToken);
-            JsonObject sourceBinding = Receipt.Make(original.Values);
-            if (!JsonNode.DeepEquals(sourceBinding["sources"], receipt.Receipt["sources"])
-                || !JsonNode.DeepEquals(sourceBinding["policy"], receipt.Receipt["policy"])
-                || original.Values.Concat(generated.Values).Where(entry => entry.Type != "tree").Select(entry => entry.Path).Distinct(StringComparer.Ordinal)
-                    .Any(path => original.GetValueOrDefault(path) != generated.GetValueOrDefault(path) && !Receipt.IsExportPath(path))
-                || (operation.Obj("evidence").Str("export_tree_sha").Length != 0
-                    && operation.Obj("evidence").Str("export_tree_sha") != commit.Obj("tree").Str("sha")))
-            {
-                throw new Conflict("Journaled export recovery differs from the reviewed source, policy or generated-only tree.");
-            }
-            await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
-            await EnsureDraftForExportAsync(api, store, request, owner, sourcePr, cancellationToken);
-            await RecordAsync(store, request, owner, "resume journaled generated ref update", (_, op) =>
-            {
-                JsonObject evidence = op.Obj("evidence");
-                evidence["export_ref_update_attempted_at"] = Runtime.Iso();
-                op["evidence"] = evidence;
-            }, cancellationToken);
-            if (await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), request.Str("expected_head"), cancellationToken) is null)
-            {
-                return await MarkStaleAsync(store, request, owner, "Managed source changed during generated ref recovery.", cancellationToken);
-            }
-            await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
-            await api.RequestAsync("PATCH", "/git/refs/heads/" + Uri.EscapeDataString(request.Str("branch")),
-                new JsonObject { ["sha"] = head, ["force"] = false }, cancellationToken: cancellationToken);
-            string propagationError;
-            (pr, propagationError) = await AwaitGeneratedHeadAsync(api, config, store, request, owner, head, checkWait, cancellationToken);
-            if (pr is null)
-            {
-                return await MarkStaleAsync(store, request, owner, propagationError, cancellationToken);
-            }
-            await RecordAsync(store, request, owner, "record recovered generated branch update", (_, op) =>
-            {
-                JsonObject evidence = op.Obj("evidence");
-                evidence["export_phase"] = "branch_updated";
-                op["evidence"] = evidence;
-            }, cancellationToken);
+            return await MarkStaleAsync(store, request, owner, "Managed source head, current base or PR lifecycle changed before artifact checks.", cancellationToken);
         }
-        PublicationChecks checks = await AwaitChecksAsync(api, config, store, request, owner, head, checkWait, cancellationToken);
+        string statusLine = $"<!-- devbook-export-validation -->Quartz artifact: verified for `{head}`; required checks and full-vault validation passed on that exact head.";
+        bool bodyApplied = pr.Str("body").Contains(statusLine, StringComparison.Ordinal);
+        long? priorBodyRun = bodyApplied && long.TryParse(operation.Obj("evidence")["export_body_prior_run_id"]?.ToString(), out long priorRun) ? priorRun : null;
+        PublicationChecks checks = await AwaitChecksAsync(api, config, store, request, owner, head, checkWait, cancellationToken, priorBodyRun);
         if (checks.Status == "stale")
         {
             return await MarkStaleAsync(store, request, owner, "Managed head or PR lifecycle changed while waiting for exact-head checks.", cancellationToken);
         }
-        await RecordAsync(store, request, owner, "record generated exact-head check results", (_, op) =>
-        {
-            JsonObject evidence = op.Obj("evidence");
-            evidence["export_checks"] = checks.Checks.Copy();
-            evidence["export_vault_validation"] = checks.VaultValidation;
-            evidence["export_check_status"] = checks.Status;
-            if (checks.Status == "failed")
-            {
-                evidence["export_paused"] = true;
-                if (!evidence.Bool("export_validation_exhausted"))
-                {
-                    evidence["export_error"] = "Generated exact-head validation failed; inspect and fix before explicitly resuming validation.";
-                }
-            }
-            op["evidence"] = evidence;
-        }, cancellationToken);
+        await SaveCheckResultsAsync(store, request, owner, checks, cancellationToken);
         if (checks.Status != "success")
         {
             return new JsonObject
@@ -442,9 +335,34 @@ public static partial class Worker
                 ["model_calls"] = 0
             };
         }
-        if (await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken) is null)
+        if (await CurrentSourceAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken) is null)
         {
             return await MarkStaleAsync(store, request, owner, "Managed head changed after export validation.", cancellationToken);
+        }
+        if (!await ArtifactCurrentAsync(api, config, (await store.ReadAsync(cancellationToken)).State, row, head, cancellationToken))
+        {
+            await RecordAsync(store, request, owner, "refresh artifact expired during validation", (current, _) =>
+                RequestArtifactRefresh(current, current.Obj("prs").Obj($"{request.Str("topic_id")}:{request.Int("generation")}"), head), cancellationToken);
+            return new JsonObject { ["status"] = "awaiting_export", ["commit_sha"] = head, ["model_calls"] = 0 };
+        }
+        if (previouslyFinalized)
+        {
+            await RecordAsync(store, request, owner, "refresh verified artifact for unchanged reviewed source", (current, op) =>
+            {
+                JsonObject proof = op.Obj("evidence");
+                proof["export_refresh_required"] = false;
+                proof["export_refresh_registered"] = false;
+                proof["export_phase"] = "finalized";
+                proof["export_verified_head"] = head;
+                op["evidence"] = proof;
+                JsonObject finalized = current.Obj("finalized_exports").Obj(request.Str("op_id"));
+                finalized["artifact_hash"] = proof.Str("export_artifact_hash");
+                finalized["validated_at"] = Runtime.Iso();
+                JsonObject unchanged = current.Obj("prs").Obj($"{request.Str("topic_id")}:{request.Int("generation")}");
+                unchanged["export_required"] = false;
+                unchanged["export_check_status"] = "success";
+            }, cancellationToken);
+            return new JsonObject { ["status"] = "exported", ["commit_sha"] = head, ["refreshed"] = true, ["model_calls"] = 0 };
         }
         JsonObject reviewed = operation.Obj("receipts");
         if (reviewed.Count == 0 || WorkloadReceipts.Records(reviewed).Count == 0)
@@ -457,20 +375,32 @@ public static partial class Worker
             await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
             await PostFeedbackReceiptAsync(api, record.Obj("proposal"), record.Obj("batch"), head, cancellationToken);
         }
-        pr = await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken);
+        pr = await CurrentSourceAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken);
         if (pr is null)
         {
             return await MarkStaleAsync(store, request, owner, "Managed head changed while recording feedback results.", cancellationToken);
         }
-        string statusLine = $"<!-- devbook-export-validation -->Quartz export: verified in `{head}`; required checks and full-vault validation passed on that exact head.";
         string updatedBody = Regex.Replace(pr.Str("body"), @"(?m)^<!-- devbook-export-validation -->.*$", _ => statusLine);
         if (updatedBody != pr.Str("body"))
         {
             await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
             string merged = Runtime.MergeManagedSection(pr.Str("body"), updatedBody, request.Str("topic_id"));
+            long runId = checks.PrTitleRunId ?? throw new Conflict("Managed-body update requires its validated PR Title workflow identity.");
+            await RecordAsync(store, request, owner, "bind managed-body update to fresh source checks", (_, op) =>
+            {
+                JsonObject evidence = op.Obj("evidence");
+                evidence["export_body_prior_run_id"] = runId;
+                op["evidence"] = evidence;
+            }, cancellationToken);
             await api.RequestAsync("PATCH", $"/pulls/{request.Int("pr_number")}", new JsonObject { ["body"] = merged }, cancellationToken: cancellationToken);
+            checks = await AwaitChecksAsync(api, config, store, request, owner, head, checkWait, cancellationToken, runId);
+            await SaveCheckResultsAsync(store, request, owner, checks, cancellationToken);
+            if (checks.Status == "stale")
+                return await MarkStaleAsync(store, request, owner, "Managed source changed while validating its deterministic body update.", cancellationToken);
+            if (checks.Status != "success")
+                return new JsonObject { ["status"] = checks.Status == "failed" ? "checks_failed" : "awaiting_checks", ["commit_sha"] = head, ["pr_number"] = request.Int("pr_number"), ["model_calls"] = 0 };
         }
-        pr = await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken);
+        pr = await CurrentSourceAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken);
         if (pr is null)
         {
             return await MarkStaleAsync(store, request, owner, "Managed head changed before delivery for review.", cancellationToken);
@@ -478,7 +408,7 @@ public static partial class Worker
         await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
         string deliveredNode = pr.Str("node_id");
         await Runtime.EnsureReadyForReviewAsync(api, pr, cancellationToken);
-        pr = await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken);
+        pr = await CurrentSourceAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken);
         if (pr is null)
         {
             JsonObject changed = await Runtime.ObjectAsync(api, "GET", $"/pulls/{request.Int("pr_number")}", cancellationToken: cancellationToken);
@@ -499,28 +429,48 @@ public static partial class Worker
         _ = BoundOperation(final, request);
         final = WorkloadReceipts.Apply(final, reviewed);
         JsonObject finalized = final.Obj("finalized_exports").Copy();
-        finalized[request.Str("op_id")] = new JsonObject { ["head_sha"] = head, ["validated_at"] = Runtime.Iso() };
+        finalized[request.Str("op_id")] = new JsonObject { ["head_sha"] = head, ["artifact_hash"] = operation.Obj("evidence").Str("export_artifact_hash"), ["validated_at"] = Runtime.Iso() };
         final["finalized_exports"] = finalized;
         JsonObject feedbackReceipts = final.Obj("export_feedback_receipts").Copy();
         feedbackReceipts[request.Str("op_id")] = true;
         final["export_feedback_receipts"] = feedbackReceipts;
-        JsonObject row = final.Obj("prs").Obj($"{request.Str("topic_id")}:{request.Int("generation")}");
-        if (row.Str("export_operation_id") == request.Str("op_id"))
+        JsonObject finalRow = final.Obj("prs").Obj($"{request.Str("topic_id")}:{request.Int("generation")}");
+        if (finalRow.Str("export_operation_id") == request.Str("op_id"))
         {
-            row["export_required"] = false;
-            row["head_sha"] = head;
-            row["export_verified_head"] = head;
-            row["export_check_status"] = "success";
+            finalRow["export_required"] = false;
+            finalRow["head_sha"] = head;
+            finalRow["export_verified_head"] = head;
+            finalRow["export_check_status"] = "success";
         }
         JsonObject finalOp = final.Obj("export_operations").Obj(request.Str("op_id"));
         JsonObject finalEvidence = finalOp.Obj("evidence");
         finalEvidence["export_phase"] = "finalized";
+        finalEvidence["export_refresh_required"] = false;
+        finalEvidence["export_refresh_registered"] = false;
         finalEvidence["export_verified_head"] = head;
         finalOp["evidence"] = finalEvidence;
         OperationJournal.CompactFinalizedExports(final, request.Int("pr_number"));
-        await store.WriteAsync(final, finalSnapshot, "maintenance: finalize verified generated export", cancellationToken);
+        await store.WriteAsync(final, finalSnapshot, "maintenance: finalize verified native artifact", cancellationToken);
         return new JsonObject { ["status"] = "exported", ["commit_sha"] = head, ["pr_number"] = request.Int("pr_number"), ["model_calls"] = 0 };
     }
+
+    private static Task<JsonObject> SaveCheckResultsAsync(IStateStore store, JsonObject request, string owner,
+        PublicationChecks checks, CancellationToken cancellationToken) =>
+        RecordAsync(store, request, owner, "record source artifact exact-head check results", (_, op) =>
+        {
+            JsonObject evidence = op.Obj("evidence");
+            evidence["export_checks"] = checks.Checks.Copy();
+            evidence["export_vault_validation"] = checks.VaultValidation;
+            evidence["export_pr_title_run_id"] = checks.PrTitleRunId;
+            evidence["export_check_status"] = checks.Status;
+            if (checks.Status == "failed")
+            {
+                evidence["export_paused"] = true;
+                if (!evidence.Bool("export_validation_exhausted"))
+                    evidence["export_error"] = "Source artifact exact-head validation failed; inspect and fix before explicitly resuming validation.";
+            }
+            op["evidence"] = evidence;
+        }, cancellationToken);
 
     private static int CheckSetting(JsonObject config, string name, int fallback, int minimum, int maximum)
     {
@@ -578,7 +528,7 @@ public static partial class Worker
             }, cancellationToken);
             return false;
         }
-        if (await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken) is null)
+        if (await CurrentSourceAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, cancellationToken) is null)
         {
             return null;
         }
@@ -604,7 +554,7 @@ public static partial class Worker
     }
 
     private static async Task<PublicationChecks> AwaitChecksAsync(IGitHubApi api, JsonObject config, IStateStore store,
-        JsonObject request, string owner, string head, ExportCheckWait? checkWait, CancellationToken cancellationToken)
+        JsonObject request, string owner, string head, ExportCheckWait? checkWait, CancellationToken cancellationToken, long? afterPrTitleRun = null)
     {
         int seconds = CheckSetting(config, "export_check_wait_seconds", 600, 0, 600);
         int interval = CheckSetting(config, "export_check_poll_seconds", 10, 1, 60);
@@ -634,7 +584,7 @@ public static partial class Worker
                 }
                 observed = true;
                 await AssertBoundLeaseAsync(store, request, owner, bounded.Token);
-                if (await CurrentPrAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, bounded.Token) is null)
+                if (await CurrentSourceAsync(api, config, request.Int("pr_number"), request.Str("branch"), head, bounded.Token) is null)
                 {
                     return new("stale", checks.Checks, checks.VaultValidation);
                 }
@@ -653,6 +603,8 @@ public static partial class Worker
                 }
                 checks = await Runtime.PublicationCheckStateAsync(api, request.Str("branch"), head,
                     config.Arr("required_check_contexts").Count == 0 ? null : config.Arr("required_check_contexts").Strings(), bounded.Token);
+                if (checks.Status == "success" && afterPrTitleRun is long previous && (checks.PrTitleRunId is null || checks.PrTitleRunId <= previous))
+                    checks = checks with { Status = "pending" };
                 if (validation is "failure" or "error" or "cancelled" or "timed_out" or "action_required" or "startup_failure" or "stale")
                 {
                     return new("failed", checks.Checks, validation);

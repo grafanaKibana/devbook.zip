@@ -38,8 +38,8 @@ jobs:
       - name: Test changelog generation and pre-commit integration
         run: node --test .scripts/tests/changelog.test.cjs
 
-      - name: Test Preview deployment links
-        run: node --test .scripts/tests/preview-deployment-link.test.cjs
+      - name: Test artifact transport, deployment and workflow boundaries
+        run: node --test .scripts/tests/site-*.test.mjs
 
       - name: Test native tooling core
         working-directory: .scripts

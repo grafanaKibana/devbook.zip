@@ -10,8 +10,24 @@ namespace DevBook.Tooling.Tests;
 
 public sealed class ExportTests
 {
+    [Theory]
+    [InlineData("verify")]
+    [InlineData("export")]
+    public async Task RetiredReceiptCommandsCannotApproveAnUnmanagedBranch(string mode)
+    {
+        // Arrange
+        using var fixture = new PublishingPublishingFixture();
+
+        // Act
+        int result = await Receipt.RunAsync([mode, "--repo-root", fixture.Root,
+            "--base-ref", "HEAD", "--head-ref", "feature/source-only"]);
+
+        // Assert
+        result.Should().Be(1);
+    }
+
     [Fact]
-    public async Task ImmutableExportStagesGeneratedOutputAndPreservesUndatedSources()
+    public async Task ImmutableExportLeavesIndexUntouchedAndPreservesUndatedSources()
     {
         // Arrange
         using var fixture = new PublishingPublishingFixture();
@@ -26,7 +42,7 @@ public sealed class ExportTests
         File.ReadAllBytes(Path.Combine(fixture.Root, "Vault/Home/Undated.md")).Should().Equal(original);
         fixture.Calls.Should().ContainInOrder("quartz-syncer:cache action=tree-refresh", "quartz-syncer:publish", "quartz-syncer:delete force");
         fixture.Calls.Should().Contain(call => call.Contains("cleanOrphanedMedia", StringComparison.Ordinal));
-        Git.Paths(fixture.Root, "diff", "--cached", "--name-only", "-z").Should().Equal("Web/content/Card.md");
+        Git.Paths(fixture.Root, "diff", "--cached", "--name-only", "-z").Should().BeEmpty();
     }
 
     [Fact]
@@ -164,24 +180,6 @@ public sealed class ExportTests
     }
 
     [Fact]
-    public void ChangedPolicyBytesInvalidateAnExistingExportReceipt()
-    {
-        // Arrange
-        GitTreeEntry[] entries = [.. Receipt.RequiredPolicyPaths.Select(path => new GitTreeEntry(path, "100644", "blob", new string('a', 40))),
-            new(".scripts/DevBook.Tooling/Infrastructure/LegacyCaseFold.json", "100644", "blob", new string('b', 40)),
-            new("Vault/Home/Programming/Card.md", "100644", "blob", new string('c', 40)),
-            new("Web/content/Programming/Card.md", "100644", "blob", new string('d', 40))];
-        JsonObject receipt = Receipt.Make(entries);
-        GitTreeEntry[] changed = [.. entries.Select(entry => entry.Path.EndsWith("LegacyCaseFold.json", StringComparison.Ordinal) ? entry with { Sha = new string('f', 40) } : entry)];
-
-        // Act
-        Action validate = () => Receipt.Validate(receipt, changed);
-
-        // Assert
-        validate.Should().Throw<InvalidDataException>();
-    }
-
-    [Fact]
     public void ConcurrentSourceEditBlocksExportBeforePublication()
     {
         // Arrange
@@ -212,6 +210,18 @@ public sealed class ExportTests
         DateTimeOffset.Parse(fields["published"].Text).Should().BeOnOrAfter(started).And.BeOnOrBefore(DateTimeOffset.UtcNow);
         fixture.PublishCount.Should().Be(2);
         File.ReadAllText(Path.Combine(fixture.Root, "Vault/Home/Undated.md")).Should().NotContain("published:");
+    }
+
+    [Fact]
+    public async Task ImmutableExportPointsMissingPublicationDatesToLocalPreview()
+    {
+        using var fixture = new PublishingPublishingFixture(published: false);
+        var context = new SyncerContext(fixture.Root, fixture.CommandAsync, timeout: TimeSpan.FromSeconds(10));
+
+        Func<Task> export = () => Syncer.ExportAsync(context);
+
+        await export.Should().ThrowAsync<NoteDateException>().WithMessage("*site preview*Vault open in Obsidian*CLI enabled*");
+        fixture.PublishCount.Should().Be(0);
     }
 
     [Fact]
