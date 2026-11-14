@@ -2994,51 +2994,56 @@
       }
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md": {
-      "content_hash": "45caaa8e133c5691ee48d43c800a326500c85d86312fcf5864c7acc61b0e203a",
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "content_hash": "9cbf76f779d07497e71108578c1ecff2302424c2784a32da52ec925d8b9b1a28",
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
       "outcome": "keep",
       "repair_input_hash": "",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_process": "focused-whole-note-v1",
       "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "keep_review": {
-        "content_hash": "45caaa8e133c5691ee48d43c800a326500c85d86312fcf5864c7acc61b0e203a",
-        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "content_hash": "9cbf76f779d07497e71108578c1ecff2302424c2784a32da52ec925d8b9b1a28",
+        "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
         "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
         "review": {
           "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
           "verdict": "CLEAN",
-          "summary": "I read the whole note and found no factual, structural, or question-quality defect that justifies an edit. The layered retrieval, generation and end-to-end framing, the RAGAS reference requirements, the hedged diagnostic tables and the four existing cards are accurate and consistent. Leaving the note unchanged avoids cosmetic churn.",
-          "page_type": "Concept note, with a Questions section of Qard callouts and a References section. Qard ID comments are protected metadata.",
+          "summary": "The note separates retrieval, generation and end-to-end evaluation, hedges diagnostic combinations as hypotheses, and handles version-dependent RAGAS details (Context Precision variants, Noise Sensitivity modes) with care. Cards are focused and cite answer-side sources. No edit is warranted.",
+          "page_type": "Concept — typed frontmatter, optional Questions/References present and valid; no fenced code blocks; special-page rules not applicable.",
           "current_text_evidence": [
             {
-              "quote": "A support bot can retrieve the correct policy and still misread its date constraint.",
-              "line_start": 21,
-              "reason": "A concrete example restores the retrieval-versus-generation distinction quickly, and it appears before the metric tables."
+              "quote": "Mixing the layers turns every regression into guesswork",
+              "line_start": 17,
+              "reason": "The opening states the operating idea and why layered evaluation matters, which makes the topic quick to re-enter."
             },
             {
-              "quote": "so the evaluation record must name the variant rather than reporting an unqualified",
+              "quote": "Empty-result rate needs no labels, because it only counts queries for which retrieval returns nothing.",
+              "line_start": 25,
+              "reason": "Accurately states the label dependence boundary between ranking metrics and the label-free telemetry metric."
+            },
+            {
+              "quote": "so the evaluation record must name the variant rather than reporting an unqualified \"Context Precision\" score",
               "line_start": 59,
-              "reason": "This states the version-specific condition for Context Precision. Current RAGAS has several variants with different reference requirements."
+              "reason": "Handles the version-specific RAGAS Context Precision variants correctly instead of overstating a single definition."
+            },
+            {
+              "quote": "Scores alone do not establish a component's root cause.",
+              "line_start": 63,
+              "reason": "Diagnostic combination tables are properly framed as hypotheses with an investigation order, avoiding overclaiming."
             },
             {
               "quote": "Attribution shows which context supports an incorrect claim, not that the chunk caused the error.",
               "line_start": 80,
-              "reason": "This limit on Noise Sensitivity is precise and prevents over-interpreting the score."
+              "reason": "Noise Sensitivity is described with its mode and its causal limit, an exception that preserves technical accuracy."
             },
             {
               "quote": "Rerunning the same evaluation on the same queries does not satisfy the second condition.",
               "line_start": 158,
-              "reason": "This answer explains why repeated runs cannot replace a larger or more representative query sample. Each card covers one gradeable task, and its answer is consistent with the body."
-            },
-            {
-              "quote": "Recall@5 is `3/4 = 0.75`, because three of the four relevant documents appear.",
-              "line_start": 126,
-              "reason": "The worked example is arithmetically correct. The relevant documents sit at ranks 2, 3 and 5, so Precision@5 = 0.6 and reciprocal rank = 0.5."
+              "reason": "The segment-drop card explains the condition and its exception directly in words, with a finite gradeable answer; the worked example in the metrics card (3/4, 3/5, hit, RR 0.5) is arithmetically correct."
             }
           ],
           "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the metrics layers, the RAGAS mapping and the pitfalls form one coherent evaluation topic. Definitions are already delegated to Monitoring.",
+          "split_suggestion": "No split: retrieval metrics, generation metrics, RAGAS scores and tradeoffs form one coherent evaluation-metrics topic; the full definitions already live in Monitoring, and the note links out rather than duplicating them.",
           "findings": [],
           "source_checks": [],
           "rejection_equivalence": [],
@@ -3051,6 +3056,59 @@
           }
         },
         "review_process": "focused-whole-note-v1"
+      },
+      "keep_review_history": {
+        "b6f66528bdb83faf258ba2700c85feb435b34907b3cbda8f9e3f3651826fa93e": {
+          "content_hash": "45caaa8e133c5691ee48d43c800a326500c85d86312fcf5864c7acc61b0e203a",
+          "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+          "review": {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+            "verdict": "CLEAN",
+            "summary": "I read the whole note and found no factual, structural, or question-quality defect that justifies an edit. The layered retrieval, generation and end-to-end framing, the RAGAS reference requirements, the hedged diagnostic tables and the four existing cards are accurate and consistent. Leaving the note unchanged avoids cosmetic churn.",
+            "page_type": "Concept note, with a Questions section of Qard callouts and a References section. Qard ID comments are protected metadata.",
+            "current_text_evidence": [
+              {
+                "quote": "A support bot can retrieve the correct policy and still misread its date constraint.",
+                "line_start": 21,
+                "reason": "A concrete example restores the retrieval-versus-generation distinction quickly, and it appears before the metric tables."
+              },
+              {
+                "quote": "so the evaluation record must name the variant rather than reporting an unqualified",
+                "line_start": 59,
+                "reason": "This states the version-specific condition for Context Precision. Current RAGAS has several variants with different reference requirements."
+              },
+              {
+                "quote": "Attribution shows which context supports an incorrect claim, not that the chunk caused the error.",
+                "line_start": 80,
+                "reason": "This limit on Noise Sensitivity is precise and prevents over-interpreting the score."
+              },
+              {
+                "quote": "Rerunning the same evaluation on the same queries does not satisfy the second condition.",
+                "line_start": 158,
+                "reason": "This answer explains why repeated runs cannot replace a larger or more representative query sample. Each card covers one gradeable task, and its answer is consistent with the body."
+              },
+              {
+                "quote": "Recall@5 is `3/4 = 0.75`, because three of the four relevant documents appear.",
+                "line_start": 126,
+                "reason": "The worked example is arithmetically correct. The relevant documents sit at ranks 2, 3 and 5, so Precision@5 = 0.6 and reciprocal rank = 0.5."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the metrics layers, the RAGAS mapping and the pitfalls form one coherent evaluation topic. Definitions are already delegated to Monitoring.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          },
+          "review_process": "focused-whole-note-v1"
+        }
       }
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md": {
@@ -14424,7 +14482,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-14T18:18:47.082551Z",
-    "elapsed_seconds": 306.6253593999999,
+    "elapsed_seconds": 310.58749099999994,
     "calls_reserved": 9,
     "responses_received": 9,
     "attempted_paths": [
@@ -14668,7 +14726,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T18:23:53.707379Z",
+    "checkpoint_at": "2026-11-14T18:23:57.669510Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -22566,6 +22624,96 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md": "335c856c61ac7d13ea7921ce27b8ad91bb41fb8fe44e7db21bf343fc43e4ab97"
+      },
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "5456b8fdc8a96fc587b46f00cfc3be2ad6481905e33291532f78a4d245a78063": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Independent whole-note audit found no factual, editorial or card-quality defect. The keep is justified and no edits are proposed.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+            "verdict": "CLEAN",
+            "summary": "The note separates retrieval, generation and end-to-end evaluation, hedges diagnostic combinations as hypotheses, and handles version-dependent RAGAS details (Context Precision variants, Noise Sensitivity modes) with care. Cards are focused and cite answer-side sources. No edit is warranted.",
+            "page_type": "Concept — typed frontmatter, optional Questions/References present and valid; no fenced code blocks; special-page rules not applicable.",
+            "current_text_evidence": [
+              {
+                "quote": "Mixing the layers turns every regression into guesswork",
+                "line_start": 17,
+                "reason": "The opening states the operating idea and why layered evaluation matters, which makes the topic quick to re-enter."
+              },
+              {
+                "quote": "Empty-result rate needs no labels, because it only counts queries for which retrieval returns nothing.",
+                "line_start": 25,
+                "reason": "Accurately states the label dependence boundary between ranking metrics and the label-free telemetry metric."
+              },
+              {
+                "quote": "so the evaluation record must name the variant rather than reporting an unqualified \"Context Precision\" score",
+                "line_start": 58,
+                "reason": "Handles the version-specific RAGAS Context Precision variants correctly instead of overstating a single definition."
+              },
+              {
+                "quote": "Scores alone do not establish a component's root cause.",
+                "line_start": 62,
+                "reason": "Diagnostic combination tables are properly framed as hypotheses with an investigation order, avoiding overclaiming."
+              },
+              {
+                "quote": "Attribution shows which context supports an incorrect claim, not that the chunk caused the error.",
+                "line_start": 79,
+                "reason": "Noise Sensitivity is described with its mode and its causal limit, an exception that preserves technical accuracy."
+              },
+              {
+                "quote": "Rerunning the same evaluation on the same queries does not satisfy the second condition.",
+                "line_start": 126,
+                "reason": "The segment-drop card explains the condition and its exception directly in words, with a finite gradeable answer; the worked example in the metrics card (3/4, 3/5, hit, RR 0.5) is arithmetically correct."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: retrieval metrics, generation metrics, RAGAS scores and tradeoffs form one coherent evaluation-metrics topic; the full definitions already live in Monitoring, and the note links out rather than duplicating them.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+          "citation_index": 2,
+          "reported_line_start": 58,
+          "resolved_line_start": 59
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+          "citation_index": 3,
+          "reported_line_start": 62,
+          "resolved_line_start": 63
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+          "citation_index": 4,
+          "reported_line_start": 79,
+          "resolved_line_start": 80
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+          "citation_index": 5,
+          "reported_line_start": 126,
+          "resolved_line_start": 158
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md": "9cbf76f779d07497e71108578c1ecff2302424c2784a32da52ec925d8b9b1a28"
       },
       "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -43410,200 +43558,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "40a68853698f42388f6dd5882c679ad4",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Retrieval, generation, and end-to-end metrics each answer a different question, making regressions diagnosable.\"\nlevel: [\"2\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics\"\nflashcard_uid: \"a6155222\"\ncreated: \"2026-06-12T18:21:46.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:28:37.413Z\"\n---\n\nRAG evaluation needs separate views of retrieval and generation. Retrieval metrics test whether the right evidence arrived. Generation metrics test whether the answer used that evidence correctly. End-to-end outcomes then show whether the task was solved. Mixing the layers turns every regression into guesswork: a faithful answer over irrelevant documents needs a retrieval fix, while ignored evidence points at generation.\n\nRetrieval and correctness metrics depend on relevance labels, reference evidence, or reference answers. Some generation diagnostics, including faithfulness and response relevancy, can instead compare the query, response, and retrieved context without a reference answer. [[Retrieval Evaluation Sets]] covers retrieval labels and builds on the broader [[Building an Evaluation Set]] process. A changed score still identifies a symptom, not the responsible component. [[Component-Level Evaluation]] provides the ablation method for that diagnosis.\n\nA support bot can retrieve the correct policy and still misread its date constraint. Retrieval passed. Generation failed. More search tuning cannot repair that answer.\n\n# Retrieval Metrics\n\nRetrieval metrics evaluate whether the relevant documents reached the generator. The relevance and ranking metrics assume a labeled set in which each query has known relevant documents. Empty-result rate needs no labels, because it only counts queries for which retrieval returns nothing. The full definitions, worked examples, and alerting guidance live in [[Monitoring#Retrieval Quality Metrics|Monitoring — Retrieval Quality Metrics]]. This table summarizes what each metric answers and when to prefer it.\n\n| Metric | What it answers | When to prefer |\n| --- | --- | --- |\n| [[Monitoring#Retrieval Quality Metrics\\|Recall@k]] | Were the relevant documents found | Primary metric -- always tracked |\n| [[Monitoring#Retrieval Quality Metrics\\|Precision@k]] | How much noise is in the context | Context window is tight or token cost matters |\n| [[Monitoring#Retrieval Quality Metrics\\|HitRate@k]] | Did at least one relevant doc appear | Quick minimum-bar check. Good for dashboards |\n| [[Monitoring#Retrieval Quality Metrics\\|MRR]] | Is the best result ranked first | Generator uses only top-1 or top-2 chunks |\n| [[Monitoring#Retrieval Quality Metrics\\|MAP]] | Are all relevant docs found and ranked high | Multiple relevant documents per query expected |\n| [[Monitoring#Retrieval Quality Metrics\\|nDCG@k]] | Is the full ranking quality good | Generator uses all k chunks with position-aware weighting |\n| [[Monitoring#Deterministic Metrics\\|Empty-result rate]] | How often retrieval returns nothing -- label-free telemetry for possible coverage gaps | Corpus is growing or query patterns are shifting |\n\nRecall creates a hard ceiling because the generator cannot use evidence it never receives. [[Monitoring#Deterministic Metrics|Empty-result rate]] needs separate tracking as well. Aggregate recall can hide queries for which the index returns nothing.\n\n# Generation Metrics\n\nGeneration metrics judge the answer against the query and retrieved context. Many use a separate [[LLM-as-a-Judge|LLM-as-judge]] model. [[Monitoring#LLM-as-Judge Metrics|Monitoring — LLM-as-Judge Metrics]] gives the full definitions. These dimensions cover different failure modes:\n\n- **[[Monitoring#LLM-as-Judge Metrics|Faithfulness (groundedness)]]** — does every claim in the answer trace back to the provided context? The RAG-specific counterpart to hallucination detection — see [[Hallucinations]] for broader coverage.\n- **[[Monitoring#LLM-as-Judge Metrics|Answer correctness]]** — does the answer actually solve the user's question? A response can be perfectly faithful yet still wrong if it misses the key constraint or answers a different question. Requires a reference answer.\n- **[[Monitoring#LLM-as-Judge Metrics|Citation validity]]** — does each citation actually support the claim it is attached to? Stricter than faithfulness: an answer can be grounded overall while a specific citation points to an irrelevant passage.\n- **[[Monitoring#LLM-as-Judge Metrics|Response completeness]]** — does the answer cover all aspects of the query? \"Compare A and B\" expects coverage of both. Partial answers score lower.\n\n# RAGAS Framework\n\n[RAGAS](https://docs.ragas.io/) turns these concepts into runnable scores, often through an [[LLM-as-a-Judge|LLM-as-judge]]. Each score targets a distinct retrieval or generation failure, though its exact implementation and model requirements depend on the RAGAS version.\n\n| Metric | Layer | What it measures | Reference needed |\n| --- | --- | --- | --- |\n| **Faithfulness** | Generation | Are all claims in the response supported by retrieved context? Score = `supported_claims / total_claims` | No |\n| **Response Relevancy** | Generation | Does the response address the user's question? Reverse-engineers questions from response, measures embedding similarity to original query | No |\n| **Context Precision** | Retrieval | Are relevant chunks ranked higher than irrelevant ones? Signal-to-noise in the retrieved set | Variant-dependent: reference response, reference contexts, or another declared relevance signal |\n| **Context Recall** | Retrieval | Did retrieval capture all evidence needed to answer? Score = `reference_claims_in_context / total_reference_claims` | Always |\n\nFaithfulness and Response Relevancy can run without a reference answer. Context Recall requires reference evidence. Current RAGAS releases expose several Context Precision variants whose required columns differ: some compare retrieved contexts with a reference response, while others use reference contexts or a non-LLM relevance signal. The exact class names and inputs are versioned API details, so the evaluation record must name the variant rather than reporting an unqualified \"Context Precision\" score.\n\n## Diagnostic Combinations\n\nIndividual scores identify symptoms. Combinations are hypotheses, interpreted only after reference quality, captured context, metric configuration, and representative samples have been checked. Scores alone do not establish a component's root cause.\n\n| Faithfulness | Context Recall | Observation / hypothesis | Investigation |\n| --- | --- | --- | --- |\n| High | Low | Answer claims are largely supported by retrieved context, but reference coverage is low | Missing evidence, metadata filters, candidate cutoff, and retrieval fit warrant inspection |\n| Low | High | Unsupported answer claims despite high reference coverage in the measured context | Assembled model input, generation behavior, and evaluator judgments warrant inspection |\n| Low | Low | Unsupported answer claims and low reference coverage | Both measurements are validated first; missing evidence and generation are then investigated separately |\n\n| Context Precision | Context Recall | Observation / hypothesis | Investigation |\n| --- | --- | --- | --- |\n| Low | High | Relevant chunks tend to rank below irrelevant chunks while reference coverage is high | Ranking, metadata filters, and final context selection warrant inspection |\n| High | Low | Relevant chunks tend to rank above irrelevant chunks while reference coverage is low | Missing evidence, candidate cutoff, [[Home/AI & ML/LLM/Context Engineering/RAG/Retrieval#Hybrid Retrieval — Vector + Keyword\\|hybrid search]], and chunk boundaries warrant inspection |\n\n## Additional RAGAS Metrics\n\nTwo additional diagnostics cover failure modes that the four core rows above do not:\n\n- **[[Monitoring#LLM-as-Judge Metrics|Noise Sensitivity]]** — measures incorrect response claims, judged against the reference, that are attributable to retrieved context. A selected mode sets the attribution: relevant mode counts incorrect claims attributable to relevant retrieved chunks, and irrelevant mode counts those attributable to irrelevant chunks, so a reported score names its mode. Catches a gap the original four miss: a claim that the retrieved context supports, and that Faithfulness therefore accepts, can still be incorrect against the reference. Attribution shows which context supports an incorrect claim, not that the chunk caused the error. Requires reference. Lower is better.\n- **[[Monitoring#LLM-as-Judge Metrics|Context Entities Recall]]** — compares named entities in the reference answer against entities in retrieved context. Useful for entity-heavy domains (legal, medical, financial) where missing a specific name, date, or identifier is a hard failure even when general topic recall is adequate.\n\n# Tradeoffs\n\nNo scoring method gives high semantic coverage, low cost, and stable calibration at once. The mix depends on available ground truth and the consequence of a false pass.\n\n| Approach | Coverage | Cost | Latency | Reliability |\n| --- | --- | --- | --- | --- |\n| Human evaluation | Highest -- catches nuance and edge cases | Highest -- annotator time per query | Slow -- days to weeks per batch | Gold standard but low throughput |\n| LLM-as-judge | High -- handles open-ended semantics | Medium -- API cost per scored response | Fast -- seconds per judgment | Subject to bias and prompt sensitivity |\n| Deterministic checks | Low for open-ended semantics -- covers explicitly encoded rules such as exact match, format, business rules, permissions, and argument constraints | Lowest -- no model calls | Instant | Reproducible, but only as valid as the encoded specification |\n| Reference-free metrics | Medium -- no ground truth needed | Medium -- model calls for scoring | Fast | Limited -- can flag claims unsupported by or contradicting the supplied context, but cannot establish real-world correctness or completeness, or catch an error the answer copies faithfully from that context |\n| End-to-end user metrics | Highest signal -- measures real impact | Low direct cost -- piggybacks on production | Delayed -- needs traffic volume | Noisy -- confounded by UI and user behavior |\n\nDeterministic checks serve as fast release gates, while an LLM judge covers semantic failures. Human labels calibrate both and cover costly edge cases. Production outcomes validate the system, but they are too delayed and confounded to serve as the only evaluation.\n\n# Pitfalls\n\n## Aggregate Metrics Mask Segment Regressions\n\nA change can improve average Recall@5 by 2% while dropping 15% for one tenant's query cluster. The average passes and the tenant sees a regression. Query types and document sources do not share one retrieval distribution.\n\nSlicing by the dimensions that can change the retrieval problem, such as tenant, language, query cluster, or document source, exposes such losses. A material segment regression remains a regression even when the global average rises.\n\n## LLM-as-Judge Bias in Generation Metrics\n\nLLM judges exhibit positional bias (scoring the first response higher in pairwise comparisons), verbosity bias (rewarding longer answers regardless of correctness), and self-preference bias (scoring outputs from the same model family higher). For RAG specifically, judges are also sensitive to evaluation prompt wording: small changes to the prompt that asks whether an answer is faithful can shift scores across the entire eval set.\n\nBinary judgments often calibrate more reliably than broad numeric scales. Prompt-sensitivity checks, comparison with a small human-labeled set, and agreement tracked over time show whether a judge stays reliable. [[LLM-as-a-Judge]] covers the reliability mechanics in more depth.\n\n# Questions\n\n> [!qard]- How do Recall@k, Precision@k, HitRate@k, MRR and nDCG@k differ as retrieval metrics?\n> All five compare a ranked result list with labeled relevant documents, but each rewards something different: coverage, low noise, any success, an early first hit or a well-ordered ranking.\n>\n> | Metric | What it measures | Effect of rank within the top k | What it misses |\n> |---|---|---|---|\n> | Recall@k | Share of a query's relevant documents that appear in the top k | None | How high the relevant documents rank and how much noise surrounds them |\n> | Precision@k | Share of the top k results that are relevant | None | Relevant documents that were never retrieved |\n> | HitRate@k | Share of queries with at least one relevant result in the top k | None | Every missing document after the first hit |\n> | MRR | Mean, across queries, of `1 / rank` for the first relevant result, counting `0` when none is found | Strong, but only for the first hit | Everything after the first relevant result |\n> | nDCG@k | Sum of the relevance grades in the top k, each discounted by its position, divided by that sum for the ideal ordering | Applies across the whole top k | Whether a low score comes from missing documents or from poor ordering |\n>\n> Example: a query has four known relevant documents, and its top five results are `[irrelevant, relevant, relevant, irrelevant, relevant]`.\n>\n> - Recall@5 is `3/4 = 0.75`, because three of the four relevant documents appear.\n> - Precision@5 is `3/5 = 0.6`, because three of the five results are relevant.\n> - The query counts as a hit for HitRate@5.\n> - Its reciprocal rank is `1/2 = 0.5`, because the first relevant result is at rank 2.\n> \n> Recall sets a ceiling for generation, because the generator cannot use evidence it never receives. Precision matters when context space or token cost is tight. MRR fits a generator that reads only the top one or two chunks. nDCG@k fits a generator that uses all k chunks and benefits from seeing the strongest evidence first.\n>\n> Sources:\n> - [RAG evaluators and document retrieval metrics (Microsoft Foundry)](https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators?view=foundry)\n> - [[Monitoring#Retrieval Quality Metrics|Monitoring: Retrieval Quality Metrics]]\n\n<!-- qard-id: 93e287a9-2061-488e-ae8b-95393678099a -->\n> [!qard]- Why can aggregate retrieval metrics hide a segment regression?\n> An aggregate metric averages over all queries, so a gain on large, healthy segments can outweigh a serious loss on a small one.\n>\n> Example: a change raises overall Recall@5 by 2%, while recall for one tenant's query cluster falls by 15%. A gate on the global average passes, yet that tenant now receives worse evidence.\n>\n> Slicing results by dimensions that change the retrieval problem, such as tenant, language, query class or document source, exposes such losses.\n>\n> Sources:\n> - [Rules of Machine Learning (Google)](https://developers.google.com/machine-learning/guides/rules-of-ml)\n> - [[Evaluation Metrics#Aggregate Metrics Mask Segment Regressions|Evaluation Metrics: Aggregate Metrics Mask Segment Regressions]]\n\n> [!qard]- When is a drop in a segment's retrieval metric actionable?\n> A segment drop is actionable when it matters to that segment's users and is too large to explain as sampling noise.\n>\n> Slicing has its own risk. A small segment has few labeled queries, so its score depends heavily on which queries happen to be in the set. A segment drop is credible and actionable when:\n>\n> - the segment has enough labeled queries, representative of its real traffic, for its score to be meaningful;\n> - the drop exceeds the uncertainty that comes from that limited query sample, for example by falling outside a confidence interval computed over the segment's queries;\n> - it crosses a threshold set in advance from the product's risk for that segment.\n>\n> Rerunning the same evaluation on the same queries does not satisfy the second condition. Repeated runs show whether scores stay stable when retrieval or judging is nondeterministic. They add no queries, and they do not make the existing queries more representative.\n>\n> A material, credible segment regression remains a regression even when the global average improves.\n>\n> Sources:\n> - [Rules of Machine Learning (Google)](https://developers.google.com/machine-learning/guides/rules-of-ml)\n> - [[Evaluation Metrics#Aggregate Metrics Mask Segment Regressions|Evaluation Metrics: Aggregate Metrics Mask Segment Regressions]]\n\n<!-- qard-id: f85d000b-ccfc-45ce-9b8a-b98babd40c07 -->\n> [!qard]- How should high Faithfulness with low Context Recall be investigated in a RAGAS evaluation?\n> It suggests that the answer stays consistent with the context it received, but that context lacks evidence the reference answer needs. The first check is the measurement itself: the reference answer, the captured context and the metric configuration. Retrieval is investigated once those are confirmed sound.\n>\n> - **Faithfulness:** the share of claims in the response that the supplied context supports. It does not show whether that context was complete.\n> - **Context Recall:** the share of claims in the reference answer that the retrieved context supports. It requires a reference and measures coverage of the evidence an answer needs.\n>\n> Together, the scores fit a generator that stays within limited evidence, which can produce a grounded but incomplete answer.\n>\n> The order of investigation:\n>\n> 1. **Measurement:** the reference answer is correct, the scored context is what the generator actually received, and the metric variant, judge model and inputs are as intended. A flawed reference or a logging gap can produce the same pattern.\n> 2. **Retrieval path:** missing or unindexed documents, metadata filters, the candidate cutoff and context assembly.\n> 3. **Generation:** changed only after the retrieval path is ruled out, because a prompt cannot make use of evidence that never arrived.\n>\n> Neither score alone proves the cause. The combination is a hypothesis to test on representative samples.\n>\n> Sources:\n> - [Context Recall (Ragas)](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/context_recall/)\n> - [Faithfulness (Ragas v0.2.5)](https://docs.ragas.io/en/v0.2.5/concepts/metrics/available_metrics/faithfulness/)\n> - [[Evaluation Metrics#Diagnostic Combinations|Evaluation Metrics: Diagnostic Combinations]]\n\n# References\n\n- [RAGAS -- automated evaluation of RAG pipelines (EACL 2024)](https://arxiv.org/abs/2309.15217)\n- [Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena -- positional and verbosity bias (NeurIPS 2023)](https://arxiv.org/abs/2306.05685)\n",
-          "hash": "9cbf76f779d07497e71108578c1ecff2302424c2784a32da52ec925d8b9b1a28",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its text and known RAGAS and retrieval-metric definitions. The opening separates retrieval, generation and end-to-end layers and carries a concrete example. The retrieval table matches the standard definitions of Recall, Precision, HitRate, MRR, MAP and nDCG, and it correctly marks empty-result rate as label-free. The RAGAS table is accurate: Faithfulness is supported claims over total claims, and Context Recall needs reference evidence. Context Precision is correctly described as variant-dependent. Diagnostic combinations are hedged as hypotheses, and Noise Sensitivity is described with its mode. The tradeoff table and the judge-bias pitfalls are consistent with MT-Bench. The cards each test one gradeable task, and the worked example in the metrics card is arithmetically correct (3/4, 3/5, hit, RR 0.5). Existing cards cite sources on the answer side, and known_violations is empty. No factual or editorial defect justifies an edit."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md": "9cbf76f779d07497e71108578c1ecff2302424c2784a32da52ec925d8b9b1a28"
-    },
-    "feedback_keys": [],
-    "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T18:23:30.139072Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "Independent whole-note audit found no factual, editorial or card-quality defect. The keep is justified and no edits are proposed.",
-        "change_checks": [],
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
-            "verdict": "CLEAN",
-            "summary": "The note separates retrieval, generation and end-to-end evaluation, hedges diagnostic combinations as hypotheses, and handles version-dependent RAGAS details (Context Precision variants, Noise Sensitivity modes) with care. Cards are focused and cite answer-side sources. No edit is warranted.",
-            "page_type": "Concept — typed frontmatter, optional Questions/References present and valid; no fenced code blocks; special-page rules not applicable.",
-            "current_text_evidence": [
-              {
-                "quote": "Mixing the layers turns every regression into guesswork",
-                "line_start": 17,
-                "reason": "The opening states the operating idea and why layered evaluation matters, which makes the topic quick to re-enter."
-              },
-              {
-                "quote": "Empty-result rate needs no labels, because it only counts queries for which retrieval returns nothing.",
-                "line_start": 25,
-                "reason": "Accurately states the label dependence boundary between ranking metrics and the label-free telemetry metric."
-              },
-              {
-                "quote": "so the evaluation record must name the variant rather than reporting an unqualified \"Context Precision\" score",
-                "line_start": 58,
-                "reason": "Handles the version-specific RAGAS Context Precision variants correctly instead of overstating a single definition."
-              },
-              {
-                "quote": "Scores alone do not establish a component's root cause.",
-                "line_start": 62,
-                "reason": "Diagnostic combination tables are properly framed as hypotheses with an investigation order, avoiding overclaiming."
-              },
-              {
-                "quote": "Attribution shows which context supports an incorrect claim, not that the chunk caused the error.",
-                "line_start": 79,
-                "reason": "Noise Sensitivity is described with its mode and its causal limit, an exception that preserves technical accuracy."
-              },
-              {
-                "quote": "Rerunning the same evaluation on the same queries does not satisfy the second condition.",
-                "line_start": 126,
-                "reason": "The segment-drop card explains the condition and its exception directly in words, with a finite gradeable answer; the worked example in the metrics card (3/4, 3/5, hit, RR 0.5) is arithmetically correct."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: retrieval metrics, generation metrics, RAGAS scores and tradeoffs form one coherent evaluation-metrics topic; the full definitions already live in Monitoring, and the note links out rather than duplicating them.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ]
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
-          "citation_index": 2,
-          "reported_line_start": 58,
-          "resolved_line_start": 59
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
-          "citation_index": 3,
-          "reported_line_start": 62,
-          "resolved_line_start": 63
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
-          "citation_index": 4,
-          "reported_line_start": 79,
-          "resolved_line_start": 80
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
-          "citation_index": 5,
-          "reported_line_start": 126,
-          "resolved_line_start": 158
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md": "9cbf76f779d07497e71108578c1ecff2302424c2784a32da52ec925d8b9b1a28"
-      },
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "Independent whole-note audit found no factual, editorial or card-quality defect. The keep is justified and no edits are proposed.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
-          "verdict": "CLEAN",
-          "summary": "The note separates retrieval, generation and end-to-end evaluation, hedges diagnostic combinations as hypotheses, and handles version-dependent RAGAS details (Context Precision variants, Noise Sensitivity modes) with care. Cards are focused and cite answer-side sources. No edit is warranted.",
-          "page_type": "Concept — typed frontmatter, optional Questions/References present and valid; no fenced code blocks; special-page rules not applicable.",
-          "current_text_evidence": [
-            {
-              "quote": "Mixing the layers turns every regression into guesswork",
-              "line_start": 17,
-              "reason": "The opening states the operating idea and why layered evaluation matters, which makes the topic quick to re-enter."
-            },
-            {
-              "quote": "Empty-result rate needs no labels, because it only counts queries for which retrieval returns nothing.",
-              "line_start": 25,
-              "reason": "Accurately states the label dependence boundary between ranking metrics and the label-free telemetry metric."
-            },
-            {
-              "quote": "so the evaluation record must name the variant rather than reporting an unqualified \"Context Precision\" score",
-              "line_start": 59,
-              "reason": "Handles the version-specific RAGAS Context Precision variants correctly instead of overstating a single definition."
-            },
-            {
-              "quote": "Scores alone do not establish a component's root cause.",
-              "line_start": 63,
-              "reason": "Diagnostic combination tables are properly framed as hypotheses with an investigation order, avoiding overclaiming."
-            },
-            {
-              "quote": "Attribution shows which context supports an incorrect claim, not that the chunk caused the error.",
-              "line_start": 80,
-              "reason": "Noise Sensitivity is described with its mode and its causal limit, an exception that preserves technical accuracy."
-            },
-            {
-              "quote": "Rerunning the same evaluation on the same queries does not satisfy the second condition.",
-              "line_start": 158,
-              "reason": "The segment-drop card explains the condition and its exception directly in words, with a finite gradeable answer; the worked example in the metrics card (3/4, 3/5, hit, RR 0.5) is arithmetically correct."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: retrieval metrics, generation metrics, RAGAS scores and tradeoffs form one coherent evaluation-metrics topic; the full definitions already live in Monitoring, and the note links out rather than duplicating them.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
-    }
-  }
+  "parked_author_proposals": {}
 }
