@@ -11,7 +11,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/Context Engineering"
 flashcard_uid: "0d1d06bc"
 created: "2026-06-11T07:39:53.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-14T11:37:10.880Z"
 published: "2026-07-13T18:58:50.735Z"
 ---
 
@@ -120,13 +120,13 @@ The smallest context that answers the task is the starting point. Retrieval and 
 # Questions
 
 <!-- qard-id: ddd8a30b-97ea-4f04-8025-704d1c3481ab -->
-> [!qard]- Why can adding more context make answers worse instead of better?
+> [!qard]- Why adding more context can make answers worse instead of better?
 > Because a model does not use every part of a long input equally well, so extra material can bury or dilute the evidence that the answer depends on.
 >
 > - **Position effects:** in the long-context tasks evaluated in *Lost in the Middle*, some models used relevant information near the beginning or end of the input more reliably than the same information placed in the middle. The size of the effect depends on the model and task.
 > - **Dilution:** irrelevant or redundant text competes with the useful evidence, so adding it can lower answer quality instead of adding information.
 > - **Cost:** extra input tokens also add cost and can add latency, even when they do not improve the answer.
-> 
+>
 > Added context is not always harmful. The aim is complete, relevant material placed deliberately, with answer quality and input cost measured on the actual workload as the context grows.
 >
 > [Lost in the Middle](https://arxiv.org/abs/2307.03172) · [Latency optimization](https://developers.openai.com/api/docs/guides/latency-optimization)
