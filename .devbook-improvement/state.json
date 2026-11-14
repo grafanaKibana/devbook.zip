@@ -14586,11 +14586,11 @@
     "version": 1,
     "id": "40a68853698f42388f6dd5882c679ad4",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-14T18:18:47.082551Z",
-    "elapsed_seconds": 459.3263975999998,
+    "elapsed_seconds": 480.37635169999976,
     "calls_reserved": 15,
-    "responses_received": 14,
+    "responses_received": 15,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
@@ -15059,7 +15059,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T18:26:26.408420Z",
+    "checkpoint_at": "2026-11-14T18:26:47.458374Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -44096,6 +44096,143 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T18:26:22.974566Z"
+    "prepared_at": "2026-11-14T18:26:22.974566Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Full-note audit found no factual, structural, voice or Qard defects. No edits were proposed and the keep disposition holds.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
+            "verdict": "CLEAN",
+            "summary": "The note moves from the offline-versus-production distinction through instrumentation, metric families, segmentation, alerting, pitfalls and tradeoffs. Mechanisms, conditions and worked numbers are accurate and preserved. Any edit would be cosmetic, so keeping it unchanged is justified.",
+            "page_type": "Concept — authorable concept note in the impersonal whiteboard voice. Optional Questions and References sections are present and valid, the mermaid fence has a language identifier, and the frontmatter and Qard ID are intact.",
+            "current_text_evidence": [
+              {
+                "quote": "A global faithfulness score can hold at 0.91 while one tenant falls to 0.72",
+                "line_start": 21,
+                "reason": "The opening states the operating idea early: per-segment monitoring and why an aggregate hides a local regression. This gives fast re-entry."
+              },
+              {
+                "quote": "so a relevant document that is never retrieved contributes zero",
+                "line_start": 83,
+                "reason": "The MAP definition is precise and correct. AP is divided by the total number of relevant documents, and the worked MRR 0.88 versus MAP 0.51 example shows why the metric matters."
+              },
+              {
+                "quote": "Attribution locates which context supports a wrong claim but does not by itself prove that the chunk caused it.",
+                "line_start": 114,
+                "reason": "Noise Sensitivity is stated with its modes, its lower-is-better direction and the attribution-is-not-causation limit. This is a careful condition, not a vague gloss."
+              },
+              {
+                "quote": "The values below are examples: each production threshold should come from historical variance",
+                "line_start": 161,
+                "reason": "Alert thresholds are explicitly labeled as illustrative. This avoids presenting fixed numbers as universal."
+              },
+              {
+                "quote": "How do offline evaluation and production monitoring work together for a RAG system?",
+                "line_start": 205,
+                "reason": "The single Qard is one dependent task (a focused comparison plus the feedback loop). It is self-contained and carries answer-side primary sources, and its ID is retained."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the metric families, segmentation, alerting and pitfalls all serve one coherent topic, monitoring a deployed RAG pipeline. They share the same dashboard and alerting decisions.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
+          "citation_index": 1,
+          "reported_line_start": 83,
+          "resolved_line_start": 84
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
+          "citation_index": 2,
+          "reported_line_start": 114,
+          "resolved_line_start": 115
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
+          "citation_index": 3,
+          "reported_line_start": 161,
+          "resolved_line_start": 179
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
+          "citation_index": 4,
+          "reported_line_start": 205,
+          "resolved_line_start": 232
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md": "8a82a85200f501865e19f8fdf7a73b663abccdf67edae0eccd2187b973924db7"
+      },
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "Full-note audit found no factual, structural, voice or Qard defects. No edits were proposed and the keep disposition holds.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
+          "verdict": "CLEAN",
+          "summary": "The note moves from the offline-versus-production distinction through instrumentation, metric families, segmentation, alerting, pitfalls and tradeoffs. Mechanisms, conditions and worked numbers are accurate and preserved. Any edit would be cosmetic, so keeping it unchanged is justified.",
+          "page_type": "Concept — authorable concept note in the impersonal whiteboard voice. Optional Questions and References sections are present and valid, the mermaid fence has a language identifier, and the frontmatter and Qard ID are intact.",
+          "current_text_evidence": [
+            {
+              "quote": "A global faithfulness score can hold at 0.91 while one tenant falls to 0.72",
+              "line_start": 21,
+              "reason": "The opening states the operating idea early: per-segment monitoring and why an aggregate hides a local regression. This gives fast re-entry."
+            },
+            {
+              "quote": "so a relevant document that is never retrieved contributes zero",
+              "line_start": 84,
+              "reason": "The MAP definition is precise and correct. AP is divided by the total number of relevant documents, and the worked MRR 0.88 versus MAP 0.51 example shows why the metric matters."
+            },
+            {
+              "quote": "Attribution locates which context supports a wrong claim but does not by itself prove that the chunk caused it.",
+              "line_start": 115,
+              "reason": "Noise Sensitivity is stated with its modes, its lower-is-better direction and the attribution-is-not-causation limit. This is a careful condition, not a vague gloss."
+            },
+            {
+              "quote": "The values below are examples: each production threshold should come from historical variance",
+              "line_start": 179,
+              "reason": "Alert thresholds are explicitly labeled as illustrative. This avoids presenting fixed numbers as universal."
+            },
+            {
+              "quote": "How do offline evaluation and production monitoring work together for a RAG system?",
+              "line_start": 232,
+              "reason": "The single Qard is one dependent task (a focused comparison plus the feedback loop). It is self-contained and carries answer-side primary sources, and its ID is retained."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the metric families, segmentation, alerting and pitfalls all serve one coherent topic, monitoring a deployed RAG pipeline. They share the same dashboard and alerting decisions.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
