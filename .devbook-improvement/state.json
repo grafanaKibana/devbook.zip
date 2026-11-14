@@ -14364,11 +14364,11 @@
     "version": 1,
     "id": "40a68853698f42388f6dd5882c679ad4",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-14T18:18:47.082551Z",
-    "elapsed_seconds": 226.92552129999996,
+    "elapsed_seconds": 243.31914039999995,
     "calls_reserved": 7,
-    "responses_received": 6,
+    "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
@@ -14531,7 +14531,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T18:22:34.007540Z",
+    "checkpoint_at": "2026-11-14T18:22:50.401159Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -43224,6 +43224,159 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T18:22:29.627746Z"
+    "prepared_at": "2026-11-14T18:22:29.627746Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate, ordered from ablation concept to chunking, embeddings and ANN, and carries conditions and caveats rather than invented thresholds. No concrete defect or essential gap was found, so leaving it unchanged is justified.",
+            "page_type": "Concept — no Questions section; References present with two relevant bare link bullets; no code fences.",
+            "current_text_evidence": [
+              {
+                "quote": "Change one component, keep the rest fixed, and compare the metric delta with run-to-run noise.",
+                "line_start": 16,
+                "reason": "States the operating idea of ablation and the noise condition up front."
+              },
+              {
+                "quote": "a large chunk can count as a retrieval hit while most of its tokens are irrelevant",
+                "line_start": 30,
+                "reason": "Explains the mechanism by which token IoU exposes what Recall@k misses, scoped to a single corpus."
+              },
+              {
+                "quote": "Fixed top-k confounds chunk size with retrieved context",
+                "line_start": 32,
+                "reason": "Names the confound that motivates a fixed token budget."
+              },
+              {
+                "quote": "identical ANN settings can favor one embedding space over another",
+                "line_start": 40,
+                "reason": "Gives a precise condition for fair embedding comparison."
+              },
+              {
+                "quote": "ANN Recall@k is not retrieval Recall@k.",
+                "line_start": 46,
+                "reason": "Clear boundary between labeled retrieval recall and exact-neighbor ANN recall."
+              },
+              {
+                "quote": "Fixed `nprobe`, for example, visits the same number of IVF lists while the number of vectors inside those lists can grow.",
+                "line_start": 50,
+                "reason": "Concrete mechanism with a hedge about index family, avoiding an overclaim."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: chunking, embedding and ANN evaluation share one ablation method and are short enough to stay together.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The whole note was read independently. It is accurate, well ordered, and free of rule violations. It has no unsupported claims, and the keep is justified.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+          "citation_index": 1,
+          "reported_line_start": 30,
+          "resolved_line_start": 28
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+          "citation_index": 2,
+          "reported_line_start": 32,
+          "resolved_line_start": 30
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+          "citation_index": 3,
+          "reported_line_start": 40,
+          "resolved_line_start": 38
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+          "citation_index": 4,
+          "reported_line_start": 46,
+          "resolved_line_start": 44
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+          "citation_index": 5,
+          "reported_line_start": 50,
+          "resolved_line_start": 48
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md": "335c856c61ac7d13ea7921ce27b8ad91bb41fb8fe44e7db21bf343fc43e4ab97"
+      },
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate, ordered from ablation concept to chunking, embeddings and ANN, and carries conditions and caveats rather than invented thresholds. No concrete defect or essential gap was found, so leaving it unchanged is justified.",
+          "page_type": "Concept — no Questions section; References present with two relevant bare link bullets; no code fences.",
+          "current_text_evidence": [
+            {
+              "quote": "Change one component, keep the rest fixed, and compare the metric delta with run-to-run noise.",
+              "line_start": 16,
+              "reason": "States the operating idea of ablation and the noise condition up front."
+            },
+            {
+              "quote": "a large chunk can count as a retrieval hit while most of its tokens are irrelevant",
+              "line_start": 28,
+              "reason": "Explains the mechanism by which token IoU exposes what Recall@k misses, scoped to a single corpus."
+            },
+            {
+              "quote": "Fixed top-k confounds chunk size with retrieved context",
+              "line_start": 30,
+              "reason": "Names the confound that motivates a fixed token budget."
+            },
+            {
+              "quote": "identical ANN settings can favor one embedding space over another",
+              "line_start": 38,
+              "reason": "Gives a precise condition for fair embedding comparison."
+            },
+            {
+              "quote": "ANN Recall@k is not retrieval Recall@k.",
+              "line_start": 44,
+              "reason": "Clear boundary between labeled retrieval recall and exact-neighbor ANN recall."
+            },
+            {
+              "quote": "Fixed `nprobe`, for example, visits the same number of IVF lists while the number of vectors inside those lists can grow.",
+              "line_start": 48,
+              "reason": "Concrete mechanism with a hedge about index family, avoiding an overclaim."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: chunking, embedding and ANN evaluation share one ablation method and are short enough to stay together.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The whole note was read independently. It is accurate, well ordered, and free of rule violations. It has no unsupported claims, and the keep is justified.",
+      "change_checks": []
+    }
   }
 }
