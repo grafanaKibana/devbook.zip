@@ -71,12 +71,6 @@ npx quartz build --serve     # dev server + live reload → http://localhost:808
 
 `npm run build` regenerates and checks StepTrace, clears the disposable `.quartz/plugins` installation cache, installs configured plugins with `plugin install --from-config`, updates them with `plugin install --latest`, then builds the site. Reinstalling protects builds from Vercel caches that omit plugins’ Git metadata. It preserves the committed lockfile baseline and authored plugin sources. Latest follows each plugin's upstream default branch, including commits newer than its last tagged release.
 
-## Quartz 5.1 upgrade policy
-
-The engine tracks Quartz 5.1.0. Frontmatter, link processing, draft exclusion, and the content index now belong to core; NoteProperties is unnecessary because the site hides its panel. GFM precedes OFM, whose strict preset and strict line breaks preserve custom syntax and existing paragraph wrapping. Prefetching is explicitly disabled.
-
-DevBook retains its 768px tablet boundary, branded static images, Syncer styles and authored customizations. The shared layout loader supplies the existing page dispatcher; custom overrides mutate that layout rather than creating a second dispatcher. The separate plugin lockfile remains the reviewed baseline. The dev-only `@quartz-community/explorer` npm dependency supports upstream npm-plugin discovery tests; the site still loads Explorer from its locked Git source.
-
 ## Customization surfaces
 
 Quartz is "clone and own" — the engine under `quartz/` is committed. **Ground changes in the [official docs](https://quartz.jzhao.xyz) and prefer config/plugins over custom code.** Only these surfaces are ours:

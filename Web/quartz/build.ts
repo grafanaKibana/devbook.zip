@@ -3,7 +3,7 @@ sourceMapSupport.install(options)
 import path from "path"
 import fs from "fs"
 import { PerfTimer } from "./util/perf"
-import { rm, readdir } from "fs/promises"
+import { lstat, rm, readdir } from "fs/promises"
 import { GlobbyFilterFunction, isGitIgnored } from "globby"
 import { styleText } from "util"
 import { parseMarkdown } from "./processors/parse"
@@ -104,7 +104,7 @@ async function buildQuartz(argv: Argv, mut: Mutex, clientRefresh: () => void) {
   }
 
   const perf = new PerfTimer()
-  const output = argv.output
+  const output = path.resolve(argv.output)
 
   const pluginCount = Object.values(cfg.plugins).flat().length
   const pluginNames = (key: "transformers" | "filters" | "emitters" | "pageTypes") =>
@@ -138,6 +138,9 @@ async function buildQuartz(argv: Argv, mut: Mutex, clientRefresh: () => void) {
   const release = await mut.acquire()
   perf.addEvent("clean")
   try {
+    if ((await lstat(output)).isSymbolicLink()) {
+      throw new Error(`Refusing to clean symbolic link output directory: ${output}`)
+    }
     const entries = await readdir(output)
     await Promise.all(
       entries.map((e) => rm(path.join(output, e), { recursive: true, force: true })),
@@ -352,6 +355,15 @@ async function rebuild(changes: ChangeEvent[], clientRefresh: () => void, buildD
       changesSinceLastBuild[change.path] = change.type
     }
 
+    // Discover addresses before parsing, while keeping deleted content available for cleanup.
+    const allFiles = new Set(contentMap.keys())
+    for (const [file, change] of Object.entries(changesSinceLastBuild)) {
+      if (change === "delete") allFiles.delete(file as FilePath)
+      else allFiles.add(file as FilePath)
+    }
+    ctx.allFiles = Array.from(allFiles)
+    updateSlugs(ctx, ctx.allFiles)
+
     const staticResources = getStaticResourcesFromPlugins(ctx)
     const pathsToParse: FilePath[] = []
     for (const [fp, type] of Object.entries(changesSinceLastBuild)) {
@@ -409,9 +421,8 @@ async function rebuild(changes: ChangeEvent[], clientRefresh: () => void, buildD
       }
     })
 
-    // update allFiles and then allSlugs with the consistent view of content map
+    // Keep the parsed file list without discarding aliases registered during parsing.
     ctx.allFiles = Array.from(contentMap.keys())
-    updateSlugs(ctx, ctx.allFiles)
 
     const markdownContent = Array.from(contentMap.values())
       .filter((file) => file.type === "markdown")
