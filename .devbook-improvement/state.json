@@ -14904,11 +14904,11 @@
     "version": 1,
     "id": "5fe9ecfcc7344982bcd2cdfba7482c21",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-14T22:36:29.240304Z",
-    "elapsed_seconds": 253.10817199999994,
+    "elapsed_seconds": 267.4828743999999,
     "calls_reserved": 9,
-    "responses_received": 8,
+    "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/Cloud/Providers.md",
       "Vault/Home/Cloud/Cloud Cost Management.md",
@@ -15146,7 +15146,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T22:40:42.348115Z",
+    "checkpoint_at": "2026-11-14T22:40:56.722818Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
@@ -45468,6 +45468,135 @@
       "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T22:40:38.384890Z"
+    "prepared_at": "2026-11-14T22:40:38.384890Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The independent whole-note audit found no accuracy, clarity, structure or rules defect, so the keep is justified and no edits are needed.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate and compact. It separates NIST-defined models from industry labels, gives a responsibility table, an ordered selection rule with its exception, and concrete consequences. Nothing needs to change.",
+            "page_type": "Concept — typed frontmatter; Questions and References are optional; no Qards; no code fences; no generated navigation or Links section.",
+            "current_text_evidence": [
+              {
+                "quote": "NIST defines IaaS, PaaS, and SaaS. CaaS and FaaS are useful industry labels",
+                "line_start": 14,
+                "reason": "The opening states the terminology boundary correctly: NIST SP 800-145 defines only three service models."
+              },
+              {
+                "quote": "managed Kubernetes usually includes the control plane",
+                "line_start": 21,
+                "reason": "The CaaS row gives the concrete provider/customer split and hedges appropriately for product variance."
+              },
+              {
+                "quote": "Managed does not mean responsibility-free.",
+                "line_start": 26,
+                "reason": "This is the key caveat, and it is followed by a concrete list of what remains with the customer."
+              },
+              {
+                "quote": "Familiarity alone is not a host-level requirement.",
+                "line_start": 38,
+                "reason": "It states the exception to the highest-managed-layer rule and explains the cost of ignoring it."
+              },
+              {
+                "quote": "Externally visible side effects need idempotency regardless of who operates the runtime.",
+                "line_start": 43,
+                "reason": "This explains the retry mechanism and the engineering consequence rather than a vocabulary list."
+              },
+              {
+                "quote": "- [Azure shared responsibility in the cloud](https://learn.microsoft.com/en-us/azure/security/fundamentals/shared-responsibility)",
+                "line_start": 49,
+                "reason": "The single reference is a relevant primary source and is a bare descriptive link."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the service-model comparison and the selection rule form one coherent decision topic, and splitting would separate the table from the rule that uses it.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "identity_safety": "NOT APPLICABLE",
+              "question_quality": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+          "citation_index": 5,
+          "reported_line_start": 49,
+          "resolved_line_start": 50
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md": "43a163d432be3ffe4d567286af33c04435fa293205c76695f6d69af69484d16a"
+      },
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The independent whole-note audit found no accuracy, clarity, structure or rules defect, so the keep is justified and no edits are needed.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate and compact. It separates NIST-defined models from industry labels, gives a responsibility table, an ordered selection rule with its exception, and concrete consequences. Nothing needs to change.",
+          "page_type": "Concept — typed frontmatter; Questions and References are optional; no Qards; no code fences; no generated navigation or Links section.",
+          "current_text_evidence": [
+            {
+              "quote": "NIST defines IaaS, PaaS, and SaaS. CaaS and FaaS are useful industry labels",
+              "line_start": 14,
+              "reason": "The opening states the terminology boundary correctly: NIST SP 800-145 defines only three service models."
+            },
+            {
+              "quote": "managed Kubernetes usually includes the control plane",
+              "line_start": 21,
+              "reason": "The CaaS row gives the concrete provider/customer split and hedges appropriately for product variance."
+            },
+            {
+              "quote": "Managed does not mean responsibility-free.",
+              "line_start": 26,
+              "reason": "This is the key caveat, and it is followed by a concrete list of what remains with the customer."
+            },
+            {
+              "quote": "Familiarity alone is not a host-level requirement.",
+              "line_start": 38,
+              "reason": "It states the exception to the highest-managed-layer rule and explains the cost of ignoring it."
+            },
+            {
+              "quote": "Externally visible side effects need idempotency regardless of who operates the runtime.",
+              "line_start": 43,
+              "reason": "This explains the retry mechanism and the engineering consequence rather than a vocabulary list."
+            },
+            {
+              "quote": "- [Azure shared responsibility in the cloud](https://learn.microsoft.com/en-us/azure/security/fundamentals/shared-responsibility)",
+              "line_start": 50,
+              "reason": "The single reference is a relevant primary source and is a bare descriptive link."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the service-model comparison and the selection rule form one coherent decision topic, and splitting would separate the table from the rule that uses it.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "identity_safety": "NOT APPLICABLE",
+            "question_quality": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
