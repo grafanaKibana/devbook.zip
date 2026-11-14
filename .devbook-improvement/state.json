@@ -17767,11 +17767,11 @@
     "version": 1,
     "id": "1036754a634142d7a6f283117a763aa4",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 405.27836979999995,
+    "elapsed_seconds": 421.91013399999997,
     "calls_reserved": 11,
-    "responses_received": 10,
+    "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Embeddings.md",
       "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
@@ -18072,7 +18072,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:50:57.903642Z",
+    "checkpoint_at": "2026-11-14T06:51:14.535406Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -45218,6 +45218,63 @@
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T06:50:54.557982Z"
+    "prepared_at": "2026-11-14T06:50:54.557982Z",
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+          "verdict": "CLEAN",
+          "summary": "Whole-note audit found no accurate-content, structure, or card defects. The opening states the use and limit of benchmarks, the table matches the cited benchmarks, the leaderboard section carries the needed conditions, and the example correctly refuses to name a winner. Remaining overlap (tau vs τ, example closing paragraph) is cosmetic, so keeping the note unchanged is justified.",
+          "page_type": "Concept — authorable prose with optional Questions and References; no special-page protection.",
+          "current_text_evidence": [
+            {
+              "quote": "A leaderboard score cannot make the final selection.",
+              "line_start": 19,
+              "reason": "States the operating idea and key boundary early: score measures a whole system, so public suites only shortlist."
+            },
+            {
+              "quote": "| AgentBench | 8 environments | Interactive tasks across OS, DB, web, games | per-environment success |",
+              "line_start": 29,
+              "reason": "Table facts (8 environments, per-environment success) match the AgentBench paper; the other rows likewise match their sources."
+            },
+            {
+              "quote": "`pass^k` requires the task to succeed on every one of `k` attempts, so it exposes intermittent failures that an average hides.",
+              "line_start": 37,
+              "reason": "Correct mechanism distinction from average success, with the condition that changes the decision."
+            },
+            {
+              "quote": "Human verification improves issue and test quality; it does not isolate public tasks from training.",
+              "line_start": 38,
+              "reason": "Precise, hedged contamination claim that separates curation from leakage."
+            },
+            {
+              "quote": "The example exposes missing evidence rather than a winner.",
+              "line_start": 62,
+              "reason": "The worked example correctly concludes the systems are not comparable instead of choosing one."
+            },
+            {
+              "quote": "> [!qard]- Why can one base model produce very different results on the same agent benchmark?",
+              "line_start": 67,
+              "reason": "A single dependent task (scaffold and run conditions affect score), a direct question with a finite answer, an answer-side tau-bench source, and a retained ID."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the benchmark table, leaderboard reading rules and worked example all serve one decision (using public scores to shortlist, not select), and the note is compact.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The note is accurate and clear, and its single card tests one dependent task. No proposed edits exist and no concrete defect remains, so the keep is justified.",
+      "change_checks": []
+    }
   }
 }
