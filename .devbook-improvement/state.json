@@ -14267,16 +14267,16 @@
     "version": 1,
     "id": "40a68853698f42388f6dd5882c679ad4",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-14T18:18:47.082551Z",
-    "elapsed_seconds": 28.236528499999995,
+    "elapsed_seconds": 60.103269399999995,
     "calls_reserved": 1,
-    "responses_received": 0,
+    "responses_received": 1,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T18:19:15.318547Z",
+    "checkpoint_at": "2026-11-14T18:19:47.185285Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -42452,7 +42452,7 @@
   },
   "parked_author_proposals": {},
   "pending_author_proposal": {
-    "workload_id": "1036754a634142d7a6f283117a763aa4",
+    "workload_id": "40a68853698f42388f6dd5882c679ad4",
     "topic_id": "ai-ml-4edf0823",
     "batch": {
       "topic": "AI & ML",
@@ -42477,12 +42477,76 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+          "expected_hash": "586da4ffa96c83ea779d9f9b7dd2f9bcff9f8886a57181a4763f24c010ed9e74",
+          "before": "status: New",
+          "after": "status: Established",
+          "reason": "The note is a complete, published explanation, so New (barely created) misreports its development state.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "status reflects a solid, usable note"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "Frontmatter status is New although the note is fully developed and published.",
+          "reader_benefit": "Lifecycle metadata matches the note's actual state."
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+          "expected_hash": "586da4ffa96c83ea779d9f9b7dd2f9bcff9f8886a57181a4763f24c010ed9e74",
+          "before": "- [Patterns for Basic Agent Workflows — cookbook (Anthropic)](https://platform.claude.com/cookbook/patterns-agents-basic-workflows)",
+          "after": "- [Patterns for Basic Agent Workflows — cookbook (Anthropic)](https://platform.claude.com/cookbook/patterns-agents-basic-workflows)\n- [How we built our multi-agent research system (Anthropic)](https://www.anthropic.com/engineering/multi-agent-research-system)",
+          "reason": "Sources the 3-5 subagent and 90.2% claims made in the Orchestrator-Workers section.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "research-system claim is sourced"
+          ],
+          "sources": [
+            {
+              "url": "https://www.anthropic.com/engineering/multi-agent-research-system",
+              "claim": "Lead agent launches 3-5 subagents in parallel; multi-agent setup beat single-agent Opus 4 by 90.2% on an internal research evaluation.",
+              "version": "Anthropic Engineering post, 2025-06-13"
+            }
+          ],
+          "feedback_keys": [],
+          "problem": "The Research-system figures in the note have no listed source.",
+          "reader_benefit": "The numeric claim can be verified."
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+          "expected_hash": "586da4ffa96c83ea779d9f9b7dd2f9bcff9f8886a57181a4763f24c010ed9e74",
+          "before": "<!-- qard-id: c1c8ac97-e367-45a7-9727-9a1da6e9a126 -->\n> [!qard]- Why is the orchestrator-workers pattern harder to operate than ordinary parallelization, even though both fan out work to several calls?\n> Orchestrator-workers is harder to operate because a model, not code, decides the structure of the fan-out. In ordinary parallelization, code defines the subtasks and the aggregation in advance. In orchestrator-workers, a model chooses the subtasks for each input at runtime and also synthesizes the results, so the set of calls is not known before the run.\n>\n> - **Ordinary parallelization:** application code starts a predefined set of independent calls, such as one per code-review concern, and aggregates their outputs programmatically. The split and aggregation rules can be read, reviewed and tested before any run.\n> - **Orchestrator-workers:** an orchestrator model reads the input, decides how to split it and what to delegate, then synthesizes the workers' results. The worker count and assignments exist only at runtime.\n> \n> Fixed rules make the structure inspectable, but they do not make outcomes repeatable. In both patterns, the workers are model calls whose outputs can differ between runs, and how well a split suits the task depends on the input. Orchestrator-workers adds model-chosen structure on top of that variability:\n>\n> - **Work and cost vary:** the number of workers, and therefore the calls and tokens spent, can change between inputs and even between runs on the same input.\n> - **The split itself can fail per run:** any fan-out can miss part of the task, duplicate work or combine results poorly. With a fixed fan-out, the split and aggregation rules can be checked before deployment. With orchestrator-workers, a flawed decomposition or synthesis exists only in a particular run's decisions. It cannot be reviewed in advance and can appear for some inputs or runs but not others. It is therefore harder to reproduce and to catch with a few fixed test cases.\n> \n> These are risks, not guaranteed outcomes. A trace of each run's decomposition and synthesis shows where a particular run went wrong.\n>\n> [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)",
+          "after": "<!-- qard-id: c1c8ac97-e367-45a7-9727-9a1da6e9a126 -->\n> [!qard]- Why is the orchestrator-workers pattern harder to operate than ordinary parallelization, even though both fan out work to several calls?\n> A model, not code, decides the structure of the fan-out. In ordinary parallelization, code defines the subtasks and the aggregation, so the split can be read, reviewed and tested before any run. In orchestrator-workers, the orchestrator chooses the subtasks for each input at runtime and also synthesizes the results, so the set of calls is unknown until the run.\n>\n> This has two operational consequences:\n>\n> - **Work and cost vary:** the number of workers, and therefore the calls and tokens spent, can change between inputs and even between runs on the same input.\n> - **Decomposition failures are per-run:** a missed part of the task, duplicated work or a poor synthesis exists only in that run's decisions. It cannot be reviewed in advance and may appear for some inputs but not others, so a few fixed test cases can miss it.\n>\n> These are risks, not guaranteed outcomes. Tracing each run's decomposition and synthesis shows where it went wrong.\n>\n> [Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents)",
+          "reason": "Removes repeated fixed-versus-runtime and variability statements, keeping mechanism, two consequences and the trace remedy.",
+          "kind": "rewrite",
+          "learning_target": "same",
+          "essential_meanings": [
+            "model-chosen structure at runtime vs code-defined",
+            "cost and call count vary",
+            "decomposition failures are per-run and hard to review or reproduce",
+            "tracing helps"
+          ],
+          "sources": [
+            {
+              "url": "https://www.anthropic.com/engineering/building-effective-agents",
+              "claim": "Orchestrator-workers subtasks are determined by the orchestrator at runtime, unlike parallelization where they are predefined.",
+              "version": "not version-specific"
+            }
+          ],
+          "feedback_keys": [],
+          "problem": "The second answer restates the same variability and fixed-versus-runtime point in the intro, bullets and closing.",
+          "reader_benefit": "A shorter answer that is easier to retrieve while keeping every mechanism."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
-          "outcome": "keep",
-          "reason": "I read the whole note against Anthropic's Building Effective AI Agents taxonomy. The five patterns are described correctly: chaining with gates, routing, sectioning versus voting, runtime decomposition in orchestrator-workers, and evaluator-optimizer with criteria and an iteration cap. The 90.2% Research-system figure is scoped to that system and evaluation rather than presented as general. Both diagrams and prose agree. The existing cards each test one task: the control-flow comparison, and why orchestrator-workers is harder to operate. Their answers are accurate and cite the primary source. Frontmatter, wikilinks, code-fence language identifiers and References format are valid, and there are no known violations. The few stylistic nits do not justify churn."
+          "outcome": "changed",
+          "reason": "Audited the five patterns, diagrams and both cards against Anthropic's sources; the technical content is accurate. Fixes: stale status, an unsourced Research-system figure now referenced (verified 3-5 subagents and 90.2%), and a repetitive second card answer condensed while keeping all mechanisms."
         }
       ],
       "feedback": []
@@ -42497,8 +42561,10 @@
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T06:55:25.369524Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-14T18:19:47.185262Z",
+    "review_repair_key": "8f20b332c81285c2b22f8014271bce7f66f3158972c17a7d26fdeafaacb9d050",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The technical content of the note is accurate. Two issues remain unfixed: the lifecycle status is stale, and the 90.2% Research-system figure has no reference. The second card is also repetitive.",
       "notes": [
@@ -42582,81 +42648,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The technical content of the note is accurate. Two issues remain unfixed: the lifecycle status is stale, and the 90.2% Research-system figure has no reference. The second card is also repetitive.",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The five patterns, diagrams and cards are technically sound, but the note is published with status New. The Anthropic Research-system figure is not backed by any listed source, and the second card repeats itself.",
-          "page_type": "Concept — typed frontmatter, optional Questions and References, MD040 fences, Qard cards with protected IDs.",
-          "current_text_evidence": [
-            {
-              "quote": "status: New",
-              "line_start": 7,
-              "reason": "Under the contract, New means barely created. The note is fully developed and published, so the status is stale."
-            },
-            {
-              "quote": "Anthropic reports this design in its Research system: a lead agent starts three to five subagents in parallel",
-              "line_start": 75,
-              "reason": "The claim comes from Anthropic's multi-agent research system post. References lists only the cookbook, so the figure is not sourced in the note."
-            },
-            {
-              "quote": "Fixed rules make the structure inspectable, but they do not make outcomes repeatable.",
-              "line_start": 117,
-              "reason": "The second card restates the same point about run-to-run variability and fixed fan-out several times, which makes the answer harder to retrieve."
-            },
-            {
-              "quote": "The worker count and assignments do not exist until runtime.",
-              "line_start": 73,
-              "reason": "This is a clear statement of the boundary between orchestrator-workers and parallelization, and it is accurate."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the five patterns form one coherent comparison and are short enough to stay together.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Frontmatter lifecycle",
-              "location": "frontmatter, line 7",
-              "evidence": "status: New alongside publish: true and complete content",
-              "effect": "The note's development state is misreported. New means little content, and this note has a solid explanation.",
-              "fix": "Set status to Established, or In Progress if the owner still plans substantive work."
-            },
-            {
-              "severity": "Medium",
-              "dimension": "Accuracy / sourcing",
-              "location": "## Orchestrator-Workers, line 74",
-              "evidence": "The 90.2% improvement and the three-to-five-subagent claim have no source in References.",
-              "effect": "A specific numeric claim cannot be verified from the note.",
-              "fix": "Add Anthropic's 'How we built our multi-agent research system' post to References, or cite it on the answer side."
-            },
-            {
-              "severity": "Medium",
-              "dimension": "Clarity / question quality",
-              "location": "second Qard answer",
-              "evidence": "The answer repeats the same variability and fixed-versus-runtime point in the intro, the bullets and the closing paragraph.",
-              "effect": "The answer is long and padded, so it is hard to recall under pressure.",
-              "fix": "Condense it to the model-chosen structure, the resulting variable cost and calls, the decomposition failure that cannot be reviewed beforehand, and the value of a trace."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "FAIL",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "FAIL"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "8f20b332c81285c2b22f8014271bce7f66f3158972c17a7d26fdeafaacb9d050",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
