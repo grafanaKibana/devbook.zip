@@ -14364,10 +14364,10 @@
     "version": 1,
     "id": "40a68853698f42388f6dd5882c679ad4",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "review_reserved",
     "started_at": "2026-11-14T18:18:47.082551Z",
-    "elapsed_seconds": 222.54573699999995,
-    "calls_reserved": 6,
+    "elapsed_seconds": 226.92552129999996,
+    "calls_reserved": 7,
     "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
@@ -14531,7 +14531,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T18:22:29.627754Z",
+    "checkpoint_at": "2026-11-14T18:22:34.007540Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -14556,7 +14556,7 @@
       "pr": null
     },
     "base_sha": "05acbe8a0b43fe2fc9d9f2ad31a17f07d9fdaf51",
-    "reservation_deadline": "2026-11-14T18:37:16.729471Z"
+    "reservation_deadline": "2026-11-14T18:37:33.776303Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
