@@ -2453,51 +2453,56 @@
       }
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md": {
-      "content_hash": "581bad4527c490b8e9656b39703deac0788a28f77fc0d1fe29fc9ae21ff83045",
-      "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+      "content_hash": "335c856c61ac7d13ea7921ce27b8ad91bb41fb8fe44e7db21bf343fc43e4ab97",
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
       "outcome": "keep",
       "repair_input_hash": "",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_process": "focused-whole-note-v1",
       "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "keep_review": {
-        "content_hash": "581bad4527c490b8e9656b39703deac0788a28f77fc0d1fe29fc9ae21ff83045",
-        "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+        "content_hash": "335c856c61ac7d13ea7921ce27b8ad91bb41fb8fe44e7db21bf343fc43e4ab97",
+        "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
         "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
         "review": {
           "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
           "verdict": "CLEAN",
-          "summary": "The note explains ablation and then applies it to chunking, embedding comparison and ANN loss. It keeps the mechanism, the conditions and the caveats, and the prose is direct and impersonal. The opening, section order and terminology are coherent, and nothing is repeated or padded. There are no wikilink or code-fence issues and no Questions section to review.",
-          "page_type": "Concept — impersonal whiteboard voice; Questions and References are optional. Only the References section is present, with two descriptive bare link bullets.",
+          "summary": "The note is accurate, ordered from ablation concept to chunking, embeddings and ANN, and carries conditions and caveats rather than invented thresholds. No concrete defect or essential gap was found, so leaving it unchanged is justified.",
+          "page_type": "Concept — no Questions section; References present with two relevant bare link bullets; no code fences.",
           "current_text_evidence": [
             {
-              "quote": "Component-level evaluation holds most of the pipeline still and moves one part at a time.",
-              "line_start": 13,
-              "reason": "The opening motivates the topic quickly and states the operating idea that the rest of the note relies on."
+              "quote": "Change one component, keep the rest fixed, and compare the metric delta with run-to-run noise.",
+              "line_start": 16,
+              "reason": "States the operating idea of ablation and the noise condition up front."
             },
             {
-              "quote": "Token IoU exposes a weakness that Recall@k misses",
-              "line_start": 27,
-              "reason": "The note gives the mechanism, the reported numbers and a caveat that they are corpus-specific, so the figures are not over-generalized."
+              "quote": "a large chunk can count as a retrieval hit while most of its tokens are irrelevant",
+              "line_start": 28,
+              "reason": "Explains the mechanism by which token IoU exposes what Recall@k misses, scoped to a single corpus."
             },
             {
-              "quote": "There is no portable percentage threshold that decides the tradeoff for every corpus.",
-              "line_start": 37,
-              "reason": "The embedding section states its limit explicitly instead of inventing a threshold."
+              "quote": "Fixed top-k confounds chunk size with retrieved context",
+              "line_start": 30,
+              "reason": "Names the confound that motivates a fixed token budget."
+            },
+            {
+              "quote": "identical ANN settings can favor one embedding space over another",
+              "line_start": 38,
+              "reason": "Gives a precise condition for fair embedding comparison."
             },
             {
               "quote": "ANN Recall@k is not retrieval Recall@k.",
-              "line_start": 43,
-              "reason": "The note separates the labeled-relevance metric from the exact-search metric, which prevents a common conflation."
+              "line_start": 44,
+              "reason": "Clear boundary between labeled retrieval recall and exact-neighbor ANN recall."
             },
             {
               "quote": "Fixed `nprobe`, for example, visits the same number of IVF lists while the number of vectors inside those lists can grow.",
-              "line_start": 47,
-              "reason": "The claim is hedged by index family and workload, and the IVF example makes it concrete."
+              "line_start": 48,
+              "reason": "Concrete mechanism with a hedge about index family, avoiding an overclaim."
             }
           ],
           "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: chunking, embedding and ANN evaluation share one ablation method and are short enough to read together.",
+          "split_suggestion": "No split: chunking, embedding and ANN evaluation share one ablation method and are short enough to stay together.",
           "findings": [],
           "source_checks": [],
           "rejection_equivalence": [],
@@ -2510,6 +2515,59 @@
           }
         },
         "review_process": "focused-whole-note-v1"
+      },
+      "keep_review_history": {
+        "997058023aef248f6770c14e176c9d5b935b94b4f73f2f613ad1c4bc775fe25d": {
+          "content_hash": "581bad4527c490b8e9656b39703deac0788a28f77fc0d1fe29fc9ae21ff83045",
+          "rules_hash": "264d16c1cdd0550e8de34525350fcc463d41b1c8095a38a38008f9f84304bb03",
+          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+          "review": {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains ablation and then applies it to chunking, embedding comparison and ANN loss. It keeps the mechanism, the conditions and the caveats, and the prose is direct and impersonal. The opening, section order and terminology are coherent, and nothing is repeated or padded. There are no wikilink or code-fence issues and no Questions section to review.",
+            "page_type": "Concept — impersonal whiteboard voice; Questions and References are optional. Only the References section is present, with two descriptive bare link bullets.",
+            "current_text_evidence": [
+              {
+                "quote": "Component-level evaluation holds most of the pipeline still and moves one part at a time.",
+                "line_start": 13,
+                "reason": "The opening motivates the topic quickly and states the operating idea that the rest of the note relies on."
+              },
+              {
+                "quote": "Token IoU exposes a weakness that Recall@k misses",
+                "line_start": 27,
+                "reason": "The note gives the mechanism, the reported numbers and a caveat that they are corpus-specific, so the figures are not over-generalized."
+              },
+              {
+                "quote": "There is no portable percentage threshold that decides the tradeoff for every corpus.",
+                "line_start": 37,
+                "reason": "The embedding section states its limit explicitly instead of inventing a threshold."
+              },
+              {
+                "quote": "ANN Recall@k is not retrieval Recall@k.",
+                "line_start": 43,
+                "reason": "The note separates the labeled-relevance metric from the exact-search metric, which prevents a common conflation."
+              },
+              {
+                "quote": "Fixed `nprobe`, for example, visits the same number of IVF lists while the number of vectors inside those lists can grow.",
+                "line_start": 47,
+                "reason": "The claim is hedged by index family and workload, and the IVF example makes it concrete."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: chunking, embedding and ANN evaluation share one ablation method and are short enough to read together.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          },
+          "review_process": "focused-whole-note-v1"
+        }
       }
     },
     "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": {
@@ -14366,7 +14424,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-14T18:18:47.082551Z",
-    "elapsed_seconds": 243.31914039999995,
+    "elapsed_seconds": 247.45210579999994,
     "calls_reserved": 7,
     "responses_received": 7,
     "attempted_paths": [
@@ -14531,7 +14589,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T18:22:50.401159Z",
+    "checkpoint_at": "2026-11-14T18:22:54.534124Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -22333,6 +22391,102 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md": "3933a697e245c0120b34a16df852cd4ddaa1a8ef4eb0bde74121c1064285ad15"
+      },
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "dc9172905e945b51e5271a2eb39a734b4cc1e4b87936d052ee445edde89a456d": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate, ordered from ablation concept to chunking, embeddings and ANN, and carries conditions and caveats rather than invented thresholds. No concrete defect or essential gap was found, so leaving it unchanged is justified.",
+            "page_type": "Concept — no Questions section; References present with two relevant bare link bullets; no code fences.",
+            "current_text_evidence": [
+              {
+                "quote": "Change one component, keep the rest fixed, and compare the metric delta with run-to-run noise.",
+                "line_start": 16,
+                "reason": "States the operating idea of ablation and the noise condition up front."
+              },
+              {
+                "quote": "a large chunk can count as a retrieval hit while most of its tokens are irrelevant",
+                "line_start": 30,
+                "reason": "Explains the mechanism by which token IoU exposes what Recall@k misses, scoped to a single corpus."
+              },
+              {
+                "quote": "Fixed top-k confounds chunk size with retrieved context",
+                "line_start": 32,
+                "reason": "Names the confound that motivates a fixed token budget."
+              },
+              {
+                "quote": "identical ANN settings can favor one embedding space over another",
+                "line_start": 40,
+                "reason": "Gives a precise condition for fair embedding comparison."
+              },
+              {
+                "quote": "ANN Recall@k is not retrieval Recall@k.",
+                "line_start": 46,
+                "reason": "Clear boundary between labeled retrieval recall and exact-neighbor ANN recall."
+              },
+              {
+                "quote": "Fixed `nprobe`, for example, visits the same number of IVF lists while the number of vectors inside those lists can grow.",
+                "line_start": 50,
+                "reason": "Concrete mechanism with a hedge about index family, avoiding an overclaim."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: chunking, embedding and ANN evaluation share one ablation method and are short enough to stay together.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The whole note was read independently. It is accurate, well ordered, and free of rule violations. It has no unsupported claims, and the keep is justified.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+          "citation_index": 1,
+          "reported_line_start": 30,
+          "resolved_line_start": 28
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+          "citation_index": 2,
+          "reported_line_start": 32,
+          "resolved_line_start": 30
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+          "citation_index": 3,
+          "reported_line_start": 40,
+          "resolved_line_start": 38
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+          "citation_index": 4,
+          "reported_line_start": 46,
+          "resolved_line_start": 44
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+          "citation_index": 5,
+          "reported_line_start": 50,
+          "resolved_line_start": 48
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md": "335c856c61ac7d13ea7921ce27b8ad91bb41fb8fe44e7db21bf343fc43e4ab97"
       },
       "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -43177,206 +43331,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "40a68853698f42388f6dd5882c679ad4",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Ablation varies one component at a time to isolate what caused a retrieval-metric change.\"\nlevel: [\"2\"]\npriority: High\nstatus: In Progress\npublish: true\ncreated: \"2026-06-12T18:21:46.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.484Z\"\n---\n\nEnd-to-end metrics show that a RAG pipeline regressed. They rarely show why. A lower Recall@5 could come from split evidence, an embedding model that mishandles domain vocabulary, or an ANN index that approximates too aggressively. Component-level evaluation holds most of the pipeline still and moves one part at a time.\n\nThat experiment is an ablation. Change one component, keep the rest fixed, and compare the metric delta with run-to-run noise. A component that does not move the result is unlikely to be the current bottleneck. [[Evaluation Metrics]] defines the measured outcomes, while [[Retrieval Evaluation Sets]] covers the labels those measurements consume.\n\n# How to Evaluate Chunking\n\nMost RAG frameworks have no standalone \"chunking quality\" score. Chunking is judged by what it does to retrieval, using either token-span labels or a controlled pipeline comparison.\n\n**Token-level IoU** measures how tightly retrieved chunks cover the evidence a query needs. It requires `(query, gold_evidence_span)` pairs, built manually or generated and then checked. For each query, compute:\n\n- **Token Recall** = `|gold ∩ retrieved| / |gold|` — were the relevant tokens retrieved?\n- **Token Precision** = `|gold ∩ retrieved| / |retrieved|` — how much noise came along?\n- **Token IoU** = `|gold ∩ retrieved| / |gold ∪ retrieved|` — combined efficiency that penalizes both missed evidence and noise\n\nToken IoU exposes a weakness that Recall@k misses: a large chunk can count as a retrieval hit while most of its tokens are irrelevant. In Chroma's controlled experiment, an 800-token chunk with 400-token overlap reached 87.9% token recall and only 1.4% precision. A 400-token semantic strategy reached 91.3% recall with 4.5% precision. The comparison is specific to that corpus, but the measurement problem is general.\n\n**Ablation via retrieval metrics** is cheaper when token-span labels are unavailable. Run the same queries through each chunking strategy while keeping the embedding model, index, and retriever fixed. Fill a fixed token budget in rank order instead of retrieving a fixed number of chunks. Fixed top-k confounds chunk size with retrieved context and generally gives larger chunks a larger token budget. Compare retrieval recall and answer faithfulness. Overlap often gives diminishing returns once the splitter already preserves sentence boundaries, while excessive context can lower answer quality by burying evidence in noise.\n\n# How to Compare Embedding Models\n\nAn embedding model is useful when it ranks relevant corpus passages well. Raw cosine scores do not establish that. Only retrieval metrics against labeled queries do.\n\n**Build a domain set.** Collect representative queries and label relevant passages from the real corpus as qrels: `query_id → doc_id → relevance_score`. Start small enough to review carefully, then add cases from production failures. General benchmarks such as MTEB and BEIR help with screening, but they do not predict performance on internal terminology.\n\n**Compare one variable.** Embed the same corpus with each candidate and use exact search when the goal is to isolate embedding quality. If the corpus requires ANN, tune each index and verify matched ANN recall against exact search before comparing retrieval metrics; identical ANN settings can favor one embedding space over another. Measure nDCG at the cutoffs the generator actually consumes because two models can have similar top-10 quality and very different top-3 quality. Small metric gaps should be weighed against latency and cost. There is no portable percentage threshold that decides the tradeoff for every corpus.\n\n**Watch for drift.** Golden-query neighbor overlap catches ranking changes directly. Distribution measures such as JS divergence can show that the embedding space moved, while click-through and query reformulation provide slower behavioral evidence. Set thresholds from known-good and known-bad deployments. Before changing models, build a shadow index and compare its recall before moving traffic.\n\n# How to Isolate ANN Loss\n\nANN Recall@k is not retrieval Recall@k. Retrieval recall compares results with relevance labels. ANN recall compares an approximate index with exact nearest-neighbor search over the same vectors. The latter isolates index loss. [[Retrieval]] covers the parameters that control it.\n\nGround truth is established by running brute-force (exact) search over the full corpus for every query in a test set. ANN results are then compared against these true neighbors. ANN Recall@10 = 0.85 means the approximate index returned 85% of the actual 10 closest vectors.\n\n**Tune against exact search.** Sweep `ef_search` for HNSW or `nprobe` for IVF and plot ANN recall against p99 latency. The useful operating point is where extra search work stops buying material recall. Re-run the sweep as the corpus and data distribution change. A fixed setting can leave the old recall/latency operating point behind, but the direction and size of each change depend on the index family, partition or graph shape, and workload. Fixed `nprobe`, for example, visits the same number of IVF lists while the number of vectors inside those lists can grow.\n\n**Filtered search evaluation** requires separate ground truth: brute-force over only the vectors that pass the metadata filter, then compare ANN filtered results against this restricted set. Post-filtering HNSW (run ANN first, then apply filter) can lose recall under high selectivity because most candidates are removed after the graph search. Test several selectivity levels, such as 100%, 10%, and 1%, to measure the workload's degradation curve. Some vector databases maintain filtered indexes that preserve graph connectivity at the cost of more storage.\n\n**Production monitoring.** Run exact-versus-approximate recall checks on a golden query set after major ingestion events and on a schedule that fits the index's change rate. Proxy signals help explain a regression but do not replace that comparison:\n\n- rising `nprobe` requirements to hold recall can indicate degraded IVF partition quality.\n- shard load skew exposes hot partitions caused by semantically clustered traffic or data.\n- KL divergence over pairwise-distance distributions exposes embedding-space movement.\n\n# References\n\n- [Evaluating chunking strategies for retrieval -- token-level IoU methodology and benchmark (Chroma Research)](https://research.trychroma.com/evaluating-chunking)\n- [A practical guide to selecting HNSW hyperparameters -- portfolio learning across 15 datasets (OpenSearch)](https://opensearch.org/blog/a-practical-guide-to-selecting-hnsw-hyperparameters/)\n",
-          "hash": "335c856c61ac7d13ea7921ce27b8ad91bb41fb8fe44e7db21bf343fc43e4ab97",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
-          "outcome": "keep",
-          "reason": "I audited the whole note against its text and general knowledge of the cited sources. I did not re-fetch the sources in this pass. The opening defines ablation and links the Evaluation Metrics and Retrieval Evaluation Sets notes where they are needed. The chunking section gives the token recall, precision and IoU formulas. It explains why IoU exposes the large-chunk weakness of Recall@k, and its Chroma figures (87.9% recall with 1.4% precision, 91.3% recall with 4.5% precision) are scoped to that corpus. The fixed-token-budget advice correctly names the chunk-size confound in fixed top-k. The embedding section separates exact search from ANN, requires matched ANN recall, and avoids invented thresholds. The ANN section correctly separates ANN recall (against exact neighbors) from labeled retrieval recall. It also covers the sweep of ef_search or nprobe, filtered-search ground truth with selectivity levels, and production proxy signals. It makes no unsupported universal claims. The prose is direct and non-repetitive, there are no fenced-code or Qard issues, and no violations are listed. The only references are two relevant sources. No concrete defect or essential gap was found, so a forced edit would be cosmetic churn."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md": "335c856c61ac7d13ea7921ce27b8ad91bb41fb8fe44e7db21bf343fc43e4ab97"
-    },
-    "feedback_keys": [],
-    "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T18:22:29.627746Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
-            "verdict": "CLEAN",
-            "summary": "The note is accurate, ordered from ablation concept to chunking, embeddings and ANN, and carries conditions and caveats rather than invented thresholds. No concrete defect or essential gap was found, so leaving it unchanged is justified.",
-            "page_type": "Concept — no Questions section; References present with two relevant bare link bullets; no code fences.",
-            "current_text_evidence": [
-              {
-                "quote": "Change one component, keep the rest fixed, and compare the metric delta with run-to-run noise.",
-                "line_start": 16,
-                "reason": "States the operating idea of ablation and the noise condition up front."
-              },
-              {
-                "quote": "a large chunk can count as a retrieval hit while most of its tokens are irrelevant",
-                "line_start": 30,
-                "reason": "Explains the mechanism by which token IoU exposes what Recall@k misses, scoped to a single corpus."
-              },
-              {
-                "quote": "Fixed top-k confounds chunk size with retrieved context",
-                "line_start": 32,
-                "reason": "Names the confound that motivates a fixed token budget."
-              },
-              {
-                "quote": "identical ANN settings can favor one embedding space over another",
-                "line_start": 40,
-                "reason": "Gives a precise condition for fair embedding comparison."
-              },
-              {
-                "quote": "ANN Recall@k is not retrieval Recall@k.",
-                "line_start": 46,
-                "reason": "Clear boundary between labeled retrieval recall and exact-neighbor ANN recall."
-              },
-              {
-                "quote": "Fixed `nprobe`, for example, visits the same number of IVF lists while the number of vectors inside those lists can grow.",
-                "line_start": 50,
-                "reason": "Concrete mechanism with a hedge about index family, avoiding an overclaim."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: chunking, embedding and ANN evaluation share one ablation method and are short enough to stay together.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The whole note was read independently. It is accurate, well ordered, and free of rule violations. It has no unsupported claims, and the keep is justified.",
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
-          "citation_index": 1,
-          "reported_line_start": 30,
-          "resolved_line_start": 28
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
-          "citation_index": 2,
-          "reported_line_start": 32,
-          "resolved_line_start": 30
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
-          "citation_index": 3,
-          "reported_line_start": 40,
-          "resolved_line_start": 38
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
-          "citation_index": 4,
-          "reported_line_start": 46,
-          "resolved_line_start": 44
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
-          "citation_index": 5,
-          "reported_line_start": 50,
-          "resolved_line_start": 48
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md": "335c856c61ac7d13ea7921ce27b8ad91bb41fb8fe44e7db21bf343fc43e4ab97"
-      },
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
-          "verdict": "CLEAN",
-          "summary": "The note is accurate, ordered from ablation concept to chunking, embeddings and ANN, and carries conditions and caveats rather than invented thresholds. No concrete defect or essential gap was found, so leaving it unchanged is justified.",
-          "page_type": "Concept — no Questions section; References present with two relevant bare link bullets; no code fences.",
-          "current_text_evidence": [
-            {
-              "quote": "Change one component, keep the rest fixed, and compare the metric delta with run-to-run noise.",
-              "line_start": 16,
-              "reason": "States the operating idea of ablation and the noise condition up front."
-            },
-            {
-              "quote": "a large chunk can count as a retrieval hit while most of its tokens are irrelevant",
-              "line_start": 28,
-              "reason": "Explains the mechanism by which token IoU exposes what Recall@k misses, scoped to a single corpus."
-            },
-            {
-              "quote": "Fixed top-k confounds chunk size with retrieved context",
-              "line_start": 30,
-              "reason": "Names the confound that motivates a fixed token budget."
-            },
-            {
-              "quote": "identical ANN settings can favor one embedding space over another",
-              "line_start": 38,
-              "reason": "Gives a precise condition for fair embedding comparison."
-            },
-            {
-              "quote": "ANN Recall@k is not retrieval Recall@k.",
-              "line_start": 44,
-              "reason": "Clear boundary between labeled retrieval recall and exact-neighbor ANN recall."
-            },
-            {
-              "quote": "Fixed `nprobe`, for example, visits the same number of IVF lists while the number of vectors inside those lists can grow.",
-              "line_start": 48,
-              "reason": "Concrete mechanism with a hedge about index family, avoiding an overclaim."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: chunking, embedding and ANN evaluation share one ablation method and are short enough to stay together.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The whole note was read independently. It is accurate, well ordered, and free of rule violations. It has no unsupported claims, and the keep is justified.",
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
