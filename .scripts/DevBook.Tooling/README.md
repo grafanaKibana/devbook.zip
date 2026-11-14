@@ -190,6 +190,8 @@ dotnet run --project DevBook.Tooling -- site export --repo-root .. \
 
 This produces only a complete artifact from an owned disposable checkout, without staging or committing it. Use `site verify --extract` to materialize the validated output in a dedicated checkout, as shown in the [Web README](../../Web/README.md#local-development). It never switches, resets or stashes the live Vault. Failed exports preserve source and named desktop recovery data; inspect those owned paths before cleanup. Never hand-edit `Web/content`, discard source, invent an artifact receipt or bypass a failed binding.
 
+Quartz build and serve use a shared external snapshot of the verified content so Git ignore rules cannot hide generated notes. A zero-note build fails even when Quartz exits successfully. Local preview serves a fixed snapshot; rerun `site preview` after editing the Vault. Its external temporary input is removed on exit or cancellation.
+
 Legacy generated-commit requests are a different transport contract. They pause with audit/review evidence intact instead of invoking the retired writer. Before promoting the migration to `main`, pause the old maintenance schedule and wait for active writes, inspect old open PRs/journals and update their source/base deliberately. Preserve authored edits and independent review evidence. Rebind only verified current source under a fresh supported artifact operation; otherwise leave the specific operation paused with a clear reason. Do not clear the state branch or mark a legacy generated commit exported under the new contract. Existing automated note PRs still target the configured `main`; artifact migration does not retarget them to `stage`.
 
 ## Pause, stop and recover

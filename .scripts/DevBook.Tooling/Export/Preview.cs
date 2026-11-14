@@ -119,6 +119,7 @@ public static class Preview
         Directory.CreateDirectory(parent);
         string preview = Path.Combine(parent, Guid.NewGuid().ToString("N"));
         bool retained = false;
+        string? quartzTemporaryRoot = null;
         try
         {
             Console.WriteLine("Preparing an isolated preview of current Vault files; the Git index and personal Obsidian settings stay unchanged.");
@@ -177,7 +178,9 @@ public static class Preview
                 Directory.CreateSymbolicLink(Path.Combine(web, "node_modules"), Path.Combine(root, "Web/node_modules"));
             else
                 await RunNpmAsync(web, ["ci", "--include=dev"], TimeSpan.FromMinutes(10), cancellationToken, runner);
-            await RunNpmAsync(web, ["run", "build"], TimeSpan.FromMinutes(10), cancellationToken, runner);
+            quartzTemporaryRoot = Directory.CreateTempSubdirectory("devbook-preview-quartz-").FullName;
+            quartzTemporaryRoot = Desktop.RealPath(quartzTemporaryRoot);
+            await RunNpmAsync(web, ["run", "build"], TimeSpan.FromMinutes(10), cancellationToken, runner, quartzTemporaryRoot);
             Console.WriteLine(new JsonObject { ["preview_root"] = preview, ["kind"] = "local", ["new_publication_dates"] = published.Count,
                 ["url"] = $"http://localhost:{port}", ["source_index_preserved_during_preparation"] = true }.ToJsonString());
             if (!serve)
@@ -190,12 +193,14 @@ public static class Preview
             using var stopped = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             ConsoleCancelEventHandler stop = (_, args) => { args.Cancel = true; stopped.Cancel(); };
             Console.CancelKeyPress += stop;
-            try { await RunNpmAsync(web, ["run", "serve", "--", "--port", port.ToString(System.Globalization.CultureInfo.InvariantCulture)], TimeSpan.FromDays(1), stopped.Token, runner); }
+            try { await RunNpmAsync(web, ["run", "serve", "--", "--port", port.ToString(System.Globalization.CultureInfo.InvariantCulture)], TimeSpan.FromDays(1), stopped.Token, runner, quartzTemporaryRoot); }
             catch (OperationCanceledException) when (stopped.IsCancellationRequested) { }
             finally { Console.CancelKeyPress -= stop; }
         }
         finally
         {
+            if (quartzTemporaryRoot is not null && Directory.Exists(quartzTemporaryRoot))
+                Directory.Delete(quartzTemporaryRoot, true);
             if (!retained && Directory.Exists(preview))
             {
                 bool recovery = Directory.EnumerateDirectories(preview, ".desktop-export-*", SearchOption.TopDirectoryOnly)
@@ -212,9 +217,11 @@ public static class Preview
         }
     }
 
-    private static async Task RunNpmAsync(string root, IReadOnlyList<string> arguments, TimeSpan timeout, CancellationToken cancellationToken, IProcessRunner? runner)
+    private static async Task RunNpmAsync(string root, IReadOnlyList<string> arguments, TimeSpan timeout, CancellationToken cancellationToken, IProcessRunner? runner, string? quartzTemporaryRoot = null)
     {
-        ProcessResult result = await (runner ?? new SystemProcessRunner()).RunAsync(new ProcessRequest("npm", arguments, root, Timeout: timeout), cancellationToken);
+        Dictionary<string, string>? environment = quartzTemporaryRoot is null ? null
+            : new Dictionary<string, string> { ["DEVBOOK_QUARTZ_TEMP_ROOT"] = quartzTemporaryRoot };
+        ProcessResult result = await (runner ?? new SystemProcessRunner()).RunAsync(new ProcessRequest("npm", arguments, root, Environment: environment, Timeout: timeout), cancellationToken);
         if (result.Stdout.Length > 0) Console.WriteLine(Syncer.SafeText(result.Stdout, 12000));
         if (result.Stderr.Length > 0) Console.Error.WriteLine(Syncer.SafeText(result.Stderr, 12000));
         result.EnsureSuccess("Preview npm operation");

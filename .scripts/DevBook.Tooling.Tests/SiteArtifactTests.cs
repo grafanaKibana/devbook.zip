@@ -226,6 +226,48 @@ public sealed class SiteArtifactTests
         }
     }
 
+    [Fact]
+    public async Task CancelledPreviewKillsTheChildAndRemovesItsExternalQuartzInput()
+    {
+        using var fixture = new ArtifactFixture();
+        using var cancelled = new CancellationTokenSource();
+        var runner = new CancelledQuartzRunner(cancelled);
+
+        await Preview.RunAsync(fixture.Root, "unused-test-app", cancellationToken: cancelled.Token,
+            runner: runner, renderSnapshot: (_, _, _) => Task.CompletedTask);
+
+        runner.TemporaryRoot.Should().NotBeNull();
+        Directory.Exists(runner.TemporaryRoot).Should().BeFalse();
+        runner.ChildCancelled.Should().BeTrue();
+        using (Syncer.AcquireLock(new SyncerContext(fixture.Root))) { }
+    }
+
+    private sealed class CancelledQuartzRunner(CancellationTokenSource cancelled) : IProcessRunner
+    {
+        public string? TemporaryRoot { get; private set; }
+        public bool ChildCancelled { get; private set; }
+
+        public async Task<ProcessResult> RunAsync(ProcessRequest request, CancellationToken cancellationToken = default)
+        {
+            if (!request.Arguments.Contains("serve")) return new ProcessResult(0, [], []);
+            TemporaryRoot = request.Environment!["DEVBOOK_QUARTZ_TEMP_ROOT"];
+            Directory.CreateDirectory(Path.Combine(TemporaryRoot, "devbook-quartz-content-test"));
+            cancelled.CancelAfter(TimeSpan.FromMilliseconds(300));
+            try
+            {
+                return await new SystemProcessRunner().RunAsync(request with
+                {
+                    FileName = "node", Arguments = ["-e", "setInterval(() => {}, 1000)"], Timeout = TimeSpan.FromSeconds(10)
+                }, cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                ChildCancelled = true;
+                throw;
+            }
+        }
+    }
+
     private sealed class PreviewRunner(Func<ProcessRequest, Task<ProcessResult>> run) : IProcessRunner
     {
         public Task<ProcessResult> RunAsync(ProcessRequest request, CancellationToken cancellationToken = default) => run(request);
