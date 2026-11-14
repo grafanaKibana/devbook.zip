@@ -14480,16 +14480,17 @@
     "version": 1,
     "id": "40a68853698f42388f6dd5882c679ad4",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-14T18:18:47.082551Z",
-    "elapsed_seconds": 310.58749099999994,
+    "elapsed_seconds": 313.8363954999999,
     "calls_reserved": 9,
     "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md"
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -14723,10 +14724,88 @@
           },
           "model_calls": 7
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and known RAGAS and retrieval-metric definitions. The opening separates retrieval, generation and end-to-end layers and carries a concrete example. The retrieval table matches the standard definitions of Recall, Precision, HitRate, MRR, MAP and nDCG, and it correctly marks empty-result rate as label-free. The RAGAS table is accurate: Faithfulness is supported claims over total claims, and Context Recall needs reference evidence. Context Precision is correctly described as variant-dependent. Diagnostic combinations are hedged as hypotheses, and Noise Sensitivity is described with its mode. The tradeoff table and the judge-bias pitfalls are consistent with MT-Bench. The cards each test one gradeable task, and the worked example in the metrics card is arithmetically correct (3/4, 3/5, hit, RR 0.5). Existing cards cite sources on the answer side, and known_violations is empty. No factual or editorial defect justifies an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no factual, editorial or card-quality defect. The keep is justified and no edits are proposed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
+                "verdict": "CLEAN",
+                "summary": "The note separates retrieval, generation and end-to-end evaluation, hedges diagnostic combinations as hypotheses, and handles version-dependent RAGAS details (Context Precision variants, Noise Sensitivity modes) with care. Cards are focused and cite answer-side sources. No edit is warranted.",
+                "page_type": "Concept — typed frontmatter, optional Questions/References present and valid; no fenced code blocks; special-page rules not applicable.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Mixing the layers turns every regression into guesswork",
+                    "line_start": 17,
+                    "reason": "The opening states the operating idea and why layered evaluation matters, which makes the topic quick to re-enter."
+                  },
+                  {
+                    "quote": "Empty-result rate needs no labels, because it only counts queries for which retrieval returns nothing.",
+                    "line_start": 25,
+                    "reason": "Accurately states the label dependence boundary between ranking metrics and the label-free telemetry metric."
+                  },
+                  {
+                    "quote": "so the evaluation record must name the variant rather than reporting an unqualified \"Context Precision\" score",
+                    "line_start": 59,
+                    "reason": "Handles the version-specific RAGAS Context Precision variants correctly instead of overstating a single definition."
+                  },
+                  {
+                    "quote": "Scores alone do not establish a component's root cause.",
+                    "line_start": 63,
+                    "reason": "Diagnostic combination tables are properly framed as hypotheses with an investigation order, avoiding overclaiming."
+                  },
+                  {
+                    "quote": "Attribution shows which context supports an incorrect claim, not that the chunk caused the error.",
+                    "line_start": 80,
+                    "reason": "Noise Sensitivity is described with its mode and its causal limit, an exception that preserves technical accuracy."
+                  },
+                  {
+                    "quote": "Rerunning the same evaluation on the same queries does not satisfy the second condition.",
+                    "line_start": 158,
+                    "reason": "The segment-drop card explains the condition and its exception directly in words, with a finite gradeable answer; the worked example in the metrics card (3/4, 3/5, hit, RR 0.5) is arithmetically correct."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: retrieval metrics, generation metrics, RAGAS scores and tradeoffs form one coherent evaluation-metrics topic; the full definitions already live in Monitoring, and the note links out rather than duplicating them.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 9
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T18:23:57.669510Z",
+    "checkpoint_at": "2026-11-14T18:24:00.918415Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
