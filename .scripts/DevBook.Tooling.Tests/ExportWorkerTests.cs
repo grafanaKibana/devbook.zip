@@ -62,6 +62,7 @@ public sealed class ExportWorkerTests
         if (scenario == "lag")
         {
             result.Str("status").Should().Be("exported");
+            fixture.Api.ReadyConversions.Should().Be(1);
             delays.Should().Be(1);
             state.Obj("finalized_exports").ContainsKey(fixture.Request.Str("op_id")).Should().BeTrue();
         }
@@ -71,6 +72,7 @@ public sealed class ExportWorkerTests
             state.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence").Bool("export_paused").Should().BeTrue();
             state.Obj("finalized_exports").Count.Should().Be(0);
             fixture.Api.Comments.Should().BeEmpty();
+            fixture.Api.ReadyConversions.Should().Be(0);
             delays.Should().Be(0);
         }
     }
@@ -97,6 +99,76 @@ public sealed class ExportWorkerTests
         fixture.Api.CurrentTree.Should().NotContainKey("Web/content/Removed.md");
         fixture.Api.Blobs[fixture.Api.CurrentTree["Web/content/Assets/image.png"].Sha].Should().Equal(fixture.Binary);
         fixture.Api.Comments.Should().ContainSingle();
+        fixture.Api.Pr.Bool("draft").Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task VerifiedExportDeliversNewAndUpdatedPrsReadyForReview(bool initiallyDraft)
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.Pr["draft"] = initiallyDraft;
+        fixture.Api.ChecksReady = true;
+        var store = new MemoryStateStore(fixture.State);
+        JsonObject? beforeReady = null;
+        fixture.Api.BeforeReadyConversion = async () => beforeReady = (await store.ReadAsync()).State;
+
+        // Act
+        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+
+        // Assert
+        result.Str("status").Should().Be("exported");
+        fixture.Api.ReadyConversions.Should().Be(1);
+        fixture.Api.Pr.Bool("draft").Should().BeFalse();
+        fixture.Api.Pr.Obj("head").Str("sha").Should().Be(FakeExportApi.GeneratedHead);
+        beforeReady!.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence")
+            .Str("export_check_status").Should().Be("success");
+    }
+
+    [Theory]
+    [InlineData("pending", "awaiting_checks")]
+    [InlineData("failure", "checks_failed")]
+    public async Task UnsuccessfulExactHeadChecksKeepTheExportDraft(string checkConclusion, string expectedStatus)
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.ChecksReady = checkConclusion != "pending";
+        fixture.Api.CheckConclusion = checkConclusion;
+        var store = new MemoryStateStore(fixture.State);
+
+        // Act
+        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+
+        // Assert
+        result.Str("status").Should().Be(expectedStatus);
+        fixture.Api.ReadyConversions.Should().Be(0);
+        fixture.Api.Pr.Bool("draft").Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task HeadChangingDuringReadyDeliveryReturnsTheManagedPrToDraft()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.Pr["draft"] = true;
+        fixture.Api.ChecksReady = true;
+        fixture.Api.BeforeReadyConversion = () =>
+        {
+            fixture.Api.Head = FakeExportApi.OwnerChangedHead;
+            return Task.CompletedTask;
+        };
+        var store = new MemoryStateStore(fixture.State);
+
+        // Act
+        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+
+        // Assert
+        result.Str("status").Should().Be("stale");
+        fixture.Api.Head.Should().Be(FakeExportApi.OwnerChangedHead);
+        fixture.Api.Pr.Bool("draft").Should().BeTrue();
+        (await store.ReadAsync()).State.Obj("finalized_exports").Count.Should().Be(0);
     }
 
     [Fact]
@@ -118,6 +190,7 @@ public sealed class ExportWorkerTests
         beforeConversion.Str("review_started_head_sha").Should().Be(FakeExportApi.SourceHead);
         fixture.Api.DraftConversions.Should().Be(1);
         fixture.Api.Pr.Bool("draft").Should().BeTrue();
+        fixture.Api.ReadyConversions.Should().Be(0);
     }
 
     [Fact]
@@ -349,6 +422,7 @@ public sealed class ExportWorkerTests
         public string Repo => "owner/devbook";
         public string Head { get; set; } = SourceHead;
         public bool ChecksReady { get; set; }
+        public string CheckConclusion { get; set; } = "success";
         public bool ValidationMissing { get; set; }
         public bool FailBeforeRefOnce { get; set; }
         public bool FailAfterTreeOnce { get; set; }
@@ -361,7 +435,9 @@ public sealed class ExportWorkerTests
         public int CommitWrites { get; private set; }
         public int Dispatches { get; private set; }
         public int DraftConversions { get; private set; }
+        public int ReadyConversions { get; private set; }
         public Func<Task>? BeforeDraftConversion { get; set; }
+        public Func<Task>? BeforeReadyConversion { get; set; }
         public Action? AfterRefUpdate { get; set; }
         public string? PrHeadAfterRef { get; set; }
         public JsonObject Pr { get; }
@@ -533,7 +609,7 @@ public sealed class ExportWorkerTests
                 {
                     ["total_count"] = ChecksReady ? 2 : 0,
                     ["check_runs"] = ChecksReady
-                    ? new JsonArray(new JsonObject { ["id"] = 1, ["name"] = "pr-title", ["head_sha"] = Head, ["conclusion"] = "success" },
+                    ? new JsonArray(new JsonObject { ["id"] = 1, ["name"] = "pr-title", ["head_sha"] = Head, ["conclusion"] = CheckConclusion },
                         new JsonObject { ["id"] = 2, ["name"] = "major-approval", ["head_sha"] = Head, ["conclusion"] = "success" }) : new JsonArray()
                 };
             }
@@ -576,6 +652,16 @@ public sealed class ExportWorkerTests
 
         public async Task<JsonNode?> GraphqlAsync(string query, JsonObject variables, CancellationToken cancellationToken = default)
         {
+            if (query.Contains("markPullRequestReadyForReview", StringComparison.Ordinal))
+            {
+                if (BeforeReadyConversion is not null)
+                {
+                    await BeforeReadyConversion();
+                }
+                ReadyConversions++;
+                Pr["draft"] = false;
+                return new JsonObject();
+            }
             if (BeforeDraftConversion is not null)
             {
                 await BeforeDraftConversion();

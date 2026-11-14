@@ -219,6 +219,19 @@ public static partial class Runtime
         }
     }
 
+    public static async Task EnsureReadyForReviewAsync(IGitHubApi api, JsonObject pr, CancellationToken cancellationToken = default)
+    {
+        if (pr.Bool("draft", true))
+        {
+            string id = pr.Str("node_id");
+            if (id.Length == 0)
+            {
+                throw new RuntimeFailure("Pull request node_id is required to deliver verified changes for review.");
+            }
+            await api.GraphqlAsync("mutation($id:ID!){markPullRequestReadyForReview(input:{pullRequestId:$id}){pullRequest{id isDraft}}}", new JsonObject { ["id"] = id }, cancellationToken);
+        }
+    }
+
     internal static async Task<JsonObject> ObjectAsync(IGitHubApi api, string method, string path, JsonNode? payload = null, CancellationToken cancellationToken = default) =>
         await api.RequestAsync(method, path, payload, cancellationToken: cancellationToken) as JsonObject ?? throw new RuntimeFailure("GitHub response must be an object.");
 

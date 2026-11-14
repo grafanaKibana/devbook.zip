@@ -65,7 +65,7 @@ test("description normalization selects and synchronizes the first non-empty val
   assert.equal(data.description, "Description")
 })
 
-test("index policy canonicalizes public routes and unlists noindex output", () => {
+test("index policy canonicalizes public routes and unlists noindex output", async () => {
   const publicHead = render(seoHead(fileData("section/page")))
   assert.match(publicHead, /rel="canonical"/)
   assert.doesNotMatch(publicHead, /name="robots"/)
@@ -79,7 +79,7 @@ test("index policy canonicalizes public routes and unlists noindex output", () =
   ]
   const plugin = { name: "Generated", generate: () => pages } as unknown as PageTypePluginEntry
   unlistGenerated(plugin, isNoIndex)
-  const generated = plugin.generate!()
+  const generated = await plugin.generate!()
   assert.equal(generated[0]?.data.unlisted, true)
   assert.equal(generated[1], pages[1])
 
@@ -89,7 +89,7 @@ test("index policy canonicalizes public routes and unlists noindex output", () =
     generate: () => drawingPages,
   } as unknown as PageTypePluginEntry
   unlistGenerated(drawingPlugin, () => true)
-  const drawing = drawingPlugin.generate!()[0]!
+  const drawing = (await drawingPlugin.generate!())[0]!
   assert.equal(drawing.data.unlisted, true)
   const drawingData = fileData(drawing.slug)
   drawingData.unlisted = drawing.data.unlisted
@@ -126,4 +126,19 @@ test("plugin ordering fails closed and inserts after the required plugin", () =>
     plugins.map(({ name }) => name),
     ["Before", "Description", "Seo", "After"],
   )
+})
+
+test("async generated pages retain the noindex policy", async () => {
+  const pages = [
+    { slug: "tags/example", data: {} },
+    { slug: "section/page", data: {} },
+  ]
+  const plugin = {
+    name: "AsyncGenerated",
+    generate: async () => pages,
+  } as unknown as PageTypePluginEntry
+  unlistGenerated(plugin, isNoIndex)
+  const result = await plugin.generate!()
+  assert.equal(result[0].data.unlisted, true)
+  assert.equal(result[1], pages[1])
 })
