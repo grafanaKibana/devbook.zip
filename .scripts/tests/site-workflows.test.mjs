@@ -36,7 +36,8 @@ test("readiness failure does not skip real source validation and documents stage
   const gate = title.jobs["pr-title"].steps.find((step) => step.env?.READY)
   assert.match(gate.run, /READY.*true/)
   assert.match(gate.run, /Keep the migration PR draft/)
-  assert.match(gate.run, /stage does not currently enforce required checks/)
+  assert.match(gate.run, /Trusted Sources OIDC access/)
+  assert.match(gate.run, /required pr-title on stage/)
 })
 
 test("only accepted stage/main sources enter serialized protected deployment", () => {
@@ -70,6 +71,28 @@ test("pulled environment secrets are cleared before any Vercel repository build"
   assert.ok(steps.some((step) => step.run?.includes("site verify") && step.run.includes("--extract")))
   const upload = steps.find((step) => step.id === "upload")
   assert.equal(upload.with.path, "${{ runner.temp }}/package/deployment.json")
+})
+
+test("only the deploy job requests masked OIDC and passes it solely to HTTP verification", () => {
+  const deploy = workflow("site-deploy")
+  assert.deepEqual(deploy.permissions, { contents: "read" })
+  assert.equal(deploy.jobs.native.permissions, undefined)
+  assert.equal(deploy.jobs.package.permissions, undefined)
+  assert.deepEqual(deploy.jobs.deploy.permissions, { contents: "read", "id-token": "write" })
+  const steps = deploy.jobs.deploy.steps
+  const issueIndex = steps.findIndex((step) => step.id === "http-identity")
+  const verifyIndex = steps.findIndex((step) => step.run?.includes("site-pipeline.mjs publish"))
+  assert.equal(issueIndex, verifyIndex - 1)
+  const issue = steps[issueIndex]
+  assert.equal(issue.uses, "actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3")
+  assert.match(issue.with.script, /core\.getIDToken\('https:\/\/github\.com\/grafanaKibana'\)/)
+  assert.ok(issue.with.script.indexOf("core.setSecret(token)") < issue.with.script.indexOf("core.setOutput('token', token)"))
+  assert.equal(steps[verifyIndex].env.VERCEL_DEPLOYMENT_OIDC_TOKEN, "${{ steps.http-identity.outputs.token }}")
+  for (const [index, step] of steps.entries()) {
+    if (index !== verifyIndex) assert.equal(step.env?.VERCEL_DEPLOYMENT_OIDC_TOKEN, undefined)
+  }
+  assert.doesNotMatch(JSON.stringify(deploy.jobs.package), /OIDC_TOKEN|id-token|getIDToken/)
+  assert.doesNotMatch(JSON.stringify(deploy), /AUTOMATION_BYPASS|GITHUB_ENV/)
 })
 
 test("managed native artifacts transfer exact provenance without generated commits", () => {

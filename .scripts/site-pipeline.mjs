@@ -202,8 +202,9 @@ async function verifiedDeployment(options) {
 }
 
 async function verifyMarker(options, domain) {
+  if (typeof options.oidcToken !== "string" || !options.oidcToken.trim()) throw new Error("Missing protected deployment OIDC token")
   const marker = await request(options, `https://${domain}/.well-known/devbook-build.json?source=${options.source}&native=${options.native}`, {
-    headers: { "cache-control": "no-cache, no-store", ...(options.bypass ? { "x-vercel-protection-bypass": options.bypass } : {}) }, redirect: "error",
+    headers: { "cache-control": "no-cache, no-store", "x-vercel-trusted-oidc-idp-token": options.oidcToken }, redirect: "error",
   })
   if (marker.source !== options.source || marker.native !== options.native) throw new Error("Served site build identity mismatch")
 }
@@ -283,7 +284,7 @@ async function main() {
     if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, `deployment=${deployment.id}\n`)
   } else if (command === "publish") {
     const options = { ...identity, deployment: args.deployment, token: process.env.VERCEL_TOKEN, project: process.env.VERCEL_PROJECT_ID,
-      org: process.env.VERCEL_ORG_ID, githubToken: process.env.GITHUB_TOKEN, bypass: process.env.VERCEL_AUTOMATION_BYPASS_SECRET }
+      org: process.env.VERCEL_ORG_ID, githubToken: process.env.GITHUB_TOKEN, oidcToken: process.env.VERCEL_DEPLOYMENT_OIDC_TOKEN }
     await publishDeployment(options)
     await verifyDeployment(options)
   } else throw new Error("Unknown site pipeline operation")

@@ -112,6 +112,9 @@ jobs:
     needs: [native, package]
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
     environment:
       name: ${{ github.ref_name == 'main' && 'Production' || 'Preview' }}
       url: ${{ github.ref_name == 'main' && 'https://devbook.zip' || 'https://stage.devbook.zip' }}
@@ -148,10 +151,18 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: node .scripts/site-pipeline.mjs deploy --source "$SOURCE_SHA" --target "$TARGET" --native "$NATIVE_SHA256"
+      - name: Request short-lived identity for protected site verification
+        id: http-identity
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const token = await core.getIDToken('https://github.com/grafanaKibana');
+            core.setSecret(token);
+            core.setOutput('token', token);
       - name: Verify immutable build, recheck branch, publish and verify fixed URL
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          VERCEL_DEPLOYMENT_OIDC_TOKEN: ${{ steps.http-identity.outputs.token }}
           GITHUB_TOKEN: ${{ github.token }}
           DEPLOYMENT: ${{ steps.create.outputs.deployment }}
         run: node .scripts/site-pipeline.mjs publish --source "$SOURCE_SHA" --target "$TARGET" --native "$NATIVE_SHA256" --deployment "$DEPLOYMENT"

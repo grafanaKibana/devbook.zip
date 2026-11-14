@@ -40,6 +40,6 @@ jobs:
           READY: ${{ vars.DEVBOOK_ARTIFACT_DEPLOYMENT_READY }}
         run: |
           if [ "$READY" != true ]; then
-            echo '::error::Artifact deployment is not configured. Configure Vercel IDs/token in Preview and Production, validate protected preview access and stage required checks, then set DEVBOOK_ARTIFACT_DEPLOYMENT_READY=true. Keep the migration PR draft; stage does not currently enforce required checks.'
+            echo '::error::Artifact deployment is not configured. Configure Vercel IDs/token in Preview and Production, validate Trusted Sources OIDC access and required pr-title on stage, then set DEVBOOK_ARTIFACT_DEPLOYMENT_READY=true. Keep the migration PR draft until configuration is verified.'
             exit 1
           fi

@@ -115,9 +115,9 @@ test("deployment success requires project, SHA, alias and served build marker", 
   const deployment = { id: "dpl_one", projectId: deploymentProject.project, readyState: "READY", target: null, meta: { devbookSourceSha: source } }
   const alias = { deploymentId: "dpl_one", projectId: deploymentProject.project }
   const fetch = async (url) => ({ ok: true, json: async () => url.includes("/deployments/") ? deployment : url.includes("/aliases/") ? alias : { source, native } })
-  await verifyDeployment({ ...identity, project: deploymentProject.project, org: deploymentProject.org, deployment: "dpl_one", token: "secret", fetch })
+  await verifyDeployment({ ...identity, project: deploymentProject.project, org: deploymentProject.org, deployment: "dpl_one", token: "secret", oidcToken: "short-lived-http", fetch })
   alias.deploymentId = "dpl_other"
-  await assert.rejects(verifyDeployment({ ...identity, project: deploymentProject.project, org: deploymentProject.org, deployment: "dpl_one", token: "secret", fetch }), /alias/)
+  await assert.rejects(verifyDeployment({ ...identity, project: deploymentProject.project, org: deploymentProject.org, deployment: "dpl_one", token: "secret", oidcToken: "short-lived-http", fetch }), /alias/)
 })
 
 test("stale source never receives the environment alias", async () => {
@@ -126,7 +126,7 @@ test("stale source never receives the environment alias", async () => {
     calls.push([url, options])
     return { ok: true, json: async () => ({ object: { sha: "c".repeat(40) } }) }
   }
-  await assert.rejects(publishDeployment({ ...identity, project: deploymentProject.project, org: deploymentProject.org, deployment: "dpl_one", token: "secret", githubToken: "read", fetch }), /stale/)
+  await assert.rejects(publishDeployment({ ...identity, project: deploymentProject.project, org: deploymentProject.org, deployment: "dpl_one", token: "secret", oidcToken: "short-lived-http", githubToken: "read", fetch }), /stale/)
   assert.equal(calls.length, 1)
   assert.ok(calls[0][0].includes("api.github.com"))
 })
@@ -134,7 +134,7 @@ test("stale source never receives the environment alias", async () => {
 test("a different Vercel project fails before any account request or mutation", async () => {
   assert.throws(() => assertConfiguredProject({ ...deploymentProject, project: "prj_other" }), /reviewed DevBook target/)
   let calls = 0
-  await assert.rejects(publishDeployment({ ...identity, ...deploymentProject, project: "prj_other", token: "secret", fetch: async () => { calls++ } }), /reviewed DevBook target/)
+  await assert.rejects(publishDeployment({ ...identity, ...deploymentProject, project: "prj_other", token: "secret", oidcToken: "short-lived-http", fetch: async () => { calls++ } }), /reviewed DevBook target/)
   assert.equal(calls, 0)
 })
 
@@ -148,7 +148,7 @@ test("an edit during immutable smoke verification stops alias assignment", async
         : { source, native }
     return { ok: true, json: async () => value }
   }
-  await assert.rejects(publishDeployment({ ...identity, project: deploymentProject.project, org: deploymentProject.org, deployment: "dpl_one", token: "secret", githubToken: "read", fetch }), /stale/)
+  await assert.rejects(publishDeployment({ ...identity, project: deploymentProject.project, org: deploymentProject.org, deployment: "dpl_one", token: "secret", oidcToken: "short-lived-http", githubToken: "read", fetch }), /stale/)
   assert.equal(heads, 2)
   assert.deepEqual(mutations, [])
 })
@@ -163,7 +163,7 @@ test("production promotion follows successful immutable smoke and last head chec
     return { ok: true, json: async () => value }
   }
   let promoted
-  await publishDeployment({ ...identity, target: "production", project: deploymentProject.project, org: deploymentProject.org, deployment: "dpl_one", token: "secret", githubToken: "read", fetch,
+  await publishDeployment({ ...identity, target: "production", project: deploymentProject.project, org: deploymentProject.org, deployment: "dpl_one", token: "secret", oidcToken: "short-lived-http", githubToken: "read", fetch,
     runCommand: (args) => { promoted = args; operations.push("promote") } })
   assert.deepEqual(promoted, ["promote", "dpl_one", "--yes"])
   assert.ok(operations[2].includes("build.vercel.app"))
@@ -180,8 +180,56 @@ test("a protected login page or wrong immutable source never changes the alias",
         : { login: true }
     return { ok: true, json: async () => value }
   }
-  await assert.rejects(publishDeployment({ ...identity, project: deploymentProject.project, org: deploymentProject.org, deployment: "dpl_one", token: "secret", githubToken: "read", fetch }), /build identity/)
+  await assert.rejects(publishDeployment({ ...identity, project: deploymentProject.project, org: deploymentProject.org, deployment: "dpl_one", token: "secret", oidcToken: "short-lived-http", githubToken: "read", fetch }), /build identity/)
   assert.deepEqual(mutations, [])
+})
+
+test("short-lived OIDC reaches only protected site requests, while API credentials stay separate", async () => {
+  for (const target of ["preview", "production"]) {
+    const calls = []
+    const fetch = async (url, options) => {
+      calls.push({ url: new URL(url), options })
+      const value = url.includes("api.github.com") ? { object: { sha: source } }
+        : url.includes("/v4/aliases/") ? { deploymentId: "dpl_one", projectId: deploymentProject.project }
+          : url.includes("api.vercel.com") ? { id: "dpl_one", url: "build.vercel.app", projectId: deploymentProject.project, readyState: "READY", target: target === "production" ? "production" : null, meta: { devbookSourceSha: source } }
+            : { source, native }
+      return { ok: true, json: async () => value }
+    }
+    const options = { ...identity, target, ...deploymentProject, deployment: "dpl_one", token: "api-only", githubToken: "github-only", oidcToken: "short-lived-http", fetch, runCommand: () => {} }
+    await publishDeployment(options)
+    await verifyDeployment(options)
+    const siteHosts = ["build.vercel.app", target === "production" ? "devbook.zip" : "stage.devbook.zip"]
+    assert.deepEqual(calls.filter(({ url }) => siteHosts.includes(url.hostname)).map(({ url }) => url.hostname), siteHosts)
+    for (const { url, options: request } of calls) {
+      if (siteHosts.includes(url.hostname)) {
+        assert.equal(request.headers["x-vercel-trusted-oidc-idp-token"], "short-lived-http")
+        assert.equal(request.headers.authorization, undefined)
+        assert.equal(request.headers["x-vercel-protection-bypass"], undefined)
+        assert.equal(request.redirect, "error")
+      } else {
+        assert.ok(["api.github.com", "api.vercel.com"].includes(url.hostname))
+        assert.equal(request.headers.authorization, url.hostname === "api.github.com" ? "Bearer github-only" : "Bearer api-only")
+        assert.equal(request.headers["x-vercel-trusted-oidc-idp-token"], undefined)
+      }
+    }
+  }
+})
+
+test("missing or rejected OIDC never assigns an alias or promotes Production", async () => {
+  for (const target of ["preview", "production"]) {
+    for (const oidcToken of [undefined, "", " ", "rejected-http-token"]) {
+      const mutations = []
+      const fetch = async (url, options) => {
+        if (options.method) mutations.push(url)
+        if (url.includes("build.vercel.app")) return { ok: false, status: 401 }
+        const value = url.includes("api.github.com") ? { object: { sha: source } }
+          : { id: "dpl_one", url: "build.vercel.app", projectId: deploymentProject.project, readyState: "READY", target: target === "production" ? "production" : null, meta: { devbookSourceSha: source } }
+        return { ok: true, json: async () => value }
+      }
+      await assert.rejects(publishDeployment({ ...identity, target, ...deploymentProject, deployment: "dpl_one", token: "api-only", githubToken: "github-only", oidcToken, fetch, runCommand: () => mutations.push("promote") }), /OIDC token|verification request failed \(401\)/)
+      assert.deepEqual(mutations, [])
+    }
+  }
 })
 
 test("multi-MiB binary assets retain strict canonical base64 validation without regex stack exhaustion", (t) => {
