@@ -17615,10 +17615,10 @@
     "version": 1,
     "id": "1036754a634142d7a6f283117a763aa4",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 111.20120740000002,
-    "calls_reserved": 2,
+    "elapsed_seconds": 114.46682500000001,
+    "calls_reserved": 3,
     "responses_received": 2,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Embeddings.md"
@@ -17696,7 +17696,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:46:03.826479Z",
+    "checkpoint_at": "2026-11-14T06:46:07.092098Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -17721,7 +17721,7 @@
       "pr": null
     },
     "base_sha": "2032b76ef1fbc6e01fc6e8d7861493b4a6b0859b",
-    "reservation_deadline": "2026-11-14T07:00:08.935358Z"
+    "reservation_deadline": "2026-11-14T07:01:06.803789Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
