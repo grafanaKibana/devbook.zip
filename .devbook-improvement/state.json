@@ -17670,14 +17670,15 @@
     "version": 1,
     "id": "1036754a634142d7a6f283117a763aa4",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 208.16174919999997,
+    "elapsed_seconds": 211.32943439999997,
     "calls_reserved": 5,
     "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Embeddings.md",
-      "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md"
+      "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -17817,10 +17818,21 @@
           },
           "model_calls": 4
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+        "outcome": "proposal_blocked",
+        "reason": "wikilink removal requires explicit target-specific semantic rationale",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "wikilink removal requires explicit target-specific semantic rationale",
+          "model_calls": 5
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:47:40.787020Z",
+    "checkpoint_at": "2026-11-14T06:47:43.954706Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
