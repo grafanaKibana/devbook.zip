@@ -14639,9 +14639,9 @@
     "version": 1,
     "id": "40a68853698f42388f6dd5882c679ad4",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-14T18:18:47.082551Z",
-    "elapsed_seconds": 484.90785549999976,
+    "elapsed_seconds": 487.99710019999975,
     "calls_reserved": 15,
     "responses_received": 15,
     "attempted_paths": [
@@ -14651,7 +14651,8 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md"
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -15109,10 +15110,83 @@
           },
           "model_calls": 13
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
+                "outcome": "keep",
+                "reason": "Read the whole note against the current text. The flow runs from the offline-versus-production distinction through instrumentation, deterministic, retrieval, judge, performance and data-health metrics to segmentation, alerting, pitfalls and tradeoffs. Metric definitions are correct: Recall/Precision/HitRate@k, MRR, MAP (AP divided by total relevant documents, so unretrieved relevant documents count as zero) and nDCG. The RAGAS-style judge metrics are described consistently: noise sensitivity is lower-is-better with relevant and irrelevant modes, and the note states that attribution is not causation. The OpenTelemetry GenAI names (gen_ai.operation.name, gen_ai.usage.input_tokens/output_tokens, gen_ai.client.token.usage) match the semantic conventions. The alert thresholds are explicitly labeled as examples, and the tables agree with the prose, so no contradictions turned up. The single Qard asks one dependent task (how the two practices form a feedback loop), is self-contained, and carries primary sources; known_violations is empty. The prose is direct, and the existing detail (worked numeric examples, pitfalls) is worth keeping. No defect was found, so an edit would be cosmetic."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Full-note audit found no factual, structural, voice or Qard defects. No edits were proposed and the keep disposition holds.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md",
+                "verdict": "CLEAN",
+                "summary": "The note moves from the offline-versus-production distinction through instrumentation, metric families, segmentation, alerting, pitfalls and tradeoffs. Mechanisms, conditions and worked numbers are accurate and preserved. Any edit would be cosmetic, so keeping it unchanged is justified.",
+                "page_type": "Concept — authorable concept note in the impersonal whiteboard voice. Optional Questions and References sections are present and valid, the mermaid fence has a language identifier, and the frontmatter and Qard ID are intact.",
+                "current_text_evidence": [
+                  {
+                    "quote": "A global faithfulness score can hold at 0.91 while one tenant falls to 0.72",
+                    "line_start": 21,
+                    "reason": "The opening states the operating idea early: per-segment monitoring and why an aggregate hides a local regression. This gives fast re-entry."
+                  },
+                  {
+                    "quote": "so a relevant document that is never retrieved contributes zero",
+                    "line_start": 84,
+                    "reason": "The MAP definition is precise and correct. AP is divided by the total number of relevant documents, and the worked MRR 0.88 versus MAP 0.51 example shows why the metric matters."
+                  },
+                  {
+                    "quote": "Attribution locates which context supports a wrong claim but does not by itself prove that the chunk caused it.",
+                    "line_start": 115,
+                    "reason": "Noise Sensitivity is stated with its modes, its lower-is-better direction and the attribution-is-not-causation limit. This is a careful condition, not a vague gloss."
+                  },
+                  {
+                    "quote": "The values below are examples: each production threshold should come from historical variance",
+                    "line_start": 179,
+                    "reason": "Alert thresholds are explicitly labeled as illustrative. This avoids presenting fixed numbers as universal."
+                  },
+                  {
+                    "quote": "How do offline evaluation and production monitoring work together for a RAG system?",
+                    "line_start": 232,
+                    "reason": "The single Qard is one dependent task (a focused comparison plus the feedback loop). It is self-contained and carries answer-side primary sources, and its ID is retained."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the metric families, segmentation, alerting and pitfalls all serve one coherent topic, monitoring a deployed RAG pipeline. They share the same dashboard and alerting decisions.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 15
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T18:26:51.989878Z",
+    "checkpoint_at": "2026-11-14T18:26:55.079123Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
