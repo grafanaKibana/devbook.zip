@@ -17716,15 +17716,16 @@
     "version": 1,
     "id": "1036754a634142d7a6f283117a763aa4",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 278.74837339999993,
+    "elapsed_seconds": 283.03081919999994,
     "calls_reserved": 7,
     "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Embeddings.md",
       "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md"
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+      "Vault/Home/AI & ML/AI & ML.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -17875,10 +17876,78 @@
           "reason": "wikilink removal requires explicit target-specific semantic rationale",
           "model_calls": 5
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/AI & ML.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/AI & ML.md",
+                "outcome": "keep",
+                "reason": "I read the whole folder note. The opening paragraph states the scope, which runs from classic ML to LLM applications and tooling. It also states the key judgment: production results depend on data, evaluation and operations more than on model choice. The Datacore folder map is protected and was left alone. The single card tests one decision, when classic ML beats an LLM. Its answer names two conditions: task and data fit, then measured quality, latency, cost and maintenance on the real workload. It also says that fit alone does not decide, because LLMs can do classification and regression. That is consistent with Google's ML problem framing and Rules of ML guidance, which the card cites on the answer side. The card is a single dependent explanation, so it does not need splitting, and its qard-id is intact. The frontmatter is valid, the one reference is a real topic-specific bare link, and no violations are listed. A rewrite would only reword accurate prose, so I made no edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/AI & ML.md",
+                "verdict": "CLEAN",
+                "summary": "The folder note has a compact opening that states the scope and the key judgment: production results depend on data, evaluation and operations more than on model choice. It has one coherent decision card and one real reference. I found no concrete error, so keeping it unchanged is justified.",
+                "page_type": "FolderNote — keeps tags: [FolderNote], the protected datacorejsx folder map, and an optional Questions/References pair.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Model choice matters, but production results usually turn on the data and on how the system is evaluated and operated.",
+                    "line_start": 21,
+                    "reason": "States the operating idea and the engineering judgment of the folder. The following sentence about gradient-boosted trees and LLMs gives a concrete illustration without padding."
+                  },
+                  {
+                    "quote": "The first condition makes classic ML a strong candidate. Only the second decides.",
+                    "line_start": 32,
+                    "reason": "The card answer is ordered from its conditions to the deciding factor, which makes the decision rule recoverable."
+                  },
+                  {
+                    "quote": "generative models can also perform classification and regression, and an LLM can be the stronger option for some text-classification tasks",
+                    "line_start": 35,
+                    "reason": "Gives the exception that stops the answer from being a blanket rule that classic ML wins on labeled tasks."
+                  },
+                  {
+                    "quote": "[Microsoft AI for Beginners](https://microsoft.github.io/AI-For-Beginners/)",
+                    "line_start": 44,
+                    "reason": "The reference is a real, topic-specific bare link with no trailing annotation."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the folder note is short and holds a single topic, the overview of AI & ML. The child notes belong in the folder map.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is accurate and readable, and the single card tests one decision with its conditions and exception. The qard-id is intact, the Datacore block is untouched, and no violations are listed. No defect was found, so keeping it is justified.",
+            "change_checks": []
+          },
+          "model_calls": 7
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:48:51.373644Z",
+    "checkpoint_at": "2026-11-14T06:48:55.656090Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
