@@ -198,3 +198,17 @@ test("multi-MiB binary assets retain strict canonical base64 validation without 
     bundle.files["static/large.bin"] = canonical
   }
 })
+
+test("package enforces 256 MiB aggregate and 25 MiB file bounds before decoding payloads", (t) => {
+  const f = fixture(t)
+  const bundle = createPackage(f.root, identity)
+  for (let i = 0; i < 11; i++) {
+    const name = `static/large-${i}.bin`
+    bundle.files[name] = "AA=="
+    bundle.manifest.files[name] = { sha256: sha256(Buffer.from([0])), size: 25 * 1024 * 1024, mode: 420 }
+  }
+  assert.throws(() => verifyPackage(bundle, identity), /aggregate size bound/)
+  const single = createPackage(f.root, identity)
+  single.manifest.files["static/index.html"].size = 25 * 1024 * 1024 + 1
+  assert.throws(() => verifyPackage(single, identity), /file exceeds its size bound/)
+})

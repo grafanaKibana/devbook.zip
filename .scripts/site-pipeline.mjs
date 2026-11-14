@@ -5,7 +5,7 @@ import { execFileSync } from "node:child_process"
 import { fileURLToPath } from "node:url"
 
 const maximumFile = 25 * 1024 * 1024
-const maximumTotal = 150 * 1024 * 1024
+const maximumTotal = 256 * 1024 * 1024
 const targets = { preview: { branch: "stage", domain: "stage.devbook.zip" }, production: { branch: "main", domain: "devbook.zip" } }
 export const deploymentProject = Object.freeze({ org: "team_oe3ByhkyzxSLo4G4aibDvOMA", project: "prj_NwP2L88ODNMTDmHk0fWS5c1jtw2Y" })
 export const sha256 = (bytes) => crypto.createHash("sha256").update(bytes).digest("hex")
@@ -100,6 +100,13 @@ export function verifyPackage(bundle, identity) {
   JSON.parse(manifest.quartz_lock)
   const names = Object.keys(bundle.files).sort()
   if (!manifest.files || JSON.stringify(names) !== JSON.stringify(Object.keys(manifest.files).sort()) || names.length < 2 || names.length > 30000) throw new Error("Incomplete deployment inventory")
+  let declaredTotal = 0
+  for (const name of names) {
+    const size = manifest.files[name]?.size
+    if (!Number.isSafeInteger(size) || size < 0 || size > maximumFile) throw new Error("Deployment file exceeds its size bound")
+    declaredTotal += size
+    if (declaredTotal > maximumTotal) throw new Error("Deployment aggregate size bound exceeded")
+  }
   const seen = new Set()
   let total = 0
   for (const name of names) {
