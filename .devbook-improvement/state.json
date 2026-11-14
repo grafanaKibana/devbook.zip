@@ -14533,11 +14533,11 @@
     "version": 1,
     "id": "40a68853698f42388f6dd5882c679ad4",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-14T18:18:47.082551Z",
-    "elapsed_seconds": 398.35197739999984,
+    "elapsed_seconds": 414.2370238999998,
     "calls_reserved": 13,
-    "responses_received": 12,
+    "responses_received": 13,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
@@ -14932,7 +14932,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T18:25:25.433999Z",
+    "checkpoint_at": "2026-11-14T18:25:41.319045Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -43902,6 +43902,125 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T18:25:21.897007Z"
+    "prepared_at": "2026-11-14T18:25:21.897007Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "Independent full-note audit found no factual, structural or question-quality defects; keeping the note unchanged is justified.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains how to match metrics to relevance label shapes and how chunk-anchored synthetic questions distort labels. The mechanisms, conditions and caveats are accurate and well ordered, and nothing needs rewriting.",
+            "page_type": "Concept — frontmatter intact; Questions and References are optional and well formed; the code fence has a language identifier.",
+            "current_text_evidence": [
+              {
+                "quote": "A result containing only plan A has `HitRate@5 = 1`, but complementary recall is `1/2`",
+                "line_start": 37,
+                "reason": "The worked example is arithmetically correct and shows why label shape changes the verdict for a fixed retrieved list."
+              },
+              {
+                "quote": "Complementary cases need a cutoff at least as large as the required set.",
+                "line_start": 39,
+                "reason": "The cutoff condition is stated with its consequence, that recall is capped below 1.0."
+              },
+              {
+                "quote": "it cannot prove that the labels are exhaustive; unjudged chunks can still answer the query",
+                "line_start": 61,
+                "reason": "The limit of the second-pass judging is hedged accurately and avoids overclaiming."
+              },
+              {
+                "quote": "Generation prompts that require paraphrases and realistically incomplete wording",
+                "line_start": 62,
+                "reason": "Lexical leakage is paired with concrete mitigations."
+              },
+              {
+                "quote": "> [!qard]- Which retrieval metric fits a query with several relevant chunks?",
+                "line_start": 66,
+                "reason": "This is a direct question and one focused comparison, and the answer carries sources and a self-link anchor."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: label shape and synthetic-label distortion are two facets of one topic, retrieval ground-truth labeling, and the note stays compact.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
+          "citation_index": 4,
+          "reported_line_start": 66,
+          "resolved_line_start": 67
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md": "0d4a9d530586e3127e2b195f28a55d3d8ef23206f3ca4862ef0feb60e7ee626e"
+      },
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "Independent full-note audit found no factual, structural or question-quality defects; keeping the note unchanged is justified.",
+      "change_checks": [],
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md",
+          "verdict": "CLEAN",
+          "summary": "The note explains how to match metrics to relevance label shapes and how chunk-anchored synthetic questions distort labels. The mechanisms, conditions and caveats are accurate and well ordered, and nothing needs rewriting.",
+          "page_type": "Concept — frontmatter intact; Questions and References are optional and well formed; the code fence has a language identifier.",
+          "current_text_evidence": [
+            {
+              "quote": "A result containing only plan A has `HitRate@5 = 1`, but complementary recall is `1/2`",
+              "line_start": 37,
+              "reason": "The worked example is arithmetically correct and shows why label shape changes the verdict for a fixed retrieved list."
+            },
+            {
+              "quote": "Complementary cases need a cutoff at least as large as the required set.",
+              "line_start": 39,
+              "reason": "The cutoff condition is stated with its consequence, that recall is capped below 1.0."
+            },
+            {
+              "quote": "it cannot prove that the labels are exhaustive; unjudged chunks can still answer the query",
+              "line_start": 61,
+              "reason": "The limit of the second-pass judging is hedged accurately and avoids overclaiming."
+            },
+            {
+              "quote": "Generation prompts that require paraphrases and realistically incomplete wording",
+              "line_start": 62,
+              "reason": "Lexical leakage is paired with concrete mitigations."
+            },
+            {
+              "quote": "> [!qard]- Which retrieval metric fits a query with several relevant chunks?",
+              "line_start": 67,
+              "reason": "This is a direct question and one focused comparison, and the answer carries sources and a self-link anchor."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: label shape and synthetic-label distortion are two facets of one topic, retrieval ground-truth labeling, and the note stays compact.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ]
+    }
   }
 }
