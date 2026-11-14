@@ -14750,10 +14750,10 @@
     "version": 1,
     "id": "5fe9ecfcc7344982bcd2cdfba7482c21",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "review_reserved",
     "started_at": "2026-11-14T22:36:29.240304Z",
-    "elapsed_seconds": 80.89516850000003,
-    "calls_reserved": 2,
+    "elapsed_seconds": 86.06153440000001,
+    "calls_reserved": 3,
     "responses_received": 2,
     "attempted_paths": [
       "Vault/Home/Cloud/Providers.md"
@@ -14773,7 +14773,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T22:37:50.135110Z",
+    "checkpoint_at": "2026-11-14T22:37:55.301480Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
@@ -14798,7 +14798,7 @@
       "pr": null
     },
     "base_sha": "4c28a0295ce7c4697ea2adcea1e919f008c6b755",
-    "reservation_deadline": "2026-11-14T22:52:41.454135Z"
+    "reservation_deadline": "2026-11-14T22:52:55.032324Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
