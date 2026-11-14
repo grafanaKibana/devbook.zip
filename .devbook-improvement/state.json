@@ -17975,14 +17975,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-14T18:18:47.082551Z",
-    "elapsed_seconds": 0.0011607,
+    "elapsed_seconds": 3.6612220000000004,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T18:18:47.083304Z"
+    "checkpoint_at": "2026-11-14T18:18:50.743239Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
