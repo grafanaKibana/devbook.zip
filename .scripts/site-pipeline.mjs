@@ -109,8 +109,9 @@ export function verifyPackage(bundle, identity) {
     seen.add(folded)
     const value = bundle.files[name]
     const entry = manifest.files[name]
-    if (typeof value !== "string" || value.length > 4 * Math.ceil(maximumFile / 3) || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)) throw new Error("Invalid deployment output encoding")
+    if (typeof value !== "string" || value.length > 4 * Math.ceil(maximumFile / 3)) throw new Error("Invalid deployment output encoding")
     const bytes = Buffer.from(value, "base64")
+    if (bytes.toString("base64") !== value) throw new Error("Invalid deployment output encoding")
     total += bytes.length
     if (bytes.length > maximumFile || total > maximumTotal || entry.size !== bytes.length || entry.sha256 !== sha256(bytes) || ![0o644, 0o755].includes(entry.mode)) throw new Error("Deployment output digest, size or mode mismatch")
   }

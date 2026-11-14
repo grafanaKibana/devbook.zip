@@ -183,3 +183,18 @@ test("a protected login page or wrong immutable source never changes the alias",
   await assert.rejects(publishDeployment({ ...identity, project: deploymentProject.project, org: deploymentProject.org, deployment: "dpl_one", token: "secret", githubToken: "read", fetch }), /build identity/)
   assert.deepEqual(mutations, [])
 })
+
+test("multi-MiB binary assets retain strict canonical base64 validation without regex stack exhaustion", (t) => {
+  const f = fixture(t)
+  const bytes = Buffer.alloc(8 * 1024 * 1024, 0xff)
+  f.write(".vercel/output/static/large.bin", bytes)
+  const bundle = createPackage(f.root, identity)
+  verifyPackage(bundle, identity)
+  assert.deepEqual(Buffer.from(bundle.files["static/large.bin"], "base64"), bytes)
+  for (const invalid of [bundle.files["static/large.bin"] + "\n", "!!!!", "AB==", "YQ", "YQ==="]) {
+    const canonical = bundle.files["static/large.bin"]
+    bundle.files["static/large.bin"] = invalid
+    assert.throws(() => verifyPackage(bundle, identity), /encoding/)
+    bundle.files["static/large.bin"] = canonical
+  }
+})
