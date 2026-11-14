@@ -17716,11 +17716,11 @@
     "version": 1,
     "id": "1036754a634142d7a6f283117a763aa4",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 329.8911051,
+    "elapsed_seconds": 347.9604734,
     "calls_reserved": 9,
-    "responses_received": 8,
+    "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Embeddings.md",
       "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
@@ -17947,7 +17947,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:49:42.516377Z",
+    "checkpoint_at": "2026-11-14T06:50:00.585745Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -45014,6 +45014,137 @@
       "Vault/Home/AI & ML/LLM/Agents/Agents.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T06:49:38.812853Z"
+    "prepared_at": "2026-11-14T06:49:38.812853Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+            "verdict": "CLEAN",
+            "summary": "The complete note is accurate and coherent. It separates workflows from agents, orders its explanation sensibly, and keeps the memory design explicitly labelled as an architectural choice. Each Qard tests one task, and the unchanged keep is justified.",
+            "page_type": "FolderNote — hub with a protected datacorejsx folder map, an optional Questions section and an optional References section. Qard callouts and their IDs are protected.",
+            "current_text_evidence": [
+              {
+                "quote": "**Workflows** are systems where LLMs and tools are orchestrated through predefined code paths.",
+                "line_start": 20,
+                "reason": "The workflow/agent definition matches Anthropic's 'Building Effective Agents' and sets up the rest of the note."
+              },
+              {
+                "quote": "Workflow orchestration belongs next, once a single call falls short.",
+                "line_start": 23,
+                "reason": "The simplest-design-first escalation order is stated with its condition."
+              },
+              {
+                "quote": "This is an architectural choice, not a universal standard.",
+                "line_start": 75,
+                "reason": "The memory taxonomy is honestly scoped, so it does not overclaim."
+              },
+              {
+                "quote": "Authorization scope must be checked before ranking. Relevance metadata cannot enforce access.",
+                "line_start": 85,
+                "reason": "This states a concrete mechanism and a security limit."
+              },
+              {
+                "quote": "> [!qard]- Which controls contain error propagation during an autonomous agent run?",
+                "line_start": 107,
+                "reason": "This card is a separate gradeable task from the compounding-mechanism card. It correctly stays ID-less and ends with a bounded caveat."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the topics (augmented LLM, workflow patterns, autonomous agents, memory) are short and share one decision frame. Workflow Patterns already has its own note.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "I read the whole note and found no concrete defect. Facts match the primary source, the explanation order works, and there is no repetition or voice problem. The cards are single-task and direct, and references are valid. There are no edits, so the keep is justified.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+          "citation_index": 2,
+          "reported_line_start": 75,
+          "resolved_line_start": 74
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+          "citation_index": 3,
+          "reported_line_start": 85,
+          "resolved_line_start": 84
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+          "citation_index": 4,
+          "reported_line_start": 107,
+          "resolved_line_start": 111
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Agents/Agents.md": "0e0c2a136f776886c4fb878a8565eafff5de014f12db72151b6a2f5f973501ad"
+      },
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+          "verdict": "CLEAN",
+          "summary": "The complete note is accurate and coherent. It separates workflows from agents, orders its explanation sensibly, and keeps the memory design explicitly labelled as an architectural choice. Each Qard tests one task, and the unchanged keep is justified.",
+          "page_type": "FolderNote — hub with a protected datacorejsx folder map, an optional Questions section and an optional References section. Qard callouts and their IDs are protected.",
+          "current_text_evidence": [
+            {
+              "quote": "**Workflows** are systems where LLMs and tools are orchestrated through predefined code paths.",
+              "line_start": 20,
+              "reason": "The workflow/agent definition matches Anthropic's 'Building Effective Agents' and sets up the rest of the note."
+            },
+            {
+              "quote": "Workflow orchestration belongs next, once a single call falls short.",
+              "line_start": 23,
+              "reason": "The simplest-design-first escalation order is stated with its condition."
+            },
+            {
+              "quote": "This is an architectural choice, not a universal standard.",
+              "line_start": 74,
+              "reason": "The memory taxonomy is honestly scoped, so it does not overclaim."
+            },
+            {
+              "quote": "Authorization scope must be checked before ranking. Relevance metadata cannot enforce access.",
+              "line_start": 84,
+              "reason": "This states a concrete mechanism and a security limit."
+            },
+            {
+              "quote": "> [!qard]- Which controls contain error propagation during an autonomous agent run?",
+              "line_start": 111,
+              "reason": "This card is a separate gradeable task from the compounding-mechanism card. It correctly stays ID-less and ends with a bounded caveat."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the topics (augmented LLM, workflow patterns, autonomous agents, memory) are short and share one decision frame. Workflow Patterns already has its own note.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "I read the whole note and found no concrete defect. Facts match the primary source, the explanation order works, and there is no repetition or voice problem. The cards are single-task and direct, and references are valid. There are no edits, so the keep is justified.",
+      "change_checks": []
+    }
   }
 }
