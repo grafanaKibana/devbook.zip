@@ -17615,16 +17615,88 @@
     "version": 1,
     "id": "1036754a634142d7a6f283117a763aa4",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 76.4863567,
+    "elapsed_seconds": 80.2343713,
     "calls_reserved": 2,
     "responses_received": 2,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/AI & ML/LLM/Embeddings.md"
+    ],
     "accepted_records": [],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+                "outcome": "keep",
+                "reason": "I read the whole note and found no verified defect. The opening gives the operating idea, and the Mermaid query-to-ANN flow matches the prose. Model families, dimensions and the MRL claims are internally consistent. The OpenAI `dimensions` parameter and the 256-dimension `text-embedding-3-large` versus `ada-002` MTEB result match OpenAI's published guidance as I recall it. I did not re-fetch them or the Databricks FinanceBench recall figures. The note scopes both claims correctly: they motivate testing, and corpus-specific Recall@k decides. The metric section handles the normalization conditions correctly: dot product equals cosine, and squared L2 equals 2 − 2·cosine, only for normalized vectors. The re-embedding cost arithmetic checks out: 10M chunks × 500 tokens is 5B tokens, which at $0.02/1M is $100. The pitfalls, the tradeoff table and the closing guidance (simplest baseline first, then fine-tune only after failure analysis) each add a distinct decision and do not repeat each other. The four cards each test one separable task: retrieval mechanism, MRL storage, validating a shorter dimension, and model-swap mismatch. The answers state conditions and cite sources. The ID-less dimension-validation card is permitted as an ID-less card, and the note has no native violations. Rewording would be cosmetic churn."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole note and found no concrete defect. The mechanism, conditions and numbers hold together, and the four cards each test one task. Rewording would be cosmetic churn.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, Mermaid fence has a language identifier, no standalone Links section.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Matryoshka Representation Learning (MRL) trains models so that prefixes of the full vector remain independently meaningful.",
+                    "line_start": 53,
+                    "reason": "The MRL claim comes with the condition that corpus-specific Recall@k decides the tradeoff, so it is not overstated."
+                  },
+                  {
+                    "quote": "For length-normalized vectors, squared L2 distance equals 2 − 2 × cosine similarity",
+                    "line_start": 65,
+                    "reason": "The identity is correct and is limited to normalized vectors. The unnormalized exception is stated in the next sentence."
+                  },
+                  {
+                    "quote": "for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100",
+                    "line_start": 83,
+                    "reason": "10M × 500 = 5B tokens, and at $0.02 per 1M tokens that is $100. The arithmetic is correct."
+                  },
+                  {
+                    "quote": "MTEB aggregates several task families.",
+                    "line_start": 87,
+                    "reason": "This pitfall gives a distinct, actionable rule: select on the Retrieval category, then test on a corpus-specific set."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one coherent topic. Model selection, dimensionality, metrics and pitfalls all serve the same embedding choice, and none would be independently useful as its own note.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note has no concrete native violations or factual defects. Cards 1, 2 and 4 keep their IDs. Card 3 is an ID-less card, which is allowed. The keep disposition is justified.",
+            "change_checks": []
+          },
+          "model_calls": 2
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:45:29.111628Z",
+    "checkpoint_at": "2026-11-14T06:45:32.859652Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
