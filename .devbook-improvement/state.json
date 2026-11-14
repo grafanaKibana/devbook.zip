@@ -17560,16 +17560,16 @@
     "version": 1,
     "id": "1036754a634142d7a6f283117a763aa4",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 56.550773899999996,
+    "elapsed_seconds": 73.604095,
     "calls_reserved": 2,
-    "responses_received": 1,
+    "responses_received": 2,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:45:09.176046Z",
+    "checkpoint_at": "2026-11-14T06:45:26.229366Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -44495,6 +44495,53 @@
       "Vault/Home/AI & ML/LLM/Embeddings.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T06:45:05.909434Z"
+    "prepared_at": "2026-11-14T06:45:05.909434Z",
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Embeddings.md",
+          "verdict": "CLEAN",
+          "summary": "I read the whole note and found no concrete defect. The mechanism, conditions and numbers hold together, and the four cards each test one task. Rewording would be cosmetic churn.",
+          "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, Mermaid fence has a language identifier, no standalone Links section.",
+          "current_text_evidence": [
+            {
+              "quote": "Matryoshka Representation Learning (MRL) trains models so that prefixes of the full vector remain independently meaningful.",
+              "line_start": 53,
+              "reason": "The MRL claim comes with the condition that corpus-specific Recall@k decides the tradeoff, so it is not overstated."
+            },
+            {
+              "quote": "For length-normalized vectors, squared L2 distance equals 2 − 2 × cosine similarity",
+              "line_start": 65,
+              "reason": "The identity is correct and is limited to normalized vectors. The unnormalized exception is stated in the next sentence."
+            },
+            {
+              "quote": "for a 10M-chunk index at $0.02/1M tokens and 500 tokens/chunk average, that is ~$100",
+              "line_start": 83,
+              "reason": "10M × 500 = 5B tokens, and at $0.02 per 1M tokens that is $100. The arithmetic is correct."
+            },
+            {
+              "quote": "MTEB aggregates several task families.",
+              "line_start": 87,
+              "reason": "This pitfall gives a distinct, actionable rule: select on the Retrieval category, then test on a corpus-specific set."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note covers one coherent topic. Model selection, dimensionality, metrics and pitfalls all serve the same embedding choice, and none would be independently useful as its own note.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The note has no concrete native violations or factual defects. Cards 1, 2 and 4 keep their IDs. Card 3 is an ID-less card, which is allowed. The keep disposition is justified.",
+      "change_checks": []
+    }
   }
 }
