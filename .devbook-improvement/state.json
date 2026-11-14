@@ -14480,11 +14480,11 @@
     "version": 1,
     "id": "40a68853698f42388f6dd5882c679ad4",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-14T18:18:47.082551Z",
-    "elapsed_seconds": 335.95465639999986,
+    "elapsed_seconds": 343.20457779999987,
     "calls_reserved": 10,
-    "responses_received": 9,
+    "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
@@ -14805,7 +14805,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T18:24:23.036677Z",
+    "checkpoint_at": "2026-11-14T18:24:30.286597Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -43637,5 +43637,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "40a68853698f42388f6dd5882c679ad4",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
+          "content": "---\ntitle: RAG Evaluation\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Decomposes into retrieval, generation, and end-to-end layers so regressions isolate to one layer.\"\nlevel: [\"2\"]\npriority: High\ntags: [FolderNote]\npublish: true\nstatus: In Progress\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Context Engineering/RAG/Evaluation/Evaluation\"\nflashcard_uid: \"4c492fb9\"\ncreated: \"2026-06-12T18:21:46.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-11T21:45:16.245Z\"\n---\n\nRAG can fail before generation starts. It can also retrieve the right evidence and still produce a bad answer. Evaluation therefore separates retrieval from generation, then checks the finished system against the user's task. One blended quality score cannot show which part needs repair.\n\nRetrieval metrics ask whether relevant chunks reached the model and whether they were ranked well. Generation metrics check that the answer uses those chunks faithfully. End-to-end evaluation looks at the actual outcome. The distinction matters because prompt changes cannot recover a document that retrieval never found, while another embedding model will not fix a generator that ignores clear evidence already in context.\n\n```mermaid\nflowchart LR\n    Q[Query + Ground Truth] --> RM[Retrieval Metrics]\n    Q --> GM[Generation Metrics]\n    Q --> EM[End-to-End Metrics]\n    RM --> D1[Did the right chunks arrive]\n    GM --> D2[Is the answer faithful and correct]\n    EM --> D3[Did the user task get solved]\n```\n\nA support bot may retrieve the correct policy and still misread its date constraint. Retrieval passes. Generation fails. Without separate scores, that defect looks like a search problem and sends work toward the wrong component.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Questions\n\n<!-- qard-id: 03a585b9-616f-472a-a294-ac7bac300cb4 -->\n> [!qard]- What do retrieval, response, and end-to-end evaluations each show about a RAG system?\n> Each evaluation answers a different question, so separate results show where a RAG system failed rather than only that it failed.\n>\n> | Evaluation | Question it answers | A failure points toward | What it cannot show |\n> |---|---|---|---|\n> | Retrieval | Was relevant evidence found, ranked well and selected for the context? | Indexing, chunking, query handling, search or ranking | Whether the answer then used good evidence correctly |\n> | Response | Given the supplied evidence, is the answer grounded in it, relevant to the question and, when a reference exists, correct? | The prompt or the generator's use of the evidence | Whether better evidence existed and was missed |\n> | End-to-end | Did the complete system meet the task's outcome criteria? | A user-visible miss somewhere in the pipeline | Which stage caused the miss |\n>\n> Combined, the results localize a likely cause. A grounded answer built on poor or incomplete context points upstream to retrieval. Good context paired with a wrong answer points to generation.\n>\n> Example: a support bot retrieves the correct policy but misreads its date constraint. Retrieval passes and the response check fails, so more search tuning cannot fix that answer.\n>\n> Sources:\n> - [RAG evaluators (Microsoft Foundry)](https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators?view=foundry)\n\n<!-- qard-id: c73e80bf-ab77-4bfc-b246-be9e3d11ce10 -->\n> [!qard]- Which evaluation concerns are specific to RAG, and which can reuse general LLM evaluation methods?\n> RAG adds retrieval to evaluation: whether relevant evidence was found, ranked well and supplied in sufficient quantity. Retrieval metrics that score against labeled relevance judgments need relevance labels that other LLM tasks do not. Reference-free retrieval evaluation does not use such labels. Answer-quality checks and the evaluation methods themselves are largely reusable.\n>\n> | Aspect | Specific to RAG | Reusable from general LLM evaluation |\n> |---|---|---|\n> | What is measured | Retrieval relevance, ranking quality and whether the context covers the evidence an answer needs | Correctness, relevance to the question, safety and format. Groundedness also applies to any answer constrained by supplied text, such as a summary of a given document. |\n> | Ground truth | For label-based retrieval metrics, relevance labels per query, which must allow several acceptable chunks or require a set of complementary ones | Reference answers and rubrics, built as for any task |\n> | Methods | Ranked-retrieval metrics, such as Recall@k or nDCG, over those labels | Golden datasets, deterministic checks, LLM judges, human review and online evaluation of production traces |\n>\n> Any evaluator must match the claim being measured. Its limits need checking, as do any labels it uses. A judge reused from another task is not automatically valid for a new one.\n>\n> Sources:\n> - [Built-in evaluators (Microsoft Foundry)](https://learn.microsoft.com/en-us/azure/foundry/concepts/built-in-evaluators)\n> - [RAGAS: Automated Evaluation of Retrieval Augmented Generation (EACL 2024)](https://aclanthology.org/2024.eacl-demo.16.pdf)\n> - [Evaluation types (LangSmith)](https://docs.langchain.com/langsmith/evaluation-types)\n\n# References\n\n- [RAGAS metrics reference](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/)\n- [RAG evaluators in Azure AI Foundry](https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/evaluation-evaluators/rag-evaluators)\n",
+          "hash": "8fa3ff112bdd284261af8377a3c562231de38505d31e993311e7a7cae675c000",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "changed"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note. The intro separates retrieval, generation and end-to-end evaluation, explains why each failure needs a different fix, and the support-bot example is consistent with the mermaid diagram and the first card. The first card's table covers each layer's question, failure signal and limit. The second card separates RAG-specific concerns from reusable LLM evaluation methods and correctly notes that label-free retrieval evaluation exists. Both cards test one gradeable task, are phrased directly and cite Foundry, RAGAS and LangSmith docs. The claims match those evaluator docs as I know them. Frontmatter, the Datacore block, the code fence language and the References bullets are valid, and there are no known violations. No defect found, so no edit is warranted."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md": "8fa3ff112bdd284261af8377a3c562231de38505d31e993311e7a7cae675c000"
+    },
+    "feedback_keys": [],
+    "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-14T18:24:30.286588Z"
+  }
 }
