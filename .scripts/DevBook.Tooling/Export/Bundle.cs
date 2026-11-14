@@ -11,7 +11,7 @@ namespace DevBook.Tooling.Export;
 public static class Bundle
 {
     public const int MaxFileBytes = 10 * 1024 * 1024;
-    public const int MaxTotalBytes = 50 * 1024 * 1024;
+    public const int MaxTotalBytes = 128 * 1024 * 1024;
 
     public static string ExactHead(string value) => Regex.IsMatch(value, "^[0-9a-f]{40}$", RegexOptions.CultureInvariant)
         ? value : throw new UnsafeInput("Export requires an exact GitHub commit SHA.");

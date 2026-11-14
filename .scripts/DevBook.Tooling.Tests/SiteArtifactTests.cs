@@ -1,5 +1,6 @@
 using DevBook.Tooling.Export;
 using DevBook.Tooling.Infrastructure;
+using DevBook.Tooling.Vault;
 using FluentAssertions;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -281,6 +282,95 @@ public sealed class SiteArtifactTests
             Directory.CreateDirectory(Path.GetDirectoryName(target)!);
             File.WriteAllText(target, text);
         }
+    }
+
+    [Fact]
+    public void ReadOnlyGitChecksPreserveIndexBytesAfterBackdatingAndSettingsSwap()
+    {
+        using var fixture = new ArtifactFixture();
+        string index = Path.Combine(fixture.Root, ".git/index");
+        byte[] originalIndex = File.ReadAllBytes(index);
+        foreach (string relative in Git.Paths(fixture.Root, "ls-files", "-z"))
+            File.SetLastWriteTimeUtc(Path.Combine(fixture.Root, relative), DateTime.UtcNow.AddDays(-30));
+        string settings = Path.Combine(fixture.Root, "Vault/.obsidian");
+        string backup = Path.Combine(fixture.Root, "original-settings");
+        Directory.Move(settings, backup);
+        Directory.CreateDirectory(settings);
+        File.WriteAllText(Path.Combine(settings, "runtime.json"), "{}");
+        Directory.Delete(settings, true);
+        Directory.Move(backup, settings);
+
+        var context = new SyncerContext(fixture.Root);
+        _ = context.GitText("status", "--porcelain", "--untracked-files=all");
+        _ = Git.Text(fixture.Root, "status", "--porcelain", "--untracked-files=all");
+        Syncer.GuardSource(context);
+        NoteDates.RequirePublications(fixture.Root);
+        Git.Text(fixture.Root, "diff", "--name-only", "--", "Vault/.obsidian").Should().BeEmpty();
+
+        File.ReadAllBytes(index).Should().Equal(originalIndex);
+    }
+
+    [Fact]
+    public void DisablingOptionalLocksDoesNotPreventExplicitPrivateIndexWrites()
+    {
+        using var fixture = new ArtifactFixture();
+        string index = Path.Combine(fixture.Root, ".git/index");
+        byte[] originalIndex = File.ReadAllBytes(index);
+        string privateIndex = Path.Combine(fixture.Root, "private-index");
+        File.Copy(index, privateIndex);
+        File.AppendAllText(Path.Combine(fixture.Root, "Vault/Home/Card.md"), "Private snapshot update.\n");
+        var context = new SyncerContext(fixture.Root, gitEnvironment: new Dictionary<string, string>
+        {
+            ["PATH"] = Environment.GetEnvironmentVariable("PATH") ?? "/usr/bin:/bin",
+            ["GIT_INDEX_FILE"] = privateIndex
+        });
+
+        context.GitBytes("add", "--", "Vault/Home/Card.md");
+
+        context.GitText("diff", "--cached", "--name-only").Should().Be("Vault/Home/Card.md");
+        File.ReadAllBytes(index).Should().Equal(originalIndex);
+        File.ReadAllBytes(privateIndex).Should().NotEqual(originalIndex);
+    }
+
+    [Fact]
+    public async Task MalformedNativeJsonReportsSafeProbeFingerprintWithoutResponseContent()
+    {
+        using var fixture = new ArtifactFixture();
+        const string privateText = "PRIVATE_NOTE_SHOULD_NOT_APPEAR";
+        string payload = "{\"content\":\"" + privateText + "\"";
+        var context = new SyncerContext(fixture.Root, (_, _) => Task.FromResult("=> " + payload));
+        Func<Task> probe = () => Syncer.CliAsync(context, ["eval", "code=private-script"], probeLabel: "compiled-media-cleanup");
+
+        SyncException error = (await probe.Should().ThrowAsync<SyncException>()).Which;
+
+        error.Message.Should().Contain("compiled-media-cleanup: malformed JSON")
+            .And.Contain("bytes=" + Encoding.UTF8.GetByteCount(payload))
+            .And.Contain("sha256=" + SiteArtifact.Digest(Encoding.UTF8.GetBytes(payload)))
+            .And.Contain("type=Json").And.Contain("line=0").And.Contain("byte=")
+            .And.NotContain(privateText).And.NotContain("private-script");
+        error.InnerException.Should().BeNull();
+    }
+
+    [Fact]
+    public void CompletePublishedSiteFitsAggregateBoundWhileLargerPayloadStillFails()
+    {
+        const int publishedSiteBytes = 97_953_161;
+        byte[] largestPublishedFile = new byte[7_234_404];
+        var files = new Dictionary<string, byte[]>
+        {
+            ["Web/content/Card.md"] = [],
+            ["Web/quartz/styles/syncer/_index.scss"] = []
+        };
+        for (var index = 0; index < 13; index++) files[$"Web/content/Assets/{index}.png"] = largestPublishedFile;
+        files["Web/content/Assets/remainder.png"] = new byte[publishedSiteBytes - 13 * largestPublishedFile.Length];
+
+        Action acceptExistingSite = () => SiteArtifact.ValidateFiles(files);
+
+        files.Values.Sum(bytes => bytes.Length).Should().Be(publishedSiteBytes);
+        acceptExistingSite.Should().NotThrow();
+        for (var index = 13; index < 19; index++) files[$"Web/content/Assets/{index}.png"] = largestPublishedFile;
+        Action rejectOverflow = () => SiteArtifact.ValidateFiles(files);
+        rejectOverflow.Should().Throw<InvalidOperationException>().WithMessage("*total size bound*total_bytes_limit=134217728*");
     }
 
     private sealed class ArtifactFixture : IDisposable

@@ -42,6 +42,7 @@ public static class SiteArtifact
         var files = new Dictionary<string, byte[]>(StringComparer.Ordinal);
         var physical = new Dictionary<string, string>(StringComparer.Ordinal);
         long total = 0;
+        long largest = 0;
         foreach (string output in Syncer.Outputs)
         {
             Syncer.EnsureRegularPath(root, output);
@@ -74,8 +75,11 @@ public static class SiteArtifact
                 {
                     var info = new FileInfo(path);
                     total += info.Length;
+                    largest = Math.Max(largest, info.Length);
                     if (info.Length > Bundle.MaxFileBytes || physical.Count >= 2000 || total > Bundle.MaxTotalBytes)
-                        throw new UnsafeInput("Generated artifact exceeds its file count or size bound.");
+                        throw new UnsafeInput($"Generated artifact exceeds its file count or size bound; files={physical.Count + 1}; "
+                            + $"total_bytes={total}; max_file_bytes={largest}; file_count_limit=2000; "
+                            + $"file_bytes_limit={Bundle.MaxFileBytes}; total_bytes_limit={Bundle.MaxTotalBytes}.");
                     if (!OperatingSystem.IsWindows() && (File.GetUnixFileMode(path) & (UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute)) != 0)
                         throw new UnsafeInput("Generated artifact contains an executable file.");
                     physical.Add(relative, path);
@@ -165,7 +169,8 @@ public static class SiteArtifact
             if (!IsOutput(path) || !paths.Add(path.Normalize()) || data.Length > Bundle.MaxFileBytes)
                 throw new UnsafeInput("Artifact contains unsafe, duplicate or oversized generated paths.");
             total += data.Length;
-            if (total > Bundle.MaxTotalBytes) throw new UnsafeInput("Artifact exceeds its total size bound.");
+            if (total > Bundle.MaxTotalBytes) throw new UnsafeInput($"Artifact exceeds its total size bound; files={files.Count}; "
+                + $"observed_bytes={total}; total_bytes_limit={Bundle.MaxTotalBytes}.");
         }
         foreach (string path in files.Keys)
         {

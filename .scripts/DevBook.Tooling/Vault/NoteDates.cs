@@ -278,7 +278,7 @@ public static class NoteDates
         return WithDates(candidate, dates);
     }
 
-    private static ProcessResult RunGit(string root, params string[] args) => new SystemProcessRunner()
+    private static ProcessResult RunGit(string root, params string[] args) => Git
         .RunAsync(new ProcessRequest("git", ["--literal-pathspecs", .. args], root)).GetAwaiter().GetResult();
 
     private static byte[] GitBytes(string root, params string[] args) => RunGit(root, args).EnsureSuccess("Git date operation").Output;

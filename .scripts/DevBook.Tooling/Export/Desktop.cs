@@ -40,6 +40,7 @@ public static class Desktop
         ["HOME"] = profile,
         ["TMPDIR"] = Path.Combine(profile, "tmp"),
         ["LANG"] = "en_US.UTF-8",
+        ["GIT_OPTIONAL_LOCKS"] = "0",
         ["HTTP_PROXY"] = "http://127.0.0.1:9",
         ["HTTPS_PROXY"] = "http://127.0.0.1:9",
         ["ALL_PROXY"] = "http://127.0.0.1:9",
