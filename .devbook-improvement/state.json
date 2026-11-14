@@ -3569,51 +3569,51 @@
       }
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md": {
-      "content_hash": "0b8738b6976efeb95c5426f504ba38ca5c71027bac62613cc13fbe117cf91df1",
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "content_hash": "21a2d5bc455f3329af1210afea5b4c4ca36e327a75b57c7fd94c1d9298d69132",
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
       "outcome": "keep",
       "repair_input_hash": "",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_process": "focused-whole-note-v1",
       "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "keep_review": {
-        "content_hash": "0b8738b6976efeb95c5426f504ba38ca5c71027bac62613cc13fbe117cf91df1",
-        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "content_hash": "21a2d5bc455f3329af1210afea5b4c4ca36e327a75b57c7fd94c1d9298d69132",
+        "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
         "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
         "review": {
           "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
           "verdict": "CLEAN",
-          "summary": "The note explains layered RAG caches, their keys and invalidation, and the authorization scoping. The mechanisms, conditions and failure modes are accurate and consistent across the prose, diagrams and cards. No edit is needed.",
-          "page_type": "Concept — frontmatter intact, Questions and References optional but present and valid; no fenced code without language (both mermaid).",
+          "summary": "The note states the operating idea (keys must capture every result-affecting input, including authorization). Each layer section gives its key, value, work skipped and failure mode. The diagrams agree with the text. The three cards each test one gradeable task. The repetition in Pitfalls is a compact recall list and does not need an edit.",
+          "page_type": "Concept: optional Questions and References sections are present and valid. Frontmatter is typed. Code fences carry language identifiers (mermaid). Card IDs are protected.",
           "current_text_evidence": [
             {
               "quote": "Caches remove that work only when their keys capture every input that affects the result.",
               "line_start": 17,
-              "reason": "Opening states the operating idea quickly and sets the key-completeness condition used by the whole note."
+              "reason": "The opening states the operating idea and the key boundary quickly."
             },
             {
-              "quote": "This is a data breach, not a staleness bug.",
-              "line_start": 114,
-              "reason": "Cross-tenant leakage is distinguished from staleness, which is the key engineering boundary."
+              "quote": "Permission scope belongs in every key whose value depends on protected content.",
+              "line_start": 21,
+              "reason": "It states the authorization boundary that changes the engineering decision."
             },
             {
               "quote": "The diagrams place the response lookup after retrieval and context assembly so the key can include the actual evidence.",
               "line_start": 122,
-              "reason": "Explains the design choice and the condition under which an earlier lookup would need extra versioning and permission checks."
-            },
-            {
-              "quote": "A response TTL limits staleness, while source and permission changes that invalidate an answer require invalidation before that TTL expires.",
-              "line_start": 124,
-              "reason": "Gives the TTL limit with its exception. The pitfall bullet repeats it briefly, which is reinforcing rather than padding."
+              "reason": "It explains the design choice and its tradeoff, which keeps the diagrams consistent with the prose."
             },
             {
               "quote": "For protected content, a complete key is necessary but not sufficient.",
               "line_start": 147,
-              "reason": "The retrieval-key card adds the current-access recheck beyond the key, consistent with the Pitfalls section; each card tests one focused task."
+              "reason": "The card answer adds the caveat that reads must recheck current access, so it is more than a paraphrase of the prose."
+            },
+            {
+              "quote": "Which pipeline work does each RAG cache layer avoid?",
+              "line_start": 155,
+              "reason": "This is one focused comparison with a bounded answer."
             }
           ],
           "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: embedding, retrieval and response caches are one coherent layered-design topic, and the response-cache detail is already delegated to LLM Caching.",
+          "split_suggestion": "No split: embedding, retrieval and response caches are one layered design that shares key and authorization reasoning. LLM response matching is already delegated to the LLM Caching note.",
           "findings": [],
           "source_checks": [],
           "rejection_equivalence": [],
@@ -3626,6 +3626,59 @@
           }
         },
         "review_process": "focused-whole-note-v1"
+      },
+      "keep_review_history": {
+        "3096f48aeb36ca98310b9208be6ca9be90c41f17ca394bd09beeb17ab5f38376": {
+          "content_hash": "0b8738b6976efeb95c5426f504ba38ca5c71027bac62613cc13fbe117cf91df1",
+          "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+          "review": {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains layered RAG caches, their keys and invalidation, and the authorization scoping. The mechanisms, conditions and failure modes are accurate and consistent across the prose, diagrams and cards. No edit is needed.",
+            "page_type": "Concept — frontmatter intact, Questions and References optional but present and valid; no fenced code without language (both mermaid).",
+            "current_text_evidence": [
+              {
+                "quote": "Caches remove that work only when their keys capture every input that affects the result.",
+                "line_start": 17,
+                "reason": "Opening states the operating idea quickly and sets the key-completeness condition used by the whole note."
+              },
+              {
+                "quote": "This is a data breach, not a staleness bug.",
+                "line_start": 114,
+                "reason": "Cross-tenant leakage is distinguished from staleness, which is the key engineering boundary."
+              },
+              {
+                "quote": "The diagrams place the response lookup after retrieval and context assembly so the key can include the actual evidence.",
+                "line_start": 122,
+                "reason": "Explains the design choice and the condition under which an earlier lookup would need extra versioning and permission checks."
+              },
+              {
+                "quote": "A response TTL limits staleness, while source and permission changes that invalidate an answer require invalidation before that TTL expires.",
+                "line_start": 124,
+                "reason": "Gives the TTL limit with its exception. The pitfall bullet repeats it briefly, which is reinforcing rather than padding."
+              },
+              {
+                "quote": "For protected content, a complete key is necessary but not sufficient.",
+                "line_start": 147,
+                "reason": "The retrieval-key card adds the current-access recheck beyond the key, consistent with the Pitfalls section; each card tests one focused task."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: embedding, retrieval and response caches are one coherent layered-design topic, and the response-cache detail is already delegated to LLM Caching.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          },
+          "review_process": "focused-whole-note-v1"
+        }
       }
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md": {
@@ -14699,7 +14752,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-14T18:18:47.082551Z",
-    "elapsed_seconds": 598.3879087999999,
+    "elapsed_seconds": 601.3496367999999,
     "calls_reserved": 19,
     "responses_received": 19,
     "attempted_paths": [
@@ -15324,7 +15377,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T18:28:45.469933Z",
+    "checkpoint_at": "2026-11-14T18:28:48.431661Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -23555,6 +23608,85 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md": "8a82a85200f501865e19f8fdf7a73b663abccdf67edae0eccd2187b973924db7"
+      },
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "c0b8d5dde706e73d465c89d8365ccc6383c8e308fdbc4829fce4da6acfa04c1b": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The note is accurate and coherent, and I found no concrete defect. I checked the claims against general cache-aside and RAG practice and the cards against the one-task rule. No edits were proposed, so no change checks apply.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+            "verdict": "CLEAN",
+            "summary": "The note states the operating idea (keys must capture every result-affecting input, including authorization). Each layer section gives its key, value, work skipped and failure mode. The diagrams agree with the text. The three cards each test one gradeable task. The repetition in Pitfalls is a compact recall list and does not need an edit.",
+            "page_type": "Concept: optional Questions and References sections are present and valid. Frontmatter is typed. Code fences carry language identifiers (mermaid). Card IDs are protected.",
+            "current_text_evidence": [
+              {
+                "quote": "Caches remove that work only when their keys capture every input that affects the result.",
+                "line_start": 17,
+                "reason": "The opening states the operating idea and the key boundary quickly."
+              },
+              {
+                "quote": "Permission scope belongs in every key whose value depends on protected content.",
+                "line_start": 21,
+                "reason": "It states the authorization boundary that changes the engineering decision."
+              },
+              {
+                "quote": "The diagrams place the response lookup after retrieval and context assembly so the key can include the actual evidence.",
+                "line_start": 88,
+                "reason": "It explains the design choice and its tradeoff, which keeps the diagrams consistent with the prose."
+              },
+              {
+                "quote": "For protected content, a complete key is necessary but not sufficient.",
+                "line_start": 112,
+                "reason": "The card answer adds the caveat that reads must recheck current access, so it is more than a paraphrase of the prose."
+              },
+              {
+                "quote": "Which pipeline work does each RAG cache layer avoid?",
+                "line_start": 120,
+                "reason": "This is one focused comparison with a bounded answer."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: embedding, retrieval and response caches are one layered design that shares key and authorization reasoning. LLM response matching is already delegated to the LLM Caching note.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+          "citation_index": 2,
+          "reported_line_start": 88,
+          "resolved_line_start": 122
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+          "citation_index": 3,
+          "reported_line_start": 112,
+          "resolved_line_start": 147
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
+          "citation_index": 4,
+          "reported_line_start": 120,
+          "resolved_line_start": 155
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md": "21a2d5bc455f3329af1210afea5b4c4ca36e327a75b57c7fd94c1d9298d69132"
       },
       "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -44399,184 +44531,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "40a68853698f42388f6dd5882c679ad4",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Stores results at each RAG stage to cut latency and cost, scoped by authorization.\"\nlevel: [\"2\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Context Engineering/RAG/RAG Caching\"\nflashcard_uid: \"e2208d57\"\ncreated: \"2026-09-29T12:13:16.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-09-21T08:43:52.494Z\"\n---\n\nA RAG request can repeat the same expensive work: embed the query, search the index, and generate an answer. Caches remove that work only when their keys capture every input that affects the result.\n\nThat leads to a layered design. Embedding, retrieval, and response caches have different keys and invalidation rules. Treating them as one generic cache hides those differences and usually creates stale or unsafe hits.\n\nFor retrieval and response caches, correctness includes authorization. If the key omits permission context, one caller can populate an entry containing evidence that another caller is not allowed to see. Permission scope belongs in every key whose value depends on protected content.\n\nA versioned request identity across those protected layers covers canonical or translated query text plus its transformation version, tenant and authorization-context hash, embedding model and index versions, filters and top-k, and retriever/reranker configuration. A response key extends that identity with the prompt template, selected evidence, generation model, and conversation state when it changes meaning.\n\n# Flow\n\n## Cache Hit Diagram\n\n```mermaid\nsequenceDiagram\n  participant App\n  participant EC as Embedding Cache\n  participant RC as Retrieval Cache\n  participant LC as Response Cache\n\n  App->>EC: hash processed query + model/config version\n  EC-->>App: stored vector\n\n  App->>RC: request identity + retrieval config\n  RC-->>App: doc IDs + scores\n\n  Note over App: assemble context from docs\n\n  App->>LC: request identity + prompt + context + model ver\n  LC-->>App: cached answer\n```\n\n## Cache Miss Diagram\n\n```mermaid\nsequenceDiagram\n  participant App\n  participant EC as Embedding Cache\n  participant EM as Embedding Model\n  participant RC as Retrieval Cache\n  participant VDB as Vector DB\n  participant LC as Response Cache\n  participant LLM\n\n  App->>EC: hash processed query + model/config version\n  EC-->>App: miss\n  App->>EM: embed query\n  EM-->>App: vector\n  App->>EC: store vector\n\n  App->>RC: request identity + retrieval config\n  RC-->>App: miss\n  App->>VDB: ANN search\n  VDB-->>App: doc IDs + scores\n  App->>RC: store results\n\n  Note over App: assemble context from docs\n\n  App->>LC: request identity + prompt + context + model ver\n  LC-->>App: miss\n  App->>LLM: generate\n  LLM-->>App: answer\n  App->>LC: store response\n```\n\n# Embedding Cache\n\nAn embedding cache reuses a vector for the same text and pinned embedding configuration.\n\n- Maps text to its vector representation so a cache hit avoids another embedding call. At ingestion time, it reuses vectors for unchanged chunks; at query time, it reuses vectors for repeated queries. Eviction, expiry, or concurrent misses can still cause repeated calls.\n- The key combines a hash of the processed text with the model version and relevant configuration, including output dimensions, task mode, and preprocessing version. The value is the vector. Reuse requires a compatible embedding space and input transformation.\n- Long TTLs can work when text and configuration are stable. Changed text produces a new hash; model or configuration changes require a new cache namespace. Sensitive text and vectors still need an appropriate access, retention, and deletion policy.\n\nIt pays off in two places:\n\n- High-volume ingestion pipelines where documents are re-processed frequently (nightly syncs, incremental updates). Without an embedding cache, every re-run re-embeds unchanged chunks at full cost.\n- Query-heavy workloads with repeated identical or deterministically canonicalized queries. An exact hash does not match merely similar wording; semantic reuse is a separate cache with a different correctness risk.\n\nThe main failure mode is version drift.\n\n- **Model version mismatch.** Without the model version in the key, an upgrade can return old vectors from a different embedding space. Similarity scores then lose meaning. A model or configuration change uses a new namespace so old vectors cannot be reused accidentally.\n\n# Retrieval Cache\n\nA retrieval cache stores the ranked candidate list, not the source documents.\n\n- Stores the candidate document IDs and their relevance scores for a given query, so the vector search and any reranking are skipped on cache hit. The cache sits between query embedding and context assembly.\n- The key must cover the processed query and transformation version, embedding model and index versions, top-k, filters, tenant and authorization context, and retriever/reranker configuration. An omitted field can change the correct candidate list without changing the cache key.\n- The value stays small: a list of `(document_id, score)` pairs. Full content remains in the document store.\n\nThis cache works best when queries repeat and the index changes slowly.\n\n- Workloads with high query repetition and stable indexes. Customer support systems, internal knowledge bases, and documentation assistants often see the same questions repeatedly. If the index is rebuilt infrequently (daily or weekly), retrieval cache hit rates can be high.\n- Systems where vector search latency or cost is the bottleneck. A cache hit skips search and reranking, but lookup latency still depends on cache placement, network traffic, and serialization. Measured request latency determines the benefit.\n\nTwo failures matter more than hit rate.\n\n- **Stale results after index update.** Without an index version in the key, added or removed documents remain invisible to cached queries. Every rebuild or incremental update changes the version used for new lookups.\n- **Cross-tenant leakage.** If tenant ID or authorization context is missing from the key, a query from one tenant can populate the cache with results that a different tenant's query later receives. This is a data breach, not a staleness bug.\n\n# Response Caching in RAG\n\nA RAG response cache reuses a final answer only while its retrieval and generation inputs remain valid. [[Home/AI & ML/LLM/LLM Caching#Response Caching|LLM response caching]] covers exact and semantic matching, false-hit risks, and the distinction from provider prompt caching.\n\nThe response key extends the protected request identity with the full generation input: system instructions, selected evidence and its versions, user query, generation model and settings, and relevant conversation history. An exact hit skips generation. Semantic matching can find paraphrases, but it must stay within the same authorization and evidence constraints; similar queries can still require different documents or answers.\n\nThe diagrams place the response lookup after retrieval and context assembly so the key can include the actual evidence. A lookup before retrieval can avoid more work, but a query match alone cannot establish that the old evidence is current. Such a design needs corpus or dependency versions and permission checks that invalidate answers when their supporting sources or access rights change.\n\nFast-changing evidence may justify caching embeddings and retrieval results without caching final answers. A response TTL limits staleness, while source and permission changes that invalidate an answer require invalidation before that TTL expires.\n\n# Pitfalls\n\n- **Cross-tenant leakage from missing authorization fields.** Without tenant ID and authorization-context hash, one caller's cached result can be served to someone without permission. Both belong in keys that depend on protected content, and reads must recheck the caller's current access.\n- **Silent staleness when index version is not part of key.** Documents are added, updated, or deleted, but the retrieval cache keeps serving old candidate lists because the key does not change. Users see outdated or missing information with no error signal. An `index_version` in retrieval cache keys changes on each rebuild or incremental update, preventing reuse across those versions.\n- **Over-caching LLM responses while source freshness changes quickly.** If the corpus updates frequently but the response-cache TTL is long, callers receive answers grounded in old evidence. The TTL follows source freshness requirements; known invalidating changes take effect before expiry. Fast-changing data may justify caching embeddings and retrieval results without caching final answers.\n\n# Questions\n\n> [!qard]- What must a RAG retrieval-cache key include to keep cache hits correct?\n> The key must include every input that can change the ranked candidate list, so that changing any of them produces a different key. A retrieval cache stores document IDs and scores. If a result-affecting input is missing from the key, a hit returns a list computed under different conditions.\n>\n> | Key field | Failure if it is missing |\n> |---|---|\n> | Processed query, plus the version of the canonicalization or translation that produced it | After query processing changes, hits can return lists produced by the old processing. |\n> | Embedding model and its configuration | After an upgrade, lists ranked in the old embedding space are reused. |\n> | Index or corpus version | Added, changed or deleted documents stay invisible to cached queries. |\n> | Tenant and authorization-context hash | One caller receives candidates computed for another caller's permissions, which is a data leak, not just staleness. |\n> | Filters, top-k and retriever or reranker configuration | A request with different settings receives a list built for other settings. |\n>\n> The query part of the key can be processed text or embedding bytes. Text is inspectable and stays stable while its canonicalization is versioned. Embedding bytes are deterministic only while the encoder, model and configuration are pinned. Either works when every other result-changing input is also in the key.\n>\n> For protected content, a complete key is necessary but not sufficient. A read still checks the caller's current access, because permissions can change after an entry is stored.\n>\n> Sources:\n> - [Cache-Aside pattern (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside)\n> - [Cache-aside with Azure Managed Redis and PostgreSQL (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/databases/architecture/cache-aside-azure-managed-redis-postgresql)\n> - [[RAG Caching#Retrieval Cache|RAG Caching: Retrieval Cache]]\n\n<!-- qard-id: 5cb490e8-881c-4bf7-832b-d7d2d8ceeb1d -->\n> [!qard]- Which pipeline work does each RAG cache layer avoid?\n> Each cache layer skips a different expensive step: an embedding cache skips the embedding call, a retrieval cache skips search and reranking, and a response cache skips generation.\n>\n> | Layer | Stores | Work skipped on a hit |\n> | --- | --- | --- |\n> | Embedding | The vector for a processed text | The embedding call, at ingestion or query time |\n> | Retrieval | Ranked document IDs and scores | Vector search and reranking |\n> | Response | The final answer | Generation |\n>\n> Sources:\n> - [Cache-Aside pattern (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside)\n> - [[RAG Caching#Flow|RAG Caching: Flow]]\n\n> [!qard]- When is a RAG cache hit safe to reuse?\n> A hit is safe only when three conditions hold: the key or a validation check covers every input that could change that stage's result, the caller is currently allowed to see the value, and the entry is fresh enough for its sources.\n>\n> | Layer | Key must cover | Main risk |\n> | --- | --- | --- |\n> | Embedding | Text hash, embedding model, dimensions and preprocessing version | Vectors from an old model mixed with new ones, which makes similarity scores meaningless |\n> | Retrieval | Processed query, index version, filters, top-k, retriever settings, tenant and authorization context | Stale lists after an index update, or results computed for another tenant |\n> | Response | The retrieval inputs plus prompt template, selected evidence, generation model and settings, and any conversation state that changes meaning | Answers grounded in outdated evidence, or served to a caller who may not see that evidence |\n>\n> Freshness follows the sources. A time-to-live bounds staleness, and known source or permission changes invalidate entries before it expires. Fast-changing evidence can justify caching embeddings and retrieval results while not caching final answers.\n>\n> Sources:\n> - [Cache-Aside pattern (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside)\n> - [[RAG Caching#Flow|RAG Caching: Flow]]\n\n# References\n\n- [Cache-Aside pattern (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside)\n- [Cache-aside with Azure Managed Redis and PostgreSQL (Azure Architecture Center)](https://learn.microsoft.com/en-us/azure/architecture/databases/architecture/cache-aside-azure-managed-redis-postgresql)\n",
-          "hash": "21a2d5bc455f3329af1210afea5b4c4ca36e327a75b57c7fd94c1d9298d69132",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
-          "outcome": "keep",
-          "reason": "The whole note was read and checked against its content and the cache-aside sources it cites. The opening states the operating idea: cache keys must capture every result-affecting input, and authorization belongs in any key whose value depends on protected content. The hit and miss sequence diagrams match the per-layer sections, since the response lookup comes after context assembly so the key can include the evidence. The embedding, retrieval and response sections each give a key, a value, the work skipped, and a specific failure mode (version drift, stale index, cross-tenant leakage, stale evidence). The response section correctly defers exact and semantic matching to the LLM Caching note and explains the tradeoff of looking up before retrieval. The Pitfalls section partly repeats earlier sections, but it works as a compact recall list and carries a few details not stated earlier, such as rechecking current access on reads. The three cards each test one gradeable task: the retrieval key fields, the work each layer skips, and when a hit is safe. Their answers state conditions and exceptions, and the key-field card adds the caveat that a complete key still needs a current-access check. No factual defect or reader-facing gap was found, and the known_violations list is empty. Any edit would be cosmetic churn."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md": "21a2d5bc455f3329af1210afea5b4c4ca36e327a75b57c7fd94c1d9298d69132"
-    },
-    "feedback_keys": [],
-    "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T18:28:25.788678Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "The note is accurate and coherent, and I found no concrete defect. I checked the claims against general cache-aside and RAG practice and the cards against the one-task rule. No edits were proposed, so no change checks apply.",
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
-            "verdict": "CLEAN",
-            "summary": "The note states the operating idea (keys must capture every result-affecting input, including authorization). Each layer section gives its key, value, work skipped and failure mode. The diagrams agree with the text. The three cards each test one gradeable task. The repetition in Pitfalls is a compact recall list and does not need an edit.",
-            "page_type": "Concept: optional Questions and References sections are present and valid. Frontmatter is typed. Code fences carry language identifiers (mermaid). Card IDs are protected.",
-            "current_text_evidence": [
-              {
-                "quote": "Caches remove that work only when their keys capture every input that affects the result.",
-                "line_start": 17,
-                "reason": "The opening states the operating idea and the key boundary quickly."
-              },
-              {
-                "quote": "Permission scope belongs in every key whose value depends on protected content.",
-                "line_start": 21,
-                "reason": "It states the authorization boundary that changes the engineering decision."
-              },
-              {
-                "quote": "The diagrams place the response lookup after retrieval and context assembly so the key can include the actual evidence.",
-                "line_start": 88,
-                "reason": "It explains the design choice and its tradeoff, which keeps the diagrams consistent with the prose."
-              },
-              {
-                "quote": "For protected content, a complete key is necessary but not sufficient.",
-                "line_start": 112,
-                "reason": "The card answer adds the caveat that reads must recheck current access, so it is more than a paraphrase of the prose."
-              },
-              {
-                "quote": "Which pipeline work does each RAG cache layer avoid?",
-                "line_start": 120,
-                "reason": "This is one focused comparison with a bounded answer."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: embedding, retrieval and response caches are one layered design that shares key and authorization reasoning. LLM response matching is already delegated to the LLM Caching note.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
-          "citation_index": 2,
-          "reported_line_start": 88,
-          "resolved_line_start": 122
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
-          "citation_index": 3,
-          "reported_line_start": 112,
-          "resolved_line_start": 147
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
-          "citation_index": 4,
-          "reported_line_start": 120,
-          "resolved_line_start": 155
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md": "21a2d5bc455f3329af1210afea5b4c4ca36e327a75b57c7fd94c1d9298d69132"
-      },
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "The note is accurate and coherent, and I found no concrete defect. I checked the claims against general cache-aside and RAG practice and the cards against the one-task rule. No edits were proposed, so no change checks apply.",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md",
-          "verdict": "CLEAN",
-          "summary": "The note states the operating idea (keys must capture every result-affecting input, including authorization). Each layer section gives its key, value, work skipped and failure mode. The diagrams agree with the text. The three cards each test one gradeable task. The repetition in Pitfalls is a compact recall list and does not need an edit.",
-          "page_type": "Concept: optional Questions and References sections are present and valid. Frontmatter is typed. Code fences carry language identifiers (mermaid). Card IDs are protected.",
-          "current_text_evidence": [
-            {
-              "quote": "Caches remove that work only when their keys capture every input that affects the result.",
-              "line_start": 17,
-              "reason": "The opening states the operating idea and the key boundary quickly."
-            },
-            {
-              "quote": "Permission scope belongs in every key whose value depends on protected content.",
-              "line_start": 21,
-              "reason": "It states the authorization boundary that changes the engineering decision."
-            },
-            {
-              "quote": "The diagrams place the response lookup after retrieval and context assembly so the key can include the actual evidence.",
-              "line_start": 122,
-              "reason": "It explains the design choice and its tradeoff, which keeps the diagrams consistent with the prose."
-            },
-            {
-              "quote": "For protected content, a complete key is necessary but not sufficient.",
-              "line_start": 147,
-              "reason": "The card answer adds the caveat that reads must recheck current access, so it is more than a paraphrase of the prose."
-            },
-            {
-              "quote": "Which pipeline work does each RAG cache layer avoid?",
-              "line_start": 155,
-              "reason": "This is one focused comparison with a bounded answer."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: embedding, retrieval and response caches are one layered design that shares key and authorization reasoning. LLM response matching is already delegated to the LLM Caching note.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
