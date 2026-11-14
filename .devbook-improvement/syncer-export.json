@@ -2038,11 +2038,11 @@
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/Runtime/Common Language Runtime.md": {
-      "sha": "8ca39b3cb27e8106bf1bfee06c561ea927cb4992",
+      "sha": "0eefe95f9c6b3938f8f29f03d9564a782f324dd7",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/Runtime/Garbage Collector.md": {
-      "sha": "b204f8f1520a532bd572f714792c62c218f8c029",
+      "sha": "561b8da64f1986f8d1216a851552f0a632affbea",
       "mode": "100644"
     },
     "Vault/Home/Programming/NET/Runtime/Memory Leaks.md": {
@@ -4024,11 +4024,11 @@
       "mode": "100644"
     },
     "Web/content/Programming/NET/Runtime/Common Language Runtime.md": {
-      "sha": "f671e3a1eb1eea83682a5a48604e8ec6d33039a0",
+      "sha": "937fedbe3b59899a0116633d327b7204fab96eaf",
       "mode": "100644"
     },
     "Web/content/Programming/NET/Runtime/Garbage Collector.md": {
-      "sha": "94ac99fca47f686fa5970d3af890558b90ab2856",
+      "sha": "fa11b00ec7ebbfb83cafd0cd865a1accc119104b",
       "mode": "100644"
     },
     "Web/content/Programming/NET/Runtime/Memory Leaks.md": {
@@ -4048,7 +4048,7 @@
       "mode": "100644"
     },
     "Web/content/Questions.md": {
-      "sha": "75dcfcfb10221378462e51487ef030e1fe5208b9",
+      "sha": "b936a42d11e03cde74f1f9c7b691c7037cf88262",
       "mode": "100644"
     },
     "Web/content/Roadmap.canvas": {
