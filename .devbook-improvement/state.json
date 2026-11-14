@@ -14422,15 +14422,16 @@
     "version": 1,
     "id": "40a68853698f42388f6dd5882c679ad4",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-14T18:18:47.082551Z",
-    "elapsed_seconds": 247.45210579999994,
+    "elapsed_seconds": 251.94216669999994,
     "calls_reserved": 7,
     "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md"
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -14586,10 +14587,88 @@
           },
           "model_calls": 5
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+                "outcome": "keep",
+                "reason": "I audited the whole note against its text and general knowledge of the cited sources. I did not re-fetch the sources in this pass. The opening defines ablation and links the Evaluation Metrics and Retrieval Evaluation Sets notes where they are needed. The chunking section gives the token recall, precision and IoU formulas. It explains why IoU exposes the large-chunk weakness of Recall@k, and its Chroma figures (87.9% recall with 1.4% precision, 91.3% recall with 4.5% precision) are scoped to that corpus. The fixed-token-budget advice correctly names the chunk-size confound in fixed top-k. The embedding section separates exact search from ANN, requires matched ANN recall, and avoids invented thresholds. The ANN section correctly separates ANN recall (against exact neighbors) from labeled retrieval recall. It also covers the sweep of ef_search or nprobe, filtered-search ground truth with selectivity levels, and production proxy signals. It makes no unsupported universal claims. The prose is direct and non-repetitive, there are no fenced-code or Qard issues, and no violations are listed. The only references are two relevant sources. No concrete defect or essential gap was found, so a forced edit would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate, ordered from ablation concept to chunking, embeddings and ANN, and carries conditions and caveats rather than invented thresholds. No concrete defect or essential gap was found, so leaving it unchanged is justified.",
+                "page_type": "Concept — no Questions section; References present with two relevant bare link bullets; no code fences.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Change one component, keep the rest fixed, and compare the metric delta with run-to-run noise.",
+                    "line_start": 16,
+                    "reason": "States the operating idea of ablation and the noise condition up front."
+                  },
+                  {
+                    "quote": "a large chunk can count as a retrieval hit while most of its tokens are irrelevant",
+                    "line_start": 28,
+                    "reason": "Explains the mechanism by which token IoU exposes what Recall@k misses, scoped to a single corpus."
+                  },
+                  {
+                    "quote": "Fixed top-k confounds chunk size with retrieved context",
+                    "line_start": 30,
+                    "reason": "Names the confound that motivates a fixed token budget."
+                  },
+                  {
+                    "quote": "identical ANN settings can favor one embedding space over another",
+                    "line_start": 38,
+                    "reason": "Gives a precise condition for fair embedding comparison."
+                  },
+                  {
+                    "quote": "ANN Recall@k is not retrieval Recall@k.",
+                    "line_start": 44,
+                    "reason": "Clear boundary between labeled retrieval recall and exact-neighbor ANN recall."
+                  },
+                  {
+                    "quote": "Fixed `nprobe`, for example, visits the same number of IVF lists while the number of vectors inside those lists can grow.",
+                    "line_start": 48,
+                    "reason": "Concrete mechanism with a hedge about index family, avoiding an overclaim."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: chunking, embedding and ANN evaluation share one ablation method and are short enough to stay together.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The whole note was read independently. It is accurate, well ordered, and free of rule violations. It has no unsupported claims, and the keep is justified.",
+            "change_checks": []
+          },
+          "model_calls": 7
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T18:22:54.534124Z",
+    "checkpoint_at": "2026-11-14T18:22:59.024185Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
