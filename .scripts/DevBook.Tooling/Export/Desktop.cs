@@ -96,17 +96,11 @@ public static class Desktop
         return result;
     }
 
-    private static Dictionary<string, DateTimeOffset> BaselineDates(string path)
+    private static Dictionary<string, DateTimeOffset> BaselineDates(string root, string relative)
     {
-        if (!File.Exists(path))
-        {
-            return [];
-        }
-        if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
-        {
-            throw new InvalidDataException("Generated timestamp baseline cannot be a symlink.");
-        }
-        string text = File.ReadAllText(path);
+        string revision = Git.Text(root, "log", "-1", "--format=%H", "--diff-filter=AM", "--", relative);
+        if (revision.Length == 0) return [];
+        string text = Encoding.UTF8.GetString(Git.Run(root, "show", revision + ":" + relative));
         Match frontmatter = Regex.Match(text, @"\A---\r?\n(.*?)\r?\n---(?:\r?\n|\z)", RegexOptions.Singleline);
         var result = new Dictionary<string, DateTimeOffset>(StringComparer.Ordinal);
         if (!frontmatter.Success)
@@ -164,11 +158,11 @@ public static class Desktop
             if (name.StartsWith("Vault/Home/", StringComparison.Ordinal) && name.EndsWith(".md", StringComparison.Ordinal))
             {
                 string outputName = "Web/content/" + name["Vault/Home/".Length..];
-                Dictionary<string, DateTimeOffset> dates = BaselineDates(Path.Combine(root, outputName));
+                Dictionary<string, DateTimeOffset> dates = BaselineDates(root, outputName);
                 created = dates.GetValueOrDefault("created", created);
                 if (dates.TryGetValue("modified", out DateTimeOffset oldModified))
                 {
-                    string history = Git.Text(root, "log", "-1", "--format=%H", "--", outputName);
+                    string history = Git.Text(root, "log", "-1", "--format=%H", "--diff-filter=AM", "--", outputName);
                     if (history.Length != 0)
                     {
                         ProcessResult relation = new SystemProcessRunner().RunAsync(new ProcessRequest("git",
@@ -188,7 +182,7 @@ public static class Desktop
         }
     }
 
-    public static void PrepareSettings(string original, string destination)
+    public static void PrepareSettings(string original, string destination, string? root = null)
     {
         Directory.CreateDirectory(Path.Combine(destination, "plugins"));
         foreach (string plugin in Plugins)
@@ -211,13 +205,20 @@ public static class Desktop
                 File.Copy(source, Path.Combine(target, name));
             }
         }
+        if (root is not null)
+        {
+            JsonObject defaults = JsonData.ParseObject(File.ReadAllText(Path.Combine(root, ".scripts/quartz-syncer.defaults.json")));
+            defaults["publishTarget"] = "local";
+            defaults["quartzRepoPath"] = Path.Combine(root, "Web");
+            File.WriteAllText(Path.Combine(destination, "plugins/quartz-syncer/data.json"), defaults.ToJsonString(JsonData.Options));
+        }
         File.WriteAllText(Path.Combine(destination, "community-plugins.json"), "[]");
         File.WriteAllText(Path.Combine(destination, "core-plugins.json"), "[\"canvas\",\"bases\"]");
         File.WriteAllText(Path.Combine(destination, "app.json"), "{\"alwaysUpdateLinks\":false,\"showUnsupportedFiles\":true,\"defaultViewMode\":\"preview\"}");
     }
 
     public static async Task<JsonObject> ExportCheckoutAsync(string root, string expectedHead, string appBundle,
-        int timeoutSeconds = 600, CancellationToken cancellationToken = default)
+        int timeoutSeconds = 600, CancellationToken cancellationToken = default, bool localSnapshot = false)
     {
         if (!OperatingSystem.IsMacOS())
         {
@@ -229,22 +230,30 @@ public static class Desktop
         }
         root = RealPath(root);
         appBundle = RealPath(appBundle);
-        if (Git.Text(root, "rev-parse", "HEAD") != expectedHead
-            || !Git.Text(root, "symbolic-ref", "--short", "HEAD").StartsWith("notes/automated-", StringComparison.Ordinal)
-            || Git.Text(root, "status", "--porcelain", "--untracked-files=all").Length != 0)
+        if (Git.Text(root, "rev-parse", "HEAD") != Bundle.ExactHead(expectedHead)
+            || (!localSnapshot && Git.Text(root, "status", "--porcelain", "--untracked-files=all").Length != 0))
         {
-            throw new InvalidDataException("Desktop export requires the expected head of a clean dedicated managed notes/automated-* checkout.");
+            throw new InvalidDataException("Desktop export requires the exact source SHA in a clean dedicated checkout; use site preview for current working files.");
         }
+        GitTreeEntry[] inputs = localSnapshot ? Receipt.IndexEntries(root) : Receipt.TreeEntries(root);
+        _ = SiteArtifact.Inputs(inputs);
+        SiteArtifact.AssertWorkingInputs(root, inputs);
         Dictionary<string, byte[]> sourceHashes = SourceHashes(root);
+        byte[] authoredStyles = File.ReadAllBytes(Path.Combine(root, SiteArtifact.AuthoredStyles));
         string settings = Path.Combine(root, "Vault/.obsidian");
         Syncer.EnsureRegularPath(root, "Vault/.obsidian");
         if (!Directory.Exists(settings))
         {
             throw new InvalidDataException("Dedicated checkout must have a regular .obsidian directory.");
         }
-        ValidateAppVersion(appBundle, settings);
+        string appVersion = ValidateAppVersion(appBundle, settings);
+        var pluginVersions = new JsonObject();
+        foreach (string plugin in Receipt.Plugins)
+            pluginVersions[plugin] = JsonData.ParseObject(File.ReadAllText(Path.Combine(settings, "plugins", plugin, "manifest.json"))).Str("version");
+        var runtime = new JsonObject { ["obsidian"] = appVersion, ["plugins"] = pluginVersions };
         string index = Git.Text(root, "rev-parse", "--git-path", "index");
         index = Path.IsPathRooted(index) ? index : Path.Combine(root, index);
+        byte[] originalIndex = File.ReadAllBytes(index);
         string temporary = Path.Combine(root, ".desktop-export-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(temporary);
         string backup = Path.Combine(temporary, "settings");
@@ -277,16 +286,19 @@ public static class Desktop
                 (await new SystemProcessRunner().RunAsync(new ProcessRequest("git", ["update-index", "--skip-worktree", "-z", "--stdin"],
                     root, gitEnvironment, tracked, context.Remaining, true), cancellationToken)).EnsureSuccess("Hide disposable settings from private index");
             }
-            MaterializeTimestamps(root);
+            if (!localSnapshot) MaterializeTimestamps(root);
+            SiteArtifact.ClearOutputs(root);
             var session = new DesktopSession(appBundle, profile, Path.Combine(root, "Vault"), context.Deadline);
             Directory.Move(settings, backup);
             JsonObject receipt;
             try
             {
-                PrepareSettings(backup, settings);
+                PrepareSettings(backup, settings, root);
                 await session.StartAsync(cancellationToken);
                 var scoped = new SyncerContext(root, session.CommandAsync, gitEnvironment, context.Remaining);
-                receipt = await Receipt.ExportAsync(scoped, expectedHead, cancellationToken);
+                using FileStream exportLock = Syncer.AcquireLock(scoped);
+                await Syncer.ExportAsync(scoped, cancellationToken: cancellationToken, allowMissingPublicationDates: localSnapshot);
+                receipt = new JsonObject();
                 if (!Syncer.SameSnapshot(sourceHashes, SourceHashes(root)))
                 {
                     throw new InvalidDataException("Source changed during desktop export.");
@@ -316,12 +328,18 @@ public static class Desktop
             {
                 throw new InvalidDataException("Original Obsidian settings were not restored exactly.");
             }
+            if (!File.ReadAllBytes(index).AsSpan().SequenceEqual(originalIndex)
+                || !File.ReadAllBytes(Path.Combine(root, SiteArtifact.AuthoredStyles)).AsSpan().SequenceEqual(authoredStyles))
+                throw new InvalidDataException("Native export changed the real Git index or authored CSS.");
+            SiteArtifact.AssertWorkingInputs(root, inputs);
             Syncer.GuardSource(new SyncerContext(root));
-            string[] outputs = [.. Syncer.Outputs, Receipt.PathName];
-            outputs = outputs.Where(path => File.Exists(Path.Combine(root, path)) || Directory.Exists(Path.Combine(root, path))
-                || Git.Text(root, "ls-files", "--", path).Length != 0).ToArray();
-            Git.Run(root, ["add", "-A", "--", .. outputs]);
-            Receipt.Validate(receipt, Receipt.IndexEntries(root));
+            receipt = SiteArtifact.CreateManifest(root, expectedHead, runtime, localSnapshot);
+            Syncer.EnsureRegularPath(root, Receipt.PathName);
+            string manifestPath = Path.Combine(root, Receipt.PathName);
+            Directory.CreateDirectory(Path.GetDirectoryName(manifestPath)!);
+            await File.WriteAllTextAsync(manifestPath, receipt.ToJsonString(JsonData.Options) + "\n", cancellationToken);
+            if (!File.ReadAllBytes(index).AsSpan().SequenceEqual(originalIndex))
+                throw new InvalidDataException("Native export changed the real Git index.");
             return receipt;
         }
         finally

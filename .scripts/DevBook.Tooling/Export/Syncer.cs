@@ -52,7 +52,7 @@ public sealed class SyncerContext
 
 public static class Syncer
 {
-    public static readonly string[] Outputs = ["Web/content", "Web/quartz/styles/syncer", "Web/quartz/styles/custom.scss"];
+    public static readonly string[] Outputs = ["Web/content", "Web/quartz/styles/syncer"];
 
     public static TimeSpan ResolveTimeout(TimeSpan? explicitTimeout, string? localOverride)
     {
@@ -486,7 +486,7 @@ public static class Syncer
     }
 
     public static async Task ExportAsync(SyncerContext context, bool prepareLocalDates = false,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, bool allowMissingPublicationDates = false)
     {
         (JsonObject settings, JsonObject identity) = await ConfigureAsync(context, cancellationToken);
         if (settings.Bool("useDatacore") && !identity.Bool("datacoreReady"))
@@ -506,7 +506,7 @@ public static class Syncer
                 throw new SyncException("Vault source changed while preparing note dates; commit blocked.");
             }
         }
-        else
+        else if (!allowMissingPublicationDates)
         {
             NoteDates.RequirePublications(context.Root);
         }
@@ -528,13 +528,7 @@ public static class Syncer
             }
         }
         GuardSource(context);
-        string[] existing = Outputs.Where(path => File.Exists(Path.Combine(context.Root, path)) || Directory.Exists(Path.Combine(context.Root, path))
-            || context.GitText("ls-files", "--", path).Length != 0).ToArray();
-        if (existing.Length != 0)
-        {
-            context.GitBytes(["add", "-A", "--", .. existing]);
-        }
-        Log(context, "Export verified; generated output staged.");
+        Log(context, "Export verified; generated output remains outside the Git index.");
     }
 
     private static async Task RenderAsync(SyncerContext context, Dictionary<string, byte[]> before, CancellationToken cancellationToken)
@@ -641,14 +635,13 @@ public static class Syncer
                 return 0;
             }
             GuardSource(context);
-            GuardOutput(context);
             if (hook is not null)
             {
                 await RunMaintenanceHookAsync(context, hook);
                 GuardSource(context);
             }
             await ExportAsync(context, prepareLocalDates: true);
-            Console.WriteLine("[pre-commit] Quartz export completed; generated output staged.");
+            Console.WriteLine("Quartz export verified; generated output was not staged. Use site preview for local preview and first publication.");
             return 0;
         }
         catch (Exception error) when (error is SyncException or IOException or InvalidOperationException or IndexOutOfRangeException)

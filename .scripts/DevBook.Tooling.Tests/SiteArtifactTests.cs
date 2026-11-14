@@ -1,0 +1,346 @@
+using DevBook.Tooling.Export;
+using DevBook.Tooling.Infrastructure;
+using FluentAssertions;
+using System.Text;
+using System.Text.Json.Nodes;
+using Xunit;
+
+namespace DevBook.Tooling.Tests;
+
+public sealed class SiteArtifactTests
+{
+    [Fact]
+    public void CompleteBundleIncludesUnchangedMediaWithoutStaging()
+    {
+        using var fixture = new ArtifactFixture();
+        byte[] index = File.ReadAllBytes(Path.Combine(fixture.Root, ".git/index"));
+        JsonObject bundle = Bundle.FromCheckout(fixture.Root, 0, "", fixture.Head);
+        IReadOnlyDictionary<string, byte[]?> files = Bundle.Decode(bundle);
+        files.Keys.Should().Contain("Web/content/Assets/image.png");
+        files["Web/content/Assets/image.png"].Should().Equal([0, 255, 128, 10, 0, 32]);
+        files["Web/content/é.md"].Should().Equal(Encoding.UTF8.GetBytes("\uFEFFé😀\r\n\"\\"));
+        File.ReadAllBytes(Path.Combine(fixture.Root, ".git/index")).Should().Equal(index);
+        Bundle.ValidateInputs(bundle, fixture.Entries).Should().BeTrue();
+    }
+
+    [Fact]
+    public void CompleteArtifactRejectsAnOversizedNativeFile()
+    {
+        using var fixture = new ArtifactFixture();
+        File.WriteAllBytes(Path.Combine(fixture.Root, "Web/content/Assets/image.png"), new byte[Bundle.MaxFileBytes + 1]);
+        Action collect = () => Bundle.FromCheckout(fixture.Root, 0, "", fixture.Head);
+        collect.Should().Throw<InvalidOperationException>();
+    }
+
+    [Theory]
+    [InlineData("Web/content/../outside.md")]
+    [InlineData("Web/quartz/styles/custom.scss")]
+    [InlineData("/Web/content/absolute.md")]
+    public void BundleRejectsUnexpectedOrUnsafePaths(string path)
+    {
+        using var fixture = new ArtifactFixture();
+        JsonObject bundle = Bundle.FromCheckout(fixture.Root, 0, "", fixture.Head);
+        bundle.Obj("files")[path] = Convert.ToBase64String("foreign"u8.ToArray());
+        Action decode = () => Bundle.Decode(bundle);
+        decode.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
+    public void TamperedMissingAndCaseCollidingFilesAreRejected()
+    {
+        using var fixture = new ArtifactFixture();
+        foreach (int scenario in Enumerable.Range(0, 3))
+        {
+            JsonObject bundle = Bundle.FromCheckout(fixture.Root, 0, "", fixture.Head);
+            JsonObject files = bundle.Obj("files");
+            if (scenario == 0) files["Web/content/Card.md"] = Convert.ToBase64String("tampered"u8.ToArray());
+            if (scenario == 1) files.Remove("Web/content/Card.md");
+            if (scenario == 2) files["Web/content/card.md"] = files["Web/content/Card.md"]!.DeepClone();
+            Action decode = () => Bundle.Decode(bundle);
+            decode.Should().Throw<InvalidOperationException>();
+        }
+    }
+
+    [Fact]
+    public void ChangedSourceOrPolicyCannotUseExistingArtifact()
+    {
+        using var fixture = new ArtifactFixture();
+        JsonObject bundle = Bundle.FromCheckout(fixture.Root, 0, "", fixture.Head);
+        foreach (string path in new[] { "Vault/Home/Card.md", ".scripts/global.json", ".scripts/DevBook.Tooling/Infrastructure/LegacyCaseFold.json" })
+        {
+            GitTreeEntry[] changed = fixture.Entries.Select(item => item.Path == path ? item with { Sha = new string('f', 40) } : item).ToArray();
+            Action verify = () => Bundle.ValidateInputs(bundle, changed);
+            verify.Should().Throw<InvalidOperationException>();
+        }
+    }
+
+    [Fact]
+    public void LocalSnapshotCannotPassCommittedArtifactValidation()
+    {
+        using var fixture = new ArtifactFixture();
+        JsonObject bundle = Bundle.FromCheckout(fixture.Root, 0, "", fixture.Head);
+        bundle.Obj("manifest")["kind"] = "local";
+        Action verify = () => Bundle.ValidateInputs(bundle, fixture.Entries);
+        verify.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
+    public void ExtractionReplacesTheCompleteOutputAndLeavesIndexUntouched()
+    {
+        using var fixture = new ArtifactFixture();
+        JsonObject bundle = Bundle.FromCheckout(fixture.Root, 0, "", fixture.Head);
+        byte[] index = File.ReadAllBytes(Path.Combine(fixture.Root, ".git/index"));
+        File.WriteAllText(Path.Combine(fixture.Root, "Web/content/Stale.md"), "stale");
+        SiteArtifact.Extract(fixture.Root, bundle, fixture.Head);
+        File.Exists(Path.Combine(fixture.Root, "Web/content/Stale.md")).Should().BeFalse();
+        File.ReadAllBytes(Path.Combine(fixture.Root, ".git/index")).Should().Equal(index);
+    }
+
+    [Fact]
+    public void OutputSymlinksAreRejectedWithoutReadingTheirTarget()
+    {
+        if (OperatingSystem.IsWindows()) return;
+        using var fixture = new ArtifactFixture();
+        File.CreateSymbolicLink(Path.Combine(fixture.Root, "Web/content/Linked.md"), Path.Combine(fixture.Root, "Vault/Home/Card.md"));
+        Action collect = () => SiteArtifact.OutputFiles(fixture.Root);
+        collect.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
+    public async Task NamedPipesAreRejectedBeforeReadingTheirContents()
+    {
+        if (!OperatingSystem.IsMacOS() && !OperatingSystem.IsLinux()) return;
+        using var fixture = new ArtifactFixture();
+        string pipe = Path.Combine(fixture.Root, "Web/content/pipe");
+        (await new SystemProcessRunner().RunAsync(new ProcessRequest("mkfifo", [pipe], fixture.Root))).EnsureSuccess();
+        Action collect = () => SiteArtifact.OutputFiles(fixture.Root);
+        collect.Should().Throw<InvalidOperationException>().WithMessage("*non-regular*");
+    }
+
+    [Fact]
+    public async Task FirstPublicationAddsOnlyTheMissingFieldAndPreservesAliasesAndIndex()
+    {
+        using var fixture = new ArtifactFixture();
+        string path = "Vault/Home/New.md";
+        byte[] original = Encoding.UTF8.GetBytes("---\r\npublish: true\r\ncreated: 2020-01-01T00:00:00.000Z\r\nmodified: 2026-01-01T00:00:00.000Z\r\n---\r\n> [!qard]- Identity remains.\r\n");
+        File.WriteAllBytes(Path.Combine(fixture.Root, path), original);
+        File.WriteAllText(Path.Combine(fixture.Root, "Vault/Home/Alias.md"), "---\npublish: true\npublishDate: 2020-01-01T00:00:00.000Z\n---\nExisting alias.\n");
+        Dictionary<string, byte[]> sources = Preview.ReadSources(fixture.Root);
+        DateTimeOffset instant = DateTimeOffset.Parse("2026-11-14T00:00:00Z");
+        Dictionary<string, byte[]> changes = Preview.PublicationChanges(fixture.Root, sources, instant);
+        byte[] index = File.ReadAllBytes(Path.Combine(fixture.Root, ".git/index"));
+        await Preview.WritePublicationsAsync(fixture.Root, sources, changes, fixture.PublicationCommandAsync);
+        changes.Keys.Should().Equal(path);
+        string actual = File.ReadAllText(Path.Combine(fixture.Root, path));
+        actual.Replace("published: \"2026-11-14T00:00:00.000Z\"\r\n", "", StringComparison.Ordinal).Should().Be(Encoding.UTF8.GetString(original));
+        File.ReadAllBytes(Path.Combine(fixture.Root, ".git/index")).Should().Equal(index);
+    }
+
+    [Fact]
+    public async Task ConcurrentPreviewEditsPreventPublicationWriteback()
+    {
+        using var fixture = new ArtifactFixture();
+        string path = Path.Combine(fixture.Root, "Vault/Home/New.md");
+        File.WriteAllText(path, "---\npublish: true\n---\nOriginal\n");
+        Dictionary<string, byte[]> source = Preview.ReadSources(fixture.Root);
+        Dictionary<string, byte[]> changes = Preview.PublicationChanges(fixture.Root, source, DateTimeOffset.UtcNow);
+        File.AppendAllText(path, "Concurrent editor text\n");
+        Func<Task> write = () => Preview.WritePublicationsAsync(fixture.Root, source, changes, fixture.PublicationCommandAsync);
+        await write.Should().ThrowAsync<InvalidOperationException>();
+        File.ReadAllText(path).Should().Contain("Concurrent editor text").And.NotContain("published:");
+    }
+
+    [Fact]
+    public async Task EditBetweenSnapshotCheckAndAtomicCallbackIsPreserved()
+    {
+        using var fixture = new ArtifactFixture { EditInsideProcess = true };
+        string path = Path.Combine(fixture.Root, "Vault/Home/New.md");
+        File.WriteAllText(path, "---\npublish: true\n---\nOriginal\n");
+        Dictionary<string, byte[]> source = Preview.ReadSources(fixture.Root);
+        Dictionary<string, byte[]> changes = Preview.PublicationChanges(fixture.Root, source, DateTimeOffset.UtcNow);
+        Func<Task> write = () => Preview.WritePublicationsAsync(fixture.Root, source, changes, fixture.PublicationCommandAsync);
+        await write.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Source changed*");
+        File.ReadAllText(path).Should().Contain("Concurrent callback edit").And.NotContain("published:");
+    }
+
+    [Fact]
+    public void DisposableSettingsStartWithSharedPolicyAndNoPersonalData()
+    {
+        using var fixture = new ArtifactFixture();
+        File.WriteAllText(Path.Combine(fixture.Root, ".scripts/quartz-syncer.defaults.json"), "{\"autoPublishInterval\":0,\"obsidianCommentMode\":\"preserve\"}");
+        string original = Path.Combine(fixture.Root, "Vault/.obsidian");
+        string destination = Path.Combine(fixture.Root, "disposable-settings");
+        Desktop.PrepareSettings(original, destination, fixture.Root);
+        JsonObject settings = JsonData.ParseObject(File.ReadAllText(Path.Combine(destination, "plugins/quartz-syncer/data.json")));
+        settings.Int("autoPublishInterval", -1).Should().Be(0);
+        settings.Str("obsidianCommentMode").Should().Be("preserve");
+        settings.Str("publishTarget").Should().Be("local");
+        settings.Str("quartzRepoPath").Should().Be(Path.Combine(fixture.Root, "Web"));
+        File.Exists(Path.Combine(original, "plugins/quartz-syncer/data.json")).Should().BeFalse();
+        File.ReadAllText(Path.Combine(destination, "community-plugins.json")).Should().Be("[]");
+    }
+
+    [Fact]
+    public async Task SnapshotBuildAndServerDoNotHoldTheSourceCommitLock()
+    {
+        using var fixture = new ArtifactFixture();
+        var buildEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var finishBuild = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var serverEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var finishServer = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var source = new SyncerContext(fixture.Root);
+        var runner = new PreviewRunner(async request =>
+        {
+            if (request.Arguments.Contains("build"))
+            {
+                buildEntered.SetResult();
+                await finishBuild.Task;
+            }
+            if (request.Arguments.Contains("serve"))
+            {
+                serverEntered.SetResult();
+                await finishServer.Task;
+            }
+            return new ProcessResult(0, [], []);
+        });
+        Task preview = Preview.RunAsync(fixture.Root, "unused-test-app", runner: runner, renderSnapshot: (_, _, _) =>
+        {
+            Action competingPreparation = () => Syncer.AcquireLock(source).Dispose();
+            competingPreparation.Should().Throw<SyncException>();
+            return Task.CompletedTask;
+        });
+        try
+        {
+            await buildEntered.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            using (Syncer.AcquireLock(source)) { }
+            finishBuild.SetResult();
+            await serverEntered.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            using (Syncer.AcquireLock(source)) { }
+        }
+        finally
+        {
+            finishBuild.TrySetResult();
+            finishServer.TrySetResult();
+            await preview.WaitAsync(TimeSpan.FromSeconds(10));
+        }
+    }
+
+    private sealed class PreviewRunner(Func<ProcessRequest, Task<ProcessResult>> run) : IProcessRunner
+    {
+        public Task<ProcessResult> RunAsync(ProcessRequest request, CancellationToken cancellationToken = default) => run(request);
+    }
+
+    [Fact]
+    public async Task PublicExportRendersAnOwnedCloneWithoutBorrowingLiveSettings()
+    {
+        using var fixture = new ArtifactFixture();
+        File.AppendAllText(Path.Combine(fixture.Root, ".git/info/exclude"),
+            "\n/Web/content/\n/Web/quartz/styles/syncer/\n/.devbook-improvement/syncer-export.json\n/Vault/.obsidian/plugins/quartz-syncer/data.json\n");
+        string liveSettings = Path.Combine(fixture.Root, "Vault/.obsidian/plugins/quartz-syncer/data.json");
+        File.WriteAllText(liveSettings, "Personal settings before export.\n");
+        byte[] index = File.ReadAllBytes(Path.Combine(fixture.Root, ".git/index"));
+        byte[] projection = File.ReadAllBytes(Path.Combine(fixture.Root, "Web/content/Card.md"));
+        string output = fixture.Root + "-artifact";
+        string? renderedCheckout = null;
+        try
+        {
+            int result = await SiteCommand.RunAsync(["export", "--repo-root", fixture.Root, "--expected-head", fixture.Head,
+                "--app-bundle", "unused-test-app", "--output", output], (checkout, head, _) =>
+            {
+                renderedCheckout = checkout;
+                Desktop.RealPath(checkout).Should().NotBe(Desktop.RealPath(fixture.Root));
+                Git.Text(checkout, "rev-parse", "HEAD").Should().Be(fixture.Head);
+                File.Exists(Path.Combine(checkout, "Vault/.obsidian/plugins/quartz-syncer/data.json")).Should().BeFalse();
+                File.WriteAllText(liveSettings, "Concurrent owner settings.\n");
+                Write(checkout, "Vault/.obsidian/plugins/quartz-syncer/data.json", "Disposable settings.\n");
+                Write(checkout, "Web/content/Card.md", "Isolated rendered projection.\n");
+                Write(checkout, "Web/quartz/styles/syncer/_index.scss", "Generated styles.\n");
+                JsonObject runtime = new() { ["obsidian"] = "1.14.5", ["plugins"] = new JsonObject(Receipt.Plugins.Select(name =>
+                    new KeyValuePair<string, JsonNode?>(name, JsonValue.Create("1.0.0")))) };
+                Write(checkout, Receipt.PathName, SiteArtifact.CreateManifest(checkout, head, runtime).ToJsonString());
+                return Task.CompletedTask;
+            });
+
+            result.Should().Be(0);
+            renderedCheckout.Should().NotBeNull();
+            Directory.Exists(renderedCheckout).Should().BeFalse();
+            File.ReadAllText(liveSettings).Should().Be("Concurrent owner settings.\n");
+            File.ReadAllBytes(Path.Combine(fixture.Root, ".git/index")).Should().Equal(index);
+            File.ReadAllBytes(Path.Combine(fixture.Root, "Web/content/Card.md")).Should().Equal(projection);
+            JsonObject bundle = JsonData.ParseObject(File.ReadAllText(Path.Combine(output, "bundle.json")));
+            Bundle.ValidateInputs(bundle, fixture.Entries).Should().BeTrue();
+        }
+        finally
+        {
+            if (Directory.Exists(output)) Directory.Delete(output, true);
+        }
+
+        static void Write(string root, string relative, string text)
+        {
+            string target = Path.Combine(root, relative);
+            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+            File.WriteAllText(target, text);
+        }
+    }
+
+    private sealed class ArtifactFixture : IDisposable
+    {
+        public string Root { get; } = Path.Combine(Path.GetTempPath(), "devbook-artifact-" + Guid.NewGuid().ToString("N"));
+        public string Head { get; }
+        public GitTreeEntry[] Entries { get; }
+
+        public ArtifactFixture()
+        {
+            Directory.CreateDirectory(Root);
+            Git.Run(Root, "init", "-q");
+            foreach (string path in Receipt.RequiredPolicyPaths) Write(path, path.EndsWith("manifest.json", StringComparison.Ordinal) ? "{\"version\":\"1.0.0\"}" : path.EndsWith(".json", StringComparison.Ordinal) ? "{}" : "policy");
+            Write(".scripts/DevBook.Tooling/Infrastructure/LegacyCaseFold.json", "{}");
+            Write("Vault/Home/Card.md", "---\npublish: true\npublished: 2020-01-01T00:00:00.000Z\n---\nSource\n");
+            Git.Run(Root, "add", ".");
+            Git.Run(Root, "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "-c", "core.hooksPath=/dev/null", "commit", "-qm", "fixture");
+            Head = Git.Text(Root, "rev-parse", "HEAD");
+            Entries = Receipt.TreeEntries(Root);
+            Write("Web/content/Card.md", "Rendered\n");
+            Write("Web/content/Assets/image.png", "");
+            File.WriteAllBytes(Path.Combine(Root, "Web/content/Assets/image.png"), [0, 255, 128, 10, 0, 32]);
+            Write("Web/content/é.md", "\uFEFFé😀\r\n\"\\");
+            Write("Web/quartz/styles/syncer/_index.scss", "styles");
+            JsonObject runtime = new() { ["obsidian"] = "1.14.5", ["plugins"] = new JsonObject(Receipt.Plugins.Select(name => new KeyValuePair<string, JsonNode?>(name, JsonValue.Create("1.0.0")))) };
+            JsonObject manifest = SiteArtifact.CreateManifest(Root, Head, runtime);
+            Write(Receipt.PathName, manifest.ToJsonString());
+        }
+
+        public bool EditInsideProcess { get; set; }
+
+        public async Task<string> PublicationCommandAsync(IReadOnlyList<string> arguments, CancellationToken cancellationToken)
+        {
+            const string harness = """
+                const fs=require('node:fs');
+                const root=process.argv[1],code=process.argv[2],concurrent=process.argv[3]==='true';
+                const app={vault:{adapter:{getBasePath:()=>root},getFileByPath:path=>({path}),
+                 process:async(file,fn)=>{
+                  const target=root+'/'+file.path;
+                  if(concurrent)fs.appendFileSync(target,'Concurrent callback edit\n');
+                  const updated=fn(fs.readFileSync(target,'utf8'));
+                  fs.writeFileSync(target,updated);return updated;
+                 },read:async file=>fs.readFileSync(root+'/'+file.path,'utf8')}};
+                Promise.resolve(eval(code)).then(value=>process.stdout.write(value));
+                """;
+            string script = arguments[1]["code=".Length..];
+            script.Should().Contain("app.vault.process(file,current=>").And.NotContain("Identity remains");
+            ProcessResult result = await new SystemProcessRunner().RunAsync(new ProcessRequest("node",
+                ["-e", harness, Path.Combine(Desktop.RealPath(Root), "Vault"), script, EditInsideProcess ? "true" : "false"], Root), cancellationToken);
+            result.EnsureSuccess("Exercise atomic publication callback");
+            return result.Stdout;
+        }
+
+        private void Write(string path, string text)
+        {
+            string target = Path.Combine(Root, path);
+            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+            File.WriteAllText(target, text, new UTF8Encoding(false));
+        }
+
+        public void Dispose() => Directory.Delete(Root, true);
+    }
+}

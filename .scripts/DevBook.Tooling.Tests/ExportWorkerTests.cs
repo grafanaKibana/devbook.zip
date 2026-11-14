@@ -10,94 +10,83 @@ namespace DevBook.Tooling.Tests;
 
 public sealed class ExportWorkerTests
 {
-    [Theory]
-    [InlineData("lag")]
-    [InlineData("foreign-head")]
-    [InlineData("closed")]
-    [InlineData("identity")]
-    public async Task GeneratedRefPublicationWaitsOnlyForSafePrHeadPropagation(string scenario)
+    [Fact]
+    public async Task ArtifactCompletionNeverChangesTheReviewedSourceRef()
     {
         // Arrange
         var fixture = new WorkerFixture();
         fixture.Api.ChecksReady = true;
         var store = new MemoryStateStore(fixture.State);
-        // Git accepts the ref before the PR head reflects that update.
-        fixture.Api.AfterRefUpdate = () =>
-        {
-            fixture.Api.PrHeadAfterRef = FakeExportApi.SourceHead;
-            switch (scenario)
-            {
-                case "foreign-head":
-                    fixture.Api.PrHeadAfterRef = FakeExportApi.OwnerChangedHead;
-                    break;
-                case "closed":
-                    fixture.Api.Pr["state"] = "closed";
-                    break;
-                case "identity":
-                    fixture.Api.Pr["body"] = "Owner replaced the managed identity.";
-                    break;
-            }
-        };
-        var clock = new ExportWorkerCheckClock(DateTimeOffset.UtcNow);
-        var delays = 0;
-        var wait = new ExportCheckWait(clock, (duration, token) =>
-        {
-            token.ThrowIfCancellationRequested();
-            clock.Advance(duration);
-            delays++;
-            if (scenario == "lag")
-            {
-                fixture.Api.PrHeadAfterRef = null;
-            }
-            return Task.CompletedTask;
-        });
 
         // Act
-        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, checkWait: wait);
-        JsonObject state = (await store.ReadAsync()).State;
+        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, provenance: fixture.Provenance);
 
         // Assert
-        fixture.Api.RefWrites.Should().Be(1);
-        fixture.Api.CommitWrites.Should().Be(1);
-        if (scenario == "lag")
+        result.Str("status").Should().Be("exported");
+        fixture.Api.Head.Should().Be(FakeExportApi.SourceHead);
+        fixture.Api.RefWrites.Should().Be(0);
+        fixture.Api.CommitWrites.Should().Be(0);
+        fixture.Api.BlobWrites.Should().Be(0);
+        fixture.Api.TreeRequests.Should().BeEmpty();
+    }
+
+    [Theory]
+    [InlineData("expired")]
+    [InlineData("digest")]
+    [InlineData("run")]
+    [InlineData("event")]
+    [InlineData("branch")]
+    [InlineData("attempt")]
+    [InlineData("repository")]
+    public async Task UntrustedOrExpiredArtifactCannotCompleteTheReviewedSource(string scenario)
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.ChecksReady = true;
+        switch (scenario)
         {
-            result.Str("status").Should().Be("exported");
-            fixture.Api.ReadyConversions.Should().Be(1);
-            delays.Should().Be(1);
-            state.Obj("finalized_exports").ContainsKey(fixture.Request.Str("op_id")).Should().BeTrue();
+            case "expired": fixture.Api.Artifact["expired"] = true; break;
+            case "digest": fixture.Api.Artifact["digest"] = "sha256:" + new string('c', 64); break;
+            case "run": fixture.Api.Artifact.Obj("workflow_run")["id"] = 99; break;
+            case "event": fixture.Api.Run["event"] = "pull_request"; break;
+            case "branch": fixture.Api.Run["head_branch"] = "untrusted"; break;
+            case "attempt": fixture.Api.Run["run_attempt"] = 2; break;
+            case "repository": fixture.Api.Run.Obj("repository")["full_name"] = "other/repo"; break;
         }
-        else
-        {
-            result.Str("status").Should().Be("stale");
-            state.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence").Bool("export_paused").Should().BeTrue();
-            state.Obj("finalized_exports").Count.Should().Be(0);
-            fixture.Api.Comments.Should().BeEmpty();
-            fixture.Api.ReadyConversions.Should().Be(0);
-            delays.Should().Be(0);
-        }
+        var store = new MemoryStateStore(fixture.State);
+
+        // Act
+        Func<Task> complete = () => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store,
+            provenance: fixture.Provenance);
+
+        // Assert
+        await complete.Should().ThrowAsync<RuntimeFailure>();
+        fixture.Api.RefWrites.Should().Be(0);
+        fixture.Api.CommitWrites.Should().Be(0);
+        fixture.Api.ReadyConversions.Should().Be(0);
     }
 
     [Fact]
-    public async Task InterruptedGeneratedRefResumesTheSavedBinaryAndDeletionCommit()
+    public async Task RegisteredArtifactResumesChecksWithoutChangingTheSourceOrRepeatingFeedback()
     {
         // Arrange
         var fixture = new WorkerFixture();
         var store = new MemoryStateStore(fixture.State);
-        fixture.Api.FailBeforeRefOnce = true;
-        Exception? interruption = await Record.ExceptionAsync(() => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store));
+        JsonObject waiting = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store,
+            provenance: fixture.Provenance);
         fixture.Api.ChecksReady = true;
 
         // Act
         JsonObject result = await Worker.FinalizeAsync(fixture.Api, fixture.Config, store, fixture.Request);
+        JsonObject replay = await Worker.FinalizeAsync(fixture.Api, fixture.Config, store, fixture.Request);
 
         // Assert
-        interruption.Should().BeOfType<RuntimeFailure>();
+        waiting.Str("status").Should().Be("awaiting_checks");
         result.Str("status").Should().Be("exported");
-        fixture.Api.RefWrites.Should().Be(1);
-        fixture.Api.CommitWrites.Should().Be(1);
-        fixture.Api.ForceWrites.Should().Be(0);
-        fixture.Api.CurrentTree.Should().NotContainKey("Web/content/Removed.md");
-        fixture.Api.Blobs[fixture.Api.CurrentTree["Web/content/Assets/image.png"].Sha].Should().Equal(fixture.Binary);
+        replay.Bool("resumed").Should().BeTrue();
+        fixture.Api.Head.Should().Be(FakeExportApi.SourceHead);
+        fixture.Api.RefWrites.Should().Be(0);
+        fixture.Api.CommitWrites.Should().Be(0);
         fixture.Api.Comments.Should().ContainSingle();
         fixture.Api.Pr.Bool("draft").Should().BeFalse();
     }
@@ -116,13 +105,13 @@ public sealed class ExportWorkerTests
         fixture.Api.BeforeReadyConversion = async () => beforeReady = (await store.ReadAsync()).State;
 
         // Act
-        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, provenance: fixture.Provenance);
 
         // Assert
         result.Str("status").Should().Be("exported");
         fixture.Api.ReadyConversions.Should().Be(1);
         fixture.Api.Pr.Bool("draft").Should().BeFalse();
-        fixture.Api.Pr.Obj("head").Str("sha").Should().Be(FakeExportApi.GeneratedHead);
+        fixture.Api.Pr.Obj("head").Str("sha").Should().Be(FakeExportApi.SourceHead);
         beforeReady!.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence")
             .Str("export_check_status").Should().Be("success");
     }
@@ -139,7 +128,7 @@ public sealed class ExportWorkerTests
         var store = new MemoryStateStore(fixture.State);
 
         // Act
-        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, provenance: fixture.Provenance);
 
         // Assert
         result.Str("status").Should().Be(expectedStatus);
@@ -162,7 +151,7 @@ public sealed class ExportWorkerTests
         var store = new MemoryStateStore(fixture.State);
 
         // Act
-        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, provenance: fixture.Provenance);
 
         // Assert
         result.Str("status").Should().Be("stale");
@@ -182,7 +171,7 @@ public sealed class ExportWorkerTests
         fixture.Api.BeforeDraftConversion = async () => beforeConversion = (await store.ReadAsync()).State.Obj("prs").Obj(fixture.Key).Copy();
 
         // Act
-        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, provenance: fixture.Provenance);
 
         // Assert
         result.Str("status").Should().Be("awaiting_checks");
@@ -202,7 +191,7 @@ public sealed class ExportWorkerTests
         fixture.Bundle.Obj("files")["Vault/Home/Overwrite.md"] = Convert.ToBase64String("unsafe"u8.ToArray());
 
         // Act
-        Func<Task> publish = () => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+        Func<Task> publish = () => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, provenance: fixture.Provenance);
 
         // Assert
         await publish.Should().ThrowAsync<UnsafeInput>();
@@ -211,104 +200,234 @@ public sealed class ExportWorkerTests
     }
 
     [Fact]
-    public async Task BoundedTreeBatchesPreserveExactExportBytesAndAccumulatedLeaves()
-    {
-        // Arrange
-        var fixture = new WorkerFixture();
-        var files = new Dictionary<string, byte[]?>(Export.Bundle.Decode(fixture.Bundle), StringComparer.Ordinal);
-        for (var index = 0; index < 400; index++)
-        {
-            files[$"Web/content/{index:D3}-é.md"] = Encoding.UTF8.GetBytes("\uFEFFé😀\r\n\"\\" + new string('x', 16_000));
-        }
-        files["Web/content/Large.md"] = Encoding.UTF8.GetBytes(new string('x', TreeUpload.MaximumRequestBytes));
-        Dictionary<string, GitTreeEntry> expected = await Export.Bundle.TreeAsync(fixture.Api, FakeExportApi.SourceHead);
-        foreach (KeyValuePair<string, byte[]?> file in files)
-        {
-            if (file.Value is null)
-            {
-                expected.Remove(file.Key);
-            }
-            else
-            {
-                expected[file.Key] = new GitTreeEntry(file.Key, "100644", "blob", Export.Bundle.BlobSha(file.Value));
-            }
-        }
-        files[Receipt.PathName] = Encoding.UTF8.GetBytes(Receipt.Make(expected.Values).ToJsonString());
-        Dictionary<string, GitTreeEntry> predicted = await Export.Bundle.PredictAsync(fixture.Api, FakeExportApi.SourceHead, files);
-        var clock = new ExportWorkerCheckClock(DateTimeOffset.UtcNow);
-        var writes = new List<DateTimeOffset>();
-        var wait = new TreeUploadWait(clock, (duration, _) => { clock.Advance(duration); return Task.CompletedTask; });
-
-        // Act
-        string tree = await TreeUpload.UploadAsync(fixture.Api, new string('1', 40), files,
-            _ => { writes.Add(clock.GetUtcNow()); return Task.CompletedTask; }, wait: wait);
-
-        // Assert
-        Export.Bundle.SameLeaves(fixture.Api.Trees[tree].Values, predicted.Values).Should().BeTrue();
-        fixture.Api.TreeRequests.Count.Should().BeGreaterThan(4);
-        fixture.Api.BlobWrites.Should().Be(2);
-        fixture.Api.TreeRequests.Should().OnlyContain(request => request.Arr("tree").Count <= TreeUpload.MaximumEntries
-            && Encoding.UTF8.GetByteCount(LegacyIdentity.CanonicalJson(request)) <= TreeUpload.MaximumRequestBytes);
-        fixture.Api.TreeRequests.SelectMany(request => request.Arr("tree").OfType<JsonObject>())
-            .Count(entry => entry.ContainsKey("content")).Should().Be(402);
-        foreach (KeyValuePair<string, byte[]?> file in files.Where(item => item.Value is not null))
-        {
-            fixture.Api.Blobs[fixture.Api.Trees[tree][file.Key].Sha].Should().Equal(file.Value!);
-        }
-        writes.Zip(writes.Skip(1), (before, after) => after - before).Should().OnlyContain(gap => gap >= TimeSpan.FromSeconds(1));
-        fixture.Api.RefWrites.Should().Be(0);
-    }
-
-    [Fact]
-    public async Task ExpiredLeaseAfterPacingPreventsTheNextImmutableWrite()
-    {
-        // Arrange
-        var fixture = new WorkerFixture();
-        var clock = new ExportWorkerCheckClock(DateTimeOffset.UtcNow);
-        DateTimeOffset expires = clock.GetUtcNow().AddMilliseconds(500);
-        var files = Enumerable.Range(0, 101).ToDictionary(index => $"Web/content/{index:D3}.md", _ => (byte[]?)"text"u8.ToArray());
-        var wait = new TreeUploadWait(clock, (duration, _) => { clock.Advance(duration); return Task.CompletedTask; });
-
-        // Act
-        Func<Task> upload = () => TreeUpload.UploadAsync(fixture.Api, new string('1', 40), files,
-            _ => clock.GetUtcNow() < expires ? Task.CompletedTask : throw new Conflict("Lease expired."), wait: wait);
-
-        // Assert
-        await upload.Should().ThrowAsync<Conflict>();
-        fixture.Api.TreeRequests.Should().ContainSingle();
-        fixture.Api.RefWrites.Should().Be(0);
-    }
-
-    [Fact]
-    public async Task LostTreeResponseRestartsWithoutMovingTheBranchPartially()
+    public async Task ArtifactReplayCannotReplaceTheRegisteredBytes()
     {
         // Arrange
         var fixture = new WorkerFixture();
         var store = new MemoryStateStore(fixture.State);
-        fixture.Api.FailAfterTreeOnce = true;
-        Exception? interruption = await Record.ExceptionAsync(() => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store));
-        int writesAfterInterruption = fixture.Api.RefWrites;
-        string firstTree = fixture.Api.Trees.Keys.Last();
-        fixture.Api.ChecksReady = true;
+        await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store,
+            provenance: fixture.Provenance);
+        JsonObject changed = fixture.Bundle.Copy();
+        byte[] bytes = "Different native output"u8.ToArray();
+        changed.Obj("files")["Web/content/Card.md"] = Convert.ToBase64String(bytes);
+        changed.Obj("manifest").Obj("outputs")["Web/content/Card.md"] = Output(bytes);
 
         // Act
-        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+        Func<Task> replace = () => Worker.PublishBundleAsync(fixture.Api, fixture.Config, changed, fixture.Request, store,
+            provenance: fixture.Provenance);
 
         // Assert
-        interruption.Should().BeOfType<RuntimeFailure>();
-        writesAfterInterruption.Should().Be(0);
-        fixture.Api.Trees.Keys.Last().Should().Be(firstTree);
-        result.Str("status").Should().Be("exported");
-        fixture.Api.RefWrites.Should().Be(1);
-        fixture.Api.CommitWrites.Should().Be(1);
+        await replace.Should().ThrowAsync<Conflict>();
+        fixture.Api.CommitWrites.Should().Be(0);
+        fixture.Api.RefWrites.Should().Be(0);
     }
 
-    private sealed class ExportWorkerCheckClock(DateTimeOffset now) : TimeProvider
+    [Fact]
+    public void LegacyGeneratedCommitRequestIsPausedWithoutDiscardingItsReview()
     {
-        private DateTimeOffset ExportWorkercurrent = now;
-        public override DateTimeOffset GetUtcNow() => ExportWorkercurrent;
-        public void Advance(TimeSpan duration) => ExportWorkercurrent += duration;
+        // Arrange
+        var fixture = new WorkerFixture();
+        JsonObject operation = fixture.State.Obj("export_operations").Obj(fixture.Request.Str("op_id"));
+        operation.Obj("evidence").Obj("export_request")["version"] = 1;
+        operation.Obj("evidence")["export_commit_sha"] = FakeExportApi.GeneratedHead;
+        string reviewed = operation.Obj("receipts").ToJsonString();
+
+        // Act
+        ExportOpportunity selected = Worker.SelectOpportunity(fixture.State, DateTimeOffset.UtcNow.AddDays(1));
+
+        // Assert
+        selected.Request.Should().BeNull();
+        JsonObject preserved = selected.State.Obj("export_operations").Obj(fixture.Request.Str("op_id"));
+        preserved.Obj("evidence").Bool("export_paused").Should().BeTrue();
+        preserved.Obj("receipts").ToJsonString().Should().Be(reviewed);
     }
+
+    [Fact]
+    public async Task ExpiredFinalizedArtifactRebuildsWithoutRepeatingReviewOrChangingItsReadyPr()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.ChecksReady = true;
+        var store = new MemoryStateStore(fixture.State);
+        await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store,
+            provenance: fixture.Provenance);
+        int ready = fixture.Api.ReadyConversions;
+        int draft = fixture.Api.DraftConversions;
+        fixture.Api.Artifact["expired"] = true;
+
+        // Act
+        JsonObject expired = await Worker.FinalizeAsync(fixture.Api, fixture.Config, store, fixture.Request);
+        ExportOpportunity retry = Worker.SelectOpportunity((await store.ReadAsync()).State, DateTimeOffset.UtcNow);
+        JsonObject fresh = fixture.Provenance.Copy();
+        fresh["artifact_id"] = "12";
+        fresh["run_id"] = "23";
+        fresh["digest"] = new string('c', 64);
+        fixture.Api.Artifact["expired"] = false;
+        fixture.Api.Artifact["name"] = "devbook-syncer-export-23-1";
+        fixture.Api.Artifact["digest"] = "sha256:" + new string('c', 64);
+        fixture.Api.Artifact.Obj("workflow_run")["id"] = 23;
+        JsonObject refreshed = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store,
+            provenance: fresh);
+        JsonObject state = (await store.ReadAsync()).State;
+
+        // Assert
+        expired.Str("status").Should().Be("awaiting_export");
+        retry.Mode.Should().Be("render");
+        refreshed.Bool("refreshed").Should().BeTrue();
+        fixture.Api.ReadyConversions.Should().Be(ready);
+        fixture.Api.DraftConversions.Should().Be(draft);
+        fixture.Api.Pr.Bool("draft").Should().BeFalse();
+        fixture.Api.Comments.Should().ContainSingle();
+        fixture.Api.RefWrites.Should().Be(0);
+        fixture.Api.CommitWrites.Should().Be(0);
+        JsonObject operation = state.Obj("export_operations").Obj(fixture.Request.Str("op_id"));
+        operation.Bool("compacted").Should().BeTrue();
+        operation.Obj("evidence").Arr("export_artifact_history").Count.Should().Be(1);
+        operation.Obj("evidence").Bool("export_refresh_required").Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ArtifactWithoutIndependentTransportCannotCompleteAPr()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        var store = new MemoryStateStore(fixture.State);
+
+        // Act
+        Func<Task> publish = () => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+
+        // Assert
+        await publish.Should().ThrowAsync<UnsafeInput>().WithMessage("*independent*provenance*");
+        fixture.Api.RefWrites.Should().Be(0);
+        fixture.Api.ReadyConversions.Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData("head")]
+    [InlineData("base")]
+    [InlineData("closed")]
+    [InlineData("identity")]
+    public async Task ConcurrentPrChangesKeepArtifactCompletionPaused(string change)
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.ChecksReady = true;
+        fixture.Api.BeforeDraftConversion = () =>
+        {
+            switch (change)
+            {
+                case "head": fixture.Api.Head = FakeExportApi.OwnerChangedHead; break;
+                case "base": fixture.Api.Pr.Obj("base")["sha"] = FakeExportApi.OwnerChangedHead; break;
+                case "closed": fixture.Api.Pr["state"] = "closed"; break;
+                case "identity": fixture.Api.Pr["body"] = "Owner changed PR identity."; break;
+            }
+            return Task.CompletedTask;
+        };
+        var store = new MemoryStateStore(fixture.State);
+
+        // Act
+        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store,
+            provenance: fixture.Provenance);
+
+        // Assert
+        result.Str("status").Should().Be("stale");
+        fixture.Api.ReadyConversions.Should().Be(0);
+        fixture.Api.CommitWrites.Should().Be(0);
+        fixture.Api.RefWrites.Should().Be(0);
+        (await store.ReadAsync()).State.Obj("export_operations").Obj(fixture.Request.Str("op_id"))
+            .Obj("evidence").Bool("export_paused").Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData("event")]
+    [InlineData("path")]
+    [InlineData("repository")]
+    [InlineData("sha")]
+    public async Task GenericGreenChecksCannotReplaceTheActualSourceExportWorkflow(string mismatch)
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.ChecksReady = true;
+        fixture.Api.PrTitleOverride = mismatch switch
+        {
+            "event" => new JsonObject { ["event"] = "workflow_dispatch" },
+            "path" => new JsonObject { ["path"] = ".github/workflows/other.yml" },
+            "repository" => new JsonObject { ["repository"] = new JsonObject { ["full_name"] = "untrusted/repo" } },
+            _ => new JsonObject { ["head_sha"] = FakeExportApi.OwnerChangedHead }
+        };
+        var store = new MemoryStateStore(fixture.State);
+
+        // Act
+        JsonObject result = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store,
+            provenance: fixture.Provenance);
+
+        // Assert
+        result.Str("status").Should().Be("awaiting_checks");
+        fixture.Api.ReadyConversions.Should().Be(0);
+        fixture.Api.Pr.Bool("draft").Should().BeTrue();
+        fixture.Api.CommitWrites.Should().Be(0);
+        fixture.Api.RefWrites.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task ManagedBodyUpdateAwaitsTheNewSourceWorkflowWithoutUpdatingTheBodyAgain()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.ChecksReady = true;
+        fixture.Api.BodyCheckPending = true;
+        var store = new MemoryStateStore(fixture.State);
+
+        // Act
+        JsonObject waiting = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store,
+            provenance: fixture.Provenance);
+        fixture.Api.BodyCheckPending = false;
+        JsonObject completed = await Worker.FinalizeAsync(fixture.Api, fixture.Config, store, fixture.Request);
+
+        // Assert
+        waiting.Str("status").Should().Be("awaiting_checks");
+        completed.Str("status").Should().Be("exported");
+        fixture.Api.BodyWrites.Should().Be(1);
+        fixture.Api.ReadyConversions.Should().Be(1);
+        fixture.Api.Comments.Should().ContainSingle();
+        fixture.Api.RefWrites.Should().Be(0);
+        fixture.Api.CommitWrites.Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task LostBodyUpdateResponseResumesWithoutAnExtraMutation(bool applied)
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.ChecksReady = true;
+        fixture.Api.FailBeforeBodyOnce = !applied;
+        fixture.Api.FailAfterBodyOnce = applied;
+        var store = new MemoryStateStore(fixture.State);
+        Exception? interrupted = await Record.ExceptionAsync(() => Worker.PublishBundleAsync(fixture.Api, fixture.Config,
+            fixture.Bundle, fixture.Request, store, provenance: fixture.Provenance));
+
+        // Act
+        JsonObject completed = await Worker.FinalizeAsync(fixture.Api, fixture.Config, store, fixture.Request);
+
+        // Assert
+        interrupted.Should().BeOfType<RuntimeFailure>();
+        completed.Str("status").Should().Be("exported");
+        fixture.Api.BodyWrites.Should().Be(1);
+        fixture.Api.ReadyConversions.Should().Be(1);
+        fixture.Api.Comments.Should().ContainSingle();
+        fixture.Api.RefWrites.Should().Be(0);
+        fixture.Api.CommitWrites.Should().Be(0);
+    }
+
+    private static JsonObject Output(byte[] bytes) => new()
+    {
+        ["sha256"] = Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(bytes)),
+        ["size"] = bytes.Length,
+        ["mode"] = "100644",
+        ["type"] = "file"
+    };
 
     internal sealed class WorkerFixture
     {
@@ -317,6 +436,11 @@ public sealed class ExportWorkerTests
         public JsonObject Request { get; }
         public JsonObject Bundle { get; }
         public JsonObject State { get; }
+        public JsonObject Provenance { get; } = new()
+        {
+            ["artifact_id"] = "11", ["run_id"] = "22", ["run_attempt"] = "1",
+            ["digest"] = new string('a', 64), ["bundle_sha256"] = new string('b', 64)
+        };
         public string Key { get; }
         public byte[] Binary { get; } = [0, 255, 128, 10, 0, 32];
 
@@ -335,7 +459,7 @@ public sealed class ExportWorkerTests
             };
             Request = new JsonObject
             {
-                ["version"] = 1,
+                ["version"] = 2,
                 ["op_id"] = "operation-12345678",
                 ["pr_number"] = 1,
                 ["branch"] = ExportWorkerbranch,
@@ -348,31 +472,36 @@ public sealed class ExportWorkerTests
                 new("Vault/Home/Programming/NET/Card.md", "100644", "blob", new string('f', 40)),
                 new("Web/content/Card.md", "100644", "blob", new string('8', 40)),
                 new("Web/content/Removed.md", "100644", "blob", new string('9', 40))];
-            var bytes = new Dictionary<string, byte[]?>(StringComparer.Ordinal)
+            var bytes = new Dictionary<string, byte[]>(StringComparer.Ordinal)
             {
                 ["Web/content/Card.md"] = "Updated generated note\n"u8.ToArray(),
-                ["Web/content/Removed.md"] = null,
-                ["Web/content/Assets/image.png"] = Binary
+                ["Web/content/Assets/image.png"] = Binary,
+                ["Web/quartz/styles/syncer/_index.scss"] = "/* native fixture styles */\n"u8.ToArray()
             };
-            var predicted = original.ToDictionary(item => item.Path, StringComparer.Ordinal);
-            foreach (KeyValuePair<string, byte[]?> item in bytes)
-            {
-                if (item.Value is null)
-                {
-                    predicted.Remove(item.Key);
-                }
-                else
-                {
-                    predicted[item.Key] = new GitTreeEntry(item.Key, "100644", "blob", Export.Bundle.BlobSha(item.Value));
-                }
-            }
-            bytes[Receipt.PathName] = Encoding.UTF8.GetBytes(Receipt.Make(predicted.Values).ToJsonString());
+            JsonObject inputs = SiteArtifact.Inputs(original);
+            var outputs = new JsonObject();
             var files = new JsonObject();
-            foreach (KeyValuePair<string, byte[]?> item in bytes)
+            foreach ((string path, byte[] data) in bytes)
             {
-                files[item.Key] = item.Value is null ? null : Convert.ToBase64String(item.Value);
+                files[path] = Convert.ToBase64String(data);
+                outputs[path] = Output(data);
             }
-            Bundle = new JsonObject { ["version"] = 1, ["expected_head"] = FakeExportApi.SourceHead, ["branch"] = ExportWorkerbranch, ["pr_number"] = 1, ["files"] = files };
+            Bundle = new JsonObject
+            {
+                ["version"] = 2, ["expected_head"] = FakeExportApi.SourceHead, ["branch"] = ExportWorkerbranch, ["pr_number"] = 1,
+                ["manifest"] = new JsonObject
+                {
+                    ["version"] = 2, ["repository"] = "owner/devbook", ["source_sha"] = FakeExportApi.SourceHead, ["kind"] = "commit",
+                    ["sources"] = inputs["sources"]?.DeepClone(), ["policy"] = inputs["policy"]?.DeepClone(),
+                    ["runtime"] = new JsonObject
+                    {
+                        ["obsidian"] = "1.14.5",
+                        ["plugins"] = new JsonObject(Receipt.Plugins.Select(id => new KeyValuePair<string, JsonNode?>(id, JsonValue.Create("1.0.0"))))
+                    },
+                    ["outputs"] = outputs
+                },
+                ["files"] = files
+            };
             Api = new FakeExportApi(original, topic, ExportWorkerbranch);
             var feedback = new JsonObject { ["key"] = "inline:7:revision", ["url"] = "https://github.com/owner/devbook/pull/1#discussion_r7" };
             var batch = new JsonObject { ["notes"] = new JsonArray(), ["feedback"] = new JsonArray(feedback.Copy()), ["pr"] = new JsonObject { ["number"] = 1 } };
@@ -424,11 +553,16 @@ public sealed class ExportWorkerTests
         public bool ChecksReady { get; set; }
         public string CheckConclusion { get; set; } = "success";
         public bool ValidationMissing { get; set; }
-        public bool FailBeforeRefOnce { get; set; }
-        public bool FailAfterTreeOnce { get; set; }
+        public JsonObject PrTitleOverride { get; set; } = new();
+        public long PrTitleRunId { get; private set; } = 1;
+        public bool BodyCheckPending { get; set; }
+        private bool bodyTriggered;
+        public int BodyWrites { get; private set; }
+        public bool FailBeforeBodyOnce { get; set; }
+        public bool FailAfterBodyOnce { get; set; }
         public List<JsonObject> TreeRequests { get; } = [];
         public Dictionary<string, Dictionary<string, GitTreeEntry>> Trees { get; } = new(StringComparer.Ordinal);
-        private string generatedTree = new string('1', 40);
+        private readonly string generatedTree = new string('1', 40);
         public int RefWrites { get; private set; }
         public int ForceWrites { get; private set; }
         public int BlobWrites { get; private set; }
@@ -436,21 +570,27 @@ public sealed class ExportWorkerTests
         public int Dispatches { get; private set; }
         public int DraftConversions { get; private set; }
         public int ReadyConversions { get; private set; }
+        public JsonObject Artifact { get; } = new()
+        {
+            ["expired"] = false, ["name"] = "devbook-syncer-export-22-1", ["digest"] = "sha256:" + new string('a', 64),
+            ["workflow_run"] = new JsonObject { ["id"] = 22 }
+        };
+        public JsonObject Run { get; } = new()
+        {
+            ["run_attempt"] = 1, ["path"] = ".github/workflows/devbook-improvement.yml", ["head_branch"] = "main", ["event"] = "schedule",
+            ["repository"] = new JsonObject { ["full_name"] = "owner/devbook" }
+        };
         public Func<Task>? BeforeDraftConversion { get; set; }
         public Func<Task>? BeforeReadyConversion { get; set; }
-        public Action? AfterRefUpdate { get; set; }
         public string? PrHeadAfterRef { get; set; }
         public JsonObject Pr { get; }
         public List<JsonObject> Comments { get; } = [];
-        public Dictionary<string, byte[]> Blobs { get; } = new(StringComparer.Ordinal);
-        public Dictionary<string, GitTreeEntry> CurrentTree { get; private set; }
         private readonly Dictionary<string, GitTreeEntry> original;
         private readonly string ExportWorkerbranch;
 
         public FakeExportApi(IEnumerable<GitTreeEntry> entries, string topic, string ExportWorkerbranch)
         {
             original = entries.ToDictionary(item => item.Path, StringComparer.Ordinal);
-            CurrentTree = new(original, StringComparer.Ordinal);
             Trees[new string('1', 40)] = new(original, StringComparer.Ordinal);
             this.ExportWorkerbranch = ExportWorkerbranch;
             Pr = new JsonObject
@@ -474,6 +614,14 @@ public sealed class ExportWorkerTests
             {
                 Pr.Obj("head")["sha"] = RefWrites > 0 ? PrHeadAfterRef ?? Head : Head;
                 response = Pr.Copy();
+            }
+            else if (method == "GET" && path.StartsWith("/actions/artifacts/", StringComparison.Ordinal))
+            {
+                response = Artifact.Copy();
+            }
+            else if (method == "GET" && path.StartsWith("/actions/runs/", StringComparison.Ordinal))
+            {
+                response = Run.Copy();
             }
             else if (method == "GET" && path.StartsWith("/pulls?", StringComparison.Ordinal))
             {
@@ -528,75 +676,23 @@ public sealed class ExportWorkerTests
             else if (method == "POST" && path == "/git/blobs")
             {
                 BlobWrites++;
-                byte[] bytes = Convert.FromBase64String(payload.Str("content"));
-                string sha = Export.Bundle.BlobSha(bytes);
-                Blobs[sha] = bytes;
-                response = new JsonObject { ["sha"] = sha };
-            }
-            else if (method == "GET" && path.StartsWith("/git/blobs/", StringComparison.Ordinal))
-            {
-                response = new JsonObject { ["encoding"] = "base64", ["content"] = Convert.ToBase64String(Blobs[path["/git/blobs/".Length..]]) };
+                throw new InvalidOperationException("Artifact completion cannot upload Git blobs.");
             }
             else if (method == "POST" && path == "/git/trees")
             {
                 TreeRequests.Add(payload!.AsObject().Copy());
-                CurrentTree = new(Trees[payload.Str("base_tree")], StringComparer.Ordinal);
-                foreach (JsonObject entry in payload.Arr("tree").OfType<JsonObject>())
-                {
-                    bool inline = entry.ContainsKey("content");
-                    if (inline && entry.ContainsKey("sha"))
-                    {
-                        throw new InvalidOperationException("Tree entry mixes content and sha.");
-                    }
-                    if (!inline && !entry.ContainsKey("sha"))
-                    {
-                        throw new InvalidOperationException("Tree entry requires content or explicit sha.");
-                    }
-                    if (!inline && entry["sha"] is null)
-                    {
-                        CurrentTree.Remove(entry.Str("path"));
-                    }
-                    else
-                    {
-                        string sha = entry.Str("sha");
-                        if (inline)
-                        {
-                            byte[] bytes = Encoding.UTF8.GetBytes(entry.Str("content"));
-                            sha = Export.Bundle.BlobSha(bytes);
-                            Blobs[sha] = bytes;
-                        }
-                        CurrentTree[entry.Str("path")] = new GitTreeEntry(entry.Str("path"), entry.Str("mode"), entry.Str("type"), sha);
-                    }
-                }
-                var identity = new JsonArray(CurrentTree.Values.OrderBy(entry => entry.Path, StringComparer.Ordinal)
-                    .Select(entry => (JsonNode)new JsonObject { ["path"] = entry.Path, ["mode"] = entry.Mode, ["type"] = entry.Type, ["sha"] = entry.Sha }).ToArray());
-                string treeSha = LegacyIdentity.Fingerprint(identity)[..40];
-                Trees[treeSha] = new(CurrentTree, StringComparer.Ordinal);
-                response = new JsonObject { ["sha"] = treeSha };
-                if (FailAfterTreeOnce)
-                {
-                    FailAfterTreeOnce = false;
-                    throw new RuntimeFailure("Simulated lost response after immutable tree creation.");
-                }
+                throw new InvalidOperationException("Artifact completion cannot upload Git trees.");
             }
             else if (method == "POST" && path == "/git/commits")
             {
-                generatedTree = payload.Str("tree");
                 CommitWrites++;
-                response = new JsonObject { ["sha"] = GeneratedHead };
+                throw new InvalidOperationException("Artifact completion cannot create Git commits.");
             }
             else if (method == "PATCH" && path.StartsWith("/git/refs/heads/", StringComparison.Ordinal))
             {
                 ForceWrites += payload.Bool("force") ? 1 : 0;
-                if (FailBeforeRefOnce)
-                {
-                    FailBeforeRefOnce = false;
-                    throw new RuntimeFailure("Simulated transport interruption before the ref write.");
-                }
-                Head = payload.Str("sha");
                 RefWrites++;
-                AfterRefUpdate?.Invoke();
-                response = new JsonObject { ["object"] = new JsonObject { ["sha"] = Head } };
+                throw new InvalidOperationException("Artifact completion cannot move source refs.");
             }
             else if (method == "POST" && path == "/actions/workflows/vault-validation.yml/dispatches")
             {
@@ -617,6 +713,19 @@ public sealed class ExportWorkerTests
             {
                 response = new JsonObject { ["sha"] = Head, ["statuses"] = new JsonArray() };
             }
+            else if (method == "GET" && path.StartsWith("/actions/workflows/pr-title.yml/runs", StringComparison.Ordinal))
+            {
+                var run = new JsonObject
+                {
+                    ["id"] = PrTitleRunId,
+                    ["head_branch"] = ExportWorkerbranch, ["head_sha"] = Head,
+                    ["event"] = "pull_request", ["path"] = ".github/workflows/pr-title.yml",
+                    ["repository"] = new JsonObject { ["full_name"] = Repo },
+                    ["conclusion"] = ChecksReady && (!bodyTriggered || !BodyCheckPending) ? CheckConclusion : "pending"
+                };
+                foreach ((string key, JsonNode? value) in PrTitleOverride) run[key] = value?.DeepClone();
+                response = new JsonObject { ["workflow_runs"] = new JsonArray(run) };
+            }
             else if (method == "GET" && path.StartsWith("/actions/workflows/vault-validation.yml/runs", StringComparison.Ordinal))
             {
                 response = new JsonObject
@@ -624,6 +733,8 @@ public sealed class ExportWorkerTests
                     ["workflow_runs"] = ValidationMissing || Dispatches == 0 ? new JsonArray() : new JsonArray(new JsonObject
                     {
                         ["head_branch"] = ExportWorkerbranch,
+                        ["event"] = "workflow_dispatch", ["path"] = ".github/workflows/vault-validation.yml",
+                        ["repository"] = new JsonObject { ["full_name"] = Repo },
                         ["head_sha"] = Head,
                         ["conclusion"] = ChecksReady ? "success" : "pending"
                     })
@@ -640,7 +751,20 @@ public sealed class ExportWorkerTests
             }
             else if (method == "PATCH" && path == "/pulls/1")
             {
+                if (FailBeforeBodyOnce)
+                {
+                    FailBeforeBodyOnce = false;
+                    throw new RuntimeFailure("Fixture transport failure before body mutation.");
+                }
                 Pr["body"] = payload!["body"]!.DeepClone();
+                BodyWrites++;
+                PrTitleRunId++;
+                bodyTriggered = true;
+                if (FailAfterBodyOnce)
+                {
+                    FailAfterBodyOnce = false;
+                    throw new RuntimeFailure("Fixture transport response lost after body mutation.");
+                }
                 response = Pr.Copy();
             }
             else
@@ -698,7 +822,7 @@ public sealed class ExportWorkerTests
     }
 
     [Fact]
-    public async Task AnotherWorkerLeaseBlocksGeneratedPublication()
+    public async Task AnotherWorkerLeaseBlocksArtifactCompletion()
     {
         // Arrange
         var fixture = new WorkerFixture();
@@ -706,7 +830,7 @@ public sealed class ExportWorkerTests
         await new DurableLease(store, "other-worker").AcquireAsync();
 
         // Act
-        Func<Task> publish = () => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+        Func<Task> publish = () => Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, provenance: fixture.Provenance);
 
         // Assert
         await publish.Should().ThrowAsync<Conflict>();
@@ -720,7 +844,7 @@ public sealed class ExportWorkerTests
         var fixture = new WorkerFixture();
         fixture.Api.ValidationMissing = true;
         var store = new MemoryStateStore(fixture.State);
-        await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+        await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, provenance: fixture.Provenance);
         StateSnapshot snapshot = await store.ReadAsync();
         JsonObject evidence = snapshot.State.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence");
         evidence["validation_attempts"] = 3;
@@ -734,8 +858,8 @@ public sealed class ExportWorkerTests
         // Assert
         result.Str("status").Should().Be("checks_failed");
         fixture.Api.Dispatches.Should().Be(dispatches);
-        fixture.Api.CommitWrites.Should().Be(1);
-        fixture.Api.RefWrites.Should().Be(1);
+        fixture.Api.CommitWrites.Should().Be(0);
+        fixture.Api.RefWrites.Should().Be(0);
         (await store.ReadAsync()).State.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Obj("evidence").Bool("export_paused").Should().BeTrue();
     }
 

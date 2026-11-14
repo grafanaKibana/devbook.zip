@@ -322,7 +322,7 @@ public sealed class GitHubRuntime
         }
         var request = new JsonObject
         {
-            ["version"] = 1,
+            ["version"] = 2,
             ["op_id"] = opId,
             ["pr_number"] = number,
             ["branch"] = branch,
@@ -339,7 +339,7 @@ public sealed class GitHubRuntime
             ["export_request"] = request.Copy(),
             ["export_attempts"] = automatic ? 1 : 0,
             ["export_last_dispatch_at"] = automatic ? Runtime.Iso(clock.GetUtcNow()) : null,
-            ["reason"] = automatic ? "Same-workflow Syncer export queued" : "Awaiting an explicitly approved local Syncer export"
+            ["reason"] = automatic ? "Same-workflow native artifact render queued" : "Awaiting an explicitly approved local Syncer export"
         }, freeze: !automatic, cancellationToken: cancellationToken);
         var response = new JsonObject { ["op_id"] = opId, ["commit_sha"] = head, ["status"] = "awaiting_export", ["automatic_export"] = automatic };
         if (automatic)

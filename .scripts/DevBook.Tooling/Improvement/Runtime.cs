@@ -18,7 +18,7 @@ public sealed class StalePublicationBase(string expectedSha, string observedSha)
     public string ObservedSha { get; } = observedSha;
 }
 
-public sealed record PublicationChecks(string Status, JsonObject Checks, string? VaultValidation);
+public sealed record PublicationChecks(string Status, JsonObject Checks, string? VaultValidation, long? PrTitleRunId = null);
 
 public static partial class Runtime
 {
@@ -172,12 +172,27 @@ public static partial class Runtime
     public static Task<JsonNode?> DispatchVaultValidationAsync(IGitHubApi api, string branch, CancellationToken cancellationToken = default) =>
         api.RequestAsync("POST", "/actions/workflows/vault-validation.yml/dispatches", new JsonObject { ["ref"] = branch }, cancellationToken: cancellationToken);
 
-    public static async Task<string> VaultValidationForShaAsync(IGitHubApi api, string branch, string sha, CancellationToken cancellationToken = default)
+    public static async Task<string> VaultValidationForShaAsync(IGitHubApi api, string branch, string sha, CancellationToken cancellationToken = default) =>
+        WorkflowConclusion(await WorkflowRunForShaAsync(api, "vault-validation.yml", branch, sha, ["workflow_dispatch", "pull_request", "push"], cancellationToken));
+
+    public static Task<JsonObject> PrTitleRunForShaAsync(IGitHubApi api, string branch, string sha, CancellationToken cancellationToken = default) =>
+        WorkflowRunForShaAsync(api, "pr-title.yml", branch, sha, ["pull_request"], cancellationToken);
+
+    private static string WorkflowConclusion(JsonObject run) => run.Str("conclusion", run.Str("status", "unknown"));
+
+    private static async Task<JsonObject> WorkflowRunForShaAsync(IGitHubApi api, string workflow, string branch, string sha,
+        IReadOnlyCollection<string> events, CancellationToken cancellationToken)
     {
-        JsonObject runs = await ObjectAsync(api, "GET", "/actions/workflows/vault-validation.yml/runs?event=workflow_dispatch&per_page=20", cancellationToken: cancellationToken);
-        JsonObject? run = runs.Arr("workflow_runs").OfType<JsonObject>().Where(item => item.Str("head_branch") == branch && item.Str("head_sha") == sha)
-            .OrderBy(item => item.Str("created_at"), StringComparer.Ordinal).LastOrDefault();
-        return run is null ? throw new Conflict("Vault validation run missing on exact head.") : run.Str("conclusion", run.Str("status", "unknown"));
+        JsonObject runs = await ObjectAsync(api, "GET", $"/actions/workflows/{workflow}/runs?head_sha=" + Uri.EscapeDataString(sha) + "&per_page=100", cancellationToken: cancellationToken);
+        JsonObject? run = runs.Arr("workflow_runs").OfType<JsonObject>()
+            .Where(item => item.Str("head_branch") == branch && item.Str("head_sha") == sha
+                && events.Contains(item.Str("event"))
+                && item.Str("path").Split('@')[0] == ".github/workflows/" + workflow
+                && item.Obj("repository").Str("full_name") == api.Repo)
+            .OrderBy(item => item.Str("created_at"), StringComparer.Ordinal)
+            .ThenBy(item => long.TryParse(item["id"]?.ToString(), out long id) ? id : 0)
+            .ThenBy(item => item.Int("run_attempt")).LastOrDefault();
+        return run is null ? throw new Conflict(workflow + " validation run missing on exact source head.") : run;
     }
 
     public static async Task<PublicationChecks> PublicationCheckStateAsync(IGitHubApi api, string branch, string sha, IEnumerable<string>? required = null, CancellationToken cancellationToken = default)
@@ -200,10 +215,22 @@ public static partial class Runtime
         {
             return new("pending", checks, null);
         }
+        long titleRunId;
+        try
+        {
+            JsonObject run = await PrTitleRunForShaAsync(api, branch, sha, cancellationToken);
+            if (!long.TryParse(run["id"]?.ToString(), out titleRunId) || titleRunId <= 0)
+                throw new Conflict("PR Title workflow lacks a current run identity.");
+            checks["pr-title-workflow"] = WorkflowConclusion(run);
+        }
+        catch (Conflict)
+        {
+            return new("pending", checks, vault);
+        }
         string[] failures = ["failure", "error", "cancelled", "timed_out", "action_required", "startup_failure", "stale"];
         string[] values = [.. checks.Select(item => item.Value!.GetValue<string>()), vault];
         string status = values.Any(value => failures.Contains(value)) ? "failed" : values.All(value => value == "success") ? "success" : "pending";
-        return new(status, checks, vault);
+        return new(status, checks, vault, titleRunId);
     }
 
     public static async Task EnsureDraftForMutationAsync(IGitHubApi api, JsonObject pr, CancellationToken cancellationToken = default)

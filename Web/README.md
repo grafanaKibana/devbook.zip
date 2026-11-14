@@ -7,69 +7,65 @@ This directory turns the notes in [`../Vault/`](../Vault) into a fast static web
 ## The pipeline
 
 ```text
-Obsidian  (Vault/Home, publish: true notes)
-   │  Quartz Syncer plugin: renders in-note Datacore/Bases → static HTML,
-   │  preserves %% markers, strips the "Home" vault-root folder
-   │  pre-commit waits for export and stages Web/content/ and Syncer styles
-   ▼
-Web/content/     # generated, git-tracked, deployed as-is
-   │  npx quartz build   (Vercel, on every push)
-   ▼
-Web/public/  →  devbook.zip
+Vault sources + authored site/tooling configuration
+  │ source-only commit and PR
+  ▼
+CI: genuine isolated Obsidian/Quartz Syncer export
+  │ complete source/policy/output-bound artifact; actual PR Quartz build
+  ▼
+Review and merge to stage; promote stage → main separately
+  │ CI rebuilds the exact accepted commit for its environment
+  ▼
+Verified Vercel Build Output → deploy --prebuilt
+  ├─ stage → Preview → https://stage.devbook.zip
+  └─ main  → Production → https://devbook.zip
 ```
 
-- **Author** notes in Obsidian under `Vault/Home/`. Only `publish: true` notes ever leave the vault.
-- **Commit** staged vault changes — the pre-commit hook waits for Quartz Syncer to render in-note Datacore/Bases to static HTML, verifies publication and cleanup, and stages generated output into that same commit. Treat `Web/content/` as generated output; edit notes in `Vault/`.
-- **Build & deploy** — Vercel runs the Quartz build from `Web/` on each push; production deploys from `main`.
+Author notes under `Vault/Home/`; only `publish: true` notes are exported. `Web/content/`, `quartz/styles/syncer/`, `.devbook-improvement/syncer-export.json` and the built site are generated and ignored. A clean clone intentionally has no web-ready content. Never hand-edit or commit these outputs. `quartz/styles/custom.scss` remains authored source, including its existing `@use "./syncer";` import.
 
-Before vault maintenance and export, pre-commit refreshes `Vault/Home/Changelog.md` from all published GitHub Releases and stages it in the same commit. This runs under the existing export lock after source/output guards; source-free and Obsidian-settings-only commits skip it. Python 3 and an authenticated GitHub CLI (`gh auth login`) are required. A failed release fetch blocks the commit without replacing the existing changelog; restore connectivity/authentication and retry. Unchanged release content is not rewritten, and source `created`/`modified`/`published` dates are preserved for the existing date tooling. A staged deletion of the page is respected. A newly published release appears on the next vault-source commit, then reaches the site through the normal `stage` → `main` promotion.
+Commits run source maintenance and validation without opening Obsidian: guarded `created`/`modified` preparation, Changelog refresh, folder rollups, Roadmap generation, staged-vault validation and Learn coverage. Stage all intended source changes before committing; partial staging, unstaged/untracked Vault source, concurrent source changes or failed maintenance still block the commit. Unrelated generated local previews no longer block source commits. Changelog refresh requires authenticated `gh`; a failed release fetch preserves the old page and blocks the commit. A staged Changelog deletion remains respected.
+
+PR checks export the actual candidate commit with the pinned genuine desktop app and build Quartz without Vercel credentials. The existing `pr-title` check aggregates that result; title validity alone is insufficient. Synthetic exporter fixtures remain separate integration coverage. Automated notes PRs stay source-only and draft until their reviewed source has a trusted native artifact and exact-head checks; they never receive a generated commit. Their configured base remains `main`.
 
 ## Local development
 
-After cloning, run one setup command from the repository root:
+Install Git, Bash, Python 3, GitHub CLI, .NET SDK **10.0.100**, Node **22** with npm, then run:
 
 ```bash
 bash .scripts/setup.sh
 ```
 
-It installs the locked npm dependencies in `Web/`, enables this checkout’s Git hooks, and configures Syncer for this checkout through the existing supported CLI flow. It does not export notes, stage files, commit, or deploy the site. Running it again is safe; `npm ci` reinstalls the locked dependencies.
+Setup installs locked Web dependencies and enables this checkout's hooks. Obsidian does not need to be running to set up or commit. Git identity/authentication and `gh auth login` remain local prerequisites for source commits and pushes.
 
-**Manual prerequisites before running setup:**
-
-1. Install Git, Bash, Python 3, GitHub CLI, the pinned .NET SDK 10.0.100, Node 22 with npm, and Obsidian desktop. Activate Node 22 in the shell; `Web/.node-version` records the project version. The `.scripts/global.json` SDK pin applies when commands run inside `.scripts`.
-2. Open this checkout’s `Vault/` folder in Obsidian and allow community plugins. Enable the bundled Quartz Syncer and Datacore plugins, and Git for commits inside Obsidian. Keep the bundled Syncer build described below.
-3. Enable **Settings → General → Command line interface** and follow Obsidian’s registration prompt. Keep the vault open while setup runs. See the [Obsidian CLI setup guide](https://obsidian.md/help/cli).
-
-**Manual steps before the first commit/push:** configure Git’s name/email if missing, authenticate Git for GitHub access when pulling or pushing, and let Datacore finish indexing. Setup leaves identity and credentials under your control. Local export needs no Syncer GitHub token. Once ready, commits from desktop Obsidian Git run the same blocking pre-commit export as terminal commits.
-
-If setup fails, its output identifies the failed stage. Dependencies and hooks already installed remain in place; fix the reported prerequisite and run the same command again. Setup only reports success after Syncer configuration succeeds.
-
-This workflow is tested on macOS. Linux has not been verified; native Windows and mobile are unsupported because the exporter uses Bash and Unix file locking. Quartz community plugins are installed and updated by `npm run build`, described below; setup installs the npm dependencies needed for the authoring workflow.
-
-The installed Syncer is a temporary build of [PR #153](https://github.com/saberzero1/quartz-syncer/pull/153), recorded in `Vault/.obsidian/plugins/quartz-syncer/build-info.json`. Shared export defaults live in `.scripts/quartz-syncer.defaults.json`: **Preserve** keeps existing `%%` Tabsdown/Colsdown markers, the vault root is `Home/`, and the content folder is `content`. Automatic publishing and automatic orphan-media cleanup are disabled; the hook performs checked publication and cleanup itself. It never pushes remotely. When replacing the temporary build, first verify the installed release supports Preserve; released builds without that setting cannot export marker layouts correctly.
-
-Before exporting, the hook applies the shared defaults through Syncer’s supported configuration commands and configures **Local** mode with the current checkout’s absolute `Web/` location through `repo action=set-local`. It refreshes the destination after a clone or move without changing the plugin’s runtime behavior. Syncer’s actual `Vault/.obsidian/plugins/quartz-syncer/data.json` is ignored by Git: the generated destination, credentials, cache and UI state stay on this machine. Other local settings are retained; shared export defaults are reapplied when they differ. The shared policy enables Syncer’s cache because its safe media cleanup needs compiled media references. When export settings change, setup clears Syncer’s compilation cache and reloads the plugin through Obsidian’s CLI. It verifies that automatic publication is stopped before exporting, so cached pages cannot retain the previous comment mode and an old timer cannot publish independently of the hook.
-
-The first vault commit configures Syncer automatically. To configure it before using manual Syncer commands, run this from the repository root after opening the vault:
+Export the current working Vault and start Quartz with one command:
 
 ```bash
-(cd .scripts && dotnet run --no-cache --file DevBook.Tooling/Scripts/SyncQuartz.cs -- --configure-only --repo-root ..)
+(cd .scripts && dotnet run --project DevBook.Tooling -- site preview --repo-root ..)
 ```
 
-This command only configures the connected checkout; it does not export, stage files, or require clean vault source. Setup updates an existing local `data.json` without replacing unrelated settings; new clones let Syncer create it.
+The preview command snapshots current working source, including untracked notes/media, into an ignored disposable checkout and uses a separate Obsidian profile. It preserves the real Git index, personal plugin settings and Qard study state. `--app-bundle /path/to/Obsidian.app` selects a compatible app; CI pins checksum-verified **Obsidian 1.14.5**. `--port 8085` changes the server port and `--no-serve` prepares a build without starting a server. Native rendering currently requires macOS; Node 22 remains required for Quartz.
 
-Stage all intended vault source changes before committing. Partially staged, unstaged, or untracked source blocks export, as do pre-existing generated-output changes. The hook waits for Obsidian and Syncer indexes to match the files on disk before publishing or deleting pages. Asset changes, including Markdown assets under `Vault/Assets/`, republish all eligible notes through Syncer’s existing publisher so an unchanged note cannot leave an edited image stale. Media cleanup uses Syncer’s compiled-reference-aware operation, preserving images produced only by Datacore queries. Its native safety guard may retain unused media; a no-change/withheld result is logged explicitly rather than reported as verified removal. A failed or skipped note, an unrendered query, a cleanup error, a wrong connected vault, failed configuration, concurrent source edits, or a timeout blocks the commit. Failures include the operation, failed-note details or bounded process diagnostics, without dumping settings or credentials. Inspect `git status` and the Git metadata log (`git rev-parse --git-path quartz-syncer-publish.log`), fix the cause, then review any partial generated output before committing or restoring it separately and retrying. Do not discard vault source to clear an export failure. The default overall local export budget is 600 seconds, shared by maintenance, CLI commands and index-readiness waits. `QUARTZ_SYNC_TIMEOUT` accepts finite positive seconds within the supported deadline range and overrides that local default. The isolated scheduled renderer supplies its own bounded remaining budget, which takes precedence over the environment override. A timeout does not cancel work already running inside Obsidian. Source-free commits skip export. Local commit preparation writes source `created`/`modified` under the same lock and staging guards. The recurring improvement system prepares selected candidates before independent review, then runs this genuine exporter in a source-immutable isolated job; it adds published output to the same draft PR automatically. See the [improvement runbook](../.scripts/DevBook.Tooling/README.md).
+Existing dated notes preview entirely through the isolated profile. First publication retains its existing meaning and requires the current Vault open in Obsidian with its CLI enabled. For a new `publish: true` note without `published`, this explicit preview operation first completes a genuine export, uses the public `Vault.process()` operation with a current-content hash guard to record only the missing publication date in the owning source, and exports again. There is no filesystem writeback fallback. It does not stage that change; review it with the note. Existing `created`, `modified`, `published` and supported aliases remain authoritative. Failed exports never create a publication date, and a concurrent edit is never overwritten. Immutable CI refuses a missing required publication date and directs the author to this command.
 
-Quartz requires **Node 22** (`.node-version`).
+The bundled Quartz Syncer is the temporary Preserve-capable build of [PR #153](https://github.com/saberzero1/quartz-syncer/pull/153), recorded in its `build-info.json`. Keep **Preserve** support before replacing it. Shared defaults in `.scripts/quartz-syncer.defaults.json` select `Home/`, preserve `%%` layout markers, enable compiled-reference-aware media cleanup and disable background publication. Machine-local Syncer `data.json` remains ignored. The isolated renderer uses only its required plugins and restores settings on exit.
+
+Export starts from empty owned output roots and preserves native index-readiness checks, failed/skipped-note checks, source immutability, rendered-query validation and safe media cleanup. A failure produces no successful artifact. If desktop cleanup cannot complete, diagnostics name the retained settings/profile recovery path; inspect that owned recovery data before deleting it. Never discard Vault source to bypass a failure. Local preview directories under `.devbook-preview/` are disposable after the server/profile has stopped.
+
+For an immutable dedicated checkout, CI uses:
 
 ```bash
-cd Web
-npm ci                       # install dependencies
-npm run build                # update community plugins and build → Web/public/
-npx quartz build --serve     # dev server + live reload → http://localhost:8080
+(cd .scripts && dotnet run --project DevBook.Tooling -- site export \
+  --repo-root .. --expected-head <exact-commit-sha> \
+  --app-bundle /path/to/Obsidian.app --output /tmp/devbook-native)
+(cd .scripts && dotnet run --project DevBook.Tooling -- site verify \
+  --repo-root .. --expected-head <exact-commit-sha> \
+  --bundle /tmp/devbook-native/bundle.json --extract)
+npm run build --prefix Web
 ```
 
-`npm run build` regenerates and checks StepTrace, clears the disposable `.quartz/plugins` installation cache, installs configured plugins with `plugin install --from-config`, updates them with `plugin install --latest`, then builds the site. Reinstalling protects builds from Vercel caches that omit plugins’ Git metadata. It preserves the committed lockfile baseline and authored plugin sources. Latest follows each plugin's upstream default branch, including commits newer than its last tagged release.
+Use a clean disposable checkout for immutable export, not the live Vault. The full bundle binds source/policy and every output byte; extraction validates paths, kinds, bounds and hashes before replacing owned generated roots. PR native artifacts retain for 14 days, managed artifacts for 7, deployment packages for 30. Expired artifacts require a fresh authorized export of the intended source; an artifact name alone never proves freshness.
+
+`npm run build` regenerates/checks StepTrace, reinstalls configured Quartz plugins, updates them with `--latest`, then builds the site. The committed `quartz.lock.json` remains the baseline; actual resolved plugin lock data is recorded in deployment packages, and build-time updates are never committed. Running Quartz directly requires prepared generated content first.
 
 ## Customization surfaces
 
@@ -110,16 +106,30 @@ The Questions page has one web renderer. Syncer may freeze the in-note Datacore 
 
 ## Deploy
 
-Vercel builds from the repo-root `vercel.json`:
+`.github/workflows/site-deploy.yml` owns deployment after accepted pushes to `stage` or `main`. It rebuilds that exact commit through the same native export flow; it never deploys a PR artifact. The file-based `framework: null` explicitly selects Vercel’s static “Other” preset instead of any legacy dashboard framework. Target-specific `vercel pull`/`vercel build` preserve `cleanUrls`, redirects and the existing root `vercel.json` settings. Pulled environment files are cleared before repository or latest-plugin code runs: this static build has no secret build variables. Vercel credentials are exposed only to authenticated CLI/API steps.
 
-Automatic Git deployments are limited to `main` and `stage`. Vercel's native GitHub integration records them as **Production** and **Preview**, respectively; keep its **Git → `deployment_status` Events** enabled. The preview for `stage` is also available at `https://stage.devbook.zip`; keep that Vercel domain assigned to the `stage` branch with its recommended CNAME configured at the authoritative DNS provider. Restrict the GitHub **Production** environment to the `main` branch and **Preview** to `stage`. Improvement jobs use `deployment: false` on their credential environment so maintenance runs do not appear as site deployments.
+Only allowlisted static `.vercel/output` files and a complete inventory/identity manifest enter the package. Same-run jobs transfer exact artifact IDs with fail-closed digest checks and independently bind the single payload's SHA-256. Deployment rejects wrong source, target, package bytes and unexpected functions. `--prebuilt` uploads that verified build without rebuilding it remotely.
 
-`.github/workflows/preview-deployment-link.yml` updates the existing native Preview record's link to `https://stage.devbook.zip` after a successful Vercel deployment of the current `stage` commit. It preserves the individual build log URL and creates no deployments. Deployment-status events run against the deployed commit, so the workflow must be present in the `stage` commit being deployed.
+Preview and Production jobs serialize per branch. Preview creates an immutable deployment without GitHub-reporting/branch-alias metadata; Production stages with `--prod --skip-domain`. Each checks deployment project/SHA and the served immutable build marker, then rechecks branch head immediately before explicit alias assignment or Production promotion. Afterward, alias identity and the fixed URL's build marker must match before GitHub reports success. An observed stale run stops; network calls do not provide atomic branch-head freshness. Serialized jobs prevent an older queued run from superseding a newer published deployment.
 
-```text
-installCommand:  cd Web && npm ci
-buildCommand:    cd Web && npm run build
-outputDirectory: Web/public
-```
+GitHub deployment records use **Preview** with `https://stage.devbook.zip` and **Production** with `https://devbook.zip`. Vercel still creates its normal immutable URLs for each build. `git.deploymentEnabled:false` disables the old automatic Git builds; the old Preview-link patcher is no longer needed. Improvement credentials keep `deployment: false` and create no site deployment records.
 
-Commit `quartz.lock.json` as the baseline for ordinary lockfile installs. The deployment build intentionally updates plugins beyond that baseline; its lockfile changes stay in the build workspace and are not committed back. Updates happen on each build; publishing a plugin update alone does not trigger a deployment. Vercel regenerates StepTrace before checking artifact freshness, so a stale committed Obsidian bundle cannot block the web build.
+### Cutover prerequisites
+
+Keep the migration PR **draft** until an authorized owner completes these steps; code changes do not provision credentials or activate production:
+
+1. In GitHub environments **Preview** and **Production**, configure `VERCEL_TOKEN` as a protected secret and `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` as variables for the intended Vercel project. The helper pins organization `team_oe3ByhkyzxSLo4G4aibDvOMA` and project `prj_NwP2L88ODNMTDmHk0fWS5c1jtw2Y`; mismatched variables fail before pull, upload or domain assignment. Restrict branches to `stage` / `main`; apply required reviewers according to the release policy.
+2. If Deployment Protection covers either immutable or custom URL, configure `VERCEL_AUTOMATION_BYPASS_SECRET` in that environment so the smoke test checks the actual site rather than an SSO page. Protection itself remains enabled.
+3. Preserve the Vercel domain/DNS mapping for `stage.devbook.zip`. Validate project identity, artifact package and protection-aware smoke prerequisites. Configure required checks on `stage` through a separately authorized settings change: current stage rules do not enforce checks. A red readiness check alone is advisory there; draft status blocks ordinary PR merge. Main enforces `pr-title`.
+4. Set repository variable `DEVBOOK_ARTIFACT_DEPLOYMENT_READY=true` only after the configuration is verified. The default-false readiness gate keeps `pr-title` red while actual source/export/build checks run independently. Deployment jobs also check real credential presence instead of trusting this flag.
+5. Review the PR, mark it ready and merge to `stage`; verify the new Preview. Promote `stage` to `main` separately for Production. Before promotion, pause/resume legacy improvement operations using the recovery process below so old publishers cannot reintroduce tracked output.
+
+The live project/settings remain unchanged while this PR is open. Do not disable the old live path manually before the reviewed CI cutover is ready.
+
+### Recovery and rollback
+
+For a failed build, fix source/tooling and rebuild the intended SHA. For an expired artifact, rerun its authorized workflow; do not substitute another run's similarly named artifact. A failed identity/alias/smoke check remains a failed deployment even if upload itself succeeded.
+
+To roll Production back, an authorized operator selects a previously verified **production** deployment/package and uses Vercel rollback/promotion without rebuilding unknown source. Verify its project and served build marker afterward. Rollback can disable automatic domain assignment; explicitly restore promotion behavior before resuming releases. Keep the last known-good deployment available independently of expiring CI artifacts.
+
+Old managed-note branches and journals may still reference generated commits. Update their base/source scope deliberately and request a fresh reviewed-source export under the new contract; unsupported legacy operations pause with their audit/review data intact. Never delete their source edits, invent an artifact receipt, or resume an old generated-ref writer. See the [improvement runbook](../.scripts/DevBook.Tooling/README.md).
