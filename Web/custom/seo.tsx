@@ -150,8 +150,8 @@ export function unlistGenerated(
   const generate = pageType.generate
   if (!generate)
     throw new Error(`SEO: expected Quartz page type "${pageType.name}" to generate pages`)
-  pageType.generate = (...args: never[]) =>
-    generate(...args).map((page) =>
+  pageType.generate = async (...args: never[]) =>
+    (await generate(...args)).map((page) =>
       predicate(page.slug) ? { ...page, data: { ...page.data, unlisted: true } } : page,
     )
 }

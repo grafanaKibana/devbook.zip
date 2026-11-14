@@ -33,7 +33,6 @@ import {
 import { componentRegistry } from "./quartz/components/registry"
 import { i18n } from "./quartz/i18n"
 import type { QuartzComponent, QuartzComponentConstructor } from "./quartz/components/types"
-import { PageTypes } from "./quartz/plugins"
 import type { ExplorerOptions } from "./.quartz/plugins"
 import { loadQuartzConfig, loadQuartzLayout } from "./quartz/plugins/loader/config-loader"
 
@@ -66,12 +65,9 @@ Object.assign(i18n(config.configuration.locale).pages.error, {
 })
 
 // Clean Syncer's committed markdown/HTML for the flattened web build.
-const linkIdx = config.plugins.transformers.findIndex((t) => t.name === "LinkProcessing")
-config.plugins.transformers.splice(
-  linkIdx === -1 ? config.plugins.transformers.length : linkIdx,
-  0,
-  SyncerFixups(),
-)
+const links = requireNamedPlugin(config.plugins.transformers, "Links")
+const linkIdx = config.plugins.transformers.indexOf(links)
+config.plugins.transformers.splice(linkIdx, 0, SyncerFixups())
 
 // Foldable callout titles only exist as hast after the Obsidian-flavored-markdown
 // plugin's rehype-raw pass, and must be marked before QuestionCollector clones them.
@@ -119,7 +115,8 @@ config.plugins.emitters.push(StepTraceStatic())
 config.plugins.emitters.push(ExcalidrawStatic())
 config.plugins.emitters.push(Robots())
 
-const layout = await loadQuartzLayout()
+// Use the shared layout captured by Quartz's existing page dispatcher.
+const layout = await loadQuartzLayout({})
 layout.defaults.head = withCanonicalSocialUrls(layout.defaults.head!)
 for (const pageLayout of Object.values(layout.byPageType)) {
   if (pageLayout.head) pageLayout.head = withCanonicalSocialUrls(pageLayout.head)
@@ -175,12 +172,12 @@ for (const pageLayout of Object.values(layout.byPageType)) {
 const pageContribute = PageContribute()
 
 // Preserve the configured community footer and add per-page sharing inside it.
-const footer = layout.defaults.footer
+const [footer, ...remainingFooters] = layout.defaults.footer ?? []
 if (!footer) throw new Error("SiteFooter requires an enabled footer component")
 const siteFooter = SiteFooter({ footer })
-layout.defaults.footer = siteFooter
+layout.defaults.footer = [siteFooter, ...remainingFooters]
 for (const pageLayout of Object.values(layout.byPageType)) {
-  pageLayout.footer = siteFooter
+  pageLayout.footer = [siteFooter, ...remainingFooters]
 }
 
 const content = { ...(layout.byPageType.content ?? {}) }
@@ -203,6 +200,18 @@ const instantiateRegistered = (name: string): QuartzComponent => {
   return typeof component === "function" && !("displayName" in component)
     ? componentRegistry.instantiate(component as QuartzComponentConstructor, undefined)
     : (component as QuartzComponent)
+}
+
+// Quartz 5.1 uses manifest positions when YAML omits layout. These components
+// are rendered inside DevBook wrappers, so remove their automatic placements.
+const embeddedComponents = new Set(
+  ["page-title", "search", "darkmode", "reader-mode", "content-meta"].map(instantiateRegistered),
+)
+for (const pageLayout of [layout.defaults, ...Object.values(layout.byPageType)]) {
+  for (const slot of ["header", "beforeBody", "left", "right", "afterBody"] as const) {
+    const components = pageLayout[slot]
+    if (components) pageLayout[slot] = components.filter((c) => !embeddedComponents.has(c))
+  }
 }
 
 const siteHeader = SiteHeader({
@@ -241,11 +250,6 @@ for (const [pageType, pageLayout] of Object.entries(layout.byPageType)) {
   if (pageType === "404") continue
   pageLayout.beforeBody = [...(pageLayout.beforeBody ?? []), contentMetaRow]
 }
-
-config.plugins.emitters = config.plugins.emitters.filter((e) => e.name !== "PageTypeDispatcher")
-config.plugins.emitters.push(
-  PageTypes.PageTypeDispatcher({ defaults: layout.defaults, byPageType: layout.byPageType }),
-)
 
 export default config
 export { layout }

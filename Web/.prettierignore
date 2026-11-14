@@ -1,6 +1,8 @@
 public
 node_modules
 .quartz-cache
+# Disposable installed plugins and their generated index.
+.quartz/plugins
 .omc
 content
 quartz
