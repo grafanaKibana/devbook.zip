@@ -14364,11 +14364,11 @@
     "version": 1,
     "id": "40a68853698f42388f6dd5882c679ad4",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-14T18:18:47.082551Z",
-    "elapsed_seconds": 209.86388069999995,
+    "elapsed_seconds": 222.54573699999995,
     "calls_reserved": 6,
-    "responses_received": 5,
+    "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
@@ -14531,7 +14531,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T18:22:16.945917Z",
+    "checkpoint_at": "2026-11-14T18:22:29.627754Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -43177,5 +43177,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "40a68853698f42388f6dd5882c679ad4",
+    "topic_id": "ai-ml-4edf0823",
+    "batch": {
+      "topic": "AI & ML",
+      "topic_id": "ai-ml-4edf0823",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Ablation varies one component at a time to isolate what caused a retrieval-metric change.\"\nlevel: [\"2\"]\npriority: High\nstatus: In Progress\npublish: true\ncreated: \"2026-06-12T18:21:46.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.484Z\"\n---\n\nEnd-to-end metrics show that a RAG pipeline regressed. They rarely show why. A lower Recall@5 could come from split evidence, an embedding model that mishandles domain vocabulary, or an ANN index that approximates too aggressively. Component-level evaluation holds most of the pipeline still and moves one part at a time.\n\nThat experiment is an ablation. Change one component, keep the rest fixed, and compare the metric delta with run-to-run noise. A component that does not move the result is unlikely to be the current bottleneck. [[Evaluation Metrics]] defines the measured outcomes, while [[Retrieval Evaluation Sets]] covers the labels those measurements consume.\n\n# How to Evaluate Chunking\n\nMost RAG frameworks have no standalone \"chunking quality\" score. Chunking is judged by what it does to retrieval, using either token-span labels or a controlled pipeline comparison.\n\n**Token-level IoU** measures how tightly retrieved chunks cover the evidence a query needs. It requires `(query, gold_evidence_span)` pairs, built manually or generated and then checked. For each query, compute:\n\n- **Token Recall** = `|gold ∩ retrieved| / |gold|` — were the relevant tokens retrieved?\n- **Token Precision** = `|gold ∩ retrieved| / |retrieved|` — how much noise came along?\n- **Token IoU** = `|gold ∩ retrieved| / |gold ∪ retrieved|` — combined efficiency that penalizes both missed evidence and noise\n\nToken IoU exposes a weakness that Recall@k misses: a large chunk can count as a retrieval hit while most of its tokens are irrelevant. In Chroma's controlled experiment, an 800-token chunk with 400-token overlap reached 87.9% token recall and only 1.4% precision. A 400-token semantic strategy reached 91.3% recall with 4.5% precision. The comparison is specific to that corpus, but the measurement problem is general.\n\n**Ablation via retrieval metrics** is cheaper when token-span labels are unavailable. Run the same queries through each chunking strategy while keeping the embedding model, index, and retriever fixed. Fill a fixed token budget in rank order instead of retrieving a fixed number of chunks. Fixed top-k confounds chunk size with retrieved context and generally gives larger chunks a larger token budget. Compare retrieval recall and answer faithfulness. Overlap often gives diminishing returns once the splitter already preserves sentence boundaries, while excessive context can lower answer quality by burying evidence in noise.\n\n# How to Compare Embedding Models\n\nAn embedding model is useful when it ranks relevant corpus passages well. Raw cosine scores do not establish that. Only retrieval metrics against labeled queries do.\n\n**Build a domain set.** Collect representative queries and label relevant passages from the real corpus as qrels: `query_id → doc_id → relevance_score`. Start small enough to review carefully, then add cases from production failures. General benchmarks such as MTEB and BEIR help with screening, but they do not predict performance on internal terminology.\n\n**Compare one variable.** Embed the same corpus with each candidate and use exact search when the goal is to isolate embedding quality. If the corpus requires ANN, tune each index and verify matched ANN recall against exact search before comparing retrieval metrics; identical ANN settings can favor one embedding space over another. Measure nDCG at the cutoffs the generator actually consumes because two models can have similar top-10 quality and very different top-3 quality. Small metric gaps should be weighed against latency and cost. There is no portable percentage threshold that decides the tradeoff for every corpus.\n\n**Watch for drift.** Golden-query neighbor overlap catches ranking changes directly. Distribution measures such as JS divergence can show that the embedding space moved, while click-through and query reformulation provide slower behavioral evidence. Set thresholds from known-good and known-bad deployments. Before changing models, build a shadow index and compare its recall before moving traffic.\n\n# How to Isolate ANN Loss\n\nANN Recall@k is not retrieval Recall@k. Retrieval recall compares results with relevance labels. ANN recall compares an approximate index with exact nearest-neighbor search over the same vectors. The latter isolates index loss. [[Retrieval]] covers the parameters that control it.\n\nGround truth is established by running brute-force (exact) search over the full corpus for every query in a test set. ANN results are then compared against these true neighbors. ANN Recall@10 = 0.85 means the approximate index returned 85% of the actual 10 closest vectors.\n\n**Tune against exact search.** Sweep `ef_search` for HNSW or `nprobe` for IVF and plot ANN recall against p99 latency. The useful operating point is where extra search work stops buying material recall. Re-run the sweep as the corpus and data distribution change. A fixed setting can leave the old recall/latency operating point behind, but the direction and size of each change depend on the index family, partition or graph shape, and workload. Fixed `nprobe`, for example, visits the same number of IVF lists while the number of vectors inside those lists can grow.\n\n**Filtered search evaluation** requires separate ground truth: brute-force over only the vectors that pass the metadata filter, then compare ANN filtered results against this restricted set. Post-filtering HNSW (run ANN first, then apply filter) can lose recall under high selectivity because most candidates are removed after the graph search. Test several selectivity levels, such as 100%, 10%, and 1%, to measure the workload's degradation curve. Some vector databases maintain filtered indexes that preserve graph connectivity at the cost of more storage.\n\n**Production monitoring.** Run exact-versus-approximate recall checks on a golden query set after major ingestion events and on a schedule that fits the index's change rate. Proxy signals help explain a regression but do not replace that comparison:\n\n- rising `nprobe` requirements to hold recall can indicate degraded IVF partition quality.\n- shard load skew exposes hot partitions caused by semantically clustered traffic or data.\n- KL divergence over pairwise-distance distributions exposes embedding-space movement.\n\n# References\n\n- [Evaluating chunking strategies for retrieval -- token-level IoU methodology and benchmark (Chroma Research)](https://research.trychroma.com/evaluating-chunking)\n- [A practical guide to selecting HNSW hyperparameters -- portfolio learning across 15 datasets (OpenSearch)](https://opensearch.org/blog/a-practical-guide-to-selecting-hnsw-hyperparameters/)\n",
+          "hash": "335c856c61ac7d13ea7921ce27b8ad91bb41fb8fe44e7db21bf343fc43e4ab97",
+          "topic": "AI & ML",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "changed"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md",
+          "outcome": "keep",
+          "reason": "I audited the whole note against its text and general knowledge of the cited sources. I did not re-fetch the sources in this pass. The opening defines ablation and links the Evaluation Metrics and Retrieval Evaluation Sets notes where they are needed. The chunking section gives the token recall, precision and IoU formulas. It explains why IoU exposes the large-chunk weakness of Recall@k, and its Chroma figures (87.9% recall with 1.4% precision, 91.3% recall with 4.5% precision) are scoped to that corpus. The fixed-token-budget advice correctly names the chunk-size confound in fixed top-k. The embedding section separates exact search from ANN, requires matched ANN recall, and avoids invented thresholds. The ANN section correctly separates ANN recall (against exact neighbors) from labeled retrieval recall. It also covers the sweep of ef_search or nprobe, filtered-search ground truth with selectivity levels, and production proxy signals. It makes no unsupported universal claims. The prose is direct and non-repetitive, there are no fenced-code or Qard issues, and no violations are listed. The only references are two relevant sources. No concrete defect or essential gap was found, so a forced edit would be cosmetic churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md": "335c856c61ac7d13ea7921ce27b8ad91bb41fb8fe44e7db21bf343fc43e4ab97"
+    },
+    "feedback_keys": [],
+    "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-14T18:22:29.627746Z"
+  }
 }
