@@ -14803,11 +14803,11 @@
     "version": 1,
     "id": "5fe9ecfcc7344982bcd2cdfba7482c21",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-14T22:36:29.240304Z",
-    "elapsed_seconds": 141.80001570000002,
+    "elapsed_seconds": 155.45101640000001,
     "calls_reserved": 5,
-    "responses_received": 4,
+    "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/Cloud/Providers.md",
       "Vault/Home/Cloud/Cloud Cost Management.md"
@@ -14901,7 +14901,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T22:38:51.039959Z",
+    "checkpoint_at": "2026-11-14T22:39:04.690959Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
@@ -45076,6 +45076,125 @@
       "Vault/Home/Cloud/Cloud.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T22:38:46.826203Z"
+    "prepared_at": "2026-11-14T22:38:46.826203Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The single note is accurate, coherent and in the right voice. It has no known violations and no concrete defects, so keeping it unchanged is justified.",
+        "notes": [
+          {
+            "path": "Vault/Home/Cloud/Cloud.md",
+            "verdict": "CLEAN",
+            "summary": "The folder note states the operating idea early: the operating boundary moves but does not disappear. It lists the responsibilities that stay with the application team, gives architecture questions to ask before choosing products, and explains how cloud behavior shows up in code. No edit is needed.",
+            "page_type": "FolderNote — tagged FolderNote, with the protected datacorejsx card map kept. Questions are optional and absent. References hold one real NIST primary source.",
+            "current_text_evidence": [
+              {
+                "quote": "It moves an application's operating boundary; it does not remove it.",
+                "line_start": 18,
+                "reason": "This gives the operating idea quickly. The managed-database example that follows is accurate and concrete."
+              },
+              {
+                "quote": "**Economics:** which code paths generate compute, requests, storage, transfer, and observability volume.",
+                "line_start": 33,
+                "reason": "The ownership list is concrete and non-overlapping, and it includes cost, which is easy to overlook."
+              },
+              {
+                "quote": "Start from the workload contract:",
+                "line_start": 39,
+                "reason": "The numbered questions come before product names and support engineering judgment. They lead into the Providers note."
+              },
+              {
+                "quote": "Cloud failures are ordinary distributed-system failures.",
+                "line_start": 51,
+                "reason": "This ties cloud behavior to application code through throttling, redelivery, retries and idempotency. The content is accurate, and the wording is direct and impersonal."
+              },
+              {
+                "quote": "- [NIST SP 800-145: The NIST Definition of Cloud Computing]",
+                "line_start": 56,
+                "reason": "The reference is a real, authoritative, topic-specific source, formatted as a bare link bullet with no annotation."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note is a compact hub with a card map. Its sections all serve one idea, the application's remaining responsibilities in the cloud, and the detailed topics already live in linked sibling notes.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Cloud/Cloud.md",
+          "citation_index": 4,
+          "reported_line_start": 56,
+          "resolved_line_start": 57
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Cloud/Cloud.md": "ed00c45c149656914d8a74a8e90d273290a99234af12273e7a45991cb47a57d9"
+      },
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The single note is accurate, coherent and in the right voice. It has no known violations and no concrete defects, so keeping it unchanged is justified.",
+      "notes": [
+        {
+          "path": "Vault/Home/Cloud/Cloud.md",
+          "verdict": "CLEAN",
+          "summary": "The folder note states the operating idea early: the operating boundary moves but does not disappear. It lists the responsibilities that stay with the application team, gives architecture questions to ask before choosing products, and explains how cloud behavior shows up in code. No edit is needed.",
+          "page_type": "FolderNote — tagged FolderNote, with the protected datacorejsx card map kept. Questions are optional and absent. References hold one real NIST primary source.",
+          "current_text_evidence": [
+            {
+              "quote": "It moves an application's operating boundary; it does not remove it.",
+              "line_start": 18,
+              "reason": "This gives the operating idea quickly. The managed-database example that follows is accurate and concrete."
+            },
+            {
+              "quote": "**Economics:** which code paths generate compute, requests, storage, transfer, and observability volume.",
+              "line_start": 33,
+              "reason": "The ownership list is concrete and non-overlapping, and it includes cost, which is easy to overlook."
+            },
+            {
+              "quote": "Start from the workload contract:",
+              "line_start": 39,
+              "reason": "The numbered questions come before product names and support engineering judgment. They lead into the Providers note."
+            },
+            {
+              "quote": "Cloud failures are ordinary distributed-system failures.",
+              "line_start": 51,
+              "reason": "This ties cloud behavior to application code through throttling, redelivery, retries and idempotency. The content is accurate, and the wording is direct and impersonal."
+            },
+            {
+              "quote": "- [NIST SP 800-145: The NIST Definition of Cloud Computing]",
+              "line_start": 57,
+              "reason": "The reference is a real, authoritative, topic-specific source, formatted as a bare link bullet with no annotation."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note is a compact hub with a card map. Its sections all serve one idea, the application's remaining responsibilities in the cloud, and the detailed topics already live in linked sibling notes.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
