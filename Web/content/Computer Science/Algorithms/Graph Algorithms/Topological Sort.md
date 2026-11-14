@@ -174,7 +174,7 @@ Direction carries the dependency meaning. An undirected edge says nothing about 
 
 | Approach | Traversal | Order produced | Cycle signal | Tie-break control |
 | --- | --- | --- | --- | --- |
-| Kahn's | BFS over the in-degree-0 frontier, iterative | Emission order | Fewer than `V` vertices emitted | Priority queue yields a canonical (e.g. Lexicographically smallest) order |
+| Kahn's | BFS over the in-degree-0 frontier, iterative | Emission order | Fewer than `V` vertices emitted | Priority queue yields a canonical (e.g. lexicographically smallest) order |
 | DFS-based | Recursive depth-first | Reverse postorder (decreasing finish time) | Back edge to a vertex on the recursion stack | Fixed by traversal order. No natural tie-break |
 
 Kahn's fits iterative schedulers. Its queue makes the ready frontier explicit, the emitted-count check detects cycles, and a priority queue gives deterministic tie-breaking without recursion. DFS reverse postorder is shorter when a recursive traversal already exists and finish times will be reused.
