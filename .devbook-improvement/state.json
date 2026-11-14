@@ -17922,11 +17922,11 @@
     "version": 1,
     "id": "1036754a634142d7a6f283117a763aa4",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 605.0266769999998,
+    "elapsed_seconds": 622.9758932999998,
     "calls_reserved": 17,
-    "responses_received": 16,
+    "responses_received": 17,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Embeddings.md",
       "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
@@ -18449,7 +18449,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:54:17.651952Z",
+    "checkpoint_at": "2026-11-14T06:54:35.601168Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -45669,6 +45669,137 @@
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T06:54:14.376499Z"
+    "prepared_at": "2026-11-14T06:54:14.376499Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+            "verdict": "CLEAN",
+            "summary": "Independent whole-note read found accurate mode semantics, a consistent worked example, a decision-oriented tradeoff table, and one coherent comparison card. No concrete defect justifies an edit, so the keep is sound.",
+            "page_type": "Concept — authorable prose with optional Questions and References; frontmatter and Qard ID metadata protected.",
+            "current_text_evidence": [
+              {
+                "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                "line_start": 27,
+                "reason": "Subset direction matches the LangSmith/agentevals semantics, and the safety use case follows from it."
+              },
+              {
+                "quote": "**Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration.",
+                "line_start": 28,
+                "reason": "Superset direction is correct, and the note states that bloat can still pass."
+              },
+              {
+                "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+                "line_start": 65,
+                "reason": "The example is internally consistent: both paths contain all required calls, and the judge separates them by waste."
+              },
+              {
+                "quote": "neither accepts `search` and `filter` in place of `query`",
+                "line_start": 82,
+                "reason": "The pitfall states what each mode tolerates and what it does not, which preserves the conditions."
+              },
+              {
+                "quote": "> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?",
+                "line_start": 95,
+                "reason": "The card is one focused comparison with a finite answer. Its ID comment is retained, and the answer cites the primary source."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note covers one topic, trajectory scoring. Reference matching, judge scoring and step/episode granularity depend on each other.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The note is accurate, readable and well ordered, with sound card quality and real references. No concrete violation or error was found, and the keep disposition is justified.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "citation_index": 2,
+          "reported_line_start": 65,
+          "resolved_line_start": 66
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "citation_index": 3,
+          "reported_line_start": 82,
+          "resolved_line_start": 83
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "citation_index": 4,
+          "reported_line_start": 95,
+          "resolved_line_start": 96
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "63bab4bde99725ef9c835bff3aaee850c2ee511654e3b6e1d43d81422309f4f4"
+      },
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "verdict": "CLEAN",
+          "summary": "Independent whole-note read found accurate mode semantics, a consistent worked example, a decision-oriented tradeoff table, and one coherent comparison card. No concrete defect justifies an edit, so the keep is sound.",
+          "page_type": "Concept — authorable prose with optional Questions and References; frontmatter and Qard ID metadata protected.",
+          "current_text_evidence": [
+            {
+              "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+              "line_start": 27,
+              "reason": "Subset direction matches the LangSmith/agentevals semantics, and the safety use case follows from it."
+            },
+            {
+              "quote": "**Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration.",
+              "line_start": 28,
+              "reason": "Superset direction is correct, and the note states that bloat can still pass."
+            },
+            {
+              "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+              "line_start": 66,
+              "reason": "The example is internally consistent: both paths contain all required calls, and the judge separates them by waste."
+            },
+            {
+              "quote": "neither accepts `search` and `filter` in place of `query`",
+              "line_start": 83,
+              "reason": "The pitfall states what each mode tolerates and what it does not, which preserves the conditions."
+            },
+            {
+              "quote": "> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?",
+              "line_start": 96,
+              "reason": "The card is one focused comparison with a finite answer. Its ID comment is retained, and the answer cites the primary source."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note covers one topic, trajectory scoring. Reference matching, judge scoring and step/episode granularity depend on each other.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The note is accurate, readable and well ordered, with sound card quality and real references. No concrete violation or error was found, and the keep disposition is justified.",
+      "change_checks": []
+    }
   }
 }
