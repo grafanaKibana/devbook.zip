@@ -1858,56 +1858,51 @@
       }
     },
     "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": {
-      "content_hash": "4ae20c57f450944890d2cd2665c8343048bb56c9d609b8e91bb9ba563421001b",
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "content_hash": "63bab4bde99725ef9c835bff3aaee850c2ee511654e3b6e1d43d81422309f4f4",
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
       "outcome": "keep",
       "repair_input_hash": "",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_process": "focused-whole-note-v1",
       "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "keep_review": {
-        "content_hash": "4ae20c57f450944890d2cd2665c8343048bb56c9d609b8e91bb9ba563421001b",
-        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "content_hash": "63bab4bde99725ef9c835bff3aaee850c2ee511654e3b6e1d43d81422309f4f4",
+        "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
         "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
         "review": {
           "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
           "verdict": "CLEAN",
-          "summary": "Independent whole-note read found accurate mode definitions, a consistent worked example, a coherent tradeoff table, sound pitfalls and one well-formed comparison card. No concrete defect justifies an edit, so the keep is warranted.",
-          "page_type": "Concept — typed frontmatter, optional Questions and References present and useful; the Qard ID is protected metadata.",
+          "summary": "Independent whole-note read found accurate mode semantics, a consistent worked example, a decision-oriented tradeoff table, and one coherent comparison card. No concrete defect justifies an edit, so the keep is sound.",
+          "page_type": "Concept — authorable prose with optional Questions and References; frontmatter and Qard ID metadata protected.",
           "current_text_evidence": [
             {
               "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
               "line_start": 27,
-              "reason": "Subset direction is correct and tied to a concrete safety use (read-only task never calls a write tool)."
+              "reason": "Subset direction matches the LangSmith/agentevals semantics, and the safety use case follows from it."
             },
             {
               "quote": "**Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration.",
               "line_start": 28,
-              "reason": "Superset direction is correct, and the note states the limitation that bloated traces still pass."
+              "reason": "Superset direction is correct, and the note states that bloat can still pass."
             },
             {
               "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
               "line_start": 66,
-              "reason": "The worked example agrees with the mode definitions and demonstrates why reference matching alone misses waste."
-            },
-            {
-              "quote": "A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.",
-              "line_start": 49,
-              "reason": "The explanation order is sound: the cheap episode-level gate comes first, then step-level localization, with cost named."
+              "reason": "The example is internally consistent: both paths contain all required calls, and the judge separates them by waste."
             },
             {
               "quote": "neither accepts `search` and `filter` in place of `query`",
               "line_start": 83,
-              "reason": "The brittleness pitfall states the precise limit of unordered and superset matching and the remedy (additional reference path or custom rule)."
+              "reason": "The pitfall states what each mode tolerates and what it does not, which preserves the conditions."
             },
             {
-              "quote": "Several valid paths do not automatically require a judge.",
-              "line_start": 112,
-              "reason": "The card answer states the exception to the main rule, with a hybrid alternative, and the question is a single focused comparison."
+              "quote": "> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?",
+              "line_start": 96,
+              "reason": "The card is one focused comparison with a finite answer. Its ID comment is retained, and the answer cites the primary source."
             }
           ],
           "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: reference matching, trace judging and step versus episode granularity are one coherent evaluation topic, and each section is compact.",
+          "split_suggestion": "No split: the note covers one topic, trajectory scoring. Reference matching, judge scoring and step/episode granularity depend on each other.",
           "findings": [],
           "source_checks": [],
           "rejection_equivalence": [],
@@ -1965,6 +1960,62 @@
             ],
             "target_resolution": "JUSTIFIED UNCHANGED",
             "split_suggestion": "No split: reference matching, judge scoring and step/episode granularity are facets of one coherent evaluation topic, and the note is compact.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          },
+          "review_process": "focused-whole-note-v1"
+        },
+        "039ee52ff63d1e9f1fa251ec6d8c78c0e42edf9504742a2ad7ca7ef52a610e5b": {
+          "content_hash": "4ae20c57f450944890d2cd2665c8343048bb56c9d609b8e91bb9ba563421001b",
+          "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+          "review": {
+            "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+            "verdict": "CLEAN",
+            "summary": "Independent whole-note read found accurate mode definitions, a consistent worked example, a coherent tradeoff table, sound pitfalls and one well-formed comparison card. No concrete defect justifies an edit, so the keep is warranted.",
+            "page_type": "Concept — typed frontmatter, optional Questions and References present and useful; the Qard ID is protected metadata.",
+            "current_text_evidence": [
+              {
+                "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                "line_start": 27,
+                "reason": "Subset direction is correct and tied to a concrete safety use (read-only task never calls a write tool)."
+              },
+              {
+                "quote": "**Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration.",
+                "line_start": 28,
+                "reason": "Superset direction is correct, and the note states the limitation that bloated traces still pass."
+              },
+              {
+                "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+                "line_start": 66,
+                "reason": "The worked example agrees with the mode definitions and demonstrates why reference matching alone misses waste."
+              },
+              {
+                "quote": "A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.",
+                "line_start": 49,
+                "reason": "The explanation order is sound: the cheap episode-level gate comes first, then step-level localization, with cost named."
+              },
+              {
+                "quote": "neither accepts `search` and `filter` in place of `query`",
+                "line_start": 83,
+                "reason": "The brittleness pitfall states the precise limit of unordered and superset matching and the remedy (additional reference path or custom rule)."
+              },
+              {
+                "quote": "Several valid paths do not automatically require a judge.",
+                "line_start": 112,
+                "reason": "The card answer states the exception to the main rule, with a hybrid alternative, and the question is a single focused comparison."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: reference matching, trace judging and step versus episode granularity are one coherent evaluation topic, and each section is compact.",
             "findings": [],
             "source_checks": [],
             "rejection_equivalence": [],
@@ -17924,7 +17975,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 622.9758932999998,
+    "elapsed_seconds": 625.8388025999998,
     "calls_reserved": 17,
     "responses_received": 17,
     "attempted_paths": [
@@ -18449,7 +18500,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:54:35.601168Z",
+    "checkpoint_at": "2026-11-14T06:54:38.464078Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -26110,6 +26161,85 @@
       ],
       "source_hashes": {
         "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md": "50272a753c799cfa07bda02c0a16c32596fc12befe8b564b8449e9a6a269861a"
+      },
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "134c7d604c8bdcb2ec2f8c064ed39194cf07699a04c7fc64db468d7092335e2e": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+            "verdict": "CLEAN",
+            "summary": "Independent whole-note read found accurate mode semantics, a consistent worked example, a decision-oriented tradeoff table, and one coherent comparison card. No concrete defect justifies an edit, so the keep is sound.",
+            "page_type": "Concept — authorable prose with optional Questions and References; frontmatter and Qard ID metadata protected.",
+            "current_text_evidence": [
+              {
+                "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                "line_start": 27,
+                "reason": "Subset direction matches the LangSmith/agentevals semantics, and the safety use case follows from it."
+              },
+              {
+                "quote": "**Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration.",
+                "line_start": 28,
+                "reason": "Superset direction is correct, and the note states that bloat can still pass."
+              },
+              {
+                "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+                "line_start": 65,
+                "reason": "The example is internally consistent: both paths contain all required calls, and the judge separates them by waste."
+              },
+              {
+                "quote": "neither accepts `search` and `filter` in place of `query`",
+                "line_start": 82,
+                "reason": "The pitfall states what each mode tolerates and what it does not, which preserves the conditions."
+              },
+              {
+                "quote": "> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?",
+                "line_start": 95,
+                "reason": "The card is one focused comparison with a finite answer. Its ID comment is retained, and the answer cites the primary source."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note covers one topic, trajectory scoring. Reference matching, judge scoring and step/episode granularity depend on each other.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The note is accurate, readable and well ordered, with sound card quality and real references. No concrete violation or error was found, and the keep disposition is justified.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "citation_index": 2,
+          "reported_line_start": 65,
+          "resolved_line_start": 66
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "citation_index": 3,
+          "reported_line_start": 82,
+          "resolved_line_start": 83
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "citation_index": 4,
+          "reported_line_start": 95,
+          "resolved_line_start": 96
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "63bab4bde99725ef9c835bff3aaee850c2ee511654e3b6e1d43d81422309f4f4"
       },
       "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -45622,184 +45752,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "1036754a634142d7a6f283117a763aa4",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"Scoring the whole path an agent took via reference-trajectory match or an LLM judge over the trace.\"\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Trajectory Evaluation\"\nflashcard_uid: \"4a7a9900\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:28:37.404Z\"\n---\n\nTrajectory evaluation scores the path from task to result: tool calls, observations, and intermediate decisions in order. Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls. [[Tool-Call Evaluation|tool-call scoring]] can flag individual mistakes, but it does not explain whether the sequence as a whole was sensible.\n\nTwo scorer families cover that gap. Reference matching compares the trace with a known-good path. A trace judge reads the transcript against a rubric. The second approach reuses [[LLM-as-a-Judge]] machinery, but feeds it agent decisions instead of a final answer.\n\n# Reference-trajectory Match\n\nA reference path records the calls a correct solve should contain. The comparison mode defines how much variation remains valid:\n\n- **Strict** requires the same tools, arguments, and order. It fits a task with one valid procedure.\n- **Unordered** requires the same calls but ignores order. It fits independent reads.\n- **Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`). It is useful for safety boundaries, such as proving a read-only task never invoked a write tool.\n- **Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration. It confirms that required calls appear in the recorded trajectory.\n\nReference matching is cheap and objective once the paths exist. Its coverage is narrow. An unanticipated but correct solution fails, while a bloated superset trace passes as long as the required calls appear somewhere.\n\n# LLM-as-judge over the Trace\n\nWhen many paths can work, a judge can score the transcript against a rubric covering plan quality, tool choice, wasted work, and recovery. This captures reasoning that no fixed path can enumerate. It costs a model call per trajectory.\n\n```mermaid\nflowchart LR\n    TR[Agent trajectory] --> RM{Known-good path exists?}\n    RM -->|yes, few valid paths| REF[Reference match: strict/unordered/subset/superset]\n    RM -->|no, many valid paths| J[LLM judge over the trace vs rubric]\n    REF --> SC[Path score]\n    J --> SC\n```\n\n# Step-level Vs Episode-level\n\nEpisode-level scoring assigns one verdict to the run. It is cheap enough for a release gate, but a failure only says the path was bad.\n\nStep-level scoring asks whether each next action made sense given the state at that point. It localizes the first bad decision and the recovery that followed. The price is one judgment per step plus enough running context to judge it. A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.\n\n# Example\n\nTwo evaluations of the same support task, run as reference-match plus judge:\n\n```text\nReference (superset mode): {lookup_order, issue_refund, send_email} must all appear\n\nAgent A path: lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)\n  - Judge (1-5): 5  \"minimal, correct order, no wasted calls\"\n\nAgent B path: search_orders -> lookup_order -> lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)   <- match alone hides the waste\n  - Judge (1-5): 3  \"redundant lookup_order, unnecessary initial search\"\n\nSame outcome, same superset verdict; the judge separates the clean path from the wasteful one.\n```\n\n# Tradeoffs\n\n| Approach | Catches | Cost | Breaks when |\n| --- | --- | --- | --- |\n| Reference match (strict) | Any deviation from the one correct path | Lowest to run | More than one valid path exists |\n| Reference match (subset/superset) | Missing required work / out-of-bounds actions | Low | Path quality within bounds (bloat, detours) |\n| LLM judge over the trace | Plan quality, redundancy, recovery | High — judge call per run, long context | Traces exceed the judge's reliable context window |\n\nReference matching fits when the valid procedures are few and knowable. Subset mode is especially effective as a hard safety gate because forbidden tools fail deterministically. A judge fits when decomposition is open-ended. In either case, outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] belong beside the path score. A polished trajectory that missed the task is still a failure.\n\n# Pitfalls\n\n## Reference Brittleness Penalizes Valid Alternate Paths\n\nA strict match can reject a correct solve because it used `search` followed by `filter` instead of one `query`. At that point the metric measures conformity to the author’s path. Unordered matching tolerates a different order of the same calls, and superset matching tolerates extra calls, but neither accepts `search` and `filter` in place of `query`. That decomposition passes only when it is listed as another reference path or accepted by a custom rule. A judge fits tasks where valid decompositions cannot be listed.\n\n## Judge Degrades on Long Traces\n\nWhen trace length passes the range where the judge has been validated against human labels, the trace is chunked or scored at step level instead. Agreement on short traces does not establish that boundary.\n\n## Outcome Leakage Inflates Path Scores\n\nVisible task success can make a judge rationalize a messy path. Reliable path scoring therefore hides the outcome from the trajectory scorer or evaluates path and outcome in separate calls. Otherwise a lucky recovery becomes evidence of good process.\n\n# Questions\n\n<!-- qard-id: 520c7686-9751-4f5d-b51e-53db694c08ed -->\n> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?\n> Reference matching is the better scorer when the acceptable tool-call paths are few enough to write down and the rule for comparing them is clear. It is then cheap, deterministic and repeatable. An LLM judge fits better when many different paths can be correct, because it scores the trace against a rubric instead of a list of paths. The cost is an extra model call and less deterministic scores.\n>\n> | Aspect | Reference matching | LLM judge over the trace |\n> |---|---|---|\n> | What it needs | One or more known-good tool-call paths and a comparison mode. | A rubric describing good behavior, such as plan quality, tool choice, wasted work and recovery. |\n> | Alternative valid paths | Accepted only if listed or tolerated by the mode; an unanticipated correct path fails. | Can be accepted without being listed, because the rubric describes qualities rather than one path. |\n> | Cost and repeatability | No model call; the same trace always gets the same score. | A model call per scored trajectory; scores for the same trace can vary between runs. |\n>\n> The comparison mode sets how much variation counts as acceptable:\n>\n> - **Strict:** same calls in the same order; fits a task with one valid procedure.\n> - **Unordered:** same calls in any order; fits independent reads.\n> - **Subset:** every agent call must appear in the reference, so unlisted tools fail. This can forbid writes in a read-only task.\n> - **Superset:** every reference call must appear in the trace, and extra calls are allowed. This enforces required steps, but a wasteful trace that contains them still passes.\n> \n> Several valid paths do not automatically require a judge. A richer set of references, or a hybrid rule such as a subset gate plus a judge for path quality, may be enough.\n>\n> [Trajectory evaluation (LangSmith)](https://docs.langchain.com/langsmith/trajectory-evals)\n\n# References\n\n- [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)\n- [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688)\n",
-          "hash": "63bab4bde99725ef9c835bff3aaee850c2ee511654e3b6e1d43d81422309f4f4",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
-          "outcome": "keep",
-          "reason": "I read the whole note against its text and the LangSmith trajectory-evals page it cites. The four match modes (strict, unordered, subset, superset) are described correctly, with the right direction of inclusion for subset and superset. The worked example is internally consistent: both paths pass the superset check, and the judge separates the wasteful one. The tradeoff table, the pitfalls (brittleness, long traces, outcome leakage) and the episode-versus-step explanation all follow from the earlier mechanisms. The single Qard asks one comparison task, and its answer matches the note. The References are real and relevant. I found no factual error, gap or redundancy that justifies an edit."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "63bab4bde99725ef9c835bff3aaee850c2ee511654e3b6e1d43d81422309f4f4"
-    },
-    "feedback_keys": [],
-    "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T06:54:14.376499Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
-            "verdict": "CLEAN",
-            "summary": "Independent whole-note read found accurate mode semantics, a consistent worked example, a decision-oriented tradeoff table, and one coherent comparison card. No concrete defect justifies an edit, so the keep is sound.",
-            "page_type": "Concept — authorable prose with optional Questions and References; frontmatter and Qard ID metadata protected.",
-            "current_text_evidence": [
-              {
-                "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
-                "line_start": 27,
-                "reason": "Subset direction matches the LangSmith/agentevals semantics, and the safety use case follows from it."
-              },
-              {
-                "quote": "**Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration.",
-                "line_start": 28,
-                "reason": "Superset direction is correct, and the note states that bloat can still pass."
-              },
-              {
-                "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
-                "line_start": 65,
-                "reason": "The example is internally consistent: both paths contain all required calls, and the judge separates them by waste."
-              },
-              {
-                "quote": "neither accepts `search` and `filter` in place of `query`",
-                "line_start": 82,
-                "reason": "The pitfall states what each mode tolerates and what it does not, which preserves the conditions."
-              },
-              {
-                "quote": "> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?",
-                "line_start": 95,
-                "reason": "The card is one focused comparison with a finite answer. Its ID comment is retained, and the answer cites the primary source."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the note covers one topic, trajectory scoring. Reference matching, judge scoring and step/episode granularity depend on each other.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The note is accurate, readable and well ordered, with sound card quality and real references. No concrete violation or error was found, and the keep disposition is justified.",
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
-          "citation_index": 2,
-          "reported_line_start": 65,
-          "resolved_line_start": 66
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
-          "citation_index": 3,
-          "reported_line_start": 82,
-          "resolved_line_start": 83
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
-          "citation_index": 4,
-          "reported_line_start": 95,
-          "resolved_line_start": 96
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "63bab4bde99725ef9c835bff3aaee850c2ee511654e3b6e1d43d81422309f4f4"
-      },
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
-          "verdict": "CLEAN",
-          "summary": "Independent whole-note read found accurate mode semantics, a consistent worked example, a decision-oriented tradeoff table, and one coherent comparison card. No concrete defect justifies an edit, so the keep is sound.",
-          "page_type": "Concept — authorable prose with optional Questions and References; frontmatter and Qard ID metadata protected.",
-          "current_text_evidence": [
-            {
-              "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
-              "line_start": 27,
-              "reason": "Subset direction matches the LangSmith/agentevals semantics, and the safety use case follows from it."
-            },
-            {
-              "quote": "**Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration.",
-              "line_start": 28,
-              "reason": "Superset direction is correct, and the note states that bloat can still pass."
-            },
-            {
-              "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
-              "line_start": 66,
-              "reason": "The example is internally consistent: both paths contain all required calls, and the judge separates them by waste."
-            },
-            {
-              "quote": "neither accepts `search` and `filter` in place of `query`",
-              "line_start": 83,
-              "reason": "The pitfall states what each mode tolerates and what it does not, which preserves the conditions."
-            },
-            {
-              "quote": "> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?",
-              "line_start": 96,
-              "reason": "The card is one focused comparison with a finite answer. Its ID comment is retained, and the answer cites the primary source."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note covers one topic, trajectory scoring. Reference matching, judge scoring and step/episode granularity depend on each other.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The note is accurate, readable and well ordered, with sound card quality and real references. No concrete violation or error was found, and the keep disposition is justified.",
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
