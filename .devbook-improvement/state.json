@@ -17767,16 +17767,17 @@
     "version": 1,
     "id": "1036754a634142d7a6f283117a763aa4",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 351.1383627,
+    "elapsed_seconds": 355.7425721,
     "calls_reserved": 9,
     "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Embeddings.md",
       "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
-      "Vault/Home/AI & ML/AI & ML.md"
+      "Vault/Home/AI & ML/AI & ML.md",
+      "Vault/Home/AI & ML/LLM/Agents/Agents.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -17995,10 +17996,83 @@
           },
           "model_calls": 7
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+                "outcome": "keep",
+                "reason": "I read the whole note and found no defect that justifies an edit. The workflow/agent split, the simplest-design-first guidance, and the five workflow pattern names match Anthropic's 'Building Effective Agents'. The augmented-LLM section correctly divides work between the model and the harness. The autonomous-agent section ties compounding error to the loop and lists controls that contain it. The memory section is labelled as an architectural choice, not a standard. Its table of five memory kinds is internally consistent with the prose on supersession, invalidation, and checking authorization before ranking. The Questions are each a single gradeable task. The workflow-versus-agent card compares the two with a table. The error-compounding card and the controls card are separate tasks. The good-fit card is bounded. Each card cites a primary source. The wikilinks and the datacorejsx and mermaid fences are valid. The references are real primary sources. I found no stale claim, repetition, or voice problem that would make a rewrite an improvement."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+                "verdict": "CLEAN",
+                "summary": "The complete note is accurate and coherent. It separates workflows from agents, orders its explanation sensibly, and keeps the memory design explicitly labelled as an architectural choice. Each Qard tests one task, and the unchanged keep is justified.",
+                "page_type": "FolderNote — hub with a protected datacorejsx folder map, an optional Questions section and an optional References section. Qard callouts and their IDs are protected.",
+                "current_text_evidence": [
+                  {
+                    "quote": "**Workflows** are systems where LLMs and tools are orchestrated through predefined code paths.",
+                    "line_start": 20,
+                    "reason": "The workflow/agent definition matches Anthropic's 'Building Effective Agents' and sets up the rest of the note."
+                  },
+                  {
+                    "quote": "Workflow orchestration belongs next, once a single call falls short.",
+                    "line_start": 23,
+                    "reason": "The simplest-design-first escalation order is stated with its condition."
+                  },
+                  {
+                    "quote": "This is an architectural choice, not a universal standard.",
+                    "line_start": 74,
+                    "reason": "The memory taxonomy is honestly scoped, so it does not overclaim."
+                  },
+                  {
+                    "quote": "Authorization scope must be checked before ranking. Relevance metadata cannot enforce access.",
+                    "line_start": 84,
+                    "reason": "This states a concrete mechanism and a security limit."
+                  },
+                  {
+                    "quote": "> [!qard]- Which controls contain error propagation during an autonomous agent run?",
+                    "line_start": 111,
+                    "reason": "This card is a separate gradeable task from the compounding-mechanism card. It correctly stays ID-less and ends with a bounded caveat."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the topics (augmented LLM, workflow patterns, autonomous agents, memory) are short and share one decision frame. Workflow Patterns already has its own note.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "I read the whole note and found no concrete defect. Facts match the primary source, the explanation order works, and there is no repetition or voice problem. The cards are single-task and direct, and references are valid. There are no edits, so the keep is justified.",
+            "change_checks": []
+          },
+          "model_calls": 9
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:50:03.763634Z",
+    "checkpoint_at": "2026-11-14T06:50:08.367844Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
