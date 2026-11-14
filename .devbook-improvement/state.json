@@ -14856,14 +14856,15 @@
     "version": 1,
     "id": "5fe9ecfcc7344982bcd2cdfba7482c21",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-14T22:36:29.240304Z",
-    "elapsed_seconds": 158.89803170000002,
+    "elapsed_seconds": 163.30822110000003,
     "calls_reserved": 5,
     "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/Cloud/Providers.md",
-      "Vault/Home/Cloud/Cloud Cost Management.md"
+      "Vault/Home/Cloud/Cloud Cost Management.md",
+      "Vault/Home/Cloud/Cloud.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -14951,10 +14952,83 @@
           },
           "model_calls": 3
         }
+      },
+      {
+        "path": "Vault/Home/Cloud/Cloud.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Cloud/Cloud.md",
+                "outcome": "keep",
+                "reason": "Audited the whole folder note against its text and the NIST SP 800-145 reference. The opening states the operating idea: cloud moves the operating boundary but does not remove it, and the managed-database example is accurate. The ownership list covers application, data, configuration, resilience and cost without overlapping. The workload questions come before product names and link to Providers and the IaaS/PaaS/SaaS/CaaS note. The code-behavior section correctly describes throttling, redelivery, retries and idempotency as ordinary distributed-system failures. Wikilinks are meaningful, the datacorejsx fence has a language, there are no cards, no known violations, and the single reference is a real NIST primary source. The note is concise, coherent and in the right voice, so edits would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The single note is accurate, coherent and in the right voice. It has no known violations and no concrete defects, so keeping it unchanged is justified.",
+            "notes": [
+              {
+                "path": "Vault/Home/Cloud/Cloud.md",
+                "verdict": "CLEAN",
+                "summary": "The folder note states the operating idea early: the operating boundary moves but does not disappear. It lists the responsibilities that stay with the application team, gives architecture questions to ask before choosing products, and explains how cloud behavior shows up in code. No edit is needed.",
+                "page_type": "FolderNote — tagged FolderNote, with the protected datacorejsx card map kept. Questions are optional and absent. References hold one real NIST primary source.",
+                "current_text_evidence": [
+                  {
+                    "quote": "It moves an application's operating boundary; it does not remove it.",
+                    "line_start": 18,
+                    "reason": "This gives the operating idea quickly. The managed-database example that follows is accurate and concrete."
+                  },
+                  {
+                    "quote": "**Economics:** which code paths generate compute, requests, storage, transfer, and observability volume.",
+                    "line_start": 33,
+                    "reason": "The ownership list is concrete and non-overlapping, and it includes cost, which is easy to overlook."
+                  },
+                  {
+                    "quote": "Start from the workload contract:",
+                    "line_start": 39,
+                    "reason": "The numbered questions come before product names and support engineering judgment. They lead into the Providers note."
+                  },
+                  {
+                    "quote": "Cloud failures are ordinary distributed-system failures.",
+                    "line_start": 51,
+                    "reason": "This ties cloud behavior to application code through throttling, redelivery, retries and idempotency. The content is accurate, and the wording is direct and impersonal."
+                  },
+                  {
+                    "quote": "- [NIST SP 800-145: The NIST Definition of Cloud Computing]",
+                    "line_start": 57,
+                    "reason": "The reference is a real, authoritative, topic-specific source, formatted as a bare link bullet with no annotation."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note is a compact hub with a card map. Its sections all serve one idea, the application's remaining responsibilities in the cloud, and the detailed topics already live in linked sibling notes.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 5
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T22:39:08.137975Z",
+    "checkpoint_at": "2026-11-14T22:39:12.548165Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
