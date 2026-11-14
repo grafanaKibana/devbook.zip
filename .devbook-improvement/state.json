@@ -17615,11 +17615,11 @@
     "version": 1,
     "id": "1036754a634142d7a6f283117a763aa4",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 136.0195677,
+    "elapsed_seconds": 150.880411,
     "calls_reserved": 4,
-    "responses_received": 3,
+    "responses_received": 4,
     "attempted_paths": [
       "Vault/Home/AI & ML/LLM/Embeddings.md"
     ],
@@ -17696,7 +17696,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:46:28.644839Z",
+    "checkpoint_at": "2026-11-14T06:46:43.505682Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -44621,6 +44621,53 @@
       "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-14T06:46:24.963829Z"
+    "prepared_at": "2026-11-14T06:46:24.963829Z",
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "No edits were proposed. My own read of the whole note found no factual error, structural violation or clarity gap, so keeping it unchanged is justified.",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
+          "verdict": "CLEAN",
+          "summary": "The note explains the keyed sampling mechanism, the Tournament sampling score formula, the quality/detectability trade-off and the limits in a sensible order. I found no inaccuracy, repetition or contract violation, so keeping it unchanged is justified.",
+          "page_type": "Concept — optional Questions are absent. The References section is bare descriptive links. There are no code fences, and the single wikilink uses a full path with an alias.",
+          "current_text_evidence": [
+            {
+              "quote": "This makes a watermark different from a general AI-text classifier.",
+              "line_start": 16,
+              "reason": "The opening sets the boundary against classifiers early, so the topic is introduced quickly and the main misconception is addressed."
+            },
+            {
+              "quote": "SynthID-Text implements this with **Tournament sampling**.",
+              "line_start": 28,
+              "reason": "The generic five-step mechanism is followed by a concrete implementation. The formula's symbols (T, m, r_t, g_ℓ) are defined right after it."
+            },
+            {
+              "quote": "**Higher-entropy choices.**",
+              "line_start": 45,
+              "reason": "The note gives the mechanism (entropy leaves room for the keyed preference) and the conditions for detection, not just the conclusion."
+            },
+            {
+              "quote": "**Presence provides limited evidence.**",
+              "line_start": 52,
+              "reason": "The Limits section keeps the important conditions and exceptions, with a calibrated closing judgment about attribution versus authorship."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note covers one coherent topic. Mechanism, quality trade-off and limits depend on each other, and it is compact enough to re-enter.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
