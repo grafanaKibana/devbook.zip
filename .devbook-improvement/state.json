@@ -17823,9 +17823,9 @@
     "version": 1,
     "id": "1036754a634142d7a6f283117a763aa4",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-14T06:44:12.625827Z",
-    "elapsed_seconds": 424.92682599999995,
+    "elapsed_seconds": 429.2570656,
     "calls_reserved": 11,
     "responses_received": 11,
     "attempted_paths": [
@@ -17833,7 +17833,8 @@
       "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md",
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
       "Vault/Home/AI & ML/AI & ML.md",
-      "Vault/Home/AI & ML/LLM/Agents/Agents.md"
+      "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -18125,10 +18126,88 @@
           },
           "model_calls": 9
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+                "outcome": "keep",
+                "reason": "I read the whole note and found no verified defect. The opening says what a benchmark is and why a leaderboard cannot make the final selection. The table matches the cited papers: SWE-bench hidden tests, τ-bench pass^k with a simulated user, GAIA exact match, WebArena self-hosted web apps, AgentBench's 8 environments, and BFCL AST/executable accuracy including no-call cases. The leaderboard section keeps the needed conditions: the scaffold has to be fixed to isolate the model, pass^k differs from pass@1, contamination affects old public suites, and cost and latency are often missing. The worked example correctly treats the systems as not comparable. It does not declare a winner. The single card tests one dependent idea, why scaffold and run conditions change a benchmark result. Its τ-bench source is on the answer side. The wikilinks are consistent with the sibling notes. The remaining wording overlap, such as 'tau' versus 'τ' and the example's closing paragraph, is cosmetic. Editing it would add churn and not improve understanding."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+                "verdict": "CLEAN",
+                "summary": "Whole-note audit found no accurate-content, structure, or card defects. The opening states the use and limit of benchmarks, the table matches the cited benchmarks, the leaderboard section carries the needed conditions, and the example correctly refuses to name a winner. Remaining overlap (tau vs τ, example closing paragraph) is cosmetic, so keeping the note unchanged is justified.",
+                "page_type": "Concept — authorable prose with optional Questions and References; no special-page protection.",
+                "current_text_evidence": [
+                  {
+                    "quote": "A leaderboard score cannot make the final selection.",
+                    "line_start": 19,
+                    "reason": "States the operating idea and key boundary early: score measures a whole system, so public suites only shortlist."
+                  },
+                  {
+                    "quote": "| AgentBench | 8 environments | Interactive tasks across OS, DB, web, games | per-environment success |",
+                    "line_start": 29,
+                    "reason": "Table facts (8 environments, per-environment success) match the AgentBench paper; the other rows likewise match their sources."
+                  },
+                  {
+                    "quote": "`pass^k` requires the task to succeed on every one of `k` attempts, so it exposes intermittent failures that an average hides.",
+                    "line_start": 37,
+                    "reason": "Correct mechanism distinction from average success, with the condition that changes the decision."
+                  },
+                  {
+                    "quote": "Human verification improves issue and test quality; it does not isolate public tasks from training.",
+                    "line_start": 38,
+                    "reason": "Precise, hedged contamination claim that separates curation from leakage."
+                  },
+                  {
+                    "quote": "The example exposes missing evidence rather than a winner.",
+                    "line_start": 62,
+                    "reason": "The worked example correctly concludes the systems are not comparable instead of choosing one."
+                  },
+                  {
+                    "quote": "> [!qard]- Why can one base model produce very different results on the same agent benchmark?",
+                    "line_start": 67,
+                    "reason": "A single dependent task (scaffold and run conditions affect score), a direct question with a finite answer, an answer-side tau-bench source, and a retained ID."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the benchmark table, leaderboard reading rules and worked example all serve one decision (using public scores to shortlist, not select), and the note is compact.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is accurate and clear, and its single card tests one dependent task. No proposed edits exist and no concrete defect remains, so the keep is justified.",
+            "change_checks": []
+          },
+          "model_calls": 11
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T06:51:17.552098Z",
+    "checkpoint_at": "2026-11-14T06:51:21.882338Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
