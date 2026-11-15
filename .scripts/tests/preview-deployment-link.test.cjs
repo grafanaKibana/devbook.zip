@@ -4,8 +4,9 @@ const assert = require('node:assert/strict');
 const { test } = require('node:test');
 const YAML = require('../../Web/node_modules/yaml');
 
-const workflow = YAML.parse(readFileSync(join(__dirname, '../../.github/workflows/preview-deployment-link.yml'), 'utf8'));
-const admitted = new Function('github', `return ${workflow.jobs.update.if};`);
+const workflow = YAML.parse(readFileSync(join(__dirname, '../../.github/workflows/release.yml'), 'utf8'));
+const predicate = new Function('github', `return ${workflow.jobs.update.if};`);
+const admitted = (github) => predicate({ event_name: 'deployment_status', ...github });
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 const update = new AsyncFunction('context', 'github', 'core', workflow.jobs.update.steps[0].with.script);
 const sha = 'a'.repeat(40);
