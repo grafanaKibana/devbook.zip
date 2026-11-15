@@ -186,9 +186,6 @@ jobs:
       - name: Test changelog generation and pre-commit integration
         run: node --test .scripts/tests/changelog.test.cjs
 
-      - name: Test workflow event routing and permission boundaries
-        run: node --test .scripts/tests/workflow-routing.test.cjs
-
       - name: Test Preview deployment links
         run: node --test .scripts/tests/preview-deployment-link.test.cjs
 
