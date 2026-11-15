@@ -15087,11 +15087,11 @@
     "version": 1,
     "id": "da6ae8bc44c444a5b6a4606355aadef4",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-15T06:51:01.310737Z",
-    "elapsed_seconds": 314.09218849999996,
+    "elapsed_seconds": 327.4118937,
     "calls_reserved": 9,
-    "responses_received": 8,
+    "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
       "Vault/Home/Computer Science/Algorithms/Patterns/Binary Search on Answer.md",
@@ -16519,7 +16519,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T06:56:15.402500Z",
+    "checkpoint_at": "2026-11-15T06:56:28.722205Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -48132,5 +48132,70 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "da6ae8bc44c444a5b6a4606355aadef4",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Cyclic Sort.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Sorts a permutation of 1..n by swapping each value directly to its home index.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: New\npublish: true\ncreated: \"2026-07-10T06:24:36.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-10T05:58:42.295Z\"\n---\n\nCyclic Sort exploits a narrow input contract: an array of `n` integers is a permutation of `1..n`, so every value names its final index.\n\nAt each position, the algorithm swaps the resident value into that home and repeats until the correct value arrives. Missing-value and duplicate-value problems use a guarded variant. Values still map to `1..n`, but collisions or absent homes are allowed. A final mismatch scan exposes them. This range-mapped interview pattern is distinct from the comparison-based Cycle Sort that minimizes writes on arbitrary comparable values.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{ \"algorithm\": \"cyclic-sort\", \"array\": [3, 1, 5, 4, 2] }\n```\n\nThe cursor stays put after a swap because the displaced value still needs inspection; it advances only when the resident value is home.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Cyclic Sort complexity\",\n  \"variables\": {\n    \"inputSize\": {\n      \"symbol\": \"n\",\n      \"description\": \"length of the 1..n permutation\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (merge sort)\",\n          \"formula\": \"O(n log n)\",\n          \"curveId\": \"n-log-n\"\n        },\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Cyclic sort\",\n          \"formula\": \"O(n)\",\n          \"curveId\": \"linear\"\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (merge sort)\",\n          \"formula\": \"O(n)\",\n          \"curveId\": \"linear\"\n        },\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Cyclic sort\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# Why Each Swap Finalises an Element\n\nAt index `i`, let `v = a[i]` and `home = v − 1`:\n\n- If `v` is in range and `a[home] != v`, swapping `a[i]` with `a[home]` puts `v` in its final position. The displaced value at `i` still needs inspection, so the index stays put.\n- Otherwise `v` is already home, out of range, or `home` already holds an equal value. Nothing more can be done at `i`, so `i` advances.\n\nOne index may be processed several times. Still, each swap fills a home that was previously unsatisfied, and a placed value never moves again. At most `n − 1` swaps occur across the whole run.\n\nThe guard compares values, not indices. `a[home] != v` stops when a duplicate reaches a slot already holding the same value. That check prevents an infinite swap and leaves the duplicate visible to the final scan.\n\n# Guarded Anomaly Variants\n\nDuplicates and out-of-range values break the pure permutation contract. The guarded variant can still place every value with an unsatisfied in-range home. Values with no valid home, or whose home already contains an equal value, are skipped.\n\nOut-of-range values have no home. On `[3, 4, -1, 1]` (a *First Missing Positive* input), the value `-1` and any value `> n` cannot be placed. The guard must skip them (`v < 1 || v > n`) and advance. Dropping that check computes `home = -2` and indexes out of bounds.\n\nDuplicates share a home. On `[1, 3, 3, 4]`, both copies of `3` want index 2. Once one arrives, a guard based on `i != home` keeps swapping the equal values forever. The value check `a[home] != v` recognizes that the home is already satisfied and stops.\n\nThis is not a general sort. Arbitrary integers, floating-point values, and keys without an index mapping do not identify a swap target.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Placement decision at index `i`\n>\n> ```mermaid\n> flowchart TD\n>   A[Set i to zero] --> B{i less than n}\n>   B -->|No| Z[Scan for first index whose value is not i plus one]\n>   B -->|Yes| C[Compute home as value minus one]\n>   C --> D{value in range and home does not already hold it}\n>   D -->|Yes| E[Swap value into its home and keep i fixed]\n>   D -->|No| F[Advance i]\n>   E --> B\n>   F --> B\n> ```\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n\n> public static void CyclicSort(int[] a)\n> {\n>     var i = 0;\n>     while (i < a.Length)\n>     {\n>         var home = a[i] - 1;                       // value v belongs at index v - 1\n>         if (a[i] >= 1 && a[i] <= a.Length && a[i] != a[home])\n>         {\n>             (a[i], a[home]) = (a[home], a[i]);      // swap v home; do NOT advance i\n>         }\n>         else\n>         {\n>             i++;                                    // already placed or out of range\n>         }\n>     }\n> }\n>\n> // Find All Numbers Disappeared in an Array (LeetCode 448).\n> public static IList<int> FindDisappeared(int[] a)\n> {\n>     var i = 0;\n>     while (i < a.Length)\n>     {\n>         var home = a[i] - 1;\n>         if (a[i] != a[home])                        // duplicates make a[i] == a[home], so they are skipped\n>         {\n>             (a[i], a[home]) = (a[home], a[i]);\n>         }\n>         else\n>         {\n>             i++;\n>         }\n>     }\n>\n>     var missing = new List<int>();\n>     for (var j = 0; j < a.Length; j++)\n>     {\n>         if (a[j] != j + 1)                          // slot j should hold j + 1\n>         {\n>             missing.Add(j + 1);\n>         }\n>     }\n>\n>     return missing;\n> }\n> ```\n> The guard tests `a[i] != a[home]` on values, not `i != home` on indices — that is what stops a duplicate from swapping forever and what lets the final scan report the anomaly.\n\n# Comparison\n\n| Strategy | Required input | Stronger case | Weaker case |\n| --- | --- | --- | --- |\n| Cyclic Sort | Values mapped to a contiguous range. Uniqueness for the pure sort | Place a permutation, or find a missing/duplicate in `1..n`, while mutating the array directly | Wide or non-contiguous ranges. Read-only input |\n| [[Home/Computer Science/Algorithms/Sorting Algorithms/Counting Sort\\|Counting Sort]] | Small integer range `k` | Small integer ranges that need counts or stable order | Large `k` inflates the count buffer |\n| General comparison sort | Comparable keys | Arbitrary keys with no index mapping | Cannot exploit values that already identify their destination |\n| Hash set / boolean array | Hashable values | Detecting missing or duplicate values over an arbitrary domain | Allocates a separate lookup structure |\n\nFor the read-only contract of `n + 1` values drawn from `1..n`, [[Home/Computer Science/Algorithms/Patterns/Fast and Slow Pointers|Fast and Slow Pointers]] can recover the duplicate by treating the array as a functional graph. That method does not cover arbitrary read-only missing-value inputs.\n\n# References\n\n- [Find All Numbers Disappeared in an Array (LeetCode #448)](https://leetcode.com/problems/find-all-numbers-disappeared-in-an-array/)\n",
+          "hash": "b7e0b697250b65f71b5614d2ae0929c1e8057b09b0822c07eb4d308acb8dacce",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Cyclic Sort.md",
+          "expected_hash": "b7e0b697250b65f71b5614d2ae0929c1e8057b09b0822c07eb4d308acb8dacce",
+          "before": "> ```csharp\n\n> public static void CyclicSort(int[] a)",
+          "after": "> ```csharp\n> public static void CyclicSort(int[] a)",
+          "reason": "Removes the blank line after the opening fence that ended the blockquote, so the C# code stays inside the callout.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "C# implementation renders inside the example callout"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "A blank line between the csharp fence opener and the first code line terminates the blockquote, so the implementation callout renders broken in Obsidian and Quartz.",
+          "reader_benefit": "The collapsed C# example renders as one intact code block in the callout."
+        }
+      ],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Cyclic Sort.md",
+          "outcome": "changed",
+          "reason": "Audited the whole note: the swap invariant, duplicate guard (value comparison vs index comparison), out-of-range handling, the n−1 swap bound, the [3,4,-1,1] and [1,3,3,4] examples, the complexity table, and the Fast and Slow Pointers remark (Floyd's duplicate for n+1 values in 1..n) are all accurate. The only defect was a stray blank line after the csharp fence that broke the callout; fixing it restores the code rendering."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Patterns/Cyclic Sort.md": "b7e0b697250b65f71b5614d2ae0929c1e8057b09b0822c07eb4d308acb8dacce"
+    },
+    "feedback_keys": [],
+    "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Patterns/Cyclic Sort.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-15T06:56:28.722194Z"
+  }
 }
