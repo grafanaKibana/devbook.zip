@@ -15202,11 +15202,11 @@
     "version": 1,
     "id": "da6ae8bc44c444a5b6a4606355aadef4",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-15T06:51:01.310737Z",
-    "elapsed_seconds": 549.1295487000002,
+    "elapsed_seconds": 565.3672213000002,
     "calls_reserved": 15,
-    "responses_received": 14,
+    "responses_received": 15,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
       "Vault/Home/Computer Science/Algorithms/Patterns/Binary Search on Answer.md",
@@ -18174,7 +18174,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T07:00:10.439863Z",
+    "checkpoint_at": "2026-11-15T07:00:26.677535Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -49929,5 +49929,70 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "da6ae8bc44c444a5b6a4606355aadef4",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Monotonic Stack and Queue.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"A stack or deque kept monotone by popping dominated elements, answering next-greater and window-extremum queries in one traversal.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: New\npublish: true\ncreated: \"2026-07-10T06:24:36.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-10T05:58:06.704Z\"\n---\n\nFor each daily temperature, the next warmer day may be far ahead. Rescanning the suffix repeats the same comparisons. A monotonic stack keeps only unresolved days, and one warmer value can settle several of them at once.\n\nA monotonic stack stores indices while their values remain ordered. For a next-greater query, values are non-increasing from bottom to top. An arriving value pops every smaller value above it and becomes the next greater value for each popped index. Every index is pushed once and removed at most once.\n\nA monotonic deque adds window expiry. New candidates enter at the back, dominated candidates leave from the back, and expired indices leave from the front. Storing indices makes both expiry and duplicate identity explicit.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"monotonic-stack-and-queue\",\"array\":[73,74,75,71,69,72,76,73]}\n```\n\nThe trace uses daily temperatures `[73, 74, 75, 71, 69, 72, 76, 73]`. At `72`, the stack pops `69` and `71`, then becomes `[75, 72]` from bottom to top. At `76`, it pops `72` and `75`; `74` was already popped when `75` arrived. The six popped temperatures are `73`, `74`, `69`, `71`, `72`, and `75`, each in its own frame. Converting each resolved next index to `nextIndex - currentIndex` gives the Daily Temperatures waits `[1, 1, 4, 2, 1, 1, 0, 0]`. The charge counter shows the global bound: eight pushes and six pops over the whole scan.\n\nThe stack holds unanswered indices whose values are non-increasing from bottom to top. When `a[i]` pops index `j`, no position between `j` and `i` held a greater value — such a value would already have popped `j`. Therefore `i` is the nearest qualifying index to the right. Entries left after the scan have no greater value to their right.\n\nThe deque keeps the same monotone contents but adds a second exit. Values decrease from front to back; the front is always the current window maximum. Each new index `i` drops the front if it has slid out of the window, then pops from the back while `a[back] <= a[i]`: the incoming value is at least as large, and an equal newer index dominates because it expires later. Indices are the standard representation because the expiry check is direct; a value-only variant needs the departing value and may preserve equal entries separately or compress them into counts.\n\nEach index is pushed once and removed at most once. Charge a removal to that index's earlier push and no index can be charged twice, even though one arriving value may trigger several pops.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Monotonic Stack and Queue complexity\",\n  \"variables\": {\n    \"inputSize\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of elements in the scanned sequence\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (scan back per index)\",\n          \"formula\": \"O(n^2)\",\n          \"curveId\": \"quadratic\"\n        },\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Monotonic stack\",\n          \"formula\": \"O(n)\",\n          \"curveId\": \"linear\"\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (scan back per index)\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        },\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Monotonic stack\",\n          \"formula\": \"O(n)\",\n          \"curveId\": \"linear\"\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# When the Invariant is Set Wrong\n\nThe monotone direction must match the query. A non-increasing stack with a `<` pop condition finds the next greater value. Reverse the invariant and it answers the opposite relation, leaving a different set of entries unresolved. Exact expected outputs over ordered, mixed, and duplicate inputs catch this mistake better than shape-only assertions.\n\nStrictness decides what equal values mean. With `[2, 1, 2]`, `<` keeps the older equal candidate while `<=` lets the newer one replace it. The choice affects both the reported relation and how long a deque candidate survives.\n\nWindow expiry is positional, so indices are the simplest deque representation. A value-only version needs the departing value and must either preserve equal entries or compress them into counts. Either representation loses element identity.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Next-greater control flow\n>\n> ```mermaid\n> flowchart TD\n>   A[Scan next index i] --> B{Stack non empty and top value less than a at i}\n>   B -->|Yes| C[Pop the top and record a at i as its next greater]\n>   C --> B\n>   B -->|No| D[Push i onto the stack]\n>   D --> E{More indices remain}\n>   E -->|Yes| A\n>   E -->|No| F[Indices left on the stack have no greater element]\n> ```\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> // Next greater element to the right; result[i] = index of the next greater value, or -1.\n> public static int[] NextGreater(int[] a)\n> {\n>     int n = a.Length;\n>     var res = new int[n];\n>     Array.Fill(res, -1);\n>     var stack = new Stack<int>();                  // indices, values non-increasing bottom to top\n>     for (int i = 0; i < n; i++)\n>     {\n>         while (stack.Count > 0 && a[stack.Peek()] < a[i])\n>             res[stack.Pop()] = i;                  // a[i] is the answer for each popped index\n>         stack.Push(i);\n>     }\n>     return res;                                    // indices never popped keep -1\n> }\n>\n\n> public static int[] MaxSlidingWindow(int[] a, int k)\n> {\n>     var dq = new LinkedList<int>();                // indices, values decreasing front to back\n>     var res = new int[a.Length - k + 1];\n>     for (int i = 0; i < a.Length; i++)\n>     {\n>         if (dq.Count > 0 && dq.First.Value <= i - k)\n>             dq.RemoveFirst();                      // front slid out of the window\n>         while (dq.Count > 0 && a[dq.Last.Value] <= a[i])\n>             dq.RemoveLast();                       // newer value is >= and expires later on ties\n>         dq.AddLast(i);\n>         if (i >= k - 1) res[i - k + 1] = a[dq.First.Value]; // front is the window max\n>     }\n>     return res;\n> }\n> ```\n> The pop comparison (`<` vs `<=`) sets tie handling. Both examples store indices so distances and window eviction stay recoverable.\n\n# Comparison\n\n| Approach | Use it for |\n| --- | --- |\n| Monotonic stack / deque | Nearest greater/smaller or moving-window extrema |\n| Indexed heap or periodically rebuilt heap | Window extrema when heap operations are already needed |\n| Lazy-deletion heap without rebuilding | Avoid when a long stream can accumulate expired entries |\n| Two heaps / order-statistic tree | Window median / general `k`-th value |\n\n# References\n\n- [Largest Rectangle in Histogram (LeetCode #84)](https://leetcode.com/problems/largest-rectangle-in-histogram/)\n- [Minimum stack / minimum queue](https://cp-algorithms.com/data_structures/stack_queue_modification.html)\n",
+          "hash": "ced1cac4a858ef1ed12e9856448d2bff64c5fad4cd5a725605cda0fbb4837667",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Monotonic Stack and Queue.md",
+          "expected_hash": "ced1cac4a858ef1ed12e9856448d2bff64c5fad4cd5a725605cda0fbb4837667",
+          "before": ">     return res;                                    // indices never popped keep -1\n> }\n>\n\n> public static int[] MaxSlidingWindow(int[] a, int k)",
+          "after": ">     return res;                                    // indices never popped keep -1\n> }\n>\n> // Maximum of each window of size k.\n> public static int[] MaxSlidingWindow(int[] a, int k)",
+          "reason": "Removes the blank line that ended the callout blockquote mid-code-fence, so the second method rendered as prose and the closing fence opened a new block. Adds a one-line comment naming the second method's purpose.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Both C# methods render inside one collapsed example callout and one csharp code fence"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "A blank line inside the C# example callout splits the blockquote and the unclosed code fence, so MaxSlidingWindow renders as plain text and the final fence is mismatched.",
+          "reader_benefit": "The sliding-window implementation displays as code in the example callout, so both implementations can be read and copied."
+        }
+      ],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Monotonic Stack and Queue.md",
+          "outcome": "changed",
+          "reason": "Audited the whole note. The Daily Temperatures trace (8 pushes, 6 pops, stack [75,72], waits [1,1,4,2,1,1,0,0]), the amortized argument, the tie-handling discussion, the deque expiry logic and the complexity table are all correct. One rendering defect was found: a blank line split the C# example callout and its code fence, so the second method rendered as prose. The edit repairs it."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Patterns/Monotonic Stack and Queue.md": "ced1cac4a858ef1ed12e9856448d2bff64c5fad4cd5a725605cda0fbb4837667"
+    },
+    "feedback_keys": [],
+    "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Patterns/Monotonic Stack and Queue.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-15T07:00:26.677525Z"
+  }
 }
