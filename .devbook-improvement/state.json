@@ -16728,16 +16728,87 @@
     "version": 1,
     "id": "4bd0bfa98b5d4dbbb28188e2b990362e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-15T19:02:25.981526Z",
-    "elapsed_seconds": 80.1212921,
+    "elapsed_seconds": 84.7839788,
     "calls_reserved": 2,
     "responses_received": 2,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/Data Persistence/Caching.md"
+    ],
     "accepted_records": [],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/Data Persistence/Caching.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/Caching.md",
+                "outcome": "keep",
+                "reason": "Read the whole note against the current text. The opening defines hit/miss, L1/L2 and the correctness boundary. Cache vs retained log vs index is distinguished by loss behavior. The pattern table gives each strategy's write path, failure and freshness. The invalidation section covers explicit delete, TTL, event-driven and versioned keys, each with a TTL backstop. The stale-while-revalidate code is coherent: it uses dual TTLs, a per-key Lazy refresh owner, and failures returned as data. The prose correctly says coalescing is per-process only. Redis/Memcached, EVCache, eviction and the Redis-as-record sections are internally consistent and carry the loss-window and acknowledgement caveats. The note has no cards and no known violations. Code fences have language tags, and the wikilink and image embeds look well-formed. I found no verified factual error or editorial gap that an edit would repair, and rewording would be churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The whole-note audit found no factual error, rule violation or essential gap, so keeping the note unchanged is justified. There are no edits, and the keep disposition is sound.",
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/Caching.md",
+                "verdict": "CLEAN",
+                "summary": "The note explains cache mechanics, patterns, invalidation, stampede handling, Redis/Memcached and eviction with the conditions and exceptions each decision depends on. I read the whole note and found no concrete error that an edit would repair. Rewording would be churn.",
+                "page_type": "Concept — optional Questions and References are absent, which is allowed. Frontmatter is typed, code fences carry language tags, and the one wikilink is well-formed.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Caching keeps a copy of data closer to its consumer, in process memory, in a shared store such as Redis, or in both.",
+                    "line_start": 15,
+                    "reason": "The opening states the operating idea quickly: what a cache is, where it lives, and the hit and miss behavior."
+                  },
+                  {
+                    "quote": "\"Faster copy\" is the useful boundary.",
+                    "line_start": 38,
+                    "reason": "This separates a cache from a retained log or an index by loss behavior. The table that follows gives each system's safe response to total loss."
+                  },
+                  {
+                    "quote": "A cache needs an authoritative source and a rebuild path.",
+                    "line_start": 47,
+                    "reason": "This states the boundary that decides when a component is really a system of record."
+                  },
+                  {
+                    "quote": "Write-around fits write-heavy data that is rarely read back",
+                    "line_start": 61,
+                    "reason": "The pattern table is followed by a usage condition and its cost, so the comparison supports a decision."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the sections are facets of one topic (caching and its failure modes), and Redis and EVCache appear only as supporting contrasts. Length alone is not a reason to split.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 2
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T19:03:46.102302Z",
+    "checkpoint_at": "2026-11-15T19:03:50.765000Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
