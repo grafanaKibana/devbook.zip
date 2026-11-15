@@ -107,13 +107,19 @@ export function verifyPackage(bundle, identity) {
     declaredTotal += size
     if (declaredTotal > maximumTotal) throw new Error("Deployment aggregate size bound exceeded")
   }
-  const seen = new Set()
+  const filenames = new Set(names)
+  const seen = new Map()
   let total = 0
   for (const name of names) {
     if (!outputPath(name)) throw new Error("Unsafe deployment output path")
-    const folded = name.normalize("NFC").toLowerCase()
-    if (seen.has(folded)) throw new Error("Deployment output path collision")
-    seen.add(folded)
+    const parts = name.split("/")
+    for (let count = 1; count <= parts.length; count++) {
+      const prefix = parts.slice(0, count).join("/")
+      const normalized = prefix.normalize("NFC")
+      if (count < parts.length && filenames.has(prefix)) throw new Error("Deployment output file conflicts with a directory")
+      if (seen.has(normalized) && seen.get(normalized) !== prefix) throw new Error("Deployment output path collision")
+      seen.set(normalized, prefix)
+    }
     const value = bundle.files[name]
     const entry = manifest.files[name]
     if (typeof value !== "string" || value.length > 4 * Math.ceil(maximumFile / 3)) throw new Error("Invalid deployment output encoding")
@@ -128,10 +134,50 @@ export function verifyPackage(bundle, identity) {
   return manifest
 }
 
+function requiresCaseSensitivePaths(names) {
+  const seen = new Map()
+  for (const name of names) {
+    const parts = name.split("/")
+    for (let count = 1; count <= parts.length; count++) {
+      const prefix = parts.slice(0, count).join("/").normalize("NFC")
+      const folded = prefix.toLowerCase()
+      if (seen.has(folded) && seen.get(folded) !== prefix) return true
+      seen.set(folded, prefix)
+    }
+  }
+  return false
+}
+
+function assertCaseSensitiveFilesystem(directory) {
+  const probe = fs.mkdtempSync(path.join(directory, ".devbook-case-"))
+  try {
+    fs.writeFileSync(path.join(probe, "case"), "", { flag: "wx" })
+    try {
+      fs.writeFileSync(path.join(probe, "CASE"), "", { flag: "wx" })
+    } catch (error) {
+      if (error.code === "EEXIST") throw new Error("Deployment output requires a case-sensitive destination filesystem; existing output unchanged")
+      throw error
+    }
+  } finally {
+    fs.rmSync(probe, { recursive: true, force: true })
+  }
+}
+
 export function extractPackage(root, bundle, identity) {
   verifyPackage(bundle, identity)
   const directory = path.join(root, ".vercel/output")
-  if (fs.existsSync(path.join(root, ".vercel")) && fs.lstatSync(path.join(root, ".vercel")).isSymbolicLink()) throw new Error("Deployment output parent cannot be a symlink")
+  let probeDirectory = root
+  for (const name of [".vercel", ".vercel/output"]) {
+    const candidate = path.join(root, name)
+    let stat
+    try { stat = fs.lstatSync(candidate) } catch (error) {
+      if (error.code === "ENOENT") break
+      throw error
+    }
+    if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error("Deployment output and parent must be regular directories, never symlinks")
+    probeDirectory = candidate
+  }
+  if (requiresCaseSensitivePaths(Object.keys(bundle.files))) assertCaseSensitiveFilesystem(probeDirectory)
   fs.rmSync(directory, { recursive: true, force: true })
   for (const [name, value] of Object.entries(bundle.files)) {
     const destination = path.join(directory, name)

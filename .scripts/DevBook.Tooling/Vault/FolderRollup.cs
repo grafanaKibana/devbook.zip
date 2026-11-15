@@ -210,7 +210,7 @@ public static class FolderRollup
     {
         if (args.Contains("--help") || args.Contains("-h"))
         {
-            Console.WriteLine("Sync descendant-derived FolderNote fields. --root <Vault/Home> --write --force --print-changed");
+            Console.WriteLine("Sync descendant-derived FolderNote fields. --root <Vault/Home> --write --force --print-changed --changed-files-file <path>");
             Console.WriteLine("Valid explicit statuses are preserved; --force recomputes priority and level only.");
             return Task.FromResult(0);
         }
@@ -218,6 +218,7 @@ public static class FolderRollup
         {
             string? repoRoot = null;
             string? home = null;
+            string? changedFilesFile = null;
             for (var index = 0; index < args.Length; index++)
             {
                 if (args[index] == "--root" && index + 1 < args.Length)
@@ -228,6 +229,10 @@ public static class FolderRollup
                 {
                     repoRoot = Path.GetFullPath(args[++index]);
                 }
+                else if (args[index] == "--changed-files-file" && index + 1 < args.Length)
+                {
+                    changedFilesFile = Path.GetFullPath(args[++index]);
+                }
                 else if (args[index] is not ("--write" or "--force" or "--print-changed"))
                 {
                     throw new ArgumentException($"Unknown or incomplete argument: {args[index]}");
@@ -236,6 +241,11 @@ public static class FolderRollup
             repoRoot ??= Repository.FindRoot(home);
             home ??= Path.Combine(repoRoot, "Vault", "Home");
             FolderRollupResult result = Sync(home, args.Contains("--write"), args.Contains("--force"), repoRoot);
+            if (changedFilesFile is not null)
+            {
+                string paths = string.Concat(result.Changes.OrderBy(change => change.Path, StringComparer.Ordinal).Select(change => change.Path + "\0"));
+                File.WriteAllText(changedFilesFile, paths, new UTF8Encoding(false));
+            }
             if (args.Contains("--print-changed"))
             {
                 foreach (FolderRollupChange change in result.Changes.OrderBy(change => change.Path, StringComparer.Ordinal))
@@ -253,7 +263,7 @@ public static class FolderRollup
             }
             return Task.FromResult(0);
         }
-        catch (Exception error) when (error is ArgumentException or IOException or InvalidOperationException)
+        catch (Exception error) when (error is ArgumentException or IOException or UnauthorizedAccessException or InvalidOperationException)
         {
             Console.Error.WriteLine(error.Message);
             return Task.FromResult(2);
