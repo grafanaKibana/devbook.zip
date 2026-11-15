@@ -16728,11 +16728,11 @@
     "version": 1,
     "id": "4bd0bfa98b5d4dbbb28188e2b990362e",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-15T19:02:25.981526Z",
-    "elapsed_seconds": 178.986183,
+    "elapsed_seconds": 205.7748731,
     "calls_reserved": 5,
-    "responses_received": 4,
+    "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/Data Persistence/Caching.md",
       "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md"
@@ -16820,7 +16820,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T19:05:24.967192Z",
+    "checkpoint_at": "2026-11-15T19:05:51.755881Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -46782,6 +46782,151 @@
       "Vault/Home/Data Persistence/SQL/Replication.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-15T19:05:20.846690Z"
+    "prepared_at": "2026-11-15T19:05:20.846690Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep is not justified. The Replication Lag section says PostgreSQL has no built-in way to wait for a replay position and that applications must poll. PostgreSQL 19 now ships a WAIT FOR LSN command for exactly this. The statement needs a version condition and the new mechanism.",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is mostly accurate and well organised. One version-specific claim is outdated or misleading: that PostgreSQL has no built-in way to wait for a replay LSN and that applications must poll. PostgreSQL 19 provides the WAIT FOR LSN command, which also makes the Position Token walk-through incomplete.",
+            "page_type": "Concept — applicable rules: no mandatory sections, References optional and present, MD040 satisfied, no Qards present.",
+            "current_text_evidence": [
+              {
+                "quote": "PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare `pg_last_wal_replay_lsn()`",
+                "line_start": 29,
+                "reason": "The claim is version-sensitive. PostgreSQL 19 documents a built-in WAIT FOR LSN command that blocks a standby session until replay reaches the target LSN. The note therefore tells readers polling is required without naming the native mechanism or the version condition."
+              },
+              {
+                "quote": "A fixed time window only guesses at lag. A position token states the required boundary:",
+                "line_start": 53,
+                "reason": "The Position Token walk-through step 5 (wait within a strict budget) omits the native WAIT FOR LSN ... WITH (TIMEOUT, NO_THROW) mechanism. This leaves a learning gap on PostgreSQL 19."
+              },
+              {
+                "quote": "Replication slot accumulation (PostgreSQL)",
+                "line_start": 109,
+                "reason": "Audited and sound. max_slot_wal_keep_size and slot invalidation are described correctly."
+              },
+              {
+                "quote": "A voting quorum prevents two candidates in the same voting configuration from both winning a majority.",
+                "line_start": 15,
+                "reason": "Quorum versus fencing is explained accurately and with the right conditions."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the models, lag, routing and failover sections are one coherent replication-consistency story and are not independently separable.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy",
+                "location": "# Replication Lag, item 1 Read-your-writes",
+                "evidence": "\"PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare `pg_last_wal_replay_lsn()`\"",
+                "effect": "PostgreSQL 19 documents WAIT FOR LSN with MODE, TIMEOUT and NO_THROW options. It is the built-in read-your-writes wait. The note denies a built-in mechanism and is misleading for current versions. The Position Token section also omits it.",
+                "fix": "Add the version condition: before PostgreSQL 19, poll pg_last_wal_replay_lsn(). From 19, use WAIT FOR LSN with a TIMEOUT, noting NO_THROW and the not-in-recovery result after promotion. Keep the timeline-change caveat in the failover section."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+          "citation_index": 0,
+          "reported_line_start": 29,
+          "resolved_line_start": 60
+        },
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+          "citation_index": 1,
+          "reported_line_start": 53,
+          "resolved_line_start": 83
+        },
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+          "citation_index": 2,
+          "reported_line_start": 109,
+          "resolved_line_start": 144
+        },
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+          "citation_index": 3,
+          "reported_line_start": 15,
+          "resolved_line_start": 26
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Data Persistence/SQL/Replication.md": "9b2a043d9c42a3b7d2aaa4669c597dc61c5f0c228fecf1a62b3feaf1020390f6"
+      },
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The keep is not justified. The Replication Lag section says PostgreSQL has no built-in way to wait for a replay position and that applications must poll. PostgreSQL 19 now ships a WAIT FOR LSN command for exactly this. The statement needs a version condition and the new mechanism.",
+      "notes": [
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The note is mostly accurate and well organised. One version-specific claim is outdated or misleading: that PostgreSQL has no built-in way to wait for a replay LSN and that applications must poll. PostgreSQL 19 provides the WAIT FOR LSN command, which also makes the Position Token walk-through incomplete.",
+          "page_type": "Concept — applicable rules: no mandatory sections, References optional and present, MD040 satisfied, no Qards present.",
+          "current_text_evidence": [
+            {
+              "quote": "PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare `pg_last_wal_replay_lsn()`",
+              "line_start": 60,
+              "reason": "The claim is version-sensitive. PostgreSQL 19 documents a built-in WAIT FOR LSN command that blocks a standby session until replay reaches the target LSN. The note therefore tells readers polling is required without naming the native mechanism or the version condition."
+            },
+            {
+              "quote": "A fixed time window only guesses at lag. A position token states the required boundary:",
+              "line_start": 83,
+              "reason": "The Position Token walk-through step 5 (wait within a strict budget) omits the native WAIT FOR LSN ... WITH (TIMEOUT, NO_THROW) mechanism. This leaves a learning gap on PostgreSQL 19."
+            },
+            {
+              "quote": "Replication slot accumulation (PostgreSQL)",
+              "line_start": 144,
+              "reason": "Audited and sound. max_slot_wal_keep_size and slot invalidation are described correctly."
+            },
+            {
+              "quote": "A voting quorum prevents two candidates in the same voting configuration from both winning a majority.",
+              "line_start": 26,
+              "reason": "Quorum versus fencing is explained accurately and with the right conditions."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the models, lag, routing and failover sections are one coherent replication-consistency story and are not independently separable.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Accuracy",
+              "location": "# Replication Lag, item 1 Read-your-writes",
+              "evidence": "\"PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare `pg_last_wal_replay_lsn()`\"",
+              "effect": "PostgreSQL 19 documents WAIT FOR LSN with MODE, TIMEOUT and NO_THROW options. It is the built-in read-your-writes wait. The note denies a built-in mechanism and is misleading for current versions. The Position Token section also omits it.",
+              "fix": "Add the version condition: before PostgreSQL 19, poll pg_last_wal_replay_lsn(). From 19, use WAIT FOR LSN with a TIMEOUT, noting NO_THROW and the not-in-recovery result after promotion. Keep the timeline-change caveat in the failover section."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "FAIL",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
