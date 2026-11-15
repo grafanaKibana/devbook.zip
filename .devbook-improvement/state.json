@@ -11395,6 +11395,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Computer Science/Algorithms/Patterns/Patterns.md": {
+      "content_hash": "8f319878abd74a531b571e78f10f0967251e92f81c7a8f69b9fd5b86c5c650a3",
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "8f319878abd74a531b571e78f10f0967251e92f81c7a8f69b9fd5b86c5c650a3",
+        "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Patterns.md",
+          "verdict": "CLEAN",
+          "summary": "Independent whole-note audit found no factual, editorial or structural defect. The opening defines patterns versus paradigms, the table gives accurate moves, signals and complexity wins, and the closing prose supplies decision-relevant caveats. No edits are proposed and none are needed.",
+          "page_type": "FolderNote — Datacore folder map block is protected and untouched; no cards; one reference.",
+          "current_text_evidence": [
+            {
+              "quote": "a paradigm shapes the solution, while a pattern describes the mechanism used inside it",
+              "line_start": 16,
+              "reason": "Gives the operating idea and the boundary against paradigms quickly, so the topic is recoverable."
+            },
+            {
+              "quote": "| [[Top-K Elements]] | A size-k heap over a stream |",
+              "line_start": 34,
+              "reason": "Table row mechanism and O(n log k) win are accurate and decision-oriented."
+            },
+            {
+              "quote": "A variable-size sum window needs a monotone rule for moving its boundaries, which negative values break.",
+              "line_start": 42,
+              "reason": "States the key exception explaining why prefix sum plus hashmap is needed for exact sums; correct and concise."
+            },
+            {
+              "quote": "Keywords are clues, not proof. The deciding evidence is the invariant",
+              "line_start": 40,
+              "reason": "Provides engineering judgment on pattern recognition without repetition of the table."
+            },
+            {
+              "quote": "[Competitive Programmer's Handbook (Laaksonen)](https://cses.fi/book/book.pdf)",
+              "line_start": 46,
+              "reason": "Real, authoritative, topic-relevant bare link reference."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note is a compact hub whose table and comparison paragraph depend on one another; child pattern notes already exist separately.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -15204,7 +15264,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-15T06:51:01.310737Z",
-    "elapsed_seconds": 687.6310431999999,
+    "elapsed_seconds": 691.4179141,
     "calls_reserved": 18,
     "responses_received": 18,
     "attempted_paths": [
@@ -19401,7 +19461,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T07:02:28.941359Z",
+    "checkpoint_at": "2026-11-15T07:02:32.728230Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -51088,105 +51148,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "da6ae8bc44c444a5b6a4606355aadef4",
-    "topic_id": "computer-science-445ddaa5",
-    "batch": {
-      "topic": "Computer Science",
-      "topic_id": "computer-science-445ddaa5",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Patterns.md",
-          "content": "---\ntitle: Algorithm Patterns\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Reusable coding idioms that turn brute-force approaches into efficient solutions. Recognising the pattern is the hard part.\"\ntags: [FolderNote]\npublish: true\npriority: Medium\nlevel: [\"4\"]\nstatus: New\ncreated: \"2026-06-20T05:33:50.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:28:37.375Z\"\n---\n\nAlgorithm patterns are recurring implementation moves that replace repeated work with a maintained invariant. A sliding window carries a range aggregate, prefix sums reuse cumulative work, and a monotonic stack discards candidates that cannot win. They are narrower than [[Home/Computer Science/Algorithms/Paradigms/Paradigms|paradigms]] such as dynamic programming or greedy design: a paradigm shapes the solution, while a pattern describes the mechanism used inside it.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Algorithm Selection\n\n| Pattern | The move | Strong signal | Typical win |\n|---|---|---|---|\n| [[Two Pointers]] | Two coordinated indices, ends-in | Sorted array, pair/triplet sums, in-place partition | O(n²) → O(n) |\n| [[Fast and Slow Pointers]] | Two indices at different speeds | \"Cycle in a linked list\", \"find the middle in one pass\", duplicate in `1..n` | O(n) space → O(1) |\n| [[Sliding Window]] | A moving contiguous range updated incrementally | \"Longest/shortest contiguous subarray or substring with a constraint\" | O(n·k) → O(n) |\n| [[Prefix Sum]] | Precompute cumulative sums. A range is one subtraction | \"Many range-sum queries over static data\", \"count subarrays summing to k\" | O(n) per query → O(1) |\n| [[Monotonic Stack and Queue]] | A stack or deque kept sorted, popping what can never win | \"Next/previous greater element\", \"sliding-window maximum\" | O(n²) → O(n) |\n| [[Merge Intervals]] | Sort by start, then sweep and coalesce | \"Overlapping intervals\", \"meeting rooms\", calendar booking | O(n²) → O(n log n) |\n| [[Cyclic Sort]] | Swap each value to the index it belongs at | \"n numbers in the range 1..n\" + find the missing/duplicate, in place | O(n) space → O(1) |\n| [[Top-K Elements]] | A size-k heap over a stream | \"Top / largest / smallest / most frequent K\" | O(n log n) → O(n log k) |\n| [[Home/Computer Science/Algorithms/Patterns/Two Heaps|Two Heaps]] | Max-heap below, min-heap above a moving partition | \"Running median\", \"median from a stream\", balanced lower/upper halves | O(n log n) total updates + O(1) median reads |\n| [[Binary Search on Answer]] | Binary-search the answer space, not the array | \"Minimise the maximum\", \"maximise the minimum\", \"smallest x such that…\" | O(range) → O(log range) |\n| [[Bit Manipulation]] | Operate on the binary representation directly | Small fixed sets, parity/toggles, subset enumeration | O(n) → O(1) space/time tricks |\n\n> [!TIP]\n> Keywords are clues, not proof. The deciding evidence is the invariant: contiguous ranges that update at their boundaries suggest a sliding window, sorted pair elimination suggests two pointers, and a monotone feasibility predicate suggests binary search on the answer.\n\nSeveral patterns share the same surface shape but depend on different proofs. A variable-size sum window needs a monotone rule for moving its boundaries, which negative values break. [[Prefix Sum]] plus a hashmap still handles exact subarray sums. [[Fast and Slow Pointers]] uses a speed difference along one successor chain, while [[Two Pointers]] usually eliminates candidates using order. [[Binary Search on Answer]] searches a monotone feasibility predicate rather than stored data, though it reuses the halving mechanic from [[Binary Search]].\n\n# References\n\n- [Competitive Programmer's Handbook (Laaksonen)](https://cses.fi/book/book.pdf)\n",
-          "hash": "8f319878abd74a531b571e78f10f0967251e92f81c7a8f69b9fd5b86c5c650a3",
-          "topic": "Computer Science",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Patterns.md",
-          "outcome": "keep",
-          "reason": "Audited the whole folder note. The opening defines a pattern as a maintained invariant and separates it from paradigms. The selection table's moves, signals and complexity wins are accurate: two pointers O(n²)→O(n), sliding window, prefix sum with O(1) range queries, monotonic stack O(n), merge intervals O(n log n) from the sort, cyclic sort O(1) space, top-K O(n log k), two heaps with O(1) median reads, and binary search on answer O(log range). The TIP and closing paragraph give the decision-relevant caveats: negative values break the monotone sliding-window rule, prefix sums with a hashmap handle exact sums, and the pointer variants rely on different proofs. The Datacore block is protected and untouched, there are no cards, and the single reference is a real, relevant source. No factual or editorial defect justifies an edit."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Computer Science/Algorithms/Patterns/Patterns.md": "8f319878abd74a531b571e78f10f0967251e92f81c7a8f69b9fd5b86c5c650a3"
-    },
-    "feedback_keys": [],
-    "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Computer Science/Algorithms/Patterns/Patterns.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-15T07:02:09.162562Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Patterns.md",
-          "verdict": "CLEAN",
-          "summary": "Independent whole-note audit found no factual, editorial or structural defect. The opening defines patterns versus paradigms, the table gives accurate moves, signals and complexity wins, and the closing prose supplies decision-relevant caveats. No edits are proposed and none are needed.",
-          "page_type": "FolderNote — Datacore folder map block is protected and untouched; no cards; one reference.",
-          "current_text_evidence": [
-            {
-              "quote": "a paradigm shapes the solution, while a pattern describes the mechanism used inside it",
-              "line_start": 16,
-              "reason": "Gives the operating idea and the boundary against paradigms quickly, so the topic is recoverable."
-            },
-            {
-              "quote": "| [[Top-K Elements]] | A size-k heap over a stream |",
-              "line_start": 34,
-              "reason": "Table row mechanism and O(n log k) win are accurate and decision-oriented."
-            },
-            {
-              "quote": "A variable-size sum window needs a monotone rule for moving its boundaries, which negative values break.",
-              "line_start": 42,
-              "reason": "States the key exception explaining why prefix sum plus hashmap is needed for exact sums; correct and concise."
-            },
-            {
-              "quote": "Keywords are clues, not proof. The deciding evidence is the invariant",
-              "line_start": 40,
-              "reason": "Provides engineering judgment on pattern recognition without repetition of the table."
-            },
-            {
-              "quote": "[Competitive Programmer's Handbook (Laaksonen)](https://cses.fi/book/book.pdf)",
-              "line_start": 46,
-              "reason": "Real, authoritative, topic-relevant bare link reference."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note is a compact hub whose table and comparison paragraph depend on one another; child pattern notes already exist separately.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The unchanged folder note is accurate, readable and compliant, with no known violations and no concrete defect; the keep disposition is justified.",
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
