@@ -194,8 +194,8 @@ public sealed partial class ImprovementEngine
         if (changed.Length != 0) return null;
         if (scope.Obj("pr").Bool("export_required") || scope.Obj("pr").Str("export_operation_id").Length != 0)
         {
-            RemoteExportReceipt receipt = await Receipt.RemoteAsync(api, scope.Str("head_sha"), cancellationToken);
-            if (!receipt.SourcesCurrent) return FeedbackResult("feedback_pending_export");
+            if (!await Worker.ArtifactCurrentAsync(api, config, state, scope.Obj("pr"), scope.Str("head_sha"), cancellationToken))
+                return FeedbackResult("feedback_pending_export");
         }
         if (!apply) return FeedbackResult("no_worthwhile_changes");
         foreach (JsonObject record in records)

@@ -122,7 +122,7 @@ public static class Fixture
         string asset = Path.Combine(root, "Vault/Assets/pixel.png");
         Directory.CreateDirectory(Path.GetDirectoryName(asset)!);
         File.WriteAllBytes(asset, Convert.FromBase64String(Pixel));
-        Write(root, "Web/content/Topic/Example.md", "---\ncreated: 2026-10-01T00:00:00.000Z\nmodified: 2026-10-01T00:00:00.000Z\npublished: 2026-10-01T00:00:00.000Z\n---\nOld fixture output.\n");
+        Write(root, ".gitignore", "/Web/content/\n/Web/quartz/styles/syncer/\n/.devbook-improvement/syncer-export.json\n/.desktop-export-*/\n");
         Git.Run(root, "init", "-q", "-b", Branch);
         Git.Run(root, "config", "user.name", "Fixture");
         Git.Run(root, "config", "user.email", "fixture@example.invalid");
@@ -178,7 +178,7 @@ public static class Fixture
                 throw new RuntimeFailure($"Genuine export did not preserve the authored publication date: {date.Name}");
             }
         }
-        Receipt.Validate(JsonData.ParseObject(Encoding.UTF8.GetString(files[Receipt.PathName]!)), Receipt.IndexEntries(owned.Root));
+        Bundle.ValidateInputs(bundle, Receipt.TreeEntries(owned.Root));
 
         string examplePath = Path.Combine(owned.Root, "Vault/Home/Topic/Example.md");
         File.WriteAllText(examplePath, File.ReadAllText(examplePath)
@@ -205,8 +205,9 @@ public static class Fixture
         {
             throw new RuntimeFailure("Republication did not preserve source publication metadata while updating content and modified date.");
         }
-        Receipt.Validate(JsonData.ParseObject(Encoding.UTF8.GetString(files[Receipt.PathName]!)), Receipt.IndexEntries(owned.Root));
+        Bundle.ValidateInputs(bundle, Receipt.TreeEntries(owned.Root));
         string diff = Encoding.UTF8.GetString(Git.Run(owned.Root, "diff", "--cached", "--no-ext-diff", "--binary"));
+        if (diff.Length != 0) throw new RuntimeFailure("Native export changed the real index.");
         return new JsonObject
         {
             ["status"] = "fixture_exported",

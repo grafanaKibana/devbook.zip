@@ -3,6 +3,19 @@
 @use "../../custom/complexity/styles";
 @use "sass:map";
 
+// Preserve DevBook's non-desktop spacing outside the upstream-owned base styles.
+@media all and not ($desktop) {
+  .page > #quartz-body,
+  .page > #quartz-body .sidebar {
+    margin-right: 10px;
+  }
+}
+@media all and ($mobile) {
+  .page > #quartz-body {
+    margin: 0 auto;
+  }
+}
+
 // Quartz caches these Google fonts into /static/fonts, but its generated
 // @font-face URLs point at the production baseUrl even during local serve.
 // Local aliases keep both localhost and production on the copied files.

@@ -77,12 +77,12 @@ public static class Demo
             {
                 JsonObject request = result.RequiredObject("export_request");
                 JsonObject bundle = ExportBundle(api, request);
-                JsonObject exported = await Worker.PublishBundleAsync(api, config, bundle, request, store, cancellationToken: cancellationToken);
+                JsonObject exported = await Worker.PublishBundleAsync(api, config, bundle, request, store, cancellationToken: cancellationToken, provenance: api.ExportProvenance);
                 if (exported.Str("status") != "exported")
                 {
                     throw new RuntimeFailure("Native demo export finalization failed: " + exported.Str("status"));
                 }
-                steps.Add(new JsonObject { ["stage"] = "generated-only fixture export", ["status"] = exported.Str("status"), ["commit_sha"] = exported.Str("commit_sha") });
+                steps.Add(new JsonObject { ["stage"] = "source-bound artifact fixture export", ["status"] = exported.Str("status"), ["commit_sha"] = exported.Str("commit_sha") });
             }
             JsonObject first = await Opportunity();
             if (model.AuthorCalls != 2 || model.ReviewCalls != 2 || first.Obj("coverage").Int("improved_count") != 2)
@@ -185,35 +185,33 @@ public static class Demo
     private static JsonObject ExportBundle(DemoApi api, JsonObject request)
     {
         string head = request.Str("expected_head");
-        Dictionary<string, GitTreeEntry> entries = new(api.Tree(head));
-        var changes = new Dictionary<string, byte[]?>
+        JsonObject inputs = SiteArtifact.Inputs(api.Tree(head).Values);
+        var files = new Dictionary<string, byte[]>
         {
             ["Web/content/demo.md"] = Encoding.UTF8.GetBytes("Fixture-generated output for " + head),
-            ["Web/content/assets/demo.bin"] = [0, 1, 2, 255]
+            ["Web/content/assets/demo.bin"] = [0, 1, 2, 255],
+            ["Web/quartz/styles/syncer/_index.scss"] = "/* fixture styles */\n"u8.ToArray()
         };
-        if (entries.ContainsKey("Web/content/retire-me.md"))
-        {
-            changes["Web/content/retire-me.md"] = null;
-        }
-        foreach (KeyValuePair<string, byte[]?> item in changes)
-        {
-            if (item.Value is null)
-            {
-                entries.Remove(item.Key);
-            }
-            else
-            {
-                entries[item.Key] = new GitTreeEntry(item.Key, "100644", "blob", Bundle.BlobSha(item.Value));
-            }
-        }
-        changes[Receipt.PathName] = Encoding.UTF8.GetBytes(Receipt.Make(entries.Values).ToJsonString(JsonData.Options));
         return new JsonObject
         {
-            ["version"] = 1,
-            ["pr_number"] = request.Int("pr_number"),
-            ["branch"] = request.Str("branch"),
-            ["expected_head"] = head,
-            ["files"] = new JsonObject(changes.Select(item => new KeyValuePair<string, JsonNode?>(item.Key, item.Value is null ? null : JsonValue.Create(Convert.ToBase64String(item.Value)))))
+            ["version"] = 2,
+            ["pr_number"] = request.Int("pr_number"), ["branch"] = request.Str("branch"), ["expected_head"] = head,
+            ["manifest"] = new JsonObject
+            {
+                ["version"] = 2, ["repository"] = api.Repo, ["kind"] = "commit", ["source_sha"] = head,
+                ["sources"] = inputs["sources"]?.DeepClone(), ["policy"] = inputs["policy"]?.DeepClone(),
+                ["runtime"] = new JsonObject
+                {
+                    ["obsidian"] = "1.14.5",
+                    ["plugins"] = new JsonObject(Receipt.Plugins.Select(id => new KeyValuePair<string, JsonNode?>(id, JsonValue.Create("1.0.0"))))
+                },
+                ["outputs"] = new JsonObject(files.Select(item => new KeyValuePair<string, JsonNode?>(item.Key, new JsonObject
+                {
+                    ["sha256"] = Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(item.Value)),
+                    ["size"] = item.Value.Length, ["mode"] = "100644", ["type"] = "file"
+                })))
+            },
+            ["files"] = new JsonObject(files.Select(item => new KeyValuePair<string, JsonNode?>(item.Key, JsonValue.Create(Convert.ToBase64String(item.Value)))))
         };
     }
 }

@@ -177,7 +177,7 @@ public sealed class QueueTests
     }
 
     [Fact]
-    public async Task ThreeMalformedReceiptsPauseTheirTopicsWithoutBlockingANewTopic()
+    public async Task LegacyGeneratedPrsPauseTheirTopicsWithoutBlockingANewTopic()
     {
         // Arrange
         using var fixture = new WorkloadFixture(1);
@@ -280,11 +280,11 @@ public sealed class QueueTests
             foreach (string field in new[] { "proposal_records", "export_receipt", "unknown_evidence", "base_note_hashes", "changed_paths" })
                 JsonNode.DeepEquals(row[field], original[field]).Should().BeTrue($"{key} must retain {field}");
         }
-        final.Obj("prs").Obj($"{Core.TopicId("Networks")}:1").Str("pause_reason").Should().Contain("receipt is missing");
-        final.Obj("prs").Obj($"{Core.TopicId("Databases")}:1").Str("pause_reason").Should().Contain("property name");
-        final.Obj("prs").Obj($"{Core.TopicId("Algorithms")}:1").Str("pause_reason").Should().Contain("Base-64");
-        api.Requests.Should().Contain("GET /git/blobs/" + new string('e', 40));
-        api.Requests.Should().Contain("GET /git/blobs/" + new string('f', 40));
+        foreach (string topic in new[] { "Networks", "Databases", "Algorithms" })
+        {
+            final.Obj("prs").Obj($"{Core.TopicId(topic)}:1").Str("pause_reason").Should().Contain("source-only refresh");
+        }
+        api.Requests.Should().NotContain(request => request.StartsWith("GET /git/blobs/", StringComparison.Ordinal));
         api.Requests.Should().OnlyContain(request => request.StartsWith("GET ", StringComparison.Ordinal));
     }
 

@@ -41,9 +41,12 @@ public sealed class SyncerContext
     public TimeSpan Remaining => Deadline > DateTimeOffset.UtcNow
         ? Deadline - DateTimeOffset.UtcNow : throw new SyncException("Quartz export deadline reached.");
 
-    public byte[] GitBytes(params string[] arguments) => new SystemProcessRunner().RunAsync(new ProcessRequest(
-        "git", arguments, Root, GitEnvironment, Timeout: Remaining, ClearEnvironment: GitEnvironment is not null))
-        .GetAwaiter().GetResult().EnsureSuccess("Git export operation").Output;
+    public byte[] GitBytes(params string[] arguments)
+    {
+        return Git.RunAsync(new ProcessRequest("git", arguments, Root, GitEnvironment,
+            Timeout: Remaining, ClearEnvironment: GitEnvironment is not null))
+            .GetAwaiter().GetResult().EnsureSuccess("Git export operation").Output;
+    }
 
     public string GitText(params string[] arguments) => Encoding.UTF8.GetString(GitBytes(arguments)).TrimEnd('\r', '\n');
     public string[] GitPaths(params string[] arguments) => Encoding.UTF8.GetString(GitBytes(arguments))
@@ -52,7 +55,7 @@ public sealed class SyncerContext
 
 public static class Syncer
 {
-    public static readonly string[] Outputs = ["Web/content", "Web/quartz/styles/syncer", "Web/quartz/styles/custom.scss"];
+    public static readonly string[] Outputs = ["Web/content", "Web/quartz/styles/syncer"];
 
     public static TimeSpan ResolveTimeout(TimeSpan? explicitTimeout, string? localOverride)
     {
@@ -334,7 +337,7 @@ public static class Syncer
     }
 
     public static async Task<JsonObject> CliAsync(SyncerContext context, IReadOnlyList<string> arguments,
-        bool structured = true, CancellationToken cancellationToken = default)
+        bool structured = true, CancellationToken cancellationToken = default, string? probeLabel = null)
     {
         string response = (await context.Command(arguments, cancellationToken)).Trim();
         if (arguments.Count > 0 && arguments[0] == "eval" && response.StartsWith("=> ", StringComparison.Ordinal))
@@ -348,7 +351,13 @@ public static class Syncer
         }
         catch (JsonException error)
         {
-            throw new SyncException($"{arguments[0]}: malformed JSON; export completion cannot be verified.", error);
+            string label = probeLabel ?? arguments.FirstOrDefault() ?? "unknown";
+            if (!Regex.IsMatch(label, "^[a-zA-Z0-9:-]{1,80}$", RegexOptions.CultureInvariant)) label = "unknown";
+            byte[] bytes = Encoding.UTF8.GetBytes(response);
+            string line = error.LineNumber?.ToString(CultureInfo.InvariantCulture) ?? "unknown";
+            string position = error.BytePositionInLine?.ToString(CultureInfo.InvariantCulture) ?? "unknown";
+            throw new SyncException($"{label}: malformed JSON; bytes={bytes.Length}; sha256={Convert.ToHexStringLower(SHA256.HashData(bytes))}; "
+                + $"type={error.GetType().Name}; line={line}; byte={position}; export completion cannot be verified.");
         }
         if (value is not JsonObject result || (result["success"] is JsonValue success && success.TryGetValue(out bool flag) && !flag)
             || (structured && !result.Bool("success")))
@@ -362,7 +371,7 @@ public static class Syncer
     private static async Task<JsonObject> LoadedVaultAsync(SyncerContext context, CancellationToken cancellationToken)
     {
         const string probe = "JSON.stringify({vaultPath:app.vault.adapter.getBasePath(),datacoreReady:!!window.datacore&&app.plugins.plugins.datacore?.core?.initialized===true,preserveSupported:JSON.stringify(app.setting.pluginTabs.find(t=>t.id==='quartz-syncer')?.getSettingDefinitions?.()??[]).includes('obsidianCommentMode'),syncerLoaded:!!app.plugins.plugins['quartz-syncer'],autoPublishActive:app.plugins.plugins['quartz-syncer']?.getEngineStatus?.()?.autoPublish})";
-        JsonObject identity = await CliAsync(context, ["eval", "code=" + probe], false, cancellationToken);
+        JsonObject identity = await CliAsync(context, ["eval", "code=" + probe], false, cancellationToken, probeLabel: "loaded-vault");
         if (Path.GetFullPath(identity.Str("vaultPath")) != Path.Combine(context.Root, "Vault"))
         {
             throw new SyncException("Connected Obsidian vault does not match this checkout's Vault directory.");
@@ -466,7 +475,7 @@ public static class Syncer
         while (true)
         {
             _ = context.Remaining;
-            JsonObject state = await CliAsync(context, ["eval", "code=" + SyncerProbes.IndexState], false, cancellationToken);
+            JsonObject state = await CliAsync(context, ["eval", "code=" + SyncerProbes.IndexState], false, cancellationToken, probeLabel: "index-state");
             foreach (string name in new[] { "inventory", "nativePublishPaths", "extendedPublishPaths" })
             {
                 if (state[name] is not JsonArray list || list.Any(item => item is not JsonValue val || !val.TryGetValue(out string? _)))
@@ -486,7 +495,7 @@ public static class Syncer
     }
 
     public static async Task ExportAsync(SyncerContext context, bool prepareLocalDates = false,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, bool allowMissingPublicationDates = false)
     {
         (JsonObject settings, JsonObject identity) = await ConfigureAsync(context, cancellationToken);
         if (settings.Bool("useDatacore") && !identity.Bool("datacoreReady"))
@@ -506,7 +515,7 @@ public static class Syncer
                 throw new SyncException("Vault source changed while preparing note dates; commit blocked.");
             }
         }
-        else
+        else if (!allowMissingPublicationDates)
         {
             NoteDates.RequirePublications(context.Root);
         }
@@ -528,13 +537,7 @@ public static class Syncer
             }
         }
         GuardSource(context);
-        string[] existing = Outputs.Where(path => File.Exists(Path.Combine(context.Root, path)) || Directory.Exists(Path.Combine(context.Root, path))
-            || context.GitText("ls-files", "--", path).Length != 0).ToArray();
-        if (existing.Length != 0)
-        {
-            context.GitBytes(["add", "-A", "--", .. existing]);
-        }
-        Log(context, "Export verified; generated output staged.");
+        Log(context, "Export verified; generated output remains outside the Git index.");
     }
 
     private static async Task RenderAsync(SyncerContext context, Dictionary<string, byte[]> before, CancellationToken cancellationToken)
@@ -546,7 +549,7 @@ public static class Syncer
         bool refreshAssets = StagedSource(context).Any(path => path.StartsWith("Vault/Assets/", StringComparison.Ordinal)
             || !path.EndsWith(".md", StringComparison.OrdinalIgnoreCase));
         JsonObject result = refreshAssets
-            ? await CliAsync(context, ["eval", "code=" + SyncerProbes.FullPublish], cancellationToken: cancellationToken)
+            ? await CliAsync(context, ["eval", "code=" + SyncerProbes.FullPublish], cancellationToken: cancellationToken, probeLabel: "full-publish")
             : await CliAsync(context, ["quartz-syncer:publish", "format=json"], cancellationToken: cancellationToken);
         if ((result["failures"] is not null && (result["failures"] is not JsonArray failures || failures.Count != 0)) || (result["skipped"] is not null && (result["skipped"] is not JsonValue skipped || !skipped.TryGetValue(out int skippedCount) || skippedCount != 0)))
         {
@@ -558,7 +561,7 @@ public static class Syncer
         }
         await WaitForIndexesAsync(context, before, cancellationToken);
         await CliAsync(context, ["quartz-syncer:delete", "force", "format=json"], cancellationToken: cancellationToken);
-        JsonObject cleanup = await CliAsync(context, ["eval", "code=" + SyncerProbes.CompiledMediaCleanup], cancellationToken: cancellationToken);
+        JsonObject cleanup = await CliAsync(context, ["eval", "code=" + SyncerProbes.CompiledMediaCleanup], cancellationToken: cancellationToken, probeLabel: "compiled-media-cleanup");
         if (cleanup.Str("outcome") == "unchanged-or-withheld")
         {
             Log(context, "Native media cleanup: no changes or cleanup withheld by native safeguard.");
@@ -641,14 +644,13 @@ public static class Syncer
                 return 0;
             }
             GuardSource(context);
-            GuardOutput(context);
             if (hook is not null)
             {
                 await RunMaintenanceHookAsync(context, hook);
                 GuardSource(context);
             }
             await ExportAsync(context, prepareLocalDates: true);
-            Console.WriteLine("[pre-commit] Quartz export completed; generated output staged.");
+            Console.WriteLine("Quartz export verified; generated output was not staged. Use site preview for local preview and first publication.");
             return 0;
         }
         catch (Exception error) when (error is SyncException or IOException or InvalidOperationException or IndexOutOfRangeException)

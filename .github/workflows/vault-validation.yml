@@ -1,16 +1,163 @@
-name: Vault Validation
+name: CI
 
 on:
   pull_request:
+    types: [opened, edited, synchronize, reopened]
   push:
     branches: [main]
   workflow_dispatch:
+  issue_comment:
+    types: [created]
 
 permissions:
   contents: read
 
 jobs:
+  site:
+    if: >-
+      github.event_name == 'pull_request' &&
+      (github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'stage')
+    uses: ./.github/workflows/site-check.yml
+    with:
+      source-sha: ${{ github.event.pull_request.head.sha }}
+
+  pr-title:
+    # Manual validation must not shadow a successful required PR check with skipped.
+    name: ${{ github.event_name == 'pull_request' && (github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'stage') && 'pr-title' || 'pr-title-inactive' }}
+    needs: site
+    if: >-
+      always() && github.event_name == 'pull_request' &&
+      (github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'stage')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require actual native export and Quartz build
+        env:
+          SITE_RESULT: ${{ needs.site.result }}
+        run: |
+          test "$SITE_RESULT" = success || { echo '::error::The actual PR source must pass native export and Quartz build.'; exit 1; }
+      - name: Validate PR title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+          if printf '%s' "$TITLE" | grep -qE '^(feature|notes|docs|bug|fix|maintenance)!?: .+'; then
+            echo "✓ $TITLE"
+          else
+            echo "::error::PR title must start with feature:, notes:, docs:, bug:, fix: or maintenance:."
+            exit 1
+          fi
+      - name: Require configured artifact deployment before cutover
+        env:
+          READY: ${{ vars.DEVBOOK_ARTIFACT_DEPLOYMENT_READY }}
+        run: |
+          if [ "$READY" != true ]; then
+            echo '::error::Artifact deployment is not configured. Configure Vercel IDs/token in Preview and Production, validate Trusted Sources OIDC access and required pr-title on stage, then set DEVBOOK_ARTIFACT_DEPLOYMENT_READY=true. Keep the migration PR draft until configuration is verified.'
+            exit 1
+          fi
+
+  # ── PR opened / edited / pushed: gate on a breaking (!) title ───────────────
+  gate:
+    env:
+      BANG_RE: "^(feature|notes|docs|bug|fix|maintenance)!:"
+      MARKER: "<!-- major-approval -->"
+    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set major-approval status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+
+          if printf '%s' "$PR_TITLE" | grep -qE "$BANG_RE"; then
+            NEXT=$(bash .github/scripts/next-version.sh "$PR_TITLE" | sed -n 's/^next=//p')
+            gh api -X POST "repos/$REPO/statuses/$HEAD_SHA" \
+              -f state=pending -f context=major-approval \
+              -f description="Breaking (!) title — reply /approve-major to confirm $NEXT"
+
+            HAS=$(gh api "repos/$REPO/issues/$PR/comments" \
+              --jq "[.[] | select(.body | contains(\"$MARKER\"))] | length")
+            if [ "$HAS" = "0" ]; then
+              gh pr comment "$PR" --body "$MARKER
+          ⚠️ This PR's title has a breaking \`!\`, so merging it publishes a **MAJOR** release (**$NEXT**).
+
+          - Reply \`/approve-major\` to confirm — the check clears and merge is unblocked.
+          - Reply \`/no-major\` to drop the \`!\` from the title (it becomes a normal release)."
+            fi
+          else
+            gh api -X POST "repos/$REPO/statuses/$HEAD_SHA" \
+              -f state=success -f context=major-approval \
+              -f description="No breaking change"
+          fi
+
+  # ── /approve-major or /no-major comment on the PR ───────────────────────────
+  command:
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
+      (startsWith(github.event.comment.body, '/approve-major') ||
+       startsWith(github.event.comment.body, '/no-major'))
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Handle command
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.issue.number }}
+          BODY: ${{ github.event.comment.body }}
+          ACTOR: ${{ github.event.comment.user.login }}
+        run: |
+          set -euo pipefail
+
+          TITLE=$(gh pr view "$PR" --json title --jq '.title')
+          HEAD_SHA=$(gh pr view "$PR" --json headRefOid --jq '.headRefOid')
+
+          if printf '%s' "$BODY" | grep -q '^/approve-major'; then
+            NEXT=$(bash .github/scripts/next-version.sh "$TITLE" | sed -n 's/^next=//p')
+            gh api -X POST "repos/$REPO/statuses/$HEAD_SHA" \
+              -f state=success -f context=major-approval \
+              -f description="Major approved by @$ACTOR"
+            gh pr comment "$PR" --body "✅ Approved by @$ACTOR. Merging this publishes **$NEXT**."
+            exit 0
+          fi
+
+          # /no-major → strip the `!` from the PR title (no history rewrite).
+          NEW_TITLE=$(printf '%s' "$TITLE" | sed -E 's/^(feature|notes|docs|bug|fix|maintenance)!:/\1:/')
+          gh pr edit "$PR" --title "$NEW_TITLE"
+
+          # Preview the resulting (commit-driven) version from the PR head.
+          HEAD_REF=$(gh pr view "$PR" --json headRefName --jq '.headRefName')
+          git fetch --tags origin "$HEAD_REF"
+          git checkout FETCH_HEAD
+          NEXT=$(bash .github/scripts/next-version.sh "$NEW_TITLE" | sed -n 's/^next=//p')
+
+          gh pr comment "$PR" --body "↩️ Dropped \`!\` from the title (requested by @$ACTOR). It's now \`$NEW_TITLE\` → this will publish **$NEXT**."
+
   validate:
+    if: >-
+      github.event_name == 'push' || github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.action != 'edited')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,8 +185,8 @@ jobs:
       - name: Test changelog generation and pre-commit integration
         run: node --test .scripts/tests/changelog.test.cjs
 
-      - name: Test Preview deployment links
-        run: node --test .scripts/tests/preview-deployment-link.test.cjs
+      - name: Test artifact transport, deployment and workflow boundaries
+        run: node --test .scripts/tests/site-*.test.mjs
 
       - name: Test native tooling core
         working-directory: .scripts

@@ -157,37 +157,25 @@ public sealed partial class ImprovementEngine
                 row["pause_reason"] = null;
                 if (allPaths.Any(Receipt.IsExportPath))
                 {
-                    RemoteExportReceipt receipt;
+                    row["base_conflict"] = true;
+                    row["frozen"] = true;
+                    row["pause_reason"] = "Legacy generated-file PR requires an explicit source-only refresh; its reviewed state is preserved and no generated ref will be written.";
+                    rows.Add(row);
+                    continue;
+                }
+                if (prior.Str("export_operation_id").Length > 0)
+                {
                     try
                     {
-                        receipt = await Receipt.RemoteAsync(api, pr.Obj("head").Str("sha"), cancellationToken);
+                        bool current = await Worker.ArtifactCurrentAsync(api, config, state, prior, pr.Obj("head").Str("sha"), cancellationToken);
+                        row["export_required"] = !current || prior.Str("export_check_status") != "success";
+                        if (!current) Worker.RequestArtifactRefresh(state, prior, pr.Obj("head").Str("sha"));
                     }
                     catch (Exception error) when (error is IOException or RuntimeFailure or InvalidDataException or JsonException or FormatException)
                     {
-                        row["base_conflict"] = true;
+                        row["export_required"] = true;
                         row["frozen"] = true;
                         row["pause_reason"] = error.Message;
-                        rows.Add(row);
-                        continue;
-                    }
-                    row["export_required"] = !receipt.SourcesCurrent;
-                    if (!automatic)
-                    {
-                        row["frozen"] = true;
-                    }
-                    if (receipt.SourcesCurrent && prior.Str("export_operation_id").Length > 0)
-                    {
-                        try
-                        {
-                            JsonObject checks = await Runtime.RequiredChecksForShaAsync(api, pr.Obj("head").Str("sha"), config.Arr("required_check_contexts").Strings().Append("validate").Distinct(), cancellationToken);
-                            if (checks.Count > 0 && checks.All(item => item.Value?.GetValue<string>() == "success"))
-                            {
-                                state = await FinalizeExportReceiptsAsync(state, row, pr.Obj("head").Str("sha"), postFeedback, cancellationToken);
-                            }
-                        }
-                        catch (Conflict)
-                        {
-                        }
                     }
                 }
                 else if (prior.Bool("export_required"))
