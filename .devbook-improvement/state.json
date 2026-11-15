@@ -15032,13 +15032,14 @@
     "version": 1,
     "id": "da6ae8bc44c444a5b6a4606355aadef4",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-15T06:51:01.310737Z",
-    "elapsed_seconds": 221.02047779999998,
+    "elapsed_seconds": 224.67022839999998,
     "calls_reserved": 6,
     "responses_received": 6,
     "attempted_paths": [
-      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md"
+      "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+      "Vault/Home/Computer Science/Algorithms/Patterns/Binary Search on Answer.md"
     ],
     "accepted_records": [
       {
@@ -16308,10 +16309,93 @@
             "prepared_at": "2026-11-15T06:52:42.498859Z"
           }
         }
+      },
+      {
+        "path": "Vault/Home/Computer Science/Algorithms/Patterns/Binary Search on Answer.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Patterns/Binary Search on Answer.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note. The ship-capacity example checks out: with weights [3,2,2,4,1,4] the bounds are 4 and 16, capacity 6 packs as [3,2],[2,4],[1,4] in 3 days, and capacity 5 needs 4 days, so the boundary is 6 as the visualization text says. The invariant argument is correct: the low-biased mid keeps ⌈N/2⌉ candidates and the loop terminates. The non-monotone example (false,true,false,false,true) correctly loses the true at index 1. The notes on bounds, the real-domain iteration count, and the mirrored maximise-the-minimum form are accurate. The C# code validates its inputs, uses long arithmetic, and matches the control-flow diagram. The complexity entries O(m·n) versus O(n log m) are consistent with the definitions of n and m. The comparison table and the Binary Search and Ternary Search distinctions are sound. The prose is direct and has no card issues, since there are no cards. No defect justifies an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The whole note was audited independently. The examples, invariant, bounds, code and complexity entries are correct, and no concrete defect justifies an edit.",
+            "notes": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Patterns/Binary Search on Answer.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate and coherent. The ship-capacity example, the halving invariant, the non-monotone failure case, the domain and bound caveats, the C# code and the complexity entries all check out. Keeping it unchanged is justified.",
+                "page_type": "Concept — no required sections; Questions are absent and optional; References are present and valid. The protected steptrace and complexity blocks were left untouched.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The boundary settles at capacity `6`.",
+                    "line_start": 26,
+                    "reason": "With weights [3,2,2,4,1,4] and 3 days, capacity 6 packs as [3,2],[2,4],[1,4] and capacity 5 needs 4 days, so the claim is correct."
+                  },
+                  {
+                    "quote": "Each probe keeps at most `⌈N/2⌉` of `N` candidates.",
+                    "line_start": 94,
+                    "reason": "A low-biased mid leaves ⌈N/2⌉ candidates on success and ⌊N/2⌋ on failure, so the ⌈log₂⌉ step bound is correct."
+                  },
+                  {
+                    "quote": "On `false, true, false, false, true`, a low-biased midpoint at index `2` is false, so the search moves `lo` to `3` and loses the earlier true value at index `1`.",
+                    "line_start": 100,
+                    "reason": "The concrete counterexample is correct and teaches why monotonicity is a precondition."
+                  },
+                  {
+                    "quote": "choose at least `⌈log₂((hi − lo) / δ)⌉` iterations",
+                    "line_start": 105,
+                    "reason": "The real-domain iteration count is correct for reducing the width to δ, and the surrounding prose explains why it depends on the domain."
+                  },
+                  {
+                    "quote": "Mixing the update direction with the wrong midpoint bias either loops forever on `lo == mid` or returns the neighbour of the intended answer.",
+                    "line_start": 106,
+                    "reason": "This states the failure mechanism of the mirrored form precisely."
+                  },
+                  {
+                    "quote": "return SearchBoundary(weights.Max(), weights.Sum(w => (long)w), CanShip);",
+                    "line_start": 167,
+                    "reason": "The code uses long arithmetic, validates its inputs, and matches the diagram and the stated bounds."
+                  },
+                  {
+                    "quote": "One method needs a boundary. The other needs a peak or valley.",
+                    "line_start": 183,
+                    "reason": "The comparison closes with a clear decision distinction from Ternary Search."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one pattern. Its invariant, failure cases, implementation and comparisons are mutually dependent and form one coherent explanation.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 6
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T06:54:42.330788Z",
+    "checkpoint_at": "2026-11-15T06:54:45.980539Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
