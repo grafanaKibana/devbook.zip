@@ -16839,9 +16839,9 @@
     "version": 1,
     "id": "4bd0bfa98b5d4dbbb28188e2b990362e",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-15T19:02:25.981526Z",
-    "elapsed_seconds": 570.8356504000003,
+    "elapsed_seconds": 575.1326173000003,
     "calls_reserved": 13,
     "responses_received": 13,
     "attempted_paths": [
@@ -16849,7 +16849,8 @@
       "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
       "Vault/Home/Data Persistence/SQL/Replication.md",
       "Vault/Home/Data Persistence/ACID.md",
-      "Vault/Home/Data Persistence/Connection Pooling.md"
+      "Vault/Home/Data Persistence/Connection Pooling.md",
+      "Vault/Home/Data Persistence/Data Persistence.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -17093,10 +17094,21 @@
           },
           "model_calls": 10
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/Data Persistence.md",
+        "outcome": "proposal_blocked",
+        "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+          "model_calls": 13
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T19:11:56.816662Z",
+    "checkpoint_at": "2026-11-15T19:12:01.113629Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
