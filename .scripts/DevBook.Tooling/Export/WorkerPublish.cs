@@ -80,14 +80,15 @@ public static partial class Worker
     {
         _ = Bundle.Decode(bundle);
         ValidateRequest(request);
-        if (api.Repo != config.Str("repo") || bundle.Int("pr_number") != request.Int("pr_number")
-            || bundle.Str("branch") != request.Str("branch") || bundle.Str("expected_head") != request.Str("expected_head")
+        // CI's site export carries no PR identity; the CI run's branch and head bind it instead.
+        if (api.Repo != config.Str("repo") || bundle.Int("pr_number") != 0
+            || bundle.Str("branch") != "" || bundle.Str("expected_head") != request.Str("expected_head")
             || bundle.Obj("manifest").Str("repository") != api.Repo)
         {
             throw new UnsafeInput("Export bundle differs from its workflow request or repository.");
         }
         provenance = provenance?.Copy() ?? throw new UnsafeInput("Export completion requires independent Actions artifact provenance.");
-        await ValidateTransportAsync(api, config, provenance, cancellationToken);
+        await ValidateTransportAsync(api, provenance, request.Str("branch"), request.Str("expected_head"), cancellationToken);
         owner ??= "export-" + Guid.NewGuid().ToString("N");
         var lease = new DurableLease(store, owner, ttlSeconds: 900);
         await lease.AcquireAsync(cancellationToken);
@@ -150,9 +151,13 @@ public static partial class Worker
         }
     }
 
-    public static async Task ValidateTransportAsync(IGitHubApi api, JsonObject config, JsonObject provenance,
-        CancellationToken cancellationToken = default)
+    // The artifact comes from CI's pull-request export of the managed branch. CI runs the PR head's
+    // workflow files; CollectAsync admits only notes-only PRs on the current base, so those files
+    // equal the trusted base revision.
+    public static async Task ValidateTransportAsync(IGitHubApi api, JsonObject provenance,
+        string branch, string head, CancellationToken cancellationToken = default)
     {
+        _ = Bundle.ExactHead(head);
         static string Positive(string value) => Regex.IsMatch(value, "^[1-9][0-9]{0,18}$", RegexOptions.CultureInvariant)
             && long.TryParse(value, out long number) && number > 0
             ? value : throw new UnsafeInput("Invalid Actions artifact or workflow-run identity.");
@@ -172,18 +177,27 @@ public static partial class Worker
         {
             throw new ExpiredExportArtifact("Native export artifact expired; rebuild the same authorized source with fresh validation.");
         }
-        if (artifact.Str("name") != $"devbook-syncer-export-{runId}-{attempt}"
+        if (artifact.Str("name") != CiArtifactName(runId, attempt)
             || artifact.Obj("workflow_run")["id"]?.ToString() != runId
             || apiDigest != digest.Replace("sha256:", "", StringComparison.Ordinal)
             || run["run_attempt"]?.ToString() != attempt
-            || run.Str("path").Split('@')[0] != ".github/workflows/devbook-improvement.yml"
-            || run.Str("head_branch") != config.Str("base_branch", "main")
-            || run.Obj("repository").Str("full_name") != api.Repo
-            || run.Str("event") is not ("schedule" or "workflow_dispatch" or "issue_comment" or "workflow_run"))
+            || !IsCiRun(run, api.Repo, branch, head))
         {
-            throw new Conflict("Actions artifact identity, digest, expiry or trusted workflow provenance differs from its handoff.");
+            throw new Conflict("Actions artifact identity, digest, expiry or CI pull-request provenance differs from its handoff.");
         }
     }
+
+    public const string CiWorkflow = "vault-validation.yml";
+
+    public static string CiArtifactName(string runId, string attempt) => $"devbook-native-{runId}-{attempt}";
+
+    private static bool IsCiRun(JsonObject run, string repo, string branch, string head) =>
+        run.Str("path").Split('@')[0] == ".github/workflows/" + CiWorkflow
+        && run.Str("event") == "pull_request"
+        && run.Str("head_branch") == branch
+        && run.Str("head_sha") == head
+        && run.Obj("repository").Str("full_name") == repo
+        && run.Obj("head_repository").Str("full_name") == repo;
 
     public static async Task<bool> ArtifactCurrentAsync(IGitHubApi api, JsonObject config, JsonObject state,
         JsonObject row, string head, CancellationToken cancellationToken = default)
@@ -197,7 +211,7 @@ public static partial class Worker
         }
         try
         {
-            await ValidateTransportAsync(api, config, evidence.Obj("export_transport"), cancellationToken);
+            await ValidateTransportAsync(api, evidence.Obj("export_transport"), evidence.Obj("export_request").Str("branch"), head, cancellationToken);
         }
         catch (ExpiredExportArtifact)
         {

@@ -205,7 +205,7 @@ public static class EngineCommand
         if (request is not null)
         {
             Worker.ValidateRequest(request);
-            lines.Add("export_mode=" + result.Str("export_mode", "render"));
+            lines.Add("export_mode=" + result.Str("export_mode", "collect"));
             lines.Add("pr_number=" + request.Int("pr_number"));
             lines.Add("branch=" + request.Str("branch"));
             lines.Add("expected_head=" + request.Str("expected_head"));
