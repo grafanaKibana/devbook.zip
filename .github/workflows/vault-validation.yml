@@ -13,14 +13,28 @@ permissions:
   contents: read
 
 jobs:
-  pr-title:
-    # Manual validation must not shadow a successful required PR check with skipped.
-    name: ${{ github.event_name == 'pull_request' && 'pr-title' || 'pr-title-inactive' }}
+  site:
     if: >-
       github.event_name == 'pull_request' &&
       (github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'stage')
+    uses: ./.github/workflows/site-check.yml
+    with:
+      source-sha: ${{ github.event.pull_request.head.sha }}
+
+  pr-title:
+    # Manual validation must not shadow a successful required PR check with skipped.
+    name: ${{ github.event_name == 'pull_request' && (github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'stage') && 'pr-title' || 'pr-title-inactive' }}
+    needs: site
+    if: >-
+      always() && github.event_name == 'pull_request' &&
+      (github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'stage')
     runs-on: ubuntu-latest
     steps:
+      - name: Require actual native export and Quartz build
+        env:
+          SITE_RESULT: ${{ needs.site.result }}
+        run: |
+          test "$SITE_RESULT" = success || { echo '::error::The actual PR source must pass native export and Quartz build.'; exit 1; }
       - name: Validate PR title
         env:
           TITLE: ${{ github.event.pull_request.title }}
@@ -29,32 +43,17 @@ jobs:
           if printf '%s' "$TITLE" | grep -qE '^(feature|notes|docs|bug|fix|maintenance)!?: .+'; then
             echo "✓ $TITLE"
           else
-            echo "::error::PR title must start with 'feature:', 'notes:', 'docs:', 'bug:', 'fix:' or 'maintenance:' (append '!' for a breaking/major change, e.g. 'feature!:'). Got: ${TITLE:-<empty>}"
+            echo "::error::PR title must start with feature:, notes:, docs:, bug:, fix: or maintenance:."
             exit 1
           fi
-
-      # Keep export freshness inside an already-required check; a draft flag
-      # alone does not prevent marking a stale public-note PR ready manually.
-      - uses: actions/checkout@v4
-        if: startsWith(github.head_ref, 'notes/automated-')
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-dotnet@v5
-        if: startsWith(github.head_ref, 'notes/automated-')
-        with:
-          dotnet-version: 10.0.100
-
-      - name: Verify managed-note Quartz export handoff
-        if: startsWith(github.head_ref, 'notes/automated-')
+      - name: Require configured artifact deployment before cutover
         env:
-          DEVBOOK_EXPORT_HEAD_REF: ${{ github.head_ref }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        working-directory: .scripts
+          READY: ${{ vars.DEVBOOK_ARTIFACT_DEPLOYMENT_READY }}
         run: |
-          set -euo pipefail
-          test "$(dotnet --version)" = 10.0.100
-          dotnet run --no-cache --file DevBook.Tooling/Scripts/SyncExport.cs -- verify --repo-root .. --base-ref "$BASE_SHA"
+          if [ "$READY" != true ]; then
+            echo '::error::Artifact deployment is not configured. Configure Vercel IDs/token in Preview and Production, validate Trusted Sources OIDC access and required pr-title on stage, then set DEVBOOK_ARTIFACT_DEPLOYMENT_READY=true. Keep the migration PR draft until configuration is verified.'
+            exit 1
+          fi
 
   # ── PR opened / edited / pushed: gate on a breaking (!) title ───────────────
   gate:
@@ -186,8 +185,8 @@ jobs:
       - name: Test changelog generation and pre-commit integration
         run: node --test .scripts/tests/changelog.test.cjs
 
-      - name: Test Preview deployment links
-        run: node --test .scripts/tests/preview-deployment-link.test.cjs
+      - name: Test artifact transport, deployment and workflow boundaries
+        run: node --test .scripts/tests/site-*.test.mjs
 
       - name: Test native tooling core
         working-directory: .scripts

@@ -46,3 +46,12 @@ __pycache__/
 # Reproducible product capture runtime (generated locally and in CI).
 /.product-captures-cache/
 /docs/assets/product-captures/
+
+# Native site exports and local previews are disposable build artifacts.
+/Web/content/
+/Web/quartz/styles/syncer/
+/.devbook-improvement/syncer-export.json
+/.devbook-preview/
+/.desktop-export-*/
+/artifacts/
+/.scripts/artifacts/

@@ -76,7 +76,7 @@ public sealed class StateTests
         var store = new MemoryStateStore(fixture.State);
 
         // Act
-        JsonObject published = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+        JsonObject published = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, provenance: fixture.Provenance);
         StateSnapshot finalized = await store.ReadAsync();
         JsonObject compact = finalized.State.Obj("export_operations").Obj(fixture.Request.Str("op_id"));
 
@@ -97,7 +97,7 @@ public sealed class StateTests
         finalized.State.Obj("pending_author_proposal").Str("audit").Should().Be("retain parked work");
         compact.Str("prepared_at").Should().Be(originalOperation.Str("prepared_at"));
         compact.Str("future_extension").Should().Be("preserved");
-        compact.Obj("evidence").Str("export_verified_head").Should().Be(ExportApi.GeneratedHead);
+        compact.Obj("evidence").Str("export_verified_head").Should().Be(ExportApi.SourceHead);
         JsonNode.DeepEquals(compact.Obj("evidence")["export_request"], fixture.Request).Should().BeTrue();
         JsonNode.DeepEquals(finalized.State.Obj("prs").Obj(fixture.Key)["proposal_records"], openPrRecords).Should().BeTrue();
         finalized.State.Obj("feedback").Obj("comment:kept").Str("status").Should().Be("implemented");
@@ -114,7 +114,7 @@ public sealed class StateTests
         var fixture = ExportCompactionReviewedFixture();
         fixture.Api.ChecksReady = true;
         var store = new MemoryStateStore(fixture.State);
-        await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store);
+        await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store, provenance: fixture.Provenance);
         StateSnapshot snapshot = await store.ReadAsync();
         snapshot.State["cooldown"] = null;
         if (status == "open")
@@ -157,7 +157,7 @@ public sealed class StateTests
         reconciled.Arr("rejections").Count.Should().Be(status == "closed" ? 2 : 1);
         reconciled.Obj("export_operations").Obj(fixture.Request.Str("op_id")).Bool("compacted").Should().BeTrue();
         reconciled.Obj("feedback").Obj("comment:kept").Str("status").Should().Be("implemented");
-        fixture.Api.CommitWrites.Should().Be(1);
+        fixture.Api.CommitWrites.Should().Be(0);
 
     }
 

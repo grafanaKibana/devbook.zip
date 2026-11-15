@@ -278,7 +278,7 @@ public static class NoteDates
         return WithDates(candidate, dates);
     }
 
-    private static ProcessResult RunGit(string root, params string[] args) => new SystemProcessRunner()
+    private static ProcessResult RunGit(string root, params string[] args) => Git
         .RunAsync(new ProcessRequest("git", ["--literal-pathspecs", .. args], root)).GetAwaiter().GetResult();
 
     private static byte[] GitBytes(string root, params string[] args) => RunGit(root, args).EnsureSuccess("Git date operation").Output;
@@ -528,7 +528,7 @@ public static class NoteDates
         {
             if (IsPublished(data) && Published(data, keys) is null)
             {
-                throw new NoteDateException($"Published source lacks its publication date: {path}; run the normal first successful local export before immutable rendering.");
+                throw new NoteDateException($"Published source lacks its publication date: {path}; run site preview with this Vault open in Obsidian and CLI enabled to record its first publication before immutable rendering.");
             }
         }
     }

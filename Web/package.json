@@ -13,8 +13,8 @@
   },
   "scripts": {
     "quartz": "node ./quartz/bootstrap-cli.mjs",
-    "build": "npm run steptrace:build && npm run steptrace:check && node -e \"require('node:fs').rmSync('.quartz/plugins', { recursive: true, force: true })\" && npm run quartz -- plugin install --from-config && npm run quartz -- plugin install --latest && npm run quartz -- build",
-    "serve": "node ./quartz/bootstrap-cli.mjs build --serve --port 8085 --wsPort 3002",
+    "build": "npm run steptrace:build && npm run steptrace:check && node -e \"require('node:fs').rmSync('.quartz/plugins', { recursive: true, force: true })\" && npm run quartz -- plugin install --from-config && npm run quartz -- plugin install --latest && node ./scripts/site-content.mjs build",
+    "serve": "node ./scripts/site-content.mjs serve",
     "readme:image": "playwright install chromium && node ./scripts/generate-readme-image.mjs",
     "docs": "node ./quartz/bootstrap-cli.mjs build --serve -d docs",
     "check": "npm run complexity:test && npm run home:test && npm run steptrace:test && npm run steptrace:typecheck && npm run steptrace:check && tsc --noEmit --incremental false && npx prettier . --check",

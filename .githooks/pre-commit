@@ -19,10 +19,10 @@ if [[ "$SDK_VERSION" != 10.0.100 ]]; then
     exit 1
 fi
 
-# Hold the export lock across maintenance and the awaited local publication.
+# Hold the source lock across maintenance and date preparation.
 if [[ "${DEVBOOK_QUARTZ_MAINTENANCE:-}" != 1 ]]; then
     cd "$REPO_ROOT/.scripts"
-    exec dotnet run --no-cache --file DevBook.Tooling/Scripts/SyncQuartz.cs -- --repo-root "$REPO_ROOT" --hook "$REPO_ROOT/.githooks/pre-commit"
+    exec dotnet run --no-cache --file DevBook.Tooling/Scripts/PrepareCommit.cs -- --repo-root "$REPO_ROOT" --hook "$REPO_ROOT/.githooks/pre-commit"
 fi
 
 # Collect staged Vault files, including deletions, without splitting path names.
@@ -40,7 +40,7 @@ if [[ ${#STAGED_VAULT[@]} -eq 0 ]]; then
     exit 0
 fi
 
-# Refresh published releases under the export lock, after source/output guards.
+# Refresh published releases under the source lock, after source guards.
 # Respect an explicitly staged deletion rather than recreating the page.
 CHANGELOG_FILE="Vault/Home/Changelog.md"
 if [[ -z "$(git diff --cached --name-only --diff-filter=D -- "$CHANGELOG_FILE")" ]]; then

@@ -1,0 +1,25 @@
+name: Pinned genuine Obsidian
+description: Install the checksum-verified native renderer without personal settings
+outputs:
+  app-bundle:
+    description: Isolated app bundle path
+    value: ${{ steps.install.outputs.app-bundle }}
+runs:
+  using: composite
+  steps:
+    - id: install
+      shell: bash
+      env:
+        APP_ROOT: ${{ runner.temp }}/devbook-obsidian
+      run: |
+        set -euo pipefail
+        mkdir -p "$APP_ROOT/mount"
+        curl --fail --location --retry 2 \
+          https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.5/Obsidian-1.14.5.dmg \
+          --output "$APP_ROOT/Obsidian.dmg"
+        printf '%s  %s\n' be79e6410d80fa705218aa4e8cb24ce8418cf16e13be4036227a5659b1f6aab2 "$APP_ROOT/Obsidian.dmg" | shasum -a 256 --check
+        hdiutil attach "$APP_ROOT/Obsidian.dmg" -readonly -nobrowse -mountpoint "$APP_ROOT/mount"
+        trap 'hdiutil detach "$APP_ROOT/mount" || true' EXIT
+        ditto "$APP_ROOT/mount/Obsidian.app" "$APP_ROOT/Obsidian.app"
+        codesign --verify --deep --strict "$APP_ROOT/Obsidian.app"
+        printf 'app-bundle=%s\n' "$APP_ROOT/Obsidian.app" >> "$GITHUB_OUTPUT"

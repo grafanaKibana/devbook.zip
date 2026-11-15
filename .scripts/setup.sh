@@ -36,23 +36,11 @@ printf '[setup] Installing Web dependencies with npm ci --include=dev...\n'
 printf '[setup] Enabling this checkout\047s Git hooks...\n'
 git config --local core.hooksPath .githooks || fail 'Could not enable local Git hooks. Check repository permissions and rerun setup.'
 
-printf '[setup] Configuring Quartz Syncer for this checkout...\n'
-if ! (cd "$REPO_ROOT/.scripts" && dotnet run --no-cache --file DevBook.Tooling/Scripts/SyncQuartz.cs -- --repo-root "$REPO_ROOT" --configure-only); then
-    cat >&2 <<'EOF'
-[setup] Quartz Syncer configuration failed. Complete these steps, then rerun bash .scripts/setup.sh:
-  - Open this checkout's Vault directory as a vault in Obsidian.
-  - Enable community plugins, including bundled Quartz Syncer and Datacore.
-    Enable Obsidian Git too if you commit from the app.
-  - Register the Obsidian command line interface in Settings > General.
-Dependencies and local Git hooks may already be installed; rerunning setup is safe.
-EOF
-    exit 1
-fi
-
 cat <<'EOF'
-[setup] Setup complete: dependencies installed, local Git hooks enabled, Quartz Syncer configured.
+[setup] Setup complete: dependencies installed and local Git hooks enabled.
 Remaining manual steps: configure your Git identity and repository authentication if needed.
-Keep this Vault open in Obsidian and wait for Datacore and metadata indexing before committing notes.
+Commits run source maintenance and validation without Obsidian; CI exports and builds the site.
+For native local preview: (cd .scripts && dotnet run --project DevBook.Tooling -- site preview --repo-root ..)
 Quartz site plugins install and update during npm run build in Web.
 Setup does not export notes, stage changes, commit or push.
 EOF
