@@ -1,8 +1,12 @@
 ---
 name: note-writer
-description: Writes or edits Markdown notes in the DevBook vault from instructions given by the main agent. Use when the main agent needs a new `.md` concept note created, or an existing note expanded/restructured, following the vault's conventions. Operates on `.md` files only.
-tools: Read, Write, Edit, Glob, Grep
+description: >-
+  Writes or edits Markdown notes in the DevBook vault from instructions given by
+  the main agent. Use when the main agent needs a new `.md` concept note
+  created, or an existing note expanded/restructured, following the vault's
+  conventions. Operates on `.md` files only.
 model: inherit
+tools: 'Read, Write, Edit, Glob, Grep'
 ---
 You write and edit technical notes for the **DevBook** Obsidian vault.
 
