@@ -17003,9 +17003,9 @@
     "version": 1,
     "id": "4bd0bfa98b5d4dbbb28188e2b990362e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-15T19:02:25.981526Z",
-    "elapsed_seconds": 785.2310024000005,
+    "elapsed_seconds": 789.4673819000005,
     "calls_reserved": 19,
     "responses_received": 19,
     "attempted_paths": [
@@ -17016,7 +17016,8 @@
       "Vault/Home/Data Persistence/Connection Pooling.md",
       "Vault/Home/Data Persistence/Data Persistence.md",
       "Vault/Home/Data Persistence/Erasure Coding.md",
-      "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md"
+      "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md",
+      "Vault/Home/Data Persistence/NoSQL/LSM-Tree.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -17427,10 +17428,79 @@
           },
           "model_calls": 17
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/NoSQL/LSM-Tree.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/NoSQL/LSM-Tree.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against current text and general LSM knowledge (LevelDB/RocksDB docs, O'Neil paper). Write path (WAL, memtable, flush, SSTable, tombstones) is accurate and carries durability-policy caveats. The read path correctly states that early stop is engine-specific (L0 newest-first, non-overlapping nonzero levels) and not a general rule. Compaction sections correctly cover STCS vs LCS, L0 overlap, and tombstone retention constraints. The amplification definitions, B-tree comparison table, complexity table, and Mermaid flow are consistent with each other and with the prose. No Qard cards are present and none are needed. There are no known violations, the code fence has a language identifier, wikilinks are full-path, and references are bare links. No factual or editorial defect justifies an edit."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The keep is justified. I read the whole note independently and found no factual or editorial defect that needs an edit. There are no proposed edits, cards or feedback to check.",
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/NoSQL/LSM-Tree.md",
+                "verdict": "CLEAN",
+                "summary": "The note covers the write path, read path, compaction, amplification, the B-tree comparison and complexity, and keeps the conditions and exceptions. It states that early-stop reads are engine-specific, and that tombstone collection depends on safety rules. The order runs from motivation through mechanism to tradeoffs and usage, with no repetition or padding that an edit would fix.",
+                "page_type": "Concept note. Frontmatter is typed, the Mermaid fence has a language identifier, wikilinks use full paths, Questions is absent (optional), and References are bare links.",
+                "current_text_evidence": [
+                  {
+                    "quote": "An implementation may stop at the first match only when its search order proves that no later source can contain a newer visible version.",
+                    "line_start": 38,
+                    "reason": "Correctly limits the early-stop shortcut to engines with ordering invariants (LevelDB/RocksDB) and does not present it as a general LSM rule."
+                  },
+                  {
+                    "quote": "It discards an obsolete version only after the engine can prove that no supported reader or repair path still needs it.",
+                    "line_start": 49,
+                    "reason": "States the real condition for garbage-collecting tombstones and obsolete versions."
+                  },
+                  {
+                    "quote": "Except for L0, files within a level cover non-overlapping key ranges, so a point read has at most one candidate file per nonzero level.",
+                    "line_start": 52,
+                    "reason": "Gives the leveled-compaction mechanism together with the L0 exception, which keeps the read-cost claim accurate."
+                  },
+                  {
+                    "quote": "No compaction strategy minimizes all three at once:",
+                    "line_start": 56,
+                    "reason": "Frames the amplification tradeoff as a decision, and the definitions that follow are precise."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: write path, read path, compaction and amplification are one coherent storage-engine topic, and each part depends on the others.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 19
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T19:15:31.212017Z",
+    "checkpoint_at": "2026-11-15T19:15:35.448397Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
