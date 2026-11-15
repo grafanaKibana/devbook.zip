@@ -385,7 +385,7 @@ public static partial class Worker
         {
             await AssertBoundLeaseAsync(store, request, owner, cancellationToken);
             string merged = Runtime.MergeManagedSection(pr.Str("body"), updatedBody, request.Str("topic_id"));
-            long runId = checks.PrTitleRunId ?? throw new Conflict("Managed-body update requires its validated PR Title workflow identity.");
+            long runId = checks.PrTitleRunId ?? throw new Conflict("Managed-body update requires its validated CI pull-request workflow identity.");
             await RecordAsync(store, request, owner, "bind managed-body update to fresh source checks", (_, op) =>
             {
                 JsonObject evidence = op.Obj("evidence");

@@ -342,6 +342,8 @@ public sealed class ExportWorkerTests
     [InlineData("event")]
     [InlineData("path")]
     [InlineData("repository")]
+    [InlineData("legacy_path")]
+    [InlineData("branch")]
     [InlineData("sha")]
     public async Task GenericGreenChecksCannotReplaceTheActualSourceExportWorkflow(string mismatch)
     {
@@ -352,6 +354,8 @@ public sealed class ExportWorkerTests
         {
             "event" => new JsonObject { ["event"] = "workflow_dispatch" },
             "path" => new JsonObject { ["path"] = ".github/workflows/other.yml" },
+            "legacy_path" => new JsonObject { ["path"] = ".github/workflows/pr-title.yml" },
+            "branch" => new JsonObject { ["head_branch"] = "untrusted-branch" },
             "repository" => new JsonObject { ["repository"] = new JsonObject { ["full_name"] = "untrusted/repo" } },
             _ => new JsonObject { ["head_sha"] = FakeExportApi.OwnerChangedHead }
         };
@@ -554,6 +558,7 @@ public sealed class ExportWorkerTests
         public string CheckConclusion { get; set; } = "success";
         public bool ValidationMissing { get; set; }
         public JsonObject PrTitleOverride { get; set; } = new();
+        public JsonObject ValidationOverride { get; set; } = new();
         public long PrTitleRunId { get; private set; } = 1;
         public bool BodyCheckPending { get; set; }
         private bool bodyTriggered;
@@ -713,32 +718,32 @@ public sealed class ExportWorkerTests
             {
                 response = new JsonObject { ["sha"] = Head, ["statuses"] = new JsonArray() };
             }
-            else if (method == "GET" && path.StartsWith("/actions/workflows/pr-title.yml/runs", StringComparison.Ordinal))
+            else if (method == "GET" && path.StartsWith("/actions/workflows/vault-validation.yml/runs", StringComparison.Ordinal))
             {
                 var run = new JsonObject
                 {
                     ["id"] = PrTitleRunId,
                     ["head_branch"] = ExportWorkerbranch, ["head_sha"] = Head,
-                    ["event"] = "pull_request", ["path"] = ".github/workflows/pr-title.yml",
+                    ["event"] = "pull_request", ["path"] = ".github/workflows/vault-validation.yml",
                     ["repository"] = new JsonObject { ["full_name"] = Repo },
                     ["conclusion"] = ChecksReady && (!bodyTriggered || !BodyCheckPending) ? CheckConclusion : "pending"
                 };
                 foreach ((string key, JsonNode? value) in PrTitleOverride) run[key] = value?.DeepClone();
-                response = new JsonObject { ["workflow_runs"] = new JsonArray(run) };
-            }
-            else if (method == "GET" && path.StartsWith("/actions/workflows/vault-validation.yml/runs", StringComparison.Ordinal))
-            {
-                response = new JsonObject
+                var runs = new JsonArray(run);
+                if (!ValidationMissing && Dispatches > 0)
                 {
-                    ["workflow_runs"] = ValidationMissing || Dispatches == 0 ? new JsonArray() : new JsonArray(new JsonObject
+                    var validation = new JsonObject
                     {
                         ["head_branch"] = ExportWorkerbranch,
                         ["event"] = "workflow_dispatch", ["path"] = ".github/workflows/vault-validation.yml",
                         ["repository"] = new JsonObject { ["full_name"] = Repo },
                         ["head_sha"] = Head,
                         ["conclusion"] = ChecksReady ? "success" : "pending"
-                    })
-                };
+                    };
+                    foreach ((string key, JsonNode? value) in ValidationOverride) validation[key] = value?.DeepClone();
+                    runs.Add(validation);
+                }
+                response = new JsonObject { ["workflow_runs"] = runs };
             }
             else if (method == "GET" && path.StartsWith("/issues/1/comments", StringComparison.Ordinal))
             {
@@ -835,6 +840,60 @@ public sealed class ExportWorkerTests
         // Assert
         await publish.Should().ThrowAsync<Conflict>();
         fixture.Api.RefWrites.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task ConsolidatedCiKeepsPullRequestAndFullVaultValidationEvidenceSeparate()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.ChecksReady = true;
+        string branch = fixture.Request.Str("branch");
+        string head = fixture.Api.Head;
+
+        // Act
+        JsonObject title = await Runtime.PrTitleRunForShaAsync(fixture.Api, branch, head);
+        Exception? beforeDispatch = await Record.ExceptionAsync(() => Runtime.VaultValidationForShaAsync(fixture.Api, branch, head));
+        await Runtime.DispatchVaultValidationAsync(fixture.Api, branch);
+        string validation = await Runtime.VaultValidationForShaAsync(fixture.Api, branch, head);
+        fixture.Api.PrTitleOverride["event"] = "workflow_dispatch";
+        Exception? withoutPrRun = await Record.ExceptionAsync(() => Runtime.PrTitleRunForShaAsync(fixture.Api, branch, head));
+
+        // Assert
+        title.Str("event").Should().Be("pull_request");
+        beforeDispatch.Should().BeOfType<Conflict>();
+        validation.Should().Be("success");
+        withoutPrRun.Should().BeOfType<Conflict>();
+    }
+
+    [Theory]
+    [InlineData("event")]
+    [InlineData("path")]
+    [InlineData("repository")]
+    [InlineData("branch")]
+    [InlineData("sha")]
+    public async Task ConsolidatedCiRejectsUnboundOrSkippedFullVaultValidation(string mismatch)
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.ChecksReady = true;
+        string branch = fixture.Request.Str("branch");
+        string head = fixture.Api.Head;
+        await Runtime.DispatchVaultValidationAsync(fixture.Api, branch);
+        fixture.Api.ValidationOverride = mismatch switch
+        {
+            "event" => new JsonObject { ["event"] = "pull_request" },
+            "path" => new JsonObject { ["path"] = ".github/workflows/pr-title.yml" },
+            "repository" => new JsonObject { ["repository"] = new JsonObject { ["full_name"] = "other/repo" } },
+            "branch" => new JsonObject { ["head_branch"] = "other-branch" },
+            _ => new JsonObject { ["head_sha"] = FakeExportApi.OwnerChangedHead }
+        };
+
+        // Act
+        Func<Task> validate = () => Runtime.VaultValidationForShaAsync(fixture.Api, branch, head);
+
+        // Assert
+        await validate.Should().ThrowAsync<Conflict>();
     }
 
     [Fact]

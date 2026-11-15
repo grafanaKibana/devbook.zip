@@ -173,10 +173,10 @@ public static partial class Runtime
         api.RequestAsync("POST", "/actions/workflows/vault-validation.yml/dispatches", new JsonObject { ["ref"] = branch }, cancellationToken: cancellationToken);
 
     public static async Task<string> VaultValidationForShaAsync(IGitHubApi api, string branch, string sha, CancellationToken cancellationToken = default) =>
-        WorkflowConclusion(await WorkflowRunForShaAsync(api, "vault-validation.yml", branch, sha, ["workflow_dispatch", "pull_request", "push"], cancellationToken));
+        WorkflowConclusion(await WorkflowRunForShaAsync(api, "vault-validation.yml", branch, sha, ["workflow_dispatch"], cancellationToken));
 
     public static Task<JsonObject> PrTitleRunForShaAsync(IGitHubApi api, string branch, string sha, CancellationToken cancellationToken = default) =>
-        WorkflowRunForShaAsync(api, "pr-title.yml", branch, sha, ["pull_request"], cancellationToken);
+        WorkflowRunForShaAsync(api, "vault-validation.yml", branch, sha, ["pull_request"], cancellationToken);
 
     private static string WorkflowConclusion(JsonObject run) => run.Str("conclusion", run.Str("status", "unknown"));
 
@@ -220,7 +220,7 @@ public static partial class Runtime
         {
             JsonObject run = await PrTitleRunForShaAsync(api, branch, sha, cancellationToken);
             if (!long.TryParse(run["id"]?.ToString(), out titleRunId) || titleRunId <= 0)
-                throw new Conflict("PR Title workflow lacks a current run identity.");
+                throw new Conflict("CI pull-request workflow lacks a current run identity.");
             checks["pr-title-workflow"] = WorkflowConclusion(run);
         }
         catch (Conflict)

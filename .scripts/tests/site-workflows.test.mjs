@@ -12,12 +12,12 @@ const read = (name) => fs.readFileSync(path.join(root, name), "utf8")
 const workflow = (name) => parse(read(`.github/workflows/${name}.yml`))
 
 test("required pr-title aggregates an actual secret-free candidate export and Quartz build", () => {
-  const title = workflow("pr-title")
+  const title = workflow("vault-validation")
   const site = workflow("site-check")
   assert.equal(title.jobs.site.uses, "./.github/workflows/site-check.yml")
   assert.equal(title.jobs.site.with["source-sha"], "${{ github.event.pull_request.head.sha }}")
   assert.equal(title.jobs["pr-title"].needs, "site")
-  assert.equal(title.jobs["pr-title"].if, "always()")
+  assert.match(title.jobs["pr-title"].if, /always\(\).*github\.event_name == 'pull_request'/)
   assert.ok(title.jobs["pr-title"].steps[0].run.includes('test "$SITE_RESULT" = success'))
   const job = site.jobs["site-check"]
   assert.equal(job.environment, undefined)
@@ -30,9 +30,27 @@ test("required pr-title aggregates an actual secret-free candidate export and Qu
   assert.doesNotMatch(JSON.stringify(site), /secrets\.|VERCEL_TOKEN|pull_request_target/)
 })
 
+test("ineligible CI events never publish a skipped required pr-title context", () => {
+  const job = workflow("vault-validation").jobs["pr-title"]
+  const name = new Function("github", `return ${job.name.slice(3, -2).trim()}`)
+  const admitted = new Function("github", `return ${job.if.replace(/always\(\)/g, "true")}`)
+  for (const [event, base, active] of [
+    ["pull_request", "main", true],
+    ["pull_request", "stage", true],
+    ["pull_request", "feature/other", false],
+    ["workflow_dispatch", undefined, false],
+    ["push", undefined, false],
+    ["issue_comment", undefined, false],
+  ]) {
+    const github = { event_name: event, event: base ? { pull_request: { base: { ref: base } } } : {} }
+    assert.equal(name(github), active ? "pr-title" : "pr-title-inactive")
+    assert.equal(admitted(github), active)
+  }
+})
+
 test("readiness failure does not skip real source validation and documents stage protection", () => {
-  const title = workflow("pr-title")
-  assert.equal(title.jobs.site.if, undefined)
+  const title = workflow("vault-validation")
+  assert.match(title.jobs.site.if, /github\.event_name == 'pull_request'/)
   const gate = title.jobs["pr-title"].steps.find((step) => step.env?.READY)
   assert.match(gate.run, /READY.*true/)
   assert.match(gate.run, /Keep the migration PR draft/)
@@ -111,6 +129,9 @@ test("old Git build and link patcher are removed while authored CSS remains", ()
   assert.equal(JSON.parse(read("vercel.json")).git.deploymentEnabled, false)
   assert.equal(JSON.parse(read("vercel.json")).framework, null)
   assert.equal(fs.existsSync(path.join(root, ".github/workflows/preview-deployment-link.yml")), false)
+  assert.equal(fs.existsSync(path.join(root, ".github/workflows/pr-title.yml")), false)
+  assert.equal(workflow("release").on.deployment_status, undefined)
+  assert.equal(workflow("release").jobs.update, undefined)
   assert.match(read("Web/quartz/styles/custom.scss"), /@use "\.\/syncer";/)
   const hook = read(".githooks/pre-commit")
   assert.match(hook, /PrepareCommit\.cs/)
