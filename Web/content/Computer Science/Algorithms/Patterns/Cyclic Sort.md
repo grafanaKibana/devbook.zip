@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-11-12T10:29:34.513Z
+modified: 2026-11-15T06:56:28.722Z
 published: 2026-07-10T05:58:42.295Z
 topic:
   - Computer Science
@@ -121,60 +121,54 @@ This is not a general sort. Arbitrary integers, floating-point values, and keys 
 > [!EXAMPLE]- C# implementation
 >
 > ```csharp
-> ```
-
-> public static void CyclicSort(int\[] a)
+> public static void CyclicSort(int[] a)
 > {
-> var i = 0;
-> while (i < a.Length)
-> {
-> var home = a\[i] - 1;                       // value v belongs at index v - 1
-> if (a\[i] >= 1 && a\[i] <= a.Length && a\[i] != a\[home])
-> {
-> (a\[i], a\[home]) = (a\[home], a\[i]);      // swap v home; do NOT advance i
-> }
-> else
-> {
-> i++;                                    // already placed or out of range
-> }
-> }
-> }
->
-> // Find All Numbers Disappeared in an Array (LeetCode 448).
-> public static IList<int> FindDisappeared(int\[] a)
-> {
-> var i = 0;
-> while (i < a.Length)
-> {
-> var home = a\[i] - 1;
-> if (a\[i] != a\[home])                        // duplicates make a\[i] == a\[home], so they are skipped
-> {
-> (a\[i], a\[home]) = (a\[home], a\[i]);
-> }
-> else
-> {
-> i++;
-> }
-> }
->
-> ```
-> var missing = new List<int>();
-> for (var j = 0; j < a.Length; j++)
-> {
->     if (a[j] != j + 1)                          // slot j should hold j + 1
+>     var i = 0;
+>     while (i < a.Length)
 >     {
->         missing.Add(j + 1);
+>         var home = a[i] - 1;                       // value v belongs at index v - 1
+>         if (a[i] >= 1 && a[i] <= a.Length && a[i] != a[home])
+>         {
+>             (a[i], a[home]) = (a[home], a[i]);      // swap v home; do NOT advance i
+>         }
+>         else
+>         {
+>             i++;                                    // already placed or out of range
+>         }
 >     }
 > }
 >
-> return missing;
-> ```
+> // Find All Numbers Disappeared in an Array (LeetCode 448).
+> public static IList<int> FindDisappeared(int[] a)
+> {
+>     var i = 0;
+>     while (i < a.Length)
+>     {
+>         var home = a[i] - 1;
+>         if (a[i] != a[home])                        // duplicates make a[i] == a[home], so they are skipped
+>         {
+>             (a[i], a[home]) = (a[home], a[i]);
+>         }
+>         else
+>         {
+>             i++;
+>         }
+>     }
 >
+>     var missing = new List<int>();
+>     for (var j = 0; j < a.Length; j++)
+>     {
+>         if (a[j] != j + 1)                          // slot j should hold j + 1
+>         {
+>             missing.Add(j + 1);
+>         }
+>     }
+>
+>     return missing;
 > }
+> ```
 >
-> ```
 > The guard tests `a[i] != a[home]` on values, not `i != home` on indices — that is what stops a duplicate from swapping forever and what lets the final scan report the anomaly.
-> ```
 
 # Comparison
 

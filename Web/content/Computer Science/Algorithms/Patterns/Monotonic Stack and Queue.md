@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-10T06:24:36.000Z
-modified: 2026-11-12T10:29:34.513Z
+modified: 2026-11-15T07:00:26.677Z
 published: 2026-07-10T05:58:06.704Z
 topic:
   - Computer Science
@@ -130,27 +130,26 @@ Window expiry is positional, so indices are the simplest deque representation. A
 >     }
 >     return res;                                    // indices never popped keep -1
 > }
-> ```
-
-> public static int\[] MaxSlidingWindow(int\[] a, int k)
-> {
-> var dq = new LinkedList<int>();                // indices, values decreasing front to back
-> var res = new int\[a.Length - k + 1];
-> for (int i = 0; i < a.Length; i++)
-> {
-> if (dq.Count > 0 && dq.First.Value <= i - k)
-> dq.RemoveFirst();                      // front slid out of the window
-> while (dq.Count > 0 && a\[dq.Last.Value] <= a\[i])
-> dq.RemoveLast();                       // newer value is >= and expires later on ties
-> dq.AddLast(i);
-> if (i >= k - 1) res\[i - k + 1] = a\[dq.First.Value]; // front is the window max
-> }
-> return res;
-> }
 >
+> // Maximum of each window of size k.
+> public static int[] MaxSlidingWindow(int[] a, int k)
+> {
+>     var dq = new LinkedList<int>();                // indices, values decreasing front to back
+>     var res = new int[a.Length - k + 1];
+>     for (int i = 0; i < a.Length; i++)
+>     {
+>         if (dq.Count > 0 && dq.First.Value <= i - k)
+>             dq.RemoveFirst();                      // front slid out of the window
+>         while (dq.Count > 0 && a[dq.Last.Value] <= a[i])
+>             dq.RemoveLast();                       // newer value is >= and expires later on ties
+>         dq.AddLast(i);
+>         if (i >= k - 1) res[i - k + 1] = a[dq.First.Value]; // front is the window max
+>     }
+>     return res;
+> }
 > ```
+>
 > The pop comparison (`<` vs `<=`) sets tie handling. Both examples store indices so distances and window eviction stay recoverable.
-> ```
 
 # Comparison
 

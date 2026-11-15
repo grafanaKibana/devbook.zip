@@ -1,7 +1,7 @@
 ---
 publish: true
 created: 2026-07-26T20:18:51.000Z
-modified: 2026-11-12T10:29:34.513Z
+modified: 2026-11-15T06:52:42.498Z
 published: 2026-07-26T19:27:00.411Z
 topic:
   - Computer Science
@@ -88,16 +88,16 @@ The components leave in reverse topological order of the condensation: `{D, E}` 
 >         _stack.Push(v);
 >         _onStack[v] = true;
 >
->         foreach (var w in _adjacency[v])
+>         foreach (var next in _adjacency[v])
 >         {
->             if (_disc[w] == -1)
+>             if (_disc[next] == -1)
 >             {
->                 StrongConnect(w);
->                 _low[v] = Math.Min(_low[v], _low[w]);
+>                 StrongConnect(next);
+>                 _low[v] = Math.Min(_low[v], _low[next]);
 >             }
->             else if (_onStack[w])
+>             else if (_onStack[next])
 >             {
->                 _low[v] = Math.Min(_low[v], _disc[w]);
+>                 _low[v] = Math.Min(_low[v], _disc[next]);
 >             }
 >         }
 >
