@@ -392,6 +392,49 @@ public static class NoteDates
         return changed;
     }
 
+    private static string[] MergeParents(string root)
+    {
+        string metadata = Path.GetFullPath(GitText(root, "rev-parse", "--git-path", "MERGE_HEAD"), root);
+        if (!File.Exists(metadata)) return [];
+        string[] parents = File.ReadAllLines(metadata);
+        if (parents.Length == 0 || parents.Any(parent => !Regex.IsMatch(parent, "^(?:[0-9a-f]{40}|[0-9a-f]{64})$", RegexOptions.CultureInvariant)))
+        {
+            throw new NoteDateException("Invalid Git merge-parent metadata");
+        }
+        foreach (string parent in parents)
+        {
+            ProcessResult result = RunGit(root, "cat-file", "-t", parent);
+            if (result.ExitCode != 0 || result.Stdout.Trim() != "commit")
+            {
+                throw new NoteDateException("Git merge parent is not an available commit");
+            }
+        }
+        return parents.Distinct(StringComparer.Ordinal).ToArray();
+    }
+
+    private static Dictionary<string, string> Renames(string root, string? parent = null)
+    {
+        var renames = new Dictionary<string, string>(StringComparer.Ordinal);
+        string[] arguments = ["diff", "--cached", "--name-status", "-z", "-M", .. parent is null ? Array.Empty<string>() : [parent]];
+        string[] rows = Encoding.UTF8.GetString(GitBytes(root, arguments)).Split('\0');
+        for (var index = 0; index < rows.Length && rows[index].Length > 0;)
+        {
+            if (rows[index].StartsWith('R') || rows[index].StartsWith('C'))
+            {
+                if (rows[index].StartsWith('R'))
+                {
+                    renames[rows[index + 2]] = rows[index + 1];
+                }
+                index += 3;
+            }
+            else
+            {
+                index += 2;
+            }
+        }
+        return renames;
+    }
+
     /// <summary>Local commit adapter: callers hold the shared export lock and all-source staging guard.</summary>
     public static Dictionary<string, byte[]> PrepareLocal(string root, DateTimeOffset? now = null, IReadOnlyDictionary<string, byte[]>? expectedHashes = null)
     {
@@ -438,23 +481,9 @@ public static class NoteDates
         {
             cache.Remove(key);
         }
-        var renames = new Dictionary<string, string>(StringComparer.Ordinal);
-        string[] rows = Encoding.UTF8.GetString(GitBytes(root, "diff", "--cached", "--name-status", "-z", "-M")).Split('\0');
-        for (var index = 0; index < rows.Length && rows[index].Length > 0;)
-        {
-            if (rows[index].StartsWith('R') || rows[index].StartsWith('C'))
-            {
-                if (rows[index].StartsWith('R'))
-                {
-                    renames[rows[index + 2]] = rows[index + 1];
-                }
-                index += 3;
-            }
-            else
-            {
-                index += 2;
-            }
-        }
+        Dictionary<string, string> renames = Renames(root);
+        string[] mergeParents = MergeParents(root);
+        Dictionary<string, Dictionary<string, string>> incomingRenames = mergeParents.ToDictionary(parent => parent, parent => Renames(root, parent), StringComparer.Ordinal);
         var changes = new Dictionary<string, byte[]>(StringComparer.Ordinal);
         string[] publicationKeys = PublicationKeys(root);
         foreach ((string path, byte[] data) in files)
@@ -463,6 +492,31 @@ public static class NoteDates
             ProcessResult prior = RunGit(root, "show", "HEAD:" + source);
             byte[]? parent = prior.ExitCode == 0 ? prior.Output : null;
             IReadOnlyDictionary<string, string?> currentDates = Read(data);
+            bool inherited = mergeParents.Length > 0 && parent is not null && data.AsSpan().SequenceEqual(parent);
+            foreach (string incoming in mergeParents)
+            {
+                if (inherited) break;
+                foreach (string incomingPath in new[] { path, incomingRenames[incoming].GetValueOrDefault(path, path) }.Distinct(StringComparer.Ordinal))
+                {
+                    ProcessResult committed = RunGit(root, "show", incoming + ":" + incomingPath);
+                    if (committed.ExitCode == 0 && data.AsSpan().SequenceEqual(committed.Output))
+                    {
+                        inherited = true;
+                        break;
+                    }
+                }
+            }
+            if (inherited)
+            {
+                string? publication = Published(data, publicationKeys);
+                if (currentDates["created"] is null || currentDates["modified"] is null || IsPublished(data) && publication is null)
+                {
+                    throw new NoteDateException($"Inherited merged note is missing required source dates: {path}");
+                }
+                changes[path] = data;
+                cache.Remove(path);
+                continue;
+            }
             IReadOnlyDictionary<string, string?> previousDates = parent is null ? new Dictionary<string, string?> { ["created"] = null, ["modified"] = null } : Read(parent);
             IReadOnlyList<string>? history = null;
             bool changed = parent is null || !MeaningfulContent(data).AsSpan().SequenceEqual(MeaningfulContent(parent));
