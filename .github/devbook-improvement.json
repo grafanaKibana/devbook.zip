@@ -21,6 +21,7 @@
   ],
   "required_check_contexts": [
     "pr-title",
+    "ci",
     "major-approval"
   ],
   "validator_commands": [

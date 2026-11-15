@@ -16,10 +16,14 @@ merges are disabled so commits survive both hops.
    `maintenance/…` for everything else.
 2. Open a PR into `stage` (`gh pr create --base stage`). The **PR title** must
    follow the convention (below) — the `pr-title` job in
-   [`DevBook CI/CD`](workflows/vault-validation.yml) enforces it on PRs into `stage` and `main`.
-3. **Merge it** manually with a merge commit after required checks pass. Local
-   vault changes, including Qard study state, follow the same branch and PR flow.
-   The accepted `stage` push validates, builds and deploys Preview.
+   [`PR Rules`](workflows/pr-rules.yml) checks only the title. The `ci` job in
+   [`DevBook CI/CD`](workflows/vault-validation.yml) passes only when the native
+   export, Quartz build and validation all succeed. Both are required on PRs into
+   `stage` and `main`.
+3. **Merge it** manually with a merge commit after required checks pass.
+   Obsidian Git commits and pushes local vault changes, including Qard study
+   state, straight to `stage` through the owner's ruleset bypass. Every `stage`
+   push, merged or direct, validates first, then builds and deploys Preview.
 4. To release, open a promotion PR from `stage` into `main` and use **Update
    branch** first so main-only changes (DevBook Improvement PRs)
    reach `stage`. **Merge it** with a merge commit. The commit prefixes drive
@@ -37,8 +41,6 @@ protected `stage` or `main` through the same prerequisites and never releases.
 The [Web runbook](../Web/README.md#cutover-prerequisites) owns caller-specific
 OIDC readiness and the separately authorized Stage/Main cutover; the migration
 PR stays draft until the new Stage policy and required branch checks are verified.
-[Retired workflow history cleanup](../Web/README.md#deferred-workflow-history-cleanup)
-follows accepted retirement on default `main` and verified replacement deployments.
 
 ## Convention — commit (and PR) titles
 
@@ -99,16 +101,20 @@ bug: correct rate-limit handling in the LLM judge client
 ## Enforcement (GitHub rulesets)
 
 - **Protect main branch** (branch ruleset, `~DEFAULT_BRANCH`) — requires a PR,
-  the `pr-title` **and** `major-approval` status checks, merge-commit merges only,
-  and blocks direct pushes, deletion, and force-pushes. No bypass — the checks
-  apply to everyone, including admins.
+  the `pr-title`, `ci` **and** `major-approval` status checks, merge-commit merges
+  only, and blocks direct pushes, deletion, and force-pushes. No bypass — the
+  checks apply to everyone, including admins.
+- **Protect stage branch** (branch ruleset, `stage`) — requires a PR and the
+  `pr-title` and `ci` status checks. The owner is the only bypass actor, so
+  Obsidian Git can push vault syncs directly; those pushes are validated after
+  they land, before Preview deploys. Agents and bots always go through a PR.
 - **Protect release tags** (tag ruleset, `refs/tags/v*`) — blocks tag deletion
   and force-moves; creation stays open so the CI/CD release job can tag.
 
 ## Guardrail — major needs confirmation in the PR
 
 Minor and patch releases publish automatically. A **major** is gated *before*
-merge by the major-approval jobs in [`DevBook CI/CD`](workflows/vault-validation.yml):
+merge by the major-approval jobs in [`PR Rules`](workflows/pr-rules.yml):
 
 1. Open a PR. If its **title** carries a `!` prefix (e.g. `feature!:`), the bot
    parks the `major-approval` check as **pending** and comments that merging
@@ -124,9 +130,9 @@ deliberate acts — the `!` title *and* the `/approve-major` — and a stray `!`
 just parks the PR until you decide.
 
 > `major-approval` is already a required check on the **Protect main branch**
-> ruleset. It only reports once [`vault-validation.yml`](workflows/vault-validation.yml)
+> ruleset. It only reports once [`pr-rules.yml`](workflows/pr-rules.yml)
 > lives on `main`, so merge this workflow in first — until then, PRs whose branch
-> lacks the workflow will sit blocked on the (never-reported) check. The workflow
-> defaults to read permission and grants writes only to jobs that need them;
-> only deployment requests OIDC, and only release writes repository contents.
+> lacks the workflow will sit blocked on the (never-reported) check. Both
+> workflows default to read permission and grant writes only to jobs that need
+> them; only deployment requests OIDC, and only release writes repository contents.
 

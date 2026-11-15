@@ -10,9 +10,9 @@ Branch from `origin/stage` using `notes/`, `docs/`, `feature/`, `bug/` or `maint
 
 ## Pull requests and releases
 
-Describe the complete diff and its validation. Existing description/review integrations assist review; their output does not replace owner approval. Required title and major-approval checks must pass, along with checks relevant to the change. Merge manually with a merge commit so release automation preserves individual commit prefixes. Never auto-merge.
+Describe the complete diff and its validation. Existing description/review integrations assist review; their output does not replace owner approval. The required `pr-title` and `ci` checks must pass, plus `major-approval` on PRs into `main`. Merge manually with a merge commit so release automation preserves individual commit prefixes. Never auto-merge.
 
-[DevBook CI/CD](.github/workflows/vault-validation.yml) validates PRs and accepted pushes, deploys Preview from `stage` and Production from `main`, and publishes a release only after successful Production verification. Manual dispatch defaults to validation only; explicit deployment never releases. Commit prefixes determine minor/patch releases; a `!` PR title requires explicit major-version approval. Dependabot groups npm updates into weekly maintenance PRs. See [Releasing](.github/RELEASING.md) for exact rules and the [Web runbook](Web/README.md#cutover-prerequisites) for OIDC cutover and [deferred history cleanup](Web/README.md#deferred-workflow-history-cleanup).
+[DevBook CI/CD](.github/workflows/vault-validation.yml) validates PRs and accepted pushes, deploys Preview from `stage` and Production from `main`, and publishes a release only after successful Production verification. Manual dispatch defaults to validation only; explicit deployment never releases. Commit prefixes determine minor/patch releases; a `!` PR title requires explicit major-version approval. Dependabot groups npm updates into weekly maintenance PRs. [PR Rules](.github/workflows/pr-rules.yml) owns the title check and major-version approval, so title edits and comments never re-run the heavy checks. See [Releasing](.github/RELEASING.md) for exact rules and the [Web runbook](Web/README.md#cutover-prerequisites) for OIDC cutover.
 
 ## Recurring note improvements
 

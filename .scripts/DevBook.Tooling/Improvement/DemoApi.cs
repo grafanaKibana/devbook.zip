@@ -266,8 +266,8 @@ internal sealed class DemoApi : IGitHubApi
             string sha = route.Split('/')[2];
             result = new JsonObject
             {
-                ["total_count"] = 3,
-                ["check_runs"] = new JsonArray(new[] { "pr-title", "major-approval", "validate" }.Select((name, index) => (JsonNode)new JsonObject
+                ["total_count"] = 4,
+                ["check_runs"] = new JsonArray(new[] { "pr-title", "ci", "major-approval", "validate" }.Select((name, index) => (JsonNode)new JsonObject
                 { ["id"] = index + 1, ["name"] = name, ["conclusion"] = "success", ["head_sha"] = sha }).ToArray())
             };
         }

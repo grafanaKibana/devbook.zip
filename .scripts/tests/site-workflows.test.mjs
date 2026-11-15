@@ -13,14 +13,15 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const read = (name) => fs.readFileSync(path.join(root, name), "utf8")
 const workflow = (name) => parse(read(`.github/workflows/${name}.yml`))
 
-test("required pr-title aggregates an actual secret-free candidate export and Quartz build", () => {
-  const title = workflow("vault-validation")
+test("required ci aggregates an actual secret-free candidate export and Quartz build", () => {
+  const ci = workflow("vault-validation")
   const site = workflow("site-check")
-  assert.equal(title.jobs.site.uses, "./.github/workflows/site-check.yml")
-  assert.equal(title.jobs.site.with["source-sha"], "${{ github.event.pull_request.head.sha }}")
-  assert.deepEqual(title.jobs["pr-title"].needs, ["site", "validate", "demo", "fixture"])
-  assert.match(title.jobs["pr-title"].if, /always\(\).*github\.event_name == 'pull_request'/)
-  assert.ok(title.jobs["pr-title"].steps[0].run.includes('test "$SITE_RESULT" = success'))
+  assert.equal(ci.jobs.site.uses, "./.github/workflows/site-check.yml")
+  assert.equal(ci.jobs.site.with["source-sha"], "${{ github.event.pull_request.head.sha }}")
+  assert.deepEqual(ci.jobs.ci.needs, ["site", "validate", "demo", "fixture"])
+  assert.match(ci.jobs.ci.if, /always\(\).*github\.event_name == 'pull_request'/)
+  assert.ok(ci.jobs.ci.steps[0].run.includes('test "$SITE_RESULT" = success'))
+  assert.equal(ci.jobs["pr-title"], undefined)
   const job = site.jobs["site-check"]
   assert.equal(job.environment, undefined)
   assert.equal(site.permissions.contents, "read")
@@ -32,32 +33,54 @@ test("required pr-title aggregates an actual secret-free candidate export and Qu
   assert.doesNotMatch(JSON.stringify(site), /secrets\.|VERCEL_TOKEN|pull_request_target/)
 })
 
-test("ineligible CI events never publish a skipped required pr-title context", () => {
-  const job = workflow("vault-validation").jobs["pr-title"]
-  const name = new Function("github", `return ${job.name.slice(3, -2).trim()}`)
-  const admitted = new Function("github", `return ${job.if.replace(/always\(\)/g, "true")}`)
-  for (const [event, base, active] of [
-    ["pull_request", "main", true],
-    ["pull_request", "stage", true],
-    ["pull_request", "feature/other", false],
-    ["workflow_dispatch", undefined, false],
-    ["push", undefined, false],
-    ["issue_comment", undefined, false],
-  ]) {
-    const github = { event_name: event, event: base ? { pull_request: { base: { ref: base } } } : {} }
-    assert.equal(name(github), active ? "pr-title" : "pr-title-inactive")
-    assert.equal(admitted(github), active)
+test("ineligible events never publish a skipped required pr-title or ci context", () => {
+  for (const [file, check] of [["pr-rules", "pr-title"], ["vault-validation", "ci"]]) {
+    const job = workflow(file).jobs[check]
+    const name = new Function("github", `return ${job.name.slice(3, -2).trim()}`)
+    const admitted = new Function("github", `return ${job.if.replace(/always\(\)/g, "true")}`)
+    for (const [event, base, active] of [
+      ["pull_request", "main", true],
+      ["pull_request", "stage", true],
+      ["pull_request", "feature/other", false],
+      ["workflow_dispatch", undefined, false],
+      ["push", undefined, false],
+      ["issue_comment", undefined, false],
+    ]) {
+      const github = { event_name: event, event: base ? { pull_request: { base: { ref: base } } } : {} }
+      assert.equal(name(github), active ? check : `${check}-inactive`, `${file}/${event}/${base}`)
+      assert.equal(admitted(github), active, `${file}/${event}/${base}`)
+    }
   }
 })
 
+test("pr-title checks only the title, and title edits or comments never start heavy checks", () => {
+  const rules = workflow("pr-rules")
+  const ci = workflow("vault-validation")
+  assert.deepEqual(rules.on.pull_request.types, ["opened", "edited", "synchronize", "reopened"])
+  assert.deepEqual(rules.on.issue_comment.types, ["created"])
+  assert.deepEqual(ci.on.pull_request.types, ["opened", "synchronize", "reopened"])
+  assert.equal(ci.on.issue_comment, undefined)
+  for (const name of ["gate", "command"]) {
+    assert.ok(rules.jobs[name], name)
+    assert.equal(ci.jobs[name], undefined, name)
+  }
+  const title = rules.jobs["pr-title"]
+  assert.equal(title.needs, undefined)
+  assert.equal(title.steps.length, 1)
+  const run = (TITLE) => spawnSync("bash", ["-c", title.steps[0].run], { env: { ...process.env, TITLE }, encoding: "utf8" }).status
+  for (const good of ["feature: add x", "notes: y", "fix: z", "maintenance!: breaking"]) assert.equal(run(good), 0, good)
+  for (const bad of ["Add x", "feat: x", "feature:x", "feature(scope): x"]) assert.notEqual(run(bad), 0, bad)
+  assert.doesNotMatch(JSON.stringify(rules), /secrets\.VERCEL|id-token|site-check/)
+})
+
 test("readiness failure does not skip real source validation and documents stage protection", () => {
-  const title = workflow("vault-validation")
-  assert.match(title.jobs.site.if, /github\.event_name == 'pull_request'/)
-  const gate = title.jobs["pr-title"].steps.find((step) => step.env?.READY)
+  const ci = workflow("vault-validation")
+  assert.match(ci.jobs.site.if, /github\.event_name == 'pull_request'/)
+  const gate = ci.jobs.ci.steps.find((step) => step.env?.READY)
   assert.match(gate.run, /READY.*true/)
   assert.match(gate.run, /Keep the migration PR draft/)
   assert.match(gate.run, /Trusted Sources OIDC access/)
-  assert.match(gate.run, /required pr-title on stage/)
+  assert.match(gate.run, /required pr-title and ci on stage/)
 })
 
 test("only accepted stage/main sources enter serialized protected deployment", () => {
@@ -188,7 +211,7 @@ test("all PR actions validate and aggregate rejects every unsuccessful prerequis
     github.event.action = action
     assert.equal(evaluate(ci.jobs.validate.if, { github }), true, action)
   }
-  const step = ci.jobs["pr-title"].steps[0]
+  const step = ci.jobs.ci.steps[0]
   for (const relevant of ["true", "false"]) {
     const good = { SITE_RESULT: "success", VALIDATE_RESULT: "success", RELEVANT: relevant, DEMO_RESULT: relevant === "true" ? "success" : "skipped", FIXTURE_RESULT: relevant === "true" ? "success" : "skipped" }
     const run = (env) => spawnSync("bash", ["-c", step.run], { env: { ...process.env, ...env }, encoding: "utf8" }).status
@@ -210,6 +233,9 @@ test("pure software coverage has one CI owner while candidate source validation 
   const commands = ci.jobs.validate.steps.map((step) => step.run ?? "").join("\n")
   assert.equal((commands.match(/dotnet test DevBook.Tooling.slnx/g) ?? []).length, 1)
   assert.match(commands, /custom\/transformers\/publishing.test.ts/)
+  assert.match(commands, /ValidateVault\.cs -- --all/)
+  assert.match(commands, /qard-learn-sync\/check\.cjs/)
+  assert.doesNotMatch(read(".githooks/pre-commit"), /ValidateVault\.cs|qard-learn-sync\/check\.cjs/)
   const install = ci.jobs.validate.steps.findIndex((step) => step.run?.includes("npx quartz plugin install"))
   const publishing = ci.jobs.validate.steps.findIndex((step) => step.run?.includes("publishing.test.ts"))
   assert.ok(install >= 0 && install < publishing)

@@ -100,16 +100,8 @@ PYTHON
     fi
 fi
 
-# 3. Validate staged vault structure, metadata, links, and generated artifacts
-echo "[pre-commit] Validating staged vault changes..."
-if ! (cd "$REPO_ROOT/.scripts" && dotnet run --no-cache --file DevBook.Tooling/Scripts/ValidateVault.cs -- --repo-root "$REPO_ROOT" --staged); then
-    echo ""
-    echo "[pre-commit] ✗ Vault validation failed. Fix the violations above, then re-stage."
-    exit 1
-fi
-
-# Card sources must have deliberate Learn assignment before publication.
-echo "[pre-commit] Checking Learn source assignments..."
-node "$REPO_ROOT/.scripts/qard-learn-sync/check.cjs"
+# Pre-commit only adds what must be inside the commit. Vault validation and
+# Learn coverage are judgments and run in CI (`validate`), on PRs and on every
+# push to stage.
 
 exit 0

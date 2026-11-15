@@ -53,7 +53,7 @@ public static class Demo
                 await lease.AcquireAsync(cancellationToken);
                 try
                 {
-                    var runtime = new GitHubRuntime(api, store, requiredChecks: ["pr-title", "major-approval"], leaseOwner: owner, timeProvider: clock,
+                    var runtime = new GitHubRuntime(api, store, requiredChecks: ["pr-title", "ci", "major-approval"], leaseOwner: owner, timeProvider: clock,
                         checkAttempts: 1, checkInterval: TimeSpan.Zero, activation: () => { });
                     JsonArray Notes() => new(sources.Select(source => (JsonNode)new JsonObject
                     {
