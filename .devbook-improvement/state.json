@@ -16839,11 +16839,11 @@
     "version": 1,
     "id": "4bd0bfa98b5d4dbbb28188e2b990362e",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-15T19:02:25.981526Z",
-    "elapsed_seconds": 545.9816734000002,
+    "elapsed_seconds": 566.8514780000003,
     "calls_reserved": 13,
-    "responses_received": 12,
+    "responses_received": 13,
     "attempted_paths": [
       "Vault/Home/Data Persistence/Caching.md",
       "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
@@ -17096,7 +17096,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T19:11:31.962685Z",
+    "checkpoint_at": "2026-11-15T19:11:52.832489Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -47907,12 +47907,63 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Data Persistence/Data Persistence.md",
+          "expected_hash": "02b784e79de51788da31db2ecf74da365a4dcc0ad63efc36a7a5fb1feec257ec",
+          "before": "Each step down this ladder is justified only when the previous step still misses a concrete load, latency, or recovery target.",
+          "after": "The ladder follows the diagnosis order above. Each step is justified only when the cheaper steps before it still miss a concrete load, latency, or recovery target.",
+          "reason": "Aligns the ladder rule with the diagnosis sequence.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "ladder follows diagnosis order",
+            "step justified only when cheaper steps miss a target"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The ladder puts vertical scaling before caching and replicas, while the diagnosis section scales the node after read offloading; the two give conflicting escalation orders.",
+          "reader_benefit": "One consistent escalation order is recoverable from the note."
+        },
+        {
+          "path": "Vault/Home/Data Persistence/Data Persistence.md",
+          "expected_hash": "02b784e79de51788da31db2ecf74da365a4dcc0ad63efc36a7a5fb1feec257ec",
+          "before": "| Vertical scaling | CPU, RAM, or storage throughput is saturated after query repair | Same data model and transaction boundary on a larger node | Higher failure concentration, finite ceiling, and larger restart/recovery events |\n| [[Home/Data Persistence/Caching\\|Caching]] | Repeated reads tolerate staleness and origin load is the bottleneck | Lower read latency and fewer origin requests | Invalidation, stampedes, eviction, and stale answers |\n| [[Home/Data Persistence/SQL/Replication\\|Read replicas]] | Reads dominate. Primary writes are healthy | More read capacity and additional failover options | Replication lag, read-your-writes routing, promotion, and replica cost |",
+          "after": "| [[Home/Data Persistence/Caching\\|Caching]] | Repeated reads tolerate staleness and origin load is the bottleneck | Lower read latency and fewer origin requests | Invalidation, stampedes, eviction, and stale answers |\n| [[Home/Data Persistence/SQL/Replication\\|Read replicas]] | Reads dominate. Primary writes are healthy | More read capacity and additional failover options | Replication lag, read-your-writes routing, promotion, and replica cost |\n| Vertical scaling | CPU, RAM, or storage throughput is still saturated after query repair and read offloading | Same data model and transaction boundary on a larger node | Higher failure concentration, finite ceiling, and larger restart/recovery events |",
+          "reason": "Moves vertical scaling after read offloading, matching the diagnosis steps.",
+          "kind": "rewrite",
+          "learning_target": "same",
+          "essential_meanings": [
+            "vertical scaling comes after read offloading",
+            "costs preserved"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The ladder puts vertical scaling before caching and replicas, while the diagnosis section scales the node after read offloading.",
+          "reader_benefit": "Ladder and diagnosis agree on the order of escalation."
+        },
+        {
+          "path": "Vault/Home/Data Persistence/Data Persistence.md",
+          "expected_hash": "02b784e79de51788da31db2ecf74da365a4dcc0ad63efc36a7a5fb1feec257ec",
+          "before": "status: New",
+          "after": "status: In Progress",
+          "reason": "The note is substantive and published, so New misstates its development state.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "status reflects substantive development"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "status: New on a note with extensive content that is already published.",
+          "reader_benefit": "Lifecycle metadata accurately reflects the note."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Data Persistence/Data Persistence.md",
-          "outcome": "keep",
-          "reason": "Audited the whole hub note against its text. The opening states the operating idea. The store-type table gives each access pattern with its guarantee or cost, and the block/file/object table separates the application's responsibilities. The performance-diagnosis steps match the PostgreSQL EXPLAIN (ANALYZE, BUFFERS) tooling. The SQL Server indexed-view claim is correct: such a view is maintained synchronously with base-table writes, which makes those writes more expensive. The escalation ladder orders steps by cost, and the pattern map notes that its categories overlap. Both Qards test one coherent task each, and their answers repeat the note's content with cited sources. Frontmatter, the datacorejsx block, the wikilinks and the references are well-formed, and there are no known violations. No defect or essential learning gap was found, so no edit is warranted."
+          "outcome": "changed",
+          "reason": "The ladder now orders caching and replicas before vertical scaling, matching the diagnosis section and Qard answer, and its intro states the rule consistently. Status updated from New to In Progress to match the substantive content. Other content (tables, Qards, sources) was checked and left unchanged."
         }
       ],
       "feedback": []
@@ -47927,8 +47978,10 @@
       "Vault/Home/Data Persistence/Data Persistence.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-15T19:10:29.033391Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-15T19:11:52.832474Z",
+    "review_repair_key": "40ec719a6bc4661a38e0ed27b88f653d1f4a5bad179c2c88875907162c17d09e",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The keep is not justified: the escalation ladder contradicts the note's own diagnosis order, and the note's lifecycle status is stale.",
       "notes": [
@@ -48004,73 +48057,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The keep is not justified: the escalation ladder contradicts the note's own diagnosis order, and the note's lifecycle status is stale.",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/Data Persistence.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The note is mostly accurate and well structured. The ladder, however, orders vertical scaling before caching and replicas, while the diagnosis section scales the node only after read offloading. The ladder's own rule says each step is justified only when the previous one misses its target, so the two sections give conflicting escalation orders. Status is also `New` for a substantial, published note.",
-          "page_type": "FolderNote — keeps tags FolderNote and the protected datacorejsx block; Questions and References are optional and present; no concept-only structure is required.",
-          "current_text_evidence": [
-            {
-              "quote": "Each step down this ladder is justified only when the previous step still misses a concrete load, latency, or recovery target.",
-              "line_start": 78,
-              "reason": "This states a strict sequential escalation rule for the ladder."
-            },
-            {
-              "quote": "| Vertical scaling | CPU, RAM, or storage throughput is saturated after query repair |",
-              "line_start": 84,
-              "reason": "Vertical scaling precedes caching and replicas in the ladder, so the ladder escalates to a bigger node before read offloading."
-            },
-            {
-              "quote": "The node is scaled after the query path is sound.",
-              "line_start": 70,
-              "reason": "The diagnosis section places read offloading (step 5) before node scaling (step 6), which contradicts the ladder order."
-            },
-            {
-              "quote": "status: New",
-              "line_start": 12,
-              "reason": "`New` means barely created, but the note is substantive and published."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the sections are facets of one hub on persistence choices and scaling. Detailed topics already live in child notes.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Accuracy/consistency",
-              "location": "`# Database Scaling Escalation Ladder` vs `# Database Performance Diagnosis before Scaling`",
-              "evidence": "The ladder places Vertical scaling before Caching and Read replicas, with the rule that each step is justified only when the previous one misses its target. The diagnosis section and the Qard answer scale the node after read offloading.",
-              "effect": "A reader recovers two conflicting escalation orders, which undermines the engineering-judgment purpose.",
-              "fix": "Reorder the ladder rows to match the diagnosis sequence, or state that vertical scaling and read offloading are alternatives chosen by bottleneck rather than strictly sequential steps."
-            },
-            {
-              "severity": "Medium",
-              "dimension": "Frontmatter/lifecycle",
-              "location": "frontmatter `status`",
-              "evidence": "`status: New` on a note with extensive content that is already published.",
-              "effect": "The lifecycle value misstates note development.",
-              "fix": "Set status to `In Progress` or `Established`."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "FAIL",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "FAIL"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "40ec719a6bc4661a38e0ed27b88f653d1f4a5bad179c2c88875907162c17d09e",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
