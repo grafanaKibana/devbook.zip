@@ -16897,9 +16897,9 @@
     "version": 1,
     "id": "4bd0bfa98b5d4dbbb28188e2b990362e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-15T19:02:25.981526Z",
-    "elapsed_seconds": 638.8569982000006,
+    "elapsed_seconds": 643.0177251000006,
     "calls_reserved": 15,
     "responses_received": 15,
     "attempted_paths": [
@@ -16908,7 +16908,8 @@
       "Vault/Home/Data Persistence/SQL/Replication.md",
       "Vault/Home/Data Persistence/ACID.md",
       "Vault/Home/Data Persistence/Connection Pooling.md",
-      "Vault/Home/Data Persistence/Data Persistence.md"
+      "Vault/Home/Data Persistence/Data Persistence.md",
+      "Vault/Home/Data Persistence/Erasure Coding.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -17163,10 +17164,88 @@
           "reason": "card edit must replace one complete active Qard block including adjacent metadata",
           "model_calls": 13
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/Erasure Coding.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/Erasure Coding.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and general knowledge of Reed-Solomon/MDS codes and Ceph's documented crush-failure-domain placement. The 4+2 arithmetic checks out: 256 MiB shards, 1.5 GiB total, 1.5x overhead versus 3 GiB for three copies. The d3/d4 failure walk-through is correct, as is the repair read amplification (four shards read, 1 GiB decoded). The MDS qualification, the placement caveat, the small-write read-modify-write explanation and the comparison table are all accurate and carry the conditions that matter. The prose is direct and ordered from definition to write path to cost to comparison. There are no Qard cards, so there are no question defects. The single reference is a real primary source. No known violations are outstanding, and no edit would improve the note materially."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no factual, structural or editorial defect. The keep is justified and there are no edits, cards or feedback to check.",
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/Erasure Coding.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate, ordered from definition to write path to cost to comparison, and keeps the conditions that matter (MDS qualification, failure-domain placement, correlated failures). Nothing needs changing.",
+                "page_type": "Concept — no Questions section; one real References bullet; no fenced code; frontmatter is typed and valid.",
+                "current_text_evidence": [
+                  {
+                    "quote": "With a maximum-distance-separable code such as Reed-Solomon, any `k` surviving shards can reconstruct the object.",
+                    "line_start": 14,
+                    "reason": "States the MDS condition precisely and qualifies tolerance of m losses by independence and correct placement. This is factually correct."
+                  },
+                  {
+                    "quote": "The six shards consume 1.5 GiB, an overhead factor of `(4 + 2) / 4 = 1.5`.",
+                    "line_start": 16,
+                    "reason": "The arithmetic is correct: 4 x 256 MiB data shards plus 2 coding shards gives 1.5 GiB, against 3 GiB for three copies."
+                  },
+                  {
+                    "quote": "Six shards on six disks in one server still share one server failure.",
+                    "line_start": 29,
+                    "reason": "Explains that fault tolerance comes from placement, and ties it to Ceph's crush-failure-domain."
+                  },
+                  {
+                    "quote": "Restoring one missing 256 MiB shard can mean reading four surviving 256 MiB shards, decoding 1 GiB, then writing the replacement.",
+                    "line_start": 33,
+                    "reason": "Makes repair read amplification concrete and correct for 4+2."
+                  },
+                  {
+                    "quote": "Depending on the engine, changing a few kilobytes may trigger a read-modify-write cycle across several shards.",
+                    "line_start": 37,
+                    "reason": "Correctly explains the small-write penalty and hedges by engine, without overclaiming."
+                  },
+                  {
+                    "quote": "Neither policy supplies a durability number by itself.",
+                    "line_start": 52,
+                    "reason": "Closes with the correlated-failure and backup caveats that affect engineering decisions. The comparison table has no repetition problem."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one coherent topic. Layout, write and repair path, small-write cost and the replication comparison depend on each other and are short enough to stay together.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 15
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T19:13:04.838011Z",
+    "checkpoint_at": "2026-11-15T19:13:08.998738Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
