@@ -14960,357 +14960,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "5fe9ecfcc7344982bcd2cdfba7482c21",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-14T22:36:29.240304Z",
-    "elapsed_seconds": 294.2244403999999,
-    "calls_reserved": 9,
-    "responses_received": 9,
-    "attempted_paths": [
-      "Vault/Home/Cloud/Providers.md",
-      "Vault/Home/Cloud/Cloud Cost Management.md",
-      "Vault/Home/Cloud/Cloud.md",
-      "Vault/Home/Cloud/Disaster Recovery.md",
-      "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md"
-    ],
+    "id": "da6ae8bc44c444a5b6a4606355aadef4",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-15T06:51:01.310737Z",
+    "elapsed_seconds": 0.0009141,
+    "calls_reserved": 0,
+    "responses_received": 0,
+    "attempted_paths": [],
     "accepted_records": [],
-    "outcomes": [
-      {
-        "path": "Vault/Home/Cloud/Providers.md",
-        "outcome": "proposal_blocked",
-        "reason": "source URL missing from owning note: https://docs.aws.amazon.com/ja_jp/apprunner/latest/dg/apprunner-availability-change.html",
-        "result": {
-          "status": "proposal_blocked",
-          "stage": "deterministic_application",
-          "reason": "source URL missing from owning note: https://docs.aws.amazon.com/ja_jp/apprunner/latest/dg/apprunner-availability-change.html",
-          "model_calls": 1
-        }
-      },
-      {
-        "path": "Vault/Home/Cloud/Cloud Cost Management.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Cloud/Cloud Cost Management.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text. The opening ties cost to application behavior and gives a concrete unit-cost example (cost per 1,000 successful images). The table maps behaviors to cost surfaces and design questions. It covers fan-out/retries, retention, cross-zone/region transfer, capacity model and observability, and it correctly warns that prices vary by service, region, tier and date. The unit-economics formula has a stable denominator, and the note pairs attempted with successful jobs and keeps latency/error/recovery as guardrails. The design responses state the conditions that change each decision: cache freshness and authorization scope, batch latency, bounded retries with dead-lettering, and serverless versus steady capacity. They also link to Disaster Recovery as intentional cost. The code fence has a language identifier, the wikilink target exists among sibling notes, and the single FinOps reference is relevant and unannotated. No Qard cards exist and none are required, and known_violations is empty. The prose is direct and non-repetitive, so no edit is warranted."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The single note was read in full and independently audited. No concrete defect was found, so keeping it unchanged is justified.",
-            "notes": [
-              {
-                "path": "Vault/Home/Cloud/Cloud Cost Management.md",
-                "verdict": "CLEAN",
-                "summary": "The note explains cost as application behavior, maps behaviors to cost surfaces, defines a unit-economics measure with guardrails, and lists design responses with the conditions that change each decision. It is accurate, direct and not repetitive, so leaving it unchanged is justified.",
-                "page_type": "Concept — no required sections; Questions are absent and optional; References is present and valid; the code fence has a language identifier.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Cost per 1,000 successful images can.",
-                    "line_start": 16,
-                    "reason": "The opening gives a concrete unit-cost example that makes the idea recoverable quickly."
-                  },
-                  {
-                    "quote": "Prices change by service, region, tier, and date.",
-                    "line_start": 28,
-                    "reason": "It states the version and price-volatility condition and tells readers to record assumptions instead of copying prices."
-                  },
-                  {
-                    "quote": "Track attempted jobs beside successful jobs.",
-                    "line_start": 40,
-                    "reason": "It names the failure mode of a gamed denominator and keeps latency, error rate and recovery as guardrails."
-                  },
-                  {
-                    "quote": "Cache only when freshness and authorization allow it; include tenant or access scope in the key.",
-                    "line_start": 44,
-                    "reason": "Each design response carries the condition that changes the decision, so the mechanism and its limits are explicit."
-                  },
-                  {
-                    "quote": "Recovery capacity is intentional cost, not waste.",
-                    "line_start": 49,
-                    "reason": "The link to Disaster Recovery explains why the relationship matters, with no standalone Links section."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the unit-economics measure, the cost surfaces and the design responses form one coherent topic, and none would be independently useful as a separate note.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": [],
-            "decision_checks": []
-          },
-          "model_calls": 3
-        }
-      },
-      {
-        "path": "Vault/Home/Cloud/Cloud.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Cloud/Cloud.md",
-                "outcome": "keep",
-                "reason": "Audited the whole folder note against its text and the NIST SP 800-145 reference. The opening states the operating idea: cloud moves the operating boundary but does not remove it, and the managed-database example is accurate. The ownership list covers application, data, configuration, resilience and cost without overlapping. The workload questions come before product names and link to Providers and the IaaS/PaaS/SaaS/CaaS note. The code-behavior section correctly describes throttling, redelivery, retries and idempotency as ordinary distributed-system failures. Wikilinks are meaningful, the datacorejsx fence has a language, there are no cards, no known violations, and the single reference is a real NIST primary source. The note is concise, coherent and in the right voice, so edits would be cosmetic churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The single note is accurate, coherent and in the right voice. It has no known violations and no concrete defects, so keeping it unchanged is justified.",
-            "notes": [
-              {
-                "path": "Vault/Home/Cloud/Cloud.md",
-                "verdict": "CLEAN",
-                "summary": "The folder note states the operating idea early: the operating boundary moves but does not disappear. It lists the responsibilities that stay with the application team, gives architecture questions to ask before choosing products, and explains how cloud behavior shows up in code. No edit is needed.",
-                "page_type": "FolderNote — tagged FolderNote, with the protected datacorejsx card map kept. Questions are optional and absent. References hold one real NIST primary source.",
-                "current_text_evidence": [
-                  {
-                    "quote": "It moves an application's operating boundary; it does not remove it.",
-                    "line_start": 18,
-                    "reason": "This gives the operating idea quickly. The managed-database example that follows is accurate and concrete."
-                  },
-                  {
-                    "quote": "**Economics:** which code paths generate compute, requests, storage, transfer, and observability volume.",
-                    "line_start": 33,
-                    "reason": "The ownership list is concrete and non-overlapping, and it includes cost, which is easy to overlook."
-                  },
-                  {
-                    "quote": "Start from the workload contract:",
-                    "line_start": 39,
-                    "reason": "The numbered questions come before product names and support engineering judgment. They lead into the Providers note."
-                  },
-                  {
-                    "quote": "Cloud failures are ordinary distributed-system failures.",
-                    "line_start": 51,
-                    "reason": "This ties cloud behavior to application code through throttling, redelivery, retries and idempotency. The content is accurate, and the wording is direct and impersonal."
-                  },
-                  {
-                    "quote": "- [NIST SP 800-145: The NIST Definition of Cloud Computing]",
-                    "line_start": 57,
-                    "reason": "The reference is a real, authoritative, topic-specific source, formatted as a bare link bullet with no annotation."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note is a compact hub with a card map. Its sections all serve one idea, the application's remaining responsibilities in the cloud, and the detailed topics already live in linked sibling notes.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 5
-        }
-      },
-      {
-        "path": "Vault/Home/Cloud/Disaster Recovery.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Cloud/Disaster Recovery.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note. The opening defines DR with a worked RPO/RTO example, and the objectives section states both terms precisely, including that external systems and disposable state need their own recovery paths. The mechanism table separates backup, replica, failover and exercise by what each does not prove, which matches standard DR guidance. The strategy table (backup/restore, pilot light, warm standby, active-active) matches the AWS Well-Architected DR strategies, and the warning that multi-region can propagate bad deployments or writes is sound. The application-design and proving sections add concrete conditions (idempotency, schema compatibility, dependencies, degraded mode, measured actual RPO/RTO). Frontmatter is valid, there are no code fences or Questions, and the two references are authoritative bare links. There are no known violations, and no factual error or editorial weakness justifies an edit."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "notes": [
-              {
-                "path": "Vault/Home/Cloud/Disaster Recovery.md",
-                "verdict": "CLEAN",
-                "summary": "Independent whole-note audit found the note accurate, well ordered and compact. The RPO/RTO example opens the topic, tables support decisions with conditions, and no edit is warranted.",
-                "page_type": "Concept — typed frontmatter valid, optional References present with bare descriptive links, no Questions, no code fences.",
-                "current_text_evidence": [
-                  {
-                    "quote": "If checkout may lose at most 10 minutes of accepted orders and must return within 45 minutes, its recovery point objective is 10 minutes",
-                    "line_start": 14,
-                    "reason": "Concrete worked example introduces RPO/RTO quickly and makes the targets recoverable."
-                  },
-                  {
-                    "quote": "| Replica | A current or near-current serving copy | Protection from corruption or deletion replicated from the primary |",
-                    "line_start": 28,
-                    "reason": "Mechanism table names the specific failure each mechanism does not cover, supporting engineering judgment."
-                  },
-                  {
-                    "quote": "Multi-region architecture is not automatically safer: a destructive deployment, invalid migration, or corrupted write can reach every region.",
-                    "line_start": 43,
-                    "reason": "States the condition that changes the strategy decision, matching AWS DR guidance."
-                  },
-                  {
-                    "quote": "Test the user flow, not only infrastructure health.",
-                    "line_start": 56,
-                    "reason": "Proving section gives concrete measurable outputs of an exercise; the explanation order runs target, mechanisms, strategies, design, proof."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: objectives, mechanisms, strategies, application design and testing form one coherent DR topic and are not independently separable.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "overall_reason": "The note is accurate, clear and complete for its scope; there are no known violations, edits or unsupported claims, so the keep is justified.",
-            "change_checks": []
-          },
-          "model_calls": 7
-        }
-      },
-      {
-        "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against the current text and the NIST SP 800-145 service-model definitions. The opening correctly says NIST defines only IaaS, PaaS and SaaS, and that CaaS and FaaS are industry labels with product-dependent boundaries. The responsibility table assigns provider and team duties sensibly, including the managed-Kubernetes control plane and the fact that data, identity and configuration stay with the customer. The selection rule gives a clear order and states the exception, which is that host-level control must be a real requirement. The consequences section covers retries and idempotency, portability limits, upgrade ownership and cost shape. The prose is direct and non-repetitive, and no code fences or Qards are present. The single reference is a relevant primary source (Azure shared responsibility) formatted as a bare link. There is no frontmatter or structural violation and no known violation. Any edit would be cosmetic."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The independent whole-note audit found no accuracy, clarity, structure or rules defect, so the keep is justified and no edits are needed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate and compact. It separates NIST-defined models from industry labels, gives a responsibility table, an ordered selection rule with its exception, and concrete consequences. Nothing needs to change.",
-                "page_type": "Concept — typed frontmatter; Questions and References are optional; no Qards; no code fences; no generated navigation or Links section.",
-                "current_text_evidence": [
-                  {
-                    "quote": "NIST defines IaaS, PaaS, and SaaS. CaaS and FaaS are useful industry labels",
-                    "line_start": 14,
-                    "reason": "The opening states the terminology boundary correctly: NIST SP 800-145 defines only three service models."
-                  },
-                  {
-                    "quote": "managed Kubernetes usually includes the control plane",
-                    "line_start": 21,
-                    "reason": "The CaaS row gives the concrete provider/customer split and hedges appropriately for product variance."
-                  },
-                  {
-                    "quote": "Managed does not mean responsibility-free.",
-                    "line_start": 26,
-                    "reason": "This is the key caveat, and it is followed by a concrete list of what remains with the customer."
-                  },
-                  {
-                    "quote": "Familiarity alone is not a host-level requirement.",
-                    "line_start": 38,
-                    "reason": "It states the exception to the highest-managed-layer rule and explains the cost of ignoring it."
-                  },
-                  {
-                    "quote": "Externally visible side effects need idempotency regardless of who operates the runtime.",
-                    "line_start": 43,
-                    "reason": "This explains the retry mechanism and the engineering consequence rather than a vocabulary list."
-                  },
-                  {
-                    "quote": "- [Azure shared responsibility in the cloud](https://learn.microsoft.com/en-us/azure/security/fundamentals/shared-responsibility)",
-                    "line_start": 50,
-                    "reason": "The single reference is a relevant primary source and is a bare descriptive link."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the service-model comparison and the selection rule form one coherent decision topic, and splitting would separate the table from the rule that uses it.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "identity_safety": "NOT APPLICABLE",
-                  "question_quality": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 9
-        }
-      }
-    ],
+    "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-14T22:41:23.464384Z",
-    "topic": "Cloud",
-    "topic_id": "cloud-b977b950",
-    "current_batch": {
-      "topic": "Cloud",
-      "topic_id": "cloud-b977b950",
-      "notes": [
-        {
-          "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
-          "content": "---\ntopic: [Cloud]\nsubtopic: []\nsummary: \"Choosing how much runtime control the application needs and which responsibilities can move to a provider.\"\nlevel: [\"2\"]\npriority: High\nstatus: In Progress\npublish: true\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.507Z\"\n---\n\nCloud service models describe where provider responsibility ends and application responsibility begins. NIST defines IaaS, PaaS, and SaaS. CaaS and FaaS are useful industry labels for narrower managed-platform shapes, but their exact responsibility boundary varies by product.\n\n# Responsibility and Control\n\n| Model | Provider manages | Application team manages | Use when |\n| --- | --- | --- | --- |\n| IaaS | Physical infrastructure and virtualization | Guest OS, runtime, application, identity, data, capacity, and recovery | The workload needs a specific OS, host access, appliance, specialized machine, or migration boundary |\n| CaaS | Infrastructure and some container orchestration; managed Kubernetes usually includes the control plane | Images, workloads, cluster policy, application data, and varying node/network duties | Kubernetes APIs or a shared container scheduler are explicit requirements |\n| PaaS | Hosts, OS, and a supported application platform | Code, data, identity, configuration, scaling choices, and runtime compatibility | A web service or API fits a supported runtime and deployment contract |\n| FaaS | Event-bound execution environment and platform scaling | Function code, data, identity, trigger semantics, limits, and idempotency | Work is bounded, event-driven, and compatible with the plan's latency and duration limits |\n| SaaS | The application and underlying platform | Tenant configuration, identities, data governance, integrations, and endpoint policy | Operating the capability creates no useful product differentiation |\n\nManaged does not mean responsibility-free. Moving up the table removes lower-level infrastructure work, but data, access, configuration, dependency behavior, and application recovery remain.\n\n# Selection Rule\n\nUse the highest managed layer that satisfies the real constraints:\n\n1. Choose **SaaS** for commodity business capability.\n2. Choose **PaaS** as the default for a new application that fits the supported runtime, networking, and scaling model.\n3. Choose **FaaS** for bounded event handlers where trigger delivery, cold-start behavior, duration, and concurrency limits fit.\n4. Choose **CaaS** when the system genuinely needs Kubernetes APIs, scheduling controls, or a shared container platform.\n5. Choose **IaaS** when host-level control is itself a requirement.\n\nFamiliarity alone is not a host-level requirement. Starting with VMs or Kubernetes for an ordinary web API adds patching, capacity, policy, and recovery surfaces that a managed application platform may already solve.\n\n# Developer and Architect Consequences\n\n- **Runtime constraints:** managed platforms restrict supported versions, process lifetime, filesystem behavior, networking, or background work. Confirm these before adoption.\n- **Failure semantics:** serverless and messaging integrations can retry or redeliver. Externally visible side effects need idempotency regardless of who operates the runtime.\n- **Portability:** a container standardizes the executable and filesystem, not identity, networking, storage, messaging, or database semantics.\n- **Upgrade ownership:** the provider may patch hosts, but the team still tracks runtime retirement, SDK compatibility, schema migration, and application dependencies.\n- **Cost shape:** less infrastructure work can come with per-request pricing, minimum instances, reserved capacity, data transfer, or managed-service premiums. Compare the complete workload rather than one SKU.\n\n# References\n\n- [Azure shared responsibility in the cloud](https://learn.microsoft.com/en-us/azure/security/fundamentals/shared-responsibility)\n",
-          "hash": "43a163d432be3ffe4d567286af33c04435fa293205c76695f6d69af69484d16a",
-          "topic": "Cloud",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "base_sha": "4c28a0295ce7c4697ea2adcea1e919f008c6b755",
-    "reservation_deadline": "2026-11-14T22:55:42.053276Z",
-    "stop_reason": "topic_exhausted",
-    "sealed_at": "2026-11-14T22:41:23.464390Z"
+    "checkpoint_at": "2026-11-15T06:51:01.311298Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -26242,6 +25903,360 @@
       "reservation_deadline": "2026-11-14T18:43:28.927726Z",
       "stop_reason": "call_limit",
       "sealed_at": "2026-11-14T18:29:12.697180Z"
+    },
+    "5fe9ecfcc7344982bcd2cdfba7482c21": {
+      "version": 1,
+      "id": "5fe9ecfcc7344982bcd2cdfba7482c21",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-14T22:36:29.240304Z",
+      "elapsed_seconds": 294.2244403999999,
+      "calls_reserved": 9,
+      "responses_received": 9,
+      "attempted_paths": [
+        "Vault/Home/Cloud/Providers.md",
+        "Vault/Home/Cloud/Cloud Cost Management.md",
+        "Vault/Home/Cloud/Cloud.md",
+        "Vault/Home/Cloud/Disaster Recovery.md",
+        "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md"
+      ],
+      "accepted_records": [],
+      "outcomes": [
+        {
+          "path": "Vault/Home/Cloud/Providers.md",
+          "outcome": "proposal_blocked",
+          "reason": "source URL missing from owning note: https://docs.aws.amazon.com/ja_jp/apprunner/latest/dg/apprunner-availability-change.html",
+          "result": {
+            "status": "proposal_blocked",
+            "stage": "deterministic_application",
+            "reason": "source URL missing from owning note: https://docs.aws.amazon.com/ja_jp/apprunner/latest/dg/apprunner-availability-change.html",
+            "model_calls": 1
+          }
+        },
+        {
+          "path": "Vault/Home/Cloud/Cloud Cost Management.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Cloud/Cloud Cost Management.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text. The opening ties cost to application behavior and gives a concrete unit-cost example (cost per 1,000 successful images). The table maps behaviors to cost surfaces and design questions. It covers fan-out/retries, retention, cross-zone/region transfer, capacity model and observability, and it correctly warns that prices vary by service, region, tier and date. The unit-economics formula has a stable denominator, and the note pairs attempted with successful jobs and keeps latency/error/recovery as guardrails. The design responses state the conditions that change each decision: cache freshness and authorization scope, batch latency, bounded retries with dead-lettering, and serverless versus steady capacity. They also link to Disaster Recovery as intentional cost. The code fence has a language identifier, the wikilink target exists among sibling notes, and the single FinOps reference is relevant and unannotated. No Qard cards exist and none are required, and known_violations is empty. The prose is direct and non-repetitive, so no edit is warranted."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The single note was read in full and independently audited. No concrete defect was found, so keeping it unchanged is justified.",
+              "notes": [
+                {
+                  "path": "Vault/Home/Cloud/Cloud Cost Management.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains cost as application behavior, maps behaviors to cost surfaces, defines a unit-economics measure with guardrails, and lists design responses with the conditions that change each decision. It is accurate, direct and not repetitive, so leaving it unchanged is justified.",
+                  "page_type": "Concept — no required sections; Questions are absent and optional; References is present and valid; the code fence has a language identifier.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Cost per 1,000 successful images can.",
+                      "line_start": 16,
+                      "reason": "The opening gives a concrete unit-cost example that makes the idea recoverable quickly."
+                    },
+                    {
+                      "quote": "Prices change by service, region, tier, and date.",
+                      "line_start": 28,
+                      "reason": "It states the version and price-volatility condition and tells readers to record assumptions instead of copying prices."
+                    },
+                    {
+                      "quote": "Track attempted jobs beside successful jobs.",
+                      "line_start": 40,
+                      "reason": "It names the failure mode of a gamed denominator and keeps latency, error rate and recovery as guardrails."
+                    },
+                    {
+                      "quote": "Cache only when freshness and authorization allow it; include tenant or access scope in the key.",
+                      "line_start": 44,
+                      "reason": "Each design response carries the condition that changes the decision, so the mechanism and its limits are explicit."
+                    },
+                    {
+                      "quote": "Recovery capacity is intentional cost, not waste.",
+                      "line_start": 49,
+                      "reason": "The link to Disaster Recovery explains why the relationship matters, with no standalone Links section."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the unit-economics measure, the cost surfaces and the design responses form one coherent topic, and none would be independently useful as a separate note.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": [],
+              "decision_checks": []
+            },
+            "model_calls": 3
+          }
+        },
+        {
+          "path": "Vault/Home/Cloud/Cloud.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Cloud/Cloud.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole folder note against its text and the NIST SP 800-145 reference. The opening states the operating idea: cloud moves the operating boundary but does not remove it, and the managed-database example is accurate. The ownership list covers application, data, configuration, resilience and cost without overlapping. The workload questions come before product names and link to Providers and the IaaS/PaaS/SaaS/CaaS note. The code-behavior section correctly describes throttling, redelivery, retries and idempotency as ordinary distributed-system failures. Wikilinks are meaningful, the datacorejsx fence has a language, there are no cards, no known violations, and the single reference is a real NIST primary source. The note is concise, coherent and in the right voice, so edits would be cosmetic churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The single note is accurate, coherent and in the right voice. It has no known violations and no concrete defects, so keeping it unchanged is justified.",
+              "notes": [
+                {
+                  "path": "Vault/Home/Cloud/Cloud.md",
+                  "verdict": "CLEAN",
+                  "summary": "The folder note states the operating idea early: the operating boundary moves but does not disappear. It lists the responsibilities that stay with the application team, gives architecture questions to ask before choosing products, and explains how cloud behavior shows up in code. No edit is needed.",
+                  "page_type": "FolderNote — tagged FolderNote, with the protected datacorejsx card map kept. Questions are optional and absent. References hold one real NIST primary source.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "It moves an application's operating boundary; it does not remove it.",
+                      "line_start": 18,
+                      "reason": "This gives the operating idea quickly. The managed-database example that follows is accurate and concrete."
+                    },
+                    {
+                      "quote": "**Economics:** which code paths generate compute, requests, storage, transfer, and observability volume.",
+                      "line_start": 33,
+                      "reason": "The ownership list is concrete and non-overlapping, and it includes cost, which is easy to overlook."
+                    },
+                    {
+                      "quote": "Start from the workload contract:",
+                      "line_start": 39,
+                      "reason": "The numbered questions come before product names and support engineering judgment. They lead into the Providers note."
+                    },
+                    {
+                      "quote": "Cloud failures are ordinary distributed-system failures.",
+                      "line_start": 51,
+                      "reason": "This ties cloud behavior to application code through throttling, redelivery, retries and idempotency. The content is accurate, and the wording is direct and impersonal."
+                    },
+                    {
+                      "quote": "- [NIST SP 800-145: The NIST Definition of Cloud Computing]",
+                      "line_start": 57,
+                      "reason": "The reference is a real, authoritative, topic-specific source, formatted as a bare link bullet with no annotation."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note is a compact hub with a card map. Its sections all serve one idea, the application's remaining responsibilities in the cloud, and the detailed topics already live in linked sibling notes.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 5
+          }
+        },
+        {
+          "path": "Vault/Home/Cloud/Disaster Recovery.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Cloud/Disaster Recovery.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note. The opening defines DR with a worked RPO/RTO example, and the objectives section states both terms precisely, including that external systems and disposable state need their own recovery paths. The mechanism table separates backup, replica, failover and exercise by what each does not prove, which matches standard DR guidance. The strategy table (backup/restore, pilot light, warm standby, active-active) matches the AWS Well-Architected DR strategies, and the warning that multi-region can propagate bad deployments or writes is sound. The application-design and proving sections add concrete conditions (idempotency, schema compatibility, dependencies, degraded mode, measured actual RPO/RTO). Frontmatter is valid, there are no code fences or Questions, and the two references are authoritative bare links. There are no known violations, and no factual error or editorial weakness justifies an edit."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "notes": [
+                {
+                  "path": "Vault/Home/Cloud/Disaster Recovery.md",
+                  "verdict": "CLEAN",
+                  "summary": "Independent whole-note audit found the note accurate, well ordered and compact. The RPO/RTO example opens the topic, tables support decisions with conditions, and no edit is warranted.",
+                  "page_type": "Concept — typed frontmatter valid, optional References present with bare descriptive links, no Questions, no code fences.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "If checkout may lose at most 10 minutes of accepted orders and must return within 45 minutes, its recovery point objective is 10 minutes",
+                      "line_start": 14,
+                      "reason": "Concrete worked example introduces RPO/RTO quickly and makes the targets recoverable."
+                    },
+                    {
+                      "quote": "| Replica | A current or near-current serving copy | Protection from corruption or deletion replicated from the primary |",
+                      "line_start": 28,
+                      "reason": "Mechanism table names the specific failure each mechanism does not cover, supporting engineering judgment."
+                    },
+                    {
+                      "quote": "Multi-region architecture is not automatically safer: a destructive deployment, invalid migration, or corrupted write can reach every region.",
+                      "line_start": 43,
+                      "reason": "States the condition that changes the strategy decision, matching AWS DR guidance."
+                    },
+                    {
+                      "quote": "Test the user flow, not only infrastructure health.",
+                      "line_start": 56,
+                      "reason": "Proving section gives concrete measurable outputs of an exercise; the explanation order runs target, mechanisms, strategies, design, proof."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: objectives, mechanisms, strategies, application design and testing form one coherent DR topic and are not independently separable.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "overall_reason": "The note is accurate, clear and complete for its scope; there are no known violations, edits or unsupported claims, so the keep is justified.",
+              "change_checks": []
+            },
+            "model_calls": 7
+          }
+        },
+        {
+          "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against the current text and the NIST SP 800-145 service-model definitions. The opening correctly says NIST defines only IaaS, PaaS and SaaS, and that CaaS and FaaS are industry labels with product-dependent boundaries. The responsibility table assigns provider and team duties sensibly, including the managed-Kubernetes control plane and the fact that data, identity and configuration stay with the customer. The selection rule gives a clear order and states the exception, which is that host-level control must be a real requirement. The consequences section covers retries and idempotency, portability limits, upgrade ownership and cost shape. The prose is direct and non-repetitive, and no code fences or Qards are present. The single reference is a relevant primary source (Azure shared responsibility) formatted as a bare link. There is no frontmatter or structural violation and no known violation. Any edit would be cosmetic."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The independent whole-note audit found no accuracy, clarity, structure or rules defect, so the keep is justified and no edits are needed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate and compact. It separates NIST-defined models from industry labels, gives a responsibility table, an ordered selection rule with its exception, and concrete consequences. Nothing needs to change.",
+                  "page_type": "Concept — typed frontmatter; Questions and References are optional; no Qards; no code fences; no generated navigation or Links section.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "NIST defines IaaS, PaaS, and SaaS. CaaS and FaaS are useful industry labels",
+                      "line_start": 14,
+                      "reason": "The opening states the terminology boundary correctly: NIST SP 800-145 defines only three service models."
+                    },
+                    {
+                      "quote": "managed Kubernetes usually includes the control plane",
+                      "line_start": 21,
+                      "reason": "The CaaS row gives the concrete provider/customer split and hedges appropriately for product variance."
+                    },
+                    {
+                      "quote": "Managed does not mean responsibility-free.",
+                      "line_start": 26,
+                      "reason": "This is the key caveat, and it is followed by a concrete list of what remains with the customer."
+                    },
+                    {
+                      "quote": "Familiarity alone is not a host-level requirement.",
+                      "line_start": 38,
+                      "reason": "It states the exception to the highest-managed-layer rule and explains the cost of ignoring it."
+                    },
+                    {
+                      "quote": "Externally visible side effects need idempotency regardless of who operates the runtime.",
+                      "line_start": 43,
+                      "reason": "This explains the retry mechanism and the engineering consequence rather than a vocabulary list."
+                    },
+                    {
+                      "quote": "- [Azure shared responsibility in the cloud](https://learn.microsoft.com/en-us/azure/security/fundamentals/shared-responsibility)",
+                      "line_start": 50,
+                      "reason": "The single reference is a relevant primary source and is a bare descriptive link."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the service-model comparison and the selection rule form one coherent decision topic, and splitting would separate the table from the rule that uses it.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "identity_safety": "NOT APPLICABLE",
+                    "question_quality": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 9
+          }
+        }
+      ],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-14T22:41:23.464384Z",
+      "topic": "Cloud",
+      "topic_id": "cloud-b977b950",
+      "current_batch": {
+        "topic": "Cloud",
+        "topic_id": "cloud-b977b950",
+        "notes": [
+          {
+            "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+            "content": "---\ntopic: [Cloud]\nsubtopic: []\nsummary: \"Choosing how much runtime control the application needs and which responsibilities can move to a provider.\"\nlevel: [\"2\"]\npriority: High\nstatus: In Progress\npublish: true\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.507Z\"\n---\n\nCloud service models describe where provider responsibility ends and application responsibility begins. NIST defines IaaS, PaaS, and SaaS. CaaS and FaaS are useful industry labels for narrower managed-platform shapes, but their exact responsibility boundary varies by product.\n\n# Responsibility and Control\n\n| Model | Provider manages | Application team manages | Use when |\n| --- | --- | --- | --- |\n| IaaS | Physical infrastructure and virtualization | Guest OS, runtime, application, identity, data, capacity, and recovery | The workload needs a specific OS, host access, appliance, specialized machine, or migration boundary |\n| CaaS | Infrastructure and some container orchestration; managed Kubernetes usually includes the control plane | Images, workloads, cluster policy, application data, and varying node/network duties | Kubernetes APIs or a shared container scheduler are explicit requirements |\n| PaaS | Hosts, OS, and a supported application platform | Code, data, identity, configuration, scaling choices, and runtime compatibility | A web service or API fits a supported runtime and deployment contract |\n| FaaS | Event-bound execution environment and platform scaling | Function code, data, identity, trigger semantics, limits, and idempotency | Work is bounded, event-driven, and compatible with the plan's latency and duration limits |\n| SaaS | The application and underlying platform | Tenant configuration, identities, data governance, integrations, and endpoint policy | Operating the capability creates no useful product differentiation |\n\nManaged does not mean responsibility-free. Moving up the table removes lower-level infrastructure work, but data, access, configuration, dependency behavior, and application recovery remain.\n\n# Selection Rule\n\nUse the highest managed layer that satisfies the real constraints:\n\n1. Choose **SaaS** for commodity business capability.\n2. Choose **PaaS** as the default for a new application that fits the supported runtime, networking, and scaling model.\n3. Choose **FaaS** for bounded event handlers where trigger delivery, cold-start behavior, duration, and concurrency limits fit.\n4. Choose **CaaS** when the system genuinely needs Kubernetes APIs, scheduling controls, or a shared container platform.\n5. Choose **IaaS** when host-level control is itself a requirement.\n\nFamiliarity alone is not a host-level requirement. Starting with VMs or Kubernetes for an ordinary web API adds patching, capacity, policy, and recovery surfaces that a managed application platform may already solve.\n\n# Developer and Architect Consequences\n\n- **Runtime constraints:** managed platforms restrict supported versions, process lifetime, filesystem behavior, networking, or background work. Confirm these before adoption.\n- **Failure semantics:** serverless and messaging integrations can retry or redeliver. Externally visible side effects need idempotency regardless of who operates the runtime.\n- **Portability:** a container standardizes the executable and filesystem, not identity, networking, storage, messaging, or database semantics.\n- **Upgrade ownership:** the provider may patch hosts, but the team still tracks runtime retirement, SDK compatibility, schema migration, and application dependencies.\n- **Cost shape:** less infrastructure work can come with per-request pricing, minimum instances, reserved capacity, data transfer, or managed-service premiums. Compare the complete workload rather than one SKU.\n\n# References\n\n- [Azure shared responsibility in the cloud](https://learn.microsoft.com/en-us/azure/security/fundamentals/shared-responsibility)\n",
+            "hash": "43a163d432be3ffe4d567286af33c04435fa293205c76695f6d69af69484d16a",
+            "topic": "Cloud",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "changed"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "base_sha": "4c28a0295ce7c4697ea2adcea1e919f008c6b755",
+      "reservation_deadline": "2026-11-14T22:55:42.053276Z",
+      "stop_reason": "topic_exhausted",
+      "sealed_at": "2026-11-14T22:41:23.464390Z"
     }
   },
   "feedback_workloads": {
