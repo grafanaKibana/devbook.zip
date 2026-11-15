@@ -16728,13 +16728,14 @@
     "version": 1,
     "id": "4bd0bfa98b5d4dbbb28188e2b990362e",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-15T19:02:25.981526Z",
-    "elapsed_seconds": 132.1552965,
+    "elapsed_seconds": 136.3484163,
     "calls_reserved": 3,
     "responses_received": 3,
     "attempted_paths": [
-      "Vault/Home/Data Persistence/Caching.md"
+      "Vault/Home/Data Persistence/Caching.md",
+      "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -16805,10 +16806,21 @@
           },
           "model_calls": 2
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+        "outcome": "proposal_blocked",
+        "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/azure/cosmos-db/introduction",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/azure/cosmos-db/introduction",
+          "model_calls": 3
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T19:04:38.136304Z",
+    "checkpoint_at": "2026-11-15T19:04:42.329424Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
