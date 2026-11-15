@@ -8032,51 +8032,56 @@
       }
     },
     "Vault/Home/Data Persistence/Connection Pooling.md": {
-      "content_hash": "473ecb4f3c2931aef71a842e22d58dd5e1613c11a5378106cf7255407e641ce5",
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "content_hash": "9b41913cc594f550aa933635737fe00a4e0d5725a3b258ccdbcea97a5e904b31",
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
       "outcome": "keep",
       "repair_input_hash": "",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_process": "focused-whole-note-v1",
       "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "keep_review": {
-        "content_hash": "473ecb4f3c2931aef71a842e22d58dd5e1613c11a5378106cf7255407e641ce5",
-        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "content_hash": "9b41913cc594f550aa933635737fe00a4e0d5725a3b258ccdbcea97a5e904b31",
+        "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
         "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
         "review": {
           "path": "Vault/Home/Data Persistence/Connection Pooling.md",
           "verdict": "CLEAN",
-          "summary": "Independent whole-note read found no concrete factual, structural, or question-quality defect. The note moves from the cost of a physical connection to the borrow/wait/return mechanism, a short example, sizing, pitfalls, server-side poolers and tradeoffs. Rewording would be churn.",
-          "page_type": "Concept — typed frontmatter, optional Questions and References present; Qard IDs protected; no generated-navigation or special-page rules apply.",
+          "summary": "Independent whole-note audit finds accurate, provider-hedged mechanism, sensible ordering (why, how, example, sizing, pitfalls, poolers, tradeoffs) and two well-formed cards. No concrete defect justifies an edit.",
+          "page_type": "Concept — frontmatter, optional Questions and References present; voice is impersonal and declarative; code fences carry language identifiers; qard IDs protected.",
           "current_text_evidence": [
             {
-              "quote": "Opening a physical database connection can require a socket, a security handshake, authentication, and server-side session setup.",
+              "quote": "Repeating that work for every query wastes latency and server capacity.",
               "line_start": 17,
-              "reason": "The opening states the cost that pooling avoids and the application's remaining responsibility, so the topic can be re-entered quickly."
+              "reason": "The opening states the problem pooling solves and the boundary: callers must return connections and bound the fleet-wide limit."
             },
             {
-              "quote": "Once the pool is full, another caller waits until a connection returns or the connection timeout expires.",
-              "line_start": 24,
-              "reason": "The mechanism is stated with its exhaustion condition and matches the Mermaid diagram and the Qard answer."
+              "quote": "Pools are separated by connection configuration.",
+              "line_start": 35,
+              "reason": "Correctly explains pool keying (exact connection string, identity, transaction context for SqlClient; data-source configuration for Npgsql) with hedging."
             },
             {
               "quote": "It is a heuristic, not a per-instance entitlement.",
               "line_start": 61,
-              "reason": "The HikariCP formula is correctly labelled as a heuristic. The 50 × 100 = 5,000 sessions arithmetic is correct and drives the fleet-wide budget decision."
+              "reason": "The HikariCP formula is framed as a starting point, and the fleet-wide 50x100=5,000 arithmetic is correct, so the sizing guidance preserves its conditions."
             },
             {
-              "quote": "Transaction pooling reduces server-session occupancy, but session-scoped state such as `SET`, `LISTEN`, session advisory locks, and SQL `PREPARE` does not follow a client between transactions.",
+              "quote": "Pool exhaustion.** Every connection is checked out",
+              "line_start": 65,
+              "reason": "Pitfalls name concrete causes and failure symptoms, supporting engineering judgment without padding."
+            },
+            {
+              "quote": "Protocol-level prepared plans can work when `max_prepared_statements` is configured.",
               "line_start": 76,
-              "reason": "The PgBouncer transaction-mode caveat is accurate and carries the exception that changes the engineering decision."
+              "reason": "PgBouncer transaction-mode caveats are accurate and include the version-specific exception."
             },
             {
-              "quote": "> [!qard]- When can a larger connection pool make performance worse?",
-              "line_start": 92,
-              "reason": "The card is a single bounded recall task, its answer explains the mechanism with the per-pool, fragmentation and per-instance conditions, and the answer side cites primary sources."
+              "quote": "With client-side connection pooling, what happens when application code opens and disposes a database connection?",
+              "line_start": 106,
+              "reason": "Direct, bounded question; the answer is one dependent behavior-and-why explanation with an answer-side primary source."
             }
           ],
           "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: pooling mechanics, sizing, pitfalls and server-side poolers form one coherent topic. Each part depends on the others and has no independent standalone use.",
+          "split_suggestion": "No split: client-side pooling, sizing, pitfalls and server-side poolers are one coherent topic and are not independently separable.",
           "findings": [],
           "source_checks": [],
           "rejection_equivalence": [],
@@ -8089,6 +8094,59 @@
           }
         },
         "review_process": "focused-whole-note-v1"
+      },
+      "keep_review_history": {
+        "805c1dd2874276f440b6d7c2d8d9184bf923f415b137d05c89e1892c1e1801a8": {
+          "content_hash": "473ecb4f3c2931aef71a842e22d58dd5e1613c11a5378106cf7255407e641ce5",
+          "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+          "review": {
+            "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+            "verdict": "CLEAN",
+            "summary": "Independent whole-note read found no concrete factual, structural, or question-quality defect. The note moves from the cost of a physical connection to the borrow/wait/return mechanism, a short example, sizing, pitfalls, server-side poolers and tradeoffs. Rewording would be churn.",
+            "page_type": "Concept — typed frontmatter, optional Questions and References present; Qard IDs protected; no generated-navigation or special-page rules apply.",
+            "current_text_evidence": [
+              {
+                "quote": "Opening a physical database connection can require a socket, a security handshake, authentication, and server-side session setup.",
+                "line_start": 17,
+                "reason": "The opening states the cost that pooling avoids and the application's remaining responsibility, so the topic can be re-entered quickly."
+              },
+              {
+                "quote": "Once the pool is full, another caller waits until a connection returns or the connection timeout expires.",
+                "line_start": 24,
+                "reason": "The mechanism is stated with its exhaustion condition and matches the Mermaid diagram and the Qard answer."
+              },
+              {
+                "quote": "It is a heuristic, not a per-instance entitlement.",
+                "line_start": 61,
+                "reason": "The HikariCP formula is correctly labelled as a heuristic. The 50 × 100 = 5,000 sessions arithmetic is correct and drives the fleet-wide budget decision."
+              },
+              {
+                "quote": "Transaction pooling reduces server-session occupancy, but session-scoped state such as `SET`, `LISTEN`, session advisory locks, and SQL `PREPARE` does not follow a client between transactions.",
+                "line_start": 76,
+                "reason": "The PgBouncer transaction-mode caveat is accurate and carries the exception that changes the engineering decision."
+              },
+              {
+                "quote": "> [!qard]- When can a larger connection pool make performance worse?",
+                "line_start": 92,
+                "reason": "The card is a single bounded recall task, its answer explains the mechanism with the per-pool, fragmentation and per-instance conditions, and the answer side cites primary sources."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: pooling mechanics, sizing, pitfalls and server-side poolers form one coherent topic. Each part depends on the others and has no independent standalone use.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          },
+          "review_process": "focused-whole-note-v1"
+        }
       }
     },
     "Vault/Home/Data Persistence/Data Persistence.md": {
@@ -16783,7 +16841,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-15T19:02:25.981526Z",
-    "elapsed_seconds": 435.5582430000002,
+    "elapsed_seconds": 439.15114930000016,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
@@ -16959,7 +17017,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T19:09:41.539253Z",
+    "checkpoint_at": "2026-11-15T19:09:45.132160Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -26091,6 +26149,102 @@
       ],
       "source_hashes": {
         "Vault/Home/Data Persistence/Caching.md": "ac8804a7b21acc84d9f3be1366c3c9ee96fd9a2ba11a64563dc31e4f6e214cd2"
+      },
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "4334bbf8a6275b9c70798cf39d6872063b7cf1c7d437dc54fd20b33f971b2c76": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The note is accurate, well ordered and complete for its depth. Both Qards test one coherent task and cite answer-side sources. There are no edits, no known violations and no owner feedback. The keep is justified.",
+        "change_checks": [],
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+            "verdict": "CLEAN",
+            "summary": "Independent whole-note audit finds accurate, provider-hedged mechanism, sensible ordering (why, how, example, sizing, pitfalls, poolers, tradeoffs) and two well-formed cards. No concrete defect justifies an edit.",
+            "page_type": "Concept — frontmatter, optional Questions and References present; voice is impersonal and declarative; code fences carry language identifiers; qard IDs protected.",
+            "current_text_evidence": [
+              {
+                "quote": "Repeating that work for every query wastes latency and server capacity.",
+                "line_start": 17,
+                "reason": "The opening states the problem pooling solves and the boundary: callers must return connections and bound the fleet-wide limit."
+              },
+              {
+                "quote": "Pools are separated by connection configuration.",
+                "line_start": 34,
+                "reason": "Correctly explains pool keying (exact connection string, identity, transaction context for SqlClient; data-source configuration for Npgsql) with hedging."
+              },
+              {
+                "quote": "It is a heuristic, not a per-instance entitlement.",
+                "line_start": 60,
+                "reason": "The HikariCP formula is framed as a starting point, and the fleet-wide 50x100=5,000 arithmetic is correct, so the sizing guidance preserves its conditions."
+              },
+              {
+                "quote": "Pool exhaustion.** Every connection is checked out",
+                "line_start": 64,
+                "reason": "Pitfalls name concrete causes and failure symptoms, supporting engineering judgment without padding."
+              },
+              {
+                "quote": "Protocol-level prepared plans can work when `max_prepared_statements` is configured.",
+                "line_start": 78,
+                "reason": "PgBouncer transaction-mode caveats are accurate and include the version-specific exception."
+              },
+              {
+                "quote": "With client-side connection pooling, what happens when application code opens and disposes a database connection?",
+                "line_start": 103,
+                "reason": "Direct, bounded question; the answer is one dependent behavior-and-why explanation with an answer-side primary source."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: client-side pooling, sizing, pitfalls and server-side poolers are one coherent topic and are not independently separable.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+          "citation_index": 1,
+          "reported_line_start": 34,
+          "resolved_line_start": 35
+        },
+        {
+          "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+          "citation_index": 2,
+          "reported_line_start": 60,
+          "resolved_line_start": 61
+        },
+        {
+          "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+          "citation_index": 3,
+          "reported_line_start": 64,
+          "resolved_line_start": 65
+        },
+        {
+          "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+          "citation_index": 4,
+          "reported_line_start": 78,
+          "resolved_line_start": 76
+        },
+        {
+          "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+          "citation_index": 5,
+          "reported_line_start": 103,
+          "resolved_line_start": 106
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Data Persistence/Connection Pooling.md": "9b41913cc594f550aa933635737fe00a4e0d5725a3b258ccdbcea97a5e904b31"
       },
       "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -47469,206 +47623,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "4bd0bfa98b5d4dbbb28188e2b990362e",
-    "topic_id": "data-persistence-4ea34db4",
-    "batch": {
-      "topic": "Data Persistence",
-      "topic_id": "data-persistence-4ea34db4",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/Connection Pooling.md",
-          "content": "---\ntopic: [Data Persistence]\nsubtopic: []\nsummary: \"Reusing a bounded set of open database connections to avoid costly handshakes.\"\nlevel: [\"4\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"Data Persistence\"\nqard-topic: \"Connection Pooling\"\nflashcard_uid: \"788e9b4c\"\ncreated: \"2026-06-20T08:45:59.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.349Z\"\n---\n\nOpening a physical database connection can require a socket, a security handshake, authentication, and server-side session setup. Repeating that work for every query wastes latency and server capacity. A connection pool keeps physical connections open and lends them to callers. `SqlClient` and Npgsql enable pooling by default. The application still has to return connections promptly and keep the fleet-wide limit within what the database can serve.\n\n# How It Works\n\nThe client-side pool manages a bounded set of physical connections:\n\n1. `OpenAsync()` takes a usable idle connection or creates one while the pool is below its maximum.\n2. Once the pool is full, another caller waits until a connection returns or the connection timeout expires.\n3. `Close()` or `Dispose()` returns the logical connection. The provider resets reusable session state and places the physical connection back in the pool.\n\n```mermaid\nflowchart LR\n    R[Request] -->|borrow| P[(Pool: idle conns)]\n    P -->|none free + at max| W[Wait up to timeout]\n    R -->|return on Dispose| P\n    P -.->|idle too long| C[Close extra conns]\n```\n\nPools are separated by connection configuration. `SqlClient` uses an exact connection-string match and may also separate by identity, credential object, transaction context, or other provider state. Npgsql similarly maintains pools by data-source configuration. Idle and maximum-lifetime settings decide when a provider retires extra or aging connections.\n\n# Example\n\nPooling works when checkout time stays short. A connection is opened immediately before database work and disposed as soon as that work finishes. An open connection should not sit idle while unrelated network calls or user interaction completes.\n\n```csharp\n// 'using' returns the connection to the pool immediately after the query.\nawait using var conn = new NpgsqlConnection(connectionString);\nawait conn.OpenAsync(ct);                       // rented from pool (cheap)\nawait using var cmd = new NpgsqlCommand(\"SELECT name FROM users WHERE id = $1\", conn)\n    { Parameters = { new() { Value = id } } };\nvar name = (string?)await cmd.ExecuteScalarAsync(ct);\n// dispose → connection reset and returned to pool\n```\n\nNpgsql pool settings can be configured in the connection string, for example `Maximum Pool Size=100;Minimum Pool Size=5;Connection Lifetime=300`. Defaults and keyword names are provider-specific.\n\n# Sizing the Pool\n\nBigger is not automatically better. Every open connection consumes client and server resources. Once the database reaches its CPU, I/O, or lock-contention limit, more concurrent queries increase queueing inside the server instead of raising throughput.\n\nThe HikariCP project offers this rough starting point for a database handling mostly active work:\n\n> **connections ≈ (CPU cores × 2) + effective spindle count**\n\nIt is a heuristic, not a per-instance entitlement. Storage architecture, query mix, transaction duration, and workload burstiness can move the useful limit. Sizing starts from a database-wide concurrency budget, reserves capacity for administration and background work, then divides the remainder across application instances. Fifty pods with a maximum of 100 connections each expose 5,000 possible sessions even if the database can run only a small fraction at once.\n\n# Pitfalls\n\n- **Pool exhaustion.** Every connection is checked out, so another `OpenAsync()` waits and eventually times out. A leak, a long transaction, unrelated work inside the checkout window, or more concurrency than the configured pool can support can all produce the same symptom.\n- **Connection leaks.** A connection that is never disposed may remain checked out. `using` or `await using` makes the return path explicit even when the command fails.\n- **Slow work inside the checkout window.** Waiting for an HTTP response while holding a connection consumes scarce database concurrency without using it. The same problem appears when a transaction remains open across unrelated work. See [[ACID]].\n- **Pool fragmentation.** Different connection strings, identities, or provider configurations create separate pools. Per-user credentials and per-tenant databases can multiply the physical connection count even when each pool looks small.\n- **Autoscaling multiplication.** Each process owns its client pool. Adding instances raises the possible server-session count unless pool limits shrink with the fleet.\n- **Elastic compute fan-out.** A warm function environment may reuse its own pool, but separate environments do not share it. A burst that creates many environments can therefore create many independent pools at once.\n\n# Server-Side Poolers\n\nWhen many application processes would otherwise maintain too many server sessions, a proxy can multiplex client connections in front of the database:\n\n- **PgBouncer** assigns a server connection for an entire client session, transaction, or statement depending on mode. Transaction pooling reduces server-session occupancy, but session-scoped state such as `SET`, `LISTEN`, session advisory locks, and SQL `PREPARE` does not follow a client between transactions. Protocol-level prepared plans can work when `max_prepared_statements` is configured.\n- **Managed database proxies**, such as RDS Proxy, can provide a shared connection boundary for elastic clients. Azure SQL Database is a managed database service rather than a drop-in server-side pooler, so its connection limits and gateway behavior must be designed separately.\n\n# Tradeoffs\n\n| Concern | Small pool | Large pool |\n|---|---|---|\n| DB server load | Low (few backends) | High — can saturate `max_connections`, memory |\n| App throughput under burst | May queue/timeout | More concurrency, until DB becomes the bottleneck |\n| Latency | Slight wait when busy | Lower wait, but risks DB-side contention |\n\nSizing begins with a conservative fleet-wide budget. Pool wait time is measured alongside database CPU, I/O, active sessions, transaction age, and query latency. Concurrency is increased only while throughput improves within the latency target. A shared proxy can help when process count, rather than useful database parallelism, is driving the session count.\n\n# Questions\n\n<!-- qard-id: c0535519-685c-48e5-9c02-919ec55d53c3 -->\n> [!qard]- When can a larger connection pool make performance worse?\n> A larger pool makes performance worse once the database, rather than the pool, is the bottleneck. Until that point, more connections let more work run concurrently. After the database reaches its CPU, I/O or lock-contention limit, additional sessions add contention and queueing inside the server instead of throughput. Latency rises, and every open session still consumes client and server resources.\n>\n> The possible session count is also larger than one setting suggests:\n>\n> - **The limit is per pool.** A setting such as SqlClient's `Max Pool Size` caps one pool, not the whole application or fleet.\n> - **Pools fragment.** Providers keep separate pools for different connection strings. Depending on the provider, they also separate pools by identity or other connection state. Per-tenant or per-user configurations can multiply connections even when each pool looks small.\n> - **Instances multiply pools.** Each process owns its own pools. Fifty instances with a maximum of 100 connections each can open 5,000 sessions, even if the database can usefully run only a small fraction of them at once.\n> \n> Pool size is therefore a fleet-wide budget. It starts from measured database capacity, reserves headroom for administration and background work, and divides the rest across instances. Reading pool wait time alongside database CPU, I/O and active sessions shows which side is saturated. Waits while the database is healthy point to leaks, long checkouts or an undersized pool. Waits on a saturated database are not fixed by a larger pool.\n>\n> [SQL Server connection pooling](https://learn.microsoft.com/en-us/sql/connect/ado-net/sql-server-connection-pooling?view=sql-server-ver17) · [SqlClient connection options](https://learn.microsoft.com/en-us/sql/connect/ado-net/connection-options?view=sql-server-ver17)\n\n<!-- qard-id: e65be66b-2817-486a-8729-013a780049b0 -->\n> [!qard]- With client-side connection pooling, what happens when application code opens and disposes a database connection?\n> Opening borrows a physical connection from the pool, and disposing returns it to the pool instead of closing it. The application works with a short-lived logical connection, while the provider keeps the expensive physical connection open for reuse. Establishing a physical connection can require a socket, a security handshake, authentication and a server session, depending on the provider and connection configuration. Without pooling, every open creates a new physical connection and repeats that setup. The cost belongs to establishing the connection, not to each query sent over a connection that is already open.\n>\n> 1. **Open:** the provider selects the pool that matches the connection configuration. It takes an idle physical connection, or creates a new one if the pool is below its maximum size.\n> 2. **Exhausted pool:** if every connection is checked out and the pool is at its maximum, the open call waits for another caller to return one. If none returns before the connection timeout, the open fails.\n> 3. **Close or dispose:** the logical connection ends. The provider resets reusable session state and places the physical connection back in the pool for the next caller.\n> 4. **Retirement:** idle and maximum-lifetime settings let the provider close extra or aging physical connections later.\n> \n> **Failure consequence:** a connection that is never closed or disposed may stay checked out. The usable pool also shrinks through leaks, long transactions and slow unrelated work while a connection is open, such as waiting for an HTTP response. Open calls then time out. Pooling therefore works best when a connection is opened just before database work and disposed as soon as that work ends, usually through `using` or `await using`.\n>\n> [SQL Server connection pooling](https://learn.microsoft.com/en-us/sql/connect/ado-net/sql-server-connection-pooling?view=sql-server-ver17)\n\n# References\n\n- [SQL Server connection pooling](https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/sql-server-connection-pooling)\n- [Npgsql connection string parameters](https://www.npgsql.org/doc/connection-string-parameters.html)\n- [HikariCP pool sizing](https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing)\n- [PgBouncer documentation](https://www.pgbouncer.org/)\n",
-          "hash": "9b41913cc594f550aa933635737fe00a4e0d5725a3b258ccdbcea97a5e904b31",
-          "topic": "Data Persistence",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Data Persistence/Connection Pooling.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its text and primary knowledge of SqlClient, Npgsql, HikariCP and PgBouncer. The opening explains why pooling exists. The open/wait/dispose mechanism, pool separation by connection configuration, and the Npgsql connection-string example (Maximum Pool Size, Minimum Pool Size, Connection Lifetime) are accurate and hedged as provider-specific. The HikariCP formula is presented as a heuristic, and the 50×100=5,000 sessions arithmetic is correct. The PgBouncer transaction-mode caveats (SET, LISTEN, session advisory locks, SQL PREPARE, max_prepared_statements) and the RDS Proxy versus Azure SQL distinction are correct. Pitfalls, tradeoffs and sizing guidance do not repeat each other in ways that need pruning. Both Qards each test one coherent task, ask directly, and cite sources on the answer side. There are no known violations, no flagged cards and no owner feedback, so no edit is warranted."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Data Persistence/Connection Pooling.md": "9b41913cc594f550aa933635737fe00a4e0d5725a3b258ccdbcea97a5e904b31"
-    },
-    "feedback_keys": [],
-    "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Data Persistence/Connection Pooling.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-15T19:09:18.031758Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "The note is accurate, well ordered and complete for its depth. Both Qards test one coherent task and cite answer-side sources. There are no edits, no known violations and no owner feedback. The keep is justified.",
-        "change_checks": [],
-        "notes": [
-          {
-            "path": "Vault/Home/Data Persistence/Connection Pooling.md",
-            "verdict": "CLEAN",
-            "summary": "Independent whole-note audit finds accurate, provider-hedged mechanism, sensible ordering (why, how, example, sizing, pitfalls, poolers, tradeoffs) and two well-formed cards. No concrete defect justifies an edit.",
-            "page_type": "Concept — frontmatter, optional Questions and References present; voice is impersonal and declarative; code fences carry language identifiers; qard IDs protected.",
-            "current_text_evidence": [
-              {
-                "quote": "Repeating that work for every query wastes latency and server capacity.",
-                "line_start": 17,
-                "reason": "The opening states the problem pooling solves and the boundary: callers must return connections and bound the fleet-wide limit."
-              },
-              {
-                "quote": "Pools are separated by connection configuration.",
-                "line_start": 34,
-                "reason": "Correctly explains pool keying (exact connection string, identity, transaction context for SqlClient; data-source configuration for Npgsql) with hedging."
-              },
-              {
-                "quote": "It is a heuristic, not a per-instance entitlement.",
-                "line_start": 60,
-                "reason": "The HikariCP formula is framed as a starting point, and the fleet-wide 50x100=5,000 arithmetic is correct, so the sizing guidance preserves its conditions."
-              },
-              {
-                "quote": "Pool exhaustion.** Every connection is checked out",
-                "line_start": 64,
-                "reason": "Pitfalls name concrete causes and failure symptoms, supporting engineering judgment without padding."
-              },
-              {
-                "quote": "Protocol-level prepared plans can work when `max_prepared_statements` is configured.",
-                "line_start": 78,
-                "reason": "PgBouncer transaction-mode caveats are accurate and include the version-specific exception."
-              },
-              {
-                "quote": "With client-side connection pooling, what happens when application code opens and disposes a database connection?",
-                "line_start": 103,
-                "reason": "Direct, bounded question; the answer is one dependent behavior-and-why explanation with an answer-side primary source."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: client-side pooling, sizing, pitfalls and server-side poolers are one coherent topic and are not independently separable.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ]
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/Data Persistence/Connection Pooling.md",
-          "citation_index": 1,
-          "reported_line_start": 34,
-          "resolved_line_start": 35
-        },
-        {
-          "path": "Vault/Home/Data Persistence/Connection Pooling.md",
-          "citation_index": 2,
-          "reported_line_start": 60,
-          "resolved_line_start": 61
-        },
-        {
-          "path": "Vault/Home/Data Persistence/Connection Pooling.md",
-          "citation_index": 3,
-          "reported_line_start": 64,
-          "resolved_line_start": 65
-        },
-        {
-          "path": "Vault/Home/Data Persistence/Connection Pooling.md",
-          "citation_index": 4,
-          "reported_line_start": 78,
-          "resolved_line_start": 76
-        },
-        {
-          "path": "Vault/Home/Data Persistence/Connection Pooling.md",
-          "citation_index": 5,
-          "reported_line_start": 103,
-          "resolved_line_start": 106
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/Data Persistence/Connection Pooling.md": "9b41913cc594f550aa933635737fe00a4e0d5725a3b258ccdbcea97a5e904b31"
-      },
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "The note is accurate, well ordered and complete for its depth. Both Qards test one coherent task and cite answer-side sources. There are no edits, no known violations and no owner feedback. The keep is justified.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/Connection Pooling.md",
-          "verdict": "CLEAN",
-          "summary": "Independent whole-note audit finds accurate, provider-hedged mechanism, sensible ordering (why, how, example, sizing, pitfalls, poolers, tradeoffs) and two well-formed cards. No concrete defect justifies an edit.",
-          "page_type": "Concept — frontmatter, optional Questions and References present; voice is impersonal and declarative; code fences carry language identifiers; qard IDs protected.",
-          "current_text_evidence": [
-            {
-              "quote": "Repeating that work for every query wastes latency and server capacity.",
-              "line_start": 17,
-              "reason": "The opening states the problem pooling solves and the boundary: callers must return connections and bound the fleet-wide limit."
-            },
-            {
-              "quote": "Pools are separated by connection configuration.",
-              "line_start": 35,
-              "reason": "Correctly explains pool keying (exact connection string, identity, transaction context for SqlClient; data-source configuration for Npgsql) with hedging."
-            },
-            {
-              "quote": "It is a heuristic, not a per-instance entitlement.",
-              "line_start": 61,
-              "reason": "The HikariCP formula is framed as a starting point, and the fleet-wide 50x100=5,000 arithmetic is correct, so the sizing guidance preserves its conditions."
-            },
-            {
-              "quote": "Pool exhaustion.** Every connection is checked out",
-              "line_start": 65,
-              "reason": "Pitfalls name concrete causes and failure symptoms, supporting engineering judgment without padding."
-            },
-            {
-              "quote": "Protocol-level prepared plans can work when `max_prepared_statements` is configured.",
-              "line_start": 76,
-              "reason": "PgBouncer transaction-mode caveats are accurate and include the version-specific exception."
-            },
-            {
-              "quote": "With client-side connection pooling, what happens when application code opens and disposes a database connection?",
-              "line_start": 106,
-              "reason": "Direct, bounded question; the answer is one dependent behavior-and-why explanation with an answer-side primary source."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: client-side pooling, sizing, pitfalls and server-side poolers are one coherent topic and are not independently separable.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
-    }
-  }
+  "parked_author_proposals": {}
 }
