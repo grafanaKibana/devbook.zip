@@ -42,7 +42,7 @@
       "AGENTS.md",
       ".claude/agents/note-writer.md",
       ".claude/agents/note-reviewer.md",
-      ".codex/skills/obsidian-markdown/SKILL.md",
+      ".agents/skills/obsidian-markdown/SKILL.md",
       "Vault/Templates/Pages/Template - Concept Page.md",
       "Vault/Templates/Pages/Template - Index.md",
       "Vault/Templates/Blocks/Template - Callout.md"
