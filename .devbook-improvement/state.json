@@ -15202,9 +15202,9 @@
     "version": 1,
     "id": "da6ae8bc44c444a5b6a4606355aadef4",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-15T06:51:01.310737Z",
-    "elapsed_seconds": 521.2204157000001,
+    "elapsed_seconds": 525.1007082000001,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -15212,7 +15212,8 @@
       "Vault/Home/Computer Science/Algorithms/Patterns/Binary Search on Answer.md",
       "Vault/Home/Computer Science/Algorithms/Patterns/Bit Manipulation.md",
       "Vault/Home/Computer Science/Algorithms/Patterns/Cyclic Sort.md",
-      "Vault/Home/Computer Science/Algorithms/Patterns/Fast and Slow Pointers.md"
+      "Vault/Home/Computer Science/Algorithms/Patterns/Fast and Slow Pointers.md",
+      "Vault/Home/Computer Science/Algorithms/Patterns/Merge Intervals.md"
     ],
     "accepted_records": [
       {
@@ -18102,10 +18103,78 @@
           },
           "model_calls": 12
         }
+      },
+      {
+        "path": "Vault/Home/Computer Science/Algorithms/Patterns/Merge Intervals.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Patterns/Merge Intervals.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against the current text. The opening gives the operating idea (sort by start, sweep with one current block). The visualization explains the max rule with the nested case and the closed-endpoint merge. The correctness argument is sound: after sorting by start, no later interval can reach back once a gap appears, and current.end holds the furthest right edge. Insert and two-list intersection variants state their sorted, pairwise-disjoint preconditions and the correct pointer-advance rule. The closed versus half-open section matches the <= versus < choice. The unsorted counterexample [[1,3],[6,8],[2,5]] is accurate. The C# code clones the inner arrays, sorts by start, and flushes the last block, so it is correct. Complexity (O(n log n) time, O(n) space with the clone and output) is consistent with the code. The comparison table and the two references are relevant. There are no Qard cards, no known violations, and no rendering or MD040 problems. This is standard algorithm knowledge, so no external source was needed. No edit would materially improve the note."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no factual, structural, voice or rule defects. The keep disposition is justified, and no edits or cards are present.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Patterns/Merge Intervals.md",
+                "verdict": "CLEAN",
+                "summary": "The note states the sort-then-sweep idea quickly, justifies why one comparison suffices, and covers the endpoint convention and the unsorted failure case. It also covers the insert and intersect variants with their preconditions. The code, complexity data and comparison table are consistent with the prose; no edit is needed.",
+                "page_type": "Concept — authorable prose. Questions are absent, which is allowed. References are bare descriptive links. The code fence has a language identifier (csharp), and the Mermaid and complexity blocks have identifiers too.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Sorting by start time makes those relationships local.",
+                    "line_start": 14,
+                    "reason": "The opening states the operating idea and why the sort matters, so the topic is re-enterable quickly."
+                  },
+                  {
+                    "quote": "so `current` is final the moment a gap appears",
+                    "line_start": 31,
+                    "reason": "The correctness argument is sound: later starts are at least next.start, which is greater than current.end after a gap. The invariant on current.end is stated explicitly."
+                  },
+                  {
+                    "quote": "Half-open ranges `[1,2)` and `[2,3)` do not overlap.",
+                    "line_start": 93,
+                    "reason": "The endpoint convention is tied directly to the <= versus < choice in code, with the scheduling context."
+                  },
+                  {
+                    "quote": "an unsorted pass emits `[1,3]` when it sees the gap before `[6,8]`",
+                    "line_start": 95,
+                    "reason": "The counterexample is accurate and shows concretely why sorting by start is required, and why sorting by end does not substitute."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: variants, convention and implementation are facets of one sort-then-sweep pattern, and the Two Pointers link covers the neighbouring topic.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 14
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T06:59:42.530729Z",
+    "checkpoint_at": "2026-11-15T06:59:46.411023Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
