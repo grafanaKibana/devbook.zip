@@ -16839,10 +16839,10 @@
     "version": 1,
     "id": "4bd0bfa98b5d4dbbb28188e2b990362e",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "review_reserved",
     "started_at": "2026-11-15T19:02:25.981526Z",
-    "elapsed_seconds": 483.0523907000002,
-    "calls_reserved": 11,
+    "elapsed_seconds": 487.0836682000002,
+    "calls_reserved": 12,
     "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/Data Persistence/Caching.md",
@@ -17096,7 +17096,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T19:10:29.033401Z",
+    "checkpoint_at": "2026-11-15T19:10:33.064679Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -17121,7 +17121,7 @@
       "pr": null
     },
     "base_sha": "4c28a0295ce7c4697ea2adcea1e919f008c6b755",
-    "reservation_deadline": "2026-11-15T19:25:20.103694Z"
+    "reservation_deadline": "2026-11-15T19:25:32.786769Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
