@@ -15147,11 +15147,11 @@
     "version": 1,
     "id": "da6ae8bc44c444a5b6a4606355aadef4",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-15T06:51:01.310737Z",
-    "elapsed_seconds": 484.8734706,
+    "elapsed_seconds": 494.96940720000003,
     "calls_reserved": 13,
-    "responses_received": 12,
+    "responses_received": 13,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
       "Vault/Home/Computer Science/Algorithms/Patterns/Binary Search on Answer.md",
@@ -18050,7 +18050,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T06:59:06.183784Z",
+    "checkpoint_at": "2026-11-15T06:59:16.279720Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -49805,5 +49805,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "da6ae8bc44c444a5b6a4606355aadef4",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Merge Intervals.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Sorts ranges by start, then sweeps once to merge overlapping intervals.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: New\npublish: true\ncreated: \"2026-07-10T06:24:36.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-10T05:57:55.524Z\"\n---\n\nAn arbitrary set of calendar ranges may contain overlaps and nested intervals. Sorting by start time makes those relationships local. A left-to-right sweep then carries one current block: extend it when the next interval overlaps, or emit it when a gap appears.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"merge-intervals\"}\n```\n\nThe contained interval `[3,5]` leaves `[1,6]` unchanged, which makes the `max(current.end, next.end)` rule visible. The gaps before `[8,10]` and `[13,16]` finalize the earlier blocks, while the closed intervals `[13,16]` and `[16,20]` merge at their shared endpoint.\n\nThe sweep carries one piece of state: `current`, the interval being accumulated, initialised to the first interval after sorting. For each following `next`:\n\n- `next.start <= current.end` means the two overlap, so `current.end = max(current.end, next.end)`. The `max` matters because `next` can be fully contained inside `current` — merging `[1,10]` with `[2,3]` must stay `[1,10]`, not shrink to `[1,3]`.\n- Otherwise a gap separates them: `current` can never grow again, so it is emitted and `current` becomes `next`.\n\nThe reason one comparison suffices is the sort. After ascending starts, every interval later in the list starts at or after `next.start`. If `next` does not reach `current.end`, no interval after it can reach back either, so `current` is final the moment a gap appears. The invariant that survives each step is that `current.end` holds the furthest right edge of every interval merged into the current block, which is exactly the value the next overlap test needs.\n\nThe same sort-then-sweep skeleton answers the rest of the interval family, each specialising the emit/extend step:\n\n- **Insert one interval into a sorted, pairwise-disjoint list** — the sweep copies intervals ending before the new one, then expands the pending interval to `[min(starts), max(ends)]` for every overlap under the chosen closed or half-open endpoint convention. It copies the remaining intervals after that run. No re-sort is needed. If the existing list overlaps itself, normalize it first.\n- **Intersect two sorted, pairwise-disjoint lists** — a [[Home/Computer Science/Algorithms/Patterns/Two Pointers|Two Pointers]] sweep advances the pointer whose interval ends first and emits `[max(starts), min(ends)]` whenever the current pair overlaps. Ordering and internal non-overlap on both sides keep the scan to one pass; otherwise each list needs normalization first.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Merge Intervals complexity\",\n  \"variables\": {\n    \"inputSize\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of input intervals\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (compare every pair)\",\n          \"formula\": \"O(n^2)\",\n          \"curveId\": \"quadratic\"\n        },\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Merge intervals (sort, then sweep)\",\n          \"formula\": \"O(n log n)\",\n          \"curveId\": \"n-log-n\"\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (compare every pair)\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        },\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Merge intervals (sort, then sweep)\",\n          \"formula\": \"O(n)\",\n          \"curveId\": \"linear\"\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# When the Convention or Order Breaks\n\nThe overlap rule comes from the interval convention. Closed intervals `[1,2]` and `[2,3]` share the point `2`, so they merge. Half-open ranges `[1,2)` and `[2,3)` do not overlap. The code expresses that choice as `<=` for closed intervals or `<` for half-open ones. Scheduling usually uses half-open ranges so one meeting may start when another ends.\n\nThe sweep is correct only after sorting by start. On `[[1,3],[6,8],[2,5]]`, an unsorted pass emits `[1,3]` when it sees the gap before `[6,8]`, then encounters `[2,5]` too late to form `[1,5]`. Sorting by end does not restore the needed invariant: later intervals must have starts no earlier than the one currently being processed.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Sweep control flow\n>\n> ```mermaid\n> flowchart TD\n>   A[Sort intervals by start] --> B[current = first interval]\n>   B --> C{More intervals?}\n>   C -->|No| Z[Emit current, finish]\n>   C -->|Yes| D[Take next]\n>   D --> E{next.start <= current.end?}\n>   E -->|Yes, overlap| F[current.end = max of both ends]\n>   E -->|No, gap| G[Emit current, current = next]\n>   F --> C\n>   G --> C\n> ```\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> // Merge a static list of intervals (closed intervals: <=).\n> public static List<int[]> Merge(int[][] intervals)\n> {\n>     if (intervals.Length == 0)\n>         return [];\n>\n>     int[][] sorted = Array.ConvertAll(\n>         intervals,\n>         interval => new[] { interval[0], interval[1] });\n>     Array.Sort(sorted, (a, b) => a[0].CompareTo(b[0]));      // sort by start\n>     var merged = new List<int[]>();\n>     int[] current = sorted[0];\n>     for (int i = 1; i < sorted.Length; i++)\n>     {\n>         if (sorted[i][0] <= current[1])                       // overlap\n>             current[1] = Math.Max(current[1], sorted[i][1]);\n>         else { merged.Add(current); current = sorted[i]; }    // gap: flush, restart\n>     }\n>     merged.Add(current);\n>     return merged;\n> }\n> ```\n> The clone makes `current` safe to extend without mutating a caller-owned inner array. The `max` guards against an interval nested inside the current block.\n\n# Comparison\n\n| Strategy | Precondition | Best fit |\n| --- | --- | --- |\n| Sort then merge | None | Collapse one static set |\n| Brute-force pairwise | None | Tiny inputs where simplicity dominates |\n| Insert into a merged list | Sorted, pairwise-disjoint input | Add one interval to an already-normalized list |\n| Intersect two merged lists | Both inputs sorted and pairwise-disjoint | Produce only shared coverage |\n\nSort then merge is the reliable default for an arbitrary static set. Insert and intersection variants earn their single pass only when their inputs are already sorted and pairwise disjoint.\n\n# References\n\n- [Merge Intervals (LeetCode #56)](https://leetcode.com/problems/merge-intervals/)\n- [`Array.Sort<T>`](https://learn.microsoft.com/en-us/dotnet/api/system.array.sort)\n",
+          "hash": "8c414f0847421e074f8540fe3969d844a5c4df021c71e93ec3b1780351cefb13",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Merge Intervals.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against the current text. The opening gives the operating idea (sort by start, sweep with one current block). The visualization explains the max rule with the nested case and the closed-endpoint merge. The correctness argument is sound: after sorting by start, no later interval can reach back once a gap appears, and current.end holds the furthest right edge. Insert and two-list intersection variants state their sorted, pairwise-disjoint preconditions and the correct pointer-advance rule. The closed versus half-open section matches the <= versus < choice. The unsorted counterexample [[1,3],[6,8],[2,5]] is accurate. The C# code clones the inner arrays, sorts by start, and flushes the last block, so it is correct. Complexity (O(n log n) time, O(n) space with the clone and output) is consistent with the code. The comparison table and the two references are relevant. There are no Qard cards, no known violations, and no rendering or MD040 problems. This is standard algorithm knowledge, so no external source was needed. No edit would materially improve the note."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Patterns/Merge Intervals.md": "8c414f0847421e074f8540fe3969d844a5c4df021c71e93ec3b1780351cefb13"
+    },
+    "feedback_keys": [],
+    "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Patterns/Merge Intervals.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-15T06:59:16.279710Z"
+  }
 }
