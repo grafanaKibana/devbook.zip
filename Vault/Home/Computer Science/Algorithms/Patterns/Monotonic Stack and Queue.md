@@ -7,7 +7,7 @@ priority: Medium
 status: New
 publish: true
 created: "2026-07-10T06:24:36.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-15T07:00:26.677Z"
 published: "2026-07-10T05:58:06.704Z"
 ---
 
@@ -128,7 +128,7 @@ Window expiry is positional, so indices are the simplest deque representation. A
 >     return res;                                    // indices never popped keep -1
 > }
 >
-
+> // Maximum of each window of size k.
 > public static int[] MaxSlidingWindow(int[] a, int k)
 > {
 >     var dq = new LinkedList<int>();                // indices, values decreasing front to back

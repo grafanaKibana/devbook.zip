@@ -7,7 +7,7 @@ priority: Medium
 status: New
 publish: true
 created: "2026-07-10T06:24:36.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-15T06:56:28.722Z"
 published: "2026-07-10T05:58:42.295Z"
 ---
 
@@ -118,7 +118,6 @@ This is not a general sort. Arbitrary integers, floating-point values, and keys 
 > [!EXAMPLE]- C# implementation
 >
 > ```csharp
-
 > public static void CyclicSort(int[] a)
 > {
 >     var i = 0;

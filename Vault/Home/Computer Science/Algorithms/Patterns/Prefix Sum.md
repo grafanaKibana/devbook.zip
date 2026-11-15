@@ -7,7 +7,7 @@ priority: Medium
 status: New
 publish: true
 created: "2026-07-10T06:24:36.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-15T07:03:16.381Z"
 published: "2026-07-10T05:57:16.648Z"
 ---
 
@@ -84,7 +84,7 @@ Both curves are per-query. The prefix array costs `O(n)` to build once, so the p
 
 The source array must remain static during the query phase. One element update invalidates every later prefix. Workloads that mix writes with reads need a [[Home/Computer Science/Data Structures/Trees/Fenwick Tree|Fenwick tree]] for point updates and sums, or a [[Home/Computer Science/Data Structures/Trees/Segment Tree|segment tree]] for broader associative range aggregation. Lazy range updates require an update operation that composes correctly with the stored aggregate.
 
-The `+1` convention prevents a special case at the left edge. `prefix[k]` covers elements before `k`, so an inclusive query `[l, r]` uses `prefix[r + 1] - prefix[l]`. Mixing that half-open prefix definition with closed endpoints shifts the result by one element. Single-element and full-array queries expose the mismatch quickly.
+Mixing the half-open prefix definition with closed endpoints shifts the result by one element, for example `prefix[r] - prefix[l]` for an inclusive range omits `a[r]`. Single-element and full-array queries expose the mismatch quickly.
 
 The running total may overflow even when every input fits its type. A million large `int` values exceed 32-bit range long before the array ends, so the prefix storage and subtraction should use a wider type such as `long`.
 
@@ -102,7 +102,6 @@ The running total may overflow even when every input fits its type. A million la
 > [!EXAMPLE]- C# implementation
 >
 > ```csharp
-
 > public static long[] BuildPrefix(int[] a)
 > {
 >     var prefix = new long[a.Length + 1];           // prefix[0] = 0, length n + 1
