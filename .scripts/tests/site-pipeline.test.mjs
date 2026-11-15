@@ -89,17 +89,114 @@ test("structured Vercel CLI output supports non-interactive and explicit JSON sh
   assert.throws(() => deploymentFromOutput(JSON.stringify({ ...deployment, url: "https://other.example" })), /identity/)
 })
 
-test("artifact cannot extract traversal or case-colliding paths", (t) => {
+function addOutput(bundle, name, text) {
+  const bytes = Buffer.from(text)
+  bundle.files[name] = bytes.toString("base64")
+  bundle.manifest.files[name] = { sha256: sha256(bytes), size: bytes.length, mode: 0o644 }
+}
+
+test("artifact cannot extract traversal or NFC-equivalent paths", (t) => {
   const f = fixture(t)
   const bundle = createPackage(f.root, identity)
-  bundle.files["../escape"] = ""
-  bundle.manifest.files["../escape"] = { sha256: sha256(Buffer.alloc(0)), size: 0, mode: 420 }
+  addOutput(bundle, "../escape", "")
   assert.throws(() => extractPackage(f.root, bundle, identity), /path/)
   delete bundle.files["../escape"]
   delete bundle.manifest.files["../escape"]
-  bundle.files["static/INDEX.html"] = bundle.files["static/index.html"]
-  bundle.manifest.files["static/INDEX.html"] = bundle.manifest.files["static/index.html"]
+  addOutput(bundle, "static/café.html", "composed")
+  addOutput(bundle, "static/cafe\u0301.html", "decomposed")
   assert.throws(() => verifyPackage(bundle, identity), /collision/)
+  assert.equal(fs.readFileSync(path.join(f.root, ".vercel/output/static/index.html"), "utf8"), "<h1>Actual site</h1>")
+})
+
+test("package rejects NFC-equivalent parent directories even with different child filenames", (t) => {
+  const f = fixture(t)
+  const bundle = createPackage(f.root, identity)
+  addOutput(bundle, "static/café/article.html", "composed directory")
+  addOutput(bundle, "static/cafe\u0301/alias.html", "decomposed directory")
+  assert.throws(() => verifyPackage(bundle, identity), /collision/)
+})
+
+test("a file cannot also be a parent directory, and rejection preserves existing output", (t) => {
+  const f = fixture(t)
+  const bundle = createPackage(f.root, identity)
+  addOutput(bundle, "static/article", "file")
+  addOutput(bundle, "static/article/child.html", "child")
+  assert.throws(() => extractPackage(f.root, bundle, identity), /file conflicts with a directory/)
+  assert.equal(fs.readFileSync(path.join(f.root, ".vercel/output/static/index.html"), "utf8"), "<h1>Actual site</h1>")
+})
+
+test("case-sensitive filesystems preserve the canonical article and uppercase redirect through packaging and extraction", (t) => {
+  const f = fixture(t)
+  f.write("case", "")
+  try { fs.writeFileSync(path.join(f.root, "CASE"), "", { flag: "wx" }) } catch (error) {
+    if (error.code !== "EEXIST") throw error
+    t.skip("Actual filesystem cannot represent distinct case paths; Linux CI runs this roundtrip")
+    return
+  }
+  f.write(".vercel/output/static/about.html", "<h1>Canonical article</h1>")
+  f.write(".vercel/output/static/About.html", '<meta http-equiv="refresh" content="0; url=about.html">')
+  f.write(".vercel/output/static/Topic/canonical.html", "canonical directory")
+  f.write(".vercel/output/static/topic/redirect.html", "redirect directory")
+  const bundle = createPackage(f.root, identity)
+  for (const absent of [false, true]) {
+    if (absent) fs.rmSync(path.join(f.root, ".vercel"), { recursive: true })
+    extractPackage(f.root, bundle, identity)
+    for (const [name, value] of Object.entries(bundle.files)) {
+      assert.deepEqual(fs.readFileSync(path.join(f.root, ".vercel/output", name)), Buffer.from(value, "base64"))
+    }
+  }
+})
+
+test("case-insensitive destination rejects file or directory case aliases before changing existing output", (t) => {
+  const f = fixture(t)
+  const writeFileSync = fs.writeFileSync
+  t.mock.method(fs, "writeFileSync", (file, ...args) => {
+    if (path.basename(file) === "CASE" && path.basename(path.dirname(file)).startsWith(".devbook-case-")) {
+      throw Object.assign(new Error("Simulated case-insensitive filesystem"), { code: "EEXIST" })
+    }
+    return writeFileSync(file, ...args)
+  })
+  for (const names of [["static/about.html", "static/About.html"], ["static/Topic/one.html", "static/topic/two.html"]]) {
+    const bundle = createPackage(f.root, identity)
+    for (const name of names) addOutput(bundle, name, name)
+    verifyPackage(bundle, identity)
+    assert.throws(() => extractPackage(f.root, bundle, identity), /case-sensitive destination filesystem/)
+    assert.equal(fs.readFileSync(path.join(f.root, ".vercel/output/static/index.html"), "utf8"), "<h1>Actual site</h1>")
+    assert.deepEqual(fs.readdirSync(path.join(f.root, ".vercel/output")).sort(), ["builds.json", "config.json", "static"])
+  }
+})
+
+test("a failed filesystem probe cleans its owned files and retains existing output", (t) => {
+  const f = fixture(t)
+  const bundle = createPackage(f.root, identity)
+  addOutput(bundle, "static/INDEX.html", "alias")
+  const writeFileSync = fs.writeFileSync
+  t.mock.method(fs, "writeFileSync", (file, ...args) => {
+    if (path.basename(file) === "CASE" && path.basename(path.dirname(file)).startsWith(".devbook-case-")) {
+      throw Object.assign(new Error("Probe I/O failure"), { code: "EIO" })
+    }
+    return writeFileSync(file, ...args)
+  })
+  assert.throws(() => extractPackage(f.root, bundle, identity), /Probe I\/O failure/)
+  assert.equal(fs.readFileSync(path.join(f.root, ".vercel/output/static/index.html"), "utf8"), "<h1>Actual site</h1>")
+  assert.deepEqual(fs.readdirSync(path.join(f.root, ".vercel/output")).sort(), ["builds.json", "config.json", "static"])
+})
+
+test("extraction rejects symlink parents and output roots before probing or changing their targets", (t) => {
+  const f = fixture(t)
+  const bundle = createPackage(f.root, identity)
+  addOutput(bundle, "static/INDEX.html", "alias")
+  const outside = path.join(f.root, "retained")
+  fs.mkdirSync(outside)
+  fs.writeFileSync(path.join(outside, "sentinel"), "unchanged")
+  for (const name of [".vercel/output", ".vercel"]) {
+    fs.rmSync(path.join(f.root, name), { recursive: true, force: true })
+    fs.symlinkSync(outside, path.join(f.root, name))
+    assert.throws(() => extractPackage(f.root, bundle, identity), /symlink/)
+    assert.deepEqual(fs.readdirSync(outside), ["sentinel"])
+    assert.equal(fs.readFileSync(path.join(outside, "sentinel"), "utf8"), "unchanged")
+    fs.unlinkSync(path.join(f.root, name))
+  }
 })
 
 test("pulled build secrets are removed without deleting project settings", (t) => {
