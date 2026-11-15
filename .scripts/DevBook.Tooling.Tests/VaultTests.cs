@@ -137,6 +137,42 @@ public sealed class VaultTests
         text[cards[0].Start..cards[0].End].Should().Be(cards[0].Text);
     }
 
+    [Fact]
+    public async Task FolderRollupWritesSortedNulPathsSeparatelyFromDiagnostics()
+    {
+        // Arrange
+        using var vault = new RollupRollupVault();
+        foreach (string folder in new[] { "Z space", "A\nline" })
+        {
+            vault.Write($"{folder}/{folder}.md", "---\ntags: [FolderNote]\nstatus: unknown\n---\nFolder.\n");
+            vault.Write($"{folder}/Note.md", VaultFrontmatter);
+        }
+        string output = Path.Combine(vault.Root, "changed.paths");
+
+        // Act
+        int result = await FolderRollup.RunAsync(["--repo-root", vault.Root, "--write", "--changed-files-file", output]);
+
+        // Assert
+        result.Should().Be(0);
+        File.ReadAllBytes(output).Should().Equal(Encoding.UTF8.GetBytes("Vault/Home/A\nline/A\nline.md\0Vault/Home/Z space/Z space.md\0"));
+        (await FolderRollup.RunAsync(["--repo-root", vault.Root, "--write", "--changed-files-file", output])).Should().Be(0);
+        File.ReadAllBytes(output).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task FolderRollupReportWriteFailureIsNotSuccessfulMaintenance()
+    {
+        // Arrange
+        using var vault = new RollupRollupVault();
+        vault.Write("Note.md", VaultFrontmatter);
+
+        // Act
+        int result = await FolderRollup.RunAsync(["--repo-root", vault.Root, "--changed-files-file", vault.Root]);
+
+        // Assert
+        result.Should().Be(2);
+    }
+
     private sealed class RollupRollupVault : IDisposable
     {
         public string Root { get; } = Path.Combine(Path.GetTempPath(), "devbook-rollup-" + Guid.NewGuid().ToString("N"));
