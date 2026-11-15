@@ -16839,16 +16839,17 @@
     "version": 1,
     "id": "4bd0bfa98b5d4dbbb28188e2b990362e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-15T19:02:25.981526Z",
-    "elapsed_seconds": 439.15114930000016,
+    "elapsed_seconds": 444.46792550000015,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/Data Persistence/Caching.md",
       "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
       "Vault/Home/Data Persistence/SQL/Replication.md",
-      "Vault/Home/Data Persistence/ACID.md"
+      "Vault/Home/Data Persistence/ACID.md",
+      "Vault/Home/Data Persistence/Connection Pooling.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -17014,10 +17015,88 @@
           },
           "model_calls": 8
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and primary knowledge of SqlClient, Npgsql, HikariCP and PgBouncer. The opening explains why pooling exists. The open/wait/dispose mechanism, pool separation by connection configuration, and the Npgsql connection-string example (Maximum Pool Size, Minimum Pool Size, Connection Lifetime) are accurate and hedged as provider-specific. The HikariCP formula is presented as a heuristic, and the 50×100=5,000 sessions arithmetic is correct. The PgBouncer transaction-mode caveats (SET, LISTEN, session advisory locks, SQL PREPARE, max_prepared_statements) and the RDS Proxy versus Azure SQL distinction are correct. Pitfalls, tradeoffs and sizing guidance do not repeat each other in ways that need pruning. Both Qards each test one coherent task, ask directly, and cite sources on the answer side. There are no known violations, no flagged cards and no owner feedback, so no edit is warranted."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note is accurate, well ordered and complete for its depth. Both Qards test one coherent task and cite answer-side sources. There are no edits, no known violations and no owner feedback. The keep is justified.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+                "verdict": "CLEAN",
+                "summary": "Independent whole-note audit finds accurate, provider-hedged mechanism, sensible ordering (why, how, example, sizing, pitfalls, poolers, tradeoffs) and two well-formed cards. No concrete defect justifies an edit.",
+                "page_type": "Concept — frontmatter, optional Questions and References present; voice is impersonal and declarative; code fences carry language identifiers; qard IDs protected.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Repeating that work for every query wastes latency and server capacity.",
+                    "line_start": 17,
+                    "reason": "The opening states the problem pooling solves and the boundary: callers must return connections and bound the fleet-wide limit."
+                  },
+                  {
+                    "quote": "Pools are separated by connection configuration.",
+                    "line_start": 35,
+                    "reason": "Correctly explains pool keying (exact connection string, identity, transaction context for SqlClient; data-source configuration for Npgsql) with hedging."
+                  },
+                  {
+                    "quote": "It is a heuristic, not a per-instance entitlement.",
+                    "line_start": 61,
+                    "reason": "The HikariCP formula is framed as a starting point, and the fleet-wide 50x100=5,000 arithmetic is correct, so the sizing guidance preserves its conditions."
+                  },
+                  {
+                    "quote": "Pool exhaustion.** Every connection is checked out",
+                    "line_start": 65,
+                    "reason": "Pitfalls name concrete causes and failure symptoms, supporting engineering judgment without padding."
+                  },
+                  {
+                    "quote": "Protocol-level prepared plans can work when `max_prepared_statements` is configured.",
+                    "line_start": 76,
+                    "reason": "PgBouncer transaction-mode caveats are accurate and include the version-specific exception."
+                  },
+                  {
+                    "quote": "With client-side connection pooling, what happens when application code opens and disposes a database connection?",
+                    "line_start": 106,
+                    "reason": "Direct, bounded question; the answer is one dependent behavior-and-why explanation with an answer-side primary source."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: client-side pooling, sizing, pitfalls and server-side poolers are one coherent topic and are not independently separable.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 10
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T19:09:45.132160Z",
+    "checkpoint_at": "2026-11-15T19:09:50.448936Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
