@@ -4,6 +4,8 @@ import path from "node:path"
 import { createRequire } from "node:module"
 import { fileURLToPath } from "node:url"
 import test from "node:test"
+import os from "node:os"
+import { spawnSync } from "node:child_process"
 
 const require = createRequire(import.meta.url)
 const { parse } = require("../../Web/node_modules/yaml")
@@ -16,7 +18,7 @@ test("required pr-title aggregates an actual secret-free candidate export and Qu
   const site = workflow("site-check")
   assert.equal(title.jobs.site.uses, "./.github/workflows/site-check.yml")
   assert.equal(title.jobs.site.with["source-sha"], "${{ github.event.pull_request.head.sha }}")
-  assert.equal(title.jobs["pr-title"].needs, "site")
+  assert.deepEqual(title.jobs["pr-title"].needs, ["site", "validate", "demo", "fixture"])
   assert.match(title.jobs["pr-title"].if, /always\(\).*github\.event_name == 'pull_request'/)
   assert.ok(title.jobs["pr-title"].steps[0].run.includes('test "$SITE_RESULT" = success'))
   const job = site.jobs["site-check"]
@@ -59,9 +61,8 @@ test("readiness failure does not skip real source validation and documents stage
 })
 
 test("only accepted stage/main sources enter serialized protected deployment", () => {
-  const deploy = workflow("site-deploy")
+  const deploy = workflow("vault-validation")
   assert.deepEqual(deploy.on.push.branches, ["stage", "main"])
-  assert.equal(deploy.on.pull_request, undefined)
   assert.equal(deploy.concurrency["cancel-in-progress"], false)
   assert.equal(deploy.jobs.native.with["source-sha"], "${{ github.sha }}")
   assert.equal(deploy.jobs.native.with["build-site"], false)
@@ -78,7 +79,7 @@ test("only accepted stage/main sources enter serialized protected deployment", (
 })
 
 test("pulled environment secrets are cleared before any Vercel repository build", () => {
-  const steps = workflow("site-deploy").jobs.package.steps
+  const steps = workflow("vault-validation").jobs.package.steps
   const pull = steps.findIndex((step) => step.run?.includes("vercel pull"))
   const clean = steps.findIndex((step) => step.run?.includes("site-pipeline.mjs clean-env"))
   const build = steps.findIndex((step) => step.run?.includes("vercel build"))
@@ -92,7 +93,7 @@ test("pulled environment secrets are cleared before any Vercel repository build"
 })
 
 test("only the deploy job requests masked OIDC and passes it solely to HTTP verification", () => {
-  const deploy = workflow("site-deploy")
+  const deploy = workflow("vault-validation")
   assert.deepEqual(deploy.permissions, { contents: "read" })
   assert.equal(deploy.jobs.native.permissions, undefined)
   assert.equal(deploy.jobs.package.permissions, undefined)
@@ -130,11 +131,139 @@ test("old Git build and link patcher are removed while authored CSS remains", ()
   assert.equal(JSON.parse(read("vercel.json")).framework, null)
   assert.equal(fs.existsSync(path.join(root, ".github/workflows/preview-deployment-link.yml")), false)
   assert.equal(fs.existsSync(path.join(root, ".github/workflows/pr-title.yml")), false)
-  assert.equal(workflow("release").on.deployment_status, undefined)
-  assert.equal(workflow("release").jobs.update, undefined)
+  assert.equal(fs.existsSync(path.join(root, ".github/workflows/release.yml")), false)
+  assert.equal(fs.existsSync(path.join(root, ".github/workflows/site-deploy.yml")), false)
   assert.match(read("Web/quartz/styles/custom.scss"), /@use "\.\/syncer";/)
   const hook = read(".githooks/pre-commit")
   assert.match(hook, /PrepareCommit\.cs/)
   assert.doesNotMatch(hook, /SyncQuartz\.cs|site export|Web\/content/)
   assert.doesNotMatch(read(".scripts/setup.sh"), /--configure-only/)
+})
+
+const evaluate = (expression, context) => {
+  const source = expression.replace(/^\$\{\{|\}\}$/g, "").replace(/always\(\)/g, "true").trim()
+  return new Function(...Object.keys(context), `return (${source})`)(...Object.values(context))
+}
+const event = (event_name, ref = "refs/heads/stage", mode) => ({
+  event_name, ref, ref_name: ref.replace("refs/heads/", ""), run_id: 17, run_attempt: 2,
+  event: event_name === "pull_request" ? { action: "edited", pull_request: { base: { ref: "stage" } } } : {},
+})
+
+test("unified delivery admits only protected pushes and explicit deploy dispatches", () => {
+  const ci = workflow("vault-validation")
+  assert.equal(ci.name, "DevBook CI/CD")
+  assert.deepEqual(ci.on.workflow_dispatch.inputs.mode.options, ["validate", "deploy"])
+  assert.equal(ci.on.workflow_dispatch.inputs.mode.default, "validate")
+  assert.deepEqual(Object.keys(workflow("site-check").on), ["workflow_call"])
+  assert.deepEqual(ci.jobs.native.needs, ["validate"])
+  assert.deepEqual(ci.jobs.package.needs, "native")
+  assert.deepEqual(ci.jobs.deploy.needs, ["native", "package"])
+  assert.deepEqual(ci.jobs.release.needs, ["deploy"])
+  assert.deepEqual(ci.jobs.release.permissions, { contents: "write" })
+  assert.deepEqual(ci.jobs.release.concurrency, { group: "release", "cancel-in-progress": false })
+  for (const ref of ["refs/heads/stage", "refs/heads/main", "refs/heads/feature/test"]) {
+    for (const kind of ["push", "pull_request", "issue_comment", "workflow_dispatch"]) {
+      for (const mode of [undefined, "validate", "deploy"]) {
+        const github = event(kind, ref)
+        const context = { github, inputs: { mode }, needs: { validate: { result: "success" }, deploy: { result: "success" } }, format: (pattern, ...values) => pattern.replace(/\{(\d+)\}/g, (_, i) => values[i]) }
+        const eligible = ref !== "refs/heads/feature/test" && (kind === "push" || (kind === "workflow_dispatch" && mode === "deploy"))
+        assert.equal(Boolean(evaluate(ci.jobs.native.if, context)), eligible, `${kind}/${ref}/${mode}`)
+        assert.equal(evaluate(ci.concurrency.group, context), eligible ? `site-deploy-${ref}` : "ci-17-2")
+        assert.equal(Boolean(evaluate(ci.jobs.release.if, context)), kind === "push" && ref === "refs/heads/main")
+        for (const result of ["failure", "cancelled", "skipped"]) {
+          context.needs.validate.result = result
+          assert.equal(Boolean(evaluate(ci.jobs.native.if, context)), false)
+          context.needs.deploy.result = result
+          assert.equal(Boolean(evaluate(ci.jobs.release.if, context)), false)
+        }
+      }
+    }
+  }
+})
+
+test("all PR actions validate and aggregate rejects every unsuccessful prerequisite", () => {
+  const ci = workflow("vault-validation")
+  for (const action of ci.on.pull_request.types) {
+    const github = event("pull_request")
+    github.event.action = action
+    assert.equal(evaluate(ci.jobs.validate.if, { github }), true, action)
+  }
+  const step = ci.jobs["pr-title"].steps[0]
+  for (const relevant of ["true", "false"]) {
+    const good = { SITE_RESULT: "success", VALIDATE_RESULT: "success", RELEVANT: relevant, DEMO_RESULT: relevant === "true" ? "success" : "skipped", FIXTURE_RESULT: relevant === "true" ? "success" : "skipped" }
+    const run = (env) => spawnSync("bash", ["-c", step.run], { env: { ...process.env, ...env }, encoding: "utf8" }).status
+    assert.equal(run(good), 0)
+    for (const key of ["SITE_RESULT", "VALIDATE_RESULT", "DEMO_RESULT", "FIXTURE_RESULT"]) {
+      for (const result of ["failure", "cancelled", "skipped"]) {
+        if (relevant === "false" && ["DEMO_RESULT", "FIXTURE_RESULT"].includes(key) && result === "skipped") continue
+        assert.notEqual(run({ ...good, [key]: result }), 0, `${key}/${result}/${relevant}`)
+      }
+    }
+    assert.notEqual(run({ ...good, RELEVANT: "" }), 0)
+  }
+})
+
+test("pure software coverage has one CI owner while candidate source validation remains", () => {
+  const ci = workflow("vault-validation")
+  const improvement = workflow("devbook-improvement")
+  assert.equal(improvement.on.pull_request, undefined)
+  const commands = ci.jobs.validate.steps.map((step) => step.run ?? "").join("\n")
+  assert.equal((commands.match(/dotnet test DevBook.Tooling.slnx/g) ?? []).length, 1)
+  assert.match(commands, /custom\/transformers\/publishing.test.ts/)
+  const install = ci.jobs.validate.steps.findIndex((step) => step.run?.includes("npx quartz plugin install"))
+  const publishing = ci.jobs.validate.steps.findIndex((step) => step.run?.includes("publishing.test.ts"))
+  assert.ok(install >= 0 && install < publishing)
+  assert.match(ci.jobs.validate.steps[install].run, /git diff --exit-code -- quartz.lock.json/)
+  assert.doesNotMatch(ci.jobs.validate.steps[install].run, /--latest/)
+  assert.doesNotMatch(JSON.stringify(improvement.jobs.demo), /dotnet test/)
+  const validators = JSON.parse(read(".github/devbook-improvement.json")).validator_commands
+  assert.equal(validators.length, 1)
+  assert.ok(validators[0].includes("DevBook.Tooling/Scripts/ValidateVault.cs"))
+  assert.match(JSON.stringify(ci.jobs.demo), /--demo/)
+  assert.match(JSON.stringify(ci.jobs.fixture), /export fixture/)
+  assert.doesNotMatch(JSON.stringify(ci.jobs.demo) + JSON.stringify(ci.jobs.fixture), /secrets\./)
+})
+
+test("moved PR demo and fixture keep exact path relevance and fail closed on diff errors", () => {
+  const ci = workflow("vault-validation")
+  const detector = ci.jobs.validate.steps.find((step) => step.id === "paths")
+  assert.equal(detector.if, "github.event_name == 'pull_request'")
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), "devbook-workflow-paths-"))
+  try {
+    const bin = path.join(temp, "git")
+    fs.writeFileSync(bin, '#!/bin/sh\n[ "$FAIL_GIT" != true ] || exit 9\nif [ "$1" = diff ]; then printf \'%s\\0\' "$CHANGED_PATH"; fi\n', { mode: 0o755 })
+    for (const [changed, relevant] of [
+      [".github/workflows/devbook-improvement.yml", true],
+      [".github/workflows/devbook-improvement-feedback.yml", true],
+      [".github/devbook-improvement.json", true],
+      [".scripts/DevBook.Tooling/Program.cs", true],
+      [".scripts/DevBook.Tooling.Tests/RuntimeTests.cs", true],
+      [".scripts/DevBook.Tooling.slnx", true],
+      [".scripts/global.json", true],
+      [".scripts/nested/tool.slnx", false],
+      [".scripts/DevBook.Tooling.Other/file.cs", false],
+      ["Vault/Home/A note with 'quotes'.md", false],
+      [".github/workflows/vault-validation.yml", false],
+    ]) {
+      const output = path.join(temp, "output")
+      fs.writeFileSync(output, "")
+      const result = spawnSync("bash", ["-c", detector.run], {
+        env: { ...process.env, PATH: `${temp}:${process.env.PATH}`, RUNNER_TEMP: temp, GITHUB_OUTPUT: output, BASE_SHA: "base", HEAD_SHA: "head", CHANGED_PATH: changed }, encoding: "utf8",
+      })
+      assert.equal(result.status, 0, result.stderr)
+      assert.equal(fs.readFileSync(output, "utf8"), `relevant=${relevant}\n`)
+      for (const name of ["demo", "fixture"]) {
+        const condition = ci.jobs[name].if.replace(/\.improvement-relevant/g, '["improvement-relevant"]')
+        for (const kind of ["pull_request", "push", "workflow_dispatch", "issue_comment"]) {
+          assert.equal(Boolean(evaluate(condition, { github: event(kind), needs: { validate: { outputs: { "improvement-relevant": String(relevant) } } } })), kind === "pull_request" && relevant)
+        }
+      }
+    }
+    const output = path.join(temp, "failed-output")
+    const failed = spawnSync("bash", ["-c", detector.run], { env: { ...process.env, PATH: `${temp}:${process.env.PATH}`, RUNNER_TEMP: temp, GITHUB_OUTPUT: output, FAIL_GIT: "true", BASE_SHA: "base", HEAD_SHA: "head" } })
+    assert.notEqual(failed.status, 0)
+    assert.equal(fs.existsSync(output), false)
+  } finally {
+    fs.rmSync(temp, { recursive: true, force: true })
+  }
 })

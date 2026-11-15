@@ -1,35 +1,48 @@
 # Releasing
 
 Releases are **fully automated**. Every change reaches `main` through a
-**merged pull request**; the push to `main` computes the next version, generates
-notes, and publishes a GitHub Release + tag. Direct pushes to `main` are blocked.
+**merged pull request**; [DevBook CI/CD](workflows/vault-validation.yml) validates
+the accepted `main` commit, builds and deploys Production, then computes the next
+version and publishes a GitHub Release + tag after deployment verification succeeds. Direct pushes to `main` are blocked.
 
 ## Workflow
 
-`stage` is the integration branch and the one checked out in the local vault;
-`main` is the release and deploy branch. Squash merges are disabled so commits
-survive both hops.
+`stage` is the integration branch and the one checked out in the local vault.
+It deploys Preview; `main` deploys Production and publishes releases. Squash
+merges are disabled so commits survive both hops.
 
 1. Work happens on a short-lived branch off `stage`, in the folder matching its
    type — `notes/…` for vault content, `feature/…`, `docs/…`, `bug/…`,
    `maintenance/…` for everything else.
 2. Open a PR into `stage` (`gh pr create --base stage`). The **PR title** must
    follow the convention (below) — the `pr-title` job in
-   [`CI`](workflows/vault-validation.yml) enforces it on PRs into `stage` and `main`.
-3. **Merge it** with a merge commit. Obsidian Git commits and pushes local
-   vault changes, including Qard study state, straight to `stage`.
+   [`DevBook CI/CD`](workflows/vault-validation.yml) enforces it on PRs into `stage` and `main`.
+3. **Merge it** manually with a merge commit after required checks pass. Local
+   vault changes, including Qard study state, follow the same branch and PR flow.
+   The accepted `stage` push validates, builds and deploys Preview.
 4. To release, open a promotion PR from `stage` into `main` and use **Update
    branch** first so main-only changes (DevBook Improvement PRs)
    reach `stage`. **Merge it** with a merge commit. The commit prefixes drive
    the MINOR/PATCH bump + changelog; a **MAJOR** is driven by a `!` in the
    promotion PR's title (gated — see below).
-5. The `release` job in [`Delivery`](workflows/release.yml) reads the merged PR's title
-   (for a `!` major) and the commits since the last tag (for minor/patch), bumps
-   the version, tags it, and publishes the GitHub Release. Done.
+5. After the accepted `main` commit passes validation, native export, Production
+   build/deployment and immutable/fixed-URL smoke checks, the `release` job in
+   [DevBook CI/CD](workflows/vault-validation.yml) reads the merged PR's title
+   (for a `!` major) and commits since the last tag (for minor/patch), bumps the
+   version, tags it and publishes the GitHub Release. Failed or incomplete
+   Production verification blocks release.
+
+Manual dispatch defaults to validation only. Explicit `mode=deploy` deploys only
+protected `stage` or `main` through the same prerequisites and never releases.
+The [Web runbook](../Web/README.md#cutover-prerequisites) owns caller-specific
+OIDC readiness and the separately authorized Stage/Main cutover; the migration
+PR stays draft until the new Stage policy and required branch checks are verified.
+[Retired workflow history cleanup](../Web/README.md#deferred-workflow-history-cleanup)
+follows accepted retirement on default `main` and verified replacement deployments.
 
 ## Convention — commit (and PR) titles
 
-```
+```text
 <type>: <description>
 ```
 
@@ -90,18 +103,18 @@ bug: correct rate-limit handling in the LLM judge client
   and blocks direct pushes, deletion, and force-pushes. No bypass — the checks
   apply to everyone, including admins.
 - **Protect release tags** (tag ruleset, `refs/tags/v*`) — blocks tag deletion
-  and force-moves; creation stays open so the Release workflow can tag.
+  and force-moves; creation stays open so the CI/CD release job can tag.
 
 ## Guardrail — major needs confirmation in the PR
 
 Minor and patch releases publish automatically. A **major** is gated *before*
-merge by the major-approval jobs in [`CI`](workflows/vault-validation.yml):
+merge by the major-approval jobs in [`DevBook CI/CD`](workflows/vault-validation.yml):
 
 1. Open a PR. If its **title** carries a `!` prefix (e.g. `feature!:`), the bot
    parks the `major-approval` check as **pending** and comments that merging
    will publish a MAJOR (naming the exact version).
 2. **Reply `/approve-major`** — the check turns green, merge is unblocked, and
-   the `release` job in [`Delivery`](workflows/release.yml) tags the major after merge.
+   the CI/CD `release` job tags the major after successful Production verification.
 3. **Reply `/no-major`** — the bot edits the PR title to drop the `!` (no history
    rewrite); the PR falls back to a normal commit-driven minor/patch release.
 
@@ -113,6 +126,7 @@ just parks the PR until you decide.
 > `major-approval` is already a required check on the **Protect main branch**
 > ruleset. It only reports once [`vault-validation.yml`](workflows/vault-validation.yml)
 > lives on `main`, so merge this workflow in first — until then, PRs whose branch
-> lacks the workflow will sit blocked on the (never-reported) check. Also keep
-> Actions **Workflow permissions** on "Read and write".
+> lacks the workflow will sit blocked on the (never-reported) check. The workflow
+> defaults to read permission and grants writes only to jobs that need them;
+> only deployment requests OIDC, and only release writes repository contents.
 

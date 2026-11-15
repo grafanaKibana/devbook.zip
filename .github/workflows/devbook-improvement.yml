@@ -3,15 +3,6 @@ name: DevBook Improvement
 on:
   schedule:
     - cron: "23 */6 * * *"
-  pull_request:
-    paths:
-      - .github/workflows/devbook-improvement.yml
-      - .github/workflows/devbook-improvement-feedback.yml
-      - .github/devbook-improvement.json
-      - .scripts/DevBook.Tooling/**
-      - .scripts/DevBook.Tooling.Tests/**
-      - .scripts/*.slnx
-      - .scripts/global.json
   issue_comment:
     types: [created, edited]
   workflow_run:
@@ -80,7 +71,6 @@ jobs:
 
   demo:
     if: >-
-      github.event_name == 'pull_request' ||
       (github.event_name == 'schedule' && (vars.DEVBOOK_IMPROVEMENT_ACTIVATED != 'true' || vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED != 'true')) ||
       (github.event_name == 'workflow_dispatch' && (inputs.mode == 'demo' || (inputs.mode == 'dry-run' && inputs.with_model == false)))
     runs-on: ubuntu-latest
@@ -92,7 +82,7 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.100
-      - name: Test native core and run credential-free flow
+      - name: Run credential-free flow
         working-directory: .scripts
         env:
           MODEL: ${{ inputs.model || 'claude-sonnet-5-5' }}
@@ -100,7 +90,6 @@ jobs:
         run: |
           set -euo pipefail
           test "$(dotnet --version)" = 10.0.100
-          dotnet test DevBook.Tooling.slnx --configuration Release
           mode=demo
           if [ "$SELECT_ONLY" = true ]; then mode=dry-run; fi
           dotnet run --project DevBook.Tooling -- improvement --repo-root .. \
@@ -215,8 +204,7 @@ jobs:
     needs: maintenance
     if: >-
       always() && !cancelled() &&
-      (github.event_name == 'pull_request' ||
-      (github.event_name == 'workflow_dispatch' && inputs.mode == 'fixture') ||
+      ((github.event_name == 'workflow_dispatch' && inputs.mode == 'fixture') ||
       (needs.maintenance.result == 'success' && needs.maintenance.outputs.export_ready == 'true' && needs.maintenance.outputs.export_mode == 'render'))
     runs-on: macos-15
     timeout-minutes: 20
