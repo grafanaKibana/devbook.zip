@@ -14962,16 +14962,16 @@
     "version": 1,
     "id": "da6ae8bc44c444a5b6a4606355aadef4",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-15T06:51:01.310737Z",
-    "elapsed_seconds": 87.2433885,
+    "elapsed_seconds": 101.18857549999998,
     "calls_reserved": 3,
-    "responses_received": 2,
+    "responses_received": 3,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T06:52:28.553702Z",
+    "checkpoint_at": "2026-11-15T06:52:42.498891Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -45851,12 +45851,30 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
+          "expected_hash": "47c624ff07941e41fa22518d82abb7bc92e3ca48d9d64b2afc475b8e845c50d6",
+          "before": ">         foreach (var w in _adjacency[v])\n>         {\n>             if (_disc[w] == -1)\n>             {\n>                 StrongConnect(w);\n>                 _low[v] = Math.Min(_low[v], _low[w]);\n>             }\n>             else if (_onStack[w])\n>             {\n>                 _low[v] = Math.Min(_low[v], _disc[w]);\n>             }\n>         }",
+          "after": ">         foreach (var next in _adjacency[v])\n>         {\n>             if (_disc[next] == -1)\n>             {\n>                 StrongConnect(next);\n>                 _low[v] = Math.Min(_low[v], _low[next]);\n>             }\n>             else if (_onStack[next])\n>             {\n>                 _low[v] = Math.Min(_low[v], _disc[next]);\n>             }\n>         }",
+          "reason": "Renames the foreach variable so it no longer collides with the later `int w;` declared in the enclosing method block, which C# rejects with CS0136. Algorithm logic is unchanged.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Edge loop variable is distinct from the pop-loop variable w",
+            "onStack guard and low/disc updates unchanged"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The C# sample declares `w` in the foreach and again as `int w;` in the same method block, so it does not compile (CS0136).",
+          "reader_benefit": "The published implementation compiles as shown while keeping the same algorithm."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note. The low-link definitions (disc, low, onStack) and the update rules match Tarjan's 1972 SIAM paper, which is already cited. The worked trace for A→B, B→C, C→A, C→D, D→E, E→D was checked step by step: low values, stack contents, pop order {E,D} then {C,B,A}, and the reverse-topological emission order all hold. The C# code matches the described rules, including the onStack guard and the root test low==disc. The guard section is accurate: dropping the guard can merge SCCs, and the low[w] variant keeps the same roots but departs from the formal definition. Prose is direct and non-repetitive, the link to the Strongly Connected Components note and the articulation-points contrast are useful, and no known violations exist. There are no cards and the Questions section is optional, so no edit is warranted."
+          "outcome": "changed",
+          "reason": "Whole note re-audited: prose, low-link definitions, the trace (pop order {E,D} then {C,B,A}) and guard explanation are accurate. The only defect was the C# sample's duplicate `w` in nested and enclosing scopes (CS0136); renaming the foreach variable makes the code compile with unchanged logic."
         }
       ],
       "feedback": []
@@ -45871,8 +45889,10 @@
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-15T06:51:36.190572Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-15T06:52:42.498859Z",
+    "review_repair_key": "0ffe27117e9cf57079363af53bf136d123d4e62b01771320b566886df317a578",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The keep disposition is not supported. The C# example declares `w` twice in one method, which C# rejects (CS0136), so the sample does not compile.",
       "notes": [
@@ -45935,60 +45955,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The keep disposition is not supported. The C# example declares `w` twice in one method, which C# rejects (CS0136), so the sample does not compile.",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The prose, trace and guard explanation are accurate. The C# sample is not valid C#: `StrongConnect` has a foreach variable `w` and a later `int w;` in the enclosing block, which causes compiler error CS0136. The keep disposition claims the code was checked, but this defect was missed.",
-          "page_type": "Concept — authorable prose with a C# code block and a References section. No cards.",
-          "current_text_evidence": [
-            {
-              "quote": "foreach (var w in _adjacency[v])",
-              "line_start": 88,
-              "reason": "The foreach declares `w` in a nested scope of StrongConnect."
-            },
-            {
-              "quote": "int w;",
-              "line_start": 107,
-              "reason": "This declares `w` again in the enclosing method block. C# forbids that, so the example does not compile (CS0136)."
-            },
-            {
-              "quote": "`low[v] == disc[v]` identifies an SCC root",
-              "line_start": 24,
-              "reason": "The root test and the trace are correct. The trace order, pop order {E,D} then {C,B,A}, and reverse topological emission all check out."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the note covers one algorithm, its state, an example trace, an implementation and the guard rule, all closely related. The separate SCC overview note already covers the comparisons.",
-          "findings": [
-            {
-              "severity": "High",
-              "dimension": "Accuracy",
-              "location": "# C# Implementation, StrongConnect (lines 88 and 107)",
-              "evidence": "`foreach (var w in _adjacency[v])` and later `int w;` in the same method block.",
-              "effect": "The published C# example fails to compile with CS0136, so the implementation cannot be used as shown.",
-              "fix": "Rename one variable, for example `var next` in the foreach and `w` in the pop loop. Keep the `onStack` guard and the `low == disc` root test unchanged."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "FAIL",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "0ffe27117e9cf57079363af53bf136d123d4e62b01771320b566886df317a578",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
