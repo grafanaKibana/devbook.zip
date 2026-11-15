@@ -14964,7 +14964,7 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-15T06:51:01.310737Z",
-    "elapsed_seconds": 167.7859037,
+    "elapsed_seconds": 171.505728,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
@@ -16241,7 +16241,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T06:53:49.096216Z",
+    "checkpoint_at": "2026-11-15T06:53:52.816039Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
