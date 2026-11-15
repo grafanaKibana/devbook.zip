@@ -5,9 +5,9 @@
         "matcher": "apply_patch|Edit|Write|MultiEdit",
         "hooks": [
           {
+            "statusMessage": "Tracking note review requirements...",
             "type": "command",
-            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/suggest-review.mjs\"",
-            "statusMessage": "Tracking note review requirements..."
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/suggest-review.mjs\""
           }
         ]
       }
@@ -16,9 +16,9 @@
       {
         "hooks": [
           {
+            "statusMessage": "Checking note review receipts...",
             "type": "command",
-            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/enforce-review.mjs\"",
-            "statusMessage": "Checking note review receipts..."
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/enforce-review.mjs\""
           }
         ]
       }

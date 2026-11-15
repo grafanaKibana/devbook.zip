@@ -1,16 +1,17 @@
 ---
 name: excalidraw
 description: >
-  Create, edit, and manipulate Excalidraw drawings in Obsidian using the ExcalidrawAutomate scripting API.
-  Use this skill whenever the user wants to create diagrams, sketches, illustrations, visual maps,
-  flowcharts, concept diagrams, mind maps, or any hand-drawn-style visual in Obsidian Excalidraw.
-  Also trigger when .excalidraw or .excalidraw.md files are mentioned, when the user says "draw",
-  "sketch", "illustrate", "diagram", or "visualize", or when embedding visuals into Obsidian notes.
-  This skill covers both programmatic drawing via the Obsidian CLI eval command and file-based
-  creation via MCP tools. Use it even if the user just wants a simple shape or arrow diagram —
+  Create, edit, and manipulate Excalidraw drawings in Obsidian using the
+  ExcalidrawAutomate scripting API. Use this skill whenever the user wants to
+  create diagrams, sketches, illustrations, visual maps, flowcharts, concept
+  diagrams, mind maps, or any hand-drawn-style visual in Obsidian Excalidraw.
+  Also trigger when .excalidraw or .excalidraw.md files are mentioned, when the
+  user says "draw", "sketch", "illustrate", "diagram", or "visualize", or when
+  embedding visuals into Obsidian notes. This skill covers both programmatic
+  drawing via the Obsidian CLI eval command and file-based creation via MCP
+  tools. Use it even if the user just wants a simple shape or arrow diagram —
   Excalidraw is the right tool whenever hand-drawn-style visuals are involved.
 ---
-
 # Excalidraw for Obsidian
 
 Create and manipulate Excalidraw drawings inside an Obsidian vault using the **ExcalidrawAutomate** (EA) scripting API. This skill supports two modes of operation depending on what's available in the session.

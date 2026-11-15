@@ -176,6 +176,9 @@ jobs:
         with:
           dotnet-version: 10.0.100
 
+      - name: Check generated agent configs match .rulesync
+        run: npx --yes rulesync@latest generate --check
+
       - name: Test note review hooks
         run: node --test .codex/hooks/tests/note-review-hooks.test.mjs
 
