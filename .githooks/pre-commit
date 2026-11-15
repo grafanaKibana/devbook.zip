@@ -100,8 +100,4 @@ PYTHON
     fi
 fi
 
-# Pre-commit only adds what must be inside the commit. Vault validation and
-# Learn coverage are judgments and run in CI (`validate`), on PRs and on every
-# push to stage.
-
 exit 0

@@ -73,14 +73,12 @@ test("pr-title checks only the title, and title edits or comments never start he
   assert.doesNotMatch(JSON.stringify(rules), /secrets\.VERCEL|id-token|site-check/)
 })
 
-test("readiness failure does not skip real source validation and documents stage protection", () => {
+test("deployment readiness gates deploys, not PR checks", () => {
   const ci = workflow("vault-validation")
   assert.match(ci.jobs.site.if, /github\.event_name == 'pull_request'/)
-  const gate = ci.jobs.ci.steps.find((step) => step.env?.READY)
-  assert.match(gate.run, /READY.*true/)
-  assert.match(gate.run, /Keep the migration PR draft/)
-  assert.match(gate.run, /Trusted Sources OIDC access/)
-  assert.match(gate.run, /required pr-title and ci on stage/)
+  assert.equal(ci.jobs.ci.steps.find((step) => step.env?.READY), undefined)
+  const gate = ci.jobs.package.steps.find((step) => step.env?.READY)
+  assert.match(gate.run, /test "\$READY" = true/)
 })
 
 test("only accepted stage/main sources enter serialized protected deployment", () => {

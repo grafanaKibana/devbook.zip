@@ -38,9 +38,7 @@ merges are disabled so commits survive both hops.
 
 Manual dispatch defaults to validation only. Explicit `mode=deploy` deploys only
 protected `stage` or `main` through the same prerequisites and never releases.
-The [Web runbook](../Web/README.md#cutover-prerequisites) owns caller-specific
-OIDC readiness and the separately authorized Stage/Main cutover; the migration
-PR stays draft until the new Stage policy and required branch checks are verified.
+The [Web runbook](../Web/README.md#deploy) owns deployment trust and verification.
 
 ## Convention — commit (and PR) titles
 

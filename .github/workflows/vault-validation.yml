@@ -61,16 +61,6 @@ jobs:
             false) test "$DEMO_RESULT" = skipped && test "$FIXTURE_RESULT" = skipped ;;
             *) echo '::error::Improvement path relevance was not determined.'; exit 1 ;;
           esac
-      # Cutover gate: remove this step once the deployment cutover is verified.
-      # Delivery checks the same flag again right before every deploy.
-      - name: Require configured artifact deployment before cutover
-        env:
-          READY: ${{ vars.DEVBOOK_ARTIFACT_DEPLOYMENT_READY }}
-        run: |
-          if [ "$READY" != true ]; then
-            echo '::error::Artifact deployment is not configured. Configure Vercel IDs/token in Preview and Production, validate Trusted Sources OIDC access and required pr-title and ci on stage, then set DEVBOOK_ARTIFACT_DEPLOYMENT_READY=true. Keep the migration PR draft until configuration is verified.'
-            exit 1
-          fi
 
   validate:
     outputs:
