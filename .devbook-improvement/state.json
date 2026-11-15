@@ -15032,11 +15032,11 @@
     "version": 1,
     "id": "da6ae8bc44c444a5b6a4606355aadef4",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-15T06:51:01.310737Z",
-    "elapsed_seconds": 246.5186633,
+    "elapsed_seconds": 257.98657499999996,
     "calls_reserved": 7,
-    "responses_received": 6,
+    "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Graph Algorithms/Tarjan's SCC Algorithm.md",
       "Vault/Home/Computer Science/Algorithms/Patterns/Binary Search on Answer.md"
@@ -16395,7 +16395,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T06:55:07.828974Z",
+    "checkpoint_at": "2026-11-15T06:55:19.296885Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -48008,5 +48008,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "da6ae8bc44c444a5b6a4606355aadef4",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Bit Manipulation.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Operates on integers' binary representation, using bitmasks to model sets, flags, and small finite sets.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: In Progress\npublish: true\ncreated: \"2026-06-20T05:33:50.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.337Z\"\n---\n\nAn integer is a fixed-width array of bits — 32 for `int`, 64 for `long`. Any question phrased over those bits (how many are set, which is the lowest, whether a value belongs to a universe of at most 64 items) can be answered by looping bit by bit, or by acting on the whole word at once. AND, OR, XOR, NOT, and the two shifts each transform every bit in a single CPU instruction, and a handful of algebraic identities collapse a per-bit loop into one expression.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"kernighan-popcount\",\"value\":44,\"width\":8}\n```\n\nEach pass computes `n & (n - 1)`. Subtracting 1 from `n` flips its lowest set bit to 0 and turns every zero below it into a 1 — the borrow propagates up the trailing zeros until it consumes that lowest one. AND-ing `n` with the result keeps every bit above the lowest one untouched and clears the lowest one along with the zeros beneath it, so exactly one set bit disappears per iteration. The loop therefore runs once per set bit: three iterations for `44`, not the eight a bit-by-bit scan of the word would take. When `n` reaches 0 no set bits remain and the count is final.\n\nFive operators do the work: `&` (AND), `|` (OR), `^` (XOR), `~` (NOT), and the shifts `<<` / `>>`. A single bit is addressed through a one-hot mask `1 << k`, which has bit `k` set and every other bit clear:\n\n| Operation on bit `k` | Expression |\n| --- | --- |\n| Test | `(n >> k) & 1` |\n| Set | `n \\| (1 << k)` |\n| Clear | `n & ~(1 << k)` |\n| Toggle | `n ^ (1 << k)` |\n\nThree identities carry most of the weight beyond masking:\n\n- `n & (n - 1)` clears the lowest set bit — the borrow argument from the trace. Iterating it visits each set bit once, and `n > 0 && (n & (n - 1)) == 0` tests for an exact power of two.\n- `n & -n` isolates the lowest set bit as a value. In two's-complement `-n == ~n + 1`, which flips every bit above the lowest set bit while reproducing that bit and its trailing zeros; AND with `n` keeps only that bit. This is how a Fenwick tree walks index ranges and how the least-significant set bit is extracted.\n- XOR is its own inverse: `a ^ a == 0` and `a ^ 0 == a`. XOR-ing a whole array cancels every value that appears an even number of times, leaving the one unpaired value; the same property swaps two variables with no temporary.\n\nA machine word doubles as a set over a universe of at most 64 elements: bit `i` records membership of element `i`, union is `|`, intersection is `&`, and difference is `a & ~b`. The signed-`int` subset loop below deliberately supports only `0 <= n <= 30`; within that bound, `1 << n` counts the subsets of an `n`-element set. That representation is the state in bitmask [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]], where \"which of these `n` items are already used\" is a single integer.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Bit Manipulation complexity\",\n  \"variables\": {\n    \"wordSize\": {\n      \"symbol\": \"w\",\n      \"description\": \"machine-word width\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (scan bit by bit)\",\n          \"formula\": \"O(w)\",\n          \"curveId\": \"linear\"\n        },\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Bit manipulation (whole word)\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (scan bit by bit)\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        },\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Bit manipulation (whole word)\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# Where the Representation Bites\n\nRight shift has two meanings. On a signed C# type, `>>` is arithmetic: it copies the sign bit into the vacated high positions, so `-8 >> 1 == -4`. A logical shift zero-fills instead. C# uses `>>>` (since C# 11), or `>>` on an unsigned type. Java makes the same distinction, while C leaves right-shifting a negative value implementation-defined. The difference appears as soon as the high bit is set.\n\nShift counts at or above the type width are another boundary. C# masks the count to the low bits of the width, so `1 << 32` on an `int` becomes a shift by `32 & 31 == 0` and yields `1`. In C and C++, the same expression has undefined behavior. A subset-DP loop that shifts by exactly `n` is a common place to hit this edge.\n\n`n & -n` depends on two's-complement negation, where `-n` is `~n + 1`. A sign-magnitude representation would break the identity. Widening creates a related trap: converting a negative `int` to `long` sign-extends it, adding 32 leading ones to a value that may have been intended as a 32-bit mask. Converting through `(uint)x` zero-extends and keeps those high bits clear.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Kernighan's popcount loop\n>\n> ```mermaid\n> flowchart TD\n>   A[count = 0] --> B{n != 0}\n>   B -->|No| Z[return count]\n>   B -->|Yes| C[\"n = n & (n - 1)\"]\n>   C --> D[count = count + 1]\n>   D --> B\n> ```\n\n> [!EXAMPLE]- C# implementations\n>\n> ```csharp\n> // Population count: one iteration per set bit\n> public static int PopCount(uint n)\n> {\n>     int count = 0;\n>     while (n != 0)\n>     {\n>         n &= n - 1;   // clear the lowest set bit\n>         count++;\n>     }\n>     return count;\n> }\n>\n> // Prefer the hardware intrinsic where available\n> int bits = System.Numerics.BitOperations.PopCount(n);\n>\n> // The one unpaired value; every other value appears an even number of times\n> public static int SingleNumber(int[] nums)\n> {\n>     int acc = 0;\n>     foreach (var n in nums) acc ^= n;   // pairs cancel to 0\n>     return acc;\n> }\n>\n> // Enumerate every subset of an n-element universe\n> if ((uint)n > 30)\n>     throw new ArgumentOutOfRangeException(nameof(n));\n>\n> for (int mask = 0; mask < (1 << n); mask++)\n>     for (int i = 0; i < n; i++)\n>         if ((mask & (1 << i)) != 0) { /* element i is in this subset */ }\n> ```\n> `BitOperations` (`PopCount`, `LeadingZeroCount`, `TrailingZeroCount`) compiles to a single CPU instruction where the hardware supports it and a software routine otherwise.\n\n# Comparison\n\nFour ways to count the set bits in a word, from the identity to the silicon:\n\n| Method | Extra cost | Stronger case | Weaker case |\n| --- | --- | --- | --- |\n| Naive bit scan | None | Fully portable, no assumptions | Every call pays the full word width |\n| Kernighan `n & (n-1)` | None | Sparse words with few set bits | Dense words visit most bit positions |\n| Lookup table (byte/nibble) | Precomputed table in memory | Many counts that reuse the table | Cache pressure. Table must stay hot |\n| `BitOperations.PopCount` | .NET runtime API | General-purpose set-bit counts | Runtime may use a software fallback |\n\n`BitOperations.PopCount` is the default in .NET: the runtime uses a hardware intrinsic when one is available and otherwise falls back to software. Kernighan's loop remains useful when the identity itself matters or no suitable intrinsic exists. A lookup table earns its memory only when repeated counts keep it hot in cache.\n\nPopcount is only one use. XOR cancellation expresses an unpaired value, `1 << k` addresses one flag, and `n & -n` isolates the lowest active bit. These identities also carry bitmask [[Home/Computer Science/Algorithms/Paradigms/Dynamic Programming|Dynamic Programming]], where a single integer records the whole used-item set.\n\n# References\n\n- [`BitOperations` class (.NET)](https://learn.microsoft.com/en-us/dotnet/api/system.numerics.bitoperations)\n- [Bit manipulation (cp-algorithms)](https://cp-algorithms.com/algebra/bit-manipulation.html)\n",
+          "hash": "490230483545bec800b10f662889f955725975a60f6bb5f4167ca1a7584af731",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Bit Manipulation.md",
+          "outcome": "keep",
+          "reason": "Read the whole note. The Kernighan trace is correct: 44 is 101100, so it has three set bits and the loop runs three times. The mask table and the identities check out: `n & (n-1)`, `n & -n` via two's complement, XOR cancellation, and set operations on a word. Language semantics also check out. C# `>>` is arithmetic on signed types, and `>>>` exists since C# 11. C# masks shift counts, so `1 << 32` on an int gives 1. The same shift is undefined in C/C++, and right-shifting a negative value is implementation-defined in C. Sign-extension on int-to-long widening is described correctly. The complexity tab, the C# snippets with the n<=30 guard, and the popcount comparison table are consistent with the prose. `BitOperations.PopCount` is described accurately as a hardware intrinsic with a software fallback. The two references are relevant. Wikilinks, code-fence languages and structure are fine. There are no Qards, which is optional, and no known violations. The prose is direct and mechanism-focused, with no repetition or defect worth churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Patterns/Bit Manipulation.md": "490230483545bec800b10f662889f955725975a60f6bb5f4167ca1a7584af731"
+    },
+    "feedback_keys": [],
+    "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Patterns/Bit Manipulation.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-15T06:55:19.296875Z"
+  }
 }
