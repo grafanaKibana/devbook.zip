@@ -34059,11 +34059,13 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-15T07:03:16.381116Z",
-    "phase": "branch_updated",
-    "updated_at": "2026-11-15T07:05:25Z",
+    "phase": "pr_updated",
+    "updated_at": "2026-11-15T07:05:33Z",
     "evidence": {
       "commit_sha": "d0c59fea010cb55a9de8760d3e1a83273667f5e8",
-      "branch_sha": "d0c59fea010cb55a9de8760d3e1a83273667f5e8"
+      "branch_sha": "d0c59fea010cb55a9de8760d3e1a83273667f5e8",
+      "pr_number": 231,
+      "created": true
     }
   },
   "export_operations": {
