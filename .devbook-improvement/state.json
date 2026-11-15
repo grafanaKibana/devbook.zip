@@ -16781,15 +16781,16 @@
     "version": 1,
     "id": "4bd0bfa98b5d4dbbb28188e2b990362e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-15T19:02:25.981526Z",
-    "elapsed_seconds": 365.48787410000006,
+    "elapsed_seconds": 370.12798540000006,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/Data Persistence/Caching.md",
       "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
-      "Vault/Home/Data Persistence/SQL/Replication.md"
+      "Vault/Home/Data Persistence/SQL/Replication.md",
+      "Vault/Home/Data Persistence/ACID.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -16882,10 +16883,83 @@
           "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait.html",
           "model_calls": 6
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/ACID.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/ACID.md",
+                "outcome": "keep",
+                "reason": "I read the whole note and found no verified defect. The opening states the transaction scope and the boundary: ACID stops at the participating database, and it does not give idempotent retries, synchronous replication or cross-service commit. Atomicity is explained with a failure trace and an idempotency caveat. The ACID 'C' is distinguished from the CAP 'C'. The isolation table is labelled as the SQL standard minimum. The engine caveats match PostgreSQL's documentation: Read Uncommitted maps to Read Committed, and Repeatable Read prevents phantoms but still allows serialization anomalies. They also match SQL Server's row-versioning modes. Write skew is shown with a worked example and the SQLSTATE 40001 whole-transaction retry. The durability section covers WAL, group commit and async commit, and notes that ACID's durability depends on the storage stack. The 2PC and saga limits, the pitfalls, the tradeoff tables and the EF Core row-version caveat are accurate and not repeated needlessly. The four Qards each test one task, are self-contained, and cite primary sources. They agree with the note body. known_violations is empty. The prose is direct and has no padding, so any edit would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent full-note read found no concrete factual, structural, voice or question-quality defect. The keep is justified and no edits are proposed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/ACID.md",
+                "verdict": "CLEAN",
+                "summary": "The note states the transaction scope and its limits up front. Each property is explained with its mechanism and caveats, covering isolation-level and engine differences, write skew, WAL and durability configuration, 2PC and sagas. The Qards are self-contained, each tests one task, and each cites a primary source. No edit is warranted.",
+                "page_type": "Concept — frontmatter, MD040 code-fence languages, optional Questions and References; no special-page protections apply.",
+                "current_text_evidence": [
+                  {
+                    "quote": "These guarantees stop at the participating database and the isolation and durability settings it uses.",
+                    "line_start": 19,
+                    "reason": "The opening sets the operating boundary, so the topic is recoverable quickly."
+                  },
+                  {
+                    "quote": "Whether another transaction can observe tentative writes before that outcome is an isolation question, not an atomicity guarantee.",
+                    "line_start": 25,
+                    "reason": "Separates atomicity from isolation precisely, avoiding a common conflation."
+                  },
+                  {
+                    "quote": "The \"C\" in CAP concerns whether clients observe one current value across replicas during failures.",
+                    "line_start": 50,
+                    "reason": "Disambiguates ACID consistency from CAP consistency."
+                  },
+                  {
+                    "quote": "The table gives the SQL standard's minimum guarantees.",
+                    "line_start": 67,
+                    "reason": "The generic isolation table is caveated by engine-specific behavior (PostgreSQL, SQL Server), so version-specific facts are accurate."
+                  },
+                  {
+                    "quote": "Repeating only the final `UPDATE` reuses stale reasoning.",
+                    "line_start": 85,
+                    "reason": "Gives the concrete retry condition after serialization failure (SQLSTATE 40001), preserving mechanism and exception."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: isolation, durability, atomicity and distributed limits are facets of one transaction concept and gain from sitting together; the distributed topics already link to dedicated notes.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 8
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T19:08:31.468883Z",
+    "checkpoint_at": "2026-11-15T19:08:36.108994Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
