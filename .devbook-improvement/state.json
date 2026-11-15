@@ -16955,9 +16955,9 @@
     "version": 1,
     "id": "4bd0bfa98b5d4dbbb28188e2b990362e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-15T19:02:25.981526Z",
-    "elapsed_seconds": 710.6879360000006,
+    "elapsed_seconds": 714.7920297000006,
     "calls_reserved": 17,
     "responses_received": 17,
     "attempted_paths": [
@@ -16967,7 +16967,8 @@
       "Vault/Home/Data Persistence/ACID.md",
       "Vault/Home/Data Persistence/Connection Pooling.md",
       "Vault/Home/Data Persistence/Data Persistence.md",
-      "Vault/Home/Data Persistence/Erasure Coding.md"
+      "Vault/Home/Data Persistence/Erasure Coding.md",
+      "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -17300,10 +17301,88 @@
           },
           "model_calls": 15
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its current text and my knowledge of Elasticsearch/Lucene documentation. Mapping section: text vs keyword, multi-fields, dynamic strict, scaled_float and analyzer behaviour (same analyzer for search unless search_analyzer set; analyzer changes need reindex) are accurate. Segment section: shards as Lucene indexes, immutable segments, buffer plus translog, refresh vs flush vs merge, near-real-time visibility and the note that the term dictionary is not an LSM tree are correct. Query/filter context, the bool example and the tenant-filter correctness point are sound. The use-case table and warning callout correctly flag licensed features, and the operational boundaries (mapping explosion, oversharding, disk watermarks, alias-based reindex) are accurate. Both existing cards each test one coherent task, have self-contained questions, answers consistent with the note, and primary Elastic sources. There are no known violations, frontmatter is valid and the code fences have language identifiers. Prose is direct and non-repetitive, and no concrete defect or essential gap justifies an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note is unchanged and has no known violations. The whole-note audit found no concrete factual, structural or question-quality defect that would justify an edit.",
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole note and found it accurate, well ordered and non-repetitive. It runs from mapping and analysis, through segments, refresh and shards, to query and filter context, use cases and operational limits, and it keeps its mechanisms, costs and conditions. Both cards each test one coherent task with self-contained questions and answer-side Elastic sources, so keeping the note unchanged is justified.",
+                "page_type": "Concept — typed frontmatter present, Questions and References optional but present and valid, code fences have language identifiers, no hand-rolled navigation.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Elasticsearch uses the same analyzer for search unless the field defines a separate search analyzer.",
+                    "line_start": 41,
+                    "reason": "Accurate analyzer behaviour, with the correct consequence that analyzer changes require a reindex behind an alias."
+                  },
+                  {
+                    "quote": "Its segment lifecycle resembles append-and-merge storage, but the term dictionary itself is not an LSM tree.",
+                    "line_start": 56,
+                    "reason": "Precise boundary that prevents a common misconception and keeps the Lucene explanation accurate."
+                  },
+                  {
+                    "quote": "The tenant filter is a correctness boundary, not only a performance hint.",
+                    "line_start": 81,
+                    "reason": "Concrete engineering judgment tied to the query example, stated in direct whiteboard voice."
+                  },
+                  {
+                    "quote": "A cluster near disk capacity can stop allocating shards or block writes before raw bytes reach 100%.",
+                    "line_start": 107,
+                    "reason": "Correct description of disk watermark behaviour; the Operational Boundaries list gives actionable limits without repetition."
+                  },
+                  {
+                    "quote": "Why might Elasticsearch map one logical value as both `text` and `keyword`?",
+                    "line_start": 113,
+                    "reason": "Single focused card whose answer is a dependent explanation of one multi-field decision. It is self-contained, has a retained qard-id and cites primary Elastic docs."
+                  },
+                  {
+                    "quote": "Why can a newly indexed Elasticsearch document be missing from search results for a short time?",
+                    "line_start": 131,
+                    "reason": "Direct conceptual question. The answer explains the refresh mechanism and its cost as one dependent explanation and cites primary sources."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: mapping, segments, querying and operations form one coherent Elasticsearch concept, and no part is independently useful enough to warrant a separate note.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 17
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T19:14:16.668949Z",
+    "checkpoint_at": "2026-11-15T19:14:20.773044Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
