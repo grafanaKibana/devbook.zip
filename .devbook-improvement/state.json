@@ -16728,14 +16728,15 @@
     "version": 1,
     "id": "4bd0bfa98b5d4dbbb28188e2b990362e",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-15T19:02:25.981526Z",
-    "elapsed_seconds": 289.4185926,
+    "elapsed_seconds": 294.0914533,
     "calls_reserved": 6,
     "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/Data Persistence/Caching.md",
-      "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md"
+      "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+      "Vault/Home/Data Persistence/SQL/Replication.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -16817,10 +16818,21 @@
           "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/azure/cosmos-db/introduction",
           "model_calls": 3
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+        "outcome": "proposal_blocked",
+        "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait.html",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait.html",
+          "model_calls": 6
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T19:07:15.399600Z",
+    "checkpoint_at": "2026-11-15T19:07:20.072461Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
