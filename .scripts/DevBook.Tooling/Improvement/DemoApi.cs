@@ -299,16 +299,21 @@ internal sealed class DemoApi : IGitHubApi
         }
         else if (route == "/actions/workflows/vault-validation.yml/runs")
         {
+            result = new JsonObject { ["workflow_runs"] = validations.Copy() };
+        }
+        else if (route == "/actions/workflows/pr-rules.yml/runs")
+        {
             string sha = Uri.UnescapeDataString(path.Split("head_sha=", StringSplitOptions.None)[1].Split('&')[0]);
-            JsonArray runs = validations.Copy();
-            runs.Add(new JsonObject
+            result = new JsonObject
             {
-                ["id"] = titleRunId,
-                ["head_branch"] = ViewPr().Obj("head").Str("ref"), ["head_sha"] = sha,
-                ["path"] = ".github/workflows/vault-validation.yml", ["event"] = "pull_request",
-                ["repository"] = new JsonObject { ["full_name"] = Repo }, ["conclusion"] = "success"
-            });
-            result = new JsonObject { ["workflow_runs"] = runs };
+                ["workflow_runs"] = new JsonArray(new JsonObject
+                {
+                    ["id"] = titleRunId,
+                    ["head_branch"] = ViewPr().Obj("head").Str("ref"), ["head_sha"] = sha,
+                    ["path"] = ".github/workflows/pr-rules.yml", ["event"] = "pull_request",
+                    ["repository"] = new JsonObject { ["full_name"] = Repo }, ["conclusion"] = "success"
+                })
+            };
         }
         else
         {
