@@ -17167,7 +17167,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-16T22:21:57.553782Z",
-    "elapsed_seconds": 337.08303319999993,
+    "elapsed_seconds": 341.06048229999993,
     "calls_reserved": 9,
     "responses_received": 9,
     "attempted_paths": [
@@ -17415,7 +17415,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-16T22:27:34.636388Z",
+    "checkpoint_at": "2026-11-16T22:27:38.613837Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -37681,14 +37681,14 @@
         "topic_id": "ai-ml-4edf0823",
         "notes": [
           {
-            "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
-            "content": "---\ntopic: [AI & ML]\nsubtopic: [Machine Learning]\nsummary: \"Whether predicted probabilities match reality: 0.7 predictions should be right about 70% of the time.\"\nlevel: [\"2\"]\npriority: Medium\nstatus: In Progress\npublish: true\ncreated: \"2026-06-11T07:39:53.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.492Z\"\n---\n\nCalibration asks whether predicted probabilities keep their promises. Among cases scored near 0.7, roughly 70% should be positive. This is separate from discrimination, the ranking property measured by [[ROC-AUC and PR-AUC|ROC-AUC]]. A monotonic transformation can leave AUC unchanged while turning useful probabilities into nonsense. And a model that predicts the base rate for every case can be calibrated while ranking nothing well.\n\nThe distinction becomes operational when code consumes the number. Expected-value rules such as `p × value > cost`, abstention gates, and risk scores all assume that 0.9 means something stable. A miscalibrated score breaks that arithmetic even when the ordering is good. Modern neural networks often lean overconfident, assigning probabilities near 1.0 more often than their observed accuracy supports (Guo et al., 2017).\n\n```mermaid\n---\nconfig:\n  themeVariables:\n    xyChart:\n      plotColorPalette: \"#9CA3AF, #EF4444\"\n---\nxychart-beta\n  title Reliability diagram intuition\n  x-axis Mean predicted probability 0 --> 1\n  y-axis Observed frequency 0 --> 1\n  line [0.0, 0.25, 0.5, 0.75, 1.0]\n  line [0.0, 0.13, 0.32, 0.55, 0.78]\n```\n\nThe gray diagonal marks perfect calibration. The red curve falls below it: predictions near 0.75 are positive only about 0.55 of the time. That model is overconfident. A curve above the diagonal indicates underconfidence.\n\n# Reliability Diagrams\n\nA reliability diagram makes the failure visible. Predictions are grouped into probability bins. Each point compares the bin's mean prediction with its observed positive rate. A calibrated bin lands on the diagonal.\n\n- **Below the diagonal:** the model is overconfident. Observed positives are less common than predicted.\n- **Above the diagonal:** the model is underconfident. Positives occur more often than predicted.\n- **A bent or S-shaped curve:** the error changes across the score range, which a single global correction may not repair.\n\nPair the curve with a score histogram. A point near the diagonal carries little evidence when its bin contains only a handful of cases. Sparse bins can also dominate worst-bin metrics.\n\n# Calibration Metrics\n\n**Brier score** is mean squared error between probability and a 0/1 outcome. Lower is better. As a proper scoring rule, its expected value is minimized by reporting the true probability. Its decomposition separates reliability from resolution, which explains why a constant base-rate forecast can be calibrated yet unhelpful.\n\n**Expected Calibration Error (ECE)** averages the absolute gap between mean confidence and observed frequency across bins, weighted by bin size. It is convenient and fragile. Change the number of bins or switch from equal-width to equal-frequency bins and the value changes. **Maximum Calibration Error (MCE)** keeps only the largest bin gap, making it sensitive to sparse bins.\n\n**Log loss (negative log-likelihood)** is another proper scoring rule. It punishes a confident mistake much more sharply than Brier score. The loss grows without bound as the assigned probability approaches the wrong certainty. The same distinction appears in the [[ROC-AUC and PR-AUC]] comparison.\n\n| Metric | What it captures | Watch out for |\n| --- | --- | --- |\n| Brier score | Calibration + sharpness in one proper score | Less interpretable than a curve. Mixes two effects |\n| ECE | Average calibration gap across confidence bins | Sensitive to bin count and binning scheme |\n| MCE | Worst-bin calibration gap | Dominated by sparse, noisy bins |\n| Log loss | Calibration with heavy penalty for confident mistakes | Explodes on a single confident wrong prediction. Needs clipping |\n| Reliability diagram | Where and how calibration fails | Bins with few samples look misleading |\n\n# Post-hoc Calibration Methods\n\nPost-hoc calibration fits a small mapping from model scores to probabilities. That mapping needs data held out from model fitting, while the final test set stays untouched for evaluation.\n\n- **Platt scaling** fits a sigmoid to model scores. It uses few parameters and works with modest calibration sets, but the sigmoid shape limits what it can correct. ML.NET exposes it through `mlContext.BinaryClassification.Calibrators.Platt`.\n- **Isotonic regression** learns a monotonic step function. It can follow irregular score distortions, though small calibration sets make the steps noisy and prone to overfitting. It is available as `Calibrators.Isotonic` in ML.NET and `CalibratedClassifierCV(method=\"isotonic\")` in scikit-learn.\n- **Temperature scaling** divides logits by one learned scalar before softmax. The argmax stays the same, so class predictions do not change. One scalar handles global overconfidence well, but it cannot fix errors that differ by class or region.\n\nToken-level [[Generation|logprobs]] are sometimes treated as LLM confidence. They need the same empirical check before being used as an escalation gate. A likelihood over the next token is not automatically a calibrated probability that an answer is correct.\n\n# Pitfalls\n\n**Trusting AUC as evidence of good probabilities.** AUC is unchanged by strictly monotonic score transformations. A model can keep an AUC of 0.92 while cases scored at 0.95 are positive only 60% of the time. Probability-driven decisions therefore need a calibration check of their own.\n\n**Calibrating on the test set.** Fitting the mapping on the same cases used for the reported score leaks evaluation data. Use a dedicated calibration split or cross-validated calibration, then evaluate once on a separate test set.\n\n**Reading ECE without the histogram.** A low average can hide a bad high-confidence region with few, expensive cases. Inspect the curve and the number of samples behind each point. MCE can surface the region, though it becomes noisy when the bin is tiny.\n\n**Assuming calibration survives distribution shift.** Calibration belongs to a model-distribution pair. After [[Data Drift]], the old mapping may fail even if ranking quality survives. Measure again on recent labeled data before reusing it.\n\n# Tradeoffs\n\n| Method | Data needed | Flexibility | Effect on accuracy | Best for |\n| --- | --- | --- | --- | --- |\n| Platt scaling | Low | Low — assumes sigmoid distortion | Ranking stays. Thresholded labels may change | Small calibration sets. SVM-style scores |\n| Isotonic regression | High | High — any monotonic distortion | Does not reverse score order, but stepwise ties can change ranking metrics. Thresholded labels may change | Larger sets where the distortion is non-sigmoid |\n| Temperature scaling | Low | Low — single global scalar | Unchanged (argmax preserved) | Neural network logits. Overconfidence |\n| Retrain with a proper scoring loss | Full retrain | Built into training | Can change | Training is controlled and calibration belongs in the model objective |\n\nStart with the curve and a proper scoring rule on held-out data. Ranking-only systems may not need calibrated probabilities. When a formula or person acts on the number, choose the smallest correction that matches the observed shape: temperature scaling for a global logit error, Platt for a sigmoid-shaped distortion, or isotonic with enough data for a more irregular monotonic mapping. Recheck after model or distribution changes.\n\n# References\n\n- [On Calibration of Modern Neural Networks (Guo et al., ICML 2017)](https://arxiv.org/abs/1706.04599)\n- [Probability calibration (scikit-learn user guide)](https://scikit-learn.org/stable/modules/calibration.html)\n- [ML.NET calibrators namespace (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/microsoft.ml.calibrators?view=ml-dotnet-preview)\n- [Verification of Forecasts Expressed in Terms of Probability (Brier, 1950)](https://journals.ametsoc.org/view/journals/mwre/78/1/1520-0493_1950_078_0001_vofeit_2_0_co_2.xml)\n",
-            "hash": "24eb66736260ae943720e9661b239e8fa1af6849de5c5b46008593fe04a5b5aa",
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+            "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"A second-stage pass that rescores, fuses, or diversifies retrieval candidates before context assembly.\"\nlevel: [\"2\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Context Engineering/RAG/Re-ranking\"\nflashcard_uid: \"16bb24ca\"\ncreated: \"2026-02-27T15:52:18.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.490Z\"\n---\n\nRe-ranking is a second-stage rescoring or reordering pass over candidates returned by [[Retrieval]]. It may use a cross-encoder or LLM, lexical scores such as BM25, rank fusion such as RRF, or a diversity rule such as MMR. First-stage retrieval is built for fast recall across a large corpus. The second stage has a narrower job: improve the short list before context reaches the generator.\n\nBut it cannot recover evidence that the first stage missed.\n\nFirst-stage retrieval, whether dense, sparse, or hybrid, might return 20–100 chunks under its initial score. A second stage applies the chosen model, lexical, fusion, or diversity signal. Only the reordered top-k continues to the generator.\n\n```mermaid\nsequenceDiagram\n    participant Q as Query\n    participant R as First-Stage Retrieval\n    participant RR as Reranker\n    participant G as Generator\n    Q->>R: Retrieve top-N candidates\n    R->>RR: N candidates for rescoring\n    Note over RR: Apply model, lexical,<br>fusion, or diversity score\n    RR->>G: Top-k reranked chunks\n```\n\nExample: hybrid retrieval returns 50 candidates for \"what are the SLA penalties for tier-2 partners.\" Ten discuss SLAs in general. Three contain the tier-2 terms, while much of the remaining material concerns partner onboarding. A cross-encoder reads each candidate beside the query and can move the three specific documents into positions 1–3. Without that pass, generic SLA text may crowd the useful clauses out of the prompt.\n\n# Reranking Approaches\n\n## Cross-Encoder Reranking\n\nA cross-encoder concatenates the query with one document, runs the pair through a transformer, and emits a relevance score. Bi-encoders embed the two texts independently. Cross-encoders instead allow full token-level attention across the pair, so wording such as negation or a narrow qualifier can change the score in ways a single embedding may miss.\n\nThat accuracy costs time. Scoring 50 candidates requires 50 query-document inference passes, which rules cross-encoders out for a first-stage scan over millions of chunks. They fit after retrieval because the candidate set is already small.\n\nSBERT provides pretrained cross-encoder models trained on MS MARCO across a speed-quality spectrum. The model card for `cross-encoder/ms-marco-MiniLM-L12-v2` reports [[Monitoring#Retrieval Quality Metrics|nDCG@10]] on TREC Deep Learning 2019 and [[Monitoring#Retrieval Quality Metrics|MRR@10]] on the MS MARCO dev set, with throughput measured on a V100 GPU. In that setup, `cross-encoder/ms-marco-TinyBERT-L2-v2` processes about 9000 docs/sec with lower ranking quality, while `cross-encoder/ms-marco-MiniLM-L12-v2` processes about 960 docs/sec with higher scores on both metrics. Deployed throughput depends on hardware, batch size and sequence length, so it needs its own benchmark.\n\n**Cohere Rerank** packages cross-encoder reranking as a managed API. Models such as `rerank-v3.5` and the `rerank-v4.0` family accept JSON or semi-structured data and handle multilingual queries. This removes model hosting from the application, while adding a provider call, per-query cost, and network latency.\n\n## Late Interaction — ColBERT\n\nColBERT (Contextualized Late Interaction over BERT) produces one embedding per token for both query and document. MaxSim then finds the best document-token match for each query token and sums those similarities. The encoders remain independent. Token-level interaction happens later during scoring.\n\nDocument token embeddings can be computed once at index time. A request only encodes the query, then runs MaxSim over stored vectors. This separates document encoding from query-time scoring.\n\nColBERTv2 adds residual compression that cuts its late-interaction storage footprint by 6–10x. Its paper reports state-of-the-art [[Monitoring#Retrieval Quality Metrics|nDCG]] quality among standalone retrievers across in-domain and out-of-domain benchmarks.\n\nStorage is the harder part. ColBERT keeps one vector per document token, and ordinary single-vector indexes cannot represent that layout. It needs an engine such as PLAID, ColBERTv2's retrieval engine, or a vector store with multi-vector support.\n\n## BM25 Lexical Reranking\n\nBM25 matches query terms against document terms and adjusts the score for term frequency, document length, and how rare each term is across the corpus. It usually serves as a sparse first-stage retriever. It can also provide a cheap lexical pass over dense results when exact wording matters.\n\nExample: a user asks for \"SOC 2 Type II retention exception.\" Dense retrieval may surface semantically similar compliance chunks about audits and data retention. A BM25 pass rewards chunks that contain the exact tokens `SOC`, `2`, `Type II`, `retention`, and `exception`, pushing the policy clause with the real exception language above more generic compliance explanations.\n\nBM25 is particularly good with named entities, error codes, product SKUs, and legal terms. Its weakness is vocabulary brittleness. It does not know that \"customer-managed key\" and \"CMK\" may denote the same concept unless both forms appear or query expansion connects them. In semantic workloads it works best as a lexical guardrail beside dense retrieval.\n\n## MMR — Maximal Marginal Relevance\n\nMaximal Marginal Relevance balances query relevance against similarity to documents already selected. Plain top-k may spend several prompt slots on nearly identical chunks. MMR gives some of that space to evidence that adds a different angle.\n\nThe scoring idea is: `MMR = lambda * relevance_to_query - (1 - lambda) * similarity_to_selected_docs`. A high lambda behaves like normal relevance ranking. A lower lambda increases diversity and reduces duplicate context.\n\nExample: retrieval returns ten chunks from the same incident report because all of them mention \"vector index timeout.\" Plain top-k may spend the entire prompt budget on near-duplicate paragraphs. MMR can keep the strongest incident chunk, then select a configuration page and a monitoring runbook because they add different evidence for the same query.\n\nMMR helps when overlapping chunks or template-heavy pages crowd out coverage. When lambda is too low, though, diversity starts displacing strong supporting evidence. It belongs in pipelines where the generator receives repetitive context. It is a poor fit when an answer depends on several adjacent chunks from one source.\n\n## LLM-as-Reranker\n\nAn LLM reranker judges candidate relevance directly, usually by scoring each chunk or selecting from a small set. Unlike a fixed cross-encoder, it can apply domain rules such as \"prefer current policy over archived policy\" or \"penalize snippets without dollar amounts.\"\n\nExample prompt shape:\n\n```text\nQuery: What SLA credits apply to tier-2 partners?\n\nCandidate A: Tier-2 partners receive a 5 percent service credit after two missed monthly uptime targets...\nCandidate B: Our partner program has three support tiers...\n\nReturn JSON with relevance scores from 0 to 5 and a one-sentence reason for each score.\n```\n\nThe model can read longer evidence than a small cross-encoder, apply business rules, and explain a ranking decision. It also adds substantial latency and cost, and repeated calls may disagree. That makes LLM reranking reasonable for low-volume or high-stakes queries. At high QPS, a trained reranker or managed rerank API is usually the steadier choice. LLM judging can remain an evaluation tool or a difficult-case fallback.\n\n## Score Fusion — RRF and Alternatives\n\nScore fusion merges ranked lists from several retrievers. No new model reads the candidates, so this differs from cross-encoder reranking. The output is still a new order for the generator.\n\n**Reciprocal Rank Fusion (RRF)** is the most common fusion method. It scores each document by summing the reciprocal of its rank in each input list, with each rank offset by a constant k:\n\n```mermaid\nflowchart LR\n    D[Document d] --> S1[Rank 3 in dense retrieval]\n    D --> S2[Rank 1 in BM25]\n    S1 --> F[RRF = 1 over 63 + 1 over 61 = 0.032]\n    S2 --> F\n    F --> R[Combined score 0.032]\n```\n\nThe formula is `RRF_score = sum of 1 / (k + rank_i)`, with k=60 in the original paper. RRF works from positions rather than raw scores. Dense similarity and BM25 values can therefore be combined without forcing them onto a shared scale.\n\n**Linear combination** normalizes scores from each retriever to a common range and computes a weighted sum: `score = alpha * dense_score + (1 - alpha) * sparse_score`. This preserves score magnitude but requires choosing alpha and handling score distributions that shift across query types.\n\nRRF is the safer default because it only depends on rank order. Linear combination becomes useful when one retriever is consistently better and deserves an explicit weight. Fusion and model-based reranking can be stacked: the input lists are merged first, and the fused candidates are then reranked.\n\n# Pitfalls\n\n## Latency Budget Exhaustion\n\nCross-encoder reranking may add 50–200ms per query, depending on model size and candidate count. Against a 500ms total SLA, that is 10–40% of the entire budget. A quality gain in an offline benchmark can arrive with a p95 regression under production concurrency.\n\nA hard candidate cap, often 20–50 documents, bounds the added work, and the model is chosen against the latency budget as well as quality. Measurements use realistic batch sizes and concurrency. A single-query benchmark is too clean.\n\n## Candidate Count Reduction Under Load\n\nUnder load, reducing the reranker input from 100 candidates to 20 is an easy way to protect latency. It can also erase recall. A relevant document at position 35 never reaches the second stage.\n\nDetection: first-stage recall@N is monitored at the candidate count actually passed to the reranker, rather than at a theoretical maximum. If recall@20 is significantly lower than recall@100, the candidate cut is the bottleneck.\n\n## Reranker-Retriever Distribution Mismatch\n\nA reranker trained on short English web passages from MS MARCO may underperform on long technical or multilingual material. Its relevance judgments reflect the training distribution, and unfamiliar document shapes can receive unreliable scores.\n\nMitigation: the reranker is evaluated on domain query-document pairs before adoption. A drop in domain recall means the reranker is demoting relevant material. A domain-adapted or multilingual model may fit better.\n\n## Over-Reliance on Reranking to Fix Retrieval\n\nReranking can only reorder what retrieval found. When the relevant document never enters the candidate set, the fix belongs in [[Chunking]], [[Embeddings|embedding model selection]], query expansion, or another first-stage decision. A stronger reranker cannot recover missing evidence.\n\nDiagnostic: low first-stage candidate Recall@N establishes an upstream ceiling. If Recall@N is high, demotion is established only when relevant evidence inside the first-stage top-k falls outside the reranked top-k at the same k. Low post-rerank Recall@k alone does not establish demotion: evidence can stay beyond k in both orders even after its rank improves, and such exclusion can occur even when the query needs no more relevant evidence than k can hold; on its own it does not show whether a larger k or a better ranking is the right repair.\n\n# Tradeoffs\n\n| Approach | Quality | Latency per query | Infrastructure | Best for |\n| --- | --- | --- | --- | --- |\n| No reranking | Baseline -- retrieval order only | Lowest -- no extra scoring | None | Simple corpora where first-stage ranking is sufficient |\n| BM25 lexical reranking | Moderate -- exact term precision | Low -- sparse scoring over candidates | Sparse index or BM25 scorer | Queries with identifiers, acronyms, policy terms, error codes |\n| Score fusion only -- RRF | Moderate -- better ordering from multiple signals | Minimal -- arithmetic on ranks | None -- works with any retriever pair | Hybrid retrieval where dense and sparse complement each other |\n| MMR diversity reranking | Moderate -- less redundant context | Low to moderate -- pairwise similarity over selected chunks | Embeddings or similarity scores for candidates | Context windows crowded by near-duplicate chunks |\n| Cross-encoder -- small model | Often stronger than first-stage scores, but the gain needs measurement on the domain | One model pass per candidate pair; actual cost depends on model, hardware, sequence length, and batch size and needs benchmarking | GPU or CPU inference | Quality-sensitive pipelines with moderate latency budgets |\n| Cross-encoder -- large model | More capacity, not a guaranteed quality win | Higher pair-scoring cost; actual cost needs benchmarking in the deployed configuration | Usually GPU inference | High-stakes domains where measured gains justify latency |\n| ColBERT late interaction | Token-level alignment with pre-computed documents | Query encoding plus MaxSim over stored document vectors | Multi-vector storage -- specialized index | Latency-sensitive pipelines where held-out retrieval improves over a bi-encoder |\n| LLM-as-reranker | High but variable -- instruction-following judgment | Highest -- model call over candidate text | LLM API or hosted model plus output validation | Low-volume, high-stakes queries needing explainable ranking rules |\n| Managed API -- Cohere or Azure | High -- no infrastructure | Network round-trip + provider latency | None -- API call | Teams without ML infrastructure or needing fast integration |\n\nA pipeline without a reranker is the baseline, and its measured failures show what to add. BM25 or RRF helps when lexical and dense signals cover different queries. MMR earns its place when duplicate chunks waste prompt space. A model-based reranker is justified when the right evidence is already present but ordered badly. If recall is broken, the fix belongs in retrieval, not in a reranker. LLM reranking belongs only where business judgment or an explained decision is worth the extra latency and cost.\n\n# Questions\n\n> [!qard]- Why does a RAG pipeline retrieve candidates first and then rerank them with a cross-encoder?\n> The two stages split the work between a fast scorer that can cover the whole corpus and a slower, finer-grained scorer that can only afford a short list. First-stage retrieval cheaply finds candidates across the corpus. A cross-encoder then rescores only those candidates; running it over every document would be far too slow.\n>\n> | Aspect | Bi-encoder (first-stage retrieval) | Cross-encoder (reranker) |\n> |---|---|---|\n> | How it scores | Embeds the query and each document separately. Document vectors are computed once at indexing time and compared with one query vector | Reads the query and one candidate together in a single model pass and outputs a relevance score |\n> | Relevance judgment | Coarser, because query and document are encoded without seeing each other | Can be finer, because attention spans both texts, so a qualifier or negation in the query can change the score. This often ranks better, but the gain depends on the model and the domain |\n> | Cost per query | One query encoding plus a fast index search | One model inference per candidate |\n> | Role | Recall: getting the relevant evidence into a candidate list, often tens of items | Precision: putting the best candidates into the small top-k that reaches the prompt |\n>\n> Keyword search such as BM25 can also fill the first-stage role. Whatever the first stage is, the reranker only reorders what it returned: if the relevant document is not among the candidates, no reranker can recover it. Because the ranking gain is not guaranteed, it is confirmed on domain queries against the first-stage order before the reranker is adopted.\n>\n> [Retrieve & Re-Rank (Sentence Transformers)](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html)\n\n<!-- qard-id: 466ddf4f-9bc8-46dc-82f6-34b0e669789f -->\n> [!qard]- Why can a reranker improve retrieval metrics without improving the generated answer?\n> A retrieval metric can improve in ranking positions that never reach the generator. Even when better evidence does reach the generator, the model still has to use it correctly.\n>\n> - **Outside the final cutoff:** a ranking metric is often computed over more results than the pipeline puts into the prompt. In this example, only the top 5 reranked chunks are assembled. Moving a relevant chunk from position 15 to position 8 raises a rank-sensitive metric such as nDCG@20, but the model input stays identical.\n> - **Generation-side limits:** retrieval and generation fail independently. If the needed evidence was already in the prompt, reordering it may not change the answer. If the model ignores, misreads or contradicts the evidence, better retrieval does not fix that.\n> \n> Finding where the gain lands therefore requires following the same queries through each stage. The stages are candidate Recall@N before reranking, the ranking after reranking at the cutoff actually used, and the assembled context. Answer quality is then evaluated on representative queries. A retrieval metric gain alone does not establish a user-visible benefit.\n>\n> [Retrieve & Re-Rank (Sentence Transformers)](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html) · [Optimizing LLM accuracy (OpenAI)](https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy)\n\n<!-- qard-id: 2525edd1-368e-4d10-a58a-4bc82c562674 -->\n> [!qard]- How can reranker failures be distinguished from first-stage retrieval limits?\n> A reranker trained on short web passages may misjudge long technical documents or unfamiliar terminology. It can then worsen results by pushing relevant evidence from inside the first-stage top-k to below that cutoff. A small candidate set or low first-stage recall causes a different failure. A reranker only reorders the candidates it receives, so it cannot add relevant evidence that is missing from them.\n>\n> Domain queries tell these cases apart when [[Monitoring#Retrieval Quality Metrics|recall and precision]] are measured at matched points:\n>\n> - **Missing candidates:** low candidate Recall@N before reranking means the evidence was absent before reranking began. That is a first-stage limit.\n> - **Demotion:** the comparison cuts the first-stage order and the reranked order at the same final k. Demotion means relevant evidence was inside the first-stage top-k but falls outside the reranked top-k. A net drop in Recall@k between the two orders signals it in aggregate. A low absolute Precision@k does not show demotion. With one relevant document ranked first in both orders, Recall@N and Recall@10 are both 1.0, yet Precision@10 is only 0.1, and nothing was demoted.\n> - **No promotion into top-k:** when relevant candidates fall outside top-k in both orders, their ranks in the two orders show whether reranking helped. A move from rank 50 to rank 11 at k = 10 is a partial improvement that still misses the final cutoff. An unchanged or worse rank means the reranker did not help that evidence. Exclusion in both orders does not by itself show that k is too small. Cutoff capacity matters only when the query needs more distinct relevant pieces than k can hold.\n\n# References\n\n- [Retrieve and rerank pipeline — bi-encoder retrieval plus cross-encoder reranking (SBERT)](https://sbert.net/examples/applications/retrieve_rerank/README.html)\n- [ColBERTv2 — residual compression and denoised supervision (NAACL 2022)](https://arxiv.org/abs/2112.01488)\n- [The Probabilistic Relevance Framework BM25 and beyond — lexical ranking model background (Foundations and Trends in Information Retrieval)](https://www.staff.city.ac.uk/~sbrp622/papers/foundations_bm25_review.pdf)\n- [The use of MMR, diversity-based reranking for reordering documents and producing summaries (SIGIR 1998)](https://dl.acm.org/doi/10.1145/290941.291025)\n- [RankGPT — LLM-based passage reranking with permutation generation (arXiv)](https://arxiv.org/abs/2304.09542)\n- [Reciprocal Rank Fusion outperforms Condorcet and individual rank learning methods (SIGIR 2009)](https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf)\n",
+            "hash": "63cb05382dabdd0590b1372368c5aa7db3fc81bfc409c98913503900d3631f72",
             "topic": "AI & ML",
             "violations": [],
             "needs_fixing_ids": [],
             "repair_input_hash": "",
-            "selection_reason": "new"
+            "selection_reason": "changed"
           }
         ],
         "feedback": [],
@@ -37701,48 +37701,264 @@
         "version": 1,
         "edits": [
           {
-            "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
-            "expected_hash": "24eb66736260ae943720e9661b239e8fa1af6849de5c5b46008593fe04a5b5aa",
-            "before": "The loss grows without bound as the assigned probability approaches the wrong certainty. The same distinction appears in the [[ROC-AUC and PR-AUC]] comparison.",
-            "after": "The loss grows without bound as the assigned probability approaches the wrong certainty.",
-            "reason": "Removes a dangling cross-reference sentence whose 'same distinction' has no clear referent; the ROC-AUC link already appears in the opening paragraph.",
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+            "expected_hash": "63cb05382dabdd0590b1372368c5aa7db3fc81bfc409c98913503900d3631f72",
+            "before": "Diagnostic: low first-stage candidate Recall@N establishes an upstream ceiling. If Recall@N is high, demotion is established only when relevant evidence inside the first-stage top-k falls outside the reranked top-k at the same k. Low post-rerank Recall@k alone does not establish demotion: evidence can stay beyond k in both orders even after its rank improves, and such exclusion can occur even when the query needs no more relevant evidence than k can hold; on its own it does not show whether a larger k or a better ranking is the right repair.",
+            "after": "Diagnostic: low first-stage candidate Recall@N sets an upstream ceiling. If Recall@N is high, demotion is shown only when relevant evidence inside the first-stage top-k falls outside the reranked top-k at the same k. Low post-rerank Recall@k alone does not show demotion, because the evidence can sit beyond k in both orders. Comparing its ranks in the two orders shows whether reranking helped, and that comparison alone does not say whether a larger k or a better ranking is the right repair.",
+            "reason": "Splits one overloaded sentence into a clearer diagnostic sequence, keeping every condition.",
             "kind": "note",
             "learning_target": "same",
             "essential_meanings": [
-              "Log loss grows without bound as probability assigned to the true outcome approaches zero"
+              "low Recall@N is an upstream ceiling",
+              "demotion requires evidence in first-stage top-k leaving reranked top-k at same k",
+              "low Recall@k alone does not show demotion"
             ],
             "sources": [],
             "feedback_keys": [],
-            "problem": "The log-loss paragraph ends with a vague sentence claiming 'the same distinction' appears in the ROC-AUC/PR-AUC note, but no distinction is identified, so the reader cannot tell what is meant.",
-            "reader_benefit": "The metrics section ends on the concrete log-loss behavior without an unexplained pointer."
+            "problem": "The Over-Reliance diagnostic packs several conditions into one hard-to-parse sentence.",
+            "reader_benefit": "The diagnostic can be read and recalled step by step without losing precision."
           }
         ],
         "dispositions": [
           {
-            "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
             "outcome": "changed",
-            "reason": "Audited whole note: calibration vs discrimination, reliability diagram reading, Brier/ECE/MCE/log loss, Platt/isotonic/temperature scaling, pitfalls and tradeoff table are accurate and consistent with Guo et al. and scikit-learn docs. Only a vague dangling cross-reference sentence was removed to tighten the metrics section."
+            "reason": "Audited the full note: RRF arithmetic (1/63+1/61≈0.032), the MMR formula, ColBERT/MaxSim description, BM25, tradeoff table and the three cards agree with each other and with the standard sources. One overloaded diagnostic sentence in the Over-Reliance pitfall was split for readability with all conditions preserved."
           }
         ],
         "feedback": []
       },
       "source_hashes": {
-        "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": "24eb66736260ae943720e9661b239e8fa1af6849de5c5b46008593fe04a5b5aa"
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md": "63cb05382dabdd0590b1372368c5aa7db3fc81bfc409c98913503900d3631f72"
       },
       "feedback_keys": [],
       "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "repair_inputs": {
-        "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": ""
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md": ""
       },
       "prepared_source_version": 1,
-      "prepared_at": "2026-11-16T22:22:40.615950Z",
-      "feedback_snapshot": [],
-      "blocked_review": {
-        "stage": "deterministic_application",
-        "reason": "wikilink removal requires explicit target-specific semantic rationale"
+      "prepared_at": "2026-11-16T22:27:09.732024Z",
+      "review_evidence": {
+        "raw_review": {
+          "verdict": "CHANGES REQUIRED",
+          "overall_reason": "The single edit splits the diagnostic sentence but changes its meaning. It introduces an ambiguous antecedent and drops the explicit k-capacity condition. The note is otherwise sound.",
+          "notes": [
+            {
+              "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+              "verdict": "CHANGES REQUIRED",
+              "summary": "The note is accurate and well organized, and the RRF arithmetic, MMR formula and ColBERT description check out. The proposed edit breaks up the long diagnostic sentence. In doing so it reattaches the 'does not say whether a larger k or a better ranking is the right repair' claim to the rank comparison instead of to the low Recall@k, and it removes the condition about query need versus k capacity. Its antecedent 'its ranks' is also ambiguous. The result is not a clear net gain.",
+              "page_type": "Concept note with Questions and References; the Qard callouts and their ID comments are protected.",
+              "current_text_evidence": [
+                {
+                  "quote": "Diagnostic: low first-stage candidate Recall@N sets an upstream ceiling.",
+                  "line_start": 125,
+                  "reason": "This is the edited sentence. The wording is fine, but the verb change from 'establishes' to 'sets' is cosmetic."
+                },
+                {
+                  "quote": "Comparing its ranks in the two orders shows whether reranking helped, and that comparison alone does not say whether a larger k or a better ranking is the right repair.",
+                  "line_start": 125,
+                  "reason": "'Its' has no clear referent. The claim now attaches to the rank comparison rather than to low Recall@k. The original condition that exclusion can occur even when k can hold all the needed evidence is lost."
+                },
+                {
+                  "quote": "Cutoff capacity matters only when the query needs more distinct relevant pieces than k can hold.",
+                  "line_start": 147,
+                  "reason": "The card states the k-capacity condition precisely, so the pitfall paragraph now diverges from it."
+                },
+                {
+                  "quote": "But it cannot recover evidence that the first stage missed.",
+                  "line_start": 10,
+                  "reason": "This one-sentence paragraph starting with 'But' is a minor readability issue left unaddressed, and it could be merged into the previous paragraph."
+                }
+              ],
+              "target_resolution": "UNRESOLVED",
+              "split_suggestion": "No split: the note covers one coherent topic, reranking approaches with their pitfalls and tradeoffs, and the parts depend on each other.",
+              "findings": [
+                {
+                  "severity": "Medium",
+                  "dimension": "Accuracy/Clarity",
+                  "location": "## Over-Reliance on Reranking to Fix Retrieval, Diagnostic paragraph",
+                  "evidence": "Edited text: 'Comparing its ranks in the two orders shows whether reranking helped, and that comparison alone does not say whether a larger k or a better ranking is the right repair.'",
+                  "effect": "The meaning shifts and the antecedent 'its' is ambiguous. The condition that exclusion can occur even when k can hold all the needed evidence is lost, even though the card keeps it. The sentence is still long and convoluted, so the stated readability benefit is not realized.",
+                  "fix": "Keep the sentence split, but make the subject explicit. For example: 'Low post-rerank Recall@k alone does not show demotion, because relevant evidence can sit beyond k in both orders. Comparing its rank in each order shows whether reranking helped. Neither measurement alone shows whether a larger k or a better ranking is the right repair.' Preserve the capacity condition, or leave the original sentence unchanged."
+                }
+              ],
+              "source_checks": [],
+              "rejection_equivalence": [],
+              "quality": {
+                "accuracy": "PASS",
+                "clarity": "FAIL",
+                "question_quality": "PASS",
+                "identity_safety": "PASS",
+                "rules_compliance": "PASS"
+              }
+            }
+          ],
+          "change_checks": [
+            {
+              "edit_index": 0,
+              "verdict": "NOT WORTHWHILE",
+              "reason": "The edit changes what the final claim attaches to, leaves 'its ranks' ambiguous, drops the k-capacity condition that the card keeps, and replaces 'establishes' with 'sets'/'shown' without a real benefit. The sentence is not materially clearer, and the essential meaning is not fully preserved."
+            }
+          ]
+        },
+        "bindings": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+            "citation_index": 0,
+            "reported_line_start": 125,
+            "resolved_line_start": 139
+          },
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+            "citation_index": 1,
+            "reported_line_start": 125,
+            "resolved_line_start": 139
+          },
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+            "citation_index": 2,
+            "reported_line_start": 147,
+            "resolved_line_start": 192
+          },
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+            "citation_index": 3,
+            "reported_line_start": 10,
+            "resolved_line_start": 19
+          }
+        ],
+        "source_hashes": {
+          "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md": "827d474fc33e440fb0962aab2b914519d514ab4593ed8cd1306c2aa209dbf22d"
+        },
+        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
       },
-      "failed_at": "2026-11-16T22:22:44.861585Z"
+      "completed_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The single edit splits the diagnostic sentence but changes its meaning. It introduces an ambiguous antecedent and drops the explicit k-capacity condition. The note is otherwise sound.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is accurate and well organized, and the RRF arithmetic, MMR formula and ColBERT description check out. The proposed edit breaks up the long diagnostic sentence. In doing so it reattaches the 'does not say whether a larger k or a better ranking is the right repair' claim to the rank comparison instead of to the low Recall@k, and it removes the condition about query need versus k capacity. Its antecedent 'its ranks' is also ambiguous. The result is not a clear net gain.",
+            "page_type": "Concept note with Questions and References; the Qard callouts and their ID comments are protected.",
+            "current_text_evidence": [
+              {
+                "quote": "Diagnostic: low first-stage candidate Recall@N sets an upstream ceiling.",
+                "line_start": 139,
+                "reason": "This is the edited sentence. The wording is fine, but the verb change from 'establishes' to 'sets' is cosmetic."
+              },
+              {
+                "quote": "Comparing its ranks in the two orders shows whether reranking helped, and that comparison alone does not say whether a larger k or a better ranking is the right repair.",
+                "line_start": 139,
+                "reason": "'Its' has no clear referent. The claim now attaches to the rank comparison rather than to low Recall@k. The original condition that exclusion can occur even when k can hold all the needed evidence is lost."
+              },
+              {
+                "quote": "Cutoff capacity matters only when the query needs more distinct relevant pieces than k can hold.",
+                "line_start": 192,
+                "reason": "The card states the k-capacity condition precisely, so the pitfall paragraph now diverges from it."
+              },
+              {
+                "quote": "But it cannot recover evidence that the first stage missed.",
+                "line_start": 19,
+                "reason": "This one-sentence paragraph starting with 'But' is a minor readability issue left unaddressed, and it could be merged into the previous paragraph."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the note covers one coherent topic, reranking approaches with their pitfalls and tradeoffs, and the parts depend on each other.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy/Clarity",
+                "location": "## Over-Reliance on Reranking to Fix Retrieval, Diagnostic paragraph",
+                "evidence": "Edited text: 'Comparing its ranks in the two orders shows whether reranking helped, and that comparison alone does not say whether a larger k or a better ranking is the right repair.'",
+                "effect": "The meaning shifts and the antecedent 'its' is ambiguous. The condition that exclusion can occur even when k can hold all the needed evidence is lost, even though the card keeps it. The sentence is still long and convoluted, so the stated readability benefit is not realized.",
+                "fix": "Keep the sentence split, but make the subject explicit. For example: 'Low post-rerank Recall@k alone does not show demotion, because relevant evidence can sit beyond k in both orders. Comparing its rank in each order shows whether reranking helped. Neither measurement alone shows whether a larger k or a better ranking is the right repair.' Preserve the capacity condition, or leave the original sentence unchanged."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": [
+          {
+            "edit_index": 0,
+            "verdict": "NOT WORTHWHILE",
+            "reason": "The edit changes what the final claim attaches to, leaves 'its ranks' ambiguous, drops the k-capacity condition that the card keeps, and replaces 'establishes' with 'sets'/'shown' without a real benefit. The sentence is not materially clearer, and the essential meaning is not fully preserved."
+          }
+        ]
+      },
+      "blocked_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The single edit splits the diagnostic sentence but changes its meaning. It introduces an ambiguous antecedent and drops the explicit k-capacity condition. The note is otherwise sound.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is accurate and well organized, and the RRF arithmetic, MMR formula and ColBERT description check out. The proposed edit breaks up the long diagnostic sentence. In doing so it reattaches the 'does not say whether a larger k or a better ranking is the right repair' claim to the rank comparison instead of to the low Recall@k, and it removes the condition about query need versus k capacity. Its antecedent 'its ranks' is also ambiguous. The result is not a clear net gain.",
+            "page_type": "Concept note with Questions and References; the Qard callouts and their ID comments are protected.",
+            "current_text_evidence": [
+              {
+                "quote": "Diagnostic: low first-stage candidate Recall@N sets an upstream ceiling.",
+                "line_start": 139,
+                "reason": "This is the edited sentence. The wording is fine, but the verb change from 'establishes' to 'sets' is cosmetic."
+              },
+              {
+                "quote": "Comparing its ranks in the two orders shows whether reranking helped, and that comparison alone does not say whether a larger k or a better ranking is the right repair.",
+                "line_start": 139,
+                "reason": "'Its' has no clear referent. The claim now attaches to the rank comparison rather than to low Recall@k. The original condition that exclusion can occur even when k can hold all the needed evidence is lost."
+              },
+              {
+                "quote": "Cutoff capacity matters only when the query needs more distinct relevant pieces than k can hold.",
+                "line_start": 192,
+                "reason": "The card states the k-capacity condition precisely, so the pitfall paragraph now diverges from it."
+              },
+              {
+                "quote": "But it cannot recover evidence that the first stage missed.",
+                "line_start": 19,
+                "reason": "This one-sentence paragraph starting with 'But' is a minor readability issue left unaddressed, and it could be merged into the previous paragraph."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the note covers one coherent topic, reranking approaches with their pitfalls and tradeoffs, and the parts depend on each other.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy/Clarity",
+                "location": "## Over-Reliance on Reranking to Fix Retrieval, Diagnostic paragraph",
+                "evidence": "Edited text: 'Comparing its ranks in the two orders shows whether reranking helped, and that comparison alone does not say whether a larger k or a better ranking is the right repair.'",
+                "effect": "The meaning shifts and the antecedent 'its' is ambiguous. The condition that exclusion can occur even when k can hold all the needed evidence is lost, even though the card keeps it. The sentence is still long and convoluted, so the stated readability benefit is not realized.",
+                "fix": "Keep the sentence split, but make the subject explicit. For example: 'Low post-rerank Recall@k alone does not show demotion, because relevant evidence can sit beyond k in both orders. Comparing its rank in each order shows whether reranking helped. Neither measurement alone shows whether a larger k or a better ranking is the right repair.' Preserve the capacity condition, or leave the original sentence unchanged."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": [
+          {
+            "edit_index": 0,
+            "verdict": "NOT WORTHWHILE",
+            "reason": "The edit changes what the final claim attaches to, leaves 'its ranks' ambiguous, drops the k-capacity condition that the card keeps, and replaces 'establishes' with 'sets'/'shown' without a real benefit. The sentence is not materially clearer, and the essential meaning is not fully preserved."
+          }
+        ]
+      },
+      "feedback_snapshot": []
     },
     "cloud-b977b950": {
       "workload_id": "5fe9ecfcc7344982bcd2cdfba7482c21",
@@ -48258,6 +48474,77 @@
         "reason": "proposal must preserve frontmatter exactly"
       },
       "failed_at": "2026-11-14T18:19:50.304865Z"
+    },
+    "f79768d95c48147659d5e2354b6e6b62a280878ad25d664f5aa6eed8dc796197": {
+      "workload_id": "33a5bcd3129e4228a0be70053399144d",
+      "topic_id": "ai-ml-4edf0823",
+      "batch": {
+        "topic": "AI & ML",
+        "topic_id": "ai-ml-4edf0823",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+            "content": "---\ntopic: [AI & ML]\nsubtopic: [Machine Learning]\nsummary: \"Whether predicted probabilities match reality: 0.7 predictions should be right about 70% of the time.\"\nlevel: [\"2\"]\npriority: Medium\nstatus: In Progress\npublish: true\ncreated: \"2026-06-11T07:39:53.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.492Z\"\n---\n\nCalibration asks whether predicted probabilities keep their promises. Among cases scored near 0.7, roughly 70% should be positive. This is separate from discrimination, the ranking property measured by [[ROC-AUC and PR-AUC|ROC-AUC]]. A monotonic transformation can leave AUC unchanged while turning useful probabilities into nonsense. And a model that predicts the base rate for every case can be calibrated while ranking nothing well.\n\nThe distinction becomes operational when code consumes the number. Expected-value rules such as `p × value > cost`, abstention gates, and risk scores all assume that 0.9 means something stable. A miscalibrated score breaks that arithmetic even when the ordering is good. Modern neural networks often lean overconfident, assigning probabilities near 1.0 more often than their observed accuracy supports (Guo et al., 2017).\n\n```mermaid\n---\nconfig:\n  themeVariables:\n    xyChart:\n      plotColorPalette: \"#9CA3AF, #EF4444\"\n---\nxychart-beta\n  title Reliability diagram intuition\n  x-axis Mean predicted probability 0 --> 1\n  y-axis Observed frequency 0 --> 1\n  line [0.0, 0.25, 0.5, 0.75, 1.0]\n  line [0.0, 0.13, 0.32, 0.55, 0.78]\n```\n\nThe gray diagonal marks perfect calibration. The red curve falls below it: predictions near 0.75 are positive only about 0.55 of the time. That model is overconfident. A curve above the diagonal indicates underconfidence.\n\n# Reliability Diagrams\n\nA reliability diagram makes the failure visible. Predictions are grouped into probability bins. Each point compares the bin's mean prediction with its observed positive rate. A calibrated bin lands on the diagonal.\n\n- **Below the diagonal:** the model is overconfident. Observed positives are less common than predicted.\n- **Above the diagonal:** the model is underconfident. Positives occur more often than predicted.\n- **A bent or S-shaped curve:** the error changes across the score range, which a single global correction may not repair.\n\nPair the curve with a score histogram. A point near the diagonal carries little evidence when its bin contains only a handful of cases. Sparse bins can also dominate worst-bin metrics.\n\n# Calibration Metrics\n\n**Brier score** is mean squared error between probability and a 0/1 outcome. Lower is better. As a proper scoring rule, its expected value is minimized by reporting the true probability. Its decomposition separates reliability from resolution, which explains why a constant base-rate forecast can be calibrated yet unhelpful.\n\n**Expected Calibration Error (ECE)** averages the absolute gap between mean confidence and observed frequency across bins, weighted by bin size. It is convenient and fragile. Change the number of bins or switch from equal-width to equal-frequency bins and the value changes. **Maximum Calibration Error (MCE)** keeps only the largest bin gap, making it sensitive to sparse bins.\n\n**Log loss (negative log-likelihood)** is another proper scoring rule. It punishes a confident mistake much more sharply than Brier score. The loss grows without bound as the assigned probability approaches the wrong certainty. The same distinction appears in the [[ROC-AUC and PR-AUC]] comparison.\n\n| Metric | What it captures | Watch out for |\n| --- | --- | --- |\n| Brier score | Calibration + sharpness in one proper score | Less interpretable than a curve. Mixes two effects |\n| ECE | Average calibration gap across confidence bins | Sensitive to bin count and binning scheme |\n| MCE | Worst-bin calibration gap | Dominated by sparse, noisy bins |\n| Log loss | Calibration with heavy penalty for confident mistakes | Explodes on a single confident wrong prediction. Needs clipping |\n| Reliability diagram | Where and how calibration fails | Bins with few samples look misleading |\n\n# Post-hoc Calibration Methods\n\nPost-hoc calibration fits a small mapping from model scores to probabilities. That mapping needs data held out from model fitting, while the final test set stays untouched for evaluation.\n\n- **Platt scaling** fits a sigmoid to model scores. It uses few parameters and works with modest calibration sets, but the sigmoid shape limits what it can correct. ML.NET exposes it through `mlContext.BinaryClassification.Calibrators.Platt`.\n- **Isotonic regression** learns a monotonic step function. It can follow irregular score distortions, though small calibration sets make the steps noisy and prone to overfitting. It is available as `Calibrators.Isotonic` in ML.NET and `CalibratedClassifierCV(method=\"isotonic\")` in scikit-learn.\n- **Temperature scaling** divides logits by one learned scalar before softmax. The argmax stays the same, so class predictions do not change. One scalar handles global overconfidence well, but it cannot fix errors that differ by class or region.\n\nToken-level [[Generation|logprobs]] are sometimes treated as LLM confidence. They need the same empirical check before being used as an escalation gate. A likelihood over the next token is not automatically a calibrated probability that an answer is correct.\n\n# Pitfalls\n\n**Trusting AUC as evidence of good probabilities.** AUC is unchanged by strictly monotonic score transformations. A model can keep an AUC of 0.92 while cases scored at 0.95 are positive only 60% of the time. Probability-driven decisions therefore need a calibration check of their own.\n\n**Calibrating on the test set.** Fitting the mapping on the same cases used for the reported score leaks evaluation data. Use a dedicated calibration split or cross-validated calibration, then evaluate once on a separate test set.\n\n**Reading ECE without the histogram.** A low average can hide a bad high-confidence region with few, expensive cases. Inspect the curve and the number of samples behind each point. MCE can surface the region, though it becomes noisy when the bin is tiny.\n\n**Assuming calibration survives distribution shift.** Calibration belongs to a model-distribution pair. After [[Data Drift]], the old mapping may fail even if ranking quality survives. Measure again on recent labeled data before reusing it.\n\n# Tradeoffs\n\n| Method | Data needed | Flexibility | Effect on accuracy | Best for |\n| --- | --- | --- | --- | --- |\n| Platt scaling | Low | Low — assumes sigmoid distortion | Ranking stays. Thresholded labels may change | Small calibration sets. SVM-style scores |\n| Isotonic regression | High | High — any monotonic distortion | Does not reverse score order, but stepwise ties can change ranking metrics. Thresholded labels may change | Larger sets where the distortion is non-sigmoid |\n| Temperature scaling | Low | Low — single global scalar | Unchanged (argmax preserved) | Neural network logits. Overconfidence |\n| Retrain with a proper scoring loss | Full retrain | Built into training | Can change | Training is controlled and calibration belongs in the model objective |\n\nStart with the curve and a proper scoring rule on held-out data. Ranking-only systems may not need calibrated probabilities. When a formula or person acts on the number, choose the smallest correction that matches the observed shape: temperature scaling for a global logit error, Platt for a sigmoid-shaped distortion, or isotonic with enough data for a more irregular monotonic mapping. Recheck after model or distribution changes.\n\n# References\n\n- [On Calibration of Modern Neural Networks (Guo et al., ICML 2017)](https://arxiv.org/abs/1706.04599)\n- [Probability calibration (scikit-learn user guide)](https://scikit-learn.org/stable/modules/calibration.html)\n- [ML.NET calibrators namespace (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/api/microsoft.ml.calibrators?view=ml-dotnet-preview)\n- [Verification of Forecasts Expressed in Terms of Probability (Brier, 1950)](https://journals.ametsoc.org/view/journals/mwre/78/1/1520-0493_1950_078_0001_vofeit_2_0_co_2.xml)\n",
+            "hash": "24eb66736260ae943720e9661b239e8fa1af6849de5c5b46008593fe04a5b5aa",
+            "topic": "AI & ML",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [
+          {
+            "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+            "expected_hash": "24eb66736260ae943720e9661b239e8fa1af6849de5c5b46008593fe04a5b5aa",
+            "before": "The loss grows without bound as the assigned probability approaches the wrong certainty. The same distinction appears in the [[ROC-AUC and PR-AUC]] comparison.",
+            "after": "The loss grows without bound as the assigned probability approaches the wrong certainty.",
+            "reason": "Removes a dangling cross-reference sentence whose 'same distinction' has no clear referent; the ROC-AUC link already appears in the opening paragraph.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "Log loss grows without bound as probability assigned to the true outcome approaches zero"
+            ],
+            "sources": [],
+            "feedback_keys": [],
+            "problem": "The log-loss paragraph ends with a vague sentence claiming 'the same distinction' appears in the ROC-AUC/PR-AUC note, but no distinction is identified, so the reader cannot tell what is meant.",
+            "reader_benefit": "The metrics section ends on the concrete log-loss behavior without an unexplained pointer."
+          }
+        ],
+        "dispositions": [
+          {
+            "path": "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+            "outcome": "changed",
+            "reason": "Audited whole note: calibration vs discrimination, reliability diagram reading, Brier/ECE/MCE/log loss, Platt/isotonic/temperature scaling, pitfalls and tradeoff table are accurate and consistent with Guo et al. and scikit-learn docs. Only a vague dangling cross-reference sentence was removed to tighten the metrics section."
+          }
+        ],
+        "feedback": []
+      },
+      "source_hashes": {
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": "24eb66736260ae943720e9661b239e8fa1af6849de5c5b46008593fe04a5b5aa"
+      },
+      "feedback_keys": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-16T22:22:40.615950Z",
+      "feedback_snapshot": [],
+      "blocked_review": {
+        "stage": "deterministic_application",
+        "reason": "wikilink removal requires explicit target-specific semantic rationale"
+      },
+      "failed_at": "2026-11-16T22:22:44.861585Z"
     }
   },
   "completed_review_holds": {
@@ -49537,102 +49824,7 @@
     },
     "prepared_source_version": 1,
     "prepared_at": "2026-11-16T22:27:09.732024Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CHANGES REQUIRED",
-        "overall_reason": "The single edit splits the diagnostic sentence but changes its meaning. It introduces an ambiguous antecedent and drops the explicit k-capacity condition. The note is otherwise sound.",
-        "notes": [
-          {
-            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-            "verdict": "CHANGES REQUIRED",
-            "summary": "The note is accurate and well organized, and the RRF arithmetic, MMR formula and ColBERT description check out. The proposed edit breaks up the long diagnostic sentence. In doing so it reattaches the 'does not say whether a larger k or a better ranking is the right repair' claim to the rank comparison instead of to the low Recall@k, and it removes the condition about query need versus k capacity. Its antecedent 'its ranks' is also ambiguous. The result is not a clear net gain.",
-            "page_type": "Concept note with Questions and References; the Qard callouts and their ID comments are protected.",
-            "current_text_evidence": [
-              {
-                "quote": "Diagnostic: low first-stage candidate Recall@N sets an upstream ceiling.",
-                "line_start": 125,
-                "reason": "This is the edited sentence. The wording is fine, but the verb change from 'establishes' to 'sets' is cosmetic."
-              },
-              {
-                "quote": "Comparing its ranks in the two orders shows whether reranking helped, and that comparison alone does not say whether a larger k or a better ranking is the right repair.",
-                "line_start": 125,
-                "reason": "'Its' has no clear referent. The claim now attaches to the rank comparison rather than to low Recall@k. The original condition that exclusion can occur even when k can hold all the needed evidence is lost."
-              },
-              {
-                "quote": "Cutoff capacity matters only when the query needs more distinct relevant pieces than k can hold.",
-                "line_start": 147,
-                "reason": "The card states the k-capacity condition precisely, so the pitfall paragraph now diverges from it."
-              },
-              {
-                "quote": "But it cannot recover evidence that the first stage missed.",
-                "line_start": 10,
-                "reason": "This one-sentence paragraph starting with 'But' is a minor readability issue left unaddressed, and it could be merged into the previous paragraph."
-              }
-            ],
-            "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: the note covers one coherent topic, reranking approaches with their pitfalls and tradeoffs, and the parts depend on each other.",
-            "findings": [
-              {
-                "severity": "Medium",
-                "dimension": "Accuracy/Clarity",
-                "location": "## Over-Reliance on Reranking to Fix Retrieval, Diagnostic paragraph",
-                "evidence": "Edited text: 'Comparing its ranks in the two orders shows whether reranking helped, and that comparison alone does not say whether a larger k or a better ranking is the right repair.'",
-                "effect": "The meaning shifts and the antecedent 'its' is ambiguous. The condition that exclusion can occur even when k can hold all the needed evidence is lost, even though the card keeps it. The sentence is still long and convoluted, so the stated readability benefit is not realized.",
-                "fix": "Keep the sentence split, but make the subject explicit. For example: 'Low post-rerank Recall@k alone does not show demotion, because relevant evidence can sit beyond k in both orders. Comparing its rank in each order shows whether reranking helped. Neither measurement alone shows whether a larger k or a better ranking is the right repair.' Preserve the capacity condition, or leave the original sentence unchanged."
-              }
-            ],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "FAIL",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "change_checks": [
-          {
-            "edit_index": 0,
-            "verdict": "NOT WORTHWHILE",
-            "reason": "The edit changes what the final claim attaches to, leaves 'its ranks' ambiguous, drops the k-capacity condition that the card keeps, and replaces 'establishes' with 'sets'/'shown' without a real benefit. The sentence is not materially clearer, and the essential meaning is not fully preserved."
-          }
-        ]
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-          "citation_index": 0,
-          "reported_line_start": 125,
-          "resolved_line_start": 139
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-          "citation_index": 1,
-          "reported_line_start": 125,
-          "resolved_line_start": 139
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-          "citation_index": 2,
-          "reported_line_start": 147,
-          "resolved_line_start": 192
-        },
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-          "citation_index": 3,
-          "reported_line_start": 10,
-          "resolved_line_start": 19
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md": "827d474fc33e440fb0962aab2b914519d514ab4593ed8cd1306c2aa209dbf22d"
-      },
-      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
+    "blocked_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The single edit splits the diagnostic sentence but changes its meaning. It introduces an ambiguous antecedent and drops the explicit k-capacity condition. The note is otherwise sound.",
       "notes": [
@@ -49693,6 +49885,102 @@
           "reason": "The edit changes what the final claim attaches to, leaves 'its ranks' ambiguous, drops the k-capacity condition that the card keeps, and replaces 'establishes' with 'sets'/'shown' without a real benefit. The sentence is not materially clearer, and the essential meaning is not fully preserved."
         }
       ]
-    }
+    },
+    "repair_previous_proposal": {
+      "version": 1,
+      "edits": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+          "expected_hash": "63cb05382dabdd0590b1372368c5aa7db3fc81bfc409c98913503900d3631f72",
+          "before": "Diagnostic: low first-stage candidate Recall@N establishes an upstream ceiling. If Recall@N is high, demotion is established only when relevant evidence inside the first-stage top-k falls outside the reranked top-k at the same k. Low post-rerank Recall@k alone does not establish demotion: evidence can stay beyond k in both orders even after its rank improves, and such exclusion can occur even when the query needs no more relevant evidence than k can hold; on its own it does not show whether a larger k or a better ranking is the right repair.",
+          "after": "Diagnostic: low first-stage candidate Recall@N sets an upstream ceiling. If Recall@N is high, demotion is shown only when relevant evidence inside the first-stage top-k falls outside the reranked top-k at the same k. Low post-rerank Recall@k alone does not show demotion, because the evidence can sit beyond k in both orders. Comparing its ranks in the two orders shows whether reranking helped, and that comparison alone does not say whether a larger k or a better ranking is the right repair.",
+          "reason": "Splits one overloaded sentence into a clearer diagnostic sequence, keeping every condition.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "low Recall@N is an upstream ceiling",
+            "demotion requires evidence in first-stage top-k leaving reranked top-k at same k",
+            "low Recall@k alone does not show demotion"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The Over-Reliance diagnostic packs several conditions into one hard-to-parse sentence.",
+          "reader_benefit": "The diagnostic can be read and recalled step by step without losing precision."
+        }
+      ],
+      "dispositions": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+          "outcome": "changed",
+          "reason": "Audited the full note: RRF arithmetic (1/63+1/61≈0.032), the MMR formula, ColBERT/MaxSim description, BM25, tradeoff table and the three cards agree with each other and with the standard sources. One overloaded diagnostic sentence in the Over-Reliance pitfall was split for readability with all conditions preserved."
+        }
+      ],
+      "feedback": []
+    },
+    "repair_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The single edit splits the diagnostic sentence but changes its meaning. It introduces an ambiguous antecedent and drops the explicit k-capacity condition. The note is otherwise sound.",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The note is accurate and well organized, and the RRF arithmetic, MMR formula and ColBERT description check out. The proposed edit breaks up the long diagnostic sentence. In doing so it reattaches the 'does not say whether a larger k or a better ranking is the right repair' claim to the rank comparison instead of to the low Recall@k, and it removes the condition about query need versus k capacity. Its antecedent 'its ranks' is also ambiguous. The result is not a clear net gain.",
+          "page_type": "Concept note with Questions and References; the Qard callouts and their ID comments are protected.",
+          "current_text_evidence": [
+            {
+              "quote": "Diagnostic: low first-stage candidate Recall@N sets an upstream ceiling.",
+              "line_start": 139,
+              "reason": "This is the edited sentence. The wording is fine, but the verb change from 'establishes' to 'sets' is cosmetic."
+            },
+            {
+              "quote": "Comparing its ranks in the two orders shows whether reranking helped, and that comparison alone does not say whether a larger k or a better ranking is the right repair.",
+              "line_start": 139,
+              "reason": "'Its' has no clear referent. The claim now attaches to the rank comparison rather than to low Recall@k. The original condition that exclusion can occur even when k can hold all the needed evidence is lost."
+            },
+            {
+              "quote": "Cutoff capacity matters only when the query needs more distinct relevant pieces than k can hold.",
+              "line_start": 192,
+              "reason": "The card states the k-capacity condition precisely, so the pitfall paragraph now diverges from it."
+            },
+            {
+              "quote": "But it cannot recover evidence that the first stage missed.",
+              "line_start": 19,
+              "reason": "This one-sentence paragraph starting with 'But' is a minor readability issue left unaddressed, and it could be merged into the previous paragraph."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the note covers one coherent topic, reranking approaches with their pitfalls and tradeoffs, and the parts depend on each other.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Accuracy/Clarity",
+              "location": "## Over-Reliance on Reranking to Fix Retrieval, Diagnostic paragraph",
+              "evidence": "Edited text: 'Comparing its ranks in the two orders shows whether reranking helped, and that comparison alone does not say whether a larger k or a better ranking is the right repair.'",
+              "effect": "The meaning shifts and the antecedent 'its' is ambiguous. The condition that exclusion can occur even when k can hold all the needed evidence is lost, even though the card keeps it. The sentence is still long and convoluted, so the stated readability benefit is not realized.",
+              "fix": "Keep the sentence split, but make the subject explicit. For example: 'Low post-rerank Recall@k alone does not show demotion, because relevant evidence can sit beyond k in both orders. Comparing its rank in each order shows whether reranking helped. Neither measurement alone shows whether a larger k or a better ranking is the right repair.' Preserve the capacity condition, or leave the original sentence unchanged."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "FAIL",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": [
+        {
+          "edit_index": 0,
+          "verdict": "NOT WORTHWHILE",
+          "reason": "The edit changes what the final claim attaches to, leaves 'its ranks' ambiguous, drops the k-capacity condition that the card keeps, and replaces 'establishes' with 'sets'/'shown' without a real benefit. The sentence is not materially clearer, and the essential meaning is not fully preserved."
+        }
+      ]
+    },
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "review_repair_key": "3d372b65f516f3ca754a3efb1168f45e9ee0a639919872aac16d65bb0b874f4d",
+    "author_repair_pending": true
   }
 }
