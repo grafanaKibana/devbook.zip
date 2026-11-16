@@ -53,7 +53,7 @@ public static class Demo
                 await lease.AcquireAsync(cancellationToken);
                 try
                 {
-                    var runtime = new GitHubRuntime(api, store, requiredChecks: ["pr-title", "major-approval"], leaseOwner: owner, timeProvider: clock,
+                    var runtime = new GitHubRuntime(api, store, requiredChecks: ["pr-title", "ci", "major-approval"], leaseOwner: owner, timeProvider: clock,
                         checkAttempts: 1, checkInterval: TimeSpan.Zero, activation: () => { });
                     JsonArray Notes() => new(sources.Select(source => (JsonNode)new JsonObject
                     {
@@ -76,8 +76,19 @@ public static class Demo
             async Task FinishExport(JsonObject result)
             {
                 JsonObject request = result.RequiredObject("export_request");
+                JsonObject located = await Worker.CollectAsync(api, config, request, cancellationToken: cancellationToken);
+                if (located.Str("status") != "located")
+                {
+                    throw new RuntimeFailure("Native demo did not locate the CI export: " + located.Str("status"));
+                }
                 JsonObject bundle = ExportBundle(api, request);
-                JsonObject exported = await Worker.PublishBundleAsync(api, config, bundle, request, store, cancellationToken: cancellationToken, provenance: api.ExportProvenance);
+                var provenance = new JsonObject
+                {
+                    ["artifact_id"] = located.Str("artifact_id"), ["digest"] = located.Str("digest"),
+                    ["run_id"] = located.Str("run_id"), ["run_attempt"] = located.Str("run_attempt"),
+                    ["bundle_sha256"] = new string('b', 64)
+                };
+                JsonObject exported = await Worker.PublishBundleAsync(api, config, bundle, request, store, cancellationToken: cancellationToken, provenance: provenance);
                 if (exported.Str("status") != "exported")
                 {
                     throw new RuntimeFailure("Native demo export finalization failed: " + exported.Str("status"));
@@ -195,7 +206,7 @@ public static class Demo
         return new JsonObject
         {
             ["version"] = 2,
-            ["pr_number"] = request.Int("pr_number"), ["branch"] = request.Str("branch"), ["expected_head"] = head,
+            ["pr_number"] = 0, ["branch"] = "", ["expected_head"] = head,
             ["manifest"] = new JsonObject
             {
                 ["version"] = 2, ["repository"] = api.Repo, ["kind"] = "commit", ["source_sha"] = head,

@@ -34,10 +34,14 @@ public sealed class ExportWorkerTests
     [InlineData("expired")]
     [InlineData("digest")]
     [InlineData("run")]
+    [InlineData("name")]
     [InlineData("event")]
+    [InlineData("path")]
     [InlineData("branch")]
+    [InlineData("sha")]
     [InlineData("attempt")]
     [InlineData("repository")]
+    [InlineData("fork")]
     public async Task UntrustedOrExpiredArtifactCannotCompleteTheReviewedSource(string scenario)
     {
         // Arrange
@@ -48,10 +52,14 @@ public sealed class ExportWorkerTests
             case "expired": fixture.Api.Artifact["expired"] = true; break;
             case "digest": fixture.Api.Artifact["digest"] = "sha256:" + new string('c', 64); break;
             case "run": fixture.Api.Artifact.Obj("workflow_run")["id"] = 99; break;
-            case "event": fixture.Api.Run["event"] = "pull_request"; break;
+            case "name": fixture.Api.Artifact["name"] = "devbook-syncer-export-22-1"; break;
+            case "event": fixture.Api.Run["event"] = "workflow_dispatch"; break;
+            case "path": fixture.Api.Run["path"] = ".github/workflows/devbook-improvement.yml"; break;
             case "branch": fixture.Api.Run["head_branch"] = "untrusted"; break;
+            case "sha": fixture.Api.Run["head_sha"] = FakeExportApi.OwnerChangedHead; break;
             case "attempt": fixture.Api.Run["run_attempt"] = 2; break;
             case "repository": fixture.Api.Run.Obj("repository")["full_name"] = "other/repo"; break;
+            case "fork": fixture.Api.Run.Obj("head_repository")["full_name"] = "fork/devbook"; break;
         }
         var store = new MemoryStateStore(fixture.State);
 
@@ -263,7 +271,7 @@ public sealed class ExportWorkerTests
         fresh["run_id"] = "23";
         fresh["digest"] = new string('c', 64);
         fixture.Api.Artifact["expired"] = false;
-        fixture.Api.Artifact["name"] = "devbook-syncer-export-23-1";
+        fixture.Api.Artifact["name"] = "devbook-native-23-1";
         fixture.Api.Artifact["digest"] = "sha256:" + new string('c', 64);
         fixture.Api.Artifact.Obj("workflow_run")["id"] = 23;
         JsonObject refreshed = await Worker.PublishBundleAsync(fixture.Api, fixture.Config, fixture.Bundle, fixture.Request, store,
@@ -272,7 +280,7 @@ public sealed class ExportWorkerTests
 
         // Assert
         expired.Str("status").Should().Be("awaiting_export");
-        retry.Mode.Should().Be("render");
+        retry.Mode.Should().Be("collect");
         refreshed.Bool("refreshed").Should().BeTrue();
         fixture.Api.ReadyConversions.Should().Be(ready);
         fixture.Api.DraftConversions.Should().Be(draft);
@@ -284,6 +292,128 @@ public sealed class ExportWorkerTests
         operation.Bool("compacted").Should().BeTrue();
         operation.Obj("evidence").Arr("export_artifact_history").Count.Should().Be(1);
         operation.Obj("evidence").Bool("export_refresh_required").Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task CollectLocatesTheCiExportOfTheExactManagedHead()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+
+        // Act
+        JsonObject located = await Worker.CollectAsync(fixture.Api, fixture.Config, fixture.Request);
+
+        // Assert
+        located.Str("status").Should().Be("located");
+        located.Str("artifact_id").Should().Be("11");
+        located.Str("run_id").Should().Be("22");
+        located.Str("run_attempt").Should().Be("1");
+        located.Str("digest").Should().Be("sha256:" + new string('a', 64));
+        fixture.Api.Reruns.Should().Be(0);
+    }
+
+    [Theory]
+    [InlineData("running")]
+    [InlineData("branch")]
+    [InlineData("sha")]
+    [InlineData("fork")]
+    [InlineData("event")]
+    public async Task CollectWaitsUntilAMatchingCiRunHasFinished(string scenario)
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        switch (scenario)
+        {
+            case "running": fixture.Api.Run["status"] = "in_progress"; break;
+            case "branch": fixture.Api.Run["head_branch"] = "untrusted"; break;
+            case "sha": fixture.Api.Run["head_sha"] = FakeExportApi.OwnerChangedHead; break;
+            case "fork": fixture.Api.Run.Obj("head_repository")["full_name"] = "fork/devbook"; break;
+            case "event": fixture.Api.Run["event"] = "workflow_dispatch"; break;
+        }
+
+        // Act
+        JsonObject result = await Worker.CollectAsync(fixture.Api, fixture.Config, fixture.Request);
+
+        // Assert
+        result.Str("status").Should().Be("awaiting_ci");
+        fixture.Api.Reruns.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task CollectRerunsCiWhenItsExportExpired()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.Artifact["expired"] = true;
+
+        // Act
+        JsonObject result = await Worker.CollectAsync(fixture.Api, fixture.Config, fixture.Request);
+
+        // Assert
+        result.Str("status").Should().Be("awaiting_ci");
+        fixture.Api.Reruns.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task CollectReportsAFinishedCiRunWithoutExport()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.ArtifactListed = false;
+
+        // Act
+        JsonObject result = await Worker.CollectAsync(fixture.Api, fixture.Config, fixture.Request);
+
+        // Assert
+        result.Str("status").Should().Be("export_failed");
+        fixture.Api.Reruns.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task CollectRejectsAManagedPrThatChangesMoreThanNotes()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.ChangedFiles = new JsonArray(new JsonObject { ["filename"] = DomainFixtures.Path },
+            new JsonObject { ["filename"] = ".github/workflows/site-check.yml" });
+
+        // Act
+        Func<Task> collect = () => Worker.CollectAsync(fixture.Api, fixture.Config, fixture.Request);
+
+        // Assert
+        await collect.Should().ThrowAsync<UnsafeInput>().WithMessage("*outside its source notes*");
+    }
+
+    [Fact]
+    public async Task CollectStopsWhenTheManagedHeadMoved()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        fixture.Api.Head = FakeExportApi.OwnerChangedHead;
+
+        // Act
+        JsonObject result = await Worker.CollectAsync(fixture.Api, fixture.Config, fixture.Request);
+
+        // Assert
+        result.Str("status").Should().Be("stale");
+    }
+
+    [Fact]
+    public async Task BundleWithPrIdentityIsNotACiExport()
+    {
+        // Arrange
+        var fixture = new WorkerFixture();
+        var store = new MemoryStateStore(fixture.State);
+        JsonObject rendered = fixture.Bundle.Copy();
+        rendered["pr_number"] = 1;
+        rendered["branch"] = fixture.Request.Str("branch");
+
+        // Act
+        Func<Task> publish = () => Worker.PublishBundleAsync(fixture.Api, fixture.Config, rendered, fixture.Request, store, provenance: fixture.Provenance);
+
+        // Assert
+        await publish.Should().ThrowAsync<UnsafeInput>();
+        fixture.Api.ReadyConversions.Should().Be(0);
     }
 
     [Fact]
@@ -492,7 +622,7 @@ public sealed class ExportWorkerTests
             }
             Bundle = new JsonObject
             {
-                ["version"] = 2, ["expected_head"] = FakeExportApi.SourceHead, ["branch"] = ExportWorkerbranch, ["pr_number"] = 1,
+                ["version"] = 2, ["expected_head"] = FakeExportApi.SourceHead, ["branch"] = "", ["pr_number"] = 0,
                 ["manifest"] = new JsonObject
                 {
                     ["version"] = 2, ["repository"] = "owner/devbook", ["source_sha"] = FakeExportApi.SourceHead, ["kind"] = "commit",
@@ -577,14 +707,13 @@ public sealed class ExportWorkerTests
         public int ReadyConversions { get; private set; }
         public JsonObject Artifact { get; } = new()
         {
-            ["expired"] = false, ["name"] = "devbook-syncer-export-22-1", ["digest"] = "sha256:" + new string('a', 64),
+            ["id"] = 11, ["expired"] = false, ["name"] = "devbook-native-22-1", ["digest"] = "sha256:" + new string('a', 64),
             ["workflow_run"] = new JsonObject { ["id"] = 22 }
         };
-        public JsonObject Run { get; } = new()
-        {
-            ["run_attempt"] = 1, ["path"] = ".github/workflows/devbook-improvement.yml", ["head_branch"] = "main", ["event"] = "schedule",
-            ["repository"] = new JsonObject { ["full_name"] = "owner/devbook" }
-        };
+        public JsonObject Run { get; }
+        public bool ArtifactListed { get; set; } = true;
+        public int Reruns { get; private set; }
+        public JsonArray ChangedFiles { get; set; } = new(new JsonObject { ["filename"] = DomainFixtures.Path });
         public Func<Task>? BeforeDraftConversion { get; set; }
         public Func<Task>? BeforeReadyConversion { get; set; }
         public string? PrHeadAfterRef { get; set; }
@@ -598,6 +727,14 @@ public sealed class ExportWorkerTests
             original = entries.ToDictionary(item => item.Path, StringComparer.Ordinal);
             Trees[new string('1', 40)] = new(original, StringComparer.Ordinal);
             this.ExportWorkerbranch = ExportWorkerbranch;
+            Run = new JsonObject
+            {
+                ["id"] = 22, ["run_attempt"] = 1, ["status"] = "completed", ["conclusion"] = "success",
+                ["path"] = ".github/workflows/vault-validation.yml", ["event"] = "pull_request",
+                ["head_branch"] = ExportWorkerbranch, ["head_sha"] = SourceHead, ["created_at"] = "2026-01-01T00:00:00Z",
+                ["repository"] = new JsonObject { ["full_name"] = "owner/devbook" },
+                ["head_repository"] = new JsonObject { ["full_name"] = "owner/devbook" }
+            };
             Pr = new JsonObject
             {
                 ["number"] = 1,
@@ -624,9 +761,18 @@ public sealed class ExportWorkerTests
             {
                 response = Artifact.Copy();
             }
+            else if (method == "GET" && path.StartsWith("/actions/runs/", StringComparison.Ordinal) && path.Contains("/artifacts", StringComparison.Ordinal))
+            {
+                response = new JsonObject { ["artifacts"] = ArtifactListed ? new JsonArray(Artifact.Copy()) : new JsonArray() };
+            }
             else if (method == "GET" && path.StartsWith("/actions/runs/", StringComparison.Ordinal))
             {
                 response = Run.Copy();
+            }
+            else if (method == "POST" && path.StartsWith("/actions/runs/", StringComparison.Ordinal) && path.EndsWith("/rerun", StringComparison.Ordinal))
+            {
+                Reruns++;
+                response = null;
             }
             else if (method == "GET" && path.StartsWith("/pulls?", StringComparison.Ordinal))
             {
@@ -634,7 +780,7 @@ public sealed class ExportWorkerTests
             }
             else if (method == "GET" && path == "/pulls/1/files?per_page=100")
             {
-                response = new JsonArray(new JsonObject { ["filename"] = DomainFixtures.Path });
+                response = ChangedFiles.Copy();
             }
             else if (method == "GET" && path.StartsWith("/git/ref/heads/", StringComparison.Ordinal))
             {
@@ -718,18 +864,22 @@ public sealed class ExportWorkerTests
             {
                 response = new JsonObject { ["sha"] = Head, ["statuses"] = new JsonArray() };
             }
-            else if (method == "GET" && path.StartsWith("/actions/workflows/vault-validation.yml/runs", StringComparison.Ordinal))
+            else if (method == "GET" && path.StartsWith("/actions/workflows/pr-rules.yml/runs", StringComparison.Ordinal))
             {
                 var run = new JsonObject
                 {
                     ["id"] = PrTitleRunId,
                     ["head_branch"] = ExportWorkerbranch, ["head_sha"] = Head,
-                    ["event"] = "pull_request", ["path"] = ".github/workflows/vault-validation.yml",
+                    ["event"] = "pull_request", ["path"] = ".github/workflows/pr-rules.yml",
                     ["repository"] = new JsonObject { ["full_name"] = Repo },
                     ["conclusion"] = ChecksReady && (!bodyTriggered || !BodyCheckPending) ? CheckConclusion : "pending"
                 };
                 foreach ((string key, JsonNode? value) in PrTitleOverride) run[key] = value?.DeepClone();
-                var runs = new JsonArray(run);
+                response = new JsonObject { ["workflow_runs"] = new JsonArray(run) };
+            }
+            else if (method == "GET" && path.StartsWith("/actions/workflows/vault-validation.yml/runs", StringComparison.Ordinal))
+            {
+                var runs = new JsonArray();
                 if (!ValidationMissing && Dispatches > 0)
                 {
                     var validation = new JsonObject
@@ -743,6 +893,7 @@ public sealed class ExportWorkerTests
                     foreach ((string key, JsonNode? value) in ValidationOverride) validation[key] = value?.DeepClone();
                     runs.Add(validation);
                 }
+                runs.Add(Run.Copy());
                 response = new JsonObject { ["workflow_runs"] = runs };
             }
             else if (method == "GET" && path.StartsWith("/issues/1/comments", StringComparison.Ordinal))
