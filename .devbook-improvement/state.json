@@ -17165,11 +17165,11 @@
     "version": 1,
     "id": "33a5bcd3129e4228a0be70053399144d",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-16T22:21:57.553782Z",
-    "elapsed_seconds": 490.0172628000002,
+    "elapsed_seconds": 513.7772654000003,
     "calls_reserved": 13,
-    "responses_received": 12,
+    "responses_received": 13,
     "attempted_paths": [
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
@@ -18823,7 +18823,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-16T22:30:07.570620Z",
+    "checkpoint_at": "2026-11-16T22:30:31.330622Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -51896,6 +51896,135 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-16T22:30:02.159989Z"
+    "prepared_at": "2026-11-16T22:30:02.159989Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
+            "verdict": "CLEAN",
+            "summary": "Whole-note audit found no accuracy, clarity, structure or card defects. Each retrieval mode gives mechanism, fit and main risk, and the pitfalls pair detection with mitigation. The keep is justified; remaining wording issues are cosmetic and an edit would be churn.",
+            "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied (mermaid fence), Qard callouts with protected ID comment.",
+            "current_text_evidence": [
+              {
+                "quote": "sums `1 / (k + rank)` for each document across the input lists, with k=60 in the original method",
+                "line_start": 80,
+                "reason": "RRF is described correctly, with the rank-based formula and the original k=60, and the explanation of why no shared score scale is needed follows."
+              },
+              {
+                "quote": "It does not provide BM25 as its built-in ranker.",
+                "line_start": 56,
+                "reason": "The PostgreSQL full-text note is accurate: ts_rank and ts_rank_cd are not BM25. It stops a common confusion."
+              },
+              {
+                "quote": "Authorization is a separate requirement: semantic similarity cannot enforce it",
+                "line_start": 101,
+                "reason": "Keeps the security boundary separate from the recall and cost trade-off of pre- versus post-filtering."
+              },
+              {
+                "quote": "Detection: scheduled [[Monitoring#Retrieval Quality Metrics|Recall@k]] checks compare ANN results with exact search",
+                "line_start": 111,
+                "reason": "The pitfalls state a failure condition and a concrete detection method, not only a warning."
+              },
+              {
+                "quote": "rank 1 in the weak list scores the same as rank 1 in the strong list, and higher than rank 3 in the strong list.",
+                "line_start": 156,
+                "reason": "The card's RRF arithmetic is correct: 1/61 equals 1/61 and exceeds 1/63. It is one dependent mechanism and does not bundle tasks."
+              },
+              {
+                "quote": "Hybrid retrieval with RRF and a conservative top-k, often 5–20, is a reasonable first configuration.",
+                "line_start": 140,
+                "reason": "The closing decision guidance is consistent with the table and carries its condition: compare against both single-mode baselines."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: dense, sparse and hybrid retrieval, ANN indexing and filtering form one coherent topic about choosing and operating first-stage retrieval. Reranking, monitoring and vector databases already have their own notes.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The complete note is accurate and clearly ordered, and both cards are single-task and cite an answer-side source. The second card keeps its Qard ID. There are no known violations and no edits are proposed. The keep is justified.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
+          "citation_index": 4,
+          "reported_line_start": 156,
+          "resolved_line_start": 168
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md": "82b7bddd1645cf9fcefac209cfa534613e6055897244d07d3c9ec6092a8019b5"
+      },
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
+          "verdict": "CLEAN",
+          "summary": "Whole-note audit found no accuracy, clarity, structure or card defects. Each retrieval mode gives mechanism, fit and main risk, and the pitfalls pair detection with mitigation. The keep is justified; remaining wording issues are cosmetic and an edit would be churn.",
+          "page_type": "Concept — typed frontmatter, optional Questions and References present and valid, MD040 satisfied (mermaid fence), Qard callouts with protected ID comment.",
+          "current_text_evidence": [
+            {
+              "quote": "sums `1 / (k + rank)` for each document across the input lists, with k=60 in the original method",
+              "line_start": 80,
+              "reason": "RRF is described correctly, with the rank-based formula and the original k=60, and the explanation of why no shared score scale is needed follows."
+            },
+            {
+              "quote": "It does not provide BM25 as its built-in ranker.",
+              "line_start": 56,
+              "reason": "The PostgreSQL full-text note is accurate: ts_rank and ts_rank_cd are not BM25. It stops a common confusion."
+            },
+            {
+              "quote": "Authorization is a separate requirement: semantic similarity cannot enforce it",
+              "line_start": 101,
+              "reason": "Keeps the security boundary separate from the recall and cost trade-off of pre- versus post-filtering."
+            },
+            {
+              "quote": "Detection: scheduled [[Monitoring#Retrieval Quality Metrics|Recall@k]] checks compare ANN results with exact search",
+              "line_start": 111,
+              "reason": "The pitfalls state a failure condition and a concrete detection method, not only a warning."
+            },
+            {
+              "quote": "rank 1 in the weak list scores the same as rank 1 in the strong list, and higher than rank 3 in the strong list.",
+              "line_start": 168,
+              "reason": "The card's RRF arithmetic is correct: 1/61 equals 1/61 and exceeds 1/63. It is one dependent mechanism and does not bundle tasks."
+            },
+            {
+              "quote": "Hybrid retrieval with RRF and a conservative top-k, often 5–20, is a reasonable first configuration.",
+              "line_start": 140,
+              "reason": "The closing decision guidance is consistent with the table and carries its condition: compare against both single-mode baselines."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: dense, sparse and hybrid retrieval, ANN indexing and filtering form one coherent topic about choosing and operating first-stage retrieval. Reranking, monitoring and vector databases already have their own notes.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The complete note is accurate and clearly ordered, and both cards are single-task and cite an answer-side source. The second card keeps its Qard ID. There are no known violations and no edits are proposed. The keep is justified.",
+      "change_checks": []
+    }
   }
 }
