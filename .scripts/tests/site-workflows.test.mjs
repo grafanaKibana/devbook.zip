@@ -135,15 +135,27 @@ test("only the deploy job requests masked OIDC and passes it solely to HTTP veri
   assert.doesNotMatch(JSON.stringify(deploy), /AUTOMATION_BYPASS|GITHUB_ENV/)
 })
 
-test("managed native artifacts transfer exact provenance without generated commits", () => {
+test("improvement PRs reuse their CI export instead of rendering again", () => {
   const improvement = workflow("devbook-improvement")
-  const render = improvement.jobs.render
+  const site = workflow("site-check").jobs["site-check"]
   const publish = improvement.jobs.publish
-  const upload = render.steps.find((step) => step.id === "native-upload")
-  assert.equal(upload.with.name, "devbook-syncer-export-${{ github.run_id }}-${{ github.run_attempt }}")
-  assert.equal(upload.with.path, "artifacts/export/bundle.json")
+  assert.equal(improvement.jobs.render, undefined)
+  assert.doesNotMatch(read(".github/workflows/devbook-improvement.yml"), /macos|export render|\.github\/actions\/obsidian/)
+  assert.deepEqual(improvement.on.workflow_dispatch.inputs.mode.options, ["demo", "dry-run", "apply"])
+  assert.equal(site.steps.find((step) => step.id === "upload").with.name, "devbook-native-${{ github.run_id }}-${{ github.run_attempt }}")
+  assert.equal(publish.needs, "maintenance")
+  assert.deepEqual(publish.permissions, { contents: "read", actions: "read" })
+  const collect = publish.steps.find((step) => step.id === "collect")
+  assert.match(collect.run, /export collect/)
+  const download = publish.steps.find((step) => step.with?.["run-id"])
+  assert.equal(download.with["run-id"], "${{ steps.collect.outputs.run-id }}")
+  assert.equal(download.with["artifact-ids"], "${{ steps.collect.outputs.artifact-id }}")
+  assert.equal(download.with["digest-mismatch"], "error")
   const register = publish.steps.find((step) => step.name === "Register native artifact or resume exact-source validation")
-  for (const name of ["ARTIFACT_ID", "ARTIFACT_DIGEST", "BUNDLE_SHA256", "RUN_ID", "RUN_ATTEMPT"]) assert.ok(register.env[`DEVBOOK_EXPORT_${name}`])
+  for (const [name, output] of [["ARTIFACT_ID", "artifact-id"], ["ARTIFACT_DIGEST", "artifact-digest"], ["RUN_ID", "run-id"], ["RUN_ATTEMPT", "run-attempt"]]) {
+    assert.equal(register.env[`DEVBOOK_EXPORT_${name}`], `\${{ steps.collect.outputs.${output} }}`)
+  }
+  assert.equal(register.env.DEVBOOK_EXPORT_BUNDLE_SHA256, "${{ steps.bundle-digest.outputs.sha256 }}")
   assert.equal(publish.environment.deployment, false)
 })
 

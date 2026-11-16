@@ -76,7 +76,7 @@ public static partial class Worker
             evidence["export_attempts"] = attempts + 1;
             evidence["export_last_dispatch_at"] = Runtime.Iso(now);
             operation["evidence"] = evidence;
-            return new(copy, request.Copy(), "render");
+            return new(copy, request.Copy(), "collect");
         }
         return new(copy, null, "none");
     }
@@ -137,11 +137,16 @@ public static partial class Worker
         return pr is not null && await CurrentBaseAsync(api, config, pr, expected, cancellationToken) ? pr : null;
     }
 
-    public static async Task<JsonObject> RenderManagedAsync(string trusted, IGitHubApi api, JsonObject config,
-        int number, string branch, string expected, string appBundle, int timeoutSeconds = 600, CancellationToken cancellationToken = default)
+    // Locates CI's native export of the managed PR head instead of rendering it a second time.
+    // Notes-only PRs on the current base run CI with the base revision's workflow and export policy.
+    public static async Task<JsonObject> CollectAsync(IGitHubApi api, JsonObject config, JsonObject request,
+        ExportCheckWait? checkWait = null, CancellationToken cancellationToken = default)
     {
-        JsonObject? pr = await CurrentPrAsync(api, config, number, branch, expected, cancellationToken);
-        if (pr is null || !await CurrentBaseAsync(api, config, pr, expected, cancellationToken))
+        ValidateRequest(request);
+        int number = request.Int("pr_number");
+        string branch = request.Str("branch");
+        string head = request.Str("expected_head");
+        if (await CurrentSourceAsync(api, config, number, branch, head, cancellationToken) is null)
         {
             return new JsonObject { ["status"] = "stale", ["reason"] = "Managed source head or current base changed." };
         }
@@ -154,44 +159,64 @@ public static partial class Worker
                 throw new UnsafeInput("Managed artifact PR changes files outside its source notes.");
             }
         }
-        using var owned = new OwnedExportCheckout("devbook-managed-export-");
-        (await new SystemProcessRunner().RunAsync(new ProcessRequest("git",
-            ["clone", "--no-hardlinks", "--quiet", Path.GetFullPath(trusted), owned.Root], owned.Directory), cancellationToken)).EnsureSuccess("Clone isolated managed export");
-        Git.Run(owned.Root, "checkout", "-B", branch, expected);
-        VerifyTrustedPolicy(trusted, owned.Root);
-        await Desktop.ExportCheckoutAsync(owned.Root, expected, appBundle, timeoutSeconds, cancellationToken);
-        JsonObject bundle = Bundle.FromCheckout(owned.Root, number, branch, expected);
-        Bundle.ValidateInputs(bundle, Receipt.TreeEntries(owned.Root));
-        return new JsonObject { ["status"] = "rendered", ["bundle"] = bundle };
+        int seconds = CheckSetting(config, "export_check_wait_seconds", 600, 0, 600);
+        int interval = CheckSetting(config, "export_check_poll_seconds", 10, 1, 60);
+        TimeProvider clock = checkWait?.Clock ?? TimeProvider.System;
+        Func<TimeSpan, CancellationToken, Task> delay = checkWait?.Delay ?? ((duration, token) => Task.Delay(duration, token));
+        DateTimeOffset deadline = clock.GetUtcNow() + TimeSpan.FromSeconds(seconds);
+        while (true)
+        {
+            JsonObject? run = await LatestCiRunAsync(api, branch, head, cancellationToken);
+            if (run is not null && run.Str("status") == "completed")
+            {
+                string runId = run["id"]?.ToString() ?? "";
+                string attempt = run["run_attempt"]?.ToString() ?? "";
+                string name = CiArtifactName(runId, attempt);
+                JsonObject listing = await Runtime.ObjectAsync(api, "GET",
+                    $"/actions/runs/{Uri.EscapeDataString(runId)}/artifacts?name={Uri.EscapeDataString(name)}&per_page=10", cancellationToken: cancellationToken);
+                JsonObject? artifact = listing.Arr("artifacts").OfType<JsonObject>()
+                    .FirstOrDefault(item => item.Str("name") == name && item.Obj("workflow_run")["id"]?.ToString() == runId);
+                if (artifact is null)
+                {
+                    return new JsonObject { ["status"] = "export_failed", ["reason"] = $"CI run {runId} produced no native export for {head}." };
+                }
+                if (artifact.Bool("expired", true))
+                {
+                    await api.RequestAsync("POST", $"/actions/runs/{Uri.EscapeDataString(runId)}/rerun", new JsonObject(), cancellationToken: cancellationToken);
+                    return new JsonObject { ["status"] = "awaiting_ci", ["reason"] = $"CI export expired; re-requested run {runId}." };
+                }
+                return new JsonObject
+                {
+                    ["status"] = "located", ["artifact_id"] = artifact["id"]?.ToString(), ["digest"] = artifact.Str("digest"),
+                    ["run_id"] = runId, ["run_attempt"] = attempt
+                };
+            }
+            TimeSpan remaining = deadline - clock.GetUtcNow();
+            if (remaining <= TimeSpan.Zero)
+            {
+                return new JsonObject { ["status"] = "awaiting_ci", ["reason"] = "CI has not finished exporting this head yet." };
+            }
+            await delay(TimeSpan.FromSeconds(Math.Min(interval, remaining.TotalSeconds)), cancellationToken);
+        }
     }
 
-    public static void VerifyTrustedPolicy(string trusted, string candidate)
+    private static async Task<JsonObject?> LatestCiRunAsync(IGitHubApi api, string branch, string head, CancellationToken cancellationToken)
     {
-        GitTreeEntry[] trustedEntries = Receipt.TreeEntries(trusted).Where(entry => entry.Type != "tree" && Receipt.IsPolicyPath(entry.Path)).ToArray();
-        GitTreeEntry[] candidateEntries = Receipt.TreeEntries(candidate).Where(entry => entry.Type != "tree" && Receipt.IsPolicyPath(entry.Path)).ToArray();
-        _ = SiteArtifact.Inputs(Receipt.TreeEntries(candidate));
-        if (!Bundle.SameLeaves(trustedEntries, candidateEntries))
-        {
-            throw new UnsafeInput("Candidate export policy differs from the trusted workflow checkout; update its base before retrying.");
-        }
-        foreach (GitTreeEntry entry in trustedEntries)
-        {
-            Syncer.EnsureRegularPath(trusted, entry.Path);
-            Syncer.EnsureRegularPath(candidate, entry.Path);
-            byte[] expected = File.ReadAllBytes(Path.Combine(trusted, entry.Path));
-            byte[] actual = File.ReadAllBytes(Path.Combine(candidate, entry.Path));
-            if (Bundle.BlobSha(expected) != entry.Sha || !actual.AsSpan().SequenceEqual(expected))
-            {
-                throw new UnsafeInput("Candidate renderer implementation or plugin differs from the trusted workflow revision.");
-            }
-        }
+        JsonObject runs = await Runtime.ObjectAsync(api, "GET",
+            $"/actions/workflows/{CiWorkflow}/runs?event=pull_request&head_sha={Uri.EscapeDataString(head)}&per_page=100", cancellationToken: cancellationToken);
+        return runs.Arr("workflow_runs").OfType<JsonObject>()
+            .Where(run => IsCiRun(run, api.Repo, branch, head))
+            .OrderBy(run => run.Str("created_at"), StringComparer.Ordinal)
+            .ThenBy(run => long.TryParse(run["id"]?.ToString(), out long id) ? id : 0)
+            .ThenBy(run => run.Int("run_attempt"))
+            .LastOrDefault();
     }
 
     public static async Task<int> RunAsync(string[] args)
     {
         if (args.Length == 0 || args.Contains("--help"))
         {
-            Console.WriteLine("DevBook.Tooling export fixture --app-bundle <path> --output <dir> | render --request <json> --app-bundle <path> --output <dir> | publish --bundle <json> --request <json> | finalize --request <json> [--repo-root <path>]");
+            Console.WriteLine("DevBook.Tooling export fixture --app-bundle <path> --output <dir> | collect --request <json> | publish --bundle <json> --request <json> | finalize --request <json> [--repo-root <path>]");
             return args.Length == 0 ? 2 : 0;
         }
         try
@@ -212,19 +237,19 @@ public static partial class Worker
             {
                 JsonObject request = await ReadBoundedAsync(values["--request"], 64 * 1024);
                 ValidateRequest(request);
-                if (args[0] == "render")
+                Runtime.RequireApplyActivation();
+                if (Environment.GetEnvironmentVariable("GITHUB_REF") != "refs/heads/" + config.Str("base_branch", "main"))
                 {
-                    var api = new GhApi(config.Str("repo"), "DEVBOOK_EXPORT_READ_TOKEN", readOnly: true);
-                    result = await RenderManagedAsync(root, api, config, request.Int("pr_number"), request.Str("branch"), request.Str("expected_head"), values["--app-bundle"]);
+                    throw new ProductionGate("Export publication is restricted to the configured base-branch workflow.");
+                }
+                var api = new GhApi(config.Str("repo"));
+                if (args[0] == "collect")
+                {
+                    result = await CollectAsync(api, config, request);
+                    await WriteCollectOutputsAsync(result);
                 }
                 else
                 {
-                    Runtime.RequireApplyActivation();
-                    if (Environment.GetEnvironmentVariable("GITHUB_REF") != "refs/heads/" + config.Str("base_branch", "main"))
-                    {
-                        throw new ProductionGate("Export publication is restricted to the configured base-branch workflow.");
-                    }
-                    var api = new GhApi(config.Str("repo"));
                     var store = new StateBranchStore(api, config.Str("state_branch", Runtime.StateBranch));
                     result = args[0] switch
                     {
@@ -251,7 +276,7 @@ public static partial class Worker
                 }
             }
             Console.WriteLine(result.ToJsonString());
-            return result.Str("status") == "checks_failed" ? 1 : 0;
+            return result.Str("status") is "checks_failed" or "export_failed" ? 1 : 0;
         }
         catch (Exception error) when (error is RuntimeFailure or IOException or InvalidOperationException or JsonException or FormatException or ArgumentException or IndexOutOfRangeException or KeyNotFoundException)
         {
@@ -273,11 +298,6 @@ public static partial class Worker
         {
             provenance[key] = Environment.GetEnvironmentVariable(variable) ?? "";
         }
-        if (provenance.Str("run_id") != Environment.GetEnvironmentVariable("GITHUB_RUN_ID")
-            || provenance.Str("run_attempt") != Environment.GetEnvironmentVariable("GITHUB_RUN_ATTEMPT"))
-        {
-            throw new UnsafeInput("Artifact publisher requires the current trusted workflow run and attempt.");
-        }
         if (new FileInfo(path).Length > Bundle.MaxTotalBytes * 2)
         {
             throw new UnsafeInput("Export artifact file exceeds its size bound.");
@@ -289,6 +309,27 @@ public static partial class Worker
         }
         return await PublishBundleAsync(api, config, JsonData.ParseObject(Encoding.UTF8.GetString(bytes)), request, store,
             provenance: provenance);
+    }
+
+    private static async Task WriteCollectOutputsAsync(JsonObject result)
+    {
+        string? output = Environment.GetEnvironmentVariable("GITHUB_OUTPUT");
+        if (string.IsNullOrEmpty(output)) return;
+        bool found = result.Str("status") == "located";
+        var lines = new List<string> { "found=" + (found ? "true" : "false") };
+        if (found)
+        {
+            foreach ((string key, string name) in new[] { ("artifact_id", "artifact-id"), ("digest", "artifact-digest"), ("run_id", "run-id"), ("run_attempt", "run-attempt") })
+            {
+                string value = result.Str(key);
+                if (!Regex.IsMatch(value, "^[A-Za-z0-9:_-]{1,100}$", RegexOptions.CultureInvariant))
+                {
+                    throw new UnsafeInput("CI export handoff contains an invalid identity.");
+                }
+                lines.Add(name + "=" + value);
+            }
+        }
+        await File.AppendAllTextAsync(output, string.Join('\n', lines) + "\n");
     }
 
     private static async Task<JsonObject> ReadBoundedAsync(string path, int maxBytes)
