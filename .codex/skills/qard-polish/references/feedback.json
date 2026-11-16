@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "revision": 1,
+  "general": {
+    "answer-first": "Start with the direct answer, then add the explanation and any supporting example.",
+    "plain-language": "Use straightforward, concrete language that is clear on the first read. Preserve technical precision without dense phrasing.",
+    "explain-mechanism": "Connect what happens to why it happens. Explain the relevant technical steps in simple terms rather than replacing the cause with a slogan.",
+    "focused-code": "Use code when it clarifies the explanation. Keep examples focused on the behavior, with brief setup and no unnecessary surrounding program.",
+    "comparable-aspects": "Establish what the compared concepts have in common, then compare the same aspects and state the relevant conditions.",
+    "no-long-dashes": "Do not use em dash or en dash characters in authored prose or responses."
+  },
+  "topics": {
+    "ai-and-ml": {},
+    "cloud": {},
+    "computer-science": {},
+    "data-persistence": {},
+    "devops": {},
+    "networks": {},
+    "programming": {},
+    "security": {},
+    "software-architecture": {},
+    "software-design": {}
+  }
+}

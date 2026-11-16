@@ -224,7 +224,8 @@ test('source snapshots ignore lifecycle and stock identity bookkeeping but detec
   const newCard = await sourceSnapshot(note + '\n> [!qard]- What remains shared?\n> Referenced objects.\n');
   assert.equal(newCard.cards, 2);
   assert.notEqual(newCard.revision, baseline.revision);
-  assert.notEqual((await sourceSnapshot(note.replace('Value copying', 'Aliasing'))).revision, baseline.revision);
+  assert.deepEqual(await sourceSnapshot(note.replace('Value copying', 'Aliasing')), baseline);
+  assert.deepEqual(await sourceSnapshot(note.replace('summary: \"Value copying\"\n', '')), baseline);
 });
 
 test('exported rename lookup uses the same file versus folder boundary as course merging', () => {

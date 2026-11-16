@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "A routing hub for model foundations, generation, adaptation, prompting, context, evaluation, and agent runtimes."
 tags: [FolderNote]
 publish: true
 level: ["3"]
@@ -11,7 +10,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/LLM"
 flashcard_uid: "1eb55a0b"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.410Z"
 ---
 

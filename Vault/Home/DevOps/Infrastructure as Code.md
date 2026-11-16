@@ -1,13 +1,12 @@
 ---
 topic: [DevOps]
 subtopic: []
-summary: "Provisioning infrastructure through version-controlled files, making environments repeatable and auditable."
 level: ["3"]
 priority: High
 status: In Progress
 publish: true
 created: "2026-06-20T19:32:24.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.509Z"
 ---
 

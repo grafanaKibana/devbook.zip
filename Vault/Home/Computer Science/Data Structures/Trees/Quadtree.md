@@ -1,13 +1,12 @@
 ---
 topic: [Computer Science]
 subtopic: [Data Structures]
-summary: "A tree that recursively subdivides a 2D region into four quadrants for spatial queries — fast on uniform data, unbalanced by nature."
 level: ["4"]
 priority: Medium
 status: New
 publish: true
 created: "2026-07-15T08:20:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-15T08:11:34.539Z"
 ---
 

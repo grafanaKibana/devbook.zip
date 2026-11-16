@@ -1,13 +1,12 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: "Browser protocol controlling whether cross-origin JavaScript may access an API response."
 level: ["1"]
 priority: Medium
 status: In Progress
 publish: true
 created: "2026-02-19T23:08:30.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.318Z"
 ---
 

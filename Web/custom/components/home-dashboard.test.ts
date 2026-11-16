@@ -137,13 +137,12 @@ test("source and keyboard order follows visual row-major order", async () => {
   }
 })
 
-test("rendered topic summaries remain complete and unclamped", async () => {
-  const summary =
-    "A deliberately long summary whose final sentinel must remain available to both readers. SUMMARY_END"
-  const html = await renderDashboard(1, summary)
-  const css = /<style>([\s\S]*?)<\/style>/.exec(html)?.[1] ?? ""
-  assert.match(html, new RegExp(`${summary.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</p>`))
-  assert.doesNotMatch(css, /(?:line-clamp|text-overflow|max-height)/)
+test("topic cards omit legacy summaries while preserving titles and progress", async () => {
+  const html = await renderDashboard(1, "LEGACY_SUMMARY_MUST_NOT_RENDER", ["Established"])
+  assert.doesNotMatch(html, /LEGACY_SUMMARY_MUST_NOT_RENDER|db-card-summary/)
+  assert.match(html, /class="db-card-title">Topic 00<\/span>/)
+  assert.match(html, /1 note/)
+  assert.match(html, /100% overall note development/)
 })
 
 test("note development counts all three stages and weights them independently of study", async () => {

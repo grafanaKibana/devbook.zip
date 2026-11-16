@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Retrieves evidence from a corpus, then generates an answer grounded in it, no retraining needed."
 tags: [FolderNote]
 priority: High
 level: ["2"]
@@ -11,7 +10,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/RAG"
 flashcard_uid: "33e0a516"
 created: "2026-02-27T01:19:52.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-13T18:39:40.459Z"
 ---
 

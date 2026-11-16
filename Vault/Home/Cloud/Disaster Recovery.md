@@ -1,13 +1,12 @@
 ---
 topic: [Cloud]
 subtopic: []
-summary: "Turning RPO and RTO targets into recoverable data, compatible application state, and tested user flows."
 level: ["2"]
 priority: High
 status: In Progress
 publish: true
 created: "2026-07-18T07:07:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-16T07:10:34.939Z"
 ---
 

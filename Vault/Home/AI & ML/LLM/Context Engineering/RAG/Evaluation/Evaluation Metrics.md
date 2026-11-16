@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Retrieval, generation, and end-to-end metrics each answer a different question, making regressions diagnosable."
 level: ["2"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics"
 flashcard_uid: "a6155222"
 created: "2026-06-12T18:21:46.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.413Z"
 ---
 

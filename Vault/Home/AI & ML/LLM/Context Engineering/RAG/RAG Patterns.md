@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "A catalog of production RAG patterns, each naming the failure it fixes and the risk it adds."
 level: ["2"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/RAG Patterns"
 flashcard_uid: "fb2f007d"
 created: "2026-02-27T01:19:52.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.415Z"
 ---
 

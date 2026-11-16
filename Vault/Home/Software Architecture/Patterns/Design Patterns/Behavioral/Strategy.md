@@ -1,7 +1,6 @@
 ---
 topic: [Software Architecture]
 subtopic: [Patterns]
-summary: "Defines a family of algorithms behind a common interface and makes them interchangeable at runtime, selected by the client."
 level: ["2"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Strategy"
 flashcard_uid: "1335da26"
 created: "2026-03-05T22:12:46.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.447Z"
 ---
 

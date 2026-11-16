@@ -9,13 +9,13 @@
 // Fully derived from the current file: it renders the direct child FolderNotes
 // (as folder cards, with a note count) and direct child concept notes (as note
 // cards) of the folder the current note lives in. Everything topic-specific —
-// color, ordering, per-card summary — comes from frontmatter, never from a
+// color and ordering — comes from frontmatter, never from a
 // hard-coded map. A published hub only ever links to publishable children.
 //
-// The card look (border, gradient, hover, icon, title, summary) is NOT defined
+// The card look (border, gradient, hover, icon, title) is NOT defined
 // here — it comes from the shared devbook-card.jsx chrome so the home dashboard
-// and these hubs stay visually identical. This module only adds the flex-wrap
-// layout, the note-count, and the responsive compaction of small cards.
+// and these hubs stay visually identical. This module adds balanced full-width
+// rows and the note-count.
 
 const { CARD_CSS, squashCss } = await dc.require("Assets/components/devbook-card.jsx");
 
@@ -91,19 +91,26 @@ function FolderStructureMap() {
     hexToRgb(topLevelTopicNote?.value("color")) ||
     hexToRgb(topicFolderNote?.value("color")) ||
     "125, 125, 125";
-  // Summaries are shown only when frontmatter supplies one; nothing is fabricated.
-  const summaryFor = (page) => first(page.value("summary")) || null;
 
   const icons = {
     folder: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>`,
     note: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>`,
   };
 
-  // Layout only — the visual chrome (.db-card, .db-card-icon, .db-card-title,
-  // .db-card-summary, .db-card-hit) is supplied by CARD_CSS. Here we add the
-  // flex-wrap row, the note-count, and the responsive compaction: at small
-  // widths the card is a single centered line (summary hidden, tighter padding
-  // via --db-card-pad), expanding to the full card once there's room.
+  // Balance row lengths before assigning widths. Larger rows come first, with
+  // at most one card's difference; literal CSS survives Syncer's frozen HTML.
+  const rowRules = (capacity) => {
+    const rows = Math.max(1, Math.ceil(entries.length / capacity));
+    const count = Math.max(1, Math.floor(entries.length / rows));
+    const largerCards = (entries.length % rows) * (count + 1);
+    return `
+.folder-structure-map[data-map-count="${entries.length}"] .folder-map-node:nth-child(n) { --map-row-count: ${count}; }
+${largerCards ? `.folder-structure-map[data-map-count="${entries.length}"] .folder-map-node:nth-child(-n+${largerCards}) { --map-row-count: ${count + 1}; }` : ""}
+`;
+  };
+
+  // Shared CARD_CSS supplies the chrome. Container width sets capacity so a
+  // narrow Obsidian pane and the published page follow the same layout rules.
   const CSS = `
 .folder-structure-map {
   --card-accent: 16, 185, 129;
@@ -115,25 +122,20 @@ function FolderStructureMap() {
   container-type: inline-size;
 }
 .folder-map-children {
-  /* Flex (not grid) so each card sizes to its own title — a long title widens
-     its card and pushes to another row instead of being truncated, and rows
-     grow to fill the width with no empty tracks when there are few cards. */
   display: flex;
   flex-wrap: wrap;
   gap: var(--map-gap);
 }
 .folder-map-node {
-  /* No overflow:hidden on a flex item whose min-width:auto collapses to 0: that
-     would let the card shrink below its title + note-count and clip them.
-     Without it the card's min size is its content, so long titles widen the card
-     (and wrap to another row) instead of being cut off. The shared ::before
-     accent uses border-radius:inherit to stay inside the rounded corners. */
-  flex: 1 1 12rem;
-  min-height: 2.75rem;
-  --db-card-pad: 0.5rem 0.75rem;
+  display: flex;
+  flex: 1 0 calc((100% - (var(--map-row-count, 1) - 1) * var(--map-gap)) / var(--map-row-count, 1));
+  min-width: 0;
+  min-height: 3.5rem;
+  --db-card-pad: 0.75rem;
 }
 .folder-map-node .db-card-body {
-  min-height: 2.75rem;
+  width: 100%;
+  min-height: 3.5rem;
   justify-content: center;
 }
 .folder-map-node-heading {
@@ -146,9 +148,10 @@ function FolderStructureMap() {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
 }
 .folder-map-node .db-card-title {
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .folder-map-node-count {
   display: block;
@@ -156,9 +159,6 @@ function FolderStructureMap() {
   color: var(--text-muted, var(--darkgray, #5f6b7a));
   font-size: 0.875rem;
   white-space: nowrap;
-}
-.folder-map-node .db-card-summary {
-  display: none;
 }
 /* Empty-section placeholder: reuses the full .db-card chrome (border, accent
    glow gradient, background) so it reads as a regular sub-folder card. It only
@@ -176,8 +176,7 @@ function FolderStructureMap() {
 }
 .folder-map-node-empty:hover::before,
 .folder-map-node-empty:focus-within::before { opacity: 0.78; }
-/* Higher specificity than the @container .folder-map-node .db-card-body
-   rules below so the placeholder stays vertically centered at every width. */
+/* Keep the placeholder centered at every width. */
 .folder-structure-map .folder-map-node-empty .db-card-body {
   justify-content: center;
   align-items: center;
@@ -190,32 +189,21 @@ function FolderStructureMap() {
   font-style: normal;
   line-height: 1.25;
 }
-@container folder-map (min-width: 40rem) {
-  .folder-map-node {
-    min-height: 6rem;
-    --db-card-pad: 0.85rem 0.9rem;
-  }
-  .folder-map-node .db-card-body {
-    min-height: 6rem;
-    justify-content: flex-start;
-  }
-  .folder-map-node .db-card-summary { display: block; }
+${[2, 3, 4, 5].map((capacity) => `
+@container folder-map (min-width: ${capacity * 14}rem) {
+${rowRules(capacity)}
 }
-@container folder-map (min-width: 64rem) {
-  .folder-map-node,
-  .folder-map-node .db-card-body { min-height: 6.75rem; }
-}
+`).join("")}
 `;
 
   return (
-    <nav class="folder-structure-map" aria-label={`${folderName} section map`} style={{ "--card-accent": topicRgb }}>
+    <nav class="folder-structure-map" data-map-count={entries.length} aria-label={`${folderName} section map`} style={{ "--card-accent": topicRgb }}>
       <style dangerouslySetInnerHTML={{ __html: squashCss(CARD_CSS + CSS) }} />
       {entries.length > 0 ? (
         <div class="folder-map-children">
           {entries.map((entry) => {
             const isFolder = hasTag(entry, "FolderNote");
             const noteCount = conceptNotesFor(entry).length;
-            const summary = summaryFor(entry);
             return (
               <article class="db-card folder-map-node" key={entry.$path}>
                 <div class="db-card-body">
@@ -232,7 +220,6 @@ function FolderStructureMap() {
                       <span class="folder-map-node-count">{noteCount} {noteCount === 1 ? "note" : "notes"}</span>
                     ) : null}
                   </div>
-                  {summary ? <p class="db-card-summary">{summary}</p> : null}
                 </div>
                 <span class="db-card-hit"><dc.Link link={entry.$link} /></span>
               </article>

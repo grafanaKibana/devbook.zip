@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "The OWASP Top 10 for LLM Applications, the highest-impact security failures in LLM systems."
 level: ["3"]
 priority: Medium
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Safety/OWASP vulnerabilities on AI LLM"
 flashcard_uid: "c24fd7d3"
 created: "2026-02-15T15:01:57.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.411Z"
 ---
 

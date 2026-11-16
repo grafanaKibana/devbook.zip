@@ -1,7 +1,6 @@
 ---
 topic: [Software Architecture]
 subtopic: [Patterns]
-summary: "Bridge decouples an abstraction from its implementation so the two hierarchies can evolve independently instead of exploding combinatorially."
 level: ["3"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Bridge"
 flashcard_uid: "71628ab5"
 created: "2026-03-05T22:12:42.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.452Z"
 ---
 

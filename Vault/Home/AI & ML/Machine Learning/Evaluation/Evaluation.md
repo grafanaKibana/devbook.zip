@@ -2,14 +2,13 @@
 title: Machine Learning Evaluation
 topic: [AI & ML]
 subtopic: [Machine Learning]
-summary: "Measuring whether a model solves its real problem in production by picking the right metric."
 tags: [FolderNote]
 publish: true
 priority: Medium
 level: ["3"]
 status: In Progress
 created: "2026-02-17T23:29:46.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.417Z"
 ---
 

@@ -4,14 +4,13 @@ order: 90
 color: "#3b82f6"
 topic: [Cloud]
 subtopic: []
-summary: "Using managed infrastructure without losing sight of the application responsibilities that remain."
 tags: [FolderNote]
 publish: true
 status: New
 priority: High
 level: ["2"]
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.344Z"
 ---
 

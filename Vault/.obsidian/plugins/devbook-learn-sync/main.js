@@ -20,10 +20,8 @@ var require_core = __commonJS({
     }
     var contentOf = (text) => {
       const match = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n)?/.exec(text);
-      const summary = match?.[1].match(/^summary:\s*(.*)$/m)?.[1] ?? "";
       const body = match ? text.slice(match[0].length) : text;
-      return `${summary}
-${body}`.replace(/^[ \t]*<!--[ \t]*qard-(?:id|location|siblings|reverse):[^\n]*?-->[ \t]*(?:\r?\n|$)/gm, "").replace(/<!--[ \t]*qard-(?:id|location|siblings|reverse):[^\n]*?-->/g, "").replace(/\r\n/g, "\n").replace(/[ \t]+$/gm, "").replace(/\n{3,}/g, "\n\n").trim();
+      return body.replace(/^[ \t]*<!--[ \t]*qard-(?:id|location|siblings|reverse):[^\n]*?-->[ \t]*(?:\r?\n|$)/gm, "").replace(/<!--[ \t]*qard-(?:id|location|siblings|reverse):[^\n]*?-->/g, "").replace(/\r\n/g, "\n").replace(/[ \t]+$/gm, "").replace(/\n{3,}/g, "\n\n").trim();
     };
     function cardCount(text) {
       const lines = text.split(/\r?\n/);

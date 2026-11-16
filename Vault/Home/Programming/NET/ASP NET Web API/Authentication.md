@@ -2,7 +2,6 @@
 title: ASP.NET Core Authentication
 topic: [Programming]
 subtopic: [NET]
-summary: "Verifying who a caller is and populating HttpContext.User with a ClaimsPrincipal."
 level: ["1"]
 priority: Medium
 status: In Progress
@@ -11,7 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/ASP NET Web API/Authentication"
 flashcard_uid: "9d950e14"
 created: "2026-02-19T23:08:30.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.317Z"
 ---
 

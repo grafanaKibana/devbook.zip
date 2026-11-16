@@ -1,13 +1,12 @@
 ---
 topic: [Networks]
 subtopic: []
-summary: "The packet path from an application socket through the kernel, NIC, network, and receiving process."
 level: ["3"]
 priority: Medium
 status: In Progress
 publish: true
 created: "2026-07-18T07:07:47.000Z"
-modified: "2026-11-13T22:22:25.417Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-16T07:43:33.509Z"
 ---
 

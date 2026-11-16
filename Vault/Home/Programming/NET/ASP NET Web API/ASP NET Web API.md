@@ -1,7 +1,6 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: "How ASP.NET Core routes each HTTP request through middleware to handlers or controllers."
 level: ["4"]
 priority: High
 tags: [FolderNote]
@@ -9,7 +8,7 @@ tags: [FolderNote]
 publish: true
 status: New
 created: "2026-02-14T21:59:03.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.317Z"
 ---
 

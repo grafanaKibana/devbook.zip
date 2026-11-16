@@ -1,14 +1,13 @@
 ---
 topic: [Computer Science]
 subtopic: [Algorithms]
-summary: "Algorithms to traverse, rank, and optimize graph relationships: reachability, shortest paths, connectivity, and flow."
 tags: [FolderNote]
 publish: true
 level: ["4"]
 status: New
 priority: High
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.334Z"
 ---
 

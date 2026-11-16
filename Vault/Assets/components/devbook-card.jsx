@@ -10,10 +10,9 @@
 // with style={{ "--card-accent": "R, G, B" }} (comma-separated channels).
 //
 // It owns: border, radius, background, accent gradient, hover/focus lift, the
-// body padding (via --db-card-pad, overridable), icon, title, and summary
-// typography — including the summary margin that stops Obsidian's reading view
-// from injecting large gaps around the description. Layout (grid vs flex-wrap)
-// and any extras (e.g. the home progress bar) stay in the consumer.
+// body padding (via --db-card-pad, overridable), icon, and title typography.
+// Layout (grid vs flex-wrap) and any extras (e.g. the home progress bar) stay
+// in the consumer.
 
 // Resolves to the accent triple, or a neutral grey when a consumer forgets to
 // set --card-accent. Interpolated into rgb()/rgba() below.
@@ -77,17 +76,6 @@ const CARD_CSS = `
   font-size: 1rem;
   font-weight: 700;
   line-height: 1.25;
-}
-/* Element-qualified (p.db-card-summary) on purpose: it ties the specificity of
-   Obsidian reading view's ".markdown-rendered p" and, being injected later in
-   the body, wins. A bare ".db-card-summary" loses to it, so Obsidian keeps its
-   default paragraph spacing and the description gets large gaps above/below.
-   Quartz doesn't add those margins, which is why the gap only showed there. */
-p.db-card-summary {
-  margin: 0.45rem 0 0;
-  color: var(--text-muted, var(--darkgray, #5f6b7a));
-  font-size: 0.875rem;
-  line-height: 1.45;
 }
 .db-card-hit { position: absolute; inset: 0; z-index: 1; }
 .db-card-hit a {

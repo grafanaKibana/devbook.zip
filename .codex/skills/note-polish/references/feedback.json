@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "revision": 0,
+  "general": {
+    "plain-explanations": "Use straightforward, concrete language. Make the technical cause easy to reconstruct without removing the detail needed to understand it.",
+    "no-long-dashes": "Do not use em dash or en dash characters in authored prose or responses."
+  },
+  "topics": {
+    "ai-and-ml": {},
+    "cloud": {},
+    "computer-science": {},
+    "data-persistence": {},
+    "devops": {},
+    "networks": {},
+    "programming": {},
+    "security": {},
+    "software-architecture": {},
+    "software-design": {}
+  }
+}

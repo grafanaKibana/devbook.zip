@@ -1,13 +1,12 @@
 ---
 topic: [Software Design]
 subtopic: [Testing]
-summary: "A cost and feedback heuristic that favors many fast unit tests, fewer integration tests, and a thin end-to-end layer."
 level: ["2"]
 priority: High
 status: New
 publish: true
 created: "2026-08-10T10:51:19.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-08-10T14:00:19.745Z"
 ---
 

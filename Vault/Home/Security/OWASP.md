@@ -1,7 +1,6 @@
 ---
 topic: [Security]
 subtopic: [Security]
-summary: "The non-profit behind the OWASP Top 10 web security risk checklist."
 level: ["4"]
 priority: High
 status: In Progress
@@ -11,7 +10,7 @@ qard-deck: "Security"
 qard-topic: "OWASP"
 flashcard_uid: "c892b874"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.504Z"
 ---
 

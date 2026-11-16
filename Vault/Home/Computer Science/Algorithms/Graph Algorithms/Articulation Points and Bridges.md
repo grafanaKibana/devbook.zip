@@ -1,13 +1,12 @@
 ---
 topic: [Computer Science]
 subtopic: [Algorithms]
-summary: "A single DFS finds all cut vertices and cut edges, the points whose removal disconnects an undirected graph."
 level: ["4"]
 priority: Medium
 status: New
 publish: true
 created: "2026-07-10T06:24:36.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-10T05:56:46.785Z"
 ---
 

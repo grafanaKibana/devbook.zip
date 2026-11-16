@@ -4,14 +4,13 @@ order: 10
 color: "#f43f5e"
 topic: [Programming]
 subtopic: []
-summary: "Software craft focused on the .NET stack: C#, runtime, web APIs, and concurrency."
 tags: [FolderNote]
 publish: true
 status: New
 level: ["4"]
 priority: High
 created: 2026-02-10T01:40:47.000Z
-modified: 2026-11-12T10:29:34.513Z
+modified: "2026-11-16T16:48:56.427Z"
 published: 2026-07-08T13:28:37.340Z
 ---
 

@@ -1,7 +1,6 @@
 ---
 topic: [Software Architecture]
 subtopic: [Patterns]
-summary: "Captures and externalizes an object's internal state so it can be restored later, without violating encapsulation."
 level: ["1"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Behavioral/Memento"
 flashcard_uid: "923a41fb"
 created: "2026-03-05T22:12:46.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.445Z"
 ---
 

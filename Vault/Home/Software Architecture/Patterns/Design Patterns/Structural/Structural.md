@@ -1,7 +1,6 @@
 ---
 topic: [Software Architecture]
 subtopic: [Patterns]
-summary: "Structural patterns compose classes and objects into flexible larger structures via inheritance and composition."
 tags: [FolderNote]
 level: ["3"]
 priority: High
@@ -10,7 +9,7 @@ status: In Progress
 qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Structural/Structural"
 created: "2026-03-05T22:12:32.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-15T11:47:55.161Z"
 ---
 

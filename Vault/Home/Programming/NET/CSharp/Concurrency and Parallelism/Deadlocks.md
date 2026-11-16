@@ -1,7 +1,6 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: "When execution paths wait forever on resources each other holds, halting progress."
 level: ["4"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Deadlocks"
 flashcard_uid: "f9642578"
 created: "2026-02-18T20:04:43.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.367Z"
 ---
 

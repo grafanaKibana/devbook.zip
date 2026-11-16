@@ -2,7 +2,6 @@
 title: Machine Learning Types
 topic: [AI & ML]
 subtopic: [Machine Learning]
-summary: "How a model learns from data and feedback. The choice drives data, training, and evaluation."
 tags: [FolderNote]
 publish: true
 status: In Progress
@@ -12,7 +11,7 @@ qard-deck: "AI & ML"
 qard-topic: "Machine Learning/Types/Types"
 flashcard_uid: "d3a3edaf"
 created: "2026-02-19T22:34:10.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.496Z"
 ---
 

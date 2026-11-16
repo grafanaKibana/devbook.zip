@@ -1,7 +1,6 @@
 ---
 topic: [Software Architecture]
 subtopic: [Patterns]
-summary: "Separates construction of a complex object from its representation, accumulating configuration through a fluent API validated on a final Build() call."
 level: ["3"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Builder"
 flashcard_uid: "ad1872ad"
 created: "2026-03-05T22:12:38.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.449Z"
 ---
 

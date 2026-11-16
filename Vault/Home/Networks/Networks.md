@@ -4,14 +4,13 @@ order: 40
 color: "#f59e0b"
 topic: [Networks]
 subtopic: []
-summary: "Protocols, latency, and reliability of how machines communicate over a network."
 tags: [FolderNote]
 publish: true
 priority: High
 level: ["3"]
 status: In Progress
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.342Z"
 ---
 

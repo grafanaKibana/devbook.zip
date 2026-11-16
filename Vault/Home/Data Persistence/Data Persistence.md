@@ -4,7 +4,6 @@ order: 30
 color: "#f97316"
 topic: [Data Persistence]
 subtopic: []
-summary: "How software stores and protects state across restarts using SQL, NoSQL, and caching."
 tags: [FolderNote]
 publish: true
 priority: High
@@ -14,7 +13,7 @@ qard-deck: "Data Persistence"
 qard-topic: "Data Persistence"
 flashcard_uid: "d03cdcde"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.342Z"
 ---
 

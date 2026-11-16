@@ -1,7 +1,6 @@
 ---
 topic: [Computer Science]
 subtopic: [Algorithms]
-summary: "Defines finite acyclic states and recurrences, solves each state in dependency order, and reuses stored results."
 level: ["4"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Computer Science"
 qard-topic: "Algorithms/Paradigms/Dynamic Programming"
 flashcard_uid: "fa8b80ea"
 created: "2026-06-20T05:33:50.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.336Z"
 ---
 

@@ -4,7 +4,6 @@ order: 20
 color: "#ef4444"
 topic: [Computer Science]
 subtopic: []
-summary: "Core CS reasoning for software engineering: data structures, algorithms, complexity analysis, and operating-system mechanisms."
 tags: [FolderNote]
 publish: true
 level: ["4"]
@@ -14,7 +13,7 @@ qard-deck: "Computer Science"
 qard-topic: "Computer Science"
 flashcard_uid: "827a68f2"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.342Z"
 ---
 

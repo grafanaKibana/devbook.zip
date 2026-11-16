@@ -1,13 +1,12 @@
 ---
 topic: [Computer Science]
 subtopic: [Algorithms]
-summary: "Repeatedly permutes the input until it happens to be sorted, illustrating probabilistic nontermination."
 level: ["4"]
 priority: Low
 status: New
 publish: true
 created: "2026-08-10T10:51:19.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-08-10T09:32:47.561Z"
 ---
 

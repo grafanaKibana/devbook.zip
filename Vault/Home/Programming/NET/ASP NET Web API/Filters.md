@@ -1,7 +1,6 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: "Filters around ASP.NET Core Web API controller actions and endpoint-handler invocations."
 level: ["2"]
 priority: Medium
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/ASP NET Web API/Filters"
 flashcard_uid: "ef27222b"
 created: "2026-02-19T23:08:30.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.319Z"
 ---
 

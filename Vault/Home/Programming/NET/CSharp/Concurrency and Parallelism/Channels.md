@@ -1,7 +1,6 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: "Bounded async producer-consumer handoff with explicit backpressure."
 level: ["4"]
 priority: High
 status: New
@@ -10,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Channels"
 flashcard_uid: "a3dbcc37"
 created: "2026-07-14T20:57:52.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-14T19:22:41.324Z"
 ---
 

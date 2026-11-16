@@ -1,14 +1,13 @@
 ---
 topic: [Software Architecture]
 subtopic: [Patterns]
-summary: "Behavioral patterns assign responsibilities and coordinate communication between objects without tightly coupling them."
 tags: [FolderNote]
 level: ["3"]
 priority: High
 publish: true
 status: In Progress
 created: "2026-03-05T22:12:32.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-15T11:47:55.102Z"
 ---
 

@@ -1,7 +1,6 @@
 ---
 topic: [DevOps]
 subtopic: [Version Control Systems]
-summary: "Tracks file changes over time, enabling collaboration, branching, merging, and reverting."
 level: ["4"]
 priority: High
 tags: [FolderNote]
@@ -9,7 +8,7 @@ tags: [FolderNote]
 publish: true
 status: In Progress
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.511Z"
 ---
 

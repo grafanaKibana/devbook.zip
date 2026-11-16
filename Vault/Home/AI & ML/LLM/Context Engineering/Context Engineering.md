@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Deliberately deciding what fills the finite context window, and in what order, to maximize useful signal."
 tags: [FolderNote]
 level: ["2"]
 priority: High
@@ -11,7 +10,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/Context Engineering"
 flashcard_uid: "0d1d06bc"
 created: "2026-06-11T07:39:53.000Z"
-modified: "2026-11-14T11:37:10.880Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-13T18:58:50.735Z"
 ---
 

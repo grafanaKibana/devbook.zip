@@ -1,7 +1,6 @@
 ---
 topic: [Security]
 subtopic: [Security]
-summary: "Stores password verifiers with a slow, salted password KDF so a database leak does not reveal plaintext credentials."
 level: ["3"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Security"
 qard-topic: "Password Storage"
 flashcard_uid: "e2367753"
 created: "2026-07-18T07:07:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-16T08:23:57.845Z"
 ---
 

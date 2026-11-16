@@ -1,13 +1,12 @@
 ---
 topic: [Computer Science]
 subtopic: []
-summary: "How multi-byte values map to byte addresses, and how to make byte order explicit at protocol and file boundaries."
 level: ["3"]
 priority: Medium
 status: New
 publish: true
 created: "2026-07-18T07:07:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-16T18:15:21.787Z"
 ---
 

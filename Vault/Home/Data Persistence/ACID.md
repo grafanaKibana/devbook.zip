@@ -1,7 +1,6 @@
 ---
 topic: [Data Persistence]
 subtopic: []
-summary: "Four properties (Atomicity, Consistency, Isolation, Durability) guaranteeing reliable database transactions."
 level: ["3"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Data Persistence"
 qard-topic: "ACID"
 flashcard_uid: "72457a79"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.348Z"
 ---
 

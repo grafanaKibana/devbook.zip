@@ -1,11 +1,10 @@
 ---
 title: Interview Questions
-summary: Browse interview and review questions extracted from DevBook notes, grouped by topic.
 tags: [FolderNote, MetricsIgnore]
 publish: true
 icon: circle-help
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-10-21T13:54:52.000Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-05T17:03:01.458Z"
 ---
 

@@ -1,13 +1,12 @@
 ---
 topic: [Networks]
 subtopic: [Architecture & Ops]
-summary: "Intermediaries that represent either a client reaching the internet or an origin accepting traffic."
 level: ["3"]
 priority: Medium
 status: In Progress
 publish: true
 created: "2026-07-18T07:07:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-16T08:27:14.227Z"
 ---
 

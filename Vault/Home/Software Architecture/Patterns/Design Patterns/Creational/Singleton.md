@@ -1,7 +1,6 @@
 ---
 topic: [Software Architecture]
 subtopic: [Patterns]
-summary: "Uses a container-managed singleton lifetime when one shared, thread-safe instance should serve a provider boundary."
 level: ["2"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Singleton"
 flashcard_uid: "12bb55c5"
 created: "2026-03-05T22:12:38.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.451Z"
 ---
 

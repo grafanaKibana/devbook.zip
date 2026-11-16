@@ -1,7 +1,6 @@
 ---
 topic: [Software Architecture]
 subtopic: [Distributed Systems]
-summary: "Message queues decouple producers from consumers by buffering messages until consumers are ready, absorbing spikes and isolating failures."
 tags: [FolderNote]
 publish: true
 priority: High
@@ -11,7 +10,7 @@ qard-deck: "Software Architecture"
 qard-topic: "Distributed Systems/Message Queues/Message Queues"
 flashcard_uid: "15a348c0"
 created: "2026-02-15T15:01:57.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.422Z"
 ---
 

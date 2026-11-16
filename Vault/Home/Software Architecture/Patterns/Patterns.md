@@ -2,7 +2,6 @@
 title: Software Architecture Patterns
 topic: [Software Architecture]
 subtopic: [Patterns]
-summary: "Reusable solutions to recurring design problems around boundaries, dependencies, and change."
 tags: [FolderNote]
 publish: true
 priority: High
@@ -12,7 +11,7 @@ qard-deck: "Software Architecture"
 qard-topic: "Patterns/Patterns"
 flashcard_uid: "cfaa4058"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-15T11:47:54.862Z"
 ---
 

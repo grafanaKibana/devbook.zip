@@ -26,9 +26,6 @@ if (title.startsWith("Untitled")) {
 const level = await tp.system.suggester(["1", "2", "3", "4"], ["1", "2", "3", "4"], false, "Select level");
 const priority = await tp.system.suggester(["Low", "Medium", "High"], ["Low", "Medium", "High"], false, "Select priority");
 
-// Optional one-sentence summary — used by the parent hub's card map. Leave blank to skip.
-const summary = await tp.system.prompt("One-line summary for the parent's card map (optional)", "");
-
 // Write typed frontmatter after the template finishes.
 tp.hooks.on_all_templates_executed(async () => {
   const file = tp.file.find_tfile(tp.file.path(true));
@@ -38,7 +35,6 @@ tp.hooks.on_all_templates_executed(async () => {
     if (level != null) fm.level = [level];
     if (priority != null) fm.priority = priority;
     fm.tags = ["FolderNote"];
-    if (summary && summary.trim()) fm.summary = summary.trim();
     // Set `color` (hex, e.g. "#10b981") and `order` (number) on this note to give
     // its card a topic accent and a fixed position in the parent hub's map.
   });

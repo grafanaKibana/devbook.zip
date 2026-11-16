@@ -1,7 +1,6 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: "A primitive allowing up to N concurrent holders, for bounded parallelism."
 level: ["4"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Semaphore"
 flashcard_uid: "d136a9b7"
 created: "2026-02-19T22:34:10.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.322Z"
 ---
 

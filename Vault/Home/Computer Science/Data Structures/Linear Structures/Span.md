@@ -1,7 +1,6 @@
 ---
 topic: [Computer Science]
 subtopic: [Data Structures]
-summary: "A stack-only value describing contiguous memory it does not own, enabling zero-copy slicing and parsing."
 level: ["4"]
 priority: Medium
 status: In Progress
@@ -9,7 +8,7 @@ publish: true
 qard-deck: "Computer Science"
 qard-topic: "Data Structures/Linear Structures/Span"
 created: "2026-02-19T22:34:10.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.347Z"
 ---
 

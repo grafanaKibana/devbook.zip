@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Designing the tools, protocol wiring, and execution boundary that a model acts through."
 tags: [FolderNote]
 publish: true
 level: ["3"]
@@ -11,7 +10,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Harness Engineering/Harness Engineering"
 flashcard_uid: "c0ec4e2e"
 created: "2026-07-13T18:58:50.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-13T18:59:30.970Z"
 ---
 

@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Selecting and routing models from measured task quality, latency, reliability, and cost."
 level: ["2"]
 priority: Medium
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Model Selection and Routing"
 flashcard_uid: "776eda2e"
 created: "2026-06-11T07:39:53.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.410Z"
 ---
 

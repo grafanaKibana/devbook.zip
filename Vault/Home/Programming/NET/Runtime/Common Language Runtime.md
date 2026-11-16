@@ -1,7 +1,6 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: ".NET's execution engine compiling IL to native code and managing memory and types."
 level: ["4"]
 priority: High
 status: In Progress
@@ -11,7 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/Runtime/Common Language Runtime"
 flashcard_uid: "e98a40ab"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-13T20:04:41.376Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.331Z"
 ---
 

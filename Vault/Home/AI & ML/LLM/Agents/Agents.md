@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Systems where an LLM controls part of the workflow, calling tools, making decisions, or directing other LLMs."
 tags: [FolderNote]
 publish: true
 level: ["3"]
@@ -11,7 +10,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Agents/Agents"
 flashcard_uid: "ef9c99bb"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.403Z"
 ---
 

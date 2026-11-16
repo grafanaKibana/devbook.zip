@@ -5,13 +5,13 @@ DevBook Learn Sync is a local companion plugin. It watches the source notes alre
 | Source event | Automatic behavior |
 | --- | --- |
 | A card is added, removed or edited in a linked note | Update that objective's source revision and last-change date |
-| Linked note content or its summary changes | Record the source change against its existing objectives |
+| Linked note body changes | Record the source change against its existing objectives |
 | A source file or folder is renamed while the plugin is running | Maintain the explicit source links |
 | A source disappears | Report the missing source and retain its objective and progress |
 | A note with cards has no objective in its subject course | Show an unassigned-note warning with its path and card count; leave the course unchanged |
 | A closed completed lesson exists, but its existing objective becomes new with empty due and evidence | Report possible progress loss; keep the warning until the records are reconciled |
 
-The plugin does not create objectives or tests, rewrite learning targets, infer prerequisites, or change states, due dates or assessment evidence. Card schedules, review history, note statuses and Qard settings remain under their existing owners. Unrelated metadata, including stock Qard identity bookkeeping, does not trigger a source-content update.
+The plugin does not create objectives or tests, rewrite learning targets, infer prerequisites, or change states, due dates or assessment evidence. Card schedules, review history, note statuses and Qard settings remain under their existing owners. Frontmatter metadata and stock Qard identity bookkeeping do not trigger a source-content update.
 
 ## Daily use
 

@@ -1,7 +1,6 @@
 ---
 topic: [Software Architecture]
 subtopic: [Distributed Systems]
-summary: "Coordinates multi-participant change through atomic 2PC or independently committed saga steps with semantic compensation."
 level: ["2"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Software Architecture"
 qard-topic: "Distributed Systems/Distributed Transactions"
 flashcard_uid: "c508afc9"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.369Z"
 ---
 

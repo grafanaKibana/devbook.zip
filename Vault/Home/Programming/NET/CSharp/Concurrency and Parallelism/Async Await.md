@@ -1,7 +1,6 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: ".NET's model for non-blocking I/O that releases the thread while awaiting work."
 level: ["4"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Async Await"
 flashcard_uid: "4a42db52"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-12T21:09:36.103Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.320Z"
 ---
 

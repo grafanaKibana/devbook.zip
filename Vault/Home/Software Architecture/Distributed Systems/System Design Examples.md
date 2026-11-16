@@ -1,13 +1,12 @@
 ---
 topic: [Software Architecture]
 subtopic: [Distributed Systems]
-summary: "Five system designs compared through their ordering, state ownership, recovery, and scaling constraints."
 level: ["4"]
 priority: High
 status: In Progress
 publish: true
 created: "2026-07-18T11:06:07.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-18T08:28:19.601Z"
 ---
 

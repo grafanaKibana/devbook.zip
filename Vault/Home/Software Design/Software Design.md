@@ -4,14 +4,13 @@ order: 60
 color: "#84cc16"
 topic: [Software Design]
 subtopic: []
-summary: "How code is structured at the module and class scale — the principles, paradigms, and testing discipline that shape good design."
 tags: [FolderNote]
 publish: true
 status: New
 level: ["4"]
 priority: High
 created: "2026-07-15T12:08:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-15T11:53:27.615Z"
 ---
 

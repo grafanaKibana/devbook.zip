@@ -1,13 +1,12 @@
 ---
 topic: [Computer Science]
 subtopic: [Algorithms]
-summary: "A directed graph with no directed cycle. In finite graphs, its reachability order enables dependency-first processing."
 level: ["4"]
 priority: High
 status: In Progress
 publish: true
 created: "2026-08-08T15:37:04.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-08-08T15:24:55.712Z"
 ---
 

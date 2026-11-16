@@ -1,13 +1,12 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Embedding and detecting a keyed statistical pattern in LLM token choices without adding visible markers."
 level: ["3"]
 priority: Medium
 status: In Progress
 publish: true
 created: "2026-08-24T13:55:31.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-08-24T13:55:09.085Z"
 ---
 

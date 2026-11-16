@@ -1,13 +1,12 @@
 ---
 topic: [Computer Science]
 subtopic: [Algorithms]
-summary: "Finds strongly connected components in one DFS using discovery indices, low links, and an active-vertex stack."
 level: ["4"]
 priority: Medium
 status: In Progress
 publish: true
 created: "2026-07-26T20:18:51.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-26T19:27:00.411Z"
 ---
 

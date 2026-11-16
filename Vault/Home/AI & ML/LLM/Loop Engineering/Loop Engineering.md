@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Designing control flow, stopping, verification, and recovery across repeated model calls."
 tags: [FolderNote]
 publish: true
 level: ["3"]
@@ -11,7 +10,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Loop Engineering/Loop Engineering"
 flashcard_uid: "3d544ed9"
 created: "2026-07-13T18:58:50.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-13T18:59:43.328Z"
 ---
 

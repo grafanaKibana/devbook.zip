@@ -1,13 +1,12 @@
 ---
 topic: [Security]
 subtopic: [Security]
-summary: "How SQL Injection, XSS, and CSRF work and the .NET defenses against each."
 level: ["4"]
 priority: High
 status: In Progress
 publish: true
 created: "2026-06-20T19:32:24.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.505Z"
 ---
 

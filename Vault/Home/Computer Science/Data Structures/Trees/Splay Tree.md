@@ -1,13 +1,12 @@
 ---
 topic: [Computer Science]
 subtopic: [Data Structures]
-summary: "A self-adjusting BST that rotates each accessed node to the root, adapting the structure to access locality."
 level: ["4"]
 priority: Medium
 status: New
 publish: true
 created: "2026-07-11T16:12:59.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-12T14:27:20.428Z"
 ---
 

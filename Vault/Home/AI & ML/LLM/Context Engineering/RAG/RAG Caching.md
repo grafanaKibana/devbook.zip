@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Stores results at each RAG stage to cut latency and cost, scoped by authorization."
 level: ["2"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/RAG Caching"
 flashcard_uid: "e2208d57"
 created: "2026-09-29T12:13:16.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-09-21T08:43:52.494Z"
 ---
 

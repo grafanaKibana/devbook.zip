@@ -1,7 +1,6 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: "Components forming the ASP.NET Core HTTP pipeline, each wrapping the next."
 level: ["4"]
 priority: High
 status: In Progress
@@ -11,7 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/ASP NET Web API/Middlewares"
 flashcard_uid: "7fb97c90"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.319Z"
 ---
 

@@ -4,7 +4,6 @@ order: 80
 color: "#0ea5e9"
 topic: [Security]
 subtopic: []
-summary: "Protecting users, data, and systems: authentication, authorization, and cryptography."
 tags: [FolderNote]
 publish: true
 priority: High
@@ -14,7 +13,7 @@ qard-deck: "Security"
 qard-topic: "Security"
 flashcard_uid: "e838d602"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.343Z"
 ---
 

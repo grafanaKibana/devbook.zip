@@ -1,7 +1,6 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: "Microsoft's cross-platform runtime and framework for building web, cloud, desktop, and mobile software."
 tags: [FolderNote]
 publish: true
 status: New
@@ -11,7 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/NET"
 flashcard_uid: "f0f708ed"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.329Z"
 ---
 

@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Public task suites scoring multi-step tool use. Useful to shortlist models, not to decide."
 level: ["3"]
 priority: Medium
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Agents/Evaluation/Agent Benchmarks"
 flashcard_uid: "f16dc5d5"
 created: "2026-06-12T18:50:14.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.403Z"
 ---
 
