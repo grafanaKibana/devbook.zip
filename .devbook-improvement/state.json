@@ -17054,11 +17054,11 @@
     "version": 1,
     "id": "33a5bcd3129e4228a0be70053399144d",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-16T22:21:57.553782Z",
-    "elapsed_seconds": 163.47793169999997,
+    "elapsed_seconds": 186.16287479999994,
     "calls_reserved": 5,
-    "responses_received": 4,
+    "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md"
@@ -17151,7 +17151,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-16T22:24:41.031287Z",
+    "checkpoint_at": "2026-11-16T22:25:03.716228Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -49102,6 +49102,157 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-16T22:24:35.625259Z"
+    "prepared_at": "2026-11-16T22:24:35.625259Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+            "verdict": "CLEAN",
+            "summary": "I read the whole note and found no concrete accuracy, clarity, structure or Qard defect, so keeping it unchanged is justified. Each of the 12 patterns gives its mechanism, a matching flowchart, when it fits and the risk it adds. The intro, selection table and adoption paragraph agree. The single Qard is one gradeable task with a source-backed answer.",
+            "page_type": "Concept note: no mandatory headings. Questions and References are optional and present. Frontmatter and the Qard ID are protected.",
+            "current_text_evidence": [
+              {
+                "quote": "RAG patterns are repairs for observed retrieval failures.",
+                "line_start": 17,
+                "reason": "The opening states the operating idea, which is adopting patterns only after a measured failure, and the adoption-order boundary."
+              },
+              {
+                "quote": "Its ceiling is easy to find.",
+                "line_start": 33,
+                "reason": "The baseline section names the concrete limit, which is exact identifiers and no second-stage filtering. That motivates the next pattern."
+              },
+              {
+                "quote": "The ranking stack becomes another system to tune.",
+                "line_start": 53,
+                "reason": "Each pattern section pairs a benefit with a risk, and this one adds a decision condition: a labeled query set is needed."
+              },
+              {
+                "quote": "The rewrite can silently change intent.",
+                "line_start": 73,
+                "reason": "It names the failure mode and the mitigation, which is a shared trace and measurement by query type, without padding."
+              },
+              {
+                "quote": "Self-RAG requires custom training, while CRAG-style correction depends on trustworthy evaluator thresholds.",
+                "line_start": 239,
+                "reason": "This claim matches the Self-RAG and CRAG papers and sets the condition for adopting the pattern."
+              },
+              {
+                "quote": "**Adoption order**: the baseline is measured first.",
+                "line_start": 260,
+                "reason": "The closing paragraph is consistent with the intro and the table, and it keeps the explanation order coherent."
+              },
+              {
+                "quote": "> [!qard]- What kind of RAG question can justify adding a knowledge graph to vector retrieval?",
+                "line_start": 264,
+                "reason": "The card tests one decision with a bounded answer that covers the mechanism, the cost and the condition. It keeps its ID and cites the primary source on the answer side."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the twelve patterns form one ordered adoption catalog whose entries depend on each other and are not independently reusable. A separate note for any one pattern would lose the comparison.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "No edits are proposed. The independent whole-note audit found no accuracy, editorial, Qard or rules defect, and known_violations is empty, so the unchanged note is justified.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+          "citation_index": 4,
+          "reported_line_start": 239,
+          "resolved_line_start": 246
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+          "citation_index": 5,
+          "reported_line_start": 260,
+          "resolved_line_start": 265
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+          "citation_index": 6,
+          "reported_line_start": 264,
+          "resolved_line_start": 270
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md": "1861991eca35b80a37b65f922e5326401559861ad07f075362b0a6e07f337d67"
+      },
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+          "verdict": "CLEAN",
+          "summary": "I read the whole note and found no concrete accuracy, clarity, structure or Qard defect, so keeping it unchanged is justified. Each of the 12 patterns gives its mechanism, a matching flowchart, when it fits and the risk it adds. The intro, selection table and adoption paragraph agree. The single Qard is one gradeable task with a source-backed answer.",
+          "page_type": "Concept note: no mandatory headings. Questions and References are optional and present. Frontmatter and the Qard ID are protected.",
+          "current_text_evidence": [
+            {
+              "quote": "RAG patterns are repairs for observed retrieval failures.",
+              "line_start": 17,
+              "reason": "The opening states the operating idea, which is adopting patterns only after a measured failure, and the adoption-order boundary."
+            },
+            {
+              "quote": "Its ceiling is easy to find.",
+              "line_start": 33,
+              "reason": "The baseline section names the concrete limit, which is exact identifiers and no second-stage filtering. That motivates the next pattern."
+            },
+            {
+              "quote": "The ranking stack becomes another system to tune.",
+              "line_start": 53,
+              "reason": "Each pattern section pairs a benefit with a risk, and this one adds a decision condition: a labeled query set is needed."
+            },
+            {
+              "quote": "The rewrite can silently change intent.",
+              "line_start": 73,
+              "reason": "It names the failure mode and the mitigation, which is a shared trace and measurement by query type, without padding."
+            },
+            {
+              "quote": "Self-RAG requires custom training, while CRAG-style correction depends on trustworthy evaluator thresholds.",
+              "line_start": 246,
+              "reason": "This claim matches the Self-RAG and CRAG papers and sets the condition for adopting the pattern."
+            },
+            {
+              "quote": "**Adoption order**: the baseline is measured first.",
+              "line_start": 265,
+              "reason": "The closing paragraph is consistent with the intro and the table, and it keeps the explanation order coherent."
+            },
+            {
+              "quote": "> [!qard]- What kind of RAG question can justify adding a knowledge graph to vector retrieval?",
+              "line_start": 270,
+              "reason": "The card tests one decision with a bounded answer that covers the mechanism, the cost and the condition. It keeps its ID and cites the primary source on the answer side."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the twelve patterns form one ordered adoption catalog whose entries depend on each other and are not independently reusable. A separate note for any one pattern would lose the comparison.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "No edits are proposed. The independent whole-note audit found no accuracy, editorial, Qard or rules defect, and known_violations is empty, so the unchanged note is justified.",
+      "change_checks": []
+    }
   }
 }
