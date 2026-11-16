@@ -17054,13 +17054,14 @@
     "version": 1,
     "id": "33a5bcd3129e4228a0be70053399144d",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-16T22:21:57.553782Z",
-    "elapsed_seconds": 116.43191709999999,
+    "elapsed_seconds": 121.32633489999999,
     "calls_reserved": 3,
     "responses_received": 3,
     "attempted_paths": [
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md"
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+      "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -17074,10 +17075,83 @@
           "reason": "wikilink removal requires explicit target-specific semantic rationale",
           "model_calls": 1
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against my knowledge of Anthropic's 'Building Effective AI Agents' (not re-fetched this run). The five pattern descriptions match it: chaining with gates, routing, sectioning and voting, orchestrator-workers with runtime decomposition, and evaluator-optimizer with criteria and an iteration cap. The Research-system figure is correctly attributed: a lead agent running three to five parallel subagents, 90.2% gain on an internal evaluation, scoped to that system. The intro and each section state the control-flow differences and the failure condition. These include the router as a failure point, shared state breaking sectioning, and a vague rubric giving no stopping condition. Both cards test separate, gradeable tasks: who controls the next step, and why orchestrator-workers is harder to operate than parallelization. Their answers are mechanism-based, stay hedged, and cite the source. The note has no known violations, no flagged cards and no code fences without a language. The links and the single reference are appropriate. Any further edit would be cosmetic."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "No edits proposed. The whole-note audit found the note accurate, clear and compliant, so the keep is justified.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+                "verdict": "CLEAN",
+                "summary": "The note states the control-flow axis up front, then gives each pattern a mechanism, a fit condition and a failure mode. The Research-system figure is correctly scoped to that system. The two Qards each test one gradeable comparison and have a source on the answer side. The few small wording quirks are not worth an edit.",
+                "page_type": "Concept — free-form explanatory prose; Questions and References optional and present; MD040 satisfied (all fences are mermaid).",
+                "current_text_evidence": [
+                  {
+                    "quote": "The patterns differ in where the next step is chosen.",
+                    "line_start": 19,
+                    "reason": "The opening sets the organizing axis (who chooses the next step) before the per-pattern sections."
+                  },
+                  {
+                    "quote": "a perfect specialist cannot recover a request sent to the wrong branch",
+                    "line_start": 44,
+                    "reason": "This names the concrete failure condition of routing, i.e. the router as a single point of failure."
+                  },
+                  {
+                    "quote": "The number belongs to that system and evaluation, not to the pattern in general.",
+                    "line_start": 75,
+                    "reason": "The 90.2% figure is correctly scoped and not over-generalized, which keeps the claim accurate."
+                  },
+                  {
+                    "quote": "A vague rubric produces a confident loop with no stable stopping condition",
+                    "line_start": 90,
+                    "reason": "Evaluator-optimizer states its limiting condition, together with the iteration cap."
+                  },
+                  {
+                    "quote": "Why is the orchestrator-workers pattern harder to operate than ordinary parallelization",
+                    "line_start": 111,
+                    "reason": "This is one focused comparison, answered by mechanism with hedging and a source link, and the existing ID is retained."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: five closely related orchestration patterns share one control-flow axis, and each section is short and coherent.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 3
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-16T22:23:53.985271Z",
+    "checkpoint_at": "2026-11-16T22:23:58.879690Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
