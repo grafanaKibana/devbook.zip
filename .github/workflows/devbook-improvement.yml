@@ -114,7 +114,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     environment:
-      name: devbook-improvement-production
+      name: Self-Improving
       deployment: false
     outputs:
       export_ready: ${{ steps.maintain.outputs.export_ready }}
@@ -216,7 +216,7 @@ jobs:
       contents: read
       actions: read
     environment:
-      name: devbook-improvement-production
+      name: Self-Improving
       deployment: false
     env:
       DEVBOOK_GITHUB_TOKEN: ${{ secrets.DEVBOOK_GITHUB_TOKEN }}
