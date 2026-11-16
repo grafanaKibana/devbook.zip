@@ -17117,14 +17117,15 @@
     "version": 1,
     "id": "33a5bcd3129e4228a0be70053399144d",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-16T22:21:57.553782Z",
-    "elapsed_seconds": 190.65955469999994,
+    "elapsed_seconds": 195.76783799999995,
     "calls_reserved": 5,
     "responses_received": 5,
     "attempted_paths": [
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
-      "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md"
+      "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -17211,10 +17212,93 @@
           },
           "model_calls": 3
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text. Each of the 12 patterns names the failure it repairs, the mechanism (with a matching flowchart) and the risk it adds. The adoption-order intro, the selection table and the closing adoption paragraph agree with each other. Claims were checked against known primary sources and are accurate: Self-RAG needs custom training (arXiv 2310.11511), CRAG uses a retrieval evaluator (2401.15884), GraphRAG builds entity graphs with community summaries (2404.16130), and Contextual Retrieval adds chunk context before indexing (Anthropic). Multi-query fusion is separated from decomposition, which the sibling Query Translation note covers. The single Qard asks one gradeable task, has a correct answer and cites the GraphRAG primary source. The references are real, topic-specific bare links. No known violations are open. No factual or editorial defect justifies an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole note and found no concrete accuracy, clarity, structure or Qard defect, so keeping it unchanged is justified. Each of the 12 patterns gives its mechanism, a matching flowchart, when it fits and the risk it adds. The intro, selection table and adoption paragraph agree. The single Qard is one gradeable task with a source-backed answer.",
+                "page_type": "Concept note: no mandatory headings. Questions and References are optional and present. Frontmatter and the Qard ID are protected.",
+                "current_text_evidence": [
+                  {
+                    "quote": "RAG patterns are repairs for observed retrieval failures.",
+                    "line_start": 17,
+                    "reason": "The opening states the operating idea, which is adopting patterns only after a measured failure, and the adoption-order boundary."
+                  },
+                  {
+                    "quote": "Its ceiling is easy to find.",
+                    "line_start": 33,
+                    "reason": "The baseline section names the concrete limit, which is exact identifiers and no second-stage filtering. That motivates the next pattern."
+                  },
+                  {
+                    "quote": "The ranking stack becomes another system to tune.",
+                    "line_start": 53,
+                    "reason": "Each pattern section pairs a benefit with a risk, and this one adds a decision condition: a labeled query set is needed."
+                  },
+                  {
+                    "quote": "The rewrite can silently change intent.",
+                    "line_start": 73,
+                    "reason": "It names the failure mode and the mitigation, which is a shared trace and measurement by query type, without padding."
+                  },
+                  {
+                    "quote": "Self-RAG requires custom training, while CRAG-style correction depends on trustworthy evaluator thresholds.",
+                    "line_start": 246,
+                    "reason": "This claim matches the Self-RAG and CRAG papers and sets the condition for adopting the pattern."
+                  },
+                  {
+                    "quote": "**Adoption order**: the baseline is measured first.",
+                    "line_start": 265,
+                    "reason": "The closing paragraph is consistent with the intro and the table, and it keeps the explanation order coherent."
+                  },
+                  {
+                    "quote": "> [!qard]- What kind of RAG question can justify adding a knowledge graph to vector retrieval?",
+                    "line_start": 270,
+                    "reason": "The card tests one decision with a bounded answer that covers the mechanism, the cost and the condition. It keeps its ID and cites the primary source on the answer side."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the twelve patterns form one ordered adoption catalog whose entries depend on each other and are not independently reusable. A separate note for any one pattern would lose the comparison.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "No edits are proposed. The independent whole-note audit found no accuracy, editorial, Qard or rules defect, and known_violations is empty, so the unchanged note is justified.",
+            "change_checks": []
+          },
+          "model_calls": 5
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-16T22:25:08.212909Z",
+    "checkpoint_at": "2026-11-16T22:25:13.321194Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
