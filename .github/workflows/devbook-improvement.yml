@@ -200,7 +200,7 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  # The managed PR's own CI run (DevBook CI/CD) performs the one native export;
+  # The managed PR's own CI run (CI/CD) performs the one native export;
   # publish collects that artifact instead of rendering the same head again.
   publish:
     needs: maintenance
