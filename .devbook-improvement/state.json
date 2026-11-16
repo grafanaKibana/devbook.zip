@@ -17386,10 +17386,10 @@
   "focused_workload": {
     "version": 1,
     "id": "33a5bcd3129e4228a0be70053399144d",
-    "status": "active",
-    "phase": "evaluating",
+    "status": "sealed",
+    "phase": "sealed",
     "started_at": "2026-11-16T22:21:57.553782Z",
-    "elapsed_seconds": 759.082434600001,
+    "elapsed_seconds": 763.610888900001,
     "calls_reserved": 19,
     "responses_received": 19,
     "attempted_paths": [
@@ -19351,7 +19351,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-16T22:34:36.635795Z",
+    "checkpoint_at": "2026-11-16T22:34:41.164248Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -20059,7 +20059,9 @@
         "check": "dotnet run --no-cache --file DevBook.Tooling/Scripts/ValidateVault.cs -- --all --repo-root ..",
         "result": "passed"
       }
-    ]
+    ],
+    "stop_reason": "call_limit",
+    "sealed_at": "2026-11-16T22:34:41.164252Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
