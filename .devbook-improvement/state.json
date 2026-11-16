@@ -30972,11 +30972,13 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-16T22:28:25.323098Z",
-    "phase": "branch_updated",
-    "updated_at": "2026-11-16T22:35:09Z",
+    "phase": "pr_updated",
+    "updated_at": "2026-11-16T22:35:20Z",
     "evidence": {
       "commit_sha": "53c0dea3edee92e06acd2005f904050c25c9f10f",
-      "branch_sha": "53c0dea3edee92e06acd2005f904050c25c9f10f"
+      "branch_sha": "53c0dea3edee92e06acd2005f904050c25c9f10f",
+      "pr_number": 243,
+      "created": true
     }
   },
   "export_operations": {
