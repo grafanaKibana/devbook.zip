@@ -198,10 +198,10 @@ export function removeBuildSecrets(root, target) {
   fs.writeFileSync(path.join(directory, `.env.${target}.local`), "", { mode: 0o600 })
 }
 
-async function request(options, url, init = {}) {
+async function request(options, url, init = {}, expectJson = true) {
   const response = await (options.fetch ?? globalThis.fetch)(url, { cache: "no-store", ...init, signal: AbortSignal.timeout(30000) })
   if (!response.ok) throw new Error(`Deployment verification request failed (${response.status ?? "unknown"})`)
-  return response.json()
+  return expectJson ? response.json() : response.text()
 }
 
 function apiUrl(options, endpoint) {
@@ -230,8 +230,26 @@ export async function publishDeployment(options) {
   await verifyMarker(options, deployment.url)
   await assertHead()
   if (options.target === "production") {
-    const run = options.runCommand ?? ((args) => execFileSync("vercel", args, { timeout: 300000, stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, VERCEL_TOKEN: options.token } }))
-    run(["promote", options.deployment, "--yes"])
+    await request(options, apiUrl(options, `/v10/projects/${encodeURIComponent(options.project)}/promote/${encodeURIComponent(options.deployment)}`), {
+      method: "POST", headers: { ...authorization(options), "content-type": "application/json" }, body: "{}",
+    }, false)
+    const deadline = Date.now() + 180000
+    while (true) {
+      const project = await request(options, apiUrl(options, `/v9/projects/${encodeURIComponent(options.project)}?rollbackInfo=true`), { headers: authorization(options) })
+      if (project.id !== options.project || project.accountId !== options.org) throw new Error("Promotion project or organization mismatch")
+      const promotion = project.lastAliasRequest
+      if (promotion?.toDeploymentId === options.deployment && promotion.type === "promote") {
+        if (promotion.jobStatus === "succeeded") return
+        if (promotion.jobStatus === "skipped") {
+          await verifyDeployment(options)
+          return
+        }
+        if (promotion.jobStatus === "failed") throw new Error("Production promotion failed")
+        if (!["pending", "in-progress"].includes(promotion.jobStatus)) throw new Error("Unexpected Production promotion status")
+      }
+      if (Date.now() >= deadline) throw new Error("Production promotion timed out")
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    }
   } else {
     await request(options, apiUrl(options, `/v2/deployments/${encodeURIComponent(options.deployment)}/aliases`), {
       method: "POST", headers: { ...authorization(options), "content-type": "application/json" }, body: JSON.stringify({ alias: target.domain }),

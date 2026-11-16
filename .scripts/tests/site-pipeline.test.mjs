@@ -250,22 +250,87 @@ test("an edit during immutable smoke verification stops alias assignment", async
   assert.deepEqual(mutations, [])
 })
 
-test("production promotion follows successful immutable smoke and last head check", async () => {
-  const operations = []
-  const fetch = async (url) => {
-    operations.push(url)
+function productionFixture(promotions) {
+  const calls = []
+  const alias = { deploymentId: "dpl_one", projectId: deploymentProject.project }
+  const marker = { source, native }
+  const project = { id: deploymentProject.project, accountId: deploymentProject.org }
+  const fetch = async (url, request) => {
+    calls.push({ url: new URL(url), request })
+    if (url.includes("/promote/")) return { ok: true, status: 202, text: async () => "" }
     const value = url.includes("api.github.com") ? { object: { sha: source } }
-      : url.includes("api.vercel.com") ? { id: "dpl_one", url: "build.vercel.app", projectId: deploymentProject.project, readyState: "READY", target: "production", meta: { devbookSourceSha: source } }
-        : { source, native }
+      : url.includes("/v9/projects/") ? { ...project, lastAliasRequest: promotions.length > 1 ? promotions.shift() : promotions[0] }
+        : url.includes("/v4/aliases/") ? alias
+          : url.includes("api.vercel.com") ? { id: "dpl_one", url: "build.vercel.app", projectId: deploymentProject.project, readyState: "READY", target: "production", meta: { devbookSourceSha: source } }
+            : marker
     return { ok: true, json: async () => value }
   }
-  let promoted
-  await publishDeployment({ ...identity, target: "production", project: deploymentProject.project, org: deploymentProject.org, deployment: "dpl_one", token: "secret", oidcToken: "short-lived-http", githubToken: "read", fetch,
-    runCommand: (args) => { promoted = args; operations.push("promote") } })
-  assert.deepEqual(promoted, ["promote", "dpl_one", "--yes"])
-  assert.ok(operations[2].includes("build.vercel.app"))
-  assert.ok(operations[3].includes("api.github.com"))
-  assert.equal(operations[4], "promote")
+  return { calls, alias, marker, project, options: { ...identity, target: "production", ...deploymentProject, deployment: "dpl_one", token: "secret", oidcToken: "short-lived-http", githubToken: "read", fetch } }
+}
+
+const promotion = (jobStatus, toDeploymentId = "dpl_one", type = "promote") => ({ jobStatus, toDeploymentId, type })
+
+test("production promotion uses the scoped API after immutable smoke and the last head check", async () => {
+  const f = productionFixture([promotion("succeeded")])
+  await publishDeployment(f.options)
+  assert.equal(f.calls[2].url.hostname, "build.vercel.app")
+  assert.equal(f.calls[3].url.hostname, "api.github.com")
+  const mutate = f.calls[4]
+  assert.equal(mutate.url.pathname, `/v10/projects/${deploymentProject.project}/promote/dpl_one`)
+  assert.equal(mutate.url.searchParams.get("teamId"), deploymentProject.org)
+  assert.equal(mutate.request.method, "POST")
+  assert.equal(mutate.request.body, "{}")
+  assert.equal(mutate.request.headers["content-type"], "application/json")
+  const poll = f.calls[5].url
+  assert.equal(poll.pathname, `/v9/projects/${deploymentProject.project}`)
+  assert.equal(poll.searchParams.get("teamId"), deploymentProject.org)
+  assert.equal(poll.searchParams.get("rollbackInfo"), "true")
+})
+
+test("production waits for its matching promotion instead of accepting queued or unrelated jobs", async () => {
+  const f = productionFixture([null, promotion("succeeded", "dpl_other"), promotion("pending"), promotion("in-progress"), promotion("succeeded")])
+  await publishDeployment(f.options)
+  assert.equal(f.calls.filter(({ url }) => url.pathname.includes("/v9/projects/")).length, 5)
+  assert.equal(f.calls.filter(({ request }) => request.method === "POST").length, 1)
+})
+
+test("failed, unknown and cross-project promotion status fail closed", async () => {
+  for (const status of ["failed", "unknown", undefined]) {
+    const f = productionFixture([promotion(status)])
+    await assert.rejects(publishDeployment(f.options), /promotion failed|promotion status/)
+  }
+  for (const field of ["id", "accountId"]) {
+    const f = productionFixture([promotion("succeeded")])
+    f.project[field] = "other"
+    await assert.rejects(publishDeployment(f.options), /project or organization mismatch/)
+  }
+})
+
+test("missing or unrelated promotion status cannot outlive the bounded deadline", async (t) => {
+  let now = 0
+  t.mock.method(Date, "now", () => now)
+  for (const status of [null, promotion("succeeded", "dpl_other"), promotion("succeeded", "dpl_one", "rollback")]) {
+    now = 0
+    const f = productionFixture([status])
+    const fetch = async (url, request) => {
+      const response = await f.options.fetch(url, request)
+      if (url.includes("/v9/projects/")) now = 180000
+      return response
+    }
+    await assert.rejects(publishDeployment({ ...f.options, fetch }), /promotion timed out/)
+    assert.equal(f.calls.filter(({ url }) => url.pathname.includes("/v9/projects/")).length, 1)
+  }
+})
+
+test("skipped promotion requires the intended alias and fixed OIDC marker", async () => {
+  const f = productionFixture([promotion("skipped")])
+  await publishDeployment(f.options)
+  assert.ok(f.calls.some(({ url, request }) => url.hostname === "devbook.zip" && request.headers["x-vercel-trusted-oidc-idp-token"] === "short-lived-http"))
+  f.alias.deploymentId = "dpl_other"
+  await assert.rejects(publishDeployment(f.options), /alias/)
+  f.alias.deploymentId = "dpl_one"
+  f.marker.source = "c".repeat(40)
+  await assert.rejects(publishDeployment(f.options), /build identity mismatch/)
 })
 
 test("a protected login page or wrong immutable source never changes the alias", async () => {
@@ -286,13 +351,15 @@ test("short-lived OIDC reaches only protected site requests, while API credentia
     const calls = []
     const fetch = async (url, options) => {
       calls.push({ url: new URL(url), options })
-      const value = url.includes("api.github.com") ? { object: { sha: source } }
+      if (url.includes("/promote/")) return { ok: true, status: 201, text: async () => "" }
+      const value = url.includes("/v9/projects/") ? { id: deploymentProject.project, accountId: deploymentProject.org, lastAliasRequest: promotion("succeeded") }
+        : url.includes("api.github.com") ? { object: { sha: source } }
         : url.includes("/v4/aliases/") ? { deploymentId: "dpl_one", projectId: deploymentProject.project }
           : url.includes("api.vercel.com") ? { id: "dpl_one", url: "build.vercel.app", projectId: deploymentProject.project, readyState: "READY", target: target === "production" ? "production" : null, meta: { devbookSourceSha: source } }
             : { source, native }
       return { ok: true, json: async () => value }
     }
-    const options = { ...identity, target, ...deploymentProject, deployment: "dpl_one", token: "api-only", githubToken: "github-only", oidcToken: "short-lived-http", fetch, runCommand: () => {} }
+    const options = { ...identity, target, ...deploymentProject, deployment: "dpl_one", token: "api-only", githubToken: "github-only", oidcToken: "short-lived-http", fetch }
     await publishDeployment(options)
     await verifyDeployment(options)
     const siteHosts = ["build.vercel.app", target === "production" ? "devbook.zip" : "stage.devbook.zip"]
@@ -323,7 +390,7 @@ test("missing or rejected OIDC never assigns an alias or promotes Production", a
           : { id: "dpl_one", url: "build.vercel.app", projectId: deploymentProject.project, readyState: "READY", target: target === "production" ? "production" : null, meta: { devbookSourceSha: source } }
         return { ok: true, json: async () => value }
       }
-      await assert.rejects(publishDeployment({ ...identity, target, ...deploymentProject, deployment: "dpl_one", token: "api-only", githubToken: "github-only", oidcToken, fetch, runCommand: () => mutations.push("promote") }), /OIDC token|verification request failed \(401\)/)
+      await assert.rejects(publishDeployment({ ...identity, target, ...deploymentProject, deployment: "dpl_one", token: "api-only", githubToken: "github-only", oidcToken, fetch }), /OIDC token|verification request failed \(401\)/)
       assert.deepEqual(mutations, [])
     }
   }
