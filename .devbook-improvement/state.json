@@ -17165,10 +17165,10 @@
     "version": 1,
     "id": "33a5bcd3129e4228a0be70053399144d",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-16T22:21:57.553782Z",
-    "elapsed_seconds": 467.31042580000013,
-    "calls_reserved": 11,
+    "elapsed_seconds": 472.2387653000002,
+    "calls_reserved": 12,
     "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
@@ -18823,7 +18823,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-16T22:29:44.863782Z",
+    "checkpoint_at": "2026-11-16T22:29:49.792122Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -18848,7 +18848,7 @@
       "pr": null
     },
     "base_sha": "36628d4b1ae482b0f3c18ce0548af47dd2338277",
-    "reservation_deadline": "2026-11-16T22:51:57.553354Z",
+    "reservation_deadline": "2026-11-16T22:44:49.473507Z",
     "last_request": {
       "topic": "ai-ml-4edf0823",
       "generation": 2,
