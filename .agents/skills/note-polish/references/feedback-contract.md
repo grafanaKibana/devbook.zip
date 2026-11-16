@@ -1,6 +1,6 @@
 # Feedback store
 
-Store a small set of current, reusable writing rules in this project's `.codex/skills/note-polish/references/feedback.json`. Each named rule describes one preference about structure, wording or explanation. General rules apply across the skill's work. Optional topic rules refine them within a top-level subject such as Programming or Software Architecture. The skill's workflow and repository contracts remain in their owning instructions.
+Store a small set of current, reusable writing rules in this project's `.rulesync/skill-feedback/note-polish.json`. Each named rule describes one preference about structure, wording or explanation. General rules apply across the skill's work. Optional topic rules refine them within a top-level subject such as Programming or Software Architecture. The skill's workflow and repository contracts remain in their owning instructions.
 
 Do not store card or note IDs, paths, narrow subjects such as async exceptions, specific API/example choices, accepted answers, raw feedback, quotations, rejected drafts, statuses, dates, change history or speculative preferences. An isolated request changes the current draft without becoming a persistent rule. Add or revise a rule only when the user states a reusable preference or repeated feedback across independent items clearly establishes one. Acceptance alone establishes no new writing rule. Do not transfer a Qard-specific preference to notes without evidence that it applies there.
 

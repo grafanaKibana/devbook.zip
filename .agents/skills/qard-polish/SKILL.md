@@ -1,11 +1,14 @@
 ---
 name: qard-polish
-description: Improve existing Obsidian Qard cards one by one, especially cards marked Needs fixing. Compare saved and proposed versions, refine with user feedback, and maintain reusable general or broad-topic writing rules shared by Codex and Claude Code within this DevBook project.
+description: >-
+  Improve existing Obsidian Qard cards one by one, especially cards marked Needs
+  fixing. Compare saved and proposed versions, refine with user feedback, and
+  maintain reusable general or broad-topic writing rules shared by Codex and
+  Claude Code within this DevBook project.
 ---
-
 # Qard Polish
 
-This skill is project-local. Its source and feedback live in this repository's `.codex/skills/qard-polish`; project `.agents/skills/qard-polish` and `.claude/skills/qard-polish` are discovery aliases. Read the current project `.codex/agents` contracts and use their native adapters. Do not install a global copy or use another project's feedback store.
+This skill is project-local. Its source lives in this repository's `.rulesync/skills/qard-polish`; `rulesync generate` writes the `.agents/skills/qard-polish` and `.claude/skills/qard-polish` copies, so never edit those. Feedback lives once in `.rulesync/skill-feedback/qard-polish.json`. Read the current project `.codex/agents` contracts and use their native adapters. Do not install a global copy or use another project's feedback store.
 
 Use a sequential editorial loop. Diagnose each card independently. A useful repair can be a complete rewrite or removal of redundant recall; cosmetic rewording is not a substitute for resolving the actual problem.
 
@@ -53,7 +56,7 @@ When a version or removal is accepted:
 
 ## Learn reusable writing rules
 
-Read [the feedback contract](references/feedback-contract.md) before updating `references/feedback.json`. The store is a compact description of the user's preferred structure, wording and explanations. Keep only current general rules and justified broad-topic refinements. Keep individual card choices in the conversation; do not save card IDs, example-specific instructions, quotations or rejected-draft history.
+Read [the feedback contract](references/feedback-contract.md) before updating `.rulesync/skill-feedback/qard-polish.json`. The store is a compact description of the user's preferred structure, wording and explanations. Keep only current general rules and justified broad-topic refinements. Keep individual card choices in the conversation; do not save card IDs, example-specific instructions, quotations or rejected-draft history.
 
 Update an existing rule in place when feedback refines it. Do not create a new rule for every comment, promote a one-card choice into a general requirement, or duplicate the workflow and repository contracts. Apply the feedback immediately to the current draft even when it does not belong in persistent guidance.
 

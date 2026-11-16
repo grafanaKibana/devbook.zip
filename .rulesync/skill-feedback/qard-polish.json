@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "revision": 1,
+  "revision": 2,
   "general": {
-    "answer-first": "Start with the direct answer, then add the explanation and any supporting example.",
+    "answer-first": "Make the first paragraph a complete answer to the question. Keep everything after it concise and supporting: explanation, conditions and any example that back the answer without restating it or dropping needed information.",
     "plain-language": "Use straightforward, concrete language that is clear on the first read. Preserve technical precision without dense phrasing.",
     "explain-mechanism": "Connect what happens to why it happens. Explain the relevant technical steps in simple terms rather than replacing the cause with a slogan.",
     "focused-code": "Use code when it clarifies the explanation. Keep examples focused on the behavior, with brief setup and no unnecessary surrounding program.",

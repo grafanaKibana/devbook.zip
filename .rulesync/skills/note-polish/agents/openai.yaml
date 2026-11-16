@@ -1,0 +1,4 @@
+interface:
+  display_name: "Note Polish"
+  short_description: "Polish notes with your writer and reviewer agents"
+  default_prompt: "Use $note-polish to improve this note with note-writer and note-reviewer, compare saved and proposed prose, and learn reusable writing preferences from my feedback."

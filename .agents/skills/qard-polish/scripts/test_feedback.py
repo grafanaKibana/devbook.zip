@@ -26,6 +26,19 @@ class FeedbackTests(unittest.TestCase):
         self.store.write_text(json.dumps({'version': 2, 'revision': 0, 'general': {},
                                          'topics': {topic: {} for topic in TOPICS}}))
 
+    def test_generated_copy_uses_the_rulesync_store(self):
+        project = self.root.parent / 'project'
+        copy = project / '.claude' / 'skills' / 'qard-polish' / 'scripts'
+        copy.mkdir(parents=True)
+        shutil.copyfile(SOURCE, copy / 'feedback.py')
+        (project / 'rulesync.jsonc').write_text('{}')
+        canonical = project / '.rulesync' / 'skill-feedback' / 'qard-polish.json'
+        canonical.parent.mkdir(parents=True)
+        shutil.copyfile(self.store, canonical)
+        self.invoke(*self.arguments(), script=copy / 'feedback.py')
+        self.assertEqual(json.loads(canonical.read_text())['general'], {'examples': 'Use concrete examples.'})
+        self.assertFalse((copy.parent / 'references').exists())
+
     def invoke(self, *args, success=True, script=None):
         result = subprocess.run([sys.executable, str(script or self.script), *args],
                                 text=True, capture_output=True)

@@ -147,23 +147,177 @@
       ],
       "figure": ""
     },
-    null
+    {
+      "title": "Choose a retrieval unit from an observed failure",
+      "explain": "The earlier steps gave you three tools. Chunk size trades a sharp match against missing context. Structure-aware and parent-child units keep a condition attached to its rule. Metadata traces a chunk back to its source. In practice you don't pick a unit up front. You read a failure, work out **what got separated from what**, and choose the cheapest unit that keeps those pieces together ([[Home/AI & ML/LLM/Context Engineering/RAG/Chunking#How to Choose a Strategy|Chunking: How to Choose a Strategy]]).\n\nThree questions diagnose the failure:\n\n1. **Did retrieval find the right passage?** If it didn't, the match is the problem, so look at chunk size or boundaries. If it did, the missing piece is context next to the match.\n2. **Is the separated piece inside one layout block**, such as a table, a code block, or a clause with its exception? If so, the boundary cut that block apart.\n3. **Is the block small enough to stay one chunk?** It has to fit the embedding model's input limit without burying the match in unrelated text.\n\n**Example: a table split from its header.** An API doc has a parameter table. Its header row is `Name | Type | Default`, and parameter rows follow it. A Markdown table has no blank lines between rows, so recursive splitting falls back to single newlines and can put a boundary partway down the table. A query about a parameter's default then retrieves a later row such as `timeout | int | 30`, but that chunk has no header. The model can't tell which column holds the default ([[Home/AI & ML/LLM/Context Engineering/RAG/Chunking#Recursive Chunking|Chunking: Recursive Chunking]]).\n\n- **What was separated:** rows from their header, inside one layout block (a table).\n- **Unit:** structure-aware, with the table kept atomic as its own chunk. The header and rows stay together, and the chunk carries its section path ([[Home/AI & ML/LLM/Context Engineering/RAG/Chunking#Structure-Aware Chunking|Chunking: Structure-Aware Chunking]]).\n- **Cost:** you maintain a parser for each source format, and a format change can break it without any visible error.\n- **Boundary:** a table larger than the size limit still has to be split. Copying the section path onto each fragment is not enough. The path tells you where a fragment came from, but it doesn't say what the columns mean. A later fragment without the header row reproduces the original failure. So each fragment must repeat the header row, so its rows can be read on their own.\n\n**Contrast: the right clause is found, but the answer misses the exception in the next paragraph.** Here the match was fine and the context was missing. **Parent-child** keeps the small searched unit and expands each match to a stored parent span ([[Home/AI & ML/LLM/Context Engineering/RAG/Chunking#Parent-Child Chunking|Chunking: Parent-Child Chunking]]). The fix works only if parent boundaries are drawn so that the clause and its exception fall in the same parent. If a parent ends between the two paragraphs, expansion returns the clause without its exception. Expansion costs extra tokens per hit and needs an expansion and deduplication step. A parent-size limit caps how much extra text each hit adds. It does not guarantee that the added text is relevant, so citation precision is still tracked before and after expansion.\n\n| Observed failure | What was separated | Unit | Main cost |\n| --- | --- | --- | --- |\n| Rows returned without their header | Parts of one table | Structure-aware, table kept atomic (header repeated if it must be split) | Parser maintenance |\n| Rule found, nearby exception missing | The match and its neighbouring context | Parent-child, with parents spanning rule and exception | Tokens and noise from expansion |\n\nMetadata such as document ID, section path and ACL scope goes on every unit, whichever splitter you choose. It supports citation, filtering and access control. On its own, it never puts missing text into the context.",
+      "connect": "Steps 1–3 gave you the size tradeoff, the two units that keep conditions attached, and the metadata every chunk carries. This step uses all three to diagnose a failure, choose a unit and weigh it against its cost, which is the goal of the objective.",
+      "checkFirst": false,
+      "check": {
+        "id": "k4",
+        "type": "mcq",
+        "goal": "apply",
+        "objective": "retrieval-units",
+        "marks": 1,
+        "prompt": "A RAG system indexes technical specifications written in Markdown. Each section is about 3,000 tokens, which is more than the embedding model's input limit. Within a section, a parameter is described in one paragraph and its constraint (for example, \"must not exceed the connection pool size\") is in the next paragraph. Evaluation shows that retrieval finds the correct parameter paragraph, but answers often leave out the constraint.\n\nWhich retrieval unit, with its stated cost, best fixes this failure?",
+        "options": [
+          "One structure-aware chunk per section; the cost is parser maintenance, and the whole section embeds as one precise vector",
+          "Parent-child: small searched children, each expanded to a size-limited parent that spans the parameter and its constraint; the cost is extra tokens and possible noise per hit",
+          "Smaller fixed-size chunks with more overlap; the cost is more chunks to store, and sharper matches will also rank the constraint paragraph",
+          "Current chunks plus section-path metadata on each; the cost is a few extra fields, and the path brings the rest of the section into context"
+        ],
+        "answer": 1,
+        "rubric": [
+          {
+            "point": "Chooses parent-child with parents that span the parameter and its constraint, recognising that the match already works and only the adjacent constraint is missing, at the cost of extra tokens and possible noise per hit",
+            "marks": 1
+          }
+        ],
+        "model": "**Parent-child: small searched children, each expanded to a size-limited parent that spans the parameter and its constraint.** Retrieval already finds the right paragraph, so the search unit can stay small. Expanding each match to a parent drawn to include the following paragraph brings in the constraint. The cost is extra tokens and possible noise per hit; the size limit caps how much text is added. A whole-section chunk would exceed the embedding model's input limit.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+          "heading": "Parent-Child Chunking"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Picks one structure-aware chunk per section, reasoning that the section keeps the parameter and its constraint together and embeds precisely.",
+          "reteach": "A structure-aware unit fits when the logical block is small enough to embed. Here a section is about 3,000 tokens, more than the model's input limit, so it would be split anyway. Even if it fit, one vector covering many ideas blurs the match. The match already works, so keep the search unit small. Expand each match to a parent drawn to span both the parameter and its constraint, and put a size limit on that parent so expansion adds a bounded amount of text."
+        },
+        {
+          "signs": "Picks smaller fixed-size chunks with more overlap, expecting sharper matches to bring in the constraint.",
+          "reteach": "The match was never the problem, because the right paragraph is already found. A sharper match only ranks the parameter text better. It doesn't make the system return the paragraph after it. Overlap can carry both paragraphs into one chunk only if it is large enough and happens to fall in the right place, and nothing guarantees either. Parent-child supplies the missing context deliberately: each matched child expands to a stored parent whose boundaries were drawn to include the constraint."
+        },
+        {
+          "signs": "Picks adding section-path metadata, believing the path pulls the rest of the section into the answer at little cost.",
+          "reteach": "Metadata supports citation, filtering and access control. It doesn't add text to the context the generator reads. Metadata brings in neighbouring text only when a pipeline step acts on it. Parent-child expansion is one such step: it looks up the stored parent ID and fetches the parent text. A section path on its own leaves the constraint out of the context, so the low cost buys no fix."
+        }
+      ],
+      "figure": ""
+    }
   ],
   "state": [
     {
-      "asks": []
+      "asks": [],
+      "answer": {
+        "text": "Nope, the chunks are too small and context was lost between two chunks.Model had only \"halved\" which is not a number, and doesnt reflect from what number it is halved. To fix this, either chunk size should be increased, or chunk intersection should be increased",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "Nope, the chunks are too small and context was lost between two chunks.",
+            "kind": "correct",
+            "note": "Correct verdict: the model can't get the number. You also see that splitting the sentences lost context."
+          },
+          {
+            "quote": "Model had only \"halved\" which is not a number, and doesnt reflect from what number it is halved.",
+            "kind": "missing",
+            "note": "You say the base number is absent, but not that \"this window\" points back to the 30-day rule in chunk 1. Also missing: chunk 1 wasn't retrieved because each chunk is scored and returned independently."
+          },
+          {
+            "quote": "either chunk size should be increased, or chunk intersection should be increased",
+            "kind": "insight",
+            "note": "Larger chunks or overlap are valid fixes that would keep the rule and its exception together."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "You gave the right verdict and noted the missing base number, but didn't explain that chunk 2 refers back to chunk 1, which wasn't retrieved because chunks are scored independently.",
+        "score": 1
+      },
+      "reply": "Right: the model can't give the number, and your fixes (bigger chunks, more overlap) are valid.\n\nOne gap in the reason. \"This window\" in chunk 2 points back to the 30-day rule in chunk 1. Why wasn't chunk 1 returned alongside it? Think about how each chunk is embedded and scored."
     },
     {
-      "asks": []
+      "asks": [],
+      "answer": {
+        "text": "Yes, because the parent chunk contain this info, and it will be retrieved via child chunk",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "Yes, because the parent chunk contain this info",
+            "kind": "wrong",
+            "note": "The parent is the Log Retention section, which holds only the 90-day rule. The 365-day exception sits in the separate Exceptions section, so the parent does not contain it."
+          },
+          {
+            "quote": "it will be retrieved via child chunk",
+            "kind": "wrong",
+            "note": "Expansion is a parent-ID lookup on the matched child, returning only that child's own parent. It never fetches other sections."
+          },
+          {
+            "quote": "",
+            "kind": "missing",
+            "note": "You needed to say no, and explain that the exception lies in a different section that is neither the matched child's parent nor retrieved."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "The verdict is wrong because the exception lives in a different section from the matched child's parent, so expansion never reaches it.",
+        "score": 0
+      },
+      "reply": "Not quite. Check where the 365-day line sits. Expansion looks up the parent ID stored on the matched child, so it returns only *Log Retention*. The exception is in *Exceptions*, a different section that isn't this child's parent and wasn't retrieved. Parent-child restores context only inside the child's own parent.",
+      "reteach": "Expansion is not a general \"fetch related text\" step. Each child stores **one** parent ID, and expansion returns that parent. In the lesson example the exception was in the same section as the rule, so the parent contained it. Here the exception is in a different section, so the parent of the 90-day child does not include it. Before predicting that expansion recovers a condition, check whether the condition lies inside the matched child's parent."
     },
     {
-      "asks": []
+      "asks": [],
+      "answer": {
+        "text": "AS per \"A chunk with no ACL scope field is not removed by this filter.\" i would assume that B chunk will be returned as well since i assume here access filter also include null values, even metadata is missing. If is not the case, and i misudnerstood the question, then B will not be returned since it doesnt have acl metadata because of the bug. ",
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "B chunk will be returned as well since i assume here access filter also include null values",
+            "kind": "correct",
+            "note": "You predicted B passes the filter because the stated rule lets unscoped chunks through. That is the right outcome and the right reason."
+          },
+          {
+            "quote": "If is not the case, and i misudnerstood the question, then B will not be returned since it doesnt have acl metadata because of the bug.",
+            "kind": "wrong",
+            "note": "This fallback is the misconception that missing metadata blocks retrieval. The question stated the rule, so you didn't misunderstand it."
+          },
+          {
+            "quote": "B chunk will be returned as well",
+            "kind": "missing",
+            "note": "You could also have said the restricted pay-band text reaches the prompt and can leak into the non-manager's answer. That is a small gap."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "Your main answer is correct: the filter checks each chunk's own scope and unscoped B passes, but the fallback guess was unnecessary.",
+        "score": 2
+      },
+      "reply": "Right. The filter checks each chunk by its own ACL scope. B has none, and this filter keeps unscoped chunks, so B reaches the prompt. A's `managers` tag doesn't protect B, so the pay-band text can leak to the employee.\n\nYou didn't misread the question. The stated rule decides it, so drop the fallback. Missing metadata doesn't block retrieval here. It removes the protection."
     },
     {
-      "asks": []
+      "asks": [],
+      "answer": {
+        "choice": 1,
+        "confidence": "sure"
+      },
+      "mark": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      },
+      "reply": "Right."
     }
   ],
-  "current": 0,
+  "current": 3,
   "probe": {
     "questions": [],
     "answers": {},
@@ -197,5 +351,37 @@
     ]
   },
   "stepsFor": "[\"Retrieval units that keep rules with conditions\",\"You haven't been tested on chunking, so the lesson starts with why chunk size is a tradeoff, using a rule and its exception. It then covers how structure-aware and parent-child units keep conditions attached. It ends with metadata and picking a unit from an observed failure.\",[[\"Chunk size as a precision vs context tradeoff\",\"Explain why large chunks dilute the match while small chunks can separate a rule from its exception, using a 90-day rule with a 365-day exception; builds on embedding similarity and introduces the retrieval unit.\"],[\"Keeping conditions with their rules\",\"Compare structure-aware splitting (keep the clause and exception in one unit) with parent-child (search small, return the larger parent), and name the noise or cost each adds; builds on step 1.\"],[\"Metadata that traces a chunk to its source\",\"State which metadata each chunk should carry (document ID, section path, ACL scope) and what it enables, namely citation, filtering and access control; independent of the splitter choice.\"],[\"Choose a retrieval unit from an observed failure\",\"Given a failure such as a missing exception or a table split from its header, pick the unit and justify it against its cost; combines steps 1-3 and is the goal of the objective, while evaluating chunkers is left to later objectives.\"]]]",
-  "accepted": true
+  "accepted": true,
+  "finishedAt": 1794865835014,
+  "close": {
+    "summary": "The lesson covered how to choose retrieval units in RAG chunking. It started with chunk size as a tradeoff: small chunks match precisely but can split a rule from its exception, while large chunks keep context but blur the embedding. Next came structure-aware and parent-child chunking as ways to keep conditions attached to their rules. It then covered the metadata each chunk needs to be traced back to its source (document ID, section path, timestamp, ACL), and how to pick a unit from an observed failure.\n\n**What you showed:**\n- **Chunk size (1/2):** You gave the right verdict and spotted the missing base number. You did not explain that chunk 2 depended on chunk 1, which was never retrieved because each chunk is scored on its own.\n- **Keeping conditions (0/2):** You expected parent expansion to recover an exception that sat in a *different* section. Expansion only returns the matched child's own parent, so it never reaches that exception. This is the main gap.\n- **Metadata (2/2):** Correct, but you marked yourself unsure, so it is worth reviewing.\n- **Choosing from a failure (1/1):** Solid.",
+    "cards": [
+      {
+        "front": "In parent-child chunking, a query matches a child chunk. Can parent expansion bring back an exception clause that lives in a different section of the document?",
+        "back": "No. Expansion only follows the child's stored parent ID to that one parent. Text outside that parent's span is never returned. To fix this, the exception has to be inside the same parent, or found by a separate retrieval hit or a cross-reference."
+      },
+      {
+        "front": "Chunk 2 says \"this limit doubles for security logs\", and only chunk 1 states the limit. Why can retrieval return chunk 2 without the number?",
+        "back": "Each chunk is embedded and scored on its own. Chunk 2 can match the query while chunk 1, which holds the referenced number, scores too low to be retrieved. The generator then sees \"this limit\" with nothing to resolve it."
+      },
+      {
+        "front": "Name the four pieces of metadata every chunk should carry from ingestion, and say why they are added at ingestion.",
+        "back": "Source document ID, section/heading path, ingestion timestamp, and ACL scope. Together they make citations traceable, allow section-level filtering, and enforce access control. Adding them at ingestion is cheaper than reconstructing them later."
+      },
+      {
+        "front": "What is the core tradeoff in choosing chunk size?",
+        "back": "Small chunks match precisely but can lose adjacent context, such as an exception or a referenced value. Large chunks keep that context, but one vector covering several ideas represents none of them sharply, and they cost more tokens. Which failure hurts more only shows up in evaluation on your corpus."
+      }
+    ],
+    "noteEdit": {
+      "path": "Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+      "heading": "Parent-Child Chunking",
+      "text": "Expansion also has a hard boundary: it returns only the matched child's own parent. If the exception or condition sits in a different section, such as a security-logs section that overrides a general retention rule, expansion never reaches it. That text has to be retrieved by its own hit or by following an explicit cross-reference. A child that refers back to earlier text (\"this limit\") has the same problem when the referenced value falls outside its parent, because every chunk is scored independently."
+    },
+    "cardState": {
+      "3": "added"
+    },
+    "note": "Assets/Qard/Lessons/2026-11-16 Choose retrieval units that keep conditions with their rules.md",
+    "nextCheck": "2026-11-19"
+  }
 }

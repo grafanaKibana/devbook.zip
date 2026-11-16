@@ -1,11 +1,14 @@
 ---
 name: note-polish
-description: Improve existing DevBook notes with the note-writer and note-reviewer agents. Diagnose each note, compare saved and proposed prose, refine from user feedback, and maintain reusable general or broad-topic writing rules shared by Codex and Claude Code within this DevBook project.
+description: >-
+  Improve existing DevBook notes with the note-writer and note-reviewer agents.
+  Diagnose each note, compare saved and proposed prose, refine from user
+  feedback, and maintain reusable general or broad-topic writing rules shared by
+  Codex and Claude Code within this DevBook project.
 ---
-
 # Note Polish
 
-This skill is project-local. Its source and feedback live in this repository's `.codex/skills/note-polish`; project `.agents/skills/note-polish` and `.claude/skills/note-polish` are discovery aliases. Read the current project `.codex/agents` contracts and use their native adapters. Do not install a global copy or use another project's feedback store.
+This skill is project-local. Its source lives in this repository's `.rulesync/skills/note-polish`; `rulesync generate` writes the `.agents/skills/note-polish` and `.claude/skills/note-polish` copies, so never edit those. Feedback lives once in `.rulesync/skill-feedback/note-polish.json`. Read the current project `.codex/agents` contracts and use their native adapters. Do not install a global copy or use another project's feedback store.
 
 Improve an existing note's explanation, structure or wording through an editorial loop. A note may need expansion, restructuring, a precise correction or no change. Diagnose each independently; do not apply a fixed outline or shorten every note.
 
@@ -50,7 +53,7 @@ Run relevant local validation and required review-receipt hooks. For a card-owni
 
 ## Learn reusable writing rules
 
-Read [the feedback contract](references/feedback-contract.md) before updating `references/feedback.json`. Store only current preferences about note structure, wording and explanation, general or within a broad subject. Individual passage edits, note paths, quotations, chosen examples and draft history remain in the conversation.
+Read [the feedback contract](references/feedback-contract.md) before updating `.rulesync/skill-feedback/note-polish.json`. Store only current preferences about note structure, wording and explanation, general or within a broad subject. Individual passage edits, note paths, quotations, chosen examples and draft history remain in the conversation.
 
 Update an existing rule in place when feedback refines it. Persist only explicit reusable preferences or a clear pattern across independent notes. Do not invent note preferences from one accepted Qard. Apply one-off feedback to the current draft without storing it.
 

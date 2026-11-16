@@ -15,7 +15,16 @@ import sys
 import tempfile
 
 
-STORE = Path(__file__).resolve().parent.parent / "references" / "feedback.json"
+def locate_store():
+    here = Path(__file__).resolve()
+    skill = here.parent.parent
+    for parent in here.parents:
+        if (parent / "rulesync.jsonc").is_file():
+            return parent / ".rulesync" / "skill-feedback" / f"{skill.name}.json"
+    return skill / "references" / "feedback.json"
+
+
+STORE = locate_store()
 SLUG = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
 
 
