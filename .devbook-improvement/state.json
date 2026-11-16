@@ -17334,9 +17334,9 @@
     "version": 1,
     "id": "33a5bcd3129e4228a0be70053399144d",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-16T22:21:57.553782Z",
-    "elapsed_seconds": 666.1638577000008,
+    "elapsed_seconds": 671.2227358000008,
     "calls_reserved": 17,
     "responses_received": 17,
     "attempted_paths": [
@@ -17346,7 +17346,8 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md"
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+      "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md"
     ],
     "accepted_records": [
       {
@@ -19142,10 +19143,88 @@
           },
           "model_calls": 15
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and the ARES source. Structure (input plus testable acceptable behavior, with scorer choice following label type) is accurate. The ARES description (synthetic data, small human-labeled set, prediction-powered inference) matches the paper. The synthetic-generation section explains provenance, the code fence has a language identifier, and the weakness of shared generator phrasing is stated. The sizing section covers minimum detectable effect, intervals and paired evaluation. The drift and threshold pitfalls are sound. The single Qard tests one coherent task, cites sources on the answer side and keeps its ID. References are real and non-duplicated, and wikilinks fit the sibling notes. No known violations; edits would be cosmetic."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+                "verdict": "CLEAN",
+                "summary": "Whole-note audit finds accurate, well-ordered prose with a coherent mechanism-to-pitfall flow. The single Qard is one gradeable usage-decision task with answer-side sources and an intact ID. No concrete defect justifies an edit.",
+                "page_type": "Concept — optional Questions/References present and valid; MD040 satisfied; no generated navigation.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The set defines what is measured before any metric assigns a number.",
+                    "line_start": 17,
+                    "reason": "Opening states the operating idea quickly and recoverably."
+                  },
+                  {
+                    "quote": "The label determines which scorer is valid.",
+                    "line_start": 25,
+                    "reason": "Gives the key decision rule linking label type to scorer, with the reference-free limit stated."
+                  },
+                  {
+                    "quote": "This reverses the expensive part of labeling: the evidence is known before the input is written.",
+                    "line_start": 29,
+                    "reason": "Explains the synthetic-generation mechanism; the following code fence has a text language identifier."
+                  },
+                  {
+                    "quote": "Paired evaluation, where baseline and candidate answer the same cases, often reduces variance",
+                    "line_start": 49,
+                    "reason": "Statistical sizing section keeps mechanism and condition (MDE, intervals, pairing) accurately."
+                  },
+                  {
+                    "quote": "A threshold copied from another workload has no local meaning.",
+                    "line_start": 61,
+                    "reason": "Pitfall is concrete and decided; no repetition with other sections."
+                  },
+                  {
+                    "quote": "When should a team add human-labeled evaluation cases instead of relying only on synthetic generation?",
+                    "line_start": 68,
+                    "reason": "Direct, self-contained usage-decision question; answer is a dependent explanation with ARES and OpenAI sources on the answer side and its qard-id retained."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: structure, synthetic generation, sizing and pitfalls form one coherent evaluation-set topic; related topics already live in sibling notes.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "Complete note audited independently; accurate, clear, rules-compliant, no known violations, no edits proposed, and keeping it unchanged is justified.",
+            "change_checks": []
+          },
+          "model_calls": 17
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-16T22:33:03.717216Z",
+    "checkpoint_at": "2026-11-16T22:33:08.776095Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
