@@ -17001,533 +17001,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "4bd0bfa98b5d4dbbb28188e2b990362e",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-15T19:02:25.981526Z",
-    "elapsed_seconds": 819.0341312000006,
-    "calls_reserved": 19,
-    "responses_received": 19,
-    "attempted_paths": [
-      "Vault/Home/Data Persistence/Caching.md",
-      "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
-      "Vault/Home/Data Persistence/SQL/Replication.md",
-      "Vault/Home/Data Persistence/ACID.md",
-      "Vault/Home/Data Persistence/Connection Pooling.md",
-      "Vault/Home/Data Persistence/Data Persistence.md",
-      "Vault/Home/Data Persistence/Erasure Coding.md",
-      "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md",
-      "Vault/Home/Data Persistence/NoSQL/LSM-Tree.md"
-    ],
+    "id": "33a5bcd3129e4228a0be70053399144d",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-16T22:21:57.553782Z",
+    "elapsed_seconds": 0.000933,
+    "calls_reserved": 0,
+    "responses_received": 0,
+    "attempted_paths": [],
     "accepted_records": [],
-    "outcomes": [
-      {
-        "path": "Vault/Home/Data Persistence/Caching.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Data Persistence/Caching.md",
-                "outcome": "keep",
-                "reason": "Read the whole note against the current text. The opening defines hit/miss, L1/L2 and the correctness boundary. Cache vs retained log vs index is distinguished by loss behavior. The pattern table gives each strategy's write path, failure and freshness. The invalidation section covers explicit delete, TTL, event-driven and versioned keys, each with a TTL backstop. The stale-while-revalidate code is coherent: it uses dual TTLs, a per-key Lazy refresh owner, and failures returned as data. The prose correctly says coalescing is per-process only. Redis/Memcached, EVCache, eviction and the Redis-as-record sections are internally consistent and carry the loss-window and acknowledgement caveats. The note has no cards and no known violations. Code fences have language tags, and the wikilink and image embeds look well-formed. I found no verified factual error or editorial gap that an edit would repair, and rewording would be churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The whole-note audit found no factual error, rule violation or essential gap, so keeping the note unchanged is justified. There are no edits, and the keep disposition is sound.",
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/Caching.md",
-                "verdict": "CLEAN",
-                "summary": "The note explains cache mechanics, patterns, invalidation, stampede handling, Redis/Memcached and eviction with the conditions and exceptions each decision depends on. I read the whole note and found no concrete error that an edit would repair. Rewording would be churn.",
-                "page_type": "Concept — optional Questions and References are absent, which is allowed. Frontmatter is typed, code fences carry language tags, and the one wikilink is well-formed.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Caching keeps a copy of data closer to its consumer, in process memory, in a shared store such as Redis, or in both.",
-                    "line_start": 15,
-                    "reason": "The opening states the operating idea quickly: what a cache is, where it lives, and the hit and miss behavior."
-                  },
-                  {
-                    "quote": "\"Faster copy\" is the useful boundary.",
-                    "line_start": 38,
-                    "reason": "This separates a cache from a retained log or an index by loss behavior. The table that follows gives each system's safe response to total loss."
-                  },
-                  {
-                    "quote": "A cache needs an authoritative source and a rebuild path.",
-                    "line_start": 47,
-                    "reason": "This states the boundary that decides when a component is really a system of record."
-                  },
-                  {
-                    "quote": "Write-around fits write-heavy data that is rarely read back",
-                    "line_start": 61,
-                    "reason": "The pattern table is followed by a usage condition and its cost, so the comparison supports a decision."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the sections are facets of one topic (caching and its failure modes), and Redis and EVCache appear only as supporting contrasts. Length alone is not a reason to split.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 2
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
-        "outcome": "proposal_blocked",
-        "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/azure/cosmos-db/introduction",
-        "result": {
-          "status": "proposal_blocked",
-          "stage": "deterministic_application",
-          "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/azure/cosmos-db/introduction",
-          "model_calls": 3
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-        "outcome": "proposal_blocked",
-        "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait.html",
-        "result": {
-          "status": "proposal_blocked",
-          "stage": "deterministic_application",
-          "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait.html",
-          "model_calls": 6
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/ACID.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Data Persistence/ACID.md",
-                "outcome": "keep",
-                "reason": "I read the whole note and found no verified defect. The opening states the transaction scope and the boundary: ACID stops at the participating database, and it does not give idempotent retries, synchronous replication or cross-service commit. Atomicity is explained with a failure trace and an idempotency caveat. The ACID 'C' is distinguished from the CAP 'C'. The isolation table is labelled as the SQL standard minimum. The engine caveats match PostgreSQL's documentation: Read Uncommitted maps to Read Committed, and Repeatable Read prevents phantoms but still allows serialization anomalies. They also match SQL Server's row-versioning modes. Write skew is shown with a worked example and the SQLSTATE 40001 whole-transaction retry. The durability section covers WAL, group commit and async commit, and notes that ACID's durability depends on the storage stack. The 2PC and saga limits, the pitfalls, the tradeoff tables and the EF Core row-version caveat are accurate and not repeated needlessly. The four Qards each test one task, are self-contained, and cite primary sources. They agree with the note body. known_violations is empty. The prose is direct and has no padding, so any edit would be cosmetic churn."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent full-note read found no concrete factual, structural, voice or question-quality defect. The keep is justified and no edits are proposed.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/ACID.md",
-                "verdict": "CLEAN",
-                "summary": "The note states the transaction scope and its limits up front. Each property is explained with its mechanism and caveats, covering isolation-level and engine differences, write skew, WAL and durability configuration, 2PC and sagas. The Qards are self-contained, each tests one task, and each cites a primary source. No edit is warranted.",
-                "page_type": "Concept — frontmatter, MD040 code-fence languages, optional Questions and References; no special-page protections apply.",
-                "current_text_evidence": [
-                  {
-                    "quote": "These guarantees stop at the participating database and the isolation and durability settings it uses.",
-                    "line_start": 19,
-                    "reason": "The opening sets the operating boundary, so the topic is recoverable quickly."
-                  },
-                  {
-                    "quote": "Whether another transaction can observe tentative writes before that outcome is an isolation question, not an atomicity guarantee.",
-                    "line_start": 25,
-                    "reason": "Separates atomicity from isolation precisely, avoiding a common conflation."
-                  },
-                  {
-                    "quote": "The \"C\" in CAP concerns whether clients observe one current value across replicas during failures.",
-                    "line_start": 50,
-                    "reason": "Disambiguates ACID consistency from CAP consistency."
-                  },
-                  {
-                    "quote": "The table gives the SQL standard's minimum guarantees.",
-                    "line_start": 67,
-                    "reason": "The generic isolation table is caveated by engine-specific behavior (PostgreSQL, SQL Server), so version-specific facts are accurate."
-                  },
-                  {
-                    "quote": "Repeating only the final `UPDATE` reuses stale reasoning.",
-                    "line_start": 85,
-                    "reason": "Gives the concrete retry condition after serialization failure (SQLSTATE 40001), preserving mechanism and exception."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: isolation, durability, atomicity and distributed limits are facets of one transaction concept and gain from sitting together; the distributed topics already link to dedicated notes.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 8
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/Connection Pooling.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Data Persistence/Connection Pooling.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text and primary knowledge of SqlClient, Npgsql, HikariCP and PgBouncer. The opening explains why pooling exists. The open/wait/dispose mechanism, pool separation by connection configuration, and the Npgsql connection-string example (Maximum Pool Size, Minimum Pool Size, Connection Lifetime) are accurate and hedged as provider-specific. The HikariCP formula is presented as a heuristic, and the 50×100=5,000 sessions arithmetic is correct. The PgBouncer transaction-mode caveats (SET, LISTEN, session advisory locks, SQL PREPARE, max_prepared_statements) and the RDS Proxy versus Azure SQL distinction are correct. Pitfalls, tradeoffs and sizing guidance do not repeat each other in ways that need pruning. Both Qards each test one coherent task, ask directly, and cite sources on the answer side. There are no known violations, no flagged cards and no owner feedback, so no edit is warranted."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The note is accurate, well ordered and complete for its depth. Both Qards test one coherent task and cite answer-side sources. There are no edits, no known violations and no owner feedback. The keep is justified.",
-            "change_checks": [],
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/Connection Pooling.md",
-                "verdict": "CLEAN",
-                "summary": "Independent whole-note audit finds accurate, provider-hedged mechanism, sensible ordering (why, how, example, sizing, pitfalls, poolers, tradeoffs) and two well-formed cards. No concrete defect justifies an edit.",
-                "page_type": "Concept — frontmatter, optional Questions and References present; voice is impersonal and declarative; code fences carry language identifiers; qard IDs protected.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Repeating that work for every query wastes latency and server capacity.",
-                    "line_start": 17,
-                    "reason": "The opening states the problem pooling solves and the boundary: callers must return connections and bound the fleet-wide limit."
-                  },
-                  {
-                    "quote": "Pools are separated by connection configuration.",
-                    "line_start": 35,
-                    "reason": "Correctly explains pool keying (exact connection string, identity, transaction context for SqlClient; data-source configuration for Npgsql) with hedging."
-                  },
-                  {
-                    "quote": "It is a heuristic, not a per-instance entitlement.",
-                    "line_start": 61,
-                    "reason": "The HikariCP formula is framed as a starting point, and the fleet-wide 50x100=5,000 arithmetic is correct, so the sizing guidance preserves its conditions."
-                  },
-                  {
-                    "quote": "Pool exhaustion.** Every connection is checked out",
-                    "line_start": 65,
-                    "reason": "Pitfalls name concrete causes and failure symptoms, supporting engineering judgment without padding."
-                  },
-                  {
-                    "quote": "Protocol-level prepared plans can work when `max_prepared_statements` is configured.",
-                    "line_start": 76,
-                    "reason": "PgBouncer transaction-mode caveats are accurate and include the version-specific exception."
-                  },
-                  {
-                    "quote": "With client-side connection pooling, what happens when application code opens and disposes a database connection?",
-                    "line_start": 106,
-                    "reason": "Direct, bounded question; the answer is one dependent behavior-and-why explanation with an answer-side primary source."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: client-side pooling, sizing, pitfalls and server-side poolers are one coherent topic and are not independently separable.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ]
-          },
-          "model_calls": 10
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/Data Persistence.md",
-        "outcome": "proposal_blocked",
-        "reason": "card edit must replace one complete active Qard block including adjacent metadata",
-        "result": {
-          "status": "proposal_blocked",
-          "stage": "deterministic_application",
-          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
-          "model_calls": 13
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/Erasure Coding.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Data Persistence/Erasure Coding.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its text and general knowledge of Reed-Solomon/MDS codes and Ceph's documented crush-failure-domain placement. The 4+2 arithmetic checks out: 256 MiB shards, 1.5 GiB total, 1.5x overhead versus 3 GiB for three copies. The d3/d4 failure walk-through is correct, as is the repair read amplification (four shards read, 1 GiB decoded). The MDS qualification, the placement caveat, the small-write read-modify-write explanation and the comparison table are all accurate and carry the conditions that matter. The prose is direct and ordered from definition to write path to cost to comparison. There are no Qard cards, so there are no question defects. The single reference is a real primary source. No known violations are outstanding, and no edit would improve the note materially."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Independent whole-note audit found no factual, structural or editorial defect. The keep is justified and there are no edits, cards or feedback to check.",
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/Erasure Coding.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate, ordered from definition to write path to cost to comparison, and keeps the conditions that matter (MDS qualification, failure-domain placement, correlated failures). Nothing needs changing.",
-                "page_type": "Concept — no Questions section; one real References bullet; no fenced code; frontmatter is typed and valid.",
-                "current_text_evidence": [
-                  {
-                    "quote": "With a maximum-distance-separable code such as Reed-Solomon, any `k` surviving shards can reconstruct the object.",
-                    "line_start": 14,
-                    "reason": "States the MDS condition precisely and qualifies tolerance of m losses by independence and correct placement. This is factually correct."
-                  },
-                  {
-                    "quote": "The six shards consume 1.5 GiB, an overhead factor of `(4 + 2) / 4 = 1.5`.",
-                    "line_start": 16,
-                    "reason": "The arithmetic is correct: 4 x 256 MiB data shards plus 2 coding shards gives 1.5 GiB, against 3 GiB for three copies."
-                  },
-                  {
-                    "quote": "Six shards on six disks in one server still share one server failure.",
-                    "line_start": 29,
-                    "reason": "Explains that fault tolerance comes from placement, and ties it to Ceph's crush-failure-domain."
-                  },
-                  {
-                    "quote": "Restoring one missing 256 MiB shard can mean reading four surviving 256 MiB shards, decoding 1 GiB, then writing the replacement.",
-                    "line_start": 33,
-                    "reason": "Makes repair read amplification concrete and correct for 4+2."
-                  },
-                  {
-                    "quote": "Depending on the engine, changing a few kilobytes may trigger a read-modify-write cycle across several shards.",
-                    "line_start": 37,
-                    "reason": "Correctly explains the small-write penalty and hedges by engine, without overclaiming."
-                  },
-                  {
-                    "quote": "Neither policy supplies a durability number by itself.",
-                    "line_start": 52,
-                    "reason": "Closes with the correlated-failure and backup caveats that affect engineering decisions. The comparison table has no repetition problem."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: the note covers one coherent topic. Layout, write and repair path, small-write cost and the replication comparison depend on each other and are short enough to stay together.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 15
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against its current text and my knowledge of Elasticsearch/Lucene documentation. Mapping section: text vs keyword, multi-fields, dynamic strict, scaled_float and analyzer behaviour (same analyzer for search unless search_analyzer set; analyzer changes need reindex) are accurate. Segment section: shards as Lucene indexes, immutable segments, buffer plus translog, refresh vs flush vs merge, near-real-time visibility and the note that the term dictionary is not an LSM tree are correct. Query/filter context, the bool example and the tenant-filter correctness point are sound. The use-case table and warning callout correctly flag licensed features, and the operational boundaries (mapping explosion, oversharding, disk watermarks, alias-based reindex) are accurate. Both existing cards each test one coherent task, have self-contained questions, answers consistent with the note, and primary Elastic sources. There are no known violations, frontmatter is valid and the code fences have language identifiers. Prose is direct and non-repetitive, and no concrete defect or essential gap justifies an edit."
-              }
-            ],
-            "feedback": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The note is unchanged and has no known violations. The whole-note audit found no concrete factual, structural or question-quality defect that would justify an edit.",
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md",
-                "verdict": "CLEAN",
-                "summary": "I read the whole note and found it accurate, well ordered and non-repetitive. It runs from mapping and analysis, through segments, refresh and shards, to query and filter context, use cases and operational limits, and it keeps its mechanisms, costs and conditions. Both cards each test one coherent task with self-contained questions and answer-side Elastic sources, so keeping the note unchanged is justified.",
-                "page_type": "Concept — typed frontmatter present, Questions and References optional but present and valid, code fences have language identifiers, no hand-rolled navigation.",
-                "current_text_evidence": [
-                  {
-                    "quote": "Elasticsearch uses the same analyzer for search unless the field defines a separate search analyzer.",
-                    "line_start": 41,
-                    "reason": "Accurate analyzer behaviour, with the correct consequence that analyzer changes require a reindex behind an alias."
-                  },
-                  {
-                    "quote": "Its segment lifecycle resembles append-and-merge storage, but the term dictionary itself is not an LSM tree.",
-                    "line_start": 56,
-                    "reason": "Precise boundary that prevents a common misconception and keeps the Lucene explanation accurate."
-                  },
-                  {
-                    "quote": "The tenant filter is a correctness boundary, not only a performance hint.",
-                    "line_start": 81,
-                    "reason": "Concrete engineering judgment tied to the query example, stated in direct whiteboard voice."
-                  },
-                  {
-                    "quote": "A cluster near disk capacity can stop allocating shards or block writes before raw bytes reach 100%.",
-                    "line_start": 107,
-                    "reason": "Correct description of disk watermark behaviour; the Operational Boundaries list gives actionable limits without repetition."
-                  },
-                  {
-                    "quote": "Why might Elasticsearch map one logical value as both `text` and `keyword`?",
-                    "line_start": 113,
-                    "reason": "Single focused card whose answer is a dependent explanation of one multi-field decision. It is self-contained, has a retained qard-id and cites primary Elastic docs."
-                  },
-                  {
-                    "quote": "Why can a newly indexed Elasticsearch document be missing from search results for a short time?",
-                    "line_start": 131,
-                    "reason": "Direct conceptual question. The answer explains the refresh mechanism and its cost as one dependent explanation and cites primary sources."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: mapping, segments, querying and operations form one coherent Elasticsearch concept, and no part is independently useful enough to warrant a separate note.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "PASS",
-                  "identity_safety": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 17
-        }
-      },
-      {
-        "path": "Vault/Home/Data Persistence/NoSQL/LSM-Tree.md",
-        "outcome": "no_worthwhile_changes",
-        "reason": "",
-        "result": {
-          "status": "no_worthwhile_changes",
-          "proposal": {
-            "version": 1,
-            "edits": [],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Data Persistence/NoSQL/LSM-Tree.md",
-                "outcome": "keep",
-                "reason": "Audited the whole note against current text and general LSM knowledge (LevelDB/RocksDB docs, O'Neil paper). Write path (WAL, memtable, flush, SSTable, tombstones) is accurate and carries durability-policy caveats. The read path correctly states that early stop is engine-specific (L0 newest-first, non-overlapping nonzero levels) and not a general rule. Compaction sections correctly cover STCS vs LCS, L0 overlap, and tombstone retention constraints. The amplification definitions, B-tree comparison table, complexity table, and Mermaid flow are consistent with each other and with the prose. No Qard cards are present and none are needed. There are no known violations, the code fence has a language identifier, wikilinks are full-path, and references are bare links. No factual or editorial defect justifies an edit."
-              }
-            ],
-            "feedback": [],
-            "decisions": []
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The keep is justified. I read the whole note independently and found no factual or editorial defect that needs an edit. There are no proposed edits, cards or feedback to check.",
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/NoSQL/LSM-Tree.md",
-                "verdict": "CLEAN",
-                "summary": "The note covers the write path, read path, compaction, amplification, the B-tree comparison and complexity, and keeps the conditions and exceptions. It states that early-stop reads are engine-specific, and that tombstone collection depends on safety rules. The order runs from motivation through mechanism to tradeoffs and usage, with no repetition or padding that an edit would fix.",
-                "page_type": "Concept note. Frontmatter is typed, the Mermaid fence has a language identifier, wikilinks use full paths, Questions is absent (optional), and References are bare links.",
-                "current_text_evidence": [
-                  {
-                    "quote": "An implementation may stop at the first match only when its search order proves that no later source can contain a newer visible version.",
-                    "line_start": 38,
-                    "reason": "Correctly limits the early-stop shortcut to engines with ordering invariants (LevelDB/RocksDB) and does not present it as a general LSM rule."
-                  },
-                  {
-                    "quote": "It discards an obsolete version only after the engine can prove that no supported reader or repair path still needs it.",
-                    "line_start": 49,
-                    "reason": "States the real condition for garbage-collecting tombstones and obsolete versions."
-                  },
-                  {
-                    "quote": "Except for L0, files within a level cover non-overlapping key ranges, so a point read has at most one candidate file per nonzero level.",
-                    "line_start": 52,
-                    "reason": "Gives the leveled-compaction mechanism together with the L0 exception, which keeps the read-cost claim accurate."
-                  },
-                  {
-                    "quote": "No compaction strategy minimizes all three at once:",
-                    "line_start": 56,
-                    "reason": "Frames the amplification tradeoff as a decision, and the definitions that follow are precise."
-                  }
-                ],
-                "target_resolution": "JUSTIFIED UNCHANGED",
-                "split_suggestion": "No split: write path, read path, compaction and amplification are one coherent storage-engine topic, and each part depends on the others.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "question_quality": "NOT APPLICABLE",
-                  "identity_safety": "NOT APPLICABLE",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": []
-          },
-          "model_calls": 19
-        }
-      }
-    ],
+    "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-15T19:16:05.015145Z",
-    "topic": "Data Persistence",
-    "topic_id": "data-persistence-4ea34db4",
-    "current_batch": {
-      "topic": "Data Persistence",
-      "topic_id": "data-persistence-4ea34db4",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
-          "content": "---\ntopic: [Data Persistence]\nsubtopic: [NoSQL]\nsummary: \"A family of non-relational and specialized data models chosen around concrete access, consistency, and scaling requirements.\"\nlevel: [\"4\"]\nstatus: New\ntags: [FolderNote]\n\npublish: true\npriority: High\nqard-deck: \"Data Persistence\"\nqard-topic: \"NoSQL/NoSQL\"\nflashcard_uid: \"96ca4645\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.351Z\"\n---\n\nNoSQL names a loose group of data stores rather than one database model. It covers key-value, document, wide-column, and graph stores, while search and time-series engines are often grouped beside them. Product boundaries overlap. A document store may enforce schemas, a key-value service may expose secondary indexes, and either may support transactions within a documented scope.\n\nA specialized store earns its place when one access pattern dominates the workload: point lookup by key, aggregate-shaped documents, relationship traversal, text relevance, or sustained time-window ingestion. A relational database remains the safer default when constraints, multi-entity transactions, and changing query combinations matter more. The useful decision is always about a concrete engine and its consistency, partitioning, query, and recovery contracts.\n\n```mermaid\nflowchart TD\n  A[Start from required queries and invariants] --> B{Constraints and multi-entity transactions dominate}\n  B -->|Yes| C[Relational baseline]\n  B -->|No or complementary workload| D{Dominant access pattern}\n  D -->|Point lookup| E[Key-value]\n  D -->|Aggregate document| F[Document]\n  D -->|Wide partition or high-rate series| G[Wide-column or time-series]\n  D -->|Relationship traversal| H[Graph]\n  D -->|Text relevance| I[Search index]\n```\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# How It Works\n\nEach family makes a different operation cheap. Key-value stores center the primary key. Document stores keep an aggregate together. Wide-column stores organize known queries around partition and clustering keys. Graph stores make relationships part of the stored model. Some products expose more than one of these interfaces, so the product name alone says little about the workload fit.\n\nDistributed stores make different [[CAP theorem]] choices for each operation. Cassandra can keep serving selected requests through a partition when the chosen consistency level can still be met. A leader-based replica set may instead reject writes when it cannot establish the required authority. Neither behavior follows from the word “NoSQL.” Relational systems can also be distributed, while non-relational systems can provide strong reads or transactions within bounded scopes.\n\nData is often shaped around known reads because keeping related values in one partition avoids remote joins or fan-out. That can reduce read work substantially. It also duplicates state, moves coordination into the write path, and creates a repair problem when one copy is missed.\n\n# Tradeoffs\n\n| Dimension | Common relational default | Common NoSQL patterns |\n| --- | --- | --- |\n| Consistency | ACID transactions across rows and tables within the engine's scope | Engine-specific: strong, causal, eventual, or tunable. Transaction scope varies |\n| Schema | Database-enforced table and constraint schema | Flexible, application-enforced, or database-enforced depending on engine |\n| Relationships | General joins and foreign keys are normal | Embedded, denormalized, traversed, or joined where the engine supports it |\n| Scaling | Scale-up, replicas, partitioning, or distributed SQL | Some engines are built around partitioned scale-out. Others are single-node or leader-bound |\n| Strong fit | Integrity-heavy transactions and evolving query combinations | Stable specialized access patterns whose measured benefit pays the modeling cost |\n\n# Questions\n\n<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->\n> [!qard]- When is a non-relational store a poor fit for a service?\n> A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.\n>\n> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. An engine whose transactions are limited to one document or partition provides that atomicity only when both accounts lie inside one such scope. Under a partition-scoped transaction, two separate account documents in the same partition can still commit together. When the accounts fall outside every atomic scope the engine supports, such as in different partitions, the application must coordinate the transfer itself.\n> - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.\n> - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.\n> \n> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models) · [Azure Cosmos DB: Database transactions and optimistic concurrency](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)\n\n# References\n\n- [Understand data store models](https://learn.microsoft.com/azure/architecture/guide/technology-choices/data-store-overview)\n",
-          "hash": "b5b0a74cf998f5beddfee716037bd0da007ae85123fd24a16efb2e667ac3f4d5",
-          "topic": "Data Persistence",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "base_sha": "4c28a0295ce7c4697ea2adcea1e919f008c6b755",
-    "reservation_deadline": "2026-11-15T19:30:02.338302Z",
-    "stop_reason": "call_limit",
-    "sealed_at": "2026-11-15T19:16:05.015148Z"
+    "checkpoint_at": "2026-11-16T22:21:57.554362Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -27816,7 +27301,538 @@
     "96aead5381054b1a": true,
     "da6ae8bc44c444a5": true
   },
-  "workload_history": {},
+  "workload_history": {
+    "4bd0bfa98b5d4dbbb28188e2b990362e": {
+      "version": 1,
+      "id": "4bd0bfa98b5d4dbbb28188e2b990362e",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-15T19:02:25.981526Z",
+      "elapsed_seconds": 819.0341312000006,
+      "calls_reserved": 19,
+      "responses_received": 19,
+      "attempted_paths": [
+        "Vault/Home/Data Persistence/Caching.md",
+        "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+        "Vault/Home/Data Persistence/SQL/Replication.md",
+        "Vault/Home/Data Persistence/ACID.md",
+        "Vault/Home/Data Persistence/Connection Pooling.md",
+        "Vault/Home/Data Persistence/Data Persistence.md",
+        "Vault/Home/Data Persistence/Erasure Coding.md",
+        "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md",
+        "Vault/Home/Data Persistence/NoSQL/LSM-Tree.md"
+      ],
+      "accepted_records": [],
+      "outcomes": [
+        {
+          "path": "Vault/Home/Data Persistence/Caching.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Data Persistence/Caching.md",
+                  "outcome": "keep",
+                  "reason": "Read the whole note against the current text. The opening defines hit/miss, L1/L2 and the correctness boundary. Cache vs retained log vs index is distinguished by loss behavior. The pattern table gives each strategy's write path, failure and freshness. The invalidation section covers explicit delete, TTL, event-driven and versioned keys, each with a TTL backstop. The stale-while-revalidate code is coherent: it uses dual TTLs, a per-key Lazy refresh owner, and failures returned as data. The prose correctly says coalescing is per-process only. Redis/Memcached, EVCache, eviction and the Redis-as-record sections are internally consistent and carry the loss-window and acknowledgement caveats. The note has no cards and no known violations. Code fences have language tags, and the wikilink and image embeds look well-formed. I found no verified factual error or editorial gap that an edit would repair, and rewording would be churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The whole-note audit found no factual error, rule violation or essential gap, so keeping the note unchanged is justified. There are no edits, and the keep disposition is sound.",
+              "notes": [
+                {
+                  "path": "Vault/Home/Data Persistence/Caching.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains cache mechanics, patterns, invalidation, stampede handling, Redis/Memcached and eviction with the conditions and exceptions each decision depends on. I read the whole note and found no concrete error that an edit would repair. Rewording would be churn.",
+                  "page_type": "Concept — optional Questions and References are absent, which is allowed. Frontmatter is typed, code fences carry language tags, and the one wikilink is well-formed.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Caching keeps a copy of data closer to its consumer, in process memory, in a shared store such as Redis, or in both.",
+                      "line_start": 15,
+                      "reason": "The opening states the operating idea quickly: what a cache is, where it lives, and the hit and miss behavior."
+                    },
+                    {
+                      "quote": "\"Faster copy\" is the useful boundary.",
+                      "line_start": 38,
+                      "reason": "This separates a cache from a retained log or an index by loss behavior. The table that follows gives each system's safe response to total loss."
+                    },
+                    {
+                      "quote": "A cache needs an authoritative source and a rebuild path.",
+                      "line_start": 47,
+                      "reason": "This states the boundary that decides when a component is really a system of record."
+                    },
+                    {
+                      "quote": "Write-around fits write-heavy data that is rarely read back",
+                      "line_start": 61,
+                      "reason": "The pattern table is followed by a usage condition and its cost, so the comparison supports a decision."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the sections are facets of one topic (caching and its failure modes), and Redis and EVCache appear only as supporting contrasts. Length alone is not a reason to split.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 2
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+          "outcome": "proposal_blocked",
+          "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/azure/cosmos-db/introduction",
+          "result": {
+            "status": "proposal_blocked",
+            "stage": "deterministic_application",
+            "reason": "source URL missing from owning note: https://learn.microsoft.com/en-us/azure/cosmos-db/introduction",
+            "model_calls": 3
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+          "outcome": "proposal_blocked",
+          "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait.html",
+          "result": {
+            "status": "proposal_blocked",
+            "stage": "deterministic_application",
+            "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait.html",
+            "model_calls": 6
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/ACID.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Data Persistence/ACID.md",
+                  "outcome": "keep",
+                  "reason": "I read the whole note and found no verified defect. The opening states the transaction scope and the boundary: ACID stops at the participating database, and it does not give idempotent retries, synchronous replication or cross-service commit. Atomicity is explained with a failure trace and an idempotency caveat. The ACID 'C' is distinguished from the CAP 'C'. The isolation table is labelled as the SQL standard minimum. The engine caveats match PostgreSQL's documentation: Read Uncommitted maps to Read Committed, and Repeatable Read prevents phantoms but still allows serialization anomalies. They also match SQL Server's row-versioning modes. Write skew is shown with a worked example and the SQLSTATE 40001 whole-transaction retry. The durability section covers WAL, group commit and async commit, and notes that ACID's durability depends on the storage stack. The 2PC and saga limits, the pitfalls, the tradeoff tables and the EF Core row-version caveat are accurate and not repeated needlessly. The four Qards each test one task, are self-contained, and cite primary sources. They agree with the note body. known_violations is empty. The prose is direct and has no padding, so any edit would be cosmetic churn."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent full-note read found no concrete factual, structural, voice or question-quality defect. The keep is justified and no edits are proposed.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/Data Persistence/ACID.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note states the transaction scope and its limits up front. Each property is explained with its mechanism and caveats, covering isolation-level and engine differences, write skew, WAL and durability configuration, 2PC and sagas. The Qards are self-contained, each tests one task, and each cites a primary source. No edit is warranted.",
+                  "page_type": "Concept — frontmatter, MD040 code-fence languages, optional Questions and References; no special-page protections apply.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "These guarantees stop at the participating database and the isolation and durability settings it uses.",
+                      "line_start": 19,
+                      "reason": "The opening sets the operating boundary, so the topic is recoverable quickly."
+                    },
+                    {
+                      "quote": "Whether another transaction can observe tentative writes before that outcome is an isolation question, not an atomicity guarantee.",
+                      "line_start": 25,
+                      "reason": "Separates atomicity from isolation precisely, avoiding a common conflation."
+                    },
+                    {
+                      "quote": "The \"C\" in CAP concerns whether clients observe one current value across replicas during failures.",
+                      "line_start": 50,
+                      "reason": "Disambiguates ACID consistency from CAP consistency."
+                    },
+                    {
+                      "quote": "The table gives the SQL standard's minimum guarantees.",
+                      "line_start": 67,
+                      "reason": "The generic isolation table is caveated by engine-specific behavior (PostgreSQL, SQL Server), so version-specific facts are accurate."
+                    },
+                    {
+                      "quote": "Repeating only the final `UPDATE` reuses stale reasoning.",
+                      "line_start": 85,
+                      "reason": "Gives the concrete retry condition after serialization failure (SQLSTATE 40001), preserving mechanism and exception."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: isolation, durability, atomicity and distributed limits are facets of one transaction concept and gain from sitting together; the distributed topics already link to dedicated notes.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 8
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text and primary knowledge of SqlClient, Npgsql, HikariCP and PgBouncer. The opening explains why pooling exists. The open/wait/dispose mechanism, pool separation by connection configuration, and the Npgsql connection-string example (Maximum Pool Size, Minimum Pool Size, Connection Lifetime) are accurate and hedged as provider-specific. The HikariCP formula is presented as a heuristic, and the 50×100=5,000 sessions arithmetic is correct. The PgBouncer transaction-mode caveats (SET, LISTEN, session advisory locks, SQL PREPARE, max_prepared_statements) and the RDS Proxy versus Azure SQL distinction are correct. Pitfalls, tradeoffs and sizing guidance do not repeat each other in ways that need pruning. Both Qards each test one coherent task, ask directly, and cite sources on the answer side. There are no known violations, no flagged cards and no owner feedback, so no edit is warranted."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The note is accurate, well ordered and complete for its depth. Both Qards test one coherent task and cite answer-side sources. There are no edits, no known violations and no owner feedback. The keep is justified.",
+              "change_checks": [],
+              "notes": [
+                {
+                  "path": "Vault/Home/Data Persistence/Connection Pooling.md",
+                  "verdict": "CLEAN",
+                  "summary": "Independent whole-note audit finds accurate, provider-hedged mechanism, sensible ordering (why, how, example, sizing, pitfalls, poolers, tradeoffs) and two well-formed cards. No concrete defect justifies an edit.",
+                  "page_type": "Concept — frontmatter, optional Questions and References present; voice is impersonal and declarative; code fences carry language identifiers; qard IDs protected.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Repeating that work for every query wastes latency and server capacity.",
+                      "line_start": 17,
+                      "reason": "The opening states the problem pooling solves and the boundary: callers must return connections and bound the fleet-wide limit."
+                    },
+                    {
+                      "quote": "Pools are separated by connection configuration.",
+                      "line_start": 35,
+                      "reason": "Correctly explains pool keying (exact connection string, identity, transaction context for SqlClient; data-source configuration for Npgsql) with hedging."
+                    },
+                    {
+                      "quote": "It is a heuristic, not a per-instance entitlement.",
+                      "line_start": 61,
+                      "reason": "The HikariCP formula is framed as a starting point, and the fleet-wide 50x100=5,000 arithmetic is correct, so the sizing guidance preserves its conditions."
+                    },
+                    {
+                      "quote": "Pool exhaustion.** Every connection is checked out",
+                      "line_start": 65,
+                      "reason": "Pitfalls name concrete causes and failure symptoms, supporting engineering judgment without padding."
+                    },
+                    {
+                      "quote": "Protocol-level prepared plans can work when `max_prepared_statements` is configured.",
+                      "line_start": 76,
+                      "reason": "PgBouncer transaction-mode caveats are accurate and include the version-specific exception."
+                    },
+                    {
+                      "quote": "With client-side connection pooling, what happens when application code opens and disposes a database connection?",
+                      "line_start": 106,
+                      "reason": "Direct, bounded question; the answer is one dependent behavior-and-why explanation with an answer-side primary source."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: client-side pooling, sizing, pitfalls and server-side poolers are one coherent topic and are not independently separable.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ]
+            },
+            "model_calls": 10
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/Data Persistence.md",
+          "outcome": "proposal_blocked",
+          "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+          "result": {
+            "status": "proposal_blocked",
+            "stage": "deterministic_application",
+            "reason": "card edit must replace one complete active Qard block including adjacent metadata",
+            "model_calls": 13
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/Erasure Coding.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Data Persistence/Erasure Coding.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its text and general knowledge of Reed-Solomon/MDS codes and Ceph's documented crush-failure-domain placement. The 4+2 arithmetic checks out: 256 MiB shards, 1.5 GiB total, 1.5x overhead versus 3 GiB for three copies. The d3/d4 failure walk-through is correct, as is the repair read amplification (four shards read, 1 GiB decoded). The MDS qualification, the placement caveat, the small-write read-modify-write explanation and the comparison table are all accurate and carry the conditions that matter. The prose is direct and ordered from definition to write path to cost to comparison. There are no Qard cards, so there are no question defects. The single reference is a real primary source. No known violations are outstanding, and no edit would improve the note materially."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "Independent whole-note audit found no factual, structural or editorial defect. The keep is justified and there are no edits, cards or feedback to check.",
+              "notes": [
+                {
+                  "path": "Vault/Home/Data Persistence/Erasure Coding.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note is accurate, ordered from definition to write path to cost to comparison, and keeps the conditions that matter (MDS qualification, failure-domain placement, correlated failures). Nothing needs changing.",
+                  "page_type": "Concept — no Questions section; one real References bullet; no fenced code; frontmatter is typed and valid.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "With a maximum-distance-separable code such as Reed-Solomon, any `k` surviving shards can reconstruct the object.",
+                      "line_start": 14,
+                      "reason": "States the MDS condition precisely and qualifies tolerance of m losses by independence and correct placement. This is factually correct."
+                    },
+                    {
+                      "quote": "The six shards consume 1.5 GiB, an overhead factor of `(4 + 2) / 4 = 1.5`.",
+                      "line_start": 16,
+                      "reason": "The arithmetic is correct: 4 x 256 MiB data shards plus 2 coding shards gives 1.5 GiB, against 3 GiB for three copies."
+                    },
+                    {
+                      "quote": "Six shards on six disks in one server still share one server failure.",
+                      "line_start": 29,
+                      "reason": "Explains that fault tolerance comes from placement, and ties it to Ceph's crush-failure-domain."
+                    },
+                    {
+                      "quote": "Restoring one missing 256 MiB shard can mean reading four surviving 256 MiB shards, decoding 1 GiB, then writing the replacement.",
+                      "line_start": 33,
+                      "reason": "Makes repair read amplification concrete and correct for 4+2."
+                    },
+                    {
+                      "quote": "Depending on the engine, changing a few kilobytes may trigger a read-modify-write cycle across several shards.",
+                      "line_start": 37,
+                      "reason": "Correctly explains the small-write penalty and hedges by engine, without overclaiming."
+                    },
+                    {
+                      "quote": "Neither policy supplies a durability number by itself.",
+                      "line_start": 52,
+                      "reason": "Closes with the correlated-failure and backup caveats that affect engineering decisions. The comparison table has no repetition problem."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: the note covers one coherent topic. Layout, write and repair path, small-write cost and the replication comparison depend on each other and are short enough to stay together.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 15
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against its current text and my knowledge of Elasticsearch/Lucene documentation. Mapping section: text vs keyword, multi-fields, dynamic strict, scaled_float and analyzer behaviour (same analyzer for search unless search_analyzer set; analyzer changes need reindex) are accurate. Segment section: shards as Lucene indexes, immutable segments, buffer plus translog, refresh vs flush vs merge, near-real-time visibility and the note that the term dictionary is not an LSM tree are correct. Query/filter context, the bool example and the tenant-filter correctness point are sound. The use-case table and warning callout correctly flag licensed features, and the operational boundaries (mapping explosion, oversharding, disk watermarks, alias-based reindex) are accurate. Both existing cards each test one coherent task, have self-contained questions, answers consistent with the note, and primary Elastic sources. There are no known violations, frontmatter is valid and the code fences have language identifiers. Prose is direct and non-repetitive, and no concrete defect or essential gap justifies an edit."
+                }
+              ],
+              "feedback": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The note is unchanged and has no known violations. The whole-note audit found no concrete factual, structural or question-quality defect that would justify an edit.",
+              "notes": [
+                {
+                  "path": "Vault/Home/Data Persistence/NoSQL/Elasticsearch.md",
+                  "verdict": "CLEAN",
+                  "summary": "I read the whole note and found it accurate, well ordered and non-repetitive. It runs from mapping and analysis, through segments, refresh and shards, to query and filter context, use cases and operational limits, and it keeps its mechanisms, costs and conditions. Both cards each test one coherent task with self-contained questions and answer-side Elastic sources, so keeping the note unchanged is justified.",
+                  "page_type": "Concept — typed frontmatter present, Questions and References optional but present and valid, code fences have language identifiers, no hand-rolled navigation.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Elasticsearch uses the same analyzer for search unless the field defines a separate search analyzer.",
+                      "line_start": 41,
+                      "reason": "Accurate analyzer behaviour, with the correct consequence that analyzer changes require a reindex behind an alias."
+                    },
+                    {
+                      "quote": "Its segment lifecycle resembles append-and-merge storage, but the term dictionary itself is not an LSM tree.",
+                      "line_start": 56,
+                      "reason": "Precise boundary that prevents a common misconception and keeps the Lucene explanation accurate."
+                    },
+                    {
+                      "quote": "The tenant filter is a correctness boundary, not only a performance hint.",
+                      "line_start": 81,
+                      "reason": "Concrete engineering judgment tied to the query example, stated in direct whiteboard voice."
+                    },
+                    {
+                      "quote": "A cluster near disk capacity can stop allocating shards or block writes before raw bytes reach 100%.",
+                      "line_start": 107,
+                      "reason": "Correct description of disk watermark behaviour; the Operational Boundaries list gives actionable limits without repetition."
+                    },
+                    {
+                      "quote": "Why might Elasticsearch map one logical value as both `text` and `keyword`?",
+                      "line_start": 113,
+                      "reason": "Single focused card whose answer is a dependent explanation of one multi-field decision. It is self-contained, has a retained qard-id and cites primary Elastic docs."
+                    },
+                    {
+                      "quote": "Why can a newly indexed Elasticsearch document be missing from search results for a short time?",
+                      "line_start": 131,
+                      "reason": "Direct conceptual question. The answer explains the refresh mechanism and its cost as one dependent explanation and cites primary sources."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: mapping, segments, querying and operations form one coherent Elasticsearch concept, and no part is independently useful enough to warrant a separate note.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 17
+          }
+        },
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/LSM-Tree.md",
+          "outcome": "no_worthwhile_changes",
+          "reason": "",
+          "result": {
+            "status": "no_worthwhile_changes",
+            "proposal": {
+              "version": 1,
+              "edits": [],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/Data Persistence/NoSQL/LSM-Tree.md",
+                  "outcome": "keep",
+                  "reason": "Audited the whole note against current text and general LSM knowledge (LevelDB/RocksDB docs, O'Neil paper). Write path (WAL, memtable, flush, SSTable, tombstones) is accurate and carries durability-policy caveats. The read path correctly states that early stop is engine-specific (L0 newest-first, non-overlapping nonzero levels) and not a general rule. Compaction sections correctly cover STCS vs LCS, L0 overlap, and tombstone retention constraints. The amplification definitions, B-tree comparison table, complexity table, and Mermaid flow are consistent with each other and with the prose. No Qard cards are present and none are needed. There are no known violations, the code fence has a language identifier, wikilinks are full-path, and references are bare links. No factual or editorial defect justifies an edit."
+                }
+              ],
+              "feedback": [],
+              "decisions": []
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The keep is justified. I read the whole note independently and found no factual or editorial defect that needs an edit. There are no proposed edits, cards or feedback to check.",
+              "notes": [
+                {
+                  "path": "Vault/Home/Data Persistence/NoSQL/LSM-Tree.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note covers the write path, read path, compaction, amplification, the B-tree comparison and complexity, and keeps the conditions and exceptions. It states that early-stop reads are engine-specific, and that tombstone collection depends on safety rules. The order runs from motivation through mechanism to tradeoffs and usage, with no repetition or padding that an edit would fix.",
+                  "page_type": "Concept note. Frontmatter is typed, the Mermaid fence has a language identifier, wikilinks use full paths, Questions is absent (optional), and References are bare links.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "An implementation may stop at the first match only when its search order proves that no later source can contain a newer visible version.",
+                      "line_start": 38,
+                      "reason": "Correctly limits the early-stop shortcut to engines with ordering invariants (LevelDB/RocksDB) and does not present it as a general LSM rule."
+                    },
+                    {
+                      "quote": "It discards an obsolete version only after the engine can prove that no supported reader or repair path still needs it.",
+                      "line_start": 49,
+                      "reason": "States the real condition for garbage-collecting tombstones and obsolete versions."
+                    },
+                    {
+                      "quote": "Except for L0, files within a level cover non-overlapping key ranges, so a point read has at most one candidate file per nonzero level.",
+                      "line_start": 52,
+                      "reason": "Gives the leveled-compaction mechanism together with the L0 exception, which keeps the read-cost claim accurate."
+                    },
+                    {
+                      "quote": "No compaction strategy minimizes all three at once:",
+                      "line_start": 56,
+                      "reason": "Frames the amplification tradeoff as a decision, and the definitions that follow are precise."
+                    }
+                  ],
+                  "target_resolution": "JUSTIFIED UNCHANGED",
+                  "split_suggestion": "No split: write path, read path, compaction and amplification are one coherent storage-engine topic, and each part depends on the others.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "NOT APPLICABLE",
+                    "identity_safety": "NOT APPLICABLE",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": []
+            },
+            "model_calls": 19
+          }
+        }
+      ],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-15T19:16:05.015145Z",
+      "topic": "Data Persistence",
+      "topic_id": "data-persistence-4ea34db4",
+      "current_batch": {
+        "topic": "Data Persistence",
+        "topic_id": "data-persistence-4ea34db4",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+            "content": "---\ntopic: [Data Persistence]\nsubtopic: [NoSQL]\nsummary: \"A family of non-relational and specialized data models chosen around concrete access, consistency, and scaling requirements.\"\nlevel: [\"4\"]\nstatus: New\ntags: [FolderNote]\n\npublish: true\npriority: High\nqard-deck: \"Data Persistence\"\nqard-topic: \"NoSQL/NoSQL\"\nflashcard_uid: \"96ca4645\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.351Z\"\n---\n\nNoSQL names a loose group of data stores rather than one database model. It covers key-value, document, wide-column, and graph stores, while search and time-series engines are often grouped beside them. Product boundaries overlap. A document store may enforce schemas, a key-value service may expose secondary indexes, and either may support transactions within a documented scope.\n\nA specialized store earns its place when one access pattern dominates the workload: point lookup by key, aggregate-shaped documents, relationship traversal, text relevance, or sustained time-window ingestion. A relational database remains the safer default when constraints, multi-entity transactions, and changing query combinations matter more. The useful decision is always about a concrete engine and its consistency, partitioning, query, and recovery contracts.\n\n```mermaid\nflowchart TD\n  A[Start from required queries and invariants] --> B{Constraints and multi-entity transactions dominate}\n  B -->|Yes| C[Relational baseline]\n  B -->|No or complementary workload| D{Dominant access pattern}\n  D -->|Point lookup| E[Key-value]\n  D -->|Aggregate document| F[Document]\n  D -->|Wide partition or high-rate series| G[Wide-column or time-series]\n  D -->|Relationship traversal| H[Graph]\n  D -->|Text relevance| I[Search index]\n```\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# How It Works\n\nEach family makes a different operation cheap. Key-value stores center the primary key. Document stores keep an aggregate together. Wide-column stores organize known queries around partition and clustering keys. Graph stores make relationships part of the stored model. Some products expose more than one of these interfaces, so the product name alone says little about the workload fit.\n\nDistributed stores make different [[CAP theorem]] choices for each operation. Cassandra can keep serving selected requests through a partition when the chosen consistency level can still be met. A leader-based replica set may instead reject writes when it cannot establish the required authority. Neither behavior follows from the word “NoSQL.” Relational systems can also be distributed, while non-relational systems can provide strong reads or transactions within bounded scopes.\n\nData is often shaped around known reads because keeping related values in one partition avoids remote joins or fan-out. That can reduce read work substantially. It also duplicates state, moves coordination into the write path, and creates a repair problem when one copy is missed.\n\n# Tradeoffs\n\n| Dimension | Common relational default | Common NoSQL patterns |\n| --- | --- | --- |\n| Consistency | ACID transactions across rows and tables within the engine's scope | Engine-specific: strong, causal, eventual, or tunable. Transaction scope varies |\n| Schema | Database-enforced table and constraint schema | Flexible, application-enforced, or database-enforced depending on engine |\n| Relationships | General joins and foreign keys are normal | Embedded, denormalized, traversed, or joined where the engine supports it |\n| Scaling | Scale-up, replicas, partitioning, or distributed SQL | Some engines are built around partitioned scale-out. Others are single-node or leader-bound |\n| Strong fit | Integrity-heavy transactions and evolving query combinations | Stable specialized access patterns whose measured benefit pays the modeling cost |\n\n# Questions\n\n<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->\n> [!qard]- When is a non-relational store a poor fit for a service?\n> A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.\n>\n> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. An engine whose transactions are limited to one document or partition provides that atomicity only when both accounts lie inside one such scope. Under a partition-scoped transaction, two separate account documents in the same partition can still commit together. When the accounts fall outside every atomic scope the engine supports, such as in different partitions, the application must coordinate the transfer itself.\n> - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.\n> - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.\n> \n> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models) · [Azure Cosmos DB: Database transactions and optimistic concurrency](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)\n\n# References\n\n- [Understand data store models](https://learn.microsoft.com/azure/architecture/guide/technology-choices/data-store-overview)\n",
+            "hash": "b5b0a74cf998f5beddfee716037bd0da007ae85123fd24a16efb2e667ac3f4d5",
+            "topic": "Data Persistence",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "changed"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "base_sha": "4c28a0295ce7c4697ea2adcea1e919f008c6b755",
+      "reservation_deadline": "2026-11-15T19:30:02.338302Z",
+      "stop_reason": "call_limit",
+      "sealed_at": "2026-11-15T19:16:05.015148Z"
+    }
+  },
   "feedback_workloads": {
     "fcd67e13bc430ba5facd6a87402a2d09e4ada2e8f17f6bc55ee28a8fc84d0cb7": {
       "id": "fcd67e13bc430ba5facd6a87402a2d09e4ada2e8f17f6bc55ee28a8fc84d0cb7",
