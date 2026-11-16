@@ -17165,9 +17165,9 @@
     "version": 1,
     "id": "33a5bcd3129e4228a0be70053399144d",
     "status": "active",
-    "phase": "validation_reserved",
+    "phase": "validation_completed",
     "started_at": "2026-11-16T22:21:57.553782Z",
-    "elapsed_seconds": 417.0487577000001,
+    "elapsed_seconds": 434.9636000000001,
     "calls_reserved": 11,
     "responses_received": 11,
     "attempted_paths": [
@@ -17415,7 +17415,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-16T22:28:54.602112Z",
+    "checkpoint_at": "2026-11-16T22:29:12.516956Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
