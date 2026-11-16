@@ -30972,8 +30972,11 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-16T22:28:25.323098Z",
-    "phase": "prepared",
-    "updated_at": "2026-11-16T22:34:56Z"
+    "phase": "commit_created",
+    "updated_at": "2026-11-16T22:35:02Z",
+    "evidence": {
+      "commit_sha": "53c0dea3edee92e06acd2005f904050c25c9f10f"
+    }
   },
   "export_operations": {
     "8ee974ce274c4cbc": {
