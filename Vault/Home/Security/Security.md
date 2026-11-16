@@ -13,8 +13,9 @@ qard-deck: "Security"
 qard-topic: "Security"
 flashcard_uid: "e838d602"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-16T17:10:31.241Z"
 published: "2026-07-08T13:28:37.343Z"
+summary: "Protecting users, data, and systems: authentication, authorization, and cryptography."
 ---
 
 Security keeps a system's promised behavior intact when people, software, and infrastructure fail or act maliciously. It is an engineering property of the whole service: identities, authorization, data handling, dependencies, deployment, detection, and recovery all contribute to the result.

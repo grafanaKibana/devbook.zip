@@ -10,8 +10,9 @@ priority: High
 level: ["3"]
 status: In Progress
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-16T17:10:31.241Z"
 published: "2026-07-08T13:28:37.342Z"
+summary: "Protocols, latency, and reliability of how machines communicate over a network."
 ---
 
 Networking turns local computation into communication between failure domains. A request depends on name resolution, routing, transport state, protocol semantics, and the remote application. Along that path, data may be delayed, rejected, duplicated, reordered, or hidden behind a higher layer's recovery behavior.

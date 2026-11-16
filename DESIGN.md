@@ -98,7 +98,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 ### Navigation rules
 
 - The physical folder tree and FolderNotes are the taxonomy.
-- Topic title, icon, color, and order come from FolderNote frontmatter.
+- Topic title, icon, color, and order come from FolderNote frontmatter. Top-level topic `summary` frontmatter supplies descriptions on Home cards; FolderNote maps show titles and counts without descriptions.
 - Published FolderNotes hide unpublished children; authoring views may show them.
 - Cards replace direct-child navigation, not useful prose, diagrams, questions, or references.
 - Use search, Explorer, FolderNote maps, and contextual prose links instead of standalone link lists.
@@ -136,7 +136,7 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 ### Spacing and layout rhythm
 
 - Use `0.25rem` to `1rem` spacing inside cards and controls; use larger gaps between page sections.
-- Cards align title and footer regions without forcing equal content.
+- Home cards align title, summary, and footer regions without forcing equal content.
 - Home starts with its learning overview, without a welcome heading. Ten topic cards form three, four, and three cards in complete desktop rows. Other inventories use balanced complete rows in topic/keyboard order. The dashboard container switches from one column to paired cards at `28rem`, three-card rows at `42rem`, and up to four cards at `62rem`. Content sets row height; titles wrap without clamping, and progress stays at the bottom. The page scrolls, and the desktop grid keeps its `2rem` end gutter. Search is centred over the main content track: pages without a right rail share that track's desktop offset, and tablet content has symmetric outer margins.
 - FolderNote maps use balanced full-width rows with at most one card's difference between row counts. Container widths of `28rem`, `42rem`, `56rem`, and `70rem` allow up to two, three, four, and five cards per row. Larger rows come first; titles wrap, and cards keep a `3.5rem` minimum body height.
 - Pages without a right rail (FolderNotes, tag pages, Questions, About) give their content the full track; on desktop that track keeps a `2rem` end gutter mirroring the sidebar inset.

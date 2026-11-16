@@ -3,12 +3,23 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Edit|Write|MultiEdit",
+        "matcher": "apply_patch|Edit|Write|MultiEdit",
         "hooks": [
           {
-            "statusMessage": "Checking if a note review is warranted...",
+            "statusMessage": "Tracking note review requirements...",
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/suggest-review.mjs\""
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/suggest-review.mjs\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "statusMessage": "Checking note review receipts...",
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/enforce-review.mjs\""
           }
         ]
       }

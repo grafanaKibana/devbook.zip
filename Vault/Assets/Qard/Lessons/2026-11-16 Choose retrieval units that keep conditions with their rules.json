@@ -15,7 +15,50 @@
   "course": "AI & ML",
   "objective": "retrieval-units",
   "steps": [
-    null,
+    {
+      "title": "Chunk size as a precision vs context tradeoff",
+      "explain": "Recall the retrieval step. The query is embedded as one vector, and each stored piece of text is embedded as one vector. The pieces whose vectors are most similar to the query are passed to the model. The piece that is embedded, scored and returned is the **retrieval unit**, usually called a chunk. Chunking decides where the edges of each chunk fall ([[Home/AI & ML/LLM/Context Engineering/RAG/Chunking|Chunking]]).\n\nEach chunk gets **one** vector, however much text it holds. That is why chunk size involves a tradeoff in both directions.\n\n**Large chunk: the match can be diluted.** Suppose a whole \"Data Retention\" section is one chunk. It covers log retention, backup schedules, deletion requests and audit duties. One vector has to represent all of those topics. Against a narrow query such as \"How long are security logs kept?\", it can score lower than a chunk about log retention alone would. Even when it is retrieved, most of its text is unrelated and still takes up the model's context. The note describes this for oversized structural units: unrelated text \"can dilute retrieval precision\" ([[Home/AI & ML/LLM/Context Engineering/RAG/Chunking#Structure-Aware Chunking|Structure-Aware Chunking]]).\n\n**Small chunk: a condition can be cut off.** Take the policy *\"Keep logs for 90 days. Exception: security investigations require 365 days.\"* A small fixed-size split can produce two chunks:\n\n- Chunk A: \"Keep logs for 90 days.\"\n- Chunk B: \"Exception: security investigations require 365 days.\"\n\nEach chunk now has a focused vector, which can help it match a query precisely. But each chunk is scored on its own. If retrieval returns chunk A and not chunk B, the model sees \"90 days\" and has no sign that an exception exists. Its answer can then miss the 365-day case. The note's diagram shows this failure ([[Home/AI & ML/LLM/Context Engineering/RAG/Chunking#Fixed-Size Chunking|Fixed-Size Chunking]]).\n\nNo chunk size is right by default. Smaller units **can** sharpen the match but hold less context. Larger units keep related statements together but **can** blur the match and add noise. These are tendencies, not guarantees, and their effect on a given corpus is measured by retrieval evaluation. The aim is a unit that keeps one complete idea together. In this example, that means keeping the rule with the condition that changes it.",
+      "connect": "This builds on embedding similarity: a chunk is matched only through its single vector. The tradeoff is the problem the next steps address. They show how to keep conditions with their rules, how to make each chunk traceable to its source, and how to choose a unit from an observed failure.",
+      "checkFirst": false,
+      "check": {
+        "id": "k1",
+        "type": "short",
+        "goal": "apply",
+        "objective": "retrieval-units",
+        "prompt": "A shop's returns policy is chunked **one sentence per chunk**, so two adjacent sentences become separate chunks:\n\n- Chunk 1: \"Items may be returned within 30 days of purchase.\"\n- Chunk 2: \"For sale items, this window is halved.\"\n\nEach chunk is embedded on its own, with no heading or neighbouring text added. No other document mentions return periods, and the model has no outside knowledge of this shop's policy.\n\nA user asks: *\"How many days do I have to return a sale item?\"* The retriever returns **chunk 2 only**, because it mentions sale items, and only that text is passed to the model.\n\nCan the model correctly state the number of days from what it receives? Give a verdict and explain why.",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "Verdict: no, the model cannot correctly state the number of days (15) from the retrieved text.",
+            "marks": 1
+          },
+          {
+            "point": "Reason: chunk 2's meaning depends on the omitted rule, because \"this window\" refers to the 30-day period in chunk 1, and chunk 1 was not retrieved since each chunk is scored and returned independently.",
+            "marks": 1
+          }
+        ],
+        "model": "**No.** Chunk 2 only says the window is halved. \"This window\" refers to the 30-day rule in chunk 1, which was split into a separate chunk and not retrieved, so the model has no base period to halve and cannot arrive at 15 days.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+          "heading": "Fixed-Size Chunking"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Answers \"yes, 15 days\", working from the full policy shown in the question rather than from the text the model actually receives.",
+          "reteach": "The model sees only the retrieved units. You can see both chunks, but the model receives only \"For sale items, this window is halved.\" That sentence contains no number. Halving requires the 30-day base, and that base is in chunk 1, which never reached the model."
+        },
+        {
+          "signs": "Answers yes because chunk 2 was the best match for the query, so it must contain what is needed.",
+          "reteach": "Similarity measures how closely a chunk's vector matches the query, not whether the chunk is complete. Chunk 2 matches well because it mentions sale items. But its meaning depends on another sentence (\"this window\"). A small unit can match precisely and still lack the context needed to answer."
+        },
+        {
+          "signs": "Says no, but blames dilution: the chunk mixes too many topics in one vector.",
+          "reteach": "Dilution is a risk of **large** chunks, where many topics share one vector. A one-sentence chunk is the opposite case: its vector is focused. The problem here is missing context. The rule that gives \"this window\" its meaning was split into a chunk that was not returned."
+        }
+      ],
+      "figure": ""
+    },
     {
       "title": "Keeping conditions with their rules",
       "explain": "Step 1 ended on a tension. A small chunk matches a query precisely, but it can leave the exception behind. A large chunk keeps the exception, but extra text dilutes the match. There are two ways to keep the condition with its rule, and each adds its own cost.\n\n**Running example.** A policy document has a heading *Data Retention*. Under it are two sentences: \"Keep logs for 90 days. Exception: security investigations require 365 days.\" A blind split at a fixed position can cut between them. A query about logs then retrieves only the 90-day sentence.\n\n**1. Structure-aware splitting: make the unit match the document's logic.** A parser for the format (Markdown headings, HTML DOM, PDF layout) reads the document as typed blocks such as heading + prose, table, code block and list. Each block becomes one chunk. The rule and its exception sit in the same *Data Retention* block, so they become one chunk, and that chunk is both searched and returned. Each chunk also inherits its heading path as metadata. ([[Home/AI & ML/LLM/Context Engineering/RAG/Chunking#Structure-Aware Chunking|Chunking: Structure-Aware]])\n\nCosts:\n- **Dilution from large blocks.** A long section becomes one big chunk. Its unrelated text weakens the match, and it may exceed the embedding model's input limit. A maximum chunk size bounds this by splitting oversized blocks.\n- **Parser maintenance.** Each source format needs its own parser. A parser can also misparse silently when a source changes format, which shifts chunk boundaries without any error.\n\n**2. Parent-child: search one unit, return another.** Ingestion cuts small *children* (about 100–200 tokens) for searching. Each child records the ID of its *parent*, a larger span such as the whole *Data Retention* section. At query time:\n\n1. The query matches the 90-day child.\n2. A lookup by parent ID fetches the section. This is not a second similarity search.\n3. The generator receives the section, which includes the exception.\n\nThe search stays precise because only the small children are compared with the query. ([[Home/AI & ML/LLM/Context Engineering/RAG/Chunking#Parent-Child Chunking|Chunking: Parent-Child]])\n\nCosts:\n- **Noise from broad parents.** If the parent is too large, expansion fills the context window with irrelevant text. That gives back the precision the small children gained. A size limit on parents bounds this.\n- **Pipeline and storage.** The pipeline needs an expansion step that maps children to parents, keeps a parent shared by several children only once, and assembles the context. It also stores the mapping and the parent text. This adds latency and code.\n\n**The shared boundary.** Each method recovers only what lies inside the unit it hands back. Structure-aware returns the parsed block. Parent-child returns the matched child's own parent. A condition outside that unit stays missing.",

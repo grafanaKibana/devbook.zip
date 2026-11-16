@@ -10,8 +10,9 @@ status: New
 level: ["4"]
 priority: High
 created: 2026-02-10T01:40:47.000Z
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-16T17:10:31.241Z"
 published: 2026-07-08T13:28:37.340Z
+summary: "Software craft focused on the .NET stack: C#, runtime, web APIs, and concurrency."
 ---
 
 Programming turns an operational problem into software whose behavior can be explained, tested, and changed. The code is only one part of that result. Contracts, failure handling, runtime cost, and the path from a source change to production all shape whether the system remains useful.

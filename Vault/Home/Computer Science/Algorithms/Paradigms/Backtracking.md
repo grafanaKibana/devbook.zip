@@ -9,7 +9,7 @@ qard-deck: "Computer Science"
 qard-topic: "Algorithms/Paradigms/Backtracking"
 flashcard_uid: "bbcb105b"
 created: "2026-06-20T05:33:50.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-16T17:10:31.241Z"
 published: "2026-07-08T13:14:17.335Z"
 ---
 
@@ -144,6 +144,7 @@ Appending the live buffer as a solution stores a reference that later choices ov
 >     return results;
 > }
 > ```
+>
 > The `used[i]` guard is the prefix test. N-queens replaces it with an `IsSafe(row, col)` check over occupied columns and diagonals. The `used[i] = false` line restores the parent state before the next sibling runs.
 
 # Questions

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "createdAt": 1794350918439,
+  "createdAt": 1794682393039,
   "mastery": "Assets/Qard/Courses/Software Architecture Mastery.md",
   "course": "Software Architecture",
   "objective": "singleton-scope",
@@ -11,23 +11,26 @@
   "questions": [
     {
       "id": "c1",
-      "type": "short",
-      "prompt": "Two independent .NET root service providers each register `AddSingleton<ResourceCache>()` and resolve the service. `ResourceCache` implements `IDisposable`, and its disposal releases only that instance's resources. Does disposing the first provider also dispose the cache resolved from the second provider? Explain why.",
-      "marks": 2,
+      "type": "mcq",
+      "prompt": "An ASP.NET Core app registers `services.AddSingleton<IClock, Clock>()`. While registration is still running, a helper method calls `services.BuildServiceProvider()` and resolves `IClock` from it to configure another option. Later, the app resolves `IClock` from its normal application provider. Logging shows that two different `Clock` instances were created.\n\nWhich explanation is correct?",
+      "marks": 1,
+      "options": [
+        "`AddSingleton` keeps one instance per thread, so the startup thread running the helper received its own `Clock`.",
+        "Singleton instances are created per scope, and the helper resolved outside any scope, so the first request scope created a new `Clock`.",
+        "Each `BuildServiceProvider` call creates a separate root provider with its own singleton cache, and singleton lifetime only applies within one root provider.",
+        "The container disposes and recreates all singletons when registration finishes, so the startup `Clock` was replaced by a new one."
+      ],
+      "answer": 2,
       "rubric": [
         {
-          "point": "States that disposing the first provider does not dispose the second provider's cache.",
-          "marks": 1
-        },
-        {
-          "point": "Explains that singleton ownership is bounded by the root provider: each provider creates and manages a separate instance.",
+          "point": "Chooses the option saying each `BuildServiceProvider` call creates a separate root provider with its own singleton set.",
           "marks": 1
         }
       ],
-      "model": "No. Each root provider owns a separate singleton instance and disposes only the instance it owns.",
+      "model": "**Option 3.** `AddSingleton` means one instance per root provider and registration, not one per process. Calling `BuildServiceProvider` during registration creates a second container, which has its own singleton cache, so it creates a second `Clock`.",
       "source": {
         "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md",
-        "heading": "Questions"
+        "heading": "Pitfalls"
       },
       "objective": "singleton-scope",
       "goal": "explain"
@@ -35,22 +38,22 @@
     {
       "id": "c2",
       "type": "short",
-      "prompt": "A static `Lazy<Counter>` uses its default thread-safe initialization to expose one shared counter. Multiple threads call a method that increments an ordinary integer field using `count++`, without synchronization. Explain how increments can be lost despite thread-safe initialization.",
+      "prompt": "A web API registers `RequestCounter` with `services.AddSingleton<RequestCounter>()`. The class has a plain `Dictionary<string, int>` field. Every incoming request calls a method that increments the count for the caller's API key, with no locking. A developer says: \"This is safe because the .NET DI container is thread-safe.\"\n\nExplain why this reasoning is wrong.",
       "marks": 2,
       "rubric": [
         {
-          "point": "Explains that thread-safe initialization protects creation of the shared instance, not later operations on its mutable fields.",
+          "point": "Explains that the container's thread safety covers creating and resolving the service, not the instance's own fields or dependencies.",
           "marks": 1
         },
         {
-          "point": "Explains that two threads can read the same count and write the same incremented value, losing an increment.",
+          "point": "Explains that one shared instance serves concurrent requests, so unsynchronized updates to the dictionary can race and corrupt the counts or the dictionary.",
           "marks": 1
         }
       ],
-      "model": "`Lazy<T>` protects initialization, not later field updates. Two threads can read the same count and both write the same incremented value, so one increment is lost.",
+      "model": "The container only guarantees that creating and resolving the service is thread-safe. It does nothing to protect the object's state. Because the service is a singleton, every concurrent request uses the same `RequestCounter`, so unlocked increments on the shared `Dictionary` can race, losing updates or corrupting the dictionary.\n\n*Optional:* the whole read–modify–write increment must be atomic. Either take a lock around the entire increment, or use `ConcurrentDictionary.AddOrUpdate(key, 1, (_, n) => n + 1)`. Swapping in `ConcurrentDictionary` but keeping `counts[key]++` still loses updates, because the read and the write are separate operations.",
       "source": {
         "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md",
-        "heading": "Singleton Lifetime in .NET"
+        "heading": "Pitfalls"
       },
       "objective": "singleton-scope",
       "goal": "explain"

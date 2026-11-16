@@ -6,7 +6,7 @@ priority: Medium
 status: In Progress
 publish: true
 created: "2026-07-09T18:37:04.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-16T17:10:31.241Z"
 published: "2026-07-10T14:39:34.308Z"
 ---
 
@@ -162,6 +162,7 @@ Every mutation must restore all four invariants before returning. Repairing inva
 >   C --> F(("15 B"))
 >   C --> G(("25 B"))
 > ```
+>
 > Every root-to-leaf path crosses exactly two black nodes (black-height 2), the root is black, and no red node has a red child.
 
 > [!EXAMPLE]- Insert fixup (C# sketch)
@@ -207,6 +208,7 @@ Every mutation must restore all four invariants before returning. Repairing inva
 >     _root.Color = Black; // Invariant 2, and the exit for the recolor-to-root case.
 > }
 > ```
+>
 > Delete follows the mirror shape but branches on a `nil`-or-black "double-black" node and its sibling's colors across four cases. Production code (`std::map`, `TreeMap`, `SortedSet<T>`) implements it in full rather than the sketch above.
 
 # References

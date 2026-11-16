@@ -4,7 +4,7 @@ tags: [FolderNote, MetricsIgnore]
 publish: true
 icon: home
 created: "2026-07-05T15:34:15.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-16T17:10:31.241Z"
 published: "2026-07-06T07:55:35.732Z"
 ---
 
@@ -69,8 +69,8 @@ return function TopicDashboard() {
   };
 
   // Topics are the direct-child folders of ROOT — their FolderNote sits two path
-  // segments below ROOT (ROOT/<Folder>/<name>.md). Title, colour, icon, and
-  // order come from that note and its frontmatter, so there is no hard-coded
+  // segments below ROOT (ROOT/<Folder>/<name>.md). Title, summary, colour, icon,
+  // and order come from that note and its frontmatter, so there is no hard-coded
   // topic list to keep in sync.
   const isTopicHub = (p) =>
     hasTag(p, "FolderNote") &&
@@ -91,6 +91,7 @@ return function TopicDashboard() {
       return {
         fn,
         title: fn.$name,
+        summary: firstString(fn.value("summary")),
         rgb,
         iconSvg,
         ...statsFor(dir),
@@ -98,7 +99,7 @@ return function TopicDashboard() {
     });
 
   // Balance complete rows in topic order: ten desktop cards form 3–4–3.
-  // Intrinsic row heights let every title and progress footer fit.
+  // Intrinsic row heights let every title, summary, and progress footer fit.
   const cards = baseCards;
   const bentoFor = (minSpan) => {
     const tiles = [];
@@ -183,6 +184,7 @@ return function TopicDashboard() {
 .dc-topic-title { display: flex; gap: 0.6rem; align-items: center; line-height: 1.25; }
 .dc-topic-chip { display: grid; place-items: center; flex: 0 0 auto; width: 2.25rem; height: 2.25rem; border-radius: 0.625rem; background: rgba(var(--topic-rgb), 0.13); color: rgb(var(--topic-rgb)); }
 .dc-topic-chip svg { display: block; width: 1.3rem; height: 1.3rem; }
+.dc-topic-dashboard p.dc-topic-summary { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; line-height: 1.45; overflow-wrap: anywhere; }
 .dc-topic-spacer { flex: 1 0 auto; min-height: 0.55em; }
 .dc-topic-foot { display: flex; flex-direction: column; gap: 4px; }
 .dc-topic-cap { font-size: 0.8125rem; line-height: 1.3; font-variant-numeric: tabular-nums; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0.5rem; color: var(--text-muted, var(--darkgray, #5f6b7a)); }
@@ -297,6 +299,7 @@ p.dc-progress-note { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray
                 <span class="dc-topic-chip" dangerouslySetInnerHTML={{ __html: c.iconSvg }} />
                 <span class="db-card-title">{c.title}</span>
               </div>
+              {c.summary ? <p class="dc-topic-summary">{c.summary}</p> : null}
               <div class="dc-topic-spacer" />
               <div class="dc-topic-foot">
                 <div class="dc-topic-cap"><span>{plural(c.total, "note")}</span>{" "}<strong>{c.pct}%</strong></div>

@@ -3592,10 +3592,10 @@
         "costCalls": 3
       },
       "Other|marker|codex|gpt-6.1-sol": {
-        "calls": 11,
-        "input": 418291,
-        "output": 4624,
-        "cacheRead": 80512,
+        "calls": 14,
+        "input": 540869,
+        "output": 6888,
+        "cacheRead": 102528,
         "cacheWrite": 0,
         "costUsd": 0,
         "costCalls": 0
@@ -3610,13 +3610,13 @@
         "costCalls": 1
       },
       "Writing lessons|writer|claude-code|claude-opus-5-5": {
-        "calls": 6,
-        "input": 38,
-        "output": 25934,
-        "cacheRead": 583254,
-        "cacheWrite": 328723,
-        "costUsd": 3.2652676,
-        "costCalls": 6
+        "calls": 9,
+        "input": 62,
+        "output": 40666,
+        "cacheRead": 1009732,
+        "cacheWrite": 477104,
+        "costUsd": 4.8323472,
+        "costCalls": 9
       }
     }
   },
@@ -3840,7 +3840,7 @@
       "browsing|": 7.9,
       "planning|": 1.1,
       "planning|AI & ML": 26.3,
-      "lessons|AI & ML": 116.5
+      "lessons|AI & ML": 166.4
     }
   },
   "statistics": {
@@ -4847,7 +4847,7 @@
           "browsing|": 7.9,
           "planning|": 1.1,
           "planning|AI & ML": 26.3,
-          "lessons|AI & ML": 116.5
+          "lessons|AI & ML": 166.4
         }
       },
       "usage": {
@@ -5794,10 +5794,10 @@
             "costCalls": 3
           },
           "Other|marker|codex|gpt-6.1-sol": {
-            "calls": 11,
-            "input": 418291,
-            "output": 4624,
-            "cacheRead": 80512,
+            "calls": 14,
+            "input": 540869,
+            "output": 6888,
+            "cacheRead": 102528,
             "cacheWrite": 0,
             "costUsd": 0,
             "costCalls": 0
@@ -5812,13 +5812,13 @@
             "costCalls": 1
           },
           "Writing lessons|writer|claude-code|claude-opus-5-5": {
-            "calls": 6,
-            "input": 38,
-            "output": 25934,
-            "cacheRead": 583254,
-            "cacheWrite": 328723,
-            "costUsd": 3.265268,
-            "costCalls": 6
+            "calls": 9,
+            "input": 62,
+            "output": 40666,
+            "cacheRead": 1009732,
+            "cacheWrite": 477104,
+            "costUsd": 4.832347,
+            "costCalls": 9
           }
         }
       }

@@ -7,6 +7,7 @@
     "status": "multitext",
     "level": "multitext",
     "aliases": "aliases",
-    "cssclasses": "multitext"
+    "cssclasses": "multitext",
+    "summary": "text"
   }
 }

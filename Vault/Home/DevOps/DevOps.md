@@ -10,8 +10,9 @@ priority: High
 level: ["4"]
 status: In Progress
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-16T17:10:31.241Z"
 published: "2026-07-08T13:28:37.344Z"
+summary: "Automation, observability, and delivery practices that move changes to production safely."
 ---
 
 DevOps shortens the path from a code change to production without giving up control of risk. Automation removes avoidable variation, observability exposes what the change did, and service ownership keeps production feedback with the team that can act on it. A healthy delivery system makes the normal path repeatable and the recovery path routine.

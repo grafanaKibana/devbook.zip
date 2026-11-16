@@ -6,7 +6,7 @@ priority: Medium
 status: In Progress
 publish: true
 created: "2026-07-09T18:37:04.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-16T17:10:31.241Z"
 published: "2026-07-10T14:39:34.305Z"
 ---
 
@@ -278,6 +278,7 @@ Rotation-case selection is the common implementation failure under `|balance| â‰
 >     }
 > }
 > ```
+>
 > `Rebalance` is applied to every node on the way back up the recursion. Deletion reuses the same `Recompute` + `Rebalance` pair. Because it can shorten a subtree, the rebalancing must continue past the first fix rather than stopping like insertion does.
 
 # References
