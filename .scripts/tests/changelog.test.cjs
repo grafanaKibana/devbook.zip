@@ -68,8 +68,19 @@ function fixture(t) {
 dotnet() {
   if [[ "$1" == --version ]]; then printf '10.0.100\\n'; return; fi
   printf 'dotnet %s\\n' "$*" >> "$TEST_CALLS"
-  if [[ "$*" == *ValidateVault.cs* ]]; then
-    git show :Vault/Home/Changelog.md > "$TEST_VALIDATED_CHANGELOG" 2>/dev/null || true
+  if [[ "$*" == *SyncFolderRollupFrontmatter.cs* ]]; then
+    if [[ -n "\${TEST_ROLLUP_WARNING:-}" ]]; then printf '%s\\n' "$TEST_ROLLUP_WARNING"; fi
+    if [[ "\${TEST_ROLLUP_FAILURE:-}" == 1 ]]; then return 1; fi
+    while [[ $# -gt 0 ]]; do
+      if [[ "$1" == --changed-files-file ]]; then
+        shift
+        if [[ "\${TEST_ROLLUP_MISSING:-}" == 1 ]]; then rm -f "$1";
+        elif [[ -n "\${TEST_ROLLUP_REPORT:-}" ]]; then cat "$TEST_ROLLUP_REPORT" > "$1";
+        else : > "$1"; fi
+        break
+      fi
+      shift
+    done
   fi
 }
 python3() { PATH="$TEST_BIN:$PATH" "$TEST_PYTHON" "$@"; }
@@ -97,7 +108,6 @@ node() { printf 'learn-check\\n' >> "$TEST_CALLS"; }
     TEST_PYTHON: python.stdout.trim(),
     TEST_CALLS: path.join(root, "calls.log"),
     TEST_RELEASES: path.join(root, "releases.json"),
-    TEST_VALIDATED_CHANGELOG: path.join(root, "validated-changelog.md"),
   };
   return {
     root,
@@ -152,7 +162,7 @@ test("release API failure leaves the generated source untouched", (t) => {
 });
 
 for (const source of ["Vault/Home/Note.md", "Vault/Assets/example.png"]) {
-  test(`pre-commit stages refreshed Changelog before validating a staged ${source.endsWith(".md") ? "note" : "asset"}`, (t) => {
+  test(`pre-commit stages refreshed Changelog and leaves judging to CI for a staged ${source.endsWith(".md") ? "note" : "asset"}`, (t) => {
     const f = fixture(t);
     f.write(source, "Changed source.\n");
     f.git("add", source);
@@ -160,12 +170,9 @@ for (const source of ["Vault/Home/Note.md", "Vault/Assets/example.png"]) {
     assert.equal(result.status, 0, result.stderr);
     assert.match(f.read(CHANGELOG), /## v2\.24\.3/);
     assert.equal(f.git("show", `:${CHANGELOG}`), f.read(CHANGELOG));
-    assert.equal(f.read("validated-changelog.md"), f.read(CHANGELOG));
     assert.match(f.calls(), /SyncFolderRollupFrontmatter\.cs/);
     assert.match(f.calls(), /GenerateRoadmap\.cs/);
-    assert.ok(
-      f.calls().indexOf("gh api") < f.calls().indexOf("ValidateVault.cs"),
-    );
+    assert.doesNotMatch(f.calls(), /ValidateVault\.cs|learn-check/);
     assert.equal(f.git("diff", "--name-only", "--", CHANGELOG), "");
   });
 }
@@ -222,9 +229,62 @@ test("pre-commit stages a newly generated Changelog when the page is absent from
   assert.equal(result.status, 0, result.stderr);
   assert.match(f.read(CHANGELOG), /## v2\.24\.3/);
   assert.equal(f.git("show", `:${CHANGELOG}`), f.read(CHANGELOG));
-  assert.equal(f.read("validated-changelog.md"), f.read(CHANGELOG));
   assert.ok(
     f.git("diff", "--cached", "--name-status").includes(`A\t${CHANGELOG}`),
   );
   assert.equal(f.git("diff", "--name-only", "--", CHANGELOG), "");
 });
+
+for (const changed of ["Vault/Home/Folder with spaces.md", "Vault/Home/Line\nbreak.md", "Vault/Home/[literal].md"]) {
+  test(`rollup report separates diagnostics from literal path ${JSON.stringify(changed)}`, (t) => {
+    const f = fixture(t);
+    f.write("Vault/Home/Note.md", "Changed source.\n");
+    f.git("add", "Vault/Home/Note.md");
+    f.write(changed, "Actual rollup result.\n");
+    f.write("Vault/Home/l.md", "Unrelated literal-match candidate.\n");
+    f.write("rollup.paths", Buffer.from(changed + "\0"));
+    const result = f.hook({ TEST_ROLLUP_WARNING: "warning NU1903: fixture diagnostic", TEST_ROLLUP_REPORT: path.join(f.root, "rollup.paths") });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /warning NU1903: fixture diagnostic/);
+    assert.equal(f.git("show", `:${changed}`), "Actual rollup result.\n");
+    assert.equal(f.git("diff", "--cached", "--name-only", "-z").includes("Vault/Home/l.md\0"), false);
+  });
+}
+
+for (const report of ["Vault/Home/Extra.md", "Vault/Home/Extra.md\0../README.md\0", "Vault/Home/Extra.md\0Vault/Home/../Assets/escaped.md\0", "Vault/Home/Extra.md\0\0"]) {
+  test(`invalid rollup report blocks before staging any report paths: ${JSON.stringify(report)}`, (t) => {
+    const f = fixture(t);
+    f.write("Vault/Home/Note.md", "Changed source.\n");
+    f.git("add", "Vault/Home/Note.md");
+    f.write("Vault/Home/Extra.md", "Unstaged rollup result.\n");
+    f.write("rollup.paths", Buffer.from(report));
+    const result = f.hook({ TEST_ROLLUP_REPORT: path.join(f.root, "rollup.paths") });
+    assert.notEqual(result.status, 0);
+    assert.equal(f.git("diff", "--cached", "--name-only", "-z").includes("Vault/Home/Extra.md\0"), false);
+    assert.doesNotMatch(f.calls(), /ValidateVault\.cs/);
+  });
+}
+
+for (const failure of ["TEST_ROLLUP_FAILURE", "TEST_ROLLUP_MISSING"]) {
+  test(`rollup ${failure} remains blocking`, (t) => {
+    const f = fixture(t);
+    f.write("Vault/Home/Note.md", "Changed source.\n");
+    f.git("add", "Vault/Home/Note.md");
+    const result = f.hook({ [failure]: "1" });
+    assert.notEqual(result.status, 0);
+    assert.doesNotMatch(f.calls(), /ValidateVault\.cs/);
+  });
+}
+
+for (const failure of [false, true]) {
+  test(`private rollup report is cleaned after ${failure ? "failure" : "success"}`, (t) => {
+    const f = fixture(t);
+    const temporary = path.join(f.root, "owned-tmp");
+    fs.mkdirSync(temporary);
+    f.write("Vault/Home/Note.md", "Changed source.\n");
+    f.git("add", "Vault/Home/Note.md");
+    const result = f.hook({ TMPDIR: temporary, ...(failure ? { TEST_ROLLUP_FAILURE: "1" } : {}) });
+    assert.equal(result.status === 0, !failure);
+    assert.deepEqual(fs.readdirSync(temporary).filter((name) => name.startsWith("devbook-rollup.")), []);
+  });
+}

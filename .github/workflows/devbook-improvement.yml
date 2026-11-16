@@ -3,15 +3,6 @@ name: DevBook Improvement
 on:
   schedule:
     - cron: "23 */6 * * *"
-  pull_request:
-    paths:
-      - .github/workflows/devbook-improvement.yml
-      - .github/workflows/devbook-improvement-feedback.yml
-      - .github/devbook-improvement.json
-      - .scripts/DevBook.Tooling/**
-      - .scripts/DevBook.Tooling.Tests/**
-      - .scripts/*.slnx
-      - .scripts/global.json
   issue_comment:
     types: [created, edited]
   workflow_run:
@@ -20,11 +11,11 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: Credential-free demo/fixture, selection, or protected maintenance
+        description: Credential-free demo, selection, or protected maintenance
         required: true
         default: demo
         type: choice
-        options: [demo, dry-run, apply, fixture]
+        options: [demo, dry-run, apply]
       model:
         description: Exact Claude model identifier; no fallback is configured
         required: true
@@ -39,7 +30,7 @@ on:
 permissions:
   contents: read
 
-# Covers source work, rendering, and publication; never cancel an in-flight write.
+# Covers source work and publication; never cancel an in-flight write.
 concurrency:
   group: devbook-improvement
   cancel-in-progress: false
@@ -80,7 +71,6 @@ jobs:
 
   demo:
     if: >-
-      github.event_name == 'pull_request' ||
       (github.event_name == 'schedule' && (vars.DEVBOOK_IMPROVEMENT_ACTIVATED != 'true' || vars.DEVBOOK_IMPROVEMENT_SCHEDULE_ENABLED != 'true')) ||
       (github.event_name == 'workflow_dispatch' && (inputs.mode == 'demo' || (inputs.mode == 'dry-run' && inputs.with_model == false)))
     runs-on: ubuntu-latest
@@ -92,7 +82,7 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.100
-      - name: Test native core and run credential-free flow
+      - name: Run credential-free flow
         working-directory: .scripts
         env:
           MODEL: ${{ inputs.model || 'claude-sonnet-5-5' }}
@@ -100,7 +90,6 @@ jobs:
         run: |
           set -euo pipefail
           test "$(dotnet --version)" = 10.0.100
-          dotnet test DevBook.Tooling.slnx --configuration Release
           mode=demo
           if [ "$SELECT_ONLY" = true ]; then mode=dry-run; fi
           dotnet run --project DevBook.Tooling -- improvement --repo-root .. \
@@ -130,6 +119,7 @@ jobs:
     outputs:
       export_ready: ${{ steps.maintain.outputs.export_ready }}
       export_mode: ${{ steps.maintain.outputs.export_mode }}
+      request-artifact-id: ${{ steps.request-upload.outputs.artifact-id }}
     steps:
       - name: Check protected activation gates
         env:
@@ -200,7 +190,8 @@ jobs:
           path: artifacts/devbook-improvement
           if-no-files-found: warn
           overwrite: true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        id: request-upload
         if: steps.maintain.outputs.export_ready == 'true'
         with:
           name: devbook-export-request-${{ github.run_id }}
@@ -209,84 +200,31 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  render:
-    needs: maintenance
-    if: >-
-      always() && !cancelled() &&
-      (github.event_name == 'pull_request' ||
-      (github.event_name == 'workflow_dispatch' && inputs.mode == 'fixture') ||
-      (needs.maintenance.result == 'success' && needs.maintenance.outputs.export_ready == 'true' && needs.maintenance.outputs.export_mode == 'render'))
-    runs-on: macos-15
-    timeout-minutes: 20
-    outputs:
-      ready: ${{ steps.export.outputs.ready }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: 10.0.100
-      - uses: actions/download-artifact@v4
-        if: needs.maintenance.outputs.export_mode == 'render'
-        with:
-          name: devbook-export-request-${{ github.run_id }}
-          path: artifacts/request
-      - name: Install pinned genuine Obsidian desktop
-        env:
-          APP_ROOT: ${{ runner.temp }}/devbook-obsidian
-        run: |
-          set -euo pipefail
-          mkdir -p "$APP_ROOT/mount"
-          curl --fail --location --retry 2 \
-            https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.5/Obsidian-1.14.5.dmg \
-            --output "$APP_ROOT/Obsidian.dmg"
-          printf '%s  %s\n' be79e6410d80fa705218aa4e8cb24ce8418cf16e13be4036227a5659b1f6aab2 "$APP_ROOT/Obsidian.dmg" | shasum -a 256 --check
-          hdiutil attach "$APP_ROOT/Obsidian.dmg" -readonly -nobrowse -mountpoint "$APP_ROOT/mount"
-          trap 'hdiutil detach "$APP_ROOT/mount" || true' EXIT
-          ditto "$APP_ROOT/mount/Obsidian.app" "$APP_ROOT/Obsidian.app"
-          codesign --verify --deep --strict "$APP_ROOT/Obsidian.app"
-      - name: Render through isolated desktop profile
-        id: export
-        working-directory: .scripts
-        env:
-          EXPORT_MODE: ${{ needs.maintenance.outputs.export_mode == 'render' && 'render' || 'fixture' }}
-          APP_BUNDLE: ${{ runner.temp }}/devbook-obsidian/Obsidian.app
-          DEVBOOK_EXPORT_READ_TOKEN: ${{ needs.maintenance.outputs.export_mode == 'render' && github.token || '' }}
-        run: |
-          set -euo pipefail
-          test "$(dotnet --version)" = 10.0.100
-          if [ "$EXPORT_MODE" = fixture ]; then
-            dotnet run --project DevBook.Tooling -- export fixture --repo-root .. \
-              --app-bundle "$APP_BUNDLE" --output ../artifacts/export
-          else
-            dotnet run --project DevBook.Tooling -- export render --repo-root .. \
-              --request ../artifacts/request/export-request.json --app-bundle "$APP_BUNDLE" --output ../artifacts/export
-          fi
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: devbook-syncer-export-${{ github.run_id }}
-          path: artifacts/export
-          if-no-files-found: warn
-          retention-days: 7
-          overwrite: true
-
+  # The managed PR's own CI run (CI/CD) performs the one native export;
+  # publish collects that artifact instead of rendering the same head again.
   publish:
-    needs: [maintenance, render]
+    needs: maintenance
     if: >-
       always() && !cancelled() &&
       github.ref == 'refs/heads/main' &&
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'issue_comment' || github.event_name == 'workflow_run') &&
       needs.maintenance.result == 'success' && needs.maintenance.outputs.export_ready == 'true' &&
-      (needs.maintenance.outputs.export_mode == 'finalize' || (needs.render.result == 'success' && needs.render.outputs.ready == 'true'))
+      (needs.maintenance.outputs.export_mode == 'collect' || needs.maintenance.outputs.export_mode == 'finalize')
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
     environment:
       name: devbook-improvement-production
       deployment: false
+    env:
+      DEVBOOK_GITHUB_TOKEN: ${{ secrets.DEVBOOK_GITHUB_TOKEN }}
+      DEVBOOK_IMPROVEMENT_MODE: apply
+      DEVBOOK_IMPROVEMENT_ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
+      DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
+      DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED }}
+      DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED }}
     steps:
       - name: Verify trusted workflow and activation
         env:
@@ -302,25 +240,48 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.100
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          name: devbook-export-request-${{ github.run_id }}
+          artifact-ids: ${{ needs.maintenance.outputs.request-artifact-id }}
           path: artifacts/request
-      - uses: actions/download-artifact@v4
-        if: needs.maintenance.outputs.export_mode == 'render'
+          digest-mismatch: error
+      - name: Locate the managed PR's CI export
+        id: collect
+        if: needs.maintenance.outputs.export_mode == 'collect'
+        working-directory: .scripts
+        run: |
+          set -euo pipefail
+          test "$(dotnet --version)" = 10.0.100
+          dotnet run --project DevBook.Tooling -- export collect --repo-root .. \
+            --request ../artifacts/request/export-request.json
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: steps.collect.outputs.found == 'true'
         with:
-          name: devbook-syncer-export-${{ github.run_id }}
+          artifact-ids: ${{ steps.collect.outputs.artifact-id }}
+          run-id: ${{ steps.collect.outputs.run-id }}
+          github-token: ${{ github.token }}
           path: artifacts/export
-      - name: Publish generated files or resume exact-head validation
+          digest-mismatch: error
+      - name: Bind the complete native bundle bytes
+        id: bundle-digest
+        if: steps.collect.outputs.found == 'true'
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import { createHash } from 'node:crypto';
+          const sha = createHash('sha256').update(fs.readFileSync('artifacts/export/bundle.json')).digest('hex');
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `sha256=${sha}\n`);
+          JS
+      - name: Register native artifact or resume exact-source validation
+        if: needs.maintenance.outputs.export_mode == 'finalize' || steps.collect.outputs.found == 'true'
         working-directory: .scripts
         env:
           EXPORT_MODE: ${{ needs.maintenance.outputs.export_mode }}
-          DEVBOOK_GITHUB_TOKEN: ${{ secrets.DEVBOOK_GITHUB_TOKEN }}
-          DEVBOOK_IMPROVEMENT_MODE: apply
-          DEVBOOK_IMPROVEMENT_ACTIVATED: ${{ vars.DEVBOOK_IMPROVEMENT_ACTIVATED }}
-          DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_SUBSCRIPTION_ONLY_CONFIRMED }}
-          DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_USAGE_CREDITS_DISABLED_CONFIRMED }}
-          DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED: ${{ vars.DEVBOOK_IMPROVEMENT_PR_WORKFLOWS_CONFIRMED }}
+          DEVBOOK_EXPORT_ARTIFACT_ID: ${{ steps.collect.outputs.artifact-id }}
+          DEVBOOK_EXPORT_ARTIFACT_DIGEST: ${{ steps.collect.outputs.artifact-digest }}
+          DEVBOOK_EXPORT_BUNDLE_SHA256: ${{ steps.bundle-digest.outputs.sha256 }}
+          DEVBOOK_EXPORT_RUN_ID: ${{ steps.collect.outputs.run-id }}
+          DEVBOOK_EXPORT_RUN_ATTEMPT: ${{ steps.collect.outputs.run-attempt }}
         run: |
           set -euo pipefail
           test "$(dotnet --version)" = 10.0.100

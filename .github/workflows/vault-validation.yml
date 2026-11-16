@@ -1,19 +1,79 @@
-name: Vault Validation
+name: CI/CD
 
 on:
+  # Title edits and PR comments are handled by pr-rules.yml, so they never
+  # re-run the native export or the test suite.
   pull_request:
+    types: [opened, synchronize, reopened]
   push:
-    branches: [main]
+    branches: [stage, main]
   workflow_dispatch:
+    inputs:
+      mode:
+        description: Validate only or deploy an accepted protected branch
+        required: false
+        default: validate
+        type: choice
+        options: [validate, deploy]
 
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ (github.ref == 'refs/heads/stage' || github.ref == 'refs/heads/main') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'deploy')) && format('site-deploy-{0}', github.ref) || format('ci-{0}-{1}', github.run_id, github.run_attempt) }}
+  cancel-in-progress: false
+
+env:
+  VERCEL_CLI_VERSION: 65.16.0
+
 jobs:
+  site:
+    if: >-
+      github.event_name == 'pull_request' &&
+      (github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'stage')
+    uses: ./.github/workflows/site-check.yml
+    with:
+      source-sha: ${{ github.event.pull_request.head.sha }}
+
+  ci:
+    # Required check: the change exports, builds and passes validation.
+    # Manual validation must not shadow a successful required PR check with skipped.
+    name: ${{ github.event_name == 'pull_request' && (github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'stage') && 'ci' || 'ci-inactive' }}
+    needs: [site, validate, demo, fixture]
+    if: >-
+      always() && github.event_name == 'pull_request' &&
+      (github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'stage')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require export, build and validation to pass
+        env:
+          SITE_RESULT: ${{ needs.site.result }}
+          VALIDATE_RESULT: ${{ needs.validate.result }}
+          RELEVANT: ${{ needs.validate.outputs.improvement-relevant }}
+          DEMO_RESULT: ${{ needs.demo.result }}
+          FIXTURE_RESULT: ${{ needs.fixture.result }}
+        run: |
+          set -euo pipefail
+          test "$SITE_RESULT" = success || { echo '::error::The actual PR source must pass native export and Quartz build.'; exit 1; }
+          test "$VALIDATE_RESULT" = success || { echo '::error::Software and source validation must pass.'; exit 1; }
+          case "$RELEVANT" in
+            true) test "$DEMO_RESULT" = success && test "$FIXTURE_RESULT" = success ;;
+            false) test "$DEMO_RESULT" = skipped && test "$FIXTURE_RESULT" = skipped ;;
+            *) echo '::error::Improvement path relevance was not determined.'; exit 1 ;;
+          esac
+
   validate:
+    outputs:
+      improvement-relevant: ${{ steps.paths.outputs.relevant }}
+    if: >-
+      github.event_name == 'push' || github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - uses: actions/setup-node@v4
         with:
@@ -21,13 +81,43 @@ jobs:
           cache: npm
           cache-dependency-path: Web/package-lock.json
 
+      - name: Determine Improvement coverage for the exact PR diff
+        id: paths
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$BASE_SHA" "$HEAD_SHA"
+          git diff --name-only -z "$BASE_SHA...$HEAD_SHA" > "$RUNNER_TEMP/improvement-paths"
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const paths = fs.readFileSync(`${process.env.RUNNER_TEMP}/improvement-paths`, 'utf8').split('\0').filter(Boolean);
+          const exact = ['.github/workflows/devbook-improvement.yml', '.github/workflows/devbook-improvement-feedback.yml', '.github/devbook-improvement.json', '.scripts/global.json'];
+          const relevant = paths.some(path => exact.includes(path) || path.startsWith('.scripts/DevBook.Tooling/') || path.startsWith('.scripts/DevBook.Tooling.Tests/') || /^\.scripts\/[^/]+\.slnx$/.test(path));
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `relevant=${relevant}\n`);
+          JS
+
       - name: Install Web dependencies
         working-directory: Web
         run: npm ci
 
+      - name: Install locked Quartz plugins
+        working-directory: Web
+        run: |
+          npx quartz plugin install
+          git diff --exit-code -- quartz.lock.json
+
+      - name: Test publishing transformer
+        run: npm --prefix Web run test -- custom/transformers/publishing.test.ts
+
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.100
+
+      - name: Check generated agent configs match .rulesync
+        run: npx --yes rulesync@latest generate --check
 
       - name: Test note review hooks
         run: node --test .codex/hooks/tests/note-review-hooks.test.mjs
@@ -38,8 +128,8 @@ jobs:
       - name: Test changelog generation and pre-commit integration
         run: node --test .scripts/tests/changelog.test.cjs
 
-      - name: Test Preview deployment links
-        run: node --test .scripts/tests/preview-deployment-link.test.cjs
+      - name: Test artifact transport, deployment and workflow boundaries
+        run: node --test .scripts/tests/site-*.test.mjs
 
       - name: Test native tooling core
         working-directory: .scripts
@@ -52,3 +142,274 @@ jobs:
         run: |
           test "$(dotnet --version)" = 10.0.100
           dotnet run --no-cache --file DevBook.Tooling/Scripts/ValidateVault.cs -- --all --repo-root ..
+
+      - name: Check Learn source coverage
+        run: node .scripts/qard-learn-sync/check.cjs
+
+  demo:
+    needs: validate
+    if: github.event_name == 'pull_request' && needs.validate.outputs.improvement-relevant == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+      - name: Run credential-free flow
+        working-directory: .scripts
+        env:
+          MODEL: claude-sonnet-5-5
+        run: |
+          set -euo pipefail
+          test "$(dotnet --version)" = 10.0.100
+          dotnet run --project DevBook.Tooling -- improvement --repo-root .. \
+            --config .github/devbook-improvement.json --model "$MODEL" --demo \
+            --output-dir artifacts/devbook-improvement
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: devbook-improvement-${{ github.run_id }}
+          path: artifacts/devbook-improvement
+          if-no-files-found: warn
+          overwrite: true
+
+  fixture:
+    needs: validate
+    if: github.event_name == 'pull_request' && needs.validate.outputs.improvement-relevant == 'true'
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.100
+      - uses: ./.github/actions/obsidian
+        id: obsidian
+      - name: Render synthetic native fixture through isolated desktop profile
+        working-directory: .scripts
+        env:
+          APP_BUNDLE: ${{ steps.obsidian.outputs.app-bundle }}
+        run: |
+          set -euo pipefail
+          test "$(dotnet --version)" = 10.0.100
+          dotnet run --project DevBook.Tooling -- export fixture --repo-root .. \
+            --app-bundle "$APP_BUNDLE" --output ../artifacts/export
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: devbook-syncer-export-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/export/bundle.json
+          if-no-files-found: error
+          retention-days: 7
+
+  native:
+    needs: [validate]
+    if: >-
+      needs.validate.result == 'success' &&
+      (github.ref == 'refs/heads/stage' || github.ref == 'refs/heads/main') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.mode == 'deploy'))
+    uses: ./.github/workflows/site-check.yml
+    with:
+      source-sha: ${{ github.sha }}
+      build-site: false
+
+  package:
+    needs: native
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: ${{ github.ref_name == 'main' && 'Production' || 'Preview' }}
+      deployment: false
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
+      package-sha256: ${{ steps.package.outputs.sha256 }}
+    env:
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      TARGET: ${{ github.ref_name == 'main' && 'production' || 'preview' }}
+      SOURCE_SHA: ${{ github.sha }}
+      NATIVE_SHA256: ${{ needs.native.outputs.bundle-sha256 }}
+    steps:
+      - name: Check protected deployment setup
+        env:
+          READY: ${{ vars.DEVBOOK_ARTIFACT_DEPLOYMENT_READY }}
+          TOKEN_PRESENT: ${{ secrets.VERCEL_TOKEN != '' }}
+        run: |
+          set -euo pipefail
+          test "$READY" = true
+          test "$TOKEN_PRESENT" = true
+          test -n "$VERCEL_ORG_ID"
+          test -n "$VERCEL_PROJECT_ID"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          dotnet-version: 10.0.100
+      - name: Verify the reviewed Vercel organization and project before pull
+        run: node .scripts/site-pipeline.mjs configuration
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.native.outputs.artifact-id }}
+          path: ${{ runner.temp }}/native
+          digest-mismatch: error
+      - name: Verify native artifact and materialize generated inputs
+        working-directory: .scripts
+        env:
+          BUNDLE: ${{ runner.temp }}/native/bundle.json
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import { createHash } from 'node:crypto';
+          if (createHash('sha256').update(fs.readFileSync(process.env.BUNDLE)).digest('hex') !== process.env.NATIVE_SHA256) throw new Error('Native bundle digest mismatch');
+          JS
+          dotnet run --project DevBook.Tooling -- site verify --repo-root .. \
+            --expected-head "$SOURCE_SHA" --bundle "$BUNDLE" --extract
+      - name: Install build tools without deployment credentials
+        run: |
+          npm ci --prefix Web
+          npm install --global "vercel@$VERCEL_CLI_VERSION"
+      - name: Pull protected Vercel settings
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment="$TARGET" --git-branch="$GITHUB_REF_NAME"
+      - name: Remove pulled secrets before repository or plugin build
+        run: node .scripts/site-pipeline.mjs clean-env --target "$TARGET"
+      - name: Build the accepted source for its deployment target
+        run: |
+          set -euo pipefail
+          if [ "$TARGET" = production ]; then vercel build --prod; else vercel build; fi
+          node .scripts/site-pipeline.mjs marker --source "$SOURCE_SHA" --target "$TARGET" --native "$NATIVE_SHA256"
+      - name: Package only verified static Build Output
+        id: package
+        env:
+          OUTPUT: ${{ runner.temp }}/package/deployment.json
+        run: node .scripts/site-pipeline.mjs package --source "$SOURCE_SHA" --target "$TARGET" --native "$NATIVE_SHA256" --output "$OUTPUT"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        id: upload
+        with:
+          name: devbook-deployment-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/package/deployment.json
+          if-no-files-found: error
+          retention-days: 30
+
+  deploy:
+    needs: [native, package]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    environment:
+      name: ${{ github.ref_name == 'main' && 'Production' || 'Preview' }}
+      url: ${{ github.ref_name == 'main' && 'https://devbook.zip' || 'https://stage.devbook.zip' }}
+    env:
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      TARGET: ${{ github.ref_name == 'main' && 'production' || 'preview' }}
+      SOURCE_SHA: ${{ github.sha }}
+      NATIVE_SHA256: ${{ needs.native.outputs.bundle-sha256 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - name: Install pinned deployment CLI
+        run: npm install --global "vercel@$VERCEL_CLI_VERSION"
+      - name: Verify the reviewed Vercel organization and project before upload
+        run: node .scripts/site-pipeline.mjs configuration
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.package.outputs.artifact-id }}
+          path: ${{ runner.temp }}/package
+          digest-mismatch: error
+      - name: Verify the accepted source and package bytes before deployment
+        env:
+          PACKAGE: ${{ runner.temp }}/package/deployment.json
+          PACKAGE_SHA256: ${{ needs.package.outputs.package-sha256 }}
+        run: node .scripts/site-pipeline.mjs extract --source "$SOURCE_SHA" --target "$TARGET" --native "$NATIVE_SHA256" --bundle "$PACKAGE" --digest "$PACKAGE_SHA256"
+      - name: Upload the verified prebuilt deployment
+        id: create
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: node .scripts/site-pipeline.mjs deploy --source "$SOURCE_SHA" --target "$TARGET" --native "$NATIVE_SHA256"
+      - name: Request short-lived identity for protected site verification
+        id: http-identity
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const token = await core.getIDToken('https://github.com/grafanaKibana');
+            core.setSecret(token);
+            core.setOutput('token', token);
+      - name: Verify immutable build, recheck branch, publish and verify fixed URL
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_DEPLOYMENT_OIDC_TOKEN: ${{ steps.http-identity.outputs.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+          DEPLOYMENT: ${{ steps.create.outputs.deployment }}
+        run: node .scripts/site-pipeline.mjs publish --source "$SOURCE_SHA" --target "$TARGET" --native "$NATIVE_SHA256" --deployment "$DEPLOYMENT"
+
+  release:
+    needs: [deploy]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.deploy.result == 'success'
+    permissions:
+      contents: write
+    concurrency:
+      group: release
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute next version
+        id: version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # The merged PR's title decides a MAJOR (its `!`); commits decide the
+          # rest. Look the title up from the pushed merge commit.
+          TITLE=""
+          for _ in 1 2 3; do
+            TITLE=$(gh api "repos/$REPO/commits/$GITHUB_SHA/pulls" --jq '.[0].title // ""' 2>/dev/null || true)
+            [ -n "$TITLE" ] && break
+            sleep 5
+          done
+          echo "Merged PR title: ${TITLE:-<none>}"
+          bash .github/scripts/next-version.sh "$TITLE" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Generate release notes
+        if: steps.version.outputs.bump != 'none'
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --tag ${{ steps.version.outputs.next }} --unreleased --strip header -o RELEASE_NOTES.md
+
+      - name: Create tag + GitHub Release
+        if: steps.version.outputs.bump != 'none'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEXT: ${{ steps.version.outputs.next }}
+        run: |
+          set -euo pipefail
+          gh release create "$NEXT" \
+            --target "$GITHUB_SHA" \
+            --title "$NEXT" \
+            --notes-file RELEASE_NOTES.md \
+            --latest

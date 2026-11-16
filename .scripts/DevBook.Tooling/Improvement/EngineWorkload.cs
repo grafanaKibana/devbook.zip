@@ -416,7 +416,7 @@ public sealed partial class ImprovementEngine
         }
         response["publication"] = publication.Copy();
         response["status"] = publication.Str("status", "published");
-        if (publication["export_request"] is JsonObject export) { response["export_request"] = export.Copy(); response["export_mode"] = "render"; }
+        if (publication["export_request"] is JsonObject export) { response["export_request"] = export.Copy(); response["export_mode"] = "collect"; }
         saved["status"] = "published";
         JsonObject updated = await InitialStateAsync(cancellationToken);
         await SaveAsync(updated, "record focused publication handoff", cancellationToken);

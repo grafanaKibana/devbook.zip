@@ -14,6 +14,7 @@ internal sealed class DemoApi : IGitHubApi
     private readonly JsonArray inline = new();
     private readonly JsonArray validations = new();
     private int sequence;
+    private long titleRunId = 1;
     public string Repo { get; }
     public Dictionary<string, string> References { get; } = new();
     public JsonObject? Pr { get; private set; }
@@ -66,6 +67,25 @@ internal sealed class DemoApi : IGitHubApi
         return trees[commits.TryGetValue(sha, out JsonObject? commit) ? commit.Obj("tree").Str("sha") : sha];
     }
     public string Read(string path, string reference) => Encoding.UTF8.GetString(blobs[Tree(reference)[path].Sha]);
+    // The PR's CI run exports its current head; the bot collects that artifact instead of rendering.
+    private JsonObject CiRun()
+    {
+        JsonObject head = ViewPr().Obj("head");
+        return new JsonObject
+        {
+            ["id"] = 22, ["run_attempt"] = 1, ["status"] = "completed", ["conclusion"] = "success",
+            ["path"] = ".github/workflows/vault-validation.yml", ["event"] = "pull_request",
+            ["head_branch"] = head.Str("ref"), ["head_sha"] = head.Str("sha"), ["created_at"] = Runtime.Iso(),
+            ["repository"] = new JsonObject { ["full_name"] = Repo }, ["head_repository"] = new JsonObject { ["full_name"] = Repo }
+        };
+    }
+
+    private static JsonObject CiArtifact() => new()
+    {
+        ["id"] = 11, ["expired"] = false, ["name"] = "devbook-native-22-1", ["digest"] = "sha256:" + new string('a', 64),
+        ["workflow_run"] = new JsonObject { ["id"] = 22 }
+    };
+
     private JsonObject ViewPr()
     {
         JsonObject pr = Pr?.Copy() ?? throw new GitHubApiFailure("No fixture PR", 404);
@@ -215,6 +235,7 @@ internal sealed class DemoApi : IGitHubApi
         else if (route == "/pulls/1" && method == "PATCH")
         {
             UpdatedPrs++;
+            if (input.ContainsKey("body")) titleRunId++;
             foreach (KeyValuePair<string, JsonNode?> item in input)
             {
                 Pr![item.Key] = item.Value?.DeepClone();
@@ -259,8 +280,8 @@ internal sealed class DemoApi : IGitHubApi
             string sha = route.Split('/')[2];
             result = new JsonObject
             {
-                ["total_count"] = 3,
-                ["check_runs"] = new JsonArray(new[] { "pr-title", "major-approval", "validate" }.Select((name, index) => (JsonNode)new JsonObject
+                ["total_count"] = 4,
+                ["check_runs"] = new JsonArray(new[] { "pr-title", "ci", "major-approval", "validate" }.Select((name, index) => (JsonNode)new JsonObject
                 { ["id"] = index + 1, ["name"] = name, ["conclusion"] = "success", ["head_sha"] = sha }).ToArray())
             };
         }
@@ -268,14 +289,43 @@ internal sealed class DemoApi : IGitHubApi
         {
             result = new JsonObject { ["sha"] = route.Split('/')[2], ["statuses"] = new JsonArray() };
         }
+        else if (route == "/actions/artifacts/11")
+        {
+            result = CiArtifact();
+        }
+        else if (route == "/actions/runs/22/artifacts")
+        {
+            result = new JsonObject { ["artifacts"] = new JsonArray(CiArtifact()) };
+        }
+        else if (route == "/actions/runs/22/attempts/1")
+        {
+            result = CiRun();
+        }
         else if (route == "/actions/workflows/vault-validation.yml/dispatches")
         {
-            validations.Add(new JsonObject { ["head_branch"] = input.Str("ref"), ["head_sha"] = References[input.Str("ref")], ["conclusion"] = "success", ["created_at"] = Runtime.Iso() });
+            validations.Add(new JsonObject { ["event"] = "workflow_dispatch", ["path"] = ".github/workflows/vault-validation.yml",
+                ["repository"] = new JsonObject { ["full_name"] = Repo }, ["head_branch"] = input.Str("ref"), ["head_sha"] = References[input.Str("ref")], ["conclusion"] = "success", ["created_at"] = Runtime.Iso() });
             result = null;
         }
         else if (route == "/actions/workflows/vault-validation.yml/runs")
         {
-            result = new JsonObject { ["workflow_runs"] = validations.Copy() };
+            JsonArray runs = validations.Copy();
+            runs.Add(CiRun());
+            result = new JsonObject { ["workflow_runs"] = runs };
+        }
+        else if (route == "/actions/workflows/pr-rules.yml/runs")
+        {
+            string sha = Uri.UnescapeDataString(path.Split("head_sha=", StringSplitOptions.None)[1].Split('&')[0]);
+            result = new JsonObject
+            {
+                ["workflow_runs"] = new JsonArray(new JsonObject
+                {
+                    ["id"] = titleRunId,
+                    ["head_branch"] = ViewPr().Obj("head").Str("ref"), ["head_sha"] = sha,
+                    ["path"] = ".github/workflows/pr-rules.yml", ["event"] = "pull_request",
+                    ["repository"] = new JsonObject { ["full_name"] = Repo }, ["conclusion"] = "success"
+                })
+            };
         }
         else
         {
