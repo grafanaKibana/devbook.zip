@@ -108,7 +108,7 @@ The Questions page has one web renderer. Syncer may freeze the in-note Datacore 
 
 ## Deploy
 
-[DevBook CI/CD](../.github/workflows/vault-validation.yml) validates PRs and every accepted push to `stage` or `main`, then deploys: `stage` to Preview, `main` to Production followed by the release. Its required `ci` job passes only when the native export, Quartz build and validation succeed; [PR Rules](../.github/workflows/pr-rules.yml) owns the title-only `pr-title` check and major-version approval. Manual dispatch validates only; `mode=deploy` deploys a protected branch and never releases.
+[CI/CD](../.github/workflows/vault-validation.yml) validates PRs and every accepted push to `stage` or `main`, then deploys: `stage` to Preview, `main` to Production followed by the release. Its required `ci` job passes only when the native export, Quartz build and validation succeed; [PR Rules](../.github/workflows/pr-rules.yml) owns the title-only `pr-title` check and major-version approval. Manual dispatch validates only; `mode=deploy` deploys a protected branch and never releases.
 
 Deployment rebuilds the accepted commit through the same native export flow; it never deploys a PR artifact. The file-based `framework: null` selects Vercel’s static “Other” preset. Target-specific `vercel pull`/`vercel build` preserve `cleanUrls`, redirects and the root `vercel.json` settings. Pulled environment files are cleared before repository or plugin code runs; this static build has no secret build variables. Vercel credentials reach only authenticated CLI/API steps, and deployment also requires `DEVBOOK_ARTIFACT_DEPLOYMENT_READY=true`.
 

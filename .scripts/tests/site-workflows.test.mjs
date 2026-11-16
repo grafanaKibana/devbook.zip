@@ -172,7 +172,7 @@ const event = (event_name, ref = "refs/heads/stage", mode) => ({
 
 test("unified delivery admits only protected pushes and explicit deploy dispatches", () => {
   const ci = workflow("vault-validation")
-  assert.equal(ci.name, "DevBook CI/CD")
+  assert.equal(ci.name, "CI/CD")
   assert.deepEqual(ci.on.workflow_dispatch.inputs.mode.options, ["validate", "deploy"])
   assert.equal(ci.on.workflow_dispatch.inputs.mode.default, "validate")
   assert.deepEqual(Object.keys(workflow("site-check").on), ["workflow_call"])

@@ -1,4 +1,4 @@
-name: DevBook CI/CD
+name: CI/CD
 
 on:
   # Title edits and PR comments are handled by pr-rules.yml, so they never

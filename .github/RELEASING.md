@@ -1,7 +1,7 @@
 # Releasing
 
 Releases are **fully automated**. Every change reaches `main` through a
-**merged pull request**; [DevBook CI/CD](workflows/vault-validation.yml) validates
+**merged pull request**; [CI/CD](workflows/vault-validation.yml) validates
 the accepted `main` commit, builds and deploys Production, then computes the next
 version and publishes a GitHub Release + tag after deployment verification succeeds. Direct pushes to `main` are blocked.
 
@@ -17,7 +17,7 @@ merges are disabled so commits survive both hops.
 2. Open a PR into `stage` (`gh pr create --base stage`). The **PR title** must
    follow the convention (below) — the `pr-title` job in
    [`PR Rules`](workflows/pr-rules.yml) checks only the title. The `ci` job in
-   [`DevBook CI/CD`](workflows/vault-validation.yml) passes only when the native
+   [`CI/CD`](workflows/vault-validation.yml) passes only when the native
    export, Quartz build and validation all succeed. Both are required on PRs into
    `stage` and `main`.
 3. **Merge it** manually with a merge commit after required checks pass.
@@ -31,7 +31,7 @@ merges are disabled so commits survive both hops.
    promotion PR's title (gated — see below).
 5. After the accepted `main` commit passes validation, native export, Production
    build/deployment and immutable/fixed-URL smoke checks, the `release` job in
-   [DevBook CI/CD](workflows/vault-validation.yml) reads the merged PR's title
+   [CI/CD](workflows/vault-validation.yml) reads the merged PR's title
    (for a `!` major) and commits since the last tag (for minor/patch), bumps the
    version, tags it and publishes the GitHub Release. Failed or incomplete
    Production verification blocks release.
