@@ -21,6 +21,7 @@
   ],
   "required_check_contexts": [
     "pr-title",
+    "ci",
     "major-approval"
   ],
   "validator_commands": [
@@ -34,27 +35,6 @@
       "--all",
       "--repo-root",
       ".."
-    ],
-    [
-      "dotnet",
-      "test",
-      "DevBook.Tooling.Tests/DevBook.Tooling.Tests.csproj",
-      "--configuration",
-      "Release"
-    ],
-    [
-      "node",
-      "--test",
-      ".codex/hooks/tests/note-review-hooks.test.mjs"
-    ],
-    [
-      "npm",
-      "--prefix",
-      "Web",
-      "run",
-      "test",
-      "--",
-      "custom/transformers/publishing.test.ts"
     ]
   ],
   "content_quality": {

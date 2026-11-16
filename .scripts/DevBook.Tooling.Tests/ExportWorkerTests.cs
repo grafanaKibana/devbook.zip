@@ -718,18 +718,22 @@ public sealed class ExportWorkerTests
             {
                 response = new JsonObject { ["sha"] = Head, ["statuses"] = new JsonArray() };
             }
-            else if (method == "GET" && path.StartsWith("/actions/workflows/vault-validation.yml/runs", StringComparison.Ordinal))
+            else if (method == "GET" && path.StartsWith("/actions/workflows/pr-rules.yml/runs", StringComparison.Ordinal))
             {
                 var run = new JsonObject
                 {
                     ["id"] = PrTitleRunId,
                     ["head_branch"] = ExportWorkerbranch, ["head_sha"] = Head,
-                    ["event"] = "pull_request", ["path"] = ".github/workflows/vault-validation.yml",
+                    ["event"] = "pull_request", ["path"] = ".github/workflows/pr-rules.yml",
                     ["repository"] = new JsonObject { ["full_name"] = Repo },
                     ["conclusion"] = ChecksReady && (!bodyTriggered || !BodyCheckPending) ? CheckConclusion : "pending"
                 };
                 foreach ((string key, JsonNode? value) in PrTitleOverride) run[key] = value?.DeepClone();
-                var runs = new JsonArray(run);
+                response = new JsonObject { ["workflow_runs"] = new JsonArray(run) };
+            }
+            else if (method == "GET" && path.StartsWith("/actions/workflows/vault-validation.yml/runs", StringComparison.Ordinal))
+            {
+                var runs = new JsonArray();
                 if (!ValidationMissing && Dispatches > 0)
                 {
                     var validation = new JsonObject

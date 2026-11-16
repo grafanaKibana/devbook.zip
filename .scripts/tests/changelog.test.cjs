@@ -82,9 +82,6 @@ dotnet() {
       shift
     done
   fi
-  if [[ "$*" == *ValidateVault.cs* ]]; then
-    git show :Vault/Home/Changelog.md > "$TEST_VALIDATED_CHANGELOG" 2>/dev/null || true
-  fi
 }
 python3() { PATH="$TEST_BIN:$PATH" "$TEST_PYTHON" "$@"; }
 node() { printf 'learn-check\\n' >> "$TEST_CALLS"; }
@@ -111,7 +108,6 @@ node() { printf 'learn-check\\n' >> "$TEST_CALLS"; }
     TEST_PYTHON: python.stdout.trim(),
     TEST_CALLS: path.join(root, "calls.log"),
     TEST_RELEASES: path.join(root, "releases.json"),
-    TEST_VALIDATED_CHANGELOG: path.join(root, "validated-changelog.md"),
   };
   return {
     root,
@@ -166,7 +162,7 @@ test("release API failure leaves the generated source untouched", (t) => {
 });
 
 for (const source of ["Vault/Home/Note.md", "Vault/Assets/example.png"]) {
-  test(`pre-commit stages refreshed Changelog before validating a staged ${source.endsWith(".md") ? "note" : "asset"}`, (t) => {
+  test(`pre-commit stages refreshed Changelog and leaves judging to CI for a staged ${source.endsWith(".md") ? "note" : "asset"}`, (t) => {
     const f = fixture(t);
     f.write(source, "Changed source.\n");
     f.git("add", source);
@@ -174,12 +170,9 @@ for (const source of ["Vault/Home/Note.md", "Vault/Assets/example.png"]) {
     assert.equal(result.status, 0, result.stderr);
     assert.match(f.read(CHANGELOG), /## v2\.24\.3/);
     assert.equal(f.git("show", `:${CHANGELOG}`), f.read(CHANGELOG));
-    assert.equal(f.read("validated-changelog.md"), f.read(CHANGELOG));
     assert.match(f.calls(), /SyncFolderRollupFrontmatter\.cs/);
     assert.match(f.calls(), /GenerateRoadmap\.cs/);
-    assert.ok(
-      f.calls().indexOf("gh api") < f.calls().indexOf("ValidateVault.cs"),
-    );
+    assert.doesNotMatch(f.calls(), /ValidateVault\.cs|learn-check/);
     assert.equal(f.git("diff", "--name-only", "--", CHANGELOG), "");
   });
 }
@@ -236,7 +229,6 @@ test("pre-commit stages a newly generated Changelog when the page is absent from
   assert.equal(result.status, 0, result.stderr);
   assert.match(f.read(CHANGELOG), /## v2\.24\.3/);
   assert.equal(f.git("show", `:${CHANGELOG}`), f.read(CHANGELOG));
-  assert.equal(f.read("validated-changelog.md"), f.read(CHANGELOG));
   assert.ok(
     f.git("diff", "--cached", "--name-status").includes(`A\t${CHANGELOG}`),
   );

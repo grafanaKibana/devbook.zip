@@ -25,7 +25,7 @@ public static partial class Runtime
     public const string StateBranch = "maintenance/devbook-improvement-state";
     public const string StatePath = ".devbook-improvement/state.json";
     public static readonly string[] JournalPhases = ["prepared", "commit_created", "branch_updated", "pr_updated", "checks_verified", "committed"];
-    public static readonly string[] DefaultRequiredChecks = ["pr-title", "major-approval"];
+    public static readonly string[] DefaultRequiredChecks = ["pr-title", "ci", "major-approval"];
 
     [GeneratedRegex(@"<!-- devbook-improvement:topic=(?<topic>[a-z0-9-]+);generation=(?<generation>\d+) -->", RegexOptions.CultureInvariant)]
     private static partial Regex MarkerPattern();
@@ -175,8 +175,9 @@ public static partial class Runtime
     public static async Task<string> VaultValidationForShaAsync(IGitHubApi api, string branch, string sha, CancellationToken cancellationToken = default) =>
         WorkflowConclusion(await WorkflowRunForShaAsync(api, "vault-validation.yml", branch, sha, ["workflow_dispatch"], cancellationToken));
 
+    // PR Rules re-runs on description edits, so a managed-body update yields a fresh run to wait for.
     public static Task<JsonObject> PrTitleRunForShaAsync(IGitHubApi api, string branch, string sha, CancellationToken cancellationToken = default) =>
-        WorkflowRunForShaAsync(api, "vault-validation.yml", branch, sha, ["pull_request"], cancellationToken);
+        WorkflowRunForShaAsync(api, "pr-rules.yml", branch, sha, ["pull_request"], cancellationToken);
 
     private static string WorkflowConclusion(JsonObject run) => run.Str("conclusion", run.Str("status", "unknown"));
 
