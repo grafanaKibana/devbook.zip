@@ -17223,11 +17223,11 @@
     "version": 1,
     "id": "33a5bcd3129e4228a0be70053399144d",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-16T22:21:57.553782Z",
-    "elapsed_seconds": 569.3174928000007,
+    "elapsed_seconds": 591.9603700000007,
     "calls_reserved": 15,
-    "responses_received": 14,
+    "responses_received": 15,
     "attempted_paths": [
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
@@ -18960,7 +18960,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-16T22:31:26.870851Z",
+    "checkpoint_at": "2026-11-16T22:31:49.513728Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -52105,6 +52105,125 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-16T22:31:22.075320Z"
+    "prepared_at": "2026-11-16T22:31:22.075320Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+            "verdict": "CLEAN",
+            "summary": "Whole-note read: the ANN-versus-exact framing, index descriptions, tuning knobs, filtering/authorization separation, operations guidance, system table, pitfalls and tradeoff table are accurate and mutually consistent. Prose is direct and decided, and both existing cards test one task each. No concrete defect justifies an edit.",
+            "page_type": "Concept — optional Questions/References present; Qard cards carry protected IDs; mermaid fence has a language identifier.",
+            "current_text_evidence": [
+              {
+                "quote": "Raising `ef_search` explores more of the graph and trades latency for recall.",
+                "line_start": 38,
+                "reason": "HNSW query-effort parameter is described correctly and consistently with the later pitfall and tradeoff sections."
+              },
+              {
+                "quote": "semantic similarity cannot enforce it, so tenant and ACL boundaries hold only when disallowed vectors are excluded",
+                "line_start": 49,
+                "reason": "Correctly separates the recall/cost choice of pre-filtering from the authorization requirement."
+              },
+              {
+                "quote": "**Memory budgeting** starts with roughly `N × dimensions × 4 bytes` for float32 vectors, plus graph overhead.",
+                "line_start": 62,
+                "reason": "The float32 memory estimate is correct and ties to the PQ/disk-index decision."
+              },
+              {
+                "quote": "Missed neighbors raise no error.",
+                "line_start": 135,
+                "reason": "The ANN card answer preserves the mechanism, recall measurement against exact ground truth, and the caveat that N × d is arithmetic work, not wall-clock time."
+              },
+              {
+                "quote": "> [!qard]- What role does a vector database play in a RAG system?",
+                "line_start": 124,
+                "reason": "Single bounded recall task with a neutral, direct answer and an answer-side primary source."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: index types, filtering, operations and pitfalls all serve one coherent topic of operating an ANN vector store, and none is independently reusable enough to justify a separate note.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "Independent full-note review found no factual, structural, question-quality or identity-metadata defect; keeping the note unchanged is justified and no edits were proposed.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+          "citation_index": 3,
+          "reported_line_start": 135,
+          "resolved_line_start": 134
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md": "e1f40e68e9aa9da6abb3afa234e6a649c7875015a268d209c98563c57a023c59"
+      },
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+          "verdict": "CLEAN",
+          "summary": "Whole-note read: the ANN-versus-exact framing, index descriptions, tuning knobs, filtering/authorization separation, operations guidance, system table, pitfalls and tradeoff table are accurate and mutually consistent. Prose is direct and decided, and both existing cards test one task each. No concrete defect justifies an edit.",
+          "page_type": "Concept — optional Questions/References present; Qard cards carry protected IDs; mermaid fence has a language identifier.",
+          "current_text_evidence": [
+            {
+              "quote": "Raising `ef_search` explores more of the graph and trades latency for recall.",
+              "line_start": 38,
+              "reason": "HNSW query-effort parameter is described correctly and consistently with the later pitfall and tradeoff sections."
+            },
+            {
+              "quote": "semantic similarity cannot enforce it, so tenant and ACL boundaries hold only when disallowed vectors are excluded",
+              "line_start": 49,
+              "reason": "Correctly separates the recall/cost choice of pre-filtering from the authorization requirement."
+            },
+            {
+              "quote": "**Memory budgeting** starts with roughly `N × dimensions × 4 bytes` for float32 vectors, plus graph overhead.",
+              "line_start": 62,
+              "reason": "The float32 memory estimate is correct and ties to the PQ/disk-index decision."
+            },
+            {
+              "quote": "Missed neighbors raise no error.",
+              "line_start": 134,
+              "reason": "The ANN card answer preserves the mechanism, recall measurement against exact ground truth, and the caveat that N × d is arithmetic work, not wall-clock time."
+            },
+            {
+              "quote": "> [!qard]- What role does a vector database play in a RAG system?",
+              "line_start": 124,
+              "reason": "Single bounded recall task with a neutral, direct answer and an answer-side primary source."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: index types, filtering, operations and pitfalls all serve one coherent topic of operating an ANN vector store, and none is independently reusable enough to justify a separate note.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "Independent full-note review found no factual, structural, question-quality or identity-metadata defect; keeping the note unchanged is justified and no edits were proposed.",
+      "change_checks": []
+    }
   }
 }
