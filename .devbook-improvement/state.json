@@ -17165,15 +17165,16 @@
     "version": 1,
     "id": "33a5bcd3129e4228a0be70053399144d",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-16T22:21:57.553782Z",
-    "elapsed_seconds": 264.05264229999995,
+    "elapsed_seconds": 268.47156069999994,
     "calls_reserved": 7,
     "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md"
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -17343,10 +17344,78 @@
           },
           "model_calls": 5
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
+                "outcome": "keep",
+                "reason": "I read the whole note and found no defect that needs an edit. The opening defines RAG and the pipeline, and the Core Flow diagram matches the stages in the first card (translation, retrieval and fusion, reranking, context assembly, generation, checks). The 'each stage limits the next' point is stated once and is accurate. Operational Baselines gives concrete controls: feature-flagged patterns, a retry cap with fail-closed behaviour, drift checks, caching scoped to authorization, and idempotency for mutating tools. The RAG vs Fine-Tuning section gives a clear decision rule, including the point that RAG and fine-tuning can be combined. The three cards each test one gradeable task: a definition, an experiment protocol, and stage diagnosis. Their answers state mechanisms and conditions, and each cites a primary source (Lewis et al., Google Rules of ML, Microsoft Foundry RAG evaluators). The existing qard-ids are intact. The known_violations list is empty. The References list holds two real sources, with no duplicates. I did not edit the Core Flow prose, the baselines or the table, because the existing wording is already accurate and natural."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
+                "verdict": "CLEAN",
+                "summary": "The complete note was audited and no concrete defect was found. The opening, pipeline diagram, operational controls, RAG vs fine-tuning decision rule and three cards are accurate, non-repetitive and self-contained. The keep is justified.",
+                "page_type": "FolderNote — Datacore folder map block protected; Questions and References optional but present and useful; prose is impersonal and declarative.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Each stage limits the next. When translation is used, retrieval cannot repair a rewrite that changed the intent",
+                    "line_start": 43,
+                    "reason": "States the core mechanism and its limit once, matching the diagram; explanation order is opening, flow, operations, comparison."
+                  },
+                  {
+                    "quote": "Mutating tool calls need [[Home/Software Architecture/Distributed Systems/Idempotency|idempotency]], not response caching.",
+                    "line_start": 50,
+                    "reason": "Technically sound boundary on caching with a precise condition; the terminology is concrete."
+                  },
+                  {
+                    "quote": "The boundary still holds: knowledge changes through reindexing, and behavior changes through retraining.",
+                    "line_start": 71,
+                    "reason": "The comparison ends in a decision rule and acknowledges combined use, so it is not oversimplified."
+                  },
+                  {
+                    "quote": "> [!qard]- When a RAG answer is wrong, how can the failing pipeline stage be located?",
+                    "line_start": 104,
+                    "reason": "Direct, bounded technical question with a dependent diagnostic procedure that suits one card; the answer gives mechanisms, conditions and a primary source."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note is one coherent RAG overview whose pipeline, operations and fine-tuning comparison depend on each other; child notes already cover caching and monitoring.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "Independent whole-note review found no accuracy, clarity, question-quality or rules defects. The existing Qard IDs are intact, there are no edits, and the keep is justified.",
+            "change_checks": []
+          },
+          "model_calls": 7
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-16T22:26:21.605996Z",
+    "checkpoint_at": "2026-11-16T22:26:26.024915Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
