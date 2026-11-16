@@ -17165,11 +17165,11 @@
     "version": 1,
     "id": "33a5bcd3129e4228a0be70053399144d",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-16T22:21:57.553782Z",
-    "elapsed_seconds": 373.2841201,
+    "elapsed_seconds": 387.7697595,
     "calls_reserved": 10,
-    "responses_received": 9,
+    "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
@@ -17415,7 +17415,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-16T22:28:10.837476Z",
+    "checkpoint_at": "2026-11-16T22:28:25.323114Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -49789,27 +49789,44 @@
         {
           "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
           "expected_hash": "63cb05382dabdd0590b1372368c5aa7db3fc81bfc409c98913503900d3631f72",
-          "before": "Diagnostic: low first-stage candidate Recall@N establishes an upstream ceiling. If Recall@N is high, demotion is established only when relevant evidence inside the first-stage top-k falls outside the reranked top-k at the same k. Low post-rerank Recall@k alone does not establish demotion: evidence can stay beyond k in both orders even after its rank improves, and such exclusion can occur even when the query needs no more relevant evidence than k can hold; on its own it does not show whether a larger k or a better ranking is the right repair.",
-          "after": "Diagnostic: low first-stage candidate Recall@N sets an upstream ceiling. If Recall@N is high, demotion is shown only when relevant evidence inside the first-stage top-k falls outside the reranked top-k at the same k. Low post-rerank Recall@k alone does not show demotion, because the evidence can sit beyond k in both orders. Comparing its ranks in the two orders shows whether reranking helped, and that comparison alone does not say whether a larger k or a better ranking is the right repair.",
-          "reason": "Splits one overloaded sentence into a clearer diagnostic sequence, keeping every condition.",
           "kind": "note",
           "learning_target": "same",
+          "before": "improve the short list before context reaches the generator.\n\nBut it cannot recover evidence that the first stage missed.",
+          "after": "improve the short list before context reaches the generator. It cannot recover evidence that the first stage missed.",
+          "reason": "Merges a stray one-sentence paragraph into the paragraph it completes.",
           "essential_meanings": [
-            "low Recall@N is an upstream ceiling",
-            "demotion requires evidence in first-stage top-k leaving reranked top-k at same k",
-            "low Recall@k alone does not show demotion"
+            "reranking cannot recover evidence missed by first stage"
           ],
           "sources": [],
           "feedback_keys": [],
-          "problem": "The Over-Reliance diagnostic packs several conditions into one hard-to-parse sentence.",
-          "reader_benefit": "The diagnostic can be read and recalled step by step without losing precision."
+          "problem": "A one-line paragraph beginning with 'But' interrupts the opening explanation.",
+          "reader_benefit": "The limit reads as part of the definition."
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+          "expected_hash": "63cb05382dabdd0590b1372368c5aa7db3fc81bfc409c98913503900d3631f72",
+          "kind": "note",
+          "learning_target": "same",
+          "before": "Low post-rerank Recall@k alone does not establish demotion: evidence can stay beyond k in both orders even after its rank improves, and such exclusion can occur even when the query needs no more relevant evidence than k can hold; on its own it does not show whether a larger k or a better ranking is the right repair.",
+          "after": "Low post-rerank Recall@k alone does not establish demotion, because relevant evidence can sit beyond k in both orders even after its rank improves. Such exclusion can occur even when k is large enough to hold all the evidence the query needs. Neither measurement alone shows whether a larger k or a better ranking is the right repair.",
+          "reason": "Splits the overloaded sentence with explicit subjects, keeping the k-capacity condition.",
+          "essential_meanings": [
+            "low Recall@k alone does not show demotion",
+            "evidence can be beyond k in both orders",
+            "exclusion can occur even when k has enough capacity",
+            "does not decide between larger k and better ranking"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The diagnostic packs several conditions into one hard-to-parse sentence.",
+          "reader_benefit": "Each condition can be read and recalled separately without losing precision."
         }
       ],
       "dispositions": [
         {
           "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
           "outcome": "changed",
-          "reason": "Audited the full note: RRF arithmetic (1/63+1/61≈0.032), the MMR formula, ColBERT/MaxSim description, BM25, tradeoff table and the three cards agree with each other and with the standard sources. One overloaded diagnostic sentence in the Over-Reliance pitfall was split for readability with all conditions preserved."
+          "reason": "Audited the whole note: RRF arithmetic (1/63+1/61≈0.032), MMR formula, ColBERT/MaxSim, BM25, tradeoff table and the three cards are consistent. Two readability edits: the long diagnostic sentence is split with all conditions kept, and a stray one-line paragraph is merged into the opening."
         }
       ],
       "feedback": []
@@ -49824,8 +49841,10 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-16T22:27:09.732024Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-16T22:28:25.323098Z",
+    "review_repair_key": "3d372b65f516f3ca754a3efb1168f45e9ee0a639919872aac16d65bb0b874f4d",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The single edit splits the diagnostic sentence but changes its meaning. It introduces an ambiguous antecedent and drops the explicit k-capacity condition. The note is otherwise sound.",
       "notes": [
@@ -49918,71 +49937,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The single edit splits the diagnostic sentence but changes its meaning. It introduces an ambiguous antecedent and drops the explicit k-capacity condition. The note is otherwise sound.",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The note is accurate and well organized, and the RRF arithmetic, MMR formula and ColBERT description check out. The proposed edit breaks up the long diagnostic sentence. In doing so it reattaches the 'does not say whether a larger k or a better ranking is the right repair' claim to the rank comparison instead of to the low Recall@k, and it removes the condition about query need versus k capacity. Its antecedent 'its ranks' is also ambiguous. The result is not a clear net gain.",
-          "page_type": "Concept note with Questions and References; the Qard callouts and their ID comments are protected.",
-          "current_text_evidence": [
-            {
-              "quote": "Diagnostic: low first-stage candidate Recall@N sets an upstream ceiling.",
-              "line_start": 139,
-              "reason": "This is the edited sentence. The wording is fine, but the verb change from 'establishes' to 'sets' is cosmetic."
-            },
-            {
-              "quote": "Comparing its ranks in the two orders shows whether reranking helped, and that comparison alone does not say whether a larger k or a better ranking is the right repair.",
-              "line_start": 139,
-              "reason": "'Its' has no clear referent. The claim now attaches to the rank comparison rather than to low Recall@k. The original condition that exclusion can occur even when k can hold all the needed evidence is lost."
-            },
-            {
-              "quote": "Cutoff capacity matters only when the query needs more distinct relevant pieces than k can hold.",
-              "line_start": 192,
-              "reason": "The card states the k-capacity condition precisely, so the pitfall paragraph now diverges from it."
-            },
-            {
-              "quote": "But it cannot recover evidence that the first stage missed.",
-              "line_start": 19,
-              "reason": "This one-sentence paragraph starting with 'But' is a minor readability issue left unaddressed, and it could be merged into the previous paragraph."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the note covers one coherent topic, reranking approaches with their pitfalls and tradeoffs, and the parts depend on each other.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Accuracy/Clarity",
-              "location": "## Over-Reliance on Reranking to Fix Retrieval, Diagnostic paragraph",
-              "evidence": "Edited text: 'Comparing its ranks in the two orders shows whether reranking helped, and that comparison alone does not say whether a larger k or a better ranking is the right repair.'",
-              "effect": "The meaning shifts and the antecedent 'its' is ambiguous. The condition that exclusion can occur even when k can hold all the needed evidence is lost, even though the card keeps it. The sentence is still long and convoluted, so the stated readability benefit is not realized.",
-              "fix": "Keep the sentence split, but make the subject explicit. For example: 'Low post-rerank Recall@k alone does not show demotion, because relevant evidence can sit beyond k in both orders. Comparing its rank in each order shows whether reranking helped. Neither measurement alone shows whether a larger k or a better ranking is the right repair.' Preserve the capacity condition, or leave the original sentence unchanged."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "FAIL",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": [
-        {
-          "edit_index": 0,
-          "verdict": "NOT WORTHWHILE",
-          "reason": "The edit changes what the final claim attaches to, leaves 'its ranks' ambiguous, drops the k-capacity condition that the card keeps, and replaces 'establishes' with 'sets'/'shown' without a real benefit. The sentence is not materially clearer, and the essential meaning is not fully preserved."
-        }
-      ]
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "3d372b65f516f3ca754a3efb1168f45e9ee0a639919872aac16d65bb0b874f4d",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
