@@ -99,6 +99,20 @@ test("only accepted stage/main sources enter serialized protected deployment", (
   }
 })
 
+test("Vercel pull selects a branch only for Preview", () => {
+  const pull = workflow("vault-validation").jobs.package.steps.find((step) => step.run?.includes("vercel pull"))
+  for (const [target, branch, expected] of [
+    ["preview", "stage", ["pull", "--yes", "--environment=preview", "--git-branch=stage"]],
+    ["production", "main", ["pull", "--yes", "--environment=production"]],
+  ]) {
+    const result = spawnSync("bash", ["-c", `vercel() { printf '%s\\0' "$@"; }\n${pull.run}`], {
+      env: { ...process.env, TARGET: target, GITHUB_REF_NAME: branch }, encoding: "utf8",
+    })
+    assert.equal(result.status, 0, result.stderr)
+    assert.deepEqual(result.stdout.split("\0").filter(Boolean), expected, target)
+  }
+})
+
 test("pulled environment secrets are cleared before any Vercel repository build", () => {
   const steps = workflow("vault-validation").jobs.package.steps
   const pull = steps.findIndex((step) => step.run?.includes("vercel pull"))

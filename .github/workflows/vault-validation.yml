@@ -282,7 +282,10 @@ jobs:
       - name: Pull protected Vercel settings
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: vercel pull --yes --environment="$TARGET" --git-branch="$GITHUB_REF_NAME"
+        run: |
+          pull_args=(--yes "--environment=$TARGET")
+          if [ "$TARGET" = preview ]; then pull_args+=("--git-branch=$GITHUB_REF_NAME"); fi
+          vercel pull "${pull_args[@]}"
       - name: Remove pulled secrets before repository or plugin build
         run: node .scripts/site-pipeline.mjs clean-env --target "$TARGET"
       - name: Build the accepted source for its deployment target
