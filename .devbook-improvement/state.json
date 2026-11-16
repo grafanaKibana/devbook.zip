@@ -17276,9 +17276,9 @@
     "version": 1,
     "id": "33a5bcd3129e4228a0be70053399144d",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-16T22:21:57.553782Z",
-    "elapsed_seconds": 596.2161665000007,
+    "elapsed_seconds": 601.5238631000007,
     "calls_reserved": 15,
     "responses_received": 15,
     "attempted_paths": [
@@ -17287,7 +17287,8 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md"
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
+      "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md"
     ],
     "accepted_records": [
       {
@@ -19010,10 +19011,83 @@
           },
           "model_calls": 13
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+                "outcome": "keep",
+                "reason": "Read the whole note against its text and well-established ANN literature (HNSW, PQ, DiskANN, Faiss, pgvector, Azure AI Search docs already cited in References). The ANN-vs-exact explanation is accurate: O(N) scan, silent recall loss, and the ef_search/nprobe knobs. The index descriptions and the tradeoff table are consistent with each other. The memory estimate of N×dimensions×4 bytes for float32 is correct. The pre-/post-filtering section correctly separates the recall/cost decision from the authorization requirement, and the pitfalls explain mechanism, cause and mitigation. Wikilinks, the mermaid and code-fence formatting, and the two existing cards (role of a vector DB; why ANN) each test one gradeable task and are consistent with the prose. No factual error, unclear passage, missing prerequisite or redundancy worth a change was found, and there are no known violations."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
+                "verdict": "CLEAN",
+                "summary": "Whole-note read: the ANN-versus-exact framing, index descriptions, tuning knobs, filtering/authorization separation, operations guidance, system table, pitfalls and tradeoff table are accurate and mutually consistent. Prose is direct and decided, and both existing cards test one task each. No concrete defect justifies an edit.",
+                "page_type": "Concept — optional Questions/References present; Qard cards carry protected IDs; mermaid fence has a language identifier.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Raising `ef_search` explores more of the graph and trades latency for recall.",
+                    "line_start": 38,
+                    "reason": "HNSW query-effort parameter is described correctly and consistently with the later pitfall and tradeoff sections."
+                  },
+                  {
+                    "quote": "semantic similarity cannot enforce it, so tenant and ACL boundaries hold only when disallowed vectors are excluded",
+                    "line_start": 49,
+                    "reason": "Correctly separates the recall/cost choice of pre-filtering from the authorization requirement."
+                  },
+                  {
+                    "quote": "**Memory budgeting** starts with roughly `N × dimensions × 4 bytes` for float32 vectors, plus graph overhead.",
+                    "line_start": 62,
+                    "reason": "The float32 memory estimate is correct and ties to the PQ/disk-index decision."
+                  },
+                  {
+                    "quote": "Missed neighbors raise no error.",
+                    "line_start": 134,
+                    "reason": "The ANN card answer preserves the mechanism, recall measurement against exact ground truth, and the caveat that N × d is arithmetic work, not wall-clock time."
+                  },
+                  {
+                    "quote": "> [!qard]- What role does a vector database play in a RAG system?",
+                    "line_start": 124,
+                    "reason": "Single bounded recall task with a neutral, direct answer and an answer-side primary source."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: index types, filtering, operations and pitfalls all serve one coherent topic of operating an ANN vector store, and none is independently reusable enough to justify a separate note.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "Independent full-note review found no factual, structural, question-quality or identity-metadata defect; keeping the note unchanged is justified and no edits were proposed.",
+            "change_checks": []
+          },
+          "model_calls": 15
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-16T22:31:53.769524Z",
+    "checkpoint_at": "2026-11-16T22:31:59.077221Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
