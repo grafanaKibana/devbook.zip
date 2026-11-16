@@ -17387,9 +17387,9 @@
     "version": 1,
     "id": "33a5bcd3129e4228a0be70053399144d",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-16T22:21:57.553782Z",
-    "elapsed_seconds": 732.780680400001,
+    "elapsed_seconds": 737.441053100001,
     "calls_reserved": 19,
     "responses_received": 19,
     "attempted_paths": [
@@ -17400,7 +17400,8 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md",
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md",
-      "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md"
+      "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+      "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md"
     ],
     "accepted_records": [
       {
@@ -19274,10 +19275,83 @@
           },
           "model_calls": 17
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text. The opening defines deterministic checks and states the boundary (exactly stated properties only). The check-type table, JSON schema example, pipeline diagram and judge comparison table are consistent with each other. The schema example is valid JSON Schema (additionalProperties false, enum, minLength, required), matching the JSON Schema 2020-12 core spec. The pitfalls are accurate: schema validity does not imply the right action, heuristic PII scanners can misclassify, and tool permissions must be checked before execution. The single Qard tests one dependent before/after-tool-call task. It is self-contained and sourced, and its claims match the note. The reference is a real primary source. The code fences have language identifiers. There are no known violations. Any rewrite would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note is accurate, coherent and well ordered, and the single Qard tests one dependent task. No concrete defect was found, so the keep is justified and no edits are needed.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
+                "verdict": "CLEAN",
+                "summary": "Whole-note audit found no accuracy, ordering, repetition or question-quality defect. The opening states the operating idea and its limit, the table, schema example, pipeline diagram and judge comparison agree with one another, and the pitfalls add real conditions. The one card is a single dependent before/after-tool-call task with a sourced answer. Rewriting would be cosmetic churn.",
+                "page_type": "Concept — frontmatter is typed, Questions and References are optional and valid, and every code fence has a language identifier.",
+                "current_text_evidence": [
+                  {
+                    "quote": "The boundary is simple: deterministic checks enforce properties that can be stated exactly.",
+                    "line_start": 19,
+                    "reason": "States the operating idea and its limit up front, so the topic is recoverable."
+                  },
+                  {
+                    "quote": "\"additionalProperties\": false,",
+                    "line_start": 38,
+                    "reason": "The schema example is valid JSON Schema 2020-12 (enum, minLength, required) and matches the check-type table."
+                  },
+                  {
+                    "quote": "Some scanners are heuristic, so their operational response may be quarantine or human review rather than automatic rejection.",
+                    "line_start": 94,
+                    "reason": "Gives a precise condition and exception rather than an overclaim about hard rejection."
+                  },
+                  {
+                    "quote": "Permission and argument checks belong at the tool boundary, before execution.",
+                    "line_start": 100,
+                    "reason": "Matches the Qard answer on before/after execution and the side-effect argument, so the note and card are consistent."
+                  },
+                  {
+                    "quote": "> [!qard]- Which deterministic checks should run before and after a tool-using agent calls a tool?",
+                    "line_start": 105,
+                    "reason": "A direct, self-contained question on one dependent task (before and after a tool call). The ID is intact."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one coherent topic, deterministic checks and their boundary with judges, and nothing in it is independently useful as a separate note.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 19
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-16T22:34:10.334040Z",
+    "checkpoint_at": "2026-11-16T22:34:14.994413Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
