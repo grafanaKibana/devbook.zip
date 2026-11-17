@@ -7048,7 +7048,7 @@
     },
     "Vault/Home/Cloud/Cloud.md": {
       "content_hash": "ed00c45c149656914d8a74a8e90d273290a99234af12273e7a45991cb47a57d9",
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
       "outcome": "keep",
       "repair_input_hash": "",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
@@ -7056,42 +7056,37 @@
       "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "keep_review": {
         "content_hash": "ed00c45c149656914d8a74a8e90d273290a99234af12273e7a45991cb47a57d9",
-        "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
         "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
         "review": {
           "path": "Vault/Home/Cloud/Cloud.md",
           "verdict": "CLEAN",
-          "summary": "The folder note states the operating idea early: the operating boundary moves but does not disappear. It lists the responsibilities that stay with the application team, gives architecture questions to ask before choosing products, and explains how cloud behavior shows up in code. No edit is needed.",
-          "page_type": "FolderNote — tagged FolderNote, with the protected datacorejsx card map kept. Questions are optional and absent. References hold one real NIST primary source.",
+          "summary": "The whole folder note was audited. The opening states the operating idea (the operating boundary moves and is not removed) with a managed-database example. The ownership list, the workload-contract questions and the code-behavior section are accurate, ordered from idea to decision to implementation, and free of repetition. The note needs no edit.",
+          "page_type": "FolderNote — Datacore folder map is protected and intact. Optional References contains one real primary source as a bare link. No Qard cards, so no card rules apply.",
           "current_text_evidence": [
             {
               "quote": "It moves an application's operating boundary; it does not remove it.",
               "line_start": 18,
-              "reason": "This gives the operating idea quickly. The managed-database example that follows is accurate and concrete."
-            },
-            {
-              "quote": "**Economics:** which code paths generate compute, requests, storage, transfer, and observability volume.",
-              "line_start": 33,
-              "reason": "The ownership list is concrete and non-overlapping, and it includes cost, which is easy to overlook."
-            },
-            {
-              "quote": "Start from the workload contract:",
-              "line_start": 39,
-              "reason": "The numbered questions come before product names and support engineering judgment. They lead into the Providers note."
+              "reason": "The opening states the central idea and the key limit. The managed-database example that follows makes it concrete."
             },
             {
               "quote": "Cloud failures are ordinary distributed-system failures.",
               "line_start": 51,
-              "reason": "This ties cloud behavior to application code through throttling, redelivery, retries and idempotency. The content is accurate, and the wording is direct and impersonal."
+              "reason": "This framing ties throttling, redelivery, retries and expired credentials to application-level mitigations such as bounded retries and idempotency. The mechanism and the conditions are both kept."
             },
             {
-              "quote": "- [NIST SP 800-145: The NIST Definition of Cloud Computing]",
-              "line_start": 57,
-              "reason": "The reference is a real, authoritative, topic-specific source, formatted as a bare link bullet with no annotation."
+              "quote": "Product documentation must still confirm regional support, quotas, lifecycle, failure semantics, and price",
+              "line_start": 47,
+              "reason": "This states the limit on provider comparison and the verification step. It avoids implying that similarly named products are equivalent."
+            },
+            {
+              "quote": "[[Cloud Cost Management]] develops the cost side; [[Disaster Recovery]] connects RPO and RTO targets to application design.",
+              "line_start": 53,
+              "reason": "Each wikilink is attached to a stated reason, so the relationship is explained. The RPO and RTO terminology is used consistently across the note."
             }
           ],
           "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note is a compact hub with a card map. Its sections all serve one idea, the application's remaining responsibilities in the cloud, and the detailed topics already live in linked sibling notes.",
+          "split_suggestion": "No split: the note is one coherent overview of cloud responsibility. It is a hub that links out to the separable topics (service models, providers, cost, disaster recovery).",
           "findings": [],
           "source_checks": [],
           "rejection_equivalence": [],
@@ -7144,6 +7139,57 @@
             ],
             "target_resolution": "JUSTIFIED UNCHANGED",
             "split_suggestion": "No split: the note is a compact hub with one coherent theme (retained responsibility on managed infrastructure). Provider, service-model, cost and recovery detail already lives in sibling notes.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          },
+          "review_process": "focused-whole-note-v1"
+        },
+        "fc3d6467094c1533e3869b2b1579e52549ddfba2beaabe702147a958bca71804": {
+          "content_hash": "ed00c45c149656914d8a74a8e90d273290a99234af12273e7a45991cb47a57d9",
+          "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+          "review": {
+            "path": "Vault/Home/Cloud/Cloud.md",
+            "verdict": "CLEAN",
+            "summary": "The folder note states the operating idea early: the operating boundary moves but does not disappear. It lists the responsibilities that stay with the application team, gives architecture questions to ask before choosing products, and explains how cloud behavior shows up in code. No edit is needed.",
+            "page_type": "FolderNote — tagged FolderNote, with the protected datacorejsx card map kept. Questions are optional and absent. References hold one real NIST primary source.",
+            "current_text_evidence": [
+              {
+                "quote": "It moves an application's operating boundary; it does not remove it.",
+                "line_start": 18,
+                "reason": "This gives the operating idea quickly. The managed-database example that follows is accurate and concrete."
+              },
+              {
+                "quote": "**Economics:** which code paths generate compute, requests, storage, transfer, and observability volume.",
+                "line_start": 33,
+                "reason": "The ownership list is concrete and non-overlapping, and it includes cost, which is easy to overlook."
+              },
+              {
+                "quote": "Start from the workload contract:",
+                "line_start": 39,
+                "reason": "The numbered questions come before product names and support engineering judgment. They lead into the Providers note."
+              },
+              {
+                "quote": "Cloud failures are ordinary distributed-system failures.",
+                "line_start": 51,
+                "reason": "This ties cloud behavior to application code through throttling, redelivery, retries and idempotency. The content is accurate, and the wording is direct and impersonal."
+              },
+              {
+                "quote": "- [NIST SP 800-145: The NIST Definition of Cloud Computing]",
+                "line_start": 57,
+                "reason": "The reference is a real, authoritative, topic-specific source, formatted as a bare link bullet with no annotation."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note is a compact hub with a card map. Its sections all serve one idea, the application's remaining responsibilities in the cloud, and the detailed topics already live in linked sibling notes.",
             "findings": [],
             "source_checks": [],
             "rejection_equivalence": [],
@@ -18204,7 +18250,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-17T21:08:51.301854Z",
-    "elapsed_seconds": 183.52571960000003,
+    "elapsed_seconds": 188.48330340000004,
     "calls_reserved": 6,
     "responses_received": 6,
     "attempted_paths": [
@@ -18361,7 +18407,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-17T21:11:54.827075Z",
+    "checkpoint_at": "2026-11-17T21:11:59.784659Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
@@ -28213,6 +28259,80 @@
       ],
       "source_hashes": {
         "Vault/Home/Cloud/Cloud Cost Management.md": "2de07600f19d7748ae2a3f69d33ba7966bbdb261818abcd11cf944e80f686c48"
+      },
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "7f85032109b120a69566529572fe2d5450ccb80eed6fdc083a061e09831c3903": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The note is accurate, coherent and well ordered, so keeping it unchanged is justified. It has no cards, the known-violation list is empty, and no concrete defect was found.",
+        "notes": [
+          {
+            "path": "Vault/Home/Cloud/Cloud.md",
+            "verdict": "CLEAN",
+            "summary": "The whole folder note was audited. The opening states the operating idea (the operating boundary moves and is not removed) with a managed-database example. The ownership list, the workload-contract questions and the code-behavior section are accurate, ordered from idea to decision to implementation, and free of repetition. The note needs no edit.",
+            "page_type": "FolderNote — Datacore folder map is protected and intact. Optional References contains one real primary source as a bare link. No Qard cards, so no card rules apply.",
+            "current_text_evidence": [
+              {
+                "quote": "It moves an application's operating boundary; it does not remove it.",
+                "line_start": 18,
+                "reason": "The opening states the central idea and the key limit. The managed-database example that follows makes it concrete."
+              },
+              {
+                "quote": "Cloud failures are ordinary distributed-system failures.",
+                "line_start": 50,
+                "reason": "This framing ties throttling, redelivery, retries and expired credentials to application-level mitigations such as bounded retries and idempotency. The mechanism and the conditions are both kept."
+              },
+              {
+                "quote": "Product documentation must still confirm regional support, quotas, lifecycle, failure semantics, and price",
+                "line_start": 46,
+                "reason": "This states the limit on provider comparison and the verification step. It avoids implying that similarly named products are equivalent."
+              },
+              {
+                "quote": "[[Cloud Cost Management]] develops the cost side; [[Disaster Recovery]] connects RPO and RTO targets to application design.",
+                "line_start": 52,
+                "reason": "Each wikilink is attached to a stated reason, so the relationship is explained. The RPO and RTO terminology is used consistently across the note."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note is one coherent overview of cloud responsibility. It is a hub that links out to the separable topics (service models, providers, cost, disaster recovery).",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Cloud/Cloud.md",
+          "citation_index": 1,
+          "reported_line_start": 50,
+          "resolved_line_start": 51
+        },
+        {
+          "path": "Vault/Home/Cloud/Cloud.md",
+          "citation_index": 2,
+          "reported_line_start": 46,
+          "resolved_line_start": 47
+        },
+        {
+          "path": "Vault/Home/Cloud/Cloud.md",
+          "citation_index": 3,
+          "reported_line_start": 52,
+          "resolved_line_start": 53
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Cloud/Cloud.md": "ed00c45c149656914d8a74a8e90d273290a99234af12273e7a45991cb47a57d9"
       },
       "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -54582,174 +54702,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "da052ee3e40f488c9e54026f44fa75d5",
-    "topic_id": "cloud-b977b950",
-    "batch": {
-      "topic": "Cloud",
-      "topic_id": "cloud-b977b950",
-      "notes": [
-        {
-          "path": "Vault/Home/Cloud/Cloud.md",
-          "content": "---\nicon: cloudy\norder: 90\ncolor: \"#3b82f6\"\ntopic: [Cloud]\nsubtopic: []\nsummary: \"Using managed infrastructure without losing sight of the application responsibilities that remain.\"\ntags: [FolderNote]\npublish: true\nstatus: New\npriority: High\nlevel: [\"2\"]\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:28:37.344Z\"\n---\n\nCloud computing turns compute, storage, networking, and higher-level platforms into services that can be provisioned on demand. It moves an application's operating boundary; it does not remove it. A managed database can eliminate host maintenance while leaving schema design, access control, consistency, recovery, service limits, and cost with the application team.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# What the Application Team Still Owns\n\nThe exact split changes by service model, but several responsibilities remain with the system regardless of provider:\n\n- **Application behavior:** correctness, authorization, input validation, idempotency, and safe retries.\n- **Data:** classification, access policy, retention, consistency, migration, backup requirements, and restore validation.\n- **Service configuration:** region, capacity, scaling limits, network exposure, encryption settings, and dependency timeouts.\n- **Resilience:** failure handling, recovery objectives, degraded modes, and dependency fallbacks.\n- **Economics:** which code paths generate compute, requests, storage, transfer, and observability volume.\n\n[[IaaS, PaaS, SaaS, CaaS]] shows how this boundary moves as the provider manages more of the stack.\n\n# Architecture Questions Before Product Names\n\nStart from the workload contract:\n\n1. What kind of execution is required: request-driven service, event handler, batch job, container, or VM-bound process?\n2. What data model, consistency, transaction scope, retention, and query patterns must the system support?\n3. Which latency, throughput, availability, recovery point, and recovery time targets are real requirements?\n4. Which identity, residency, compliance, and network boundaries are fixed by the organization?\n5. Which provider-specific behaviors are worth accepting, and what would make migration necessary?\n\n[[Providers]] introduces AWS, Azure, and Google Cloud without treating similarly named products as equivalent. Product documentation must still confirm regional support, quotas, lifecycle, failure semantics, and price before a service becomes an architecture assumption.\n\n# Cloud Behavior Appears in Code\n\nCloud failures are ordinary distributed-system failures. APIs throttle, queues redeliver, functions retry, credentials expire, and regional dependencies become unavailable. The application therefore needs bounded retries, backpressure, idempotent side effects, observable dependency calls, and explicit timeout behavior. Managed services reduce infrastructure work but cannot infer these application semantics.\n\nCost and recovery also shape code. Chatty service boundaries multiply request and transfer charges. Unbounded telemetry or retention grows with traffic. A recovery design may require replayable events, compatible schemas, and writes that can be retried safely. [[Cloud Cost Management]] develops the cost side; [[Disaster Recovery]] connects RPO and RTO targets to application design.\n\n# References\n\n- [NIST SP 800-145: The NIST Definition of Cloud Computing](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-145.pdf)\n",
-          "hash": "ed00c45c149656914d8a74a8e90d273290a99234af12273e7a45991cb47a57d9",
-          "topic": "Cloud",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "rules_changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Cloud/Cloud.md",
-          "outcome": "keep",
-          "reason": "Audited the whole folder note against its current text. The opening states the operating idea (cloud moves the operating boundary, not removes it) with a concrete managed-database example. The responsibilities list, the five workload-contract questions, and the code-behavior section (throttling, redelivery, retries, idempotency, cost and recovery shaping code) are technically accurate and consistent with the NIST SP 800-145 definition cited in References. Terminology is consistent (RPO/RTO, service model). Wikilinks point to sibling topics with reasons for each relationship, the Datacore folder map is intact, and the single reference is a real primary source. No cards exist, known violations are empty, and no factual, ordering or prerequisite gap justifies an edit."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Cloud/Cloud.md": "ed00c45c149656914d8a74a8e90d273290a99234af12273e7a45991cb47a57d9"
-    },
-    "feedback_keys": [],
-    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Cloud/Cloud.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-17T21:11:38.038835Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "The note is accurate, coherent and well ordered, so keeping it unchanged is justified. It has no cards, the known-violation list is empty, and no concrete defect was found.",
-        "notes": [
-          {
-            "path": "Vault/Home/Cloud/Cloud.md",
-            "verdict": "CLEAN",
-            "summary": "The whole folder note was audited. The opening states the operating idea (the operating boundary moves and is not removed) with a managed-database example. The ownership list, the workload-contract questions and the code-behavior section are accurate, ordered from idea to decision to implementation, and free of repetition. The note needs no edit.",
-            "page_type": "FolderNote — Datacore folder map is protected and intact. Optional References contains one real primary source as a bare link. No Qard cards, so no card rules apply.",
-            "current_text_evidence": [
-              {
-                "quote": "It moves an application's operating boundary; it does not remove it.",
-                "line_start": 18,
-                "reason": "The opening states the central idea and the key limit. The managed-database example that follows makes it concrete."
-              },
-              {
-                "quote": "Cloud failures are ordinary distributed-system failures.",
-                "line_start": 50,
-                "reason": "This framing ties throttling, redelivery, retries and expired credentials to application-level mitigations such as bounded retries and idempotency. The mechanism and the conditions are both kept."
-              },
-              {
-                "quote": "Product documentation must still confirm regional support, quotas, lifecycle, failure semantics, and price",
-                "line_start": 46,
-                "reason": "This states the limit on provider comparison and the verification step. It avoids implying that similarly named products are equivalent."
-              },
-              {
-                "quote": "[[Cloud Cost Management]] develops the cost side; [[Disaster Recovery]] connects RPO and RTO targets to application design.",
-                "line_start": 52,
-                "reason": "Each wikilink is attached to a stated reason, so the relationship is explained. The RPO and RTO terminology is used consistently across the note."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the note is one coherent overview of cloud responsibility. It is a hub that links out to the separable topics (service models, providers, cost, disaster recovery).",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/Cloud/Cloud.md",
-          "citation_index": 1,
-          "reported_line_start": 50,
-          "resolved_line_start": 51
-        },
-        {
-          "path": "Vault/Home/Cloud/Cloud.md",
-          "citation_index": 2,
-          "reported_line_start": 46,
-          "resolved_line_start": 47
-        },
-        {
-          "path": "Vault/Home/Cloud/Cloud.md",
-          "citation_index": 3,
-          "reported_line_start": 52,
-          "resolved_line_start": 53
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/Cloud/Cloud.md": "ed00c45c149656914d8a74a8e90d273290a99234af12273e7a45991cb47a57d9"
-      },
-      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "The note is accurate, coherent and well ordered, so keeping it unchanged is justified. It has no cards, the known-violation list is empty, and no concrete defect was found.",
-      "notes": [
-        {
-          "path": "Vault/Home/Cloud/Cloud.md",
-          "verdict": "CLEAN",
-          "summary": "The whole folder note was audited. The opening states the operating idea (the operating boundary moves and is not removed) with a managed-database example. The ownership list, the workload-contract questions and the code-behavior section are accurate, ordered from idea to decision to implementation, and free of repetition. The note needs no edit.",
-          "page_type": "FolderNote — Datacore folder map is protected and intact. Optional References contains one real primary source as a bare link. No Qard cards, so no card rules apply.",
-          "current_text_evidence": [
-            {
-              "quote": "It moves an application's operating boundary; it does not remove it.",
-              "line_start": 18,
-              "reason": "The opening states the central idea and the key limit. The managed-database example that follows makes it concrete."
-            },
-            {
-              "quote": "Cloud failures are ordinary distributed-system failures.",
-              "line_start": 51,
-              "reason": "This framing ties throttling, redelivery, retries and expired credentials to application-level mitigations such as bounded retries and idempotency. The mechanism and the conditions are both kept."
-            },
-            {
-              "quote": "Product documentation must still confirm regional support, quotas, lifecycle, failure semantics, and price",
-              "line_start": 47,
-              "reason": "This states the limit on provider comparison and the verification step. It avoids implying that similarly named products are equivalent."
-            },
-            {
-              "quote": "[[Cloud Cost Management]] develops the cost side; [[Disaster Recovery]] connects RPO and RTO targets to application design.",
-              "line_start": 53,
-              "reason": "Each wikilink is attached to a stated reason, so the relationship is explained. The RPO and RTO terminology is used consistently across the note."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note is one coherent overview of cloud responsibility. It is a hub that links out to the separable topics (service models, providers, cost, disaster recovery).",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
