@@ -9,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Async Await"
 flashcard_uid: "4a42db52"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-17T09:54:57.676Z"
 published: "2026-07-08T13:14:17.320Z"
 ---
 
@@ -183,17 +183,34 @@ A faulted `WhenAll` task records every failure in its `Exception` property, but 
 > [Microsoft: `await` operator](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/await) · [Microsoft: ASP.NET Core best practices](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/best-practices?view=aspnetcore-10.0) · [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)
 
 <!-- qard-id: d15b1902-c519-4853-98ac-4cc2da428172 -->
-> [!qard]- What changes when an incomplete task is consumed with `await` instead of `Task.Result`?
-> `await` suspends the method and frees the current thread until the task completes, while `Task.Result` blocks the calling thread for the entire wait. That difference also changes deadlock risk and how failures surface.
+> [!qard]- Why can `Task.Result` deadlock, and how does `await` help?
+> `Task.Result` blocks the calling thread until the task completes, so it deadlocks when the task needs that same thread in order to complete, as under a single-threaded `SynchronizationContext` such as a UI thread. `await` returns the thread to the caller instead of blocking, so the thread is free to run the queued continuation and the task completes.
 >
-> | Aspect | `await` | `Task.Result` |
-> |---|---|---|
-> | Calling thread | Returns to its caller while the task is pending, so the thread can run other work. | Stays blocked and idle until the task completes. |
-> | Resumption | Runs the rest of the method later as a continuation, through the captured `SynchronizationContext` or non-default `TaskScheduler` when one applies. | Continues on the same thread once it is released; no continuation is involved. |
-> | Deadlock risk | Avoids the context deadlock, because the waiting code does not hold the context's thread. | Can deadlock when the task's continuation needs a single-threaded context, such as a UI thread, that the blocked caller occupies. Each side then waits for the other. |
-> | Failures | Rethrows the task's exception itself; when a task holds several exceptions, `await` rethrows one of them. | Throws an `AggregateException` that wraps the task's exception or exceptions. |
+> ```csharp
+> // Called on the UI thread
+> var text = LoadAsync().Result;      // UI thread blocks until LoadAsync completes
 >
-> [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming) · [Microsoft: Synchronous wrappers for asynchronous methods](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/synchronous-wrappers-for-asynchronous-methods) · [Microsoft: `Task<TResult>.Result`](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task-1.result)
+> async Task<string> LoadAsync()
+> {
+>     var raw = await ReadAsync();    // incomplete: the rest is queued back to the UI thread
+>     return raw.Trim();              // can run only on the UI thread, which is blocked
+> }
+> ```
+>
+> `LoadAsync` cannot complete until its last line runs on the UI thread, and the UI thread cannot run it until `LoadAsync` completes. Each waits for the other.
+>
+> With `await LoadAsync()`, the UI thread goes back to its message loop and runs the queued line.
+>
+> Without a single-threaded context, as in ASP.NET Core or a console app, the queued line runs on a ThreadPool thread, so `Task.Result` does not deadlock there. It still holds one thread idle for the whole wait.
+>
+> [Microsoft: `await` operator](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/await) · [Microsoft: Synchronous wrappers for asynchronous methods](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/synchronous-wrappers-for-asynchronous-methods) · [Microsoft: `Task<TResult>.Result`](https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task-1.result)
+
+> [!qard]- How do exceptions from `await` and `Task.Result` differ?
+> `await` rethrows the exception the task recorded, so a `catch` for its specific type works. `Task.Result` throws an `AggregateException` that wraps it, so the original exception has to be read from `InnerExceptions`.
+>
+> A task can hold several exceptions, as a faulted `Task.WhenAll` does. `await` still rethrows only one of them, while the `AggregateException` from `Task.Result` carries all of them.
+>
+> [Microsoft: `await` operator](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/await) · [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)
 
 <!-- qard-id: 52ff6f00-16ec-4741-9be4-2551798fc8ee -->
 > [!qard]- What does `ConfigureAwait(false)` change?
@@ -223,32 +240,6 @@ A faulted `WhenAll` task records every failure in its `Exception` property, but 
 > `Task.Run` does not improve a genuine asynchronous I/O wait: that wait already holds no thread. An async method may still do expensive synchronous work before its first incomplete `await`; moving that work to a pool thread can keep a UI responsive. Awaiting a single `Task.Run` inside an ASP.NET Core request adds scheduling without reducing worker-thread use, because the request already runs on a pool thread.
 >
 > [Microsoft: Task-based asynchronous programming](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming) · [Microsoft: ASP.NET Core best practices](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/best-practices?view=aspnetcore-10.0)
-
-<!-- qard-id: 5aa8c873-def1-41f7-b94d-d57d2107cc56 -->
-> [!qard]- Why does `GetAsync() ?? throw` fail to reject a null result from `Task<string?>`?
-> The expression checks the returned task reference, not the string that the task eventually produces. A non-null task can complete successfully with a null result. The result guard belongs after the await:
->
-> ```csharp
-> static async Task<string> GetRequiredAsync()
-> {
->     return await GetAsync()
->         ?? throw new InvalidOperationException("Value is required.");
-> }
-> ```
->
-> `Task<string?>` describes a task whose result may be null; it does not make the task itself nullable. [Microsoft: async return types](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-return-types)
-
-<!-- qard-id: 65740b39-9c79-46c5-937b-0af89b968458 -->
-> [!qard]- Does a method returning `Task` always report exceptions through the task?
-> No. The caller gets different results depending on where the exception occurs:
->
-> - **Inside an `async Task` method:** an exception not caught inside the method is saved in its returned task. The caller receives that task; awaiting it throws the exception. This applies even when the body throws **before its first `await`**.
->
-> - **Inside a method returning `Task` without `async`:** if its code throws before returning a task, the call throws immediately. The caller gets an exception and no returned task. Such a method can also deliberately return a failed task; the return type alone does not decide.
->
-> - **While preparing the call’s arguments:** arguments are evaluated before the method starts. If that work throws, the method never starts, and no task is returned.
->
-> [Microsoft: C# async-function specification](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes#15143-evaluation-of-a-task-returning-async-function) · [Microsoft: Task-based asynchronous pattern exception guidance](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap#exceptions)
 
 <!-- qard-id: 4d37a597-f69e-4d9f-840b-4ec77e3aa513 -->
 > [!qard]- Why can't the caller catch exceptions from an `async void` method?

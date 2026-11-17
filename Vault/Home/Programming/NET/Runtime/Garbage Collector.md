@@ -10,7 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/Runtime/Garbage Collector"
 flashcard_uid: "4b72550a"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-17T09:54:57.676Z"
 published: "2026-07-08T13:14:17.331Z"
 ---
 
@@ -191,22 +191,42 @@ The runtime defaults are the starting point. A mode change is justified only whe
 # Questions
 
 <!-- qard-id: 43db5943-c33e-4a19-9cb1-dbbdacc1e6ec -->
-> [!qard]- How does the .NET garbage collector decide what managed memory it can reclaim?
-> The GC can reclaim any managed object that is no longer reachable from a root. Reachability alone decides: an object that is still reachable stays, even if the program will never use it again.
+> [!qard]- How does the garbage collector know which objects to free?
+> The garbage collector frees every object that can no longer be reached from a root. To find those objects, a collection begins with a mark phase. Starting from the roots, the garbage collector follows every reference and marks each object reached as alive. Once marking is finished, any object left unmarked can no longer be reached by the program, so the memory of that object is reclaimed. The surviving objects are often then moved together to close the gaps.
 >
-> 1. **Start from roots.** Roots are references the runtime knows about directly. They include static fields, local variables and CPU registers of running methods while the JIT reports them as live, and GC handles.
-> 2. **Mark reachable objects.** The GC follows reference fields from the roots, then from every object it reaches. Each object found this way is live.
-> 3. **Treat everything else as reclaimable.** An object that was not reached is eligible for reclamation. Cycles do not keep objects alive: two objects that refer only to each other are collectible once nothing reachable points to either.
-> 
-> Qualifications:
+> A root is a reference the program can use without going through another object. The everyday roots are static fields and the local variables of methods that are still running, which live on a thread's stack.
 >
-> - **Generations:** a collection reclaims objects only in the generations it collects. A young-generation collection also inspects the older-heap ranges that CoreCLR's write barriers recorded in a card table as possibly pointing to young objects. It does not scan the whole older generation, and it does not reclaim older objects. An unreachable generation 2 object is therefore reclaimed only by a collection that includes generation 2.
-> - **Finalization:** an unreachable object whose finalizer is still registered survives until its finalizer has run. A later collection normally reclaims it.
-> - **Timing:** eligibility does not mean immediate reclamation or memory returned to the operating system.
-> 
-> The reachability decision covers managed memory only. Native handles and buffers need explicit cleanup, typically through `IDisposable` and `using`.
+> ```mermaid
+> flowchart LR
+>     subgraph Roots
+>         L["Stack: local variable"]
+>         S["Static field"]
+>     end
+>     subgraph Heap["Managed heap"]
+>         A["A: marked"]
+>         B["B: marked"]
+>         C["C: marked"]
+>         D["D: marked"]
+>         E["E: not marked"]
+>         F["F: not marked"]
+>         G["G: not marked"]
+>     end
+>     L --> A
+>     S --> B
+>     A --> C
+>     B --> C
+>     C --> D
+>     E --> F
+>     F --> E
+>     classDef marked stroke-width:3px;
+>     classDef unmarked stroke-dasharray: 5 5;
+>     class A,B,C,D marked;
+>     class E,F,G unmarked;
+> ```
 >
-> [Microsoft: Fundamentals of garbage collection](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) · [dotnet/runtime: CoreCLR GC write barriers](https://github.com/dotnet/runtime/blob/1bde9a53cb55127c1e154a2e98a7332477280abf/docs/design/coreclr/jit/GC-write-barriers.md#L25-L62)
+> In the diagram, marking starts at the two roots and reaches A, B, C and D, so those four objects stay. E and F point at each other, but nothing marked points at either of them, so marking never reaches them and both are freed together with G. This is why a reference cycle does not keep objects alive: the garbage collector follows paths from the roots and does not count references.
+>
+> [Microsoft: Fundamentals of garbage collection](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals)
 
 <!-- qard-id: 2ba4053d-0180-4c76-895f-5d1c1d3b988a -->
 > [!qard]- How do generations make .NET garbage collection more efficient?

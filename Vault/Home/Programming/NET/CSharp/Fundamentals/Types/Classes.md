@@ -9,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Classes"
 flashcard_uid: "0928b940"
 created: "2026-02-18T19:18:52.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-17T09:54:57.676Z"
 published: "2026-07-08T13:14:17.327Z"
 ---
 
@@ -224,7 +224,7 @@ class Derived : Base
 }
 ```
 
-With neither type initialized previously, a first `new Derived()` from unrelated code prints: Derived static → Derived field → Base static → Base body → Derived body. Both classes have explicit static constructors here. Removing them, adding earlier uses, or changing initializer dependencies can change when type initialization occurs; [[Home/Programming/NET/Runtime/Runtime|Runtime]] explains that timing separately.
+With neither type initialized previously, a first `new Derived()` from unrelated code prints: Derived static → Derived field → Base static → Base body → Derived body. Both classes have explicit static constructors here. Removing them, adding earlier uses, or changing initializer dependencies can change when type initialization occurs. A class with an explicit static constructor is initialized at a precise moment: its static field initializers run immediately before the static constructor, which is triggered by the first instance creation or the first reference to any static member of the class. Without an explicit static constructor, the static field initializers run at an implementation-dependent time before the first use of a static field of that class, so they may run earlier than that first use.
 
 # Pitfalls
 

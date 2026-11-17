@@ -10,7 +10,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/LLM"
 flashcard_uid: "1eb55a0b"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-17T09:54:57.676Z"
 published: "2026-07-08T13:28:37.410Z"
 ---
 
@@ -164,16 +164,14 @@ The DeepSeek-V3 report describes routed experts, shared experts, and an auxiliar
 > Sources: [Attention Is All You Need](https://arxiv.org/abs/1706.03762) · [BERT](https://arxiv.org/abs/1810.04805) · [T5: Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683) · [Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)
 
 <!-- qard-id: 25714b3e-c167-44ee-b9ad-aa5e3144b4dd -->
-> [!qard]- How should prompting, RAG, and fine-tuning be chosen for an LLM system?
-> The choice follows the gap that evaluation reveals. A behavior gap is first addressed with clearer instructions and examples. A knowledge gap is closed by putting the facts into context. Small, stable facts can be written directly into the prompt. Large, private or changing facts are retrieved per request with RAG. Fine-tuning addresses behavior that stays inconsistent after prompt work. The techniques solve different problems and can be combined.
+> [!qard]- When is prompting, RAG or fine-tuning the right choice?
+> The right choice depends on what the model is missing. When the model does not know what is wanted, a clearer prompt is the fix, because the instructions and examples are the only place the task is described. When the model does not know the facts, because they are private or newer than its training data, the facts have to be put into the context, and RAG does that by retrieving them for each request when they are too large or change too often to write into every prompt. When the model has both the instructions and the facts but still answers inconsistently, fine-tuning trains the wanted behavior into the weights.
 >
-> | Technique | What it changes | Fits when | Main limit |
-> |---|---|---|---|
-> | Prompting | The instructions, examples and any fixed reference text sent with each request | The model can do the task but needs a clearer specification, output format or examples, or the facts it needs are few and stable enough to write into the prompt | Instructions alone add no knowledge. Facts written into the prompt are fixed in advance and add tokens to every call, so this approach does not scale to large or changing knowledge |
-> | RAG | The evidence selected and placed in the context at request time | Answers depend on current, private or citable information that is too large or changeable to include in every prompt | Answer quality is limited by retrieval quality, and retrieved text does not reliably teach a new format or style |
-> | Fine-tuning | The model's weights, through training on examples | Format, style or task behavior remains inconsistent after prompt work | It needs training data and evaluation, and facts stored in weights are harder to update than retrieved documents |
->
-> Prompting is the usual starting point because it is the cheapest to iterate, but this is a diagnostic default, not a mandatory sequence. A fine-tuned model can still use RAG: training shapes behavior while retrieval supplies changing facts. Each change is compared on the same representative evaluation set, so an improvement can be attributed to that change.
+> | Technique | What it changes | In a support bot |
+> |---|---|---|
+> | Prompting | The instructions and examples sent with each request | Sets the tone and the reply format |
+> | RAG | The documents placed in the context for each request | Answers from the company's current help articles |
+> | Fine-tuning | The model's weights, through training on example replies | Keeps one house style across thousands of replies |
 >
 > Source: [OpenAI: Optimizing LLM accuracy](https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy)
 

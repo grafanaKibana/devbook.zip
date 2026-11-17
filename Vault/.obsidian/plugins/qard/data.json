@@ -716,8 +716,8 @@
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1794523983963,
-      "needsFixing": true
+      "flagsAt": 1794866748852,
+      "repairSince": 1794866748851
     },
     "52ff6f00-16ec-4741-9be4-2551798fc8ee": {
       "cardId": "52ff6f00-16ec-4741-9be4-2551798fc8ee",
@@ -939,8 +939,8 @@
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1794523167045,
-      "needsFixing": true
+      "flagsAt": 1794874162493,
+      "repairSince": 1794874162491
     },
     "eaf4f1d0-cffb-4bac-a7ed-b221b03c8cc7": {
       "cardId": "eaf4f1d0-cffb-4bac-a7ed-b221b03c8cc7",
@@ -1098,8 +1098,8 @@
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1794682453613,
-      "needsFixing": true
+      "flagsAt": 1794871176625,
+      "repairSince": 1794871176623
     },
     "b7e18b9e-cdfe-42fd-b2dc-265dd55cfe9a": {
       "cardId": "b7e18b9e-cdfe-42fd-b2dc-265dd55cfe9a",
@@ -1133,8 +1133,8 @@
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1794682593247,
-      "needsFixing": true
+      "flagsAt": 1794871176668,
+      "repairSince": 1794871176656
     },
     "5e311685-41d1-44ae-baf9-516faaecaf4d": {
       "cardId": "5e311685-41d1-44ae-baf9-516faaecaf4d",
@@ -1159,8 +1159,8 @@
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1794682611511,
-      "needsFixing": true
+      "flagsAt": 1794871176673,
+      "repairSince": 1794871176673
     },
     "56cd4094-8fef-44ac-9e9c-50873f2193f8": {
       "cardId": "56cd4094-8fef-44ac-9e9c-50873f2193f8",
@@ -1168,9 +1168,8 @@
       "ease": 2.5,
       "reviewCount": 0,
       "lapses": 0,
-      "flagsAt": 1794774822974,
-      "paused": true,
-      "needsFixing": true
+      "flagsAt": 1794871346538,
+      "repairSince": 1794871176681
     },
     "b6711e69-e58a-455b-a68e-cd0dbf49abe3": {
       "cardId": "b6711e69-e58a-455b-a68e-cd0dbf49abe3",
@@ -1188,9 +1187,8 @@
       "ease": 2.5,
       "reviewCount": 0,
       "lapses": 0,
-      "flagsAt": 1794774868357,
-      "paused": true,
-      "needsFixing": true
+      "flagsAt": 1794872564242,
+      "repairSince": 1794872564219
     },
     "b1c9415e-4cff-4351-ab6e-8aa0aa02435d": {
       "cardId": "b1c9415e-4cff-4351-ab6e-8aa0aa02435d",
@@ -1208,9 +1206,8 @@
       "ease": 2.5,
       "reviewCount": 0,
       "lapses": 0,
-      "flagsAt": 1794774917394,
-      "paused": true,
-      "needsFixing": true
+      "flagsAt": 1794871968411,
+      "repairSince": 1794871968392
     },
     "bb5874a0-b6ba-4318-ab29-25a6079c807a": {
       "cardId": "bb5874a0-b6ba-4318-ab29-25a6079c807a",
@@ -3623,7 +3620,7 @@
         "output": 56320,
         "cacheRead": 1425058,
         "cacheWrite": 641164,
-        "costUsd": 6.541060399999999,
+        "costUsd": 6.54106,
         "costCalls": 12
       },
       "Tutoring|tutor|claude-code|claude-sonnet-5-5": {
@@ -3641,7 +3638,7 @@
         "output": 1526,
         "cacheRead": 46638,
         "cacheWrite": 48510,
-        "costUsd": 0.4279436,
+        "costUsd": 0.427944,
         "costCalls": 1
       }
     }
@@ -3863,7 +3860,7 @@
       "cards|": 1.8
     },
     "2026-11-16": {
-      "browsing|": 10.2,
+      "browsing|": 58.2,
       "planning|": 19.2,
       "planning|AI & ML": 26.3,
       "lessons|AI & ML": 1616.4
@@ -4870,7 +4867,7 @@
           "cards|": 1.8
         },
         "2026-11-16": {
-          "browsing|": 10.2,
+          "browsing|": 58.2,
           "planning|": 19.2,
           "planning|AI & ML": 26.3,
           "lessons|AI & ML": 1616.4
