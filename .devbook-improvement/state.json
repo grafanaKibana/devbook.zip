@@ -18153,7 +18153,7 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-17T21:08:51.301854Z",
-    "elapsed_seconds": 70.03035120000001,
+    "elapsed_seconds": 75.17293890000002,
     "calls_reserved": 2,
     "responses_received": 2,
     "attempted_paths": [
@@ -18236,7 +18236,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-17T21:10:01.331709Z",
+    "checkpoint_at": "2026-11-17T21:10:06.474295Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
