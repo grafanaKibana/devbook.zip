@@ -17737,14 +17737,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-17T21:08:51.301854Z",
-    "elapsed_seconds": 4.3580179,
+    "elapsed_seconds": 9.009154800000001,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-17T21:08:55.659373Z"
+    "checkpoint_at": "2026-11-17T21:09:00.310509Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
