@@ -18350,16 +18350,17 @@
     "version": 1,
     "id": "da052ee3e40f488c9e54026f44fa75d5",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-17T21:08:51.301854Z",
-    "elapsed_seconds": 307.24979219999994,
+    "elapsed_seconds": 311.88035709999997,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/Cloud/Providers.md",
       "Vault/Home/Cloud/Cloud Cost Management.md",
       "Vault/Home/Cloud/Cloud.md",
-      "Vault/Home/Cloud/Disaster Recovery.md"
+      "Vault/Home/Cloud/Disaster Recovery.md",
+      "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -18649,10 +18650,83 @@
           },
           "model_calls": 8
         }
+      },
+      {
+        "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against its text and the NIST SP 800-145 and Azure shared-responsibility models. The opening correctly attributes IaaS, PaaS and SaaS to NIST and treats CaaS and FaaS as industry labels with product-dependent boundaries. The responsibility table is accurate and consistent: managed Kubernetes usually includes the control plane, and node duties vary. The selection rule gives a clear ordering and a limiting condition, namely that familiarity is not a host-level requirement. The consequences section covers runtime limits, retry idempotency, container portability, upgrade ownership and cost shape. The single reference is a relevant primary source. There are no cards, no known violations, and no prose, terminology or ordering defects, so editing would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+                "verdict": "CLEAN",
+                "summary": "Whole-note audit: the note is accurate, compact and decision-oriented. The opening scopes NIST versus industry labels, the table gives responsibility and usage conditions, the selection rule gives an ordering with its limit, and the consequences section adds engineering caveats. No defects were found, so leaving it unchanged avoids cosmetic churn.",
+                "page_type": "Concept — frontmatter, optional References with a bare link bullet, no Questions section, no code fences.",
+                "current_text_evidence": [
+                  {
+                    "quote": "NIST defines IaaS, PaaS, and SaaS. CaaS and FaaS are useful industry labels",
+                    "line_start": 14,
+                    "reason": "Correct attribution: NIST SP 800-145 defines only three service models, and the note flags the product-dependent boundaries of the others."
+                  },
+                  {
+                    "quote": "managed Kubernetes usually includes the control plane",
+                    "line_start": 21,
+                    "reason": "Accurate and hedged CaaS responsibility description with node duties varying by product."
+                  },
+                  {
+                    "quote": "Familiarity alone is not a host-level requirement.",
+                    "line_start": 38,
+                    "reason": "States the limiting condition on the IaaS/CaaS choice and justifies the highest-managed-layer rule."
+                  },
+                  {
+                    "quote": "Externally visible side effects need idempotency regardless of who operates the runtime.",
+                    "line_start": 43,
+                    "reason": "Gives the retry and redelivery mechanism and its consequence for serverless integrations."
+                  },
+                  {
+                    "quote": "Managed does not mean responsibility-free.",
+                    "line_start": 26,
+                    "reason": "Concise statement of the key boundary: data, access and recovery stay with the team."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the service models form one coherent comparison and a single selection decision.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The unchanged note is accurate and clear and has no known violations or remaining defects. The keep disposition is supported by the full-note audit.",
+            "change_checks": []
+          },
+          "model_calls": 10
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-17T21:13:58.551148Z",
+    "checkpoint_at": "2026-11-17T21:14:03.181714Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
