@@ -33,6 +33,8 @@ Every card-facing proposal or revision includes:
 1. **Current saved card:** the actual question and answer from the owning source, not the previous draft. Omit hidden IDs and display-only callout syntax. Preserve a raw baseline for applying and reviewing changes.
 2. **Proposed card:** one coherent replacement, or a clear removal recommendation naming where its useful coverage remains.
 
+Present both as described in [Response layout](references/response-layout.md): the two cards in a fixed, scannable place, and everything around them conversational.
+
 Follow active preferences when writing new text. If the saved baseline contains punctuation the user has prohibited in responses, render that character as an explicit codepoint escape and label the display as escaped; do not silently change the baseline or claim it is verbatim.
 
 Lead the answer with the actual answer. Explain the concrete mechanism in plain language without removing technical detail the concept depends on. For comparisons, establish common ground and compare the same aspects. Choose paragraphs, cases or a small table to fit the concept, not a house template.
