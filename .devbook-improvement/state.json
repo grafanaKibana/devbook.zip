@@ -18299,11 +18299,11 @@
     "version": 1,
     "id": "da052ee3e40f488c9e54026f44fa75d5",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-17T21:08:51.301854Z",
-    "elapsed_seconds": 280.49132269999996,
+    "elapsed_seconds": 288.42313609999997,
     "calls_reserved": 9,
-    "responses_received": 8,
+    "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/Cloud/Providers.md",
       "Vault/Home/Cloud/Cloud Cost Management.md",
@@ -18601,7 +18601,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-17T21:13:31.792679Z",
+    "checkpoint_at": "2026-11-17T21:13:39.724492Z",
     "topic": "Cloud",
     "topic_id": "cloud-b977b950",
     "current_batch": {
@@ -54981,5 +54981,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "da052ee3e40f488c9e54026f44fa75d5",
+    "topic_id": "cloud-b977b950",
+    "batch": {
+      "topic": "Cloud",
+      "topic_id": "cloud-b977b950",
+      "notes": [
+        {
+          "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+          "content": "---\ntopic: [Cloud]\nsubtopic: []\nsummary: \"Choosing how much runtime control the application needs and which responsibilities can move to a provider.\"\nlevel: [\"2\"]\npriority: High\nstatus: In Progress\npublish: true\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.507Z\"\n---\n\nCloud service models describe where provider responsibility ends and application responsibility begins. NIST defines IaaS, PaaS, and SaaS. CaaS and FaaS are useful industry labels for narrower managed-platform shapes, but their exact responsibility boundary varies by product.\n\n# Responsibility and Control\n\n| Model | Provider manages | Application team manages | Use when |\n| --- | --- | --- | --- |\n| IaaS | Physical infrastructure and virtualization | Guest OS, runtime, application, identity, data, capacity, and recovery | The workload needs a specific OS, host access, appliance, specialized machine, or migration boundary |\n| CaaS | Infrastructure and some container orchestration; managed Kubernetes usually includes the control plane | Images, workloads, cluster policy, application data, and varying node/network duties | Kubernetes APIs or a shared container scheduler are explicit requirements |\n| PaaS | Hosts, OS, and a supported application platform | Code, data, identity, configuration, scaling choices, and runtime compatibility | A web service or API fits a supported runtime and deployment contract |\n| FaaS | Event-bound execution environment and platform scaling | Function code, data, identity, trigger semantics, limits, and idempotency | Work is bounded, event-driven, and compatible with the plan's latency and duration limits |\n| SaaS | The application and underlying platform | Tenant configuration, identities, data governance, integrations, and endpoint policy | Operating the capability creates no useful product differentiation |\n\nManaged does not mean responsibility-free. Moving up the table removes lower-level infrastructure work, but data, access, configuration, dependency behavior, and application recovery remain.\n\n# Selection Rule\n\nUse the highest managed layer that satisfies the real constraints:\n\n1. Choose **SaaS** for commodity business capability.\n2. Choose **PaaS** as the default for a new application that fits the supported runtime, networking, and scaling model.\n3. Choose **FaaS** for bounded event handlers where trigger delivery, cold-start behavior, duration, and concurrency limits fit.\n4. Choose **CaaS** when the system genuinely needs Kubernetes APIs, scheduling controls, or a shared container platform.\n5. Choose **IaaS** when host-level control is itself a requirement.\n\nFamiliarity alone is not a host-level requirement. Starting with VMs or Kubernetes for an ordinary web API adds patching, capacity, policy, and recovery surfaces that a managed application platform may already solve.\n\n# Developer and Architect Consequences\n\n- **Runtime constraints:** managed platforms restrict supported versions, process lifetime, filesystem behavior, networking, or background work. Confirm these before adoption.\n- **Failure semantics:** serverless and messaging integrations can retry or redeliver. Externally visible side effects need idempotency regardless of who operates the runtime.\n- **Portability:** a container standardizes the executable and filesystem, not identity, networking, storage, messaging, or database semantics.\n- **Upgrade ownership:** the provider may patch hosts, but the team still tracks runtime retirement, SDK compatibility, schema migration, and application dependencies.\n- **Cost shape:** less infrastructure work can come with per-request pricing, minimum instances, reserved capacity, data transfer, or managed-service premiums. Compare the complete workload rather than one SKU.\n\n# References\n\n- [Azure shared responsibility in the cloud](https://learn.microsoft.com/en-us/azure/security/fundamentals/shared-responsibility)\n",
+          "hash": "43a163d432be3ffe4d567286af33c04435fa293205c76695f6d69af69484d16a",
+          "topic": "Cloud",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "rules_changed"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against its text and the NIST SP 800-145 and Azure shared-responsibility models. The opening correctly attributes IaaS, PaaS and SaaS to NIST and treats CaaS and FaaS as industry labels with product-dependent boundaries. The responsibility table is accurate and consistent: managed Kubernetes usually includes the control plane, and node duties vary. The selection rule gives a clear ordering and a limiting condition, namely that familiarity is not a host-level requirement. The consequences section covers runtime limits, retry idempotency, container portability, upgrade ownership and cost shape. The single reference is a relevant primary source. There are no cards, no known violations, and no prose, terminology or ordering defects, so editing would be cosmetic churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md": "43a163d432be3ffe4d567286af33c04435fa293205c76695f6d69af69484d16a"
+    },
+    "feedback_keys": [],
+    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Cloud/IaaS, PaaS, SaaS, CaaS.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-17T21:13:39.724484Z"
+  }
 }
