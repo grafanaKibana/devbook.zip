@@ -17733,20 +17733,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "4fbb5b3ae5574055b03df6a7bc6af60d",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-17T08:10:05.590637Z",
-    "elapsed_seconds": 16.4507244,
+    "id": "da052ee3e40f488c9e54026f44fa75d5",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-17T21:08:51.301854Z",
+    "elapsed_seconds": 0.0011828,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-17T08:10:22.040850Z",
-    "stop_reason": "awaiting_export",
-    "sealed_at": "2026-11-17T08:10:22.040868Z"
+    "checkpoint_at": "2026-11-17T21:08:51.302669Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -32474,6 +32472,23 @@
       "summary": "## 1. Note improvements\n\nReviewed 9 notes in AI & ML; improved 1. Calls: 19; elapsed: 764 seconds; stop: call_limit.\n\n- [`AI & ML/LLM/Context Engineering/RAG/Re-ranking.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-ai-ml-4edf0823-g2/Vault/Home/AI%20%26%20ML/LLM/Context%20Engineering/RAG/Re-ranking.md) — A one-line paragraph beginning with 'But' interrupts the opening explanation. Merges a stray one-sentence paragraph into the paragraph it completes. The limit reads as part of the definition.\n- [`AI & ML/LLM/Context Engineering/RAG/Re-ranking.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-ai-ml-4edf0823-g2/Vault/Home/AI%20%26%20ML/LLM/Context%20Engineering/RAG/Re-ranking.md) — The diagnostic packs several conditions into one hard-to-parse sentence. Splits the overloaded sentence with explicit subjects, keeping the k-capacity condition. Each condition can be read and recalled separately without losing precision.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz export: awaiting the source-bound native export and checks.\n",
       "diff": "diff --git a/Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md b/Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md\nindex fa0ae22..f64d4e0 100644\n--- a/Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md\t\n+++ b/Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md\t\n@@ -10,13 +10,11 @@ qard-deck: \"AI & ML\"\n qard-topic: \"LLM/Context Engineering/RAG/Re-ranking\"\n flashcard_uid: \"16bb24ca\"\n created: \"2026-02-27T15:52:18.000Z\"\n-modified: \"2026-11-12T10:29:34.513Z\"\n+modified: \"2026-11-16T22:28:25.323Z\"\n published: \"2026-07-08T13:14:17.490Z\"\n ---\n \n-Re-ranking is a second-stage rescoring or reordering pass over candidates returned by [[Retrieval]]. It may use a cross-encoder or LLM, lexical scores such as BM25, rank fusion such as RRF, or a diversity rule such as MMR. First-stage retrieval is built for fast recall across a large corpus. The second stage has a narrower job: improve the short list before context reaches the generator.\n-\n-But it cannot recover evidence that the first stage missed.\n+Re-ranking is a second-stage rescoring or reordering pass over candidates returned by [[Retrieval]]. It may use a cross-encoder or LLM, lexical scores such as BM25, rank fusion such as RRF, or a diversity rule such as MMR. First-stage retrieval is built for fast recall across a large corpus. The second stage has a narrower job: improve the short list before context reaches the generator. It cannot recover evidence that the first stage missed.\n \n First-stage retrieval, whether dense, sparse, or hybrid, might return 20–100 chunks under its initial score. A second stage applies the chosen model, lexical, fusion, or diversity signal. Only the reordered top-k continues to the generator.\n \n@@ -136,7 +134,7 @@ Mitigation: the reranker is evaluated on domain query-document pairs before adop\n \n Reranking can only reorder what retrieval found. When the relevant document never enters the candidate set, the fix belongs in [[Chunking]], [[Embeddings|embedding model selection]], query expansion, or another first-stage decision. A stronger reranker cannot recover missing evidence.\n \n-Diagnostic: low first-stage candidate Recall@N establishes an upstream ceiling. If Recall@N is high, demotion is established only when relevant evidence inside the first-stage top-k falls outside the reranked top-k at the same k. Low post-rerank Recall@k alone does not establish demotion: evidence can stay beyond k in both orders even after its rank improves, and such exclusion can occur even when the query needs no more relevant evidence than k can hold; on its own it does not show whether a larger k or a better ranking is the right repair.\n+Diagnostic: low first-stage candidate Recall@N establishes an upstream ceiling. If Recall@N is high, demotion is established only when relevant evidence inside the first-stage top-k falls outside the reranked top-k at the same k. Low post-rerank Recall@k alone does not establish demotion, because relevant evidence can sit beyond k in both orders even after its rank improves. Such exclusion can occur even when k is large enough to hold all the evidence the query needs. Neither measurement alone shows whether a larger k or a better ranking is the right repair.\n \n # Tradeoffs\n \n",
       "question_changes": []
+    },
+    "4fbb5b3ae5574055b03df6a7bc6af60d": {
+      "version": 1,
+      "id": "4fbb5b3ae5574055b03df6a7bc6af60d",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-17T08:10:05.590637Z",
+      "elapsed_seconds": 16.4507244,
+      "calls_reserved": 0,
+      "responses_received": 0,
+      "attempted_paths": [],
+      "accepted_records": [],
+      "outcomes": [],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-17T08:10:22.040850Z",
+      "stop_reason": "awaiting_export",
+      "sealed_at": "2026-11-17T08:10:22.040868Z"
     }
   },
   "feedback_workloads": {
