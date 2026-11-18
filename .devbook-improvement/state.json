@@ -18569,11 +18569,11 @@
     "version": 1,
     "id": "13404290798f425aac29aa33825e5f6d",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-18T07:46:29.321072Z",
-    "elapsed_seconds": 687.8482161000002,
+    "elapsed_seconds": 707.0659996000002,
     "calls_reserved": 19,
-    "responses_received": 18,
+    "responses_received": 19,
     "attempted_paths": [
       "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
       "Vault/Home/Data Persistence/SQL/Replication.md",
@@ -19882,7 +19882,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-18T07:57:57.168597Z",
+    "checkpoint_at": "2026-11-18T07:58:16.386380Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -58310,6 +58310,111 @@
       "Vault/Home/Data Persistence/ORMs/Entity Framework.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-18T07:57:53.088138Z"
+    "prepared_at": "2026-11-18T07:57:53.088138Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+            "verdict": "CLEAN",
+            "summary": "Whole-note audit found no factual error, unsupported condition, or card-quality defect. Claims on tracking, snapshot detection, transactions, concurrency tokens, bulk operations, split queries and migrations match EF Core behavior and are properly conditioned. The explanation order and cards are sound, so keeping the note unchanged is justified.",
+            "page_type": "Concept note — typed frontmatter, optional Questions and References present and valid; Qard IDs are protected metadata and are preserved.",
+            "current_text_evidence": [
+              {
+                "quote": "It does not make providers interchangeable or generated SQL harmless.",
+                "line_start": 19,
+                "reason": "The opening states the operating idea and the key boundary of the ORM."
+              },
+              {
+                "quote": "A projection is untracked only when its result contains no entity instances.",
+                "line_start": 46,
+                "reason": "This is an accurate, conditioned statement of the tracking rules, including the common nested-entity trap."
+              },
+              {
+                "quote": "A token protects the rows included in the check.",
+                "line_start": 82,
+                "reason": "It states the limit of optimistic concurrency and links it to isolation levels, so the mechanism, condition and exception all stay visible."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: DbContext lifetime, tracking, concurrency, migrations and performance form one coherent EF Core topic, and none is independently needed as its own note.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The note is accurate and readable, and each card tests one gradeable task. The N+1 definition, detection and fix cards are separated. Existing IDs are intact, there are no known violations, and no edit is warranted.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+          "citation_index": 1,
+          "reported_line_start": 46,
+          "resolved_line_start": 47
+        },
+        {
+          "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+          "citation_index": 2,
+          "reported_line_start": 82,
+          "resolved_line_start": 86
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Data Persistence/ORMs/Entity Framework.md": "03a3c36e101f8e49469f86995458a466e2b073a91fd181947a0d3b2ef8787a33"
+      },
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+          "verdict": "CLEAN",
+          "summary": "Whole-note audit found no factual error, unsupported condition, or card-quality defect. Claims on tracking, snapshot detection, transactions, concurrency tokens, bulk operations, split queries and migrations match EF Core behavior and are properly conditioned. The explanation order and cards are sound, so keeping the note unchanged is justified.",
+          "page_type": "Concept note — typed frontmatter, optional Questions and References present and valid; Qard IDs are protected metadata and are preserved.",
+          "current_text_evidence": [
+            {
+              "quote": "It does not make providers interchangeable or generated SQL harmless.",
+              "line_start": 19,
+              "reason": "The opening states the operating idea and the key boundary of the ORM."
+            },
+            {
+              "quote": "A projection is untracked only when its result contains no entity instances.",
+              "line_start": 47,
+              "reason": "This is an accurate, conditioned statement of the tracking rules, including the common nested-entity trap."
+            },
+            {
+              "quote": "A token protects the rows included in the check.",
+              "line_start": 86,
+              "reason": "It states the limit of optimistic concurrency and links it to isolation levels, so the mechanism, condition and exception all stay visible."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: DbContext lifetime, tracking, concurrency, migrations and performance form one coherent EF Core topic, and none is independently needed as its own note.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The note is accurate and readable, and each card tests one gradeable task. The N+1 definition, detection and fix cards are separated. Existing IDs are intact, there are no known violations, and no edit is warranted.",
+      "change_checks": []
+    }
   }
 }
