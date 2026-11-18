@@ -18412,7 +18412,7 @@
     "status": "active",
     "phase": "evaluating",
     "started_at": "2026-11-18T07:46:29.321072Z",
-    "elapsed_seconds": 358.6111029000001,
+    "elapsed_seconds": 363.8829111000001,
     "calls_reserved": 9,
     "responses_received": 9,
     "attempted_paths": [
@@ -18581,7 +18581,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-18T07:52:27.931479Z",
+    "checkpoint_at": "2026-11-18T07:52:33.203287Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -44126,7 +44126,8 @@
     "8242511d3dd2d15f9b85a9fd80d8d26d0cd43318958e1a73b2c480894df309bd": 1,
     "40ec719a6bc4661a38e0ed27b88f653d1f4a5bad179c2c88875907162c17d09e": 1,
     "3d372b65f516f3ca754a3efb1168f45e9ee0a639919872aac16d65bb0b874f4d": 1,
-    "68a6b19e78969c8e73c90b9b798eb8c448582772bab4d5e98bf3f7f5fc157269": 1
+    "68a6b19e78969c8e73c90b9b798eb8c448582772bab4d5e98bf3f7f5fc157269": 1,
+    "c88a2b09ad2df76c154bd2bfdaaead576c646cab2bf3d1063274abf7b7a2989d": 1
   },
   "invalid_proposals": {
     "9fee84ff84d9689d5dfad3c6fe703f665c86a6d2a18f6f2293d1638835cd347c": {
@@ -56685,6 +56686,7 @@
     },
     "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
     "review_repair_key": "c88a2b09ad2df76c154bd2bfdaaead576c646cab2bf3d1063274abf7b7a2989d",
-    "author_repair_pending": true
+    "author_repair_pending": true,
+    "repair_reserved": true
   }
 }
