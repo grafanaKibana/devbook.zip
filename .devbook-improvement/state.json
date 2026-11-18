@@ -18463,16 +18463,17 @@
     "version": 1,
     "id": "13404290798f425aac29aa33825e5f6d",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-18T07:46:29.321072Z",
-    "elapsed_seconds": 502.65759390000017,
+    "elapsed_seconds": 506.4645540000002,
     "calls_reserved": 13,
     "responses_received": 13,
     "attempted_paths": [
       "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
       "Vault/Home/Data Persistence/SQL/Replication.md",
       "Vault/Home/Data Persistence/Data Persistence.md",
-      "Vault/Home/Data Persistence/NoSQL/NoSQL.md"
+      "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+      "Vault/Home/Data Persistence/NoSQL/Redis.md"
     ],
     "accepted_records": [
       {
@@ -19551,10 +19552,83 @@
             "prepared_at": "2026-11-18T07:52:56.065982Z"
           }
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/NoSQL/Redis.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/NoSQL/Redis.md",
+                "outcome": "keep",
+                "reason": "Read the whole note against Redis's documented behavior. The opening and the cache-versus-idempotency-key example make the central point that memory speed does not imply durability. The workload table names a contract per structure. Persistence is accurate: RDB is a snapshot, AOF is appended after the command is applied, the appendfsync modes are right, Redis 7 multipart AOF (base plus incremental files plus manifest) is described correctly, and fork/copy-on-write costs are covered. Topology is accurate: replication is asynchronous, WAIT does not give consensus, Sentinel has a quorum for objective-down and a majority for failover authorization, Cluster has 16,384 slots, MOVED/ASK redirects, same-slot rules and hash-tag hot-slot risk. Pitfalls are consistent with the body, the code fence has a language, the existing wikilink is valid, and the note has no cards and no known violations. I found no factual error or structural gap that an edit would fix, so rewriting would only add cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note is accurate against Redis behavior, internally consistent, and has no known violations. The keep disposition is justified, and no edit would fix a concrete defect.",
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/NoSQL/Redis.md",
+                "verdict": "CLEAN",
+                "summary": "The note is accurate and self-contained. The opening cache-versus-idempotency-key contrast frames durability, persistence, replication, Sentinel, Cluster and pitfalls correctly. Remaining nits, such as the big-key subsection also holding the persistence/replication/backup distinction, are optional polish and not defects.",
+                "page_type": "Concept - typed frontmatter, optional Questions/References. The note has no Qard cards and a single bare reference link.",
+                "current_text_evidence": [
+                  {
+                    "quote": "memory speed says nothing about durability or consistency",
+                    "line_start": 14,
+                    "reason": "The opening states the central boundary and what the design must decide, so the topic is recoverable quickly."
+                  },
+                  {
+                    "quote": "A checkout idempotency key is different: losing it can repeat a payment.",
+                    "line_start": 16,
+                    "reason": "A concrete example shows why the durability contract differs between workloads using the same command."
+                  },
+                  {
+                    "quote": "Since Redis 7, multipart AOF uses one base file plus incremental files tracked by a manifest.",
+                    "line_start": 55,
+                    "reason": "A version-specific mechanism that is correct for Redis 7 and later."
+                  },
+                  {
+                    "quote": "A configured quorum is needed to agree that the primary is objectively down, while failover authorization also requires a majority of the configured Sentinel processes.",
+                    "line_start": 71,
+                    "reason": "Correctly separates the quorum for objective-down detection from the majority needed to authorize failover."
+                  },
+                  {
+                    "quote": "Hash tags such as `cart:{u42}` and `inventory:{u42}` deliberately colocate keys, which can also create a hot slot.",
+                    "line_start": 73,
+                    "reason": "The Cluster same-slot rule is stated together with its cost."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: persistence, replication, Sentinel and Cluster all serve one coherent Redis durability and availability story, and none would be independently more useful as a separate note.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 13
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-18T07:54:51.977972Z",
+    "checkpoint_at": "2026-11-18T07:54:55.784933Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
