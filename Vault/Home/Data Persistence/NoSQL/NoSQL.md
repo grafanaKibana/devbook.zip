@@ -12,7 +12,7 @@ qard-deck: "Data Persistence"
 qard-topic: "NoSQL/NoSQL"
 flashcard_uid: "96ca4645"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-18T07:52:56.065Z"
 published: "2026-07-08T13:14:17.351Z"
 ---
 
@@ -61,7 +61,7 @@ Data is often shaped around known reads because keeping related values in one pa
 > [!qard]- When is a non-relational store a poor fit for a service?
 > A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.
 >
-> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. An engine whose transactions are limited to one document or partition provides that atomicity only when both accounts lie inside one such scope. Under a partition-scoped transaction, two separate account documents in the same partition can still commit together. When the accounts fall outside every atomic scope the engine supports, such as in different partitions, the application must coordinate the transfer itself.
+> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. That works only when both accounts fall inside the engine's atomic scope, such as one partition. Otherwise the application must coordinate the transfer itself.
 > - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.
 > - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.
 > 
