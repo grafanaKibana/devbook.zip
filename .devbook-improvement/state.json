@@ -18611,10 +18611,10 @@
   "focused_workload": {
     "version": 1,
     "id": "13404290798f425aac29aa33825e5f6d",
-    "status": "active",
-    "phase": "evaluating",
+    "status": "sealed",
+    "phase": "sealed",
     "started_at": "2026-11-18T07:46:29.321072Z",
-    "elapsed_seconds": 740.9756023000002,
+    "elapsed_seconds": 744.8547430000002,
     "calls_reserved": 19,
     "responses_received": 19,
     "attempted_paths": [
@@ -19989,7 +19989,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-18T07:58:50.295983Z",
+    "checkpoint_at": "2026-11-18T07:58:54.175125Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -20454,7 +20454,9 @@
         "check": "dotnet run --no-cache --file DevBook.Tooling/Scripts/ValidateVault.cs -- --all --repo-root ..",
         "result": "passed"
       }
-    ]
+    ],
+    "stop_reason": "call_limit",
+    "sealed_at": "2026-11-18T07:58:54.175130Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
