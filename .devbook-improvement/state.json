@@ -18410,13 +18410,14 @@
     "version": 1,
     "id": "13404290798f425aac29aa33825e5f6d",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-18T07:46:29.321072Z",
-    "elapsed_seconds": 202.8564781,
+    "elapsed_seconds": 206.42391990000002,
     "calls_reserved": 5,
     "responses_received": 5,
     "attempted_paths": [
-      "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md"
+      "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+      "Vault/Home/Data Persistence/SQL/Replication.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -18492,10 +18493,21 @@
           },
           "model_calls": 2
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+        "outcome": "proposal_blocked",
+        "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait-for.html",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait-for.html",
+          "model_calls": 5
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-18T07:49:52.176853Z",
+    "checkpoint_at": "2026-11-18T07:49:55.744296Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
