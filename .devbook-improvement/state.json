@@ -18410,11 +18410,11 @@
     "version": 1,
     "id": "13404290798f425aac29aa33825e5f6d",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-18T07:46:29.321072Z",
-    "elapsed_seconds": 313.17402720000007,
+    "elapsed_seconds": 331.6490201000001,
     "calls_reserved": 9,
-    "responses_received": 8,
+    "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
       "Vault/Home/Data Persistence/SQL/Replication.md",
@@ -18581,7 +18581,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-18T07:51:42.494403Z",
+    "checkpoint_at": "2026-11-18T07:52:00.969395Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -56345,6 +56345,129 @@
       "Vault/Home/Data Persistence/NoSQL/NoSQL.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-18T07:51:38.262079Z"
+    "prepared_at": "2026-11-18T07:51:38.262079Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The note is largely accurate, but the Qard answer's first bullet repeats the same transaction-scope point in three consecutive sentences. The keep disposition does not address this, so the audit target is unresolved.",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The prose, diagram and table are accurate and appropriately hedged. The single Qard answer's first bullet restates the transaction-scope condition three times, which hurts retrieval under pressure. A concise rewrite that keeps the ID is warranted.",
+            "page_type": "FolderNote — Datacore block, frontmatter and Qard ID protected; Questions and References optional.",
+            "current_text_evidence": [
+              {
+                "quote": "NoSQL names a loose group of data stores rather than one database model.",
+                "line_start": 19,
+                "reason": "The opening frames the topic quickly and accurately, with the overlap of product boundaries."
+              },
+              {
+                "quote": "Each family makes a different operation cheap.",
+                "line_start": 43,
+                "reason": "The mechanism section is clear and decision-oriented, with the tradeoff of duplicated state named."
+              },
+              {
+                "quote": "Under a partition-scoped transaction, two separate account documents in the same partition can still commit together.",
+                "line_start": 65,
+                "reason": "This sentence restates the preceding one (atomicity only when both accounts lie inside one scope) and is followed by a third restatement for the opposite case, so the bullet is repetitive."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the note is a coherent overview of NoSQL families and the choice criteria, and its parts are not independently useful topics.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Clarity / question answer quality",
+                "location": "Questions, first bullet of the Qard answer (line 65)",
+                "evidence": "The bullet says atomicity holds 'only when both accounts lie inside one such scope', then 'two separate account documents in the same partition can still commit together', then 'When the accounts fall outside every atomic scope ... the application must coordinate'. All three sentences state the same condition.",
+                "effect": "The answer is padded and harder to retrieve and grade on the first read. The disposition claimed that no readability problem existed.",
+                "fix": "Collapse to two sentences: a transfer needs both balance changes to commit together. That works only if both accounts fall inside the engine's atomic scope, such as one partition. Otherwise the application must coordinate it. Keep the existing qard-id."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "FAIL",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+          "citation_index": 1,
+          "reported_line_start": 43,
+          "resolved_line_start": 42
+        },
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+          "citation_index": 2,
+          "reported_line_start": 65,
+          "resolved_line_start": 64
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Data Persistence/NoSQL/NoSQL.md": "b5b0a74cf998f5beddfee716037bd0da007ae85123fd24a16efb2e667ac3f4d5"
+      },
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The note is largely accurate, but the Qard answer's first bullet repeats the same transaction-scope point in three consecutive sentences. The keep disposition does not address this, so the audit target is unresolved.",
+      "notes": [
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "The prose, diagram and table are accurate and appropriately hedged. The single Qard answer's first bullet restates the transaction-scope condition three times, which hurts retrieval under pressure. A concise rewrite that keeps the ID is warranted.",
+          "page_type": "FolderNote — Datacore block, frontmatter and Qard ID protected; Questions and References optional.",
+          "current_text_evidence": [
+            {
+              "quote": "NoSQL names a loose group of data stores rather than one database model.",
+              "line_start": 19,
+              "reason": "The opening frames the topic quickly and accurately, with the overlap of product boundaries."
+            },
+            {
+              "quote": "Each family makes a different operation cheap.",
+              "line_start": 42,
+              "reason": "The mechanism section is clear and decision-oriented, with the tradeoff of duplicated state named."
+            },
+            {
+              "quote": "Under a partition-scoped transaction, two separate account documents in the same partition can still commit together.",
+              "line_start": 64,
+              "reason": "This sentence restates the preceding one (atomicity only when both accounts lie inside one scope) and is followed by a third restatement for the opposite case, so the bullet is repetitive."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: the note is a coherent overview of NoSQL families and the choice criteria, and its parts are not independently useful topics.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Clarity / question answer quality",
+              "location": "Questions, first bullet of the Qard answer (line 65)",
+              "evidence": "The bullet says atomicity holds 'only when both accounts lie inside one such scope', then 'two separate account documents in the same partition can still commit together', then 'When the accounts fall outside every atomic scope ... the application must coordinate'. All three sentences state the same condition.",
+              "effect": "The answer is padded and harder to retrieve and grade on the first read. The disposition claimed that no readability problem existed.",
+              "fix": "Collapse to two sentences: a transfer needs both balance changes to commit together. That works only if both accounts fall inside the engine's atomic scope, such as one partition. Otherwise the application must coordinate it. Keep the existing qard-id."
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "FAIL",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
