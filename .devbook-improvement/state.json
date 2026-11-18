@@ -18410,11 +18410,11 @@
     "version": 1,
     "id": "13404290798f425aac29aa33825e5f6d",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-18T07:46:29.321072Z",
-    "elapsed_seconds": 367.6979203000001,
+    "elapsed_seconds": 386.7456247000001,
     "calls_reserved": 10,
-    "responses_received": 9,
+    "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
       "Vault/Home/Data Persistence/SQL/Replication.md",
@@ -18581,7 +18581,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-18T07:52:37.018297Z",
+    "checkpoint_at": "2026-11-18T07:52:56.066001Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -56549,12 +56549,39 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+          "expected_hash": "b5b0a74cf998f5beddfee716037bd0da007ae85123fd24a16efb2e667ac3f4d5",
+          "before": "<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->\n> [!qard]- When is a non-relational store a poor fit for a service?\n> A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.\n>\n> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. An engine whose transactions are limited to one document or partition provides that atomicity only when both accounts lie inside one such scope. Under a partition-scoped transaction, two separate account documents in the same partition can still commit together. When the accounts fall outside every atomic scope the engine supports, such as in different partitions, the application must coordinate the transfer itself.\n> - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.\n> - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.\n> \n> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models) · [Azure Cosmos DB: Database transactions and optimistic concurrency](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)",
+          "after": "<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->\n> [!qard]- When is a non-relational store a poor fit for a service?\n> A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.\n>\n> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. That works only when both accounts fall inside the engine's atomic scope, such as one partition. Otherwise the application must coordinate the transfer itself.\n> - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.\n> - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.\n> \n> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models) · [Azure Cosmos DB: Database transactions and optimistic concurrency](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)",
+          "reason": "Collapses three consecutive restatements of the same atomic-scope condition into one condition and its consequence, keeping the qard-id and all other bullets.",
+          "kind": "rewrite",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Poor fit when required guarantees (constraints, multi-record transactions, changing queries) exceed the engine's scope",
+            "Cross-record invariants move into application code",
+            "Transfers are atomic only within the engine's atomic scope, such as one partition; otherwise the application coordinates",
+            "New queries may require remodeling",
+            "The NoSQL label implies no single consistency model"
+          ],
+          "sources": [
+            {
+              "url": "https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency",
+              "claim": "Cosmos DB transactions are scoped to a logical partition, so atomicity across records holds only inside that scope.",
+              "version": "not version-specific"
+            }
+          ],
+          "feedback_keys": [],
+          "problem": "The first answer bullet states the same atomic-scope condition three times in consecutive sentences, which pads the answer and slows retrieval.",
+          "reader_benefit": "The answer is shorter and easier to recall and grade while keeping the transfer example and the scope condition."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note. The opening correctly frames NoSQL as a loose family with overlapping product boundaries, and it ties store choice to a dominant access pattern. The Mermaid decision flow matches that prose. How It Works makes the key trade visible: shaping data around known reads cuts remote joins but duplicates state and adds repair work. The CAP paragraph avoids attributing one consistency behavior to the NoSQL label (Cassandra tunable consistency versus leader-bound replica sets). The tradeoffs table hedges every cell as engine-specific, which is accurate. The single Qard tests one dependent task (poor-fit conditions and why) and is consistent with the note. Its transaction-scope claim matches the Cosmos DB documentation, where transactions are scoped to a logical partition. The card has a valid ID and answer-side sources. The Datacore block and frontmatter are intact, there are no code-fence language gaps, and the References section holds one real Microsoft source. There are no known violations. No factual defect, learning gap or readability problem justified an edit."
+          "outcome": "changed",
+          "reason": "Whole note re-audited: opening, diagram, mechanism, CAP paragraph and table are accurate and appropriately hedged. The one real defect was the Qard's first bullet repeating the transaction-scope condition three times; condensing it keeps the example and condition while making the answer easier to retrieve. ID and metadata preserved."
         }
       ],
       "feedback": []
@@ -56569,8 +56596,10 @@
       "Vault/Home/Data Persistence/NoSQL/NoSQL.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-18T07:51:38.262079Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-18T07:52:56.065982Z",
+    "review_repair_key": "c88a2b09ad2df76c154bd2bfdaaead576c646cab2bf3d1063274abf7b7a2989d",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The note is largely accurate, but the Qard answer's first bullet repeats the same transaction-scope point in three consecutive sentences. The keep disposition does not address this, so the audit target is unresolved.",
       "notes": [
@@ -56633,60 +56662,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The note is largely accurate, but the Qard answer's first bullet repeats the same transaction-scope point in three consecutive sentences. The keep disposition does not address this, so the audit target is unresolved.",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The prose, diagram and table are accurate and appropriately hedged. The single Qard answer's first bullet restates the transaction-scope condition three times, which hurts retrieval under pressure. A concise rewrite that keeps the ID is warranted.",
-          "page_type": "FolderNote — Datacore block, frontmatter and Qard ID protected; Questions and References optional.",
-          "current_text_evidence": [
-            {
-              "quote": "NoSQL names a loose group of data stores rather than one database model.",
-              "line_start": 19,
-              "reason": "The opening frames the topic quickly and accurately, with the overlap of product boundaries."
-            },
-            {
-              "quote": "Each family makes a different operation cheap.",
-              "line_start": 42,
-              "reason": "The mechanism section is clear and decision-oriented, with the tradeoff of duplicated state named."
-            },
-            {
-              "quote": "Under a partition-scoped transaction, two separate account documents in the same partition can still commit together.",
-              "line_start": 64,
-              "reason": "This sentence restates the preceding one (atomicity only when both accounts lie inside one scope) and is followed by a third restatement for the opposite case, so the bullet is repetitive."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the note is a coherent overview of NoSQL families and the choice criteria, and its parts are not independently useful topics.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Clarity / question answer quality",
-              "location": "Questions, first bullet of the Qard answer (line 65)",
-              "evidence": "The bullet says atomicity holds 'only when both accounts lie inside one such scope', then 'two separate account documents in the same partition can still commit together', then 'When the accounts fall outside every atomic scope ... the application must coordinate'. All three sentences state the same condition.",
-              "effect": "The answer is padded and harder to retrieve and grade on the first read. The disposition claimed that no readability problem existed.",
-              "fix": "Collapse to two sentences: a transfer needs both balance changes to commit together. That works only if both accounts fall inside the engine's atomic scope, such as one partition. Otherwise the application must coordinate it. Keep the existing qard-id."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "FAIL",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "c88a2b09ad2df76c154bd2bfdaaead576c646cab2bf3d1063274abf7b7a2989d",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
