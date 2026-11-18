@@ -18412,7 +18412,7 @@
     "status": "active",
     "phase": "author_completed",
     "started_at": "2026-11-18T07:46:29.321072Z",
-    "elapsed_seconds": 199.5766348,
+    "elapsed_seconds": 202.8564781,
     "calls_reserved": 5,
     "responses_received": 5,
     "attempted_paths": [
@@ -18495,7 +18495,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-18T07:49:48.897010Z",
+    "checkpoint_at": "2026-11-18T07:49:52.176853Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -43478,12 +43478,37 @@
       },
       "proposal": {
         "version": 1,
-        "edits": [],
+        "edits": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+            "expected_hash": "9b2a043d9c42a3b7d2aaa4669c597dc61c5f0c228fecf1a62b3feaf1020390f6",
+            "before": "PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare `pg_last_wal_replay_lsn()` (or an equivalent replay-position signal) with the required commit LSN.",
+            "after": "Before PostgreSQL 19, application or custom database logic must poll and compare `pg_last_wal_replay_lsn()` (or an equivalent replay-position signal) with the required commit LSN. PostgreSQL 19 adds the top-level `WAIT FOR LSN` command, which on a standby blocks until replay reaches the target LSN (default `standby_replay` mode, with `TIMEOUT` and `NO_THROW` options). It errors on a primary and compares only the numeric LSN, not the timeline.",
+            "reason": "Replaces the outdated and misnamed claim that PostgreSQL has no built-in wait facility with the version-specific polling and WAIT FOR LSN behavior.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "Before PostgreSQL 19, wait for a replay LSN by polling",
+              "PostgreSQL 19 provides WAIT FOR LSN, which waits for standby replay",
+              "WAIT FOR LSN works on a standby and compares the numeric LSN only"
+            ],
+            "sources": [
+              {
+                "url": "https://www.postgresql.org/docs/19/sql-wait-for.html",
+                "claim": "WAIT FOR LSN waits for a standby to reach a target LSN, with MODE (default standby_replay), TIMEOUT and NO_THROW options. It errors on a primary and does not track timelines.",
+                "version": "PostgreSQL 19"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The Read-your-writes paragraph says PostgreSQL has no built-in wait facility and names a nonexistent pg_wait_for_lsn, which is outdated as of PostgreSQL 19.",
+            "reader_benefit": "Readers get an accurate, version-qualified picture of how to wait for a replay position, including the built-in command and its limits."
+          }
+        ],
         "dispositions": [
           {
             "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-            "outcome": "keep",
-            "reason": "Audited the full note against its text and general knowledge of the cited product documentation. The three models (single-leader, multi-leader, leaderless) are explained with mechanisms and limits. The SQL Server claims are consistent: WSFC on Windows, Pacemaker with CLUSTER_TYPE = EXTERNAL on Linux, CLUSTER_TYPE = NONE for read scale with manual failover, and ApplicationIntent=ReadOnly routing. The Dynamo and DynamoDB distinction is accurate, and W + R > N is correctly stated as insufficient for linearizability. The lag anomalies, position-token protocol, WAL LSN comparison, timeline caveat after promotion, replication slot and max_slot_wal_keep_size guidance, and the CAP/PACELC wording all hold. The sync-versus-replay distinction is correct. The explanation order works: models, lag, routing, token, failover, CAP, tradeoffs, pitfalls. Some repetition between the routing and token sections is tolerable because each adds a different condition. The note has no Qard cards and no known violations. The References are three bare, relevant links. No verified defect justifies an edit."
+            "outcome": "changed",
+            "reason": "The audit found one verified, version-specific error: PostgreSQL 19 provides WAIT FOR LSN. The note now separates the pre-19 polling approach from the built-in command and states its limits. The rest of the note was checked and left unchanged. That covers the replication models, SQL Server cluster types, Dynamo versus DynamoDB, the lag anomalies, the position-token protocol, failover, CAP/PACELC, and the slot guidance."
           }
         ],
         "feedback": []
@@ -43498,86 +43523,10 @@
         "Vault/Home/Data Persistence/SQL/Replication.md": ""
       },
       "prepared_source_version": 1,
-      "prepared_at": "2026-11-18T07:48:10.453086Z",
-      "review_evidence": {
-        "raw_review": {
-          "verdict": "CHANGES REQUIRED",
-          "overall_reason": "The keep disposition missed a version-specific factual error. The note says PostgreSQL has no built-in wait-for-LSN facility, but PostgreSQL 19 adds a WAIT FOR LSN command for exactly this read-your-writes case. The claim is also misnamed, since there is no pg_wait_for_lsn function.",
-          "notes": [
-            {
-              "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-              "verdict": "CHANGES REQUIRED",
-              "summary": "The note is mostly strong and accurate, but its Read-your-writes paragraph says PostgreSQL has no built-in wait-for-LSN facility. PostgreSQL 19 provides a WAIT FOR LSN command that waits for standby replay, so the claim is outdated. A version-qualified correction is needed.",
-              "page_type": "Concept note. It has no Qard cards, Questions are absent (acceptable), and References are bare links.",
-              "current_text_evidence": [
-                {
-                  "quote": "PostgreSQL has no built-in `pg_wait_for_lsn`.",
-                  "line_start": 38,
-                  "reason": "Outdated and misnamed. PostgreSQL 19 adds the WAIT FOR LSN command (default mode standby_replay, with TIMEOUT and NO_THROW options), which is the built-in mechanism for this need."
-                },
-                {
-                  "quote": "A weakly specified boundary produces stale reads, acknowledged-write loss, or two writable primaries.",
-                  "line_start": 9,
-                  "reason": "The opening states the operating idea and the key boundary clearly. This part of the note is strong."
-                },
-                {
-                  "quote": "WAL positions are ordered values, not strings for lexicographic comparison.",
-                  "line_start": 71,
-                  "reason": "The position-token section is accurate and gives mechanism, example and conditions."
-                }
-              ],
-              "target_resolution": "UNRESOLVED",
-              "split_suggestion": "No split: the topics (models, lag, routing tokens, failover, CAP, tradeoffs) form one coherent replication-consistency explanation.",
-              "findings": [
-                {
-                  "severity": "High",
-                  "dimension": "Accuracy",
-                  "location": "# Replication Lag, item 1 Read-your-writes",
-                  "evidence": "The note says: PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare pg_last_wal_replay_lsn().",
-                  "effect": "The note misleads readers about current PostgreSQL. As of PostgreSQL 19 the WAIT FOR LSN command exists, so manual polling is no longer the only option. The pg_wait_for_lsn name is not a real feature either.",
-                  "fix": "Rewrite to say that before PostgreSQL 19 the application must poll pg_last_wal_replay_lsn() against the commit LSN. From version 19 the WAIT FOR LSN command can block until the standby replays to the token. Also note that the Position Token section assumes polling and should mention the command as an alternative. Verify against the PostgreSQL 19 documentation."
-                }
-              ],
-              "source_checks": [],
-              "rejection_equivalence": [],
-              "quality": {
-                "accuracy": "FAIL",
-                "clarity": "PASS",
-                "question_quality": "NOT APPLICABLE",
-                "identity_safety": "NOT APPLICABLE",
-                "rules_compliance": "PASS"
-              }
-            }
-          ],
-          "change_checks": []
-        },
-        "bindings": [
-          {
-            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-            "citation_index": 0,
-            "reported_line_start": 38,
-            "resolved_line_start": 60
-          },
-          {
-            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-            "citation_index": 1,
-            "reported_line_start": 9,
-            "resolved_line_start": 14
-          },
-          {
-            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-            "citation_index": 2,
-            "reported_line_start": 71,
-            "resolved_line_start": 97
-          }
-        ],
-        "source_hashes": {
-          "Vault/Home/Data Persistence/SQL/Replication.md": "9b2a043d9c42a3b7d2aaa4669c597dc61c5f0c228fecf1a62b3feaf1020390f6"
-        },
-        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-      },
-      "completed_review": {
+      "prepared_at": "2026-11-18T07:49:48.896980Z",
+      "review_repair_key": "68a6b19e78969c8e73c90b9b798eb8c448582772bab4d5e98bf3f7f5fc157269",
+      "repair_reserved": true,
+      "repair_review": {
         "verdict": "CHANGES REQUIRED",
         "overall_reason": "The keep disposition missed a version-specific factual error. The note says PostgreSQL has no built-in wait-for-LSN facility, but PostgreSQL 19 adds a WAIT FOR LSN command for exactly this read-your-writes case. The claim is also misnamed, since there is no pg_wait_for_lsn function.",
         "notes": [
@@ -43628,58 +43577,25 @@
         ],
         "change_checks": []
       },
+      "repair_previous_proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+            "outcome": "keep",
+            "reason": "Audited the full note against its text and general knowledge of the cited product documentation. The three models (single-leader, multi-leader, leaderless) are explained with mechanisms and limits. The SQL Server claims are consistent: WSFC on Windows, Pacemaker with CLUSTER_TYPE = EXTERNAL on Linux, CLUSTER_TYPE = NONE for read scale with manual failover, and ApplicationIntent=ReadOnly routing. The Dynamo and DynamoDB distinction is accurate, and W + R > N is correctly stated as insufficient for linearizability. The lag anomalies, position-token protocol, WAL LSN comparison, timeline caveat after promotion, replication slot and max_slot_wal_keep_size guidance, and the CAP/PACELC wording all hold. The sync-versus-replay distinction is correct. The explanation order works: models, lag, routing, token, failover, CAP, tradeoffs, pitfalls. Some repetition between the routing and token sections is tolerable because each adds a different condition. The note has no Qard cards and no known violations. The References are three bare, relevant links. No verified defect justifies an edit."
+          }
+        ],
+        "feedback": []
+      },
+      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "feedback_snapshot": [],
       "blocked_review": {
-        "verdict": "CHANGES REQUIRED",
-        "overall_reason": "The keep disposition missed a version-specific factual error. The note says PostgreSQL has no built-in wait-for-LSN facility, but PostgreSQL 19 adds a WAIT FOR LSN command for exactly this read-your-writes case. The claim is also misnamed, since there is no pg_wait_for_lsn function.",
-        "notes": [
-          {
-            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-            "verdict": "CHANGES REQUIRED",
-            "summary": "The note is mostly strong and accurate, but its Read-your-writes paragraph says PostgreSQL has no built-in wait-for-LSN facility. PostgreSQL 19 provides a WAIT FOR LSN command that waits for standby replay, so the claim is outdated. A version-qualified correction is needed.",
-            "page_type": "Concept note. It has no Qard cards, Questions are absent (acceptable), and References are bare links.",
-            "current_text_evidence": [
-              {
-                "quote": "PostgreSQL has no built-in `pg_wait_for_lsn`.",
-                "line_start": 60,
-                "reason": "Outdated and misnamed. PostgreSQL 19 adds the WAIT FOR LSN command (default mode standby_replay, with TIMEOUT and NO_THROW options), which is the built-in mechanism for this need."
-              },
-              {
-                "quote": "A weakly specified boundary produces stale reads, acknowledged-write loss, or two writable primaries.",
-                "line_start": 14,
-                "reason": "The opening states the operating idea and the key boundary clearly. This part of the note is strong."
-              },
-              {
-                "quote": "WAL positions are ordered values, not strings for lexicographic comparison.",
-                "line_start": 97,
-                "reason": "The position-token section is accurate and gives mechanism, example and conditions."
-              }
-            ],
-            "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: the topics (models, lag, routing tokens, failover, CAP, tradeoffs) form one coherent replication-consistency explanation.",
-            "findings": [
-              {
-                "severity": "High",
-                "dimension": "Accuracy",
-                "location": "# Replication Lag, item 1 Read-your-writes",
-                "evidence": "The note says: PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare pg_last_wal_replay_lsn().",
-                "effect": "The note misleads readers about current PostgreSQL. As of PostgreSQL 19 the WAIT FOR LSN command exists, so manual polling is no longer the only option. The pg_wait_for_lsn name is not a real feature either.",
-                "fix": "Rewrite to say that before PostgreSQL 19 the application must poll pg_last_wal_replay_lsn() against the commit LSN. From version 19 the WAIT FOR LSN command can block until the standby replays to the token. Also note that the Position Token section assumes polling and should mention the command as an alternative. Verify against the PostgreSQL 19 documentation."
-              }
-            ],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "FAIL",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "change_checks": []
+        "stage": "deterministic_application",
+        "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait-for.html"
       },
-      "feedback_snapshot": []
+      "failed_at": "2026-11-18T07:49:52.175993Z"
     },
     "devops-e491b463": {
       "workload_id": "dbc8c57dd5974251a623c83b7bde80ab",
@@ -54191,6 +54107,380 @@
         "reason": "card edit must replace one complete active Qard block including adjacent metadata"
       },
       "failed_at": "2026-11-15T19:11:56.816041Z"
+    },
+    "63c714d207cc518d69df207e55d11b82c8db98ce699618039908498ce08f1a31": {
+      "workload_id": "13404290798f425aac29aa33825e5f6d",
+      "topic_id": "data-persistence-4ea34db4",
+      "batch": {
+        "topic": "Data Persistence",
+        "topic_id": "data-persistence-4ea34db4",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+            "content": "---\ntopic: [Data Persistence]\nsubtopic: [SQL]\nsummary: \"Keeping copies of data on multiple nodes to spread reads and survive failures.\"\nlevel: [\"4\"]\npriority: High\nstatus: In Progress\npublish: true\ncreated: \"2026-02-28T20:52:28.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.354Z\"\n---\n\nReplication maintains copies of data on multiple nodes for availability, disaster recovery, and read distribution. Copying the initial state is the easy part. The lasting contract is how each later write is ordered, acknowledged, replayed, and exposed while nodes fail and networks partition. A weakly specified boundary produces stale reads, acknowledged-write loss, or two writable primaries.\n\n# Replication Models\n\n## Single-Leader (Leader-Follower)\n\nOne designated leader accepts writes. Followers receive an ordered change stream and may serve eligible reads after applying it. PostgreSQL streaming replication, MySQL binlog replication, SQL Server Always On Availability Groups, and MongoDB replica sets use this broad shape. In a Windows high-availability SQL Server availability group, the group moves log records to secondary replicas while Windows Server Failover Clustering (WSFC) supplies health detection, quorum, and failover orchestration. A Linux high-availability availability group instead uses `CLUSTER_TYPE = EXTERNAL` with Pacemaker as the external cluster manager.\n\nSQL Server can route connections marked with `ApplicationIntent=ReadOnly` through a configured availability-group listener and read-only routing list. Other systems expose replica endpoints or leave routing to middleware. Adding followers increases only the read capacity that can tolerate their replay boundary. Write throughput remains bounded by the leader.\n\nFailover requires electing a new leader. SQL Server high-availability availability groups use WSFC on Windows or Pacemaker on Linux. PostgreSQL commonly relies on an external manager such as Patroni or repmgr. A SQL Server availability group created with `CLUSTER_TYPE = NONE` has no cluster manager, is intended primarily for read scale, and supports only manual failover. It therefore supplies replication and readable replicas, not automatic high availability or cluster-managed fencing.\n\nA voting quorum prevents two candidates in the same voting configuration from both winning a majority. It does not stop an isolated former leader from continuing to serve stale endpoints or accept writes. Leases, endpoint ownership, and fencing must revoke that old leader before the replacement is writable. In a clusterless `NONE` configuration, the operator must establish that ownership boundary during manual failover rather than assuming the availability group will arbitrate it.\n\n## Multi-Leader\n\nMultiple leaders accept writes independently and exchange changes. CouchDB deployments and SQL Server peer-to-peer transactional replication can use this shape. A regional write need not wait for every remote leader, improving write locality and partition availability.\n\nThe cost is unavoidable conflict semantics when two leaders change the same logical value concurrently:\n\n- **Last-write-wins (LWW)** keeps the write selected by a timestamp or product-specific ordering rule. It converges, but silently discards another update and is unsafe for quantities such as money or inventory.\n- **CRDTs** merge concurrent operations according to a data type's algebra. They work only when the domain can be represented by those merge rules.\n- **Application-level resolution** exposes competing versions to domain logic. It preserves context at the cost of more state and recovery work.\n\nIn SQL Server peer-to-peer transactional replication, the recommended practice is write partitioning (each node owns a non-overlapping subset of rows). Peer-to-peer replication offers conflict detection but is not a general-purpose conflict resolution platform like CRDTs. Avoiding same-row writes across nodes is the primary design constraint.\n\n## Leaderless (Dynamo-style)\n\nIn Dynamo-style systems such as the original Amazon Dynamo, Cassandra, and Riak, several replicas can accept an operation and the client or coordinator can use tunable `N`, `W`, and `R` quorums. `W + R > N` creates overlap between the acknowledged write and read sets, but overlap alone does not serialize concurrent writes or prove linearizability. Version reconciliation, sloppy quorums, membership changes, and failure handling still matter. Read repair and anti-entropy reconcile divergent replicas under product-specific rules.\n\nAmazon DynamoDB's contract should not be inferred from the Dynamo name. DynamoDB does not expose client-selected `R` and `W` values. Single-Region operations document eventual or strong reads where supported, while transactions have their own contract. Global tables now offer multi-Region eventual consistency (MREC) and, in supported configurations, multi-Region strong consistency (MRSC). Those documented modes are the boundary. The generic quorum formula is not a DynamoDB API guarantee.\n\n## Model Comparison\n\n| Dimension | Single-Leader | Multi-Leader | Leaderless |\n|---|---|---|---|\n| Write scaling | Bounded by leader | Multiple write points | Any node |\n| Conflict handling | Leader orders writes. Failover still needs fencing | Mandatory | Version/conflict handling plus repair |\n| Acknowledgement and reads | Sync acknowledgement can protect commit durability. Replica observation still depends on replay and routing | Cross-leader acknowledgement and conflict policy are separate | Quorum settings influence overlap but do not remove concurrent-write reconciliation |\n| Failover complexity | Election, endpoint ownership, and fencing | Per-leader failure and conflict recovery | No leader election, but membership and quorum availability still matter |\n| Typical use | PostgreSQL, SQL Server AG | CouchDB, geo-distributed write topologies | Cassandra, Riak, original Dynamo-style systems |\n\n# Replication Lag\n\nWith asynchronous acknowledgement, the leader confirms a write without waiting for a standby. A follower may already have the change or may be behind. Once reads are distributed across that gap, three recurring anomalies appear:\n\n**1. Read-your-writes**: a form is submitted and immediately reloaded through a stale follower, making the committed change appear to disappear. Route the follow-up read to the leader or carry the write position and wait for a follower to reach it. PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare `pg_last_wal_replay_lsn()` (or an equivalent replay-position signal) with the required commit LSN. MongoDB exposes causal-consistency tokens for the same boundary.\n\n**2. Monotonic reads**: one read returns newer data and the next is routed to a follower that has applied less. Carry the highest observed commit or replay position, then use the primary or a follower that has reached it. Sticky routing is only an optimization while the chosen follower remains available and does not move backward. It does not preserve monotonicity across failover by itself.\n\n**3. Consistent prefix reads**: causally related writes appear out of order, such as a reply appearing before its original message. Preserve the dependency in one ordered commit stream or explicit causal metadata, and read from a position that includes the prerequisite. A shared partition key helps only when the partition supplies that ordering contract through failover.\n\n**Sync vs async tradeoff**: synchronous acknowledgement adds a configured standby to the commit path. With the required `synchronous_commit`, standby selection, and storage settings, the acknowledgement can protect the commit across failover to an eligible standby. It does not make every follower read linearizable: WAL may be durable on a standby before that standby has replayed it. A read that must observe the commit still needs the primary or a replay position at or beyond the commit token. Asynchronous acknowledgement removes the standby wait. An acknowledged commit is then at risk on leader failure only when no eligible survivor received it.\n\n# Replica Read Boundary\n\nSingle-leader replication can offload only reads whose consistency contract the selected follower can satisfy. Writes, write-capable transactions, and work with unknown intent stay on the primary. An explicitly read-only transaction pins one eligible follower. A read that must observe a prior commit uses the primary or a follower whose replay position has reached that commit token. Middleware can classify statements, but the application usually knows whether a causal dependency exists.\n\n![[Data Persistence/Data Persistence-Replication-18120000-1.png|theme-aware]]\n\nThe diagram shows the middleware topology but not its lag or transaction boundary. A safe routing contract is stricter:\n\n- A read-only transaction pins one eligible replica until commit or rollback. Its statements never hop between nodes.\n- Staleness-tolerant reads may use a healthy replica inside the configured lag budget.\n- A read that must observe a prior write uses the primary or a replica whose replay position reaches the request token.\n- The application or API marks the causal requirement because a SQL proxy usually cannot infer it from statement text.\n\n# Position Token\n\nA fixed time window only guesses at lag. A position token states the required boundary:\n\n1. Commit the write on the primary.\n2. Return a token at or after that commit's WAL position.\n3. Carry the token with the next read.\n4. Compare each standby's replay position with the required position.\n5. If replay is behind, wait within a strict budget, route to the primary, or return an explicit consistency failure.\n\n```text\nrequired = 0/16B6C50\nreplica  = 0/16B6A20  -> wait or primary\nreplica  = 0/16B6D10  -> eligible\n```\n\nWAL positions are ordered values, not strings for lexicographic comparison. A later `pg_current_wal_lsn()` is conservative when concurrent commits advance the primary beyond the target commit. `pg_last_wal_replay_lsn()` reports a standby's replay boundary.\n\n![[Data Persistence/Data Persistence-Replication-18120000.png|theme-aware]]\n\nThe topology image still omits the causal condition: a replica is eligible for a read-after-write request only after replay reaches that request's token.\n\n# Failover and Overload\n\nA PostgreSQL position from an old timeline may not be directly comparable after promotion. The routing protocol must translate the boundary through failover metadata or send consistency-sensitive reads to the new primary until follower eligibility can be proved.\n\nFollower waits need a strict budget. An unbounded wait turns replication lag into request exhaustion, while sending every lagged read to the primary can overload the node needed for recovery. Lag, wait duration, primary fallback, and rejected consistency-sensitive reads are separate operational signals.\n\n| Failure | Required behavior |\n| --- | --- |\n| Replica behind token | Bounded wait, primary fallback, or explicit consistency failure |\n| Replica fails during an idempotent read | Retry another eligible replica with the same token and retry budget |\n| Primary changes during a transaction | Fail the pinned transaction. Retry the whole transaction only when safe |\n| Commit acknowledgement is lost | Treat the result as unknown. Resolve by idempotency key or reconciliation |\n\n# CAP and PACELC\n\n**CAP** applies to an operation when a network **P**artition prevents replicas from coordinating. Preserving **C**onsistency means rejecting or delaying an operation that cannot meet the required single-copy behavior. Preserving **A**vailability means returning a non-error response from every non-failing node and accepting that replicas may diverge. Topology alone does not make a system CP or AP. A quorum-protected write that is refused without enough voters chooses consistency for that operation, while a write accepted on both sides for later reconciliation chooses availability. Synchronous versus asynchronous durability acknowledgement is a separate contract.\n\nCAP describes the partition case. **PACELC** adds the normal-operation choice between latency and coordination. Synchronous commit pays latency for an acknowledgement boundary. It is not, by itself, a linearizable follower-read protocol. Observing that commit still requires primary routing or proof that the chosen follower replayed the required position. See [[Home/Software Architecture/Distributed Systems/CAP theorem|CAP theorem]] for the theorem's full boundary.\n\n# Tradeoffs\n\nReplication and sharding solve different bottlenecks. Replication copies ownership. Sharding divides it.\n\n| Dimension | Replication | Sharding |\n|---|---|---|\n| What it solves | Read throughput, HA, DR | Write throughput, dataset size |\n| Write scaling | Writes still bottleneck at leader | Writes distributed across shards |\n| Durability and observation | Async acknowledgement can expose an acknowledged commit to failover loss when no eligible survivor received it. Sync acknowledgement can protect durability, while replica reads still need replay-aware routing | Each shard has its own replication and read-consistency boundary |\n| Operational complexity | Medium | High |\n| When to reach for | Read bottleneck, HA requirement | Write or storage bottleneck |\n\nThe measured bottleneck and consistency contract determine the mechanism. Followers scale eligible reads. A cache removes repeated origin work at a freshness cost. Sharding distributes ownership and creates cross-shard coordination. These are alternatives and combinations, not mandatory stages of one progression.\n\n# Pitfalls\n\n**Split-brain**: a network partition leaves the old primary accepting writes while a new primary is promoted elsewhere. A voting quorum limits who can be elected in the current configuration. Fencing is the separate act that revokes the old leader's ability to write. Promotion must couple both boundaries.\n\n**Replication lag as a silent consistency violation**: a follower passes a basic health check while remaining behind the primary. Reads return stale data without an error. Mitigation: monitor replication positions and time-based lag (`pg_stat_replication` in PostgreSQL, `sys.dm_hadr_database_replica_states` in SQL Server), alert when the workload's budget is exceeded, and include eligibility rather than mere connectivity in routing health.\n\n**Connection pool not refreshing after failover**: infrastructure promotes a new primary, but the application keeps pooled connections to the old endpoint. Requests continue to fail after the database is available. Mitigation: use the product's failover-aware endpoint and driver behavior, retire broken pooled connections promptly, and bound retries so reconnection does not amplify the outage.\n\n**Replication slot accumulation (PostgreSQL)**: a follower goes offline while its replication slot remains. PostgreSQL retains WAL needed from the slot's confirmed position and can exhaust primary storage. Mitigation: monitor inactive slots in `pg_replication_slots`, set `max_slot_wal_keep_size` so an abandoned slot cannot retain WAL without limit, and remove slots whose consumers have exceeded the recovery policy. Exceeding that limit can invalidate the slot, so the consumer may need to be rebuilt.\n\n**Last-write-wins data loss**: in multi-leader or leaderless setups using LWW, concurrent writes to the same key silently discard one of them. No error is returned to the client. Mitigation: use CRDTs for data shapes that support them, or implement application-level conflict detection (version vectors, conditional writes) for critical data like account balances or inventory counts.\n\n# References\n\n- [SQL Server Always On availability groups](https://learn.microsoft.com/sql/database-engine/availability-groups/windows/overview-of-always-on-availability-groups-sql-server?view=sql-server-ver17)\n- [DynamoDB read consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)\n- [PostgreSQL warm standby](https://www.postgresql.org/docs/current/warm-standby.html)\n",
+            "hash": "9b2a043d9c42a3b7d2aaa4669c597dc61c5f0c228fecf1a62b3feaf1020390f6",
+            "topic": "Data Persistence",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+            "expected_hash": "9b2a043d9c42a3b7d2aaa4669c597dc61c5f0c228fecf1a62b3feaf1020390f6",
+            "before": "PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare `pg_last_wal_replay_lsn()` (or an equivalent replay-position signal) with the required commit LSN.",
+            "after": "Before PostgreSQL 19, application or custom database logic must poll and compare `pg_last_wal_replay_lsn()` (or an equivalent replay-position signal) with the required commit LSN. PostgreSQL 19 adds the top-level `WAIT FOR LSN` command, which on a standby blocks until replay reaches the target LSN (default `standby_replay` mode, with `TIMEOUT` and `NO_THROW` options). It errors on a primary and compares only the numeric LSN, not the timeline.",
+            "reason": "Replaces the outdated and misnamed claim that PostgreSQL has no built-in wait facility with the version-specific polling and WAIT FOR LSN behavior.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "Before PostgreSQL 19, wait for a replay LSN by polling",
+              "PostgreSQL 19 provides WAIT FOR LSN, which waits for standby replay",
+              "WAIT FOR LSN works on a standby and compares the numeric LSN only"
+            ],
+            "sources": [
+              {
+                "url": "https://www.postgresql.org/docs/19/sql-wait-for.html",
+                "claim": "WAIT FOR LSN waits for a standby to reach a target LSN, with MODE (default standby_replay), TIMEOUT and NO_THROW options. It errors on a primary and does not track timelines.",
+                "version": "PostgreSQL 19"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The Read-your-writes paragraph says PostgreSQL has no built-in wait facility and names a nonexistent pg_wait_for_lsn, which is outdated as of PostgreSQL 19.",
+            "reader_benefit": "Readers get an accurate, version-qualified picture of how to wait for a replay position, including the built-in command and its limits."
+          }
+        ],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+            "outcome": "changed",
+            "reason": "The audit found one verified, version-specific error: PostgreSQL 19 provides WAIT FOR LSN. The note now separates the pre-19 polling approach from the built-in command and states its limits. The rest of the note was checked and left unchanged. That covers the replication models, SQL Server cluster types, Dynamo versus DynamoDB, the lag anomalies, the position-token protocol, failover, CAP/PACELC, and the slot guidance."
+          }
+        ],
+        "feedback": []
+      },
+      "source_hashes": {
+        "Vault/Home/Data Persistence/SQL/Replication.md": "9b2a043d9c42a3b7d2aaa4669c597dc61c5f0c228fecf1a62b3feaf1020390f6"
+      },
+      "feedback_keys": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/Data Persistence/SQL/Replication.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-18T07:49:48.896980Z",
+      "review_repair_key": "68a6b19e78969c8e73c90b9b798eb8c448582772bab4d5e98bf3f7f5fc157269",
+      "repair_reserved": true,
+      "repair_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep disposition missed a version-specific factual error. The note says PostgreSQL has no built-in wait-for-LSN facility, but PostgreSQL 19 adds a WAIT FOR LSN command for exactly this read-your-writes case. The claim is also misnamed, since there is no pg_wait_for_lsn function.",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is mostly strong and accurate, but its Read-your-writes paragraph says PostgreSQL has no built-in wait-for-LSN facility. PostgreSQL 19 provides a WAIT FOR LSN command that waits for standby replay, so the claim is outdated. A version-qualified correction is needed.",
+            "page_type": "Concept note. It has no Qard cards, Questions are absent (acceptable), and References are bare links.",
+            "current_text_evidence": [
+              {
+                "quote": "PostgreSQL has no built-in `pg_wait_for_lsn`.",
+                "line_start": 60,
+                "reason": "Outdated and misnamed. PostgreSQL 19 adds the WAIT FOR LSN command (default mode standby_replay, with TIMEOUT and NO_THROW options), which is the built-in mechanism for this need."
+              },
+              {
+                "quote": "A weakly specified boundary produces stale reads, acknowledged-write loss, or two writable primaries.",
+                "line_start": 14,
+                "reason": "The opening states the operating idea and the key boundary clearly. This part of the note is strong."
+              },
+              {
+                "quote": "WAL positions are ordered values, not strings for lexicographic comparison.",
+                "line_start": 97,
+                "reason": "The position-token section is accurate and gives mechanism, example and conditions."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the topics (models, lag, routing tokens, failover, CAP, tradeoffs) form one coherent replication-consistency explanation.",
+            "findings": [
+              {
+                "severity": "High",
+                "dimension": "Accuracy",
+                "location": "# Replication Lag, item 1 Read-your-writes",
+                "evidence": "The note says: PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare pg_last_wal_replay_lsn().",
+                "effect": "The note misleads readers about current PostgreSQL. As of PostgreSQL 19 the WAIT FOR LSN command exists, so manual polling is no longer the only option. The pg_wait_for_lsn name is not a real feature either.",
+                "fix": "Rewrite to say that before PostgreSQL 19 the application must poll pg_last_wal_replay_lsn() against the commit LSN. From version 19 the WAIT FOR LSN command can block until the standby replays to the token. Also note that the Position Token section assumes polling and should mention the command as an alternative. Verify against the PostgreSQL 19 documentation."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "repair_previous_proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+            "outcome": "keep",
+            "reason": "Audited the full note against its text and general knowledge of the cited product documentation. The three models (single-leader, multi-leader, leaderless) are explained with mechanisms and limits. The SQL Server claims are consistent: WSFC on Windows, Pacemaker with CLUSTER_TYPE = EXTERNAL on Linux, CLUSTER_TYPE = NONE for read scale with manual failover, and ApplicationIntent=ReadOnly routing. The Dynamo and DynamoDB distinction is accurate, and W + R > N is correctly stated as insufficient for linearizability. The lag anomalies, position-token protocol, WAL LSN comparison, timeline caveat after promotion, replication slot and max_slot_wal_keep_size guidance, and the CAP/PACELC wording all hold. The sync-versus-replay distinction is correct. The explanation order works: models, lag, routing, token, failover, CAP, tradeoffs, pitfalls. Some repetition between the routing and token sections is tolerable because each adds a different condition. The note has no Qard cards and no known violations. The References are three bare, relevant links. No verified defect justifies an edit."
+          }
+        ],
+        "feedback": []
+      },
+      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "feedback_snapshot": [],
+      "blocked_review": {
+        "stage": "deterministic_application",
+        "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait-for.html"
+      },
+      "failed_at": "2026-11-18T07:49:52.175993Z"
+    },
+    "b80216db119bd30dd00321d44be6ef71215cd7cb069ccffb2c1f981a50bcff28": {
+      "workload_id": "13404290798f425aac29aa33825e5f6d",
+      "topic_id": "data-persistence-4ea34db4",
+      "batch": {
+        "topic": "Data Persistence",
+        "topic_id": "data-persistence-4ea34db4",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+            "content": "---\ntopic: [Data Persistence]\nsubtopic: [SQL]\nsummary: \"Keeping copies of data on multiple nodes to spread reads and survive failures.\"\nlevel: [\"4\"]\npriority: High\nstatus: In Progress\npublish: true\ncreated: \"2026-02-28T20:52:28.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.354Z\"\n---\n\nReplication maintains copies of data on multiple nodes for availability, disaster recovery, and read distribution. Copying the initial state is the easy part. The lasting contract is how each later write is ordered, acknowledged, replayed, and exposed while nodes fail and networks partition. A weakly specified boundary produces stale reads, acknowledged-write loss, or two writable primaries.\n\n# Replication Models\n\n## Single-Leader (Leader-Follower)\n\nOne designated leader accepts writes. Followers receive an ordered change stream and may serve eligible reads after applying it. PostgreSQL streaming replication, MySQL binlog replication, SQL Server Always On Availability Groups, and MongoDB replica sets use this broad shape. In a Windows high-availability SQL Server availability group, the group moves log records to secondary replicas while Windows Server Failover Clustering (WSFC) supplies health detection, quorum, and failover orchestration. A Linux high-availability availability group instead uses `CLUSTER_TYPE = EXTERNAL` with Pacemaker as the external cluster manager.\n\nSQL Server can route connections marked with `ApplicationIntent=ReadOnly` through a configured availability-group listener and read-only routing list. Other systems expose replica endpoints or leave routing to middleware. Adding followers increases only the read capacity that can tolerate their replay boundary. Write throughput remains bounded by the leader.\n\nFailover requires electing a new leader. SQL Server high-availability availability groups use WSFC on Windows or Pacemaker on Linux. PostgreSQL commonly relies on an external manager such as Patroni or repmgr. A SQL Server availability group created with `CLUSTER_TYPE = NONE` has no cluster manager, is intended primarily for read scale, and supports only manual failover. It therefore supplies replication and readable replicas, not automatic high availability or cluster-managed fencing.\n\nA voting quorum prevents two candidates in the same voting configuration from both winning a majority. It does not stop an isolated former leader from continuing to serve stale endpoints or accept writes. Leases, endpoint ownership, and fencing must revoke that old leader before the replacement is writable. In a clusterless `NONE` configuration, the operator must establish that ownership boundary during manual failover rather than assuming the availability group will arbitrate it.\n\n## Multi-Leader\n\nMultiple leaders accept writes independently and exchange changes. CouchDB deployments and SQL Server peer-to-peer transactional replication can use this shape. A regional write need not wait for every remote leader, improving write locality and partition availability.\n\nThe cost is unavoidable conflict semantics when two leaders change the same logical value concurrently:\n\n- **Last-write-wins (LWW)** keeps the write selected by a timestamp or product-specific ordering rule. It converges, but silently discards another update and is unsafe for quantities such as money or inventory.\n- **CRDTs** merge concurrent operations according to a data type's algebra. They work only when the domain can be represented by those merge rules.\n- **Application-level resolution** exposes competing versions to domain logic. It preserves context at the cost of more state and recovery work.\n\nIn SQL Server peer-to-peer transactional replication, the recommended practice is write partitioning (each node owns a non-overlapping subset of rows). Peer-to-peer replication offers conflict detection but is not a general-purpose conflict resolution platform like CRDTs. Avoiding same-row writes across nodes is the primary design constraint.\n\n## Leaderless (Dynamo-style)\n\nIn Dynamo-style systems such as the original Amazon Dynamo, Cassandra, and Riak, several replicas can accept an operation and the client or coordinator can use tunable `N`, `W`, and `R` quorums. `W + R > N` creates overlap between the acknowledged write and read sets, but overlap alone does not serialize concurrent writes or prove linearizability. Version reconciliation, sloppy quorums, membership changes, and failure handling still matter. Read repair and anti-entropy reconcile divergent replicas under product-specific rules.\n\nAmazon DynamoDB's contract should not be inferred from the Dynamo name. DynamoDB does not expose client-selected `R` and `W` values. Single-Region operations document eventual or strong reads where supported, while transactions have their own contract. Global tables now offer multi-Region eventual consistency (MREC) and, in supported configurations, multi-Region strong consistency (MRSC). Those documented modes are the boundary. The generic quorum formula is not a DynamoDB API guarantee.\n\n## Model Comparison\n\n| Dimension | Single-Leader | Multi-Leader | Leaderless |\n|---|---|---|---|\n| Write scaling | Bounded by leader | Multiple write points | Any node |\n| Conflict handling | Leader orders writes. Failover still needs fencing | Mandatory | Version/conflict handling plus repair |\n| Acknowledgement and reads | Sync acknowledgement can protect commit durability. Replica observation still depends on replay and routing | Cross-leader acknowledgement and conflict policy are separate | Quorum settings influence overlap but do not remove concurrent-write reconciliation |\n| Failover complexity | Election, endpoint ownership, and fencing | Per-leader failure and conflict recovery | No leader election, but membership and quorum availability still matter |\n| Typical use | PostgreSQL, SQL Server AG | CouchDB, geo-distributed write topologies | Cassandra, Riak, original Dynamo-style systems |\n\n# Replication Lag\n\nWith asynchronous acknowledgement, the leader confirms a write without waiting for a standby. A follower may already have the change or may be behind. Once reads are distributed across that gap, three recurring anomalies appear:\n\n**1. Read-your-writes**: a form is submitted and immediately reloaded through a stale follower, making the committed change appear to disappear. Route the follow-up read to the leader or carry the write position and wait for a follower to reach it. PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare `pg_last_wal_replay_lsn()` (or an equivalent replay-position signal) with the required commit LSN. MongoDB exposes causal-consistency tokens for the same boundary.\n\n**2. Monotonic reads**: one read returns newer data and the next is routed to a follower that has applied less. Carry the highest observed commit or replay position, then use the primary or a follower that has reached it. Sticky routing is only an optimization while the chosen follower remains available and does not move backward. It does not preserve monotonicity across failover by itself.\n\n**3. Consistent prefix reads**: causally related writes appear out of order, such as a reply appearing before its original message. Preserve the dependency in one ordered commit stream or explicit causal metadata, and read from a position that includes the prerequisite. A shared partition key helps only when the partition supplies that ordering contract through failover.\n\n**Sync vs async tradeoff**: synchronous acknowledgement adds a configured standby to the commit path. With the required `synchronous_commit`, standby selection, and storage settings, the acknowledgement can protect the commit across failover to an eligible standby. It does not make every follower read linearizable: WAL may be durable on a standby before that standby has replayed it. A read that must observe the commit still needs the primary or a replay position at or beyond the commit token. Asynchronous acknowledgement removes the standby wait. An acknowledged commit is then at risk on leader failure only when no eligible survivor received it.\n\n# Replica Read Boundary\n\nSingle-leader replication can offload only reads whose consistency contract the selected follower can satisfy. Writes, write-capable transactions, and work with unknown intent stay on the primary. An explicitly read-only transaction pins one eligible follower. A read that must observe a prior commit uses the primary or a follower whose replay position has reached that commit token. Middleware can classify statements, but the application usually knows whether a causal dependency exists.\n\n![[Data Persistence/Data Persistence-Replication-18120000-1.png|theme-aware]]\n\nThe diagram shows the middleware topology but not its lag or transaction boundary. A safe routing contract is stricter:\n\n- A read-only transaction pins one eligible replica until commit or rollback. Its statements never hop between nodes.\n- Staleness-tolerant reads may use a healthy replica inside the configured lag budget.\n- A read that must observe a prior write uses the primary or a replica whose replay position reaches the request token.\n- The application or API marks the causal requirement because a SQL proxy usually cannot infer it from statement text.\n\n# Position Token\n\nA fixed time window only guesses at lag. A position token states the required boundary:\n\n1. Commit the write on the primary.\n2. Return a token at or after that commit's WAL position.\n3. Carry the token with the next read.\n4. Compare each standby's replay position with the required position.\n5. If replay is behind, wait within a strict budget, route to the primary, or return an explicit consistency failure.\n\n```text\nrequired = 0/16B6C50\nreplica  = 0/16B6A20  -> wait or primary\nreplica  = 0/16B6D10  -> eligible\n```\n\nWAL positions are ordered values, not strings for lexicographic comparison. A later `pg_current_wal_lsn()` is conservative when concurrent commits advance the primary beyond the target commit. `pg_last_wal_replay_lsn()` reports a standby's replay boundary.\n\n![[Data Persistence/Data Persistence-Replication-18120000.png|theme-aware]]\n\nThe topology image still omits the causal condition: a replica is eligible for a read-after-write request only after replay reaches that request's token.\n\n# Failover and Overload\n\nA PostgreSQL position from an old timeline may not be directly comparable after promotion. The routing protocol must translate the boundary through failover metadata or send consistency-sensitive reads to the new primary until follower eligibility can be proved.\n\nFollower waits need a strict budget. An unbounded wait turns replication lag into request exhaustion, while sending every lagged read to the primary can overload the node needed for recovery. Lag, wait duration, primary fallback, and rejected consistency-sensitive reads are separate operational signals.\n\n| Failure | Required behavior |\n| --- | --- |\n| Replica behind token | Bounded wait, primary fallback, or explicit consistency failure |\n| Replica fails during an idempotent read | Retry another eligible replica with the same token and retry budget |\n| Primary changes during a transaction | Fail the pinned transaction. Retry the whole transaction only when safe |\n| Commit acknowledgement is lost | Treat the result as unknown. Resolve by idempotency key or reconciliation |\n\n# CAP and PACELC\n\n**CAP** applies to an operation when a network **P**artition prevents replicas from coordinating. Preserving **C**onsistency means rejecting or delaying an operation that cannot meet the required single-copy behavior. Preserving **A**vailability means returning a non-error response from every non-failing node and accepting that replicas may diverge. Topology alone does not make a system CP or AP. A quorum-protected write that is refused without enough voters chooses consistency for that operation, while a write accepted on both sides for later reconciliation chooses availability. Synchronous versus asynchronous durability acknowledgement is a separate contract.\n\nCAP describes the partition case. **PACELC** adds the normal-operation choice between latency and coordination. Synchronous commit pays latency for an acknowledgement boundary. It is not, by itself, a linearizable follower-read protocol. Observing that commit still requires primary routing or proof that the chosen follower replayed the required position. See [[Home/Software Architecture/Distributed Systems/CAP theorem|CAP theorem]] for the theorem's full boundary.\n\n# Tradeoffs\n\nReplication and sharding solve different bottlenecks. Replication copies ownership. Sharding divides it.\n\n| Dimension | Replication | Sharding |\n|---|---|---|\n| What it solves | Read throughput, HA, DR | Write throughput, dataset size |\n| Write scaling | Writes still bottleneck at leader | Writes distributed across shards |\n| Durability and observation | Async acknowledgement can expose an acknowledged commit to failover loss when no eligible survivor received it. Sync acknowledgement can protect durability, while replica reads still need replay-aware routing | Each shard has its own replication and read-consistency boundary |\n| Operational complexity | Medium | High |\n| When to reach for | Read bottleneck, HA requirement | Write or storage bottleneck |\n\nThe measured bottleneck and consistency contract determine the mechanism. Followers scale eligible reads. A cache removes repeated origin work at a freshness cost. Sharding distributes ownership and creates cross-shard coordination. These are alternatives and combinations, not mandatory stages of one progression.\n\n# Pitfalls\n\n**Split-brain**: a network partition leaves the old primary accepting writes while a new primary is promoted elsewhere. A voting quorum limits who can be elected in the current configuration. Fencing is the separate act that revokes the old leader's ability to write. Promotion must couple both boundaries.\n\n**Replication lag as a silent consistency violation**: a follower passes a basic health check while remaining behind the primary. Reads return stale data without an error. Mitigation: monitor replication positions and time-based lag (`pg_stat_replication` in PostgreSQL, `sys.dm_hadr_database_replica_states` in SQL Server), alert when the workload's budget is exceeded, and include eligibility rather than mere connectivity in routing health.\n\n**Connection pool not refreshing after failover**: infrastructure promotes a new primary, but the application keeps pooled connections to the old endpoint. Requests continue to fail after the database is available. Mitigation: use the product's failover-aware endpoint and driver behavior, retire broken pooled connections promptly, and bound retries so reconnection does not amplify the outage.\n\n**Replication slot accumulation (PostgreSQL)**: a follower goes offline while its replication slot remains. PostgreSQL retains WAL needed from the slot's confirmed position and can exhaust primary storage. Mitigation: monitor inactive slots in `pg_replication_slots`, set `max_slot_wal_keep_size` so an abandoned slot cannot retain WAL without limit, and remove slots whose consumers have exceeded the recovery policy. Exceeding that limit can invalidate the slot, so the consumer may need to be rebuilt.\n\n**Last-write-wins data loss**: in multi-leader or leaderless setups using LWW, concurrent writes to the same key silently discard one of them. No error is returned to the client. Mitigation: use CRDTs for data shapes that support them, or implement application-level conflict detection (version vectors, conditional writes) for critical data like account balances or inventory counts.\n\n# References\n\n- [SQL Server Always On availability groups](https://learn.microsoft.com/sql/database-engine/availability-groups/windows/overview-of-always-on-availability-groups-sql-server?view=sql-server-ver17)\n- [DynamoDB read consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)\n- [PostgreSQL warm standby](https://www.postgresql.org/docs/current/warm-standby.html)\n",
+            "hash": "9b2a043d9c42a3b7d2aaa4669c597dc61c5f0c228fecf1a62b3feaf1020390f6",
+            "topic": "Data Persistence",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+            "outcome": "keep",
+            "reason": "Audited the full note against its text and general knowledge of the cited product documentation. The three models (single-leader, multi-leader, leaderless) are explained with mechanisms and limits. The SQL Server claims are consistent: WSFC on Windows, Pacemaker with CLUSTER_TYPE = EXTERNAL on Linux, CLUSTER_TYPE = NONE for read scale with manual failover, and ApplicationIntent=ReadOnly routing. The Dynamo and DynamoDB distinction is accurate, and W + R > N is correctly stated as insufficient for linearizability. The lag anomalies, position-token protocol, WAL LSN comparison, timeline caveat after promotion, replication slot and max_slot_wal_keep_size guidance, and the CAP/PACELC wording all hold. The sync-versus-replay distinction is correct. The explanation order works: models, lag, routing, token, failover, CAP, tradeoffs, pitfalls. Some repetition between the routing and token sections is tolerable because each adds a different condition. The note has no Qard cards and no known violations. The References are three bare, relevant links. No verified defect justifies an edit."
+          }
+        ],
+        "feedback": []
+      },
+      "source_hashes": {
+        "Vault/Home/Data Persistence/SQL/Replication.md": "9b2a043d9c42a3b7d2aaa4669c597dc61c5f0c228fecf1a62b3feaf1020390f6"
+      },
+      "feedback_keys": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/Data Persistence/SQL/Replication.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-18T07:48:10.453086Z",
+      "review_evidence": {
+        "raw_review": {
+          "verdict": "CHANGES REQUIRED",
+          "overall_reason": "The keep disposition missed a version-specific factual error. The note says PostgreSQL has no built-in wait-for-LSN facility, but PostgreSQL 19 adds a WAIT FOR LSN command for exactly this read-your-writes case. The claim is also misnamed, since there is no pg_wait_for_lsn function.",
+          "notes": [
+            {
+              "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+              "verdict": "CHANGES REQUIRED",
+              "summary": "The note is mostly strong and accurate, but its Read-your-writes paragraph says PostgreSQL has no built-in wait-for-LSN facility. PostgreSQL 19 provides a WAIT FOR LSN command that waits for standby replay, so the claim is outdated. A version-qualified correction is needed.",
+              "page_type": "Concept note. It has no Qard cards, Questions are absent (acceptable), and References are bare links.",
+              "current_text_evidence": [
+                {
+                  "quote": "PostgreSQL has no built-in `pg_wait_for_lsn`.",
+                  "line_start": 38,
+                  "reason": "Outdated and misnamed. PostgreSQL 19 adds the WAIT FOR LSN command (default mode standby_replay, with TIMEOUT and NO_THROW options), which is the built-in mechanism for this need."
+                },
+                {
+                  "quote": "A weakly specified boundary produces stale reads, acknowledged-write loss, or two writable primaries.",
+                  "line_start": 9,
+                  "reason": "The opening states the operating idea and the key boundary clearly. This part of the note is strong."
+                },
+                {
+                  "quote": "WAL positions are ordered values, not strings for lexicographic comparison.",
+                  "line_start": 71,
+                  "reason": "The position-token section is accurate and gives mechanism, example and conditions."
+                }
+              ],
+              "target_resolution": "UNRESOLVED",
+              "split_suggestion": "No split: the topics (models, lag, routing tokens, failover, CAP, tradeoffs) form one coherent replication-consistency explanation.",
+              "findings": [
+                {
+                  "severity": "High",
+                  "dimension": "Accuracy",
+                  "location": "# Replication Lag, item 1 Read-your-writes",
+                  "evidence": "The note says: PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare pg_last_wal_replay_lsn().",
+                  "effect": "The note misleads readers about current PostgreSQL. As of PostgreSQL 19 the WAIT FOR LSN command exists, so manual polling is no longer the only option. The pg_wait_for_lsn name is not a real feature either.",
+                  "fix": "Rewrite to say that before PostgreSQL 19 the application must poll pg_last_wal_replay_lsn() against the commit LSN. From version 19 the WAIT FOR LSN command can block until the standby replays to the token. Also note that the Position Token section assumes polling and should mention the command as an alternative. Verify against the PostgreSQL 19 documentation."
+                }
+              ],
+              "source_checks": [],
+              "rejection_equivalence": [],
+              "quality": {
+                "accuracy": "FAIL",
+                "clarity": "PASS",
+                "question_quality": "NOT APPLICABLE",
+                "identity_safety": "NOT APPLICABLE",
+                "rules_compliance": "PASS"
+              }
+            }
+          ],
+          "change_checks": []
+        },
+        "bindings": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+            "citation_index": 0,
+            "reported_line_start": 38,
+            "resolved_line_start": 60
+          },
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+            "citation_index": 1,
+            "reported_line_start": 9,
+            "resolved_line_start": 14
+          },
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+            "citation_index": 2,
+            "reported_line_start": 71,
+            "resolved_line_start": 97
+          }
+        ],
+        "source_hashes": {
+          "Vault/Home/Data Persistence/SQL/Replication.md": "9b2a043d9c42a3b7d2aaa4669c597dc61c5f0c228fecf1a62b3feaf1020390f6"
+        },
+        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+      },
+      "completed_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep disposition missed a version-specific factual error. The note says PostgreSQL has no built-in wait-for-LSN facility, but PostgreSQL 19 adds a WAIT FOR LSN command for exactly this read-your-writes case. The claim is also misnamed, since there is no pg_wait_for_lsn function.",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is mostly strong and accurate, but its Read-your-writes paragraph says PostgreSQL has no built-in wait-for-LSN facility. PostgreSQL 19 provides a WAIT FOR LSN command that waits for standby replay, so the claim is outdated. A version-qualified correction is needed.",
+            "page_type": "Concept note. It has no Qard cards, Questions are absent (acceptable), and References are bare links.",
+            "current_text_evidence": [
+              {
+                "quote": "PostgreSQL has no built-in `pg_wait_for_lsn`.",
+                "line_start": 60,
+                "reason": "Outdated and misnamed. PostgreSQL 19 adds the WAIT FOR LSN command (default mode standby_replay, with TIMEOUT and NO_THROW options), which is the built-in mechanism for this need."
+              },
+              {
+                "quote": "A weakly specified boundary produces stale reads, acknowledged-write loss, or two writable primaries.",
+                "line_start": 14,
+                "reason": "The opening states the operating idea and the key boundary clearly. This part of the note is strong."
+              },
+              {
+                "quote": "WAL positions are ordered values, not strings for lexicographic comparison.",
+                "line_start": 97,
+                "reason": "The position-token section is accurate and gives mechanism, example and conditions."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the topics (models, lag, routing tokens, failover, CAP, tradeoffs) form one coherent replication-consistency explanation.",
+            "findings": [
+              {
+                "severity": "High",
+                "dimension": "Accuracy",
+                "location": "# Replication Lag, item 1 Read-your-writes",
+                "evidence": "The note says: PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare pg_last_wal_replay_lsn().",
+                "effect": "The note misleads readers about current PostgreSQL. As of PostgreSQL 19 the WAIT FOR LSN command exists, so manual polling is no longer the only option. The pg_wait_for_lsn name is not a real feature either.",
+                "fix": "Rewrite to say that before PostgreSQL 19 the application must poll pg_last_wal_replay_lsn() against the commit LSN. From version 19 the WAIT FOR LSN command can block until the standby replays to the token. Also note that the Position Token section assumes polling and should mention the command as an alternative. Verify against the PostgreSQL 19 documentation."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "blocked_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The keep disposition missed a version-specific factual error. The note says PostgreSQL has no built-in wait-for-LSN facility, but PostgreSQL 19 adds a WAIT FOR LSN command for exactly this read-your-writes case. The claim is also misnamed, since there is no pg_wait_for_lsn function.",
+        "notes": [
+          {
+            "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is mostly strong and accurate, but its Read-your-writes paragraph says PostgreSQL has no built-in wait-for-LSN facility. PostgreSQL 19 provides a WAIT FOR LSN command that waits for standby replay, so the claim is outdated. A version-qualified correction is needed.",
+            "page_type": "Concept note. It has no Qard cards, Questions are absent (acceptable), and References are bare links.",
+            "current_text_evidence": [
+              {
+                "quote": "PostgreSQL has no built-in `pg_wait_for_lsn`.",
+                "line_start": 60,
+                "reason": "Outdated and misnamed. PostgreSQL 19 adds the WAIT FOR LSN command (default mode standby_replay, with TIMEOUT and NO_THROW options), which is the built-in mechanism for this need."
+              },
+              {
+                "quote": "A weakly specified boundary produces stale reads, acknowledged-write loss, or two writable primaries.",
+                "line_start": 14,
+                "reason": "The opening states the operating idea and the key boundary clearly. This part of the note is strong."
+              },
+              {
+                "quote": "WAL positions are ordered values, not strings for lexicographic comparison.",
+                "line_start": 97,
+                "reason": "The position-token section is accurate and gives mechanism, example and conditions."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: the topics (models, lag, routing tokens, failover, CAP, tradeoffs) form one coherent replication-consistency explanation.",
+            "findings": [
+              {
+                "severity": "High",
+                "dimension": "Accuracy",
+                "location": "# Replication Lag, item 1 Read-your-writes",
+                "evidence": "The note says: PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare pg_last_wal_replay_lsn().",
+                "effect": "The note misleads readers about current PostgreSQL. As of PostgreSQL 19 the WAIT FOR LSN command exists, so manual polling is no longer the only option. The pg_wait_for_lsn name is not a real feature either.",
+                "fix": "Rewrite to say that before PostgreSQL 19 the application must poll pg_last_wal_replay_lsn() against the commit LSN. From version 19 the WAIT FOR LSN command can block until the standby replays to the token. Also note that the Position Token section assumes polling and should mention the command as an alternative. Verify against the PostgreSQL 19 documentation."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "feedback_snapshot": []
     }
   },
   "completed_review_holds": {
@@ -55690,144 +55980,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "13404290798f425aac29aa33825e5f6d",
-    "topic_id": "data-persistence-4ea34db4",
-    "batch": {
-      "topic": "Data Persistence",
-      "topic_id": "data-persistence-4ea34db4",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-          "content": "---\ntopic: [Data Persistence]\nsubtopic: [SQL]\nsummary: \"Keeping copies of data on multiple nodes to spread reads and survive failures.\"\nlevel: [\"4\"]\npriority: High\nstatus: In Progress\npublish: true\ncreated: \"2026-02-28T20:52:28.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.354Z\"\n---\n\nReplication maintains copies of data on multiple nodes for availability, disaster recovery, and read distribution. Copying the initial state is the easy part. The lasting contract is how each later write is ordered, acknowledged, replayed, and exposed while nodes fail and networks partition. A weakly specified boundary produces stale reads, acknowledged-write loss, or two writable primaries.\n\n# Replication Models\n\n## Single-Leader (Leader-Follower)\n\nOne designated leader accepts writes. Followers receive an ordered change stream and may serve eligible reads after applying it. PostgreSQL streaming replication, MySQL binlog replication, SQL Server Always On Availability Groups, and MongoDB replica sets use this broad shape. In a Windows high-availability SQL Server availability group, the group moves log records to secondary replicas while Windows Server Failover Clustering (WSFC) supplies health detection, quorum, and failover orchestration. A Linux high-availability availability group instead uses `CLUSTER_TYPE = EXTERNAL` with Pacemaker as the external cluster manager.\n\nSQL Server can route connections marked with `ApplicationIntent=ReadOnly` through a configured availability-group listener and read-only routing list. Other systems expose replica endpoints or leave routing to middleware. Adding followers increases only the read capacity that can tolerate their replay boundary. Write throughput remains bounded by the leader.\n\nFailover requires electing a new leader. SQL Server high-availability availability groups use WSFC on Windows or Pacemaker on Linux. PostgreSQL commonly relies on an external manager such as Patroni or repmgr. A SQL Server availability group created with `CLUSTER_TYPE = NONE` has no cluster manager, is intended primarily for read scale, and supports only manual failover. It therefore supplies replication and readable replicas, not automatic high availability or cluster-managed fencing.\n\nA voting quorum prevents two candidates in the same voting configuration from both winning a majority. It does not stop an isolated former leader from continuing to serve stale endpoints or accept writes. Leases, endpoint ownership, and fencing must revoke that old leader before the replacement is writable. In a clusterless `NONE` configuration, the operator must establish that ownership boundary during manual failover rather than assuming the availability group will arbitrate it.\n\n## Multi-Leader\n\nMultiple leaders accept writes independently and exchange changes. CouchDB deployments and SQL Server peer-to-peer transactional replication can use this shape. A regional write need not wait for every remote leader, improving write locality and partition availability.\n\nThe cost is unavoidable conflict semantics when two leaders change the same logical value concurrently:\n\n- **Last-write-wins (LWW)** keeps the write selected by a timestamp or product-specific ordering rule. It converges, but silently discards another update and is unsafe for quantities such as money or inventory.\n- **CRDTs** merge concurrent operations according to a data type's algebra. They work only when the domain can be represented by those merge rules.\n- **Application-level resolution** exposes competing versions to domain logic. It preserves context at the cost of more state and recovery work.\n\nIn SQL Server peer-to-peer transactional replication, the recommended practice is write partitioning (each node owns a non-overlapping subset of rows). Peer-to-peer replication offers conflict detection but is not a general-purpose conflict resolution platform like CRDTs. Avoiding same-row writes across nodes is the primary design constraint.\n\n## Leaderless (Dynamo-style)\n\nIn Dynamo-style systems such as the original Amazon Dynamo, Cassandra, and Riak, several replicas can accept an operation and the client or coordinator can use tunable `N`, `W`, and `R` quorums. `W + R > N` creates overlap between the acknowledged write and read sets, but overlap alone does not serialize concurrent writes or prove linearizability. Version reconciliation, sloppy quorums, membership changes, and failure handling still matter. Read repair and anti-entropy reconcile divergent replicas under product-specific rules.\n\nAmazon DynamoDB's contract should not be inferred from the Dynamo name. DynamoDB does not expose client-selected `R` and `W` values. Single-Region operations document eventual or strong reads where supported, while transactions have their own contract. Global tables now offer multi-Region eventual consistency (MREC) and, in supported configurations, multi-Region strong consistency (MRSC). Those documented modes are the boundary. The generic quorum formula is not a DynamoDB API guarantee.\n\n## Model Comparison\n\n| Dimension | Single-Leader | Multi-Leader | Leaderless |\n|---|---|---|---|\n| Write scaling | Bounded by leader | Multiple write points | Any node |\n| Conflict handling | Leader orders writes. Failover still needs fencing | Mandatory | Version/conflict handling plus repair |\n| Acknowledgement and reads | Sync acknowledgement can protect commit durability. Replica observation still depends on replay and routing | Cross-leader acknowledgement and conflict policy are separate | Quorum settings influence overlap but do not remove concurrent-write reconciliation |\n| Failover complexity | Election, endpoint ownership, and fencing | Per-leader failure and conflict recovery | No leader election, but membership and quorum availability still matter |\n| Typical use | PostgreSQL, SQL Server AG | CouchDB, geo-distributed write topologies | Cassandra, Riak, original Dynamo-style systems |\n\n# Replication Lag\n\nWith asynchronous acknowledgement, the leader confirms a write without waiting for a standby. A follower may already have the change or may be behind. Once reads are distributed across that gap, three recurring anomalies appear:\n\n**1. Read-your-writes**: a form is submitted and immediately reloaded through a stale follower, making the committed change appear to disappear. Route the follow-up read to the leader or carry the write position and wait for a follower to reach it. PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare `pg_last_wal_replay_lsn()` (or an equivalent replay-position signal) with the required commit LSN. MongoDB exposes causal-consistency tokens for the same boundary.\n\n**2. Monotonic reads**: one read returns newer data and the next is routed to a follower that has applied less. Carry the highest observed commit or replay position, then use the primary or a follower that has reached it. Sticky routing is only an optimization while the chosen follower remains available and does not move backward. It does not preserve monotonicity across failover by itself.\n\n**3. Consistent prefix reads**: causally related writes appear out of order, such as a reply appearing before its original message. Preserve the dependency in one ordered commit stream or explicit causal metadata, and read from a position that includes the prerequisite. A shared partition key helps only when the partition supplies that ordering contract through failover.\n\n**Sync vs async tradeoff**: synchronous acknowledgement adds a configured standby to the commit path. With the required `synchronous_commit`, standby selection, and storage settings, the acknowledgement can protect the commit across failover to an eligible standby. It does not make every follower read linearizable: WAL may be durable on a standby before that standby has replayed it. A read that must observe the commit still needs the primary or a replay position at or beyond the commit token. Asynchronous acknowledgement removes the standby wait. An acknowledged commit is then at risk on leader failure only when no eligible survivor received it.\n\n# Replica Read Boundary\n\nSingle-leader replication can offload only reads whose consistency contract the selected follower can satisfy. Writes, write-capable transactions, and work with unknown intent stay on the primary. An explicitly read-only transaction pins one eligible follower. A read that must observe a prior commit uses the primary or a follower whose replay position has reached that commit token. Middleware can classify statements, but the application usually knows whether a causal dependency exists.\n\n![[Data Persistence/Data Persistence-Replication-18120000-1.png|theme-aware]]\n\nThe diagram shows the middleware topology but not its lag or transaction boundary. A safe routing contract is stricter:\n\n- A read-only transaction pins one eligible replica until commit or rollback. Its statements never hop between nodes.\n- Staleness-tolerant reads may use a healthy replica inside the configured lag budget.\n- A read that must observe a prior write uses the primary or a replica whose replay position reaches the request token.\n- The application or API marks the causal requirement because a SQL proxy usually cannot infer it from statement text.\n\n# Position Token\n\nA fixed time window only guesses at lag. A position token states the required boundary:\n\n1. Commit the write on the primary.\n2. Return a token at or after that commit's WAL position.\n3. Carry the token with the next read.\n4. Compare each standby's replay position with the required position.\n5. If replay is behind, wait within a strict budget, route to the primary, or return an explicit consistency failure.\n\n```text\nrequired = 0/16B6C50\nreplica  = 0/16B6A20  -> wait or primary\nreplica  = 0/16B6D10  -> eligible\n```\n\nWAL positions are ordered values, not strings for lexicographic comparison. A later `pg_current_wal_lsn()` is conservative when concurrent commits advance the primary beyond the target commit. `pg_last_wal_replay_lsn()` reports a standby's replay boundary.\n\n![[Data Persistence/Data Persistence-Replication-18120000.png|theme-aware]]\n\nThe topology image still omits the causal condition: a replica is eligible for a read-after-write request only after replay reaches that request's token.\n\n# Failover and Overload\n\nA PostgreSQL position from an old timeline may not be directly comparable after promotion. The routing protocol must translate the boundary through failover metadata or send consistency-sensitive reads to the new primary until follower eligibility can be proved.\n\nFollower waits need a strict budget. An unbounded wait turns replication lag into request exhaustion, while sending every lagged read to the primary can overload the node needed for recovery. Lag, wait duration, primary fallback, and rejected consistency-sensitive reads are separate operational signals.\n\n| Failure | Required behavior |\n| --- | --- |\n| Replica behind token | Bounded wait, primary fallback, or explicit consistency failure |\n| Replica fails during an idempotent read | Retry another eligible replica with the same token and retry budget |\n| Primary changes during a transaction | Fail the pinned transaction. Retry the whole transaction only when safe |\n| Commit acknowledgement is lost | Treat the result as unknown. Resolve by idempotency key or reconciliation |\n\n# CAP and PACELC\n\n**CAP** applies to an operation when a network **P**artition prevents replicas from coordinating. Preserving **C**onsistency means rejecting or delaying an operation that cannot meet the required single-copy behavior. Preserving **A**vailability means returning a non-error response from every non-failing node and accepting that replicas may diverge. Topology alone does not make a system CP or AP. A quorum-protected write that is refused without enough voters chooses consistency for that operation, while a write accepted on both sides for later reconciliation chooses availability. Synchronous versus asynchronous durability acknowledgement is a separate contract.\n\nCAP describes the partition case. **PACELC** adds the normal-operation choice between latency and coordination. Synchronous commit pays latency for an acknowledgement boundary. It is not, by itself, a linearizable follower-read protocol. Observing that commit still requires primary routing or proof that the chosen follower replayed the required position. See [[Home/Software Architecture/Distributed Systems/CAP theorem|CAP theorem]] for the theorem's full boundary.\n\n# Tradeoffs\n\nReplication and sharding solve different bottlenecks. Replication copies ownership. Sharding divides it.\n\n| Dimension | Replication | Sharding |\n|---|---|---|\n| What it solves | Read throughput, HA, DR | Write throughput, dataset size |\n| Write scaling | Writes still bottleneck at leader | Writes distributed across shards |\n| Durability and observation | Async acknowledgement can expose an acknowledged commit to failover loss when no eligible survivor received it. Sync acknowledgement can protect durability, while replica reads still need replay-aware routing | Each shard has its own replication and read-consistency boundary |\n| Operational complexity | Medium | High |\n| When to reach for | Read bottleneck, HA requirement | Write or storage bottleneck |\n\nThe measured bottleneck and consistency contract determine the mechanism. Followers scale eligible reads. A cache removes repeated origin work at a freshness cost. Sharding distributes ownership and creates cross-shard coordination. These are alternatives and combinations, not mandatory stages of one progression.\n\n# Pitfalls\n\n**Split-brain**: a network partition leaves the old primary accepting writes while a new primary is promoted elsewhere. A voting quorum limits who can be elected in the current configuration. Fencing is the separate act that revokes the old leader's ability to write. Promotion must couple both boundaries.\n\n**Replication lag as a silent consistency violation**: a follower passes a basic health check while remaining behind the primary. Reads return stale data without an error. Mitigation: monitor replication positions and time-based lag (`pg_stat_replication` in PostgreSQL, `sys.dm_hadr_database_replica_states` in SQL Server), alert when the workload's budget is exceeded, and include eligibility rather than mere connectivity in routing health.\n\n**Connection pool not refreshing after failover**: infrastructure promotes a new primary, but the application keeps pooled connections to the old endpoint. Requests continue to fail after the database is available. Mitigation: use the product's failover-aware endpoint and driver behavior, retire broken pooled connections promptly, and bound retries so reconnection does not amplify the outage.\n\n**Replication slot accumulation (PostgreSQL)**: a follower goes offline while its replication slot remains. PostgreSQL retains WAL needed from the slot's confirmed position and can exhaust primary storage. Mitigation: monitor inactive slots in `pg_replication_slots`, set `max_slot_wal_keep_size` so an abandoned slot cannot retain WAL without limit, and remove slots whose consumers have exceeded the recovery policy. Exceeding that limit can invalidate the slot, so the consumer may need to be rebuilt.\n\n**Last-write-wins data loss**: in multi-leader or leaderless setups using LWW, concurrent writes to the same key silently discard one of them. No error is returned to the client. Mitigation: use CRDTs for data shapes that support them, or implement application-level conflict detection (version vectors, conditional writes) for critical data like account balances or inventory counts.\n\n# References\n\n- [SQL Server Always On availability groups](https://learn.microsoft.com/sql/database-engine/availability-groups/windows/overview-of-always-on-availability-groups-sql-server?view=sql-server-ver17)\n- [DynamoDB read consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)\n- [PostgreSQL warm standby](https://www.postgresql.org/docs/current/warm-standby.html)\n",
-          "hash": "9b2a043d9c42a3b7d2aaa4669c597dc61c5f0c228fecf1a62b3feaf1020390f6",
-          "topic": "Data Persistence",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [
-        {
-          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-          "expected_hash": "9b2a043d9c42a3b7d2aaa4669c597dc61c5f0c228fecf1a62b3feaf1020390f6",
-          "before": "PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare `pg_last_wal_replay_lsn()` (or an equivalent replay-position signal) with the required commit LSN.",
-          "after": "Before PostgreSQL 19, application or custom database logic must poll and compare `pg_last_wal_replay_lsn()` (or an equivalent replay-position signal) with the required commit LSN. PostgreSQL 19 adds the top-level `WAIT FOR LSN` command, which on a standby blocks until replay reaches the target LSN (default `standby_replay` mode, with `TIMEOUT` and `NO_THROW` options). It errors on a primary and compares only the numeric LSN, not the timeline.",
-          "reason": "Replaces the outdated and misnamed claim that PostgreSQL has no built-in wait facility with the version-specific polling and WAIT FOR LSN behavior.",
-          "kind": "note",
-          "learning_target": "same",
-          "essential_meanings": [
-            "Before PostgreSQL 19, wait for a replay LSN by polling",
-            "PostgreSQL 19 provides WAIT FOR LSN, which waits for standby replay",
-            "WAIT FOR LSN works on a standby and compares the numeric LSN only"
-          ],
-          "sources": [
-            {
-              "url": "https://www.postgresql.org/docs/19/sql-wait-for.html",
-              "claim": "WAIT FOR LSN waits for a standby to reach a target LSN, with MODE (default standby_replay), TIMEOUT and NO_THROW options. It errors on a primary and does not track timelines.",
-              "version": "PostgreSQL 19"
-            }
-          ],
-          "feedback_keys": [],
-          "problem": "The Read-your-writes paragraph says PostgreSQL has no built-in wait facility and names a nonexistent pg_wait_for_lsn, which is outdated as of PostgreSQL 19.",
-          "reader_benefit": "Readers get an accurate, version-qualified picture of how to wait for a replay position, including the built-in command and its limits."
-        }
-      ],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-          "outcome": "changed",
-          "reason": "The audit found one verified, version-specific error: PostgreSQL 19 provides WAIT FOR LSN. The note now separates the pre-19 polling approach from the built-in command and states its limits. The rest of the note was checked and left unchanged. That covers the replication models, SQL Server cluster types, Dynamo versus DynamoDB, the lag anomalies, the position-token protocol, failover, CAP/PACELC, and the slot guidance."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Data Persistence/SQL/Replication.md": "9b2a043d9c42a3b7d2aaa4669c597dc61c5f0c228fecf1a62b3feaf1020390f6"
-    },
-    "feedback_keys": [],
-    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Data Persistence/SQL/Replication.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-18T07:49:48.896980Z",
-    "review_repair_key": "68a6b19e78969c8e73c90b9b798eb8c448582772bab4d5e98bf3f7f5fc157269",
-    "repair_reserved": true,
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The keep disposition missed a version-specific factual error. The note says PostgreSQL has no built-in wait-for-LSN facility, but PostgreSQL 19 adds a WAIT FOR LSN command for exactly this read-your-writes case. The claim is also misnamed, since there is no pg_wait_for_lsn function.",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The note is mostly strong and accurate, but its Read-your-writes paragraph says PostgreSQL has no built-in wait-for-LSN facility. PostgreSQL 19 provides a WAIT FOR LSN command that waits for standby replay, so the claim is outdated. A version-qualified correction is needed.",
-          "page_type": "Concept note. It has no Qard cards, Questions are absent (acceptable), and References are bare links.",
-          "current_text_evidence": [
-            {
-              "quote": "PostgreSQL has no built-in `pg_wait_for_lsn`.",
-              "line_start": 60,
-              "reason": "Outdated and misnamed. PostgreSQL 19 adds the WAIT FOR LSN command (default mode standby_replay, with TIMEOUT and NO_THROW options), which is the built-in mechanism for this need."
-            },
-            {
-              "quote": "A weakly specified boundary produces stale reads, acknowledged-write loss, or two writable primaries.",
-              "line_start": 14,
-              "reason": "The opening states the operating idea and the key boundary clearly. This part of the note is strong."
-            },
-            {
-              "quote": "WAL positions are ordered values, not strings for lexicographic comparison.",
-              "line_start": 97,
-              "reason": "The position-token section is accurate and gives mechanism, example and conditions."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the topics (models, lag, routing tokens, failover, CAP, tradeoffs) form one coherent replication-consistency explanation.",
-          "findings": [
-            {
-              "severity": "High",
-              "dimension": "Accuracy",
-              "location": "# Replication Lag, item 1 Read-your-writes",
-              "evidence": "The note says: PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare pg_last_wal_replay_lsn().",
-              "effect": "The note misleads readers about current PostgreSQL. As of PostgreSQL 19 the WAIT FOR LSN command exists, so manual polling is no longer the only option. The pg_wait_for_lsn name is not a real feature either.",
-              "fix": "Rewrite to say that before PostgreSQL 19 the application must poll pg_last_wal_replay_lsn() against the commit LSN. From version 19 the WAIT FOR LSN command can block until the standby replays to the token. Also note that the Position Token section assumes polling and should mention the command as an alternative. Verify against the PostgreSQL 19 documentation."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "FAIL",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "repair_previous_proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-          "outcome": "keep",
-          "reason": "Audited the full note against its text and general knowledge of the cited product documentation. The three models (single-leader, multi-leader, leaderless) are explained with mechanisms and limits. The SQL Server claims are consistent: WSFC on Windows, Pacemaker with CLUSTER_TYPE = EXTERNAL on Linux, CLUSTER_TYPE = NONE for read scale with manual failover, and ApplicationIntent=ReadOnly routing. The Dynamo and DynamoDB distinction is accurate, and W + R > N is correctly stated as insufficient for linearizability. The lag anomalies, position-token protocol, WAL LSN comparison, timeline caveat after promotion, replication slot and max_slot_wal_keep_size guidance, and the CAP/PACELC wording all hold. The sync-versus-replay distinction is correct. The explanation order works: models, lag, routing, token, failover, CAP, tradeoffs, pitfalls. Some repetition between the routing and token sections is tolerable because each adds a different condition. The note has no Qard cards and no known violations. The References are three bare, relevant links. No verified defect justifies an edit."
-        }
-      ],
-      "feedback": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-  }
+  "parked_author_proposals": {}
 }
