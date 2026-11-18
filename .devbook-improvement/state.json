@@ -18350,16 +18350,16 @@
     "version": 1,
     "id": "13404290798f425aac29aa33825e5f6d",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-18T07:46:29.321072Z",
-    "elapsed_seconds": 28.830647799999998,
+    "elapsed_seconds": 37.888562199999996,
     "calls_reserved": 1,
-    "responses_received": 0,
+    "responses_received": 1,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-18T07:46:58.151024Z",
+    "checkpoint_at": "2026-11-18T07:47:07.208935Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -55233,5 +55233,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "13404290798f425aac29aa33825e5f6d",
+    "topic_id": "data-persistence-4ea34db4",
+    "batch": {
+      "topic": "Data Persistence",
+      "topic_id": "data-persistence-4ea34db4",
+      "notes": [
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+          "content": "---\ntopic: [Data Persistence]\nsubtopic: [NoSQL]\nsummary: \"The four NoSQL families (document, key-value, wide-column, graph) and their access patterns.\"\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\npublish: true\ncreated: \"2026-06-20T08:45:59.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:28:37.381Z\"\n---\n\nThe four common NoSQL families are **document**, **key-value**, **wide-column**, and **graph**. They differ in the data they keep together and the queries they make cheap. Horizontal scaling, flexible schema, and [[Replication|eventual consistency]] are common associations under [[CAP theorem|CAP]], but none is a shared guarantee. [[Home/Data Persistence/NoSQL/NoSQL|NoSQL]] explains when a specialized model is worth adding at all.\n\nSearch and time-series engines sit beside these families as specialized models. A product may expose several models at once, so classification is a starting point. The workload still decides.\n\n# The Four Families\n\n## Document\n\nDocument stores persist structured records, commonly JSON or BSON, with nested fields and collections. The document is usually the natural aggregate and atomic update boundary. Related data that changes together can stay in one document. References remain useful when an embedded collection would grow without bound or when another aggregate owns the fact. Query operators, schema validation, joins, and multi-document transaction support vary by engine.\n\n- **Examples**: MongoDB, Couchbase, Azure Cosmos DB (SQL API).\n- **Best fit**: catalogs, profiles, and other aggregates whose nested shape evolves together.\n- **Model rule**: embed data owned by the aggregate. Reference data with an independent lifecycle or unbounded growth.\n\n```json\n{ \"_id\": \"u42\", \"name\": \"Ada\", \"addresses\": [ { \"city\": \"London\", \"primary\": true } ],\n  \"orders\": [ { \"id\": \"o1\", \"total\": 99.50 } ] }\n```\n\n## Key-Value\n\nA key-value store addresses a value through a unique key. The narrow contract makes direct lookup easy to scale and reason about. Some products treat the value as opaque. Others add typed structures, conditional writes, secondary indexes, or range queries. Those additions belong to the product contract rather than the base model.\n\n- **Examples**: [[Redis]], DynamoDB, Memcached, etcd.\n- **Best fit**: caching ([[Home/Data Persistence/Caching|Caching]]), session state, idempotency records, and direct entity lookup.\n- **Model rule**: design keys from the required lookups, distribution, and atomicity boundary. A value-based query needs a supported secondary access path or another model.\n\n## Wide-Column\n\nWide-column stores group rows by partition key and order data within a partition using clustering keys or an equivalent layout. They work well when a small set of high-volume queries can be encoded into that key design. Cassandra, ScyllaDB, HBase, and Bigtable use log-structured storage ideas such as memtables and immutable table files, trading cheap buffered writes for compaction and read-amplification costs described in [[LSM-Tree]].\n\n- **Examples**: Cassandra, ScyllaDB, HBase, Bigtable.\n- **Best fit**: event histories, telemetry, and other write-heavy workloads queried by a known partition and ordered range.\n- **Model rule**: start from the partition-local queries. Duplicate a read shape only when its write and repair costs are acceptable, much like [[Sharding|sharding's]] key discipline.\n\nDiscord's message store shows the boundary at production scale. Messages are read by channel and time, so the key keeps that path local. Discord later moved from Cassandra to ScyllaDB after dealing with hot partitions, garbage collection, and repair work. The engine changed. The need for a deliberate partition shape did not.\n\n![[Data Persistence/Data Persistence-NoSQL Database Types-18120000.png|theme-aware]]\n\n## Graph\n\nGraph stores represent nodes and edges directly. This fits variable-depth traversal, where each step discovers the next relationships to follow. Performance still depends on selectivity, indexes, locality, and how many edges the query visits.\n\n- **Examples**: Neo4j, Amazon Neptune, JanusGraph.\n- **Best fit**: fraud paths, dependency graphs, knowledge graphs, and recommendation queries driven by relationships.\n- **Boundary with SQL**: deep or unpredictable traversal needs repeated joins and intermediate results in a relational model. A graph engine can make adjacency expansion more direct. SQL often remains simpler for fixed-depth joins, set-based aggregates, and strong relational constraints.\n\n# Comparison\n\n| Family | Read by | Strength | Weak at | Typical store |\n|---|---|---|---|---|\n| **Document** | Document key + supported indexes | Aggregate-shaped records | Unbounded documents, cross-aggregate coordination | MongoDB |\n| **Key-Value** | Primary key and product-specific indexes | Direct lookup with a narrow contract | Ad-hoc queries over value contents | Redis, DynamoDB |\n| **Wide-Column** | Partition + clustering key | Write throughput at scale | Ad-hoc queries, cross-partition joins | Cassandra |\n| **Graph** | Traversal from a node | Deep relationship queries | Bulk aggregate scans | Neo4j |\n\n# Time-Series Workloads\n\nA time-series workload is append-heavy and reads ordered ranges by series and time. The important boundary is not “contains timestamps”. It is whether cardinality, compression, retention, and time-window aggregation have become the dominant storage costs. [[Time-Series Databases]] follows that workload through series cardinality, partitioning, rollups, and late data.\n\n# Pitfalls\n\n- **Flexible schema still has a contract.** Validation may live in the database, the application, or both. Without versioning and migration rules, old and new shapes leak into every reader.\n- **Relational habits can fight the selected model.** A normalized document design creates extra lookups. A wide-column design that ignores required queries creates scans. Model around the operations the engine can execute predictably.\n- **Consistency labels hide operation-level choices.** Read-your-writes, conditional updates, transactions, and behavior during a partition must be checked separately under the [[CAP theorem|CAP / PACELC]] boundary.\n- **Partition keys can concentrate load.** A tenant, timestamp prefix, or popular entity can send too much traffic to one partition, reproducing the hot-key problem in [[Sharding]].\n- **Every additional store has an operating cost.** Polyglot persistence adds another backup, monitoring surface, failure mode, and data-repair path. Add a model only when its access-pattern advantage pays for that cost.\n\n# Tradeoffs\n\nStay relational when changing queries, multi-row transactions, and relational constraints dominate. Choose another model when a measured access pattern has become expensive or awkward in that design. [[Replication]] and [[Home/Data Persistence/Caching|caching]] may buy enough headroom without adding another source of truth.\n\nDistributed SQL systems such as CockroachDB, Spanner, and Vitess are another option when relational semantics must survive horizontal partitioning. Their transaction, latency, topology, and compatibility costs still need to be evaluated directly.\n\n# References\n\n- [DynamoDB single-table design](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-general-nosql-design.html)\n- [How Discord stores trillions of messages](https://discord.com/blog/how-discord-stores-trillions-of-messages)\n",
+          "hash": "e919d5a30a038d56c46646e72d58d6f3b53b3e2df30b288921339037d3c694a6",
+          "topic": "Data Persistence",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against its text. The four families (document, key-value, wide-column, graph) each state the data kept together, example stores, best fit and a modeling rule. The comparison table agrees with those sections. Technical claims check out: document aggregate and atomic boundary with product-dependent joins and transactions; key-value extras such as secondary indexes belong to the product; wide-column partition and clustering keys on LSM-style storage; graph traversal costs depend on selectivity; Discord moved from Cassandra to ScyllaDB, which matches the cited reference. The pitfalls and tradeoffs sections give conditions rather than slogans, and the distributed SQL aside is accurate. There are no Qard cards and no known violations. Wikilinks are plausible, the code fence has a language identifier, and the references are bare descriptive links. Prose is direct and non-repetitive, so edits would be cosmetic churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md": "e919d5a30a038d56c46646e72d58d6f3b53b3e2df30b288921339037d3c694a6"
+    },
+    "feedback_keys": [],
+    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-18T07:47:07.208904Z"
+  }
 }
