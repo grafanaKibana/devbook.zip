@@ -18463,11 +18463,11 @@
     "version": 1,
     "id": "13404290798f425aac29aa33825e5f6d",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-18T07:46:29.321072Z",
-    "elapsed_seconds": 536.3833148000002,
+    "elapsed_seconds": 547.0225042000002,
     "calls_reserved": 14,
-    "responses_received": 13,
+    "responses_received": 14,
     "attempted_paths": [
       "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
       "Vault/Home/Data Persistence/SQL/Replication.md",
@@ -19628,7 +19628,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-18T07:55:25.703694Z",
+    "checkpoint_at": "2026-11-18T07:55:36.342883Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -58009,5 +58009,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "13404290798f425aac29aa33825e5f6d",
+    "topic_id": "data-persistence-4ea34db4",
+    "batch": {
+      "topic": "Data Persistence",
+      "topic_id": "data-persistence-4ea34db4",
+      "notes": [
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
+          "content": "---\ntopic: [Data Persistence]\nsubtopic: [NoSQL]\nsummary: \"Storage engines for append-heavy series, time-range scans, retention, and rollups.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: New\npublish: true\ncreated: \"2026-07-18T07:07:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-16T14:47:47.203Z\"\n---\n\nA time-series database organizes timestamped observations for ordered range reads and time-window calculations. It earns its place when ingest rate, retention, compression, or repeated window queries dominate storage cost. A timestamp column alone is not enough. PostgreSQL with time partitioning may handle a moderate workload cleanly. A specialized engine becomes useful when series indexing, compressed chunks, and rollups are the limiting work.\n\n# Series and Cardinality\n\nIn Prometheus, a series is the metric name plus its complete label set:\n\n```text\nhttp_request_duration_seconds_count{service=\"checkout\",method=\"POST\",status=\"200\"} 8431 1721044800000\n```\n\nChanging one label value creates another series. Bounded labels such as `service` and `status` make useful dimensions. An unbounded label such as `user_id` can create a series per user, growing the index and active-series memory until ingestion or queries become too expensive.\n\n# Storage Decisions\n\n| Decision | Engine behavior | Failure mode when wrong |\n|---|---|---|\n| Series key | Index a stable metric name and bounded labels | Unbounded labels exhaust memory and index space |\n| Time partition | Keep chunks or partitions ordered by time | Range reads and retention deletion scatter across storage |\n| Retention | Drop whole expired chunks or partitions | Row-by-row expiry amplifies writes and compaction |\n| Rollups | Persist lower-resolution aggregates | Long dashboards repeatedly scan raw samples |\n| Late data | Define an allowed lateness window | Old samples rewrite sealed chunks or disappear from aggregates |\n\n![[Data Persistence/Data Persistence-Time-Series Databases-18120000.jpg|theme-aware]]\n\nThe diagram is a workload selector. A metrics system does not automatically need a dedicated TSDB. Measured series cardinality, ingest rate, retention volume, and query windows decide.\n\n# Rollups Cap Repeated Scans\n\nAt 10,000 samples per second, 15 days of raw retention contains about 13 billion samples. Recomputing every 5-minute rate from that raw history makes each dashboard revisit the same data. Time-partitioned raw chunks plus a persisted 5-minute rollup bound the query input, and expired raw data can leave as a whole partition. That saves read work but adds write amplification and a repair rule for samples that arrive after a rollup was built.\n\n# References\n\n- [Prometheus data model](https://prometheus.io/docs/concepts/data_model/)\n- [PostgreSQL table partitioning](https://www.postgresql.org/docs/current/ddl-partitioning.html)\n",
+          "hash": "16ad82de6f2b46835014557c45d415199f9187e8103b4d066abefa03cd0aa078",
+          "topic": "Data Persistence",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "changed"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note. The opening states when a TSDB is justified and warns that a timestamp column alone is not enough. The Prometheus series definition (metric name plus full label set) and the sample line with a millisecond timestamp match the data model. The cardinality explanation names the mechanism: each new label value creates a series, which grows the index and active-series memory. The decision table pairs each choice with its failure mode, and its partition-drop retention claim is consistent with PostgreSQL partitioning, where detaching or dropping a partition is cheaper than row deletes. The rollup arithmetic checks out: 10,000/s × 86,400 s × 15 days ≈ 12.96 billion, which is about 13 billion. The tradeoff of added write amplification and a late-sample repair rule is stated. There are no cards, no known violations, and the two references are relevant and bare links. Nothing is wrong, unclear or redundant enough to justify an edit."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md": "16ad82de6f2b46835014557c45d415199f9187e8103b4d066abefa03cd0aa078"
+    },
+    "feedback_keys": [],
+    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-18T07:55:36.342871Z"
+  }
 }
