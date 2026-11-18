@@ -31566,11 +31566,13 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-18T07:52:56.065982Z",
-    "phase": "branch_updated",
-    "updated_at": "2026-11-18T07:59:19Z",
+    "phase": "pr_updated",
+    "updated_at": "2026-11-18T07:59:26Z",
     "evidence": {
       "commit_sha": "893688831f998bc811681607522fa673bcf0c015",
-      "branch_sha": "893688831f998bc811681607522fa673bcf0c015"
+      "branch_sha": "893688831f998bc811681607522fa673bcf0c015",
+      "pr_number": 244,
+      "created": true
     }
   },
   "export_operations": {
