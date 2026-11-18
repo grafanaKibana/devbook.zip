@@ -18612,9 +18612,9 @@
     "version": 1,
     "id": "13404290798f425aac29aa33825e5f6d",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-18T07:46:29.321072Z",
-    "elapsed_seconds": 711.8155265000001,
+    "elapsed_seconds": 716.5416094000002,
     "calls_reserved": 19,
     "responses_received": 19,
     "attempted_paths": [
@@ -18624,7 +18624,8 @@
       "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
       "Vault/Home/Data Persistence/NoSQL/Redis.md",
       "Vault/Home/Data Persistence/NoSQL/Time-Series Databases.md",
-      "Vault/Home/Data Persistence/Object Storage.md"
+      "Vault/Home/Data Persistence/Object Storage.md",
+      "Vault/Home/Data Persistence/ORMs/Entity Framework.md"
     ],
     "accepted_records": [
       {
@@ -19922,10 +19923,73 @@
           },
           "model_calls": 17
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against the current text and EF Core documentation. Checked: DbContext lifetime, scoped registration, pooling and IDbContextFactory; tracking defaults, projections containing entities, and snapshot detection; SaveChanges transactionality and execution-strategy retries; concurrency tokens and DbUpdateConcurrencyException; ExecuteUpdate/ExecuteDelete bypassing the tracker; global query filters; cartesian explosion and split-query consistency; lazy loading being off by default; migrations and expand-contract rollout. All claims are accurate and appropriately conditioned. The explanation order is sound and the code examples earn their place. Cards each test one gradeable task with source links on the answer side, and the N+1 cards are properly separated into definition, detection and fix. The one-link reference is valid. known_violations is empty. No defect found, so no edit is warranted."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/ORMs/Entity Framework.md",
+                "verdict": "CLEAN",
+                "summary": "Whole-note audit found no factual error, unsupported condition, or card-quality defect. Claims on tracking, snapshot detection, transactions, concurrency tokens, bulk operations, split queries and migrations match EF Core behavior and are properly conditioned. The explanation order and cards are sound, so keeping the note unchanged is justified.",
+                "page_type": "Concept note — typed frontmatter, optional Questions and References present and valid; Qard IDs are protected metadata and are preserved.",
+                "current_text_evidence": [
+                  {
+                    "quote": "It does not make providers interchangeable or generated SQL harmless.",
+                    "line_start": 19,
+                    "reason": "The opening states the operating idea and the key boundary of the ORM."
+                  },
+                  {
+                    "quote": "A projection is untracked only when its result contains no entity instances.",
+                    "line_start": 47,
+                    "reason": "This is an accurate, conditioned statement of the tracking rules, including the common nested-entity trap."
+                  },
+                  {
+                    "quote": "A token protects the rows included in the check.",
+                    "line_start": 86,
+                    "reason": "It states the limit of optimistic concurrency and links it to isolation levels, so the mechanism, condition and exception all stay visible."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: DbContext lifetime, tracking, concurrency, migrations and performance form one coherent EF Core topic, and none is independently needed as its own note.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is accurate and readable, and each card tests one gradeable task. The N+1 definition, detection and fix cards are separated. Existing IDs are intact, there are no known violations, and no edit is warranted.",
+            "change_checks": []
+          },
+          "model_calls": 19
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-18T07:58:21.135907Z",
+    "checkpoint_at": "2026-11-18T07:58:25.861991Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
