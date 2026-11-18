@@ -18463,10 +18463,10 @@
     "version": 1,
     "id": "13404290798f425aac29aa33825e5f6d",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-18T07:46:29.321072Z",
-    "elapsed_seconds": 531.3527319000002,
-    "calls_reserved": 13,
+    "elapsed_seconds": 536.3833148000002,
+    "calls_reserved": 14,
     "responses_received": 13,
     "attempted_paths": [
       "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
@@ -19628,7 +19628,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-18T07:55:20.673110Z",
+    "checkpoint_at": "2026-11-18T07:55:25.703694Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -19653,7 +19653,7 @@
       "pr": null
     },
     "base_sha": "36628d4b1ae482b0f3c18ce0548af47dd2338277",
-    "reservation_deadline": "2026-11-18T08:09:30.946202Z",
+    "reservation_deadline": "2026-11-18T08:10:25.431920Z",
     "last_request": {
       "topic": "data-persistence-4ea34db4",
       "generation": 1,
