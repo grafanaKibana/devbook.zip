@@ -18410,14 +18410,15 @@
     "version": 1,
     "id": "13404290798f425aac29aa33825e5f6d",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-18T07:46:29.321072Z",
-    "elapsed_seconds": 269.23874730000006,
+    "elapsed_seconds": 272.93932680000006,
     "calls_reserved": 7,
     "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/Data Persistence/NoSQL/NoSQL Database Types.md",
-      "Vault/Home/Data Persistence/SQL/Replication.md"
+      "Vault/Home/Data Persistence/SQL/Replication.md",
+      "Vault/Home/Data Persistence/Data Persistence.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -18504,10 +18505,83 @@
           "reason": "source URL missing from owning note: https://www.postgresql.org/docs/19/sql-wait-for.html",
           "model_calls": 5
         }
+      },
+      {
+        "path": "Vault/Home/Data Persistence/Data Persistence.md",
+        "outcome": "review_blocked",
+        "reason": "",
+        "result": {
+          "status": "review_blocked",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Data Persistence/Data Persistence.md",
+                "outcome": "keep",
+                "reason": "Audited the whole folder note against the current text. The opening, store-type table, block/file/object comparison, diagnosis sequence, escalation ladder and pattern map are internally consistent and teach mechanisms with their costs. Wikilinks, image embeds and the Datacore block are intact, and the note has no known violations. The technical claims check out: PostgreSQL EXPLAIN (ANALYZE, BUFFERS) is a real plan tool; SQL Server indexed views are maintained on base-table writes, which makes those writes more expensive; pool exhaustion with a healthy database points to leaks or sizing. The two cards each test one coherent task (store choice; diagnosis order) and cite relevant primary sources. The diagnosis card repeats the section prose, but it is a legitimate recall overview. Nearby ACID and pooling cards are not duplicated here. The References are bare descriptive links. No concrete defect justifies an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Data Persistence/Data Persistence.md",
+                "verdict": "CLEAN",
+                "summary": "Independent whole-note audit found the folder note accurate, coherent and mechanism-focused. No concrete defect justifies an edit, so the keep is supported.",
+                "page_type": "FolderNote — concept-style prose; Datacore folder-map block, wikilinks and image embeds protected; Questions and References optional but present and valid.",
+                "current_text_evidence": [
+                  {
+                    "quote": "A storage choice fixes more than where bytes live",
+                    "line_start": 21,
+                    "reason": "The opening states the operating idea and the consequences of a storage choice, so the topic is recoverable at once."
+                  },
+                  {
+                    "quote": "A larger pool does not repair saturated storage or lock contention.",
+                    "line_start": 67,
+                    "reason": "The diagnosis sequence states a correct limit on the pooling fix, so the engineering decision stays condition-bound."
+                  },
+                  {
+                    "quote": "Several steps may be necessary, but their guarantees accumulate.",
+                    "line_start": 89,
+                    "reason": "The ladder closes by naming the compounding freshness costs, so the escalation order does not read as a rigid rule."
+                  },
+                  {
+                    "quote": "What determines whether a service should use relational or non-relational storage?",
+                    "line_start": 109,
+                    "reason": "A direct, bounded question with one coherent decision answer and a cited primary source."
+                  },
+                  {
+                    "quote": "Jumping to cache, replicas, or shards may improve one graph",
+                    "line_start": 74,
+                    "reason": "The section closes on the risk of skipping diagnosis, and the diagnosis card reinforces it without introducing contradictions."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the storage choice, access contracts, diagnosis and scaling ladder are one coherent hub-level decision narrative, and detail already lives in child notes (Caching, Replication, Sharding, Object Storage).",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The complete note was read independently. The claims are accurate (EXPLAIN ANALYZE/BUFFERS, indexed-view write cost, pool exhaustion causes), the prose is direct, the tables carry costs and conditions, and the two cards each test one coherent task with the Qard ID preserved. References are bare links. No edits were proposed and none are warranted.",
+            "change_checks": []
+          },
+          "model_calls": 7
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-18T07:50:58.559121Z",
+    "checkpoint_at": "2026-11-18T07:51:02.259702Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
