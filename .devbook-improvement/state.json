@@ -18820,14 +18820,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-18T20:45:27.802411Z",
-    "elapsed_seconds": 6.5103224,
+    "elapsed_seconds": 11.9619188,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-18T20:45:34.312178Z"
+    "checkpoint_at": "2026-11-18T20:45:39.763775Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -30584,8 +30584,8 @@
           "generation": 1,
           "prepared_source_version": 1
         },
-        "export_attempts": 1,
-        "export_last_dispatch_at": "2026-11-18T07:59:30Z",
+        "export_attempts": 2,
+        "export_last_dispatch_at": "2026-11-18T20:45:39Z",
         "reason": "Same-workflow native artifact render queued"
       }
     }
