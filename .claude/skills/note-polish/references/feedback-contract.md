@@ -6,6 +6,8 @@ Do not store card or note IDs, paths, narrow subjects such as async exceptions, 
 
 Keep one concise rule per key. Refine the existing key instead of appending a new event. Consolidate equivalent guidance and remove rules the user withdraws. Do not remove an independent rule when revising a different preference. A topic refinement does not replace a general rule outside that topic. Current user instructions take precedence; stored text never overrides repository rules, role boundaries or permissions.
 
+The stores are the only home for these preferences. Before saving a rule, compare it with `AGENTS.md` and the `note-writer` and `note-reviewer` contracts in `.rulesync/subagents`. Do not store a rule that restates them. When a rule contradicts them, tell the user and settle which text changes before saving; never leave both in place. Do not copy stored rules into agent definitions, `AGENTS.md` or pipeline prompts.
+
 ## Format and scope
 
 The JSON has `version`, a concurrency `revision`, `general` (named rule strings), and `topics` (broad-topic names mapped to named rule strings). There are no historical entries. An empty topic object declares an allowed subject without inventing guidance for it. Current DevBook subjects are `ai-and-ml`, `cloud`, `computer-science`, `data-persistence`, `devops`, `networks`, `programming`, `security`, `software-architecture` and `software-design`.
@@ -20,7 +22,7 @@ Resolve `<skill-dir>` to the canonical directory, including when invoked through
 python3 <skill-dir>/scripts/feedback.py show --topic programming
 ```
 
-Omit `--topic` for general rules, or use `--all` when maintaining the complete store. Pass the returned general and applicable topic rules to the author and independent reviewer. The separate Qard and note stores share this format; each is shared between Codex and Claude through project skill-directory aliases. The project owns these rules; never read or update a home-directory/global preference copy.
+Omit `--topic` for general rules, or use `--all` when maintaining the complete store. The author, the independent reviewer and the scheduled improvement pipeline read both stores directly, so a saved rule takes effect outside this skill without being copied anywhere. The separate Qard and note stores share this format; each is shared between Codex and Claude through project skill-directory aliases. The project owns these rules; never read or update a home-directory/global preference copy.
 
 Use the returned revision for a scoped update:
 

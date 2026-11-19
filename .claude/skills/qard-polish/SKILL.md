@@ -22,7 +22,7 @@ Use a sequential editorial loop. Diagnose each card independently. A useful repa
   python3 <skill-dir>/scripts/feedback.py show --topic <top-topic-slug>
   ```
 
-  Omit the selector when the broad topic is unknown. General rules always apply; broad-topic rules refine them within that subject. Resolve the top-level subject from the note's taxonomy, not its title or a card's subtopic. Pass the applicable rules to both author and reviewer. A current user instruction takes precedence over stored preferences.
+  Omit the selector when the broad topic is unknown. General rules always apply; broad-topic rules refine them within that subject. Resolve the top-level subject from the note's taxonomy, not its title or a card's subtopic. Author and reviewer load the Qard and note stores themselves under their contracts, as does the scheduled improvement pipeline; pass them the topic slug and any user feedback not yet stored. A current user instruction takes precedence over stored preferences.
 - For a marked-card queue, distinguish current indexed cards from historical state with no current source. Check whether the filter also includes automatic entries such as Often forgotten. Read [Qard operations](references/qard-operations.md) when inventorying the queue, applying changes or changing study flags.
 
 ## Diagnose and propose
@@ -52,6 +52,7 @@ When a version or removal is accepted:
 
 - Re-read the current source and detect concurrent changes before applying a narrowly scoped edit. Preserve IDs, overrides and unrelated content. Do not invent an ID for a new split; follow the host and repository rules for identity.
 - For an accepted whole-card removal, remove its adjacent ID with it and never reuse that ID. Preserve historical study records. Retain useful unique information in owning prose only when the removal requires it and the edit is within the authorized scope.
+- When the accepted change moves a card to another note, or its owning note is moved, renamed, split, merged or deleted, follow `docs/qard-readiness.md` so decks, course links, lessons and checks stay usable. Finish with `node .scripts/qard-learn-sync/references.cjs` and repair or name every reported line.
 - Run the local checks and mandatory independent note review. In DevBook, completion requires full-note `CLEAN` with current-text evidence and a target-resolution verdict. Run the Learn coverage checker and inspect semantic objective fit; never infer progress or mastery.
 - Apply authorized flag clearing or unpausing through the current installed Qard operations only after source acceptance, required review and live source/index agreement. Preserve scheduling, history and sessions. Accepting wording alone does not automatically authorize unpausing a deliberately paused card; use the actual current authorization.
 - Read back the resulting source, index and state. Confirm the source still matches the reviewed version; reconcile subsequent edits and obtain a fresh review rather than reusing a stale verdict. Then move to the next current marked card. Report remaining current flags separately from historical orphan flags. Source indexing does not prove a Quartz export, deployment or rendering check.

@@ -33,7 +33,7 @@ Course records stay under `Assets/Qard/Courses`, hidden by the existing navigati
 
 The companion's installation baseline, acknowledgement state and pending rename events live in its ignored `.obsidian/plugins/devbook-learn-sync/data.json`. It does not use a visible metadata note. The first live course writes happen through Obsidian's public `Vault.process()` API, merging against current contents so an assessment completed during the scan is retained. Course tables are validated before writing; malformed tables are reported and left intact.
 
-File renames require an actual vault rename event. Moves made while Obsidian is closed cannot be safely inferred from a matching filename and are reported as missing links. Obsidian's per-file atomic updates do not replace cross-device sync conflict resolution.
+File renames require an actual vault rename event. Moves made while Obsidian is closed cannot be safely inferred from a matching filename and are reported as missing links. [Qard readiness](qard-readiness.md) owns the author's repair steps for such moves. Obsidian's per-file atomic updates do not replace cross-device sync conflict resolution.
 
 ## Installation and verification
 
