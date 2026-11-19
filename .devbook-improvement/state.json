@@ -36311,10 +36311,11 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-19T20:59:19.174005Z",
-    "phase": "commit_created",
-    "updated_at": "2026-11-19T21:06:46Z",
+    "phase": "branch_updated",
+    "updated_at": "2026-11-19T21:06:53Z",
     "evidence": {
-      "commit_sha": "7eac331cb883da31756143a0e761334fffb7b667"
+      "commit_sha": "7eac331cb883da31756143a0e761334fffb7b667",
+      "branch_sha": "7eac331cb883da31756143a0e761334fffb7b667"
     }
   },
   "export_operations": {
