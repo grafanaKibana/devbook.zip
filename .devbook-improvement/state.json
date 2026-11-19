@@ -10896,46 +10896,51 @@
       }
     },
     "Vault/Home/DevOps/Observability.md": {
-      "content_hash": "1218783f02cb7319ed67ea8000bb5c22ce53b8f29c37b46159b421539fe7b3ff",
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "content_hash": "2234262d1876551d42a61a355d60823e901810facde45479abd1c9b810813cc1",
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
       "outcome": "keep",
       "repair_input_hash": "",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_process": "focused-whole-note-v1",
       "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "keep_review": {
-        "content_hash": "1218783f02cb7319ed67ea8000bb5c22ce53b8f29c37b46159b421539fe7b3ff",
-        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "content_hash": "2234262d1876551d42a61a355d60823e901810facde45479abd1c9b810813cc1",
+        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
         "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
         "review": {
           "path": "Vault/Home/DevOps/Observability.md",
           "verdict": "CLEAN",
-          "summary": "The note opens with a clear definition, a signal comparison table, per-signal mechanisms, correlation, the collection pipeline, alert quality and a .NET instrumentation mapping. Facts are correct and the prose is direct and non-repetitive. The two Qard cards each test one task and stay consistent with the body.",
-          "page_type": "Concept — typed frontmatter, optional Questions and References present; Qard IDs are protected metadata; code fences have language identifiers (json, text).",
+          "summary": "The note is accurate and well ordered. It runs from the three signals to correlation, the collection pipeline, alert quality and the .NET instrumentation mapping. Both Qards are single focused tasks. No edit is needed.",
+          "page_type": "Concept — authorable prose. Questions and References are optional and present. References are bare links. Fenced blocks carry language identifiers (json, text).",
           "current_text_evidence": [
             {
-              "quote": "A **counter** records a cumulative total such as requests or failures.",
-              "line_start": 31,
-              "reason": "Counter, gauge and histogram definitions are correct and concise."
-            },
-            {
-              "quote": "Request IDs, user IDs, raw URLs, and container IDs are unbounded",
+              "quote": "Metric labels create one series for every value combination.",
               "line_start": 35,
-              "reason": "Cardinality guidance matches Prometheus practice and names where those identifiers belong instead."
+              "reason": "States the cardinality mechanism correctly and concretely. It supports the label guidance and card 2."
             },
             {
               "quote": "Uniform sampling can discard rare failures before their outcome is known; tail sampling can retain errors and slow traces after observing the result.",
               "line_start": 59,
-              "reason": "Correctly contrasts head-style and tail sampling and states the cost of each."
+              "reason": "Gives the correct trade-off between sampling strategies and the condition that matters, which is whether the outcome is known."
             },
             {
-              "quote": "Audit, security, financial, or regulatory records are different",
+              "quote": "OpenTelemetry standardizes instrumentation and transport across these boundaries; it is not a storage engine.",
+              "line_start": 79,
+              "reason": "States the boundary precisely. The application, collector and backend responsibilities in the same section are consistent with it."
+            },
+            {
+              "quote": "when policy requires durable acknowledgement, they belong on a separately designed durable record or transaction path",
               "line_start": 81,
-              "reason": "States the exception that keeps best-effort telemetry from being used for durable records."
+              "reason": "Gives the exception for audit data. This avoids the over-generalization that all telemetry is best-effort."
+            },
+            {
+              "quote": "> [!qard]- Why should request or user IDs not be metric labels?",
+              "line_start": 119,
+              "reason": "Card 2 is one dependent behavior-and-why task. Its answer gives the mechanism, an example and the condition. The original ID is intact."
             }
           ],
           "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note is one coherent topic, and the signals, correlation, pipeline and instrumentation sections depend on each other.",
+          "split_suggestion": "No split: metrics, logs, traces, correlation and alerting form one coherent observability topic. Each part is brief and depends on the others, so separate notes would not be independently useful.",
           "findings": [],
           "source_checks": [],
           "rejection_equivalence": [],
@@ -10948,6 +10953,54 @@
           }
         },
         "review_process": "focused-whole-note-v1"
+      },
+      "keep_review_history": {
+        "ca810a6cce3aac03efb3be0b56593ceaa34c15aab961727603877affd26a5f8d": {
+          "content_hash": "1218783f02cb7319ed67ea8000bb5c22ce53b8f29c37b46159b421539fe7b3ff",
+          "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+          "review": {
+            "path": "Vault/Home/DevOps/Observability.md",
+            "verdict": "CLEAN",
+            "summary": "The note opens with a clear definition, a signal comparison table, per-signal mechanisms, correlation, the collection pipeline, alert quality and a .NET instrumentation mapping. Facts are correct and the prose is direct and non-repetitive. The two Qard cards each test one task and stay consistent with the body.",
+            "page_type": "Concept — typed frontmatter, optional Questions and References present; Qard IDs are protected metadata; code fences have language identifiers (json, text).",
+            "current_text_evidence": [
+              {
+                "quote": "A **counter** records a cumulative total such as requests or failures.",
+                "line_start": 31,
+                "reason": "Counter, gauge and histogram definitions are correct and concise."
+              },
+              {
+                "quote": "Request IDs, user IDs, raw URLs, and container IDs are unbounded",
+                "line_start": 35,
+                "reason": "Cardinality guidance matches Prometheus practice and names where those identifiers belong instead."
+              },
+              {
+                "quote": "Uniform sampling can discard rare failures before their outcome is known; tail sampling can retain errors and slow traces after observing the result.",
+                "line_start": 59,
+                "reason": "Correctly contrasts head-style and tail sampling and states the cost of each."
+              },
+              {
+                "quote": "Audit, security, financial, or regulatory records are different",
+                "line_start": 81,
+                "reason": "States the exception that keeps best-effort telemetry from being used for durable records."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note is one coherent topic, and the signals, correlation, pipeline and instrumentation sections depend on each other.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          },
+          "review_process": "focused-whole-note-v1"
+        }
       }
     },
     "Vault/Home/DevOps/Version Control Systems/Branching Stratagies.md": {
@@ -19486,7 +19539,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-19T07:41:39.910595Z",
-    "elapsed_seconds": 505.4174667,
+    "elapsed_seconds": 510.47914799999995,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -19920,7 +19973,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T07:50:05.327583Z",
+    "checkpoint_at": "2026-11-19T07:50:10.389264Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
@@ -30306,6 +30359,97 @@
       ],
       "source_hashes": {
         "Vault/Home/DevOps/Infrastructure as Code.md": "a1c7fbbe56af27fc6af7d740b92d6e95d5cc9ad42d75e1561c8941577791cc18"
+      },
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "467a51b7f740d99cb5345809564759ab0fbc2a6f094b29a23d4716e92d71695f": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "I read the whole note independently and found no factual, structural, or question-quality defect that needs an edit. The keep is justified. No edits, feedback, or rejected proposals were supplied.",
+        "notes": [
+          {
+            "path": "Vault/Home/DevOps/Observability.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate and well ordered. It runs from the three signals to correlation, the collection pipeline, alert quality and the .NET instrumentation mapping. Both Qards are single focused tasks. No edit is needed.",
+            "page_type": "Concept — authorable prose. Questions and References are optional and present. References are bare links. Fenced blocks carry language identifiers (json, text).",
+            "current_text_evidence": [
+              {
+                "quote": "Metric labels create one series for every value combination.",
+                "line_start": 33,
+                "reason": "States the cardinality mechanism correctly and concretely. It supports the label guidance and card 2."
+              },
+              {
+                "quote": "Uniform sampling can discard rare failures before their outcome is known; tail sampling can retain errors and slow traces after observing the result.",
+                "line_start": 56,
+                "reason": "Gives the correct trade-off between sampling strategies and the condition that matters, which is whether the outcome is known."
+              },
+              {
+                "quote": "OpenTelemetry standardizes instrumentation and transport across these boundaries; it is not a storage engine.",
+                "line_start": 73,
+                "reason": "States the boundary precisely. The application, collector and backend responsibilities in the same section are consistent with it."
+              },
+              {
+                "quote": "when policy requires durable acknowledgement, they belong on a separately designed durable record or transaction path",
+                "line_start": 75,
+                "reason": "Gives the exception for audit data. This avoids the over-generalization that all telemetry is best-effort."
+              },
+              {
+                "quote": "> [!qard]- Why should request or user IDs not be metric labels?",
+                "line_start": 112,
+                "reason": "Card 2 is one dependent behavior-and-why task. Its answer gives the mechanism, an example and the condition. The original ID is intact."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: metrics, logs, traces, correlation and alerting form one coherent observability topic. Each part is brief and depends on the others, so separate notes would not be independently useful.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/DevOps/Observability.md",
+          "citation_index": 0,
+          "reported_line_start": 33,
+          "resolved_line_start": 35
+        },
+        {
+          "path": "Vault/Home/DevOps/Observability.md",
+          "citation_index": 1,
+          "reported_line_start": 56,
+          "resolved_line_start": 59
+        },
+        {
+          "path": "Vault/Home/DevOps/Observability.md",
+          "citation_index": 2,
+          "reported_line_start": 73,
+          "resolved_line_start": 79
+        },
+        {
+          "path": "Vault/Home/DevOps/Observability.md",
+          "citation_index": 3,
+          "reported_line_start": 75,
+          "resolved_line_start": 81
+        },
+        {
+          "path": "Vault/Home/DevOps/Observability.md",
+          "citation_index": 4,
+          "reported_line_start": 112,
+          "resolved_line_start": 119
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/DevOps/Observability.md": "2234262d1876551d42a61a355d60823e901810facde45479abd1c9b810813cc1"
       },
       "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -56600,196 +56744,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "5b261511fa644217ba9caf57468fa93e",
-    "topic_id": "devops-e491b463",
-    "batch": {
-      "topic": "DevOps",
-      "topic_id": "devops-e491b463",
-      "notes": [
-        {
-          "path": "Vault/Home/DevOps/Observability.md",
-          "content": "---\ntopic: [DevOps]\nsubtopic: []\nsummary: \"Understanding a system's internal state from metrics, logs, and traces.\"\nlevel: [\"2\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"DevOps\"\nqard-topic: \"Observability\"\nflashcard_uid: \"75262be6\"\ncreated: \"2026-02-28T16:25:46.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.510Z\"\n---\n\nObservability is the ability to infer a system's internal state from the signals it emits. Metrics reveal changes in scale and health, logs preserve discrete events, and traces reconstruct causal work across service boundaries. An alert may expose a symptom; correlation turns that symptom into a defensible explanation.\n\nInstrumentation is part of the application contract. Telemetry that was never emitted or correlated cannot be recovered after a failure.\n\n# Metrics, Logs, and Traces\n\n| Signal | Shape | Best question | Main design limit |\n| --- | --- | --- | --- |\n| Metric | Numeric series aggregated over time | Is the system healthy, and how large is the problem? | Labels must stay bounded |\n| Log | Discrete structured event | What exact state or error occurred? | Volume, sensitive data, and schema consistency |\n| Trace | Tree of timed spans for one operation | Where did this request wait or fail? | Context propagation and sampling |\n\n## Metrics\n\nA **counter** records a cumulative total such as requests or failures. A **gauge** records a current value such as queue depth. A **histogram** records a distribution such as request duration so a backend can calculate percentiles.\n\nFor a service, rate, errors, and duration provide a useful minimum. Tail latency such as p95 or p99 matters because an average can hide a slow minority. Resource metrics such as CPU, queue depth, connection-pool use, and memory pressure explain constraints, but they do not replace service-level evidence.\n\nMetric labels create one series for every value combination. Bounded dimensions such as service, route template, status class, and outcome are usually safe. Request IDs, user IDs, raw URLs, and container IDs are unbounded and can make storage and queries explode; those identifiers belong in controlled logs or traces instead.\n\n## Logs\n\nLogs record events. Structured logs keep stable property names so the backend can filter and aggregate without parsing prose. They should describe important state transitions and failures without serializing request bodies, credentials, tokens, or regulated data.\n\n```json\n{\n  \"timestamp\": \"2026-08-15T10:24:31Z\",\n  \"service\": \"checkout-api\",\n  \"severity\": \"Error\",\n  \"message\": \"Payment authorization failed\",\n  \"trace_id\": \"4bf92f3577b34da6a3ce929d0e0e4736\",\n  \"route\": \"/checkout\",\n  \"duration_ms\": 842\n}\n```\n\n`service` identifies the emitting component, `severity` supports routing, and `trace_id` joins the event to distributed work. `route` uses a stable template instead of a customer-specific URL. The timestamp must use a consistent clock and format across services.\n\n## Traces\n\nA trace represents one end-to-end operation. Each **span** records one timed unit of work and its parent relationship. W3C `traceparent` propagation carries trace identity across HTTP or messaging boundaries so an API span, database span, and downstream-service span can form one causal tree.\n\nSampling controls trace cost. Uniform sampling can discard rare failures before their outcome is known; tail sampling can retain errors and slow traces after observing the result. The system still needs an explicit policy for what may be dropped.\n\n# Correlation\n\nConsistent service identity, timestamps, and trace context connect the signals:\n\n```text\nmetric alert -> exemplar or time window -> trace -> correlated structured logs\n```\n\nMetrics find the affected interval and scale. Traces identify the slow or failing dependency. Logs supply discrete application state that a span does not contain. A business correlation ID may supplement trace context when work crosses asynchronous boundaries or outlives one trace, but it should not replace trace propagation.\n\n# Collection Boundary\n\nTelemetry passes through a pipeline:\n\n```text\napplication -> SDK or agent -> collector -> storage/query backend -> dashboard or alert\n```\n\nThe application owns stable signal names, useful attributes, context propagation, and redaction. A collector can batch, retry, sample, and route signals. The backend owns indexing, retention, queries, dashboards, and alert evaluation. OpenTelemetry standardizes instrumentation and transport across these boundaries; it is not a storage engine.\n\nBest-effort diagnostics should not exhaust memory or block production requests when the telemetry backend is unavailable. Audit, security, financial, or regulatory records are different: when policy requires durable acknowledgement, they belong on a separately designed durable record or transaction path rather than being treated as disposable telemetry.\n\n# Alert Quality\n\nAn alert should represent a user-visible symptom, exhausted reliability budget, or urgent security condition. It needs an owner and an action. A threshold with no decision behind it creates noise; a dashboard with no question behind it is decoration.\n\nGood alerts use enough time or traffic to avoid reacting to meaningless variation, but not so much that a serious failure is hidden. The exact threshold is service-specific. The design boundary is whether the signal maps to impact and whether the recipient can change the outcome.\n\n# Application Instrumentation Contract\n\nIn .NET, `ILogger` emits structured logs, `Meter` defines metrics, and `ActivitySource` creates spans. OpenTelemetry can add framework instrumentation and export those signals through OTLP. Application code still decides which business operations matter, which outcomes are bounded metric dimensions, and which data is unsafe to emit.\n\nInstrumentation should preserve:\n\n- a stable service identity and signal naming scheme;\n- W3C trace context across outgoing calls and messages;\n- bounded metric attributes;\n- structured errors and important state transitions;\n- no secrets or raw sensitive payloads;\n- explicit sampling, retention, and failure behavior outside the request path.\n\n# Questions\n\n<!-- qard-id: 72594425-1e47-4c8e-b495-fbb737e03c9c -->\n> [!qard]- How do metrics, logs, and traces answer different observability questions?\n> Each signal answers a different question. Metrics show whether the system is healthy and how large a problem is. Logs record exactly what happened at a point in time. Traces show where one operation spent its time or failed as it crossed services.\n>\n> | Signal | What it records | Question it answers | Main limit |\n> |---|---|---|---|\n> | Metrics | Numeric measurements aggregated over time, such as request rate, error count or a latency distribution. | Is something wrong, since when, and how widespread is it? | Aggregation discards per-request detail, and label values must stay bounded. |\n> | Logs | Discrete, timestamped events, ideally with structured fields that describe state or errors. | What exact error or state change occurred? | High volume, sensitive data and inconsistent fields make them costly and hard to query. |\n> | Traces | A tree of timed spans for one operation, linked by a trace ID that is propagated across process boundaries. | Which step or dependency made this request slow or fail? | Every boundary must propagate the trace context, and sampling can drop the trace that matters. |\n>\n> Correlation turns a symptom into an explanation. A metric alert identifies the affected time window and scale. A trace from that window shows the failing or slow dependency. Logs that carry the same trace ID supply the application state that the spans do not contain. Each signal still needs its own retention and access policy.\n>\n> [Prometheus: Instrumentation](https://prometheus.io/docs/practices/instrumentation/) · [OpenTelemetry Logs data model](https://opentelemetry.io/docs/specs/otel/logs/data-model/) · [OpenTelemetry traces](https://opentelemetry.io/docs/concepts/signals/traces/) · [W3C Trace Context](https://www.w3.org/TR/trace-context/)\n\n<!-- qard-id: 57640da2-2bae-4098-b66f-012dcc4697d9 -->\n> [!qard]- Why should request or user IDs not be metric labels?\n> Each distinct combination of label values creates a separate time series. Request IDs take a new value for every request and user IDs one for every user, so the number of series grows with traffic instead of staying bounded. Memory, storage and query cost grow with it.\n>\n> For example, an `http_requests_total` counter labeled by `route` and `status` has one series per route and status pair, such as one that counts all failed `/checkout` requests. Adding a `request_id` label creates a new series for every request, each used once. Even a simple total then has to be computed across an ever-growing number of series.\n>\n> Metric labels suit bounded dimensions such as service, route template, method and status class, where each value is worth aggregating. Per-request identifiers belong in logs or traces, which record individual events. Trace IDs connect those records to each other, so an investigation can move from a metric spike in a time window to the matching traces and logs. That link does not grant access: the logs and traces still need their own access controls.\n>\n> The exact cost of high cardinality depends on the metrics backend, but an unbounded label sets no upper limit on the number of series.\n>\n> [Prometheus: Do not overuse labels](https://prometheus.io/docs/practices/instrumentation/#do-not-overuse-labels) · [OpenTelemetry Logs data model](https://opentelemetry.io/docs/specs/otel/logs/data-model/) · [W3C Trace Context](https://www.w3.org/TR/trace-context/)\n\n# References\n\n- [OpenTelemetry for .NET](https://opentelemetry.io/docs/languages/dotnet/)\n- [W3C Trace Context](https://www.w3.org/TR/trace-context/)\n- [Monitoring Distributed Systems](https://sre.google/sre-book/monitoring-distributed-systems/)\n",
-          "hash": "2234262d1876551d42a61a355d60823e901810facde45479abd1c9b810813cc1",
-          "topic": "DevOps",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/DevOps/Observability.md",
-          "outcome": "keep",
-          "reason": "I audited the whole note against its text and the standard behavior of the cited specifications. The opening definition is accurate. The signal table matches the Metrics, Logs and Traces sections. Counter, gauge and histogram definitions are correct. The label-cardinality guidance matches Prometheus instrumentation practice. The W3C traceparent propagation and head-versus-tail sampling descriptions are accurate. The correlation chain, the collector and backend responsibilities, and the .NET mapping (ILogger, Meter, ActivitySource, OTLP) are correct. The JSON log example is consistent with its explanation. The two Qard cards each test one gradeable task, and their answers add mechanism and conditions without contradicting the note. The references are bare descriptive links. The note has no known violations. I found no factual error or readability weakness that justifies an edit."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/DevOps/Observability.md": "2234262d1876551d42a61a355d60823e901810facde45479abd1c9b810813cc1"
-    },
-    "feedback_keys": [],
-    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/DevOps/Observability.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-19T07:49:45.645890Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "I read the whole note independently and found no factual, structural, or question-quality defect that needs an edit. The keep is justified. No edits, feedback, or rejected proposals were supplied.",
-        "notes": [
-          {
-            "path": "Vault/Home/DevOps/Observability.md",
-            "verdict": "CLEAN",
-            "summary": "The note is accurate and well ordered. It runs from the three signals to correlation, the collection pipeline, alert quality and the .NET instrumentation mapping. Both Qards are single focused tasks. No edit is needed.",
-            "page_type": "Concept — authorable prose. Questions and References are optional and present. References are bare links. Fenced blocks carry language identifiers (json, text).",
-            "current_text_evidence": [
-              {
-                "quote": "Metric labels create one series for every value combination.",
-                "line_start": 33,
-                "reason": "States the cardinality mechanism correctly and concretely. It supports the label guidance and card 2."
-              },
-              {
-                "quote": "Uniform sampling can discard rare failures before their outcome is known; tail sampling can retain errors and slow traces after observing the result.",
-                "line_start": 56,
-                "reason": "Gives the correct trade-off between sampling strategies and the condition that matters, which is whether the outcome is known."
-              },
-              {
-                "quote": "OpenTelemetry standardizes instrumentation and transport across these boundaries; it is not a storage engine.",
-                "line_start": 73,
-                "reason": "States the boundary precisely. The application, collector and backend responsibilities in the same section are consistent with it."
-              },
-              {
-                "quote": "when policy requires durable acknowledgement, they belong on a separately designed durable record or transaction path",
-                "line_start": 75,
-                "reason": "Gives the exception for audit data. This avoids the over-generalization that all telemetry is best-effort."
-              },
-              {
-                "quote": "> [!qard]- Why should request or user IDs not be metric labels?",
-                "line_start": 112,
-                "reason": "Card 2 is one dependent behavior-and-why task. Its answer gives the mechanism, an example and the condition. The original ID is intact."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: metrics, logs, traces, correlation and alerting form one coherent observability topic. Each part is brief and depends on the others, so separate notes would not be independently useful.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "PASS",
-              "identity_safety": "PASS",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/DevOps/Observability.md",
-          "citation_index": 0,
-          "reported_line_start": 33,
-          "resolved_line_start": 35
-        },
-        {
-          "path": "Vault/Home/DevOps/Observability.md",
-          "citation_index": 1,
-          "reported_line_start": 56,
-          "resolved_line_start": 59
-        },
-        {
-          "path": "Vault/Home/DevOps/Observability.md",
-          "citation_index": 2,
-          "reported_line_start": 73,
-          "resolved_line_start": 79
-        },
-        {
-          "path": "Vault/Home/DevOps/Observability.md",
-          "citation_index": 3,
-          "reported_line_start": 75,
-          "resolved_line_start": 81
-        },
-        {
-          "path": "Vault/Home/DevOps/Observability.md",
-          "citation_index": 4,
-          "reported_line_start": 112,
-          "resolved_line_start": 119
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/DevOps/Observability.md": "2234262d1876551d42a61a355d60823e901810facde45479abd1c9b810813cc1"
-      },
-      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "I read the whole note independently and found no factual, structural, or question-quality defect that needs an edit. The keep is justified. No edits, feedback, or rejected proposals were supplied.",
-      "notes": [
-        {
-          "path": "Vault/Home/DevOps/Observability.md",
-          "verdict": "CLEAN",
-          "summary": "The note is accurate and well ordered. It runs from the three signals to correlation, the collection pipeline, alert quality and the .NET instrumentation mapping. Both Qards are single focused tasks. No edit is needed.",
-          "page_type": "Concept — authorable prose. Questions and References are optional and present. References are bare links. Fenced blocks carry language identifiers (json, text).",
-          "current_text_evidence": [
-            {
-              "quote": "Metric labels create one series for every value combination.",
-              "line_start": 35,
-              "reason": "States the cardinality mechanism correctly and concretely. It supports the label guidance and card 2."
-            },
-            {
-              "quote": "Uniform sampling can discard rare failures before their outcome is known; tail sampling can retain errors and slow traces after observing the result.",
-              "line_start": 59,
-              "reason": "Gives the correct trade-off between sampling strategies and the condition that matters, which is whether the outcome is known."
-            },
-            {
-              "quote": "OpenTelemetry standardizes instrumentation and transport across these boundaries; it is not a storage engine.",
-              "line_start": 79,
-              "reason": "States the boundary precisely. The application, collector and backend responsibilities in the same section are consistent with it."
-            },
-            {
-              "quote": "when policy requires durable acknowledgement, they belong on a separately designed durable record or transaction path",
-              "line_start": 81,
-              "reason": "Gives the exception for audit data. This avoids the over-generalization that all telemetry is best-effort."
-            },
-            {
-              "quote": "> [!qard]- Why should request or user IDs not be metric labels?",
-              "line_start": 119,
-              "reason": "Card 2 is one dependent behavior-and-why task. Its answer gives the mechanism, an example and the condition. The original ID is intact."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: metrics, logs, traces, correlation and alerting form one coherent observability topic. Each part is brief and depends on the others, so separate notes would not be independently useful.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
