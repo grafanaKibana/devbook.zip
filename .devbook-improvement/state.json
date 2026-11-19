@@ -19222,10 +19222,10 @@
   "focused_workload": {
     "version": 1,
     "id": "895ba07e431b4b1fb1f4b702293610c3",
-    "status": "active",
-    "phase": "evaluating",
+    "status": "sealed",
+    "phase": "sealed",
     "started_at": "2026-11-19T20:51:09.789366Z",
-    "elapsed_seconds": 908.423830200001,
+    "elapsed_seconds": 913.819149500001,
     "calls_reserved": 19,
     "responses_received": 19,
     "attempted_paths": [
@@ -22492,7 +22492,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T21:06:18.212702Z",
+    "checkpoint_at": "2026-11-19T21:06:23.608020Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -23239,7 +23239,9 @@
         "check": "dotnet run --no-cache --file DevBook.Tooling/Scripts/ValidateVault.cs -- --all --repo-root ..",
         "result": "passed"
       }
-    ]
+    ],
+    "stop_reason": "call_limit",
+    "sealed_at": "2026-11-19T21:06:23.608022Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
