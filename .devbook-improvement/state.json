@@ -19287,10 +19287,10 @@
     "version": 1,
     "id": "5b261511fa644217ba9caf57468fa93e",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-19T07:41:39.910595Z",
-    "elapsed_seconds": 186.23298650000004,
-    "calls_reserved": 4,
+    "elapsed_seconds": 191.71207320000002,
+    "calls_reserved": 5,
     "responses_received": 4,
     "attempted_paths": [
       "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
@@ -19441,7 +19441,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T07:44:46.143101Z",
+    "checkpoint_at": "2026-11-19T07:44:51.622187Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
@@ -19466,7 +19466,7 @@
       "pr": null
     },
     "base_sha": "36628d4b1ae482b0f3c18ce0548af47dd2338277",
-    "reservation_deadline": "2026-11-19T07:58:51.703137Z"
+    "reservation_deadline": "2026-11-19T07:59:51.380656Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
