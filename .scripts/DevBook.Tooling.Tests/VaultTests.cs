@@ -173,6 +173,22 @@ public sealed class VaultTests
         result.Should().Be(2);
     }
 
+    [Fact]
+    public void PropertyTypesMustMatchTheValidatedFrontmatterShape()
+    {
+        // Arrange
+        using var vault = new RollupRollupVault();
+        string types = Path.Combine(vault.Root, "Vault", ".obsidian", "types.json");
+        Directory.CreateDirectory(Path.GetDirectoryName(types)!);
+        File.WriteAllText(types, """{"types":{"topic":"multitext","status":"multitext","priority":"text"}}""");
+
+        // Act
+        IReadOnlyList<Issue> issues = Validation.ValidatePropertyTypes(vault.Root);
+
+        // Assert
+        issues.Should().ContainSingle().Which.Message.Should().Contain("`status`").And.Contain("`text`");
+    }
+
     private sealed class RollupRollupVault : IDisposable
     {
         public string Root { get; } = Path.Combine(Path.GetTempPath(), "devbook-rollup-" + Guid.NewGuid().ToString("N"));

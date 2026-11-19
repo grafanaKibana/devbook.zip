@@ -6,14 +6,13 @@ subtopic:
 level:
   - "2"
 priority: High
-status:
-  - Established
+status: Established
 publish: true
 qard-deck: AI & ML
 qard-topic: LLM/Context Engineering/RAG/Chunking
 flashcard_uid: 6bf1b415
 created: 2026-02-27T12:56:16.000Z
-modified: "2026-11-16T21:54:43.406Z"
+modified: "2026-11-19T18:51:19.159Z"
 published: 2026-07-08T13:14:17.484Z
 ---
 
