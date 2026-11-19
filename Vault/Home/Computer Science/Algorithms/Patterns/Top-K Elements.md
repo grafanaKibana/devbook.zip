@@ -7,7 +7,7 @@ priority: Medium
 status: New
 publish: true
 created: "2026-07-10T06:24:36.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-19T20:53:16.606Z"
 published: "2026-07-10T05:59:31.416Z"
 ---
 
@@ -108,7 +108,7 @@ For known-size input with `k ≥ n`, return every value and skip the heap. Sort 
 > ```mermaid
 > flowchart TD
 >   A[Empty min-heap, capacity k] --> B{More input}
->   B -->|No| Z[Heap holds the largest min(k,n) values]
+>   B -->|No| Z["Heap holds the largest min(k,n) values"]
 >   B -->|Yes| C[Read next element x]
 >   C --> D{Heap size less than k}
 >   D -->|Yes| E[Push x]
