@@ -18818,20 +18818,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "d453485acceb4cc2ad47b7fd423e1864",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-18T20:45:27.802411Z",
-    "elapsed_seconds": 16.6951314,
+    "id": "5b261511fa644217ba9caf57468fa93e",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-19T07:41:39.910595Z",
+    "elapsed_seconds": 0.00107,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-18T20:45:44.496988Z",
-    "stop_reason": "awaiting_export",
-    "sealed_at": "2026-11-18T20:45:44.497007Z"
+    "checkpoint_at": "2026-11-19T07:41:39.911316Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -33088,6 +33086,23 @@
           "reader_benefit": "The answer is shorter and easier to recall and grade while keeping the transfer example and the scope condition."
         }
       ]
+    },
+    "d453485acceb4cc2ad47b7fd423e1864": {
+      "version": 1,
+      "id": "d453485acceb4cc2ad47b7fd423e1864",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-18T20:45:27.802411Z",
+      "elapsed_seconds": 16.6951314,
+      "calls_reserved": 0,
+      "responses_received": 0,
+      "attempted_paths": [],
+      "accepted_records": [],
+      "outcomes": [],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-18T20:45:44.496988Z",
+      "stop_reason": "awaiting_export",
+      "sealed_at": "2026-11-18T20:45:44.497007Z"
     }
   },
   "feedback_workloads": {
