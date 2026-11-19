@@ -19038,11 +19038,11 @@
     "version": 1,
     "id": "895ba07e431b4b1fb1f4b702293610c3",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-19T20:51:09.789366Z",
-    "elapsed_seconds": 391.6964294,
+    "elapsed_seconds": 402.8549024,
     "calls_reserved": 9,
-    "responses_received": 8,
+    "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Patterns/Sliding Window.md",
       "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md",
@@ -20593,7 +20593,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T20:57:41.485296Z",
+    "checkpoint_at": "2026-11-19T20:57:52.643768Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -58774,5 +58774,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "895ba07e431b4b1fb1f4b702293610c3",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Binary Search.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Finds a target in a sorted array by repeatedly halving the search range.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: In Progress\npublish: true\ncreated: \"2026-02-20T23:50:18.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.338Z\"\n---\n\nA sorted array may contain a million user IDs, yet Binary Search needs only about twenty comparisons to find one. Each comparison uses the ordering to discard half of the remaining range.\n\nThat reduction has two requirements. The values must be ordered, and the middle element must be cheap to reach by index. Without ordering, a comparison says nothing about the untouched half. Without random access, reaching each midpoint may cost as much as scanning the range.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"binary-search\",\"array\":[4,9,13,18,22,27,31,38,45,52,58,64,70,77,83,91],\"target\":83}\n```\n\nThe trace searches for `83` in a sorted 16-element array.\n\nThe first probe inspects `38` at index 7. Because `38 < 83` and the array is sorted, indices 0 through 7 are no longer candidates; the next range begins at index 8. Repeating that elimination reaches `83`.\n\nBinary Search does not change the comparison itself; ordering makes each result eliminate an entire half-range that [[Home/Computer Science/Algorithms/Search Algorithms/Linear Search|Linear Search]] cannot discard.\n\nAt the start of every loop, the target—if it exists—must lie inside the inclusive range `[left, right]`. The middle comparison preserves that invariant:\n\n- `a[mid] < target` proves every index at or left of `mid` is too small, so the next range is `[mid + 1, right]`.\n- `a[mid] > target` proves every index at or right of `mid` is too large, so the next range is `[left, mid - 1]`.\n- Equality ends the search.\n\nThe range strictly shrinks after every miss. The iterative form carries the two boundaries and their midpoint.\n\nCompute the midpoint as `left + (right - left) / 2`. It is algebraically equivalent to `(left + right) / 2`, but it never forms the potentially overflowing sum.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Binary Search complexity\",\n  \"variables\": {\n    \"inputSize\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of elements in the sorted random-access array\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"cases\",\n      \"entries\": [\n        {\n          \"kind\": \"case\",\n          \"role\": \"Best\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        },\n        {\n          \"kind\": \"case\",\n          \"role\": \"Average\",\n          \"formula\": \"O(log n)\",\n          \"curveId\": \"log-n\"\n        },\n        {\n          \"kind\": \"case\",\n          \"role\": \"Worst\",\n          \"formula\": \"O(log n)\",\n          \"curveId\": \"log-n\"\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"cases\",\n      \"entries\": [\n        {\n          \"kind\": \"case\",\n          \"role\": \"Best\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        },\n        {\n          \"kind\": \"case\",\n          \"role\": \"Average\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        },\n        {\n          \"kind\": \"case\",\n          \"role\": \"Worst\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# When the Assumptions Stop Holding\n\nOn `[2, 100, 3, 4, 5]`, a search for `100` begins at `3`, moves right, and discards the half containing the target. The algorithm still terminates normally. Its answer is simply wrong.\n\nDuplicates create a different ambiguity. Searching `[2, 5, 5, 5, 9]` may return any of the three matching indices. A first-match variant stores `mid` as a candidate and continues left with `right = mid - 1`. A last-match variant continues right.\n\nBoundary conventions have to stay paired. This version uses an inclusive range, so the loop condition is `left <= right`, and each update excludes `mid` with `mid + 1` or `mid - 1`. Mixing those updates with a half-open range can skip an element or leave the interval unchanged.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Control flow\n>\n> ```mermaid\n> flowchart TD\n>   A[Start with sorted input] --> B[Set left and right]\n>   B --> C{left is at most right}\n>   C -->|No| Z[Target is absent]\n>   C -->|Yes| D[Compute midpoint]\n>   D --> E{Compare middle value with target}\n>   E -->|Equal| F[Return midpoint]\n>   E -->|Too small| G[Move left past midpoint]\n>   E -->|Too large| H[Move right before midpoint]\n>   G --> C\n>   H --> C\n> ```\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> public static int BinarySearch(int[] values, int target)\n> {\n>     var left = 0;\n>     var right = values.Length - 1;\n>\n>     while (left <= right)\n>     {\n>         var mid = left + (right - left) / 2;\n>         var value = values[mid];\n>\n>         if (value == target)\n>         {\n>             return mid;\n>         }\n>\n>         if (value < target)\n>         {\n>             left = mid + 1;\n>         }\n>         else\n>         {\n>             right = mid - 1;\n>         }\n>     }\n>\n>     return -1;\n> }\n> ```\n>\n> This implementation uses an inclusive search range and returns `-1` when the target is absent. .NET's `Array.BinarySearch` instead returns the bitwise complement of the insertion index.\n\n# References\n\n- [`Array.BinarySearch` method](https://learn.microsoft.com/en-us/dotnet/api/system.array.binarysearch)\n- [Binary search](https://cp-algorithms.com/num_methods/binary_search.html)\n",
+          "hash": "c1c590bb964a76527a2f75175f6aa6e519a2bcb32e84b6b030bccab31c8f6bda",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Binary Search.md",
+          "outcome": "keep",
+          "reason": "I read the whole note against the algorithm's standard behavior and found no factual or editorial defect. The opening says about 20 comparisons for a million items, and log2(10^6) is about 19.9. The sorted-order and random-access prerequisites come before the trace. The inclusive-range invariant and the three branch rules are correct. `left + (right - left) / 2` is correctly described as equivalent but overflow-safe. The complexity block is right: best O(1), average and worst O(log n), space O(1) for the iterative form. The unsorted example `[2,100,3,4,5]` does discard the half holding 100. The duplicates discussion and the pairing of `left <= right` with `mid ± 1` are accurate. The C# code matches the described invariant. The note's claim that .NET `Array.BinarySearch` returns the bitwise complement of the insertion index for a missing target matches the .NET documentation. The note has no cards and no known violations. The prose is already clear and well ordered, so any edit would be cosmetic."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Search Algorithms/Binary Search.md": "c1c590bb964a76527a2f75175f6aa6e519a2bcb32e84b6b030bccab31c8f6bda"
+    },
+    "feedback_keys": [],
+    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Search Algorithms/Binary Search.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-19T20:57:52.643758Z"
+  }
 }
