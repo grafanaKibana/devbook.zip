@@ -10459,51 +10459,46 @@
       }
     },
     "Vault/Home/DevOps/DevOps.md": {
-      "content_hash": "95456843b9c7a8fd7e997d81b94c4579c7e989a8dd445f82ed11bec48c857e7c",
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "content_hash": "56dcdaacd4330bf3bef78aff3e55a7b5dc23ff63a86404b0dff5d0ac71fb5169",
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
       "outcome": "keep",
       "repair_input_hash": "",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_process": "focused-whole-note-v1",
       "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "keep_review": {
-        "content_hash": "95456843b9c7a8fd7e997d81b94c4579c7e989a8dd445f82ed11bec48c857e7c",
-        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "content_hash": "56dcdaacd4330bf3bef78aff3e55a7b5dc23ff63a86404b0dff5d0ac71fb5169",
+        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
         "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
         "review": {
           "path": "Vault/Home/DevOps/DevOps.md",
           "verdict": "CLEAN",
-          "summary": "Compact folder note with a clear opening idea and three focused sections: ownership models, the build/release/run deployment shape, and security as delivery evidence. Claims are accurate and carry the decision conditions that matter. No edit is warranted.",
-          "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx map block, which has a language identifier. Questions are absent, which is allowed. References are bare links.",
+          "summary": "Whole-note audit of the FolderNote found accurate, direct prose with no defects. The note is internally consistent, and a keep is justified. Edits would be churn.",
+          "page_type": "FolderNote — protected datacorejsx folder map; optional Questions absent (allowed); References are bare links.",
           "current_text_evidence": [
             {
               "quote": "DevOps shortens the path from a code change to production without giving up control of risk.",
               "line_start": 18,
-              "reason": "The opening states the operating idea quickly and in a direct, impersonal voice."
+              "reason": "The opening states the operating idea quickly and clearly."
             },
             {
-              "quote": "SRE fits when reliability needs an explicit budget; a platform earns its cost when several teams will adopt the same path.",
+              "quote": "These models change support, not accountability.",
               "line_start": 29,
-              "reason": "Gives the condition that decides between SRE and a platform, and keeps accountability with application teams. This is useful engineering judgment."
+              "reason": "States the key boundary between DevOps, SRE and platform engineering, with the condition that decides when each fits."
             },
             {
-              "quote": "**Release** combines that artifact with environment configuration and secret references.",
-              "line_start": 36,
-              "reason": "Matches the Twelve-Factor build/release/run separation. The following paragraph also states what the model does not cover."
+              "quote": "It does not define Kubernetes, supply-chain security, or telemetry.",
+              "line_start": 39,
+              "reason": "Gives the explicit limit of the Twelve-Factor model, with a practical test for the deployment contract."
             },
             {
               "quote": "A signature proves artifact identity and integrity, not that the code is safe.",
               "line_start": 45,
-              "reason": "States a precise limit of signing. The same paragraph says a gate needs evidence and a named response, which gives the security section its decision rule."
-            },
-            {
-              "quote": "- [NIST Secure Software Development Framework](https://csrc.nist.gov/pubs/sp/800/218/final)",
-              "line_start": 53,
-              "reason": "References are authoritative, topic-specific, one per provider and content type, and bare descriptive links without annotation."
+              "reason": "Technically accurate security boundary. The gate criteria (exploitability, reachability, expiry) preserve useful decision detail."
             }
           ],
           "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the sections are brief, share one delivery theme, and each supports the folder hub's overview. Splitting would fragment a compact note.",
+          "split_suggestion": "No split: the sections are short, share one delivery theme and work as a folder overview.",
           "findings": [],
           "source_checks": [],
           "rejection_equivalence": [],
@@ -10516,6 +10511,59 @@
           }
         },
         "review_process": "focused-whole-note-v1"
+      },
+      "keep_review_history": {
+        "63996dbb1bc7e0b975dea868d117cb61693be6252697f3e069c411fd721ccc84": {
+          "content_hash": "95456843b9c7a8fd7e997d81b94c4579c7e989a8dd445f82ed11bec48c857e7c",
+          "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+          "review": {
+            "path": "Vault/Home/DevOps/DevOps.md",
+            "verdict": "CLEAN",
+            "summary": "Compact folder note with a clear opening idea and three focused sections: ownership models, the build/release/run deployment shape, and security as delivery evidence. Claims are accurate and carry the decision conditions that matter. No edit is warranted.",
+            "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx map block, which has a language identifier. Questions are absent, which is allowed. References are bare links.",
+            "current_text_evidence": [
+              {
+                "quote": "DevOps shortens the path from a code change to production without giving up control of risk.",
+                "line_start": 18,
+                "reason": "The opening states the operating idea quickly and in a direct, impersonal voice."
+              },
+              {
+                "quote": "SRE fits when reliability needs an explicit budget; a platform earns its cost when several teams will adopt the same path.",
+                "line_start": 29,
+                "reason": "Gives the condition that decides between SRE and a platform, and keeps accountability with application teams. This is useful engineering judgment."
+              },
+              {
+                "quote": "**Release** combines that artifact with environment configuration and secret references.",
+                "line_start": 36,
+                "reason": "Matches the Twelve-Factor build/release/run separation. The following paragraph also states what the model does not cover."
+              },
+              {
+                "quote": "A signature proves artifact identity and integrity, not that the code is safe.",
+                "line_start": 45,
+                "reason": "States a precise limit of signing. The same paragraph says a gate needs evidence and a named response, which gives the security section its decision rule."
+              },
+              {
+                "quote": "- [NIST Secure Software Development Framework](https://csrc.nist.gov/pubs/sp/800/218/final)",
+                "line_start": 53,
+                "reason": "References are authoritative, topic-specific, one per provider and content type, and bare descriptive links without annotation."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the sections are brief, share one delivery theme, and each supports the folder hub's overview. Splitting would fragment a compact note.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          },
+          "review_process": "focused-whole-note-v1"
+        }
       }
     },
     "Vault/Home/DevOps/Docker.md": {
@@ -19289,7 +19337,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-19T07:41:39.910595Z",
-    "elapsed_seconds": 217.7374428,
+    "elapsed_seconds": 222.4572239,
     "calls_reserved": 6,
     "responses_received": 6,
     "attempted_paths": [
@@ -19441,7 +19489,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T07:45:17.647557Z",
+    "checkpoint_at": "2026-11-19T07:45:22.367338Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
@@ -29691,6 +29739,80 @@
       ],
       "source_hashes": {
         "Vault/Home/Data Persistence/ORMs/Entity Framework.md": "03a3c36e101f8e49469f86995458a466e2b073a91fd181947a0d3b2ef8787a33"
+      },
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "ac4dbe479c4ab29d7c7e8a53f40a90ad85044857b3964f1bbd3fbefd7455ddd7": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/DevOps/DevOps.md",
+            "verdict": "CLEAN",
+            "summary": "Whole-note audit of the FolderNote found accurate, direct prose with no defects. The note is internally consistent, and a keep is justified. Edits would be churn.",
+            "page_type": "FolderNote — protected datacorejsx folder map; optional Questions absent (allowed); References are bare links.",
+            "current_text_evidence": [
+              {
+                "quote": "DevOps shortens the path from a code change to production without giving up control of risk.",
+                "line_start": 17,
+                "reason": "The opening states the operating idea quickly and clearly."
+              },
+              {
+                "quote": "These models change support, not accountability.",
+                "line_start": 27,
+                "reason": "States the key boundary between DevOps, SRE and platform engineering, with the condition that decides when each fits."
+              },
+              {
+                "quote": "It does not define Kubernetes, supply-chain security, or telemetry.",
+                "line_start": 38,
+                "reason": "Gives the explicit limit of the Twelve-Factor model, with a practical test for the deployment contract."
+              },
+              {
+                "quote": "A signature proves artifact identity and integrity, not that the code is safe.",
+                "line_start": 45,
+                "reason": "Technically accurate security boundary. The gate criteria (exploitability, reachability, expiry) preserve useful decision detail."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the sections are short, share one delivery theme and work as a folder overview.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The note is accurate, clear and compliant (protected datacorejsx block, bare reference links, no Qards). There are no known violations, and no edits were proposed. The keep is justified.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/DevOps/DevOps.md",
+          "citation_index": 0,
+          "reported_line_start": 17,
+          "resolved_line_start": 18
+        },
+        {
+          "path": "Vault/Home/DevOps/DevOps.md",
+          "citation_index": 1,
+          "reported_line_start": 27,
+          "resolved_line_start": 29
+        },
+        {
+          "path": "Vault/Home/DevOps/DevOps.md",
+          "citation_index": 2,
+          "reported_line_start": 38,
+          "resolved_line_start": 39
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/DevOps/DevOps.md": "56dcdaacd4330bf3bef78aff3e55a7b5dc23ff63a86404b0dff5d0ac71fb5169"
       },
       "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -55985,174 +56107,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "5b261511fa644217ba9caf57468fa93e",
-    "topic_id": "devops-e491b463",
-    "batch": {
-      "topic": "DevOps",
-      "topic_id": "devops-e491b463",
-      "notes": [
-        {
-          "path": "Vault/Home/DevOps/DevOps.md",
-          "content": "---\nicon: skull\norder: 100\ncolor: \"#6366f1\"\ntopic: [DevOps]\nsubtopic: []\nsummary: \"Automation, observability, and delivery practices that move changes to production safely.\"\ntags: [FolderNote]\npublish: true\npriority: High\nlevel: [\"4\"]\nstatus: In Progress\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:28:37.344Z\"\n---\n\nDevOps shortens the path from a code change to production without giving up control of risk. Automation removes avoidable variation, observability exposes what the change did, and service ownership keeps production feedback with the team that can act on it. A healthy delivery system makes the normal path repeatable and the recovery path routine.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# DevOps, SRE, and Platform Engineering\n\nDevOps is a way of working: the team that changes a service also sees and owns its behavior in production. SRE makes reliability measurable through service-level objectives (SLOs) and error budgets, then uses engineering to reduce operational toil. Platform engineering builds a supported internal product that gives application teams a safer self-service path through repeated infrastructure and delivery work.\n\nThese models change support, not accountability. Application teams remain responsible for service behavior. SRE supplies reliability policy and expertise. A platform supplies reusable paths such as deployment templates, environments, and observability defaults. SRE fits when reliability needs an explicit budget; a platform earns its cost when several teams will adopt the same path.\n\n# Twelve-Factor Application and Deployment Contract\n\nThe deployment contract separates three things:\n\n- **Build** produces an immutable package or image from source.\n- **Release** combines that artifact with environment configuration and secret references.\n- **Run** starts disposable processes that can shut down gracefully and keep durable state in attached services.\n\nThis shape comes from the Twelve-Factor model and remains useful with containers and orchestration. It does not define Kubernetes, supply-chain security, or telemetry. Those are separate decisions. The practical test is whether the running artifact, its configuration, its dependencies, and its previous recoverable version can be identified without rebuilding it.\n\n# Security as Delivery Evidence\n\nSecurity checks belong at the boundary where they can still prevent or contain harm: threat analysis during design, secret and dependency checks before merge, provenance and artifact scanning during build, authorization testing before release, signature or policy checks during deployment, and detection after release.\n\nA gate needs evidence and a named response. Severity alone is not enough; exploitability, reachability, asset importance, compensating controls, ownership, and expiry decide whether a finding blocks release. A signature proves artifact identity and integrity, not that the code is safe.\n\n# References\n\n- [DORA software delivery performance metrics](https://dora.dev/guides/dora-metrics/)\n- [Site Reliability Engineering](https://sre.google/sre-book/table-of-contents/)\n- [The Twelve-Factor App](https://12factor.net/)\n- [CNCF Platforms White Paper](https://tag-app-delivery.cncf.io/whitepapers/platforms/)\n- [NIST Secure Software Development Framework](https://csrc.nist.gov/pubs/sp/800/218/final)\n",
-          "hash": "56dcdaacd4330bf3bef78aff3e55a7b5dc23ff63a86404b0dff5d0ac71fb5169",
-          "topic": "DevOps",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/DevOps/DevOps.md",
-          "outcome": "keep",
-          "reason": "Audited the whole folder note against its current text and the cited primary sources. The opening defines DevOps as shortened delivery with controlled risk, and the datacorejsx folder map is protected and untouched. The DevOps, SRE and platform section matches the SRE book's SLO and error-budget framing and the CNCF platforms white paper's self-service product framing. It also states that accountability stays with application teams. The Twelve-Factor section correctly separates build, release and run, and says the model does not cover Kubernetes, supply-chain security or telemetry. The security section is consistent with NIST SSDF (SP 800-218), and it correctly says a signature proves identity and integrity but not safety. The References are five bare topic-specific links with no duplicates. The note has no Qard cards, so there are no card-granularity issues. known_violations is empty. Wording is direct and non-repetitive, and no factual defect was found, so any edit would be churn."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/DevOps/DevOps.md": "56dcdaacd4330bf3bef78aff3e55a7b5dc23ff63a86404b0dff5d0ac71fb5169"
-    },
-    "feedback_keys": [],
-    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/DevOps/DevOps.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-19T07:45:01.071735Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "notes": [
-          {
-            "path": "Vault/Home/DevOps/DevOps.md",
-            "verdict": "CLEAN",
-            "summary": "Whole-note audit of the FolderNote found accurate, direct prose with no defects. The note is internally consistent, and a keep is justified. Edits would be churn.",
-            "page_type": "FolderNote — protected datacorejsx folder map; optional Questions absent (allowed); References are bare links.",
-            "current_text_evidence": [
-              {
-                "quote": "DevOps shortens the path from a code change to production without giving up control of risk.",
-                "line_start": 17,
-                "reason": "The opening states the operating idea quickly and clearly."
-              },
-              {
-                "quote": "These models change support, not accountability.",
-                "line_start": 27,
-                "reason": "States the key boundary between DevOps, SRE and platform engineering, with the condition that decides when each fits."
-              },
-              {
-                "quote": "It does not define Kubernetes, supply-chain security, or telemetry.",
-                "line_start": 38,
-                "reason": "Gives the explicit limit of the Twelve-Factor model, with a practical test for the deployment contract."
-              },
-              {
-                "quote": "A signature proves artifact identity and integrity, not that the code is safe.",
-                "line_start": 45,
-                "reason": "Technically accurate security boundary. The gate criteria (exploitability, reachability, expiry) preserve useful decision detail."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the sections are short, share one delivery theme and work as a folder overview.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The note is accurate, clear and compliant (protected datacorejsx block, bare reference links, no Qards). There are no known violations, and no edits were proposed. The keep is justified.",
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/DevOps/DevOps.md",
-          "citation_index": 0,
-          "reported_line_start": 17,
-          "resolved_line_start": 18
-        },
-        {
-          "path": "Vault/Home/DevOps/DevOps.md",
-          "citation_index": 1,
-          "reported_line_start": 27,
-          "resolved_line_start": 29
-        },
-        {
-          "path": "Vault/Home/DevOps/DevOps.md",
-          "citation_index": 2,
-          "reported_line_start": 38,
-          "resolved_line_start": 39
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/DevOps/DevOps.md": "56dcdaacd4330bf3bef78aff3e55a7b5dc23ff63a86404b0dff5d0ac71fb5169"
-      },
-      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/DevOps/DevOps.md",
-          "verdict": "CLEAN",
-          "summary": "Whole-note audit of the FolderNote found accurate, direct prose with no defects. The note is internally consistent, and a keep is justified. Edits would be churn.",
-          "page_type": "FolderNote — protected datacorejsx folder map; optional Questions absent (allowed); References are bare links.",
-          "current_text_evidence": [
-            {
-              "quote": "DevOps shortens the path from a code change to production without giving up control of risk.",
-              "line_start": 18,
-              "reason": "The opening states the operating idea quickly and clearly."
-            },
-            {
-              "quote": "These models change support, not accountability.",
-              "line_start": 29,
-              "reason": "States the key boundary between DevOps, SRE and platform engineering, with the condition that decides when each fits."
-            },
-            {
-              "quote": "It does not define Kubernetes, supply-chain security, or telemetry.",
-              "line_start": 39,
-              "reason": "Gives the explicit limit of the Twelve-Factor model, with a practical test for the deployment contract."
-            },
-            {
-              "quote": "A signature proves artifact identity and integrity, not that the code is safe.",
-              "line_start": 45,
-              "reason": "Technically accurate security boundary. The gate criteria (exploitability, reachability, expiry) preserve useful decision detail."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the sections are short, share one delivery theme and work as a folder overview.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The note is accurate, clear and compliant (protected datacorejsx block, bare reference links, no Qards). There are no known violations, and no edits were proposed. The keep is justified.",
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
