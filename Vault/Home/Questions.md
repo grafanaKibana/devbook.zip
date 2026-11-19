@@ -4,7 +4,7 @@ tags: [FolderNote, MetricsIgnore]
 publish: true
 icon: circle-help
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-19T15:58:38.703Z"
 published: "2026-07-05T17:03:01.458Z"
 ---
 
@@ -48,13 +48,20 @@ class QuestionTopics extends dc.preact.Component {
       selection: this.props.selection,
       tabs: this.props.topics.map((topic) => ({
         id: topic.name,
-        label: `${topic.label} (${topic.count})`,
+        label: topic.label,
         panel: Array.from(host.children).find((panel) => panel.dataset.topic === topic.name),
       })),
       onSelectionChange: (selection, previous) => {
         if (selection === null) this.controller.setSelection(previous);
         else this.props.onSelect(selection);
       },
+    });
+    host.querySelectorAll(".tabsdown__tab").forEach((tab, index) => {
+      const topic = this.props.topics[index];
+      tab.dataset.count = topic?.count ?? "";
+      if (topic?.name === this.props.selection) {
+        tab.scrollIntoView({ block: "nearest", inline: "nearest" });
+      }
     });
     if (this.focusedTopic) {
       const index = this.props.topics.findIndex((topic) => topic.name === this.focusedTopic);
@@ -359,18 +366,29 @@ return function QuestionsIndex() {
   const sortedItems = (items) => [...items].sort((a, b) =>
     a.path.localeCompare(b.path, undefined, { numeric: true }) || a.id.localeCompare(b.id),
   );
-  const renderQuestion = (item) => (
-    <div class="dc-qi-question" key={item.id}>
-      <dc.Markdown content={item.block} inline={false} sourcePath={currentPath} />
-      <div class="dc-qi-source">
-        <dc.Markdown
-          content={`*Source: [${item.source}](${encodeURI(item.path)})*`}
-          inline={false}
-          sourcePath={currentPath}
-        />
+  const renderGroups = (items) => {
+    const groups = new Map();
+    for (const item of sortedItems(items)) {
+      if (!groups.has(item.path)) groups.set(item.path, []);
+      groups.get(item.path).push(item);
+    }
+    return [...groups.entries()].map(([path, group]) => (
+      <div class="dc-qi-group" key={path}>
+        <div class="dc-qi-source">
+          <dc.Markdown
+            content={`[${group[0].source}](${encodeURI(path)})`}
+            inline={false}
+            sourcePath={currentPath}
+          />
+        </div>
+        {group.map((item) => (
+          <div class="dc-qi-question" key={item.id}>
+            <dc.Markdown content={item.block} inline={false} sourcePath={currentPath} />
+          </div>
+        ))}
       </div>
-    </div>
-  );
+    ));
+  };
   const renderSections = (node, path, scopePath) => {
     const depth = path.split("/").length - scopePath.split("/").length;
     const Heading = `h${Math.min(2 + Math.max(1, depth), 6)}`;
@@ -382,7 +400,7 @@ return function QuestionsIndex() {
         hidden={path !== scopePath && !path.startsWith(`${scopePath}/`)}
       >
         {path !== scopePath ? <Heading>{path.split("/").pop()}</Heading> : null}
-        {sortedItems(node.items).map(renderQuestion)}
+        {renderGroups(node.items)}
       </section>,
     ];
     for (const key of sortedKeys(node.children)) {
@@ -402,7 +420,7 @@ return function QuestionsIndex() {
     const scopeLabel = scopePath.split("/").join(" / ");
     const isDeepScope = scopePath !== topic.name;
     const selectId = `${scopeId}-${encodeURIComponent(topic.name)}`;
-    const options = [{ value: topic.name, label: `All ${topic.name}`, count: countItems(topicNode) }];
+    const options = [{ value: topic.name, label: "All subtopics", count: countItems(topicNode) }];
     const collectOptions = (node, ancestors) => {
       for (const key of sortedKeys(node.children)) {
         const child = node.children[key];
@@ -415,16 +433,20 @@ return function QuestionsIndex() {
 
     return (
       <section class="dc-qi-topic-panel" key={topic.name} data-topic={topic.name} hidden={topic.name !== effectiveTopic}>
-        <div class="dc-qi-controls">
-          <label for={selectId}>Subtopic</label>
-          <select id={selectId} value={scopePath} onChange={(event) => setSelectedPath(event.currentTarget.value)}>
-            {options.map((option) => (
-              <option key={option.value} value={option.value}>{option.label} ({option.count})</option>
-            ))}
-          </select>
-        </div>
         <section class="dc-qi-results" aria-label={`${scopeLabel} questions`}>
-          <h2>{scopePath.split("/").pop()}</h2>
+          <div class="dc-qi-head">
+            <h2>{scopePath.split("/").pop()}</h2>
+            <select
+              id={selectId}
+              aria-label="Subtopic"
+              value={scopePath}
+              onChange={(event) => setSelectedPath(event.currentTarget.value)}
+            >
+              {options.map((option) => (
+                <option key={option.value} value={option.value}>{option.label} ({option.count})</option>
+              ))}
+            </select>
+          </div>
           {isDeepScope ? <p class="dc-qi-path">{scopeLabel}</p> : null}
           {!done && countItems(tree) === 0 ? (
             <p class="dc-qi-loading">Loading questions…</p>

@@ -29,7 +29,7 @@ Notes are authored in `Vault/Home/` and published through Quartz Syncer to the Q
 - Qard deck/topic metadata organizes study cards without replacing folder-derived dashboard grouping; valid logical overrides and per-card locations remain authoritative.
 - `Vault/` owns authored content; `Web/content/` and `Web/public/` are generated projections.
 - `AGENTS.md` owns repository and publishing rules. `DESIGN.md` owns the established visual system.
-- Interview Questions preloads every topic’s questions on page open, with wrapping Tabsdown topic tabs and a native Subtopic selector to narrow the displayed questions. Full ancestry disambiguates repeated subtopic names.
+- Interview Questions preloads every topic’s questions on page open, with single-row scrolling Tabsdown topic tabs and a native Subtopic selector to narrow the displayed questions. Full ancestry disambiguates repeated subtopic names.
 
 ## Product Principles
 

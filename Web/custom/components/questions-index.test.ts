@@ -74,7 +74,7 @@ test("topic order, labels and nested counts follow folder metadata", () => {
   assert.ok(result.indexOf('data-qi-topic="programming"') < result.indexOf('data-qi-topic="ai"'))
   assert.match(result, /data-qi-label="Programming" data-qi-count="4"/)
   assert.match(result, /AI &amp; ML/)
-  assert.match(result, /All Programming \(4\)/)
+  assert.match(result, /All subtopics \(4\)/)
   assert.match(result, /Net \/ Csharp \(3\)/)
 })
 
@@ -120,7 +120,7 @@ test("every topic panel and source is preloaded in server HTML without JavaScrip
 
 test("root-level notes are included in a selectable scope", () => {
   const result = html([file("standalone-note", 1)])
-  assert.match(result, /All Other \(1\)/)
+  assert.match(result, /All subtopics \(1\)/)
   assert.match(result, /href="\.\/standalone-note"/)
   assert.equal([...result.matchAll(/class="qi-item"/g)].length, 1)
 })
@@ -133,7 +133,7 @@ test("empty topic FolderNotes remain visible in the landscape", () => {
     file("programming/note", 1),
   ])
   assert.match(result, /data-qi-topic="cloud"/)
-  assert.match(result, /All Cloud \(0\)/)
+  assert.match(result, /All subtopics \(0\)/)
   assert.match(result, /No questions in this topic yet/)
   assert.doesNotMatch(result, /data-qi-topic="tags"/)
 })
@@ -141,7 +141,7 @@ test("empty topic FolderNotes remain visible in the landscape", () => {
 test("a tag-only FolderNote remains a visible empty topic", () => {
   const result = html([file("new-topic/index")])
   assert.match(result, /data-qi-topic="new-topic"/)
-  assert.match(result, /All New Topic \(0\)/)
+  assert.match(result, /All subtopics \(0\)/)
 })
 
 test("client mounts real Tabsdown topics and preserves hash-scoped navigation", () => {
@@ -154,7 +154,11 @@ test("client mounts real Tabsdown topics and preserves hash-scoped navigation", 
   let mounted: any
   let destroyed = false
   const selections: Array<string | null> = []
-  const tabsHost = {}
+  const tabContents = [0, 1].map(() => ({
+    dataset: {} as Record<string, string>,
+    scrollIntoView: () => {},
+  }))
+  const tabsHost = { querySelectorAll: () => tabContents }
 
   const makePanel = (topic: string, label: string, count: number, child?: string) => {
     const title = { textContent: label }
@@ -251,9 +255,13 @@ test("client mounts real Tabsdown topics and preserves hash-scoped navigation", 
   assert.deepEqual(
     Array.from(mounted.tabs, (tab: any) => [String(tab.id), String(tab.label)]),
     [
-      ["programming", "Programming (4)"],
-      ["ai", "AI & ML (3)"],
+      ["programming", "Programming"],
+      ["ai", "AI & ML"],
     ],
+  )
+  assert.deepEqual(
+    tabContents.map((content) => content.dataset.count),
+    ["4", "3"],
   )
   assert.equal(mounted.selection, "ai")
   assert.equal(ai.select.value, "ai/rag")
