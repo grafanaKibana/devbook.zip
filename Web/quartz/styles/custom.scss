@@ -1890,14 +1890,17 @@ blockquote {
     opacity var(--dur-1) var(--ease-out);
 }
 
-// Questions alone use wrapped Tabsdown topic controls. Component CSS is emitted
-// in `quartz-base`; this unlayered, mounted-only rule must outrank Tabsdown.
+// Questions topic tabs keep their natural width on one row and scroll past the
+// edge. Component CSS is emitted in `quartz-base`; this unlayered, mounted-only
+// rule must outrank Tabsdown.
 .questions-index .tabsdown.tabsdown--mounted {
-  --tabsdown-overflow-wrap: wrap;
-  --tabsdown-overflow-x: visible;
-  --tabsdown-equal-width-flex: 1 1 max-content;
-  --tabsdown-equal-width-min-inline-size: var(--tabsdown-tab-min-size);
-  --tabsdown-equal-width-white-space: normal;
+  --tabsdown-equal-width-flex: 0 0 auto;
+  --tabsdown-equal-width-min-inline-size: 0;
+  --tabsdown-equal-width-white-space: nowrap;
+
+  > .tabsdown__tablist > .tabsdown__tab {
+    padding-inline: 0.75rem;
+  }
 }
 
 // ============================================================================
