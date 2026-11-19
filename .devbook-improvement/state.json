@@ -19436,16 +19436,17 @@
     "version": 1,
     "id": "5b261511fa644217ba9caf57468fa93e",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-19T07:41:39.910595Z",
-    "elapsed_seconds": 370.8459279,
+    "elapsed_seconds": 374.999625,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
       "Vault/Home/DevOps/CI CD tools.md",
       "Vault/Home/DevOps/DevOps.md",
-      "Vault/Home/DevOps/Docker.md"
+      "Vault/Home/DevOps/Docker.md",
+      "Vault/Home/DevOps/Infrastructure as Code.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -19730,10 +19731,78 @@
           },
           "model_calls": 8
         }
+      },
+      {
+        "path": "Vault/Home/DevOps/Infrastructure as Code.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/DevOps/Infrastructure as Code.md",
+                "outcome": "keep",
+                "reason": "I read the whole note and found no verified defect, and known_violations is empty. The opening defines IaC as desired state, then a plan, then an apply. The declarative/imperative distinction is stated accurately. The Terraform fragment is labelled as a recognition aid, and its comments on resource type, local address, bucket identity and managed tags are correct. The plan/apply loop correctly says to apply a saved plan when approval must bind to exact operations. The state section is accurate: state maps addresses to remote objects, may hold sensitive values, and needs a protected backend with locking and versioning. It also correctly says ARM and CloudFormation keep state on the provider side. The drift section limits reconciliation to fields the provider reads and manages. The controller-ownership section and the engineering-boundaries list state real conditions, including that recreating a database does not restore its data. The note is compact and each section teaches something distinct. It has no Qard cards, and none is required. The two references are authoritative and carry no trailing annotation. Any edit would be cosmetic."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note is accurate and compact, has no known violations, and no edits are proposed. The keep is justified by the current text.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/DevOps/Infrastructure as Code.md",
+                "verdict": "CLEAN",
+                "summary": "The note explains desired state, the plan/apply loop, state, drift, controller ownership and practical limits accurately and compactly. Nothing found needs repair, so keeping it unchanged is justified.",
+                "page_type": "Concept — no Questions section is required. References are bare descriptive links. The code fences carry language identifiers (hcl, text).",
+                "current_text_evidence": [
+                  {
+                    "quote": "When approval must bind to exact operations, apply the saved reviewed plan rather than recomputing it after the gate.",
+                    "line_start": 40,
+                    "reason": "This states the correct condition for plan/apply approval, which is an important operational point."
+                  },
+                  {
+                    "quote": "Refresh and plan can expose drift only for fields the provider reads and manages.",
+                    "line_start": 48,
+                    "reason": "This bounds the drift claim accurately and names the limit of reconciliation."
+                  },
+                  {
+                    "quote": "Two reconcilers managing the same value can repeatedly overwrite each other.",
+                    "line_start": 52,
+                    "reason": "This gives the concrete failure mode that motivates single ownership of each resource or field."
+                  },
+                  {
+                    "quote": "Recreating a database resource does not restore its data.",
+                    "line_start": 62,
+                    "reason": "This separates resource recreation from data recovery, an essential boundary."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the sections form one coherent IaC overview, and the topics are not independently useful.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 10
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T07:47:50.756042Z",
+    "checkpoint_at": "2026-11-19T07:47:54.909740Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
