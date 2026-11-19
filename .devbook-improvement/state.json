@@ -13511,6 +13511,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md": {
+      "content_hash": "b23e4c4b2a74ed578d423e898c85a2eb34089e97dc9e9f66f6bd39f5e11acb1b",
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "b23e4c4b2a74ed578d423e898c85a2eb34089e97dc9e9f66f6bd39f5e11acb1b",
+        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
+          "verdict": "CLEAN",
+          "summary": "I read the whole note and hand-traced the quadratic example. The probes land at indices 7, 8 and 9, which matches the prose. The formula, the lo/hi updates, the zero-denominator guard, the long widening and the complexity cases are correct. The explanation runs in a sensible order, from intuition to formula, trace, complexity, failure modes and code. Nothing needs changing, and an edit would be cosmetic.",
+          "page_type": "Concept — no Qard cards; the optional References section is present with one real primary source. Fenced blocks have language identifiers (steptrace, complexity, mermaid, csharp).",
+          "current_text_evidence": [
+            {
+              "quote": "A sorted array holds ten million evenly spaced sensor readings",
+              "line_start": 14,
+              "reason": "The opening motivates the idea quickly and concretely, and states the key insight that value determines index."
+            },
+            {
+              "quote": "The trace searches for `81` in the quadratic sequence `a[i] = i²`.",
+              "line_start": 32,
+              "reason": "Hand trace: pos = 0 + 81*11/121 = 7, then 8, then 9. The 67% figure (81/121) and the undershoot at index 7 are correct."
+            },
+            {
+              "quote": "The expected row assumes uniformly distributed keys.",
+              "line_start": 103,
+              "reason": "The O(log log n) average is correctly conditioned on uniformity, and the Θ(n) worst case is shown in the table."
+            },
+            {
+              "quote": "The denominator fails when `a[hi] == a[lo]`.",
+              "line_start": 113,
+              "reason": "The zero-span failure mode is explained correctly, with integer and floating-point behavior, and it matches the guard in the code."
+            },
+            {
+              "quote": "Widen an operand to long before subtracting and multiplying",
+              "line_start": 151,
+              "reason": "The overflow reasoning is sound: the maximum product is about 2^63 − 2^32 − 2^31 + 1, which is below 2^63."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note covers one algorithm, and its failure modes and implementation depend on the same mechanism.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -19165,7 +19225,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-19T20:51:09.789366Z",
-    "elapsed_seconds": 711.1288140000004,
+    "elapsed_seconds": 715.6882236000004,
     "calls_reserved": 16,
     "responses_received": 16,
     "attempted_paths": [
@@ -22346,7 +22406,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T21:03:00.917684Z",
+    "checkpoint_at": "2026-11-19T21:03:05.477093Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -33702,6 +33762,85 @@
       ],
       "source_hashes": {
         "Vault/Home/Computer Science/Algorithms/Search Algorithms/Binary Search.md": "c1c590bb964a76527a2f75175f6aa6e519a2bcb32e84b6b030bccab31c8f6bda"
+      },
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "0832f256a9d61b40c82a6f0e4a25719c76e8efccae6d8b568b03e5238f9097de": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The note was independently audited and is accurate and clear. The keep is justified, and there are no edits, cards or open findings.",
+        "notes": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
+            "verdict": "CLEAN",
+            "summary": "I read the whole note and hand-traced the quadratic example. The probes land at indices 7, 8 and 9, which matches the prose. The formula, the lo/hi updates, the zero-denominator guard, the long widening and the complexity cases are correct. The explanation runs in a sensible order, from intuition to formula, trace, complexity, failure modes and code. Nothing needs changing, and an edit would be cosmetic.",
+            "page_type": "Concept — no Qard cards; the optional References section is present with one real primary source. Fenced blocks have language identifiers (steptrace, complexity, mermaid, csharp).",
+            "current_text_evidence": [
+              {
+                "quote": "A sorted array holds ten million evenly spaced sensor readings",
+                "line_start": 14,
+                "reason": "The opening motivates the idea quickly and concretely, and states the key insight that value determines index."
+              },
+              {
+                "quote": "The trace searches for `81` in the quadratic sequence `a[i] = i²`.",
+                "line_start": 32,
+                "reason": "Hand trace: pos = 0 + 81*11/121 = 7, then 8, then 9. The 67% figure (81/121) and the undershoot at index 7 are correct."
+              },
+              {
+                "quote": "The expected row assumes uniformly distributed keys.",
+                "line_start": 102,
+                "reason": "The O(log log n) average is correctly conditioned on uniformity, and the Θ(n) worst case is shown in the table."
+              },
+              {
+                "quote": "The denominator fails when `a[hi] == a[lo]`.",
+                "line_start": 112,
+                "reason": "The zero-span failure mode is explained correctly, with integer and floating-point behavior, and it matches the guard in the code."
+              },
+              {
+                "quote": "Widen an operand to long before subtracting and multiplying",
+                "line_start": 161,
+                "reason": "The overflow reasoning is sound: the maximum product is about 2^63 − 2^32 − 2^31 + 1, which is below 2^63."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note covers one algorithm, and its failure modes and implementation depend on the same mechanism.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
+          "citation_index": 2,
+          "reported_line_start": 102,
+          "resolved_line_start": 103
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
+          "citation_index": 3,
+          "reported_line_start": 112,
+          "resolved_line_start": 113
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
+          "citation_index": 4,
+          "reported_line_start": 161,
+          "resolved_line_start": 151
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md": "b23e4c4b2a74ed578d423e898c85a2eb34089e97dc9e9f66f6bd39f5e11acb1b"
       },
       "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
@@ -60677,184 +60816,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "895ba07e431b4b1fb1f4b702293610c3",
-    "topic_id": "computer-science-445ddaa5",
-    "batch": {
-      "topic": "Computer Science",
-      "topic_id": "computer-science-445ddaa5",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
-          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Estimates a target's position from value ratios in uniformly distributed sorted data.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: New\npublish: true\ncreated: \"2026-07-10T06:24:36.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-10T06:24:35.852Z\"\n---\n\nA sorted array holds ten million evenly spaced sensor readings, and one reading must be located by value. Binary Search ignores one fact the data offers: when values are exactly evenly spaced, the target's *value* determines its *index*. A reading whose value sits 95% of the way between the smallest and largest one sits 95% of the way through the array.\n\nInterpolation Search probes at that predicted position instead of the middle. Given the current bounds `lo` and `hi`, it maps the target's value-offset into an index:\n\n`pos = lo + (target - a[lo]) * (hi - lo) / (a[hi] - a[lo])`\n\nTo find `950` in `[0 … 1000]` it probes near index `95%`, not `50%` — the same instinct that opens a phone book near the back to find \"Smith\". Without the uniform model, value ratios stop predicting index ratios.\n\nThe distinguishing step is where the first probe lands.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"interpolation-search\",\"array\":[0,1,4,9,16,25,36,49,64,81,100,121],\"target\":81}\n```\n\nThe trace searches for `81` in the quadratic sequence `a[i] = i²`. The target sits about 67% across the initial value span but at index `9` of `11`, so the first estimate undershoots at index `7`. Each miss remaps the target against the new endpoints until the probe reaches index `9`.\n\nAt the start of every loop the target, if present, lies in `[a[lo], a[hi]]` — the same invariant Binary Search maintains. Interpolation Search adds an assumption about *where* inside that range it lies. The formula treats the values between `a[lo]` and `a[hi]` as points on a straight line against their indices: the fraction `(target - a[lo]) / (a[hi] - a[lo])` of the value span maps to that same fraction of the index span. When the data actually follows that line, the probe lands on or beside the target's true index, and even a miss leaves a sub-range far smaller than half.\n\nThe comparison that follows is identical to Binary Search. `a[pos] < target` proves indices `lo … pos` are too small, so `lo` moves to `pos + 1`; `a[pos] > target` moves `hi` to `pos - 1`. The loop also guards `a[lo] <= target <= a[hi]`, so a target that falls outside the current value window exits immediately rather than interpolating into an empty region.\n\nOn exactly evenly spaced values, a present target's value fraction equals its index fraction, so the first estimate lands exactly in the idealized arithmetic model. An individual search can shrink by more or less than the uniform model predicts.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Interpolation Search complexity\",\n  \"variables\": {\n    \"inputSize\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of elements in the sorted numeric array\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"cases\",\n      \"entries\": [\n        {\n          \"kind\": \"case\",\n          \"role\": \"Best\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        },\n        {\n          \"kind\": \"case\",\n          \"role\": \"Average\",\n          \"formula\": \"O(log log n)\",\n          \"curveId\": \"log-log-n\"\n        },\n        {\n          \"kind\": \"case\",\n          \"role\": \"Worst\",\n          \"formula\": \"Θ(n)\",\n          \"curveId\": \"linear\"\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"cases\",\n      \"entries\": [\n        {\n          \"kind\": \"case\",\n          \"role\": \"Best\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        },\n        {\n          \"kind\": \"case\",\n          \"role\": \"Average\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        },\n        {\n          \"kind\": \"case\",\n          \"role\": \"Worst\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        }\n      ]\n    }\n  }\n}\n```\n\nThe expected row assumes uniformly distributed keys. Skewed values can repeatedly place the estimated probe near one boundary, which is why binary search has a stronger unconditional guarantee.\n\n%% endtabs %%\n\n# When the Distribution Stops Cooperating\n\nNon-uniform data breaks the relationship between value ratios and index ratios. When one maximum dominates the value span, estimates cluster near `lo` even while the target remains near the far end by index. Clustered timestamps and Zipfian frequency tables can mislead the probe in the same way.\n\nThe probe also requires keys with meaningful arithmetic. `(target - a[lo]) * (hi - lo) / (a[hi] - a[lo])` needs subtraction and a ratio, not just an ordering. Strings under a custom comparator, GUIDs, or opaque records support comparison but not a numeric offset, so the position cannot be estimated at all. Those inputs are restricted to comparison-based search such as Binary Search.\n\nThe denominator fails when `a[hi] == a[lo]`. A run of equal values, or a range that has collapsed to one element, makes the value span zero. An unguarded integer implementation throws `DivideByZeroException`. Floating-point variants produce a non-finite estimate that cannot be used as an index. The C# implementation below detects the flat block before division and resolves it with a direct equality check — the same category of defensive guard as computing a midpoint that cannot overflow.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Control flow\n>\n> ```mermaid\n> flowchart TD\n>   A[Sorted array and target] --> B{lo not past hi and target within value range}\n>   B -->|No| Z[Target is absent]\n>   B -->|Yes| C{value at hi equals value at lo}\n>   C -->|Yes| D[Flat block: compare directly]\n>   C -->|No| E[Estimate pos by linear interpolation]\n>   E --> F{value at pos equals target}\n>   F -->|Yes| Y[Return pos]\n>   F -->|No| G{value at pos less than target}\n>   G -->|Yes| H[Move lo past pos]\n>   G -->|No| I[Move hi before pos]\n>   H --> B\n>   I --> B\n> ```\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> public static int InterpolationSearch(int[] values, int target)\n> {\n>     var lo = 0;\n>     var hi = values.Length - 1;\n>\n>     while (lo <= hi && target >= values[lo] && target <= values[hi])\n>     {\n>         // Flat block: the interpolation denominator would be zero.\n>         if (values[hi] == values[lo])\n>         {\n>             return values[lo] == target ? lo : -1;\n>         }\n>\n>         // Widen an operand to long before subtracting and multiplying, so\n>         // neither the value difference nor the product overflows 32-bit int.\n>         var span = ((long)target - values[lo]) * (hi - lo);\n>         var pos = lo + (int)(span / ((long)values[hi] - values[lo]));\n>\n>         if (values[pos] == target)\n>         {\n>             return pos;\n>         }\n>\n>         if (values[pos] < target)\n>         {\n>             lo = pos + 1;\n>         }\n>         else\n>         {\n>             hi = pos - 1;\n>         }\n>     }\n>\n>     return -1;\n> }\n> ```\n>\n> The `target >= values[lo] && target <= values[hi]` guard doubles as the absence check: once the target leaves the range's value window, no interpolated position can be valid.\n\n# References\n\n- [Perl, Itai & Avni, \"Interpolation Search\" (1978)](https://dl.acm.org/doi/10.1145/359545.359557)\n",
-          "hash": "b23e4c4b2a74ed578d423e898c85a2eb34089e97dc9e9f66f6bd39f5e11acb1b",
-          "topic": "Computer Science",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note. I hand-traced the quadratic example (target 81 in 12 elements). The first probe is index 7, since 81*11/121 is about 7.4. The second is index 8 and the third is index 9, which matches the prose. The formula, the loop invariant and the lo/hi updates are correct. The zero-denominator guard is correct. The long widening cannot overflow: (2^32-1)*(2^31-1) is below 2^63. The complexity table (O(1) best, O(log log n) average on uniform keys, Θ(n) worst, O(1) space) matches the Perl, Itai and Avni result, and the note states the uniformity condition. The non-uniform failure modes, the arithmetic-key requirement and the Mermaid flow agree with the code. The text is clear, and there are no Qard cards and no known violations. Any remaining edit would be cosmetic, so I left the note unchanged."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md": "b23e4c4b2a74ed578d423e898c85a2eb34089e97dc9e9f66f6bd39f5e11acb1b"
-    },
-    "feedback_keys": [],
-    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-19T21:02:27.730179Z",
-    "review_evidence": {
-      "raw_review": {
-        "verdict": "CLEAN",
-        "overall_reason": "The note was independently audited and is accurate and clear. The keep is justified, and there are no edits, cards or open findings.",
-        "notes": [
-          {
-            "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
-            "verdict": "CLEAN",
-            "summary": "I read the whole note and hand-traced the quadratic example. The probes land at indices 7, 8 and 9, which matches the prose. The formula, the lo/hi updates, the zero-denominator guard, the long widening and the complexity cases are correct. The explanation runs in a sensible order, from intuition to formula, trace, complexity, failure modes and code. Nothing needs changing, and an edit would be cosmetic.",
-            "page_type": "Concept — no Qard cards; the optional References section is present with one real primary source. Fenced blocks have language identifiers (steptrace, complexity, mermaid, csharp).",
-            "current_text_evidence": [
-              {
-                "quote": "A sorted array holds ten million evenly spaced sensor readings",
-                "line_start": 14,
-                "reason": "The opening motivates the idea quickly and concretely, and states the key insight that value determines index."
-              },
-              {
-                "quote": "The trace searches for `81` in the quadratic sequence `a[i] = i²`.",
-                "line_start": 32,
-                "reason": "Hand trace: pos = 0 + 81*11/121 = 7, then 8, then 9. The 67% figure (81/121) and the undershoot at index 7 are correct."
-              },
-              {
-                "quote": "The expected row assumes uniformly distributed keys.",
-                "line_start": 102,
-                "reason": "The O(log log n) average is correctly conditioned on uniformity, and the Θ(n) worst case is shown in the table."
-              },
-              {
-                "quote": "The denominator fails when `a[hi] == a[lo]`.",
-                "line_start": 112,
-                "reason": "The zero-span failure mode is explained correctly, with integer and floating-point behavior, and it matches the guard in the code."
-              },
-              {
-                "quote": "Widen an operand to long before subtracting and multiplying",
-                "line_start": 161,
-                "reason": "The overflow reasoning is sound: the maximum product is about 2^63 − 2^32 − 2^31 + 1, which is below 2^63."
-              }
-            ],
-            "target_resolution": "JUSTIFIED UNCHANGED",
-            "split_suggestion": "No split: the note covers one algorithm, and its failure modes and implementation depend on the same mechanism.",
-            "findings": [],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "PASS",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "change_checks": []
-      },
-      "bindings": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
-          "citation_index": 2,
-          "reported_line_start": 102,
-          "resolved_line_start": 103
-        },
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
-          "citation_index": 3,
-          "reported_line_start": 112,
-          "resolved_line_start": 113
-        },
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
-          "citation_index": 4,
-          "reported_line_start": 161,
-          "resolved_line_start": 151
-        }
-      ],
-      "source_hashes": {
-        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md": "b23e4c4b2a74ed578d423e898c85a2eb34089e97dc9e9f66f6bd39f5e11acb1b"
-      },
-      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-    },
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "The note was independently audited and is accurate and clear. The keep is justified, and there are no edits, cards or open findings.",
-      "notes": [
-        {
-          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
-          "verdict": "CLEAN",
-          "summary": "I read the whole note and hand-traced the quadratic example. The probes land at indices 7, 8 and 9, which matches the prose. The formula, the lo/hi updates, the zero-denominator guard, the long widening and the complexity cases are correct. The explanation runs in a sensible order, from intuition to formula, trace, complexity, failure modes and code. Nothing needs changing, and an edit would be cosmetic.",
-          "page_type": "Concept — no Qard cards; the optional References section is present with one real primary source. Fenced blocks have language identifiers (steptrace, complexity, mermaid, csharp).",
-          "current_text_evidence": [
-            {
-              "quote": "A sorted array holds ten million evenly spaced sensor readings",
-              "line_start": 14,
-              "reason": "The opening motivates the idea quickly and concretely, and states the key insight that value determines index."
-            },
-            {
-              "quote": "The trace searches for `81` in the quadratic sequence `a[i] = i²`.",
-              "line_start": 32,
-              "reason": "Hand trace: pos = 0 + 81*11/121 = 7, then 8, then 9. The 67% figure (81/121) and the undershoot at index 7 are correct."
-            },
-            {
-              "quote": "The expected row assumes uniformly distributed keys.",
-              "line_start": 103,
-              "reason": "The O(log log n) average is correctly conditioned on uniformity, and the Θ(n) worst case is shown in the table."
-            },
-            {
-              "quote": "The denominator fails when `a[hi] == a[lo]`.",
-              "line_start": 113,
-              "reason": "The zero-span failure mode is explained correctly, with integer and floating-point behavior, and it matches the guard in the code."
-            },
-            {
-              "quote": "Widen an operand to long before subtracting and multiplying",
-              "line_start": 151,
-              "reason": "The overflow reasoning is sound: the maximum product is about 2^63 − 2^32 − 2^31 + 1, which is below 2^63."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the note covers one algorithm, and its failure modes and implementation depend on the same mechanism.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
