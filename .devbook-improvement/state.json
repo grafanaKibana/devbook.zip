@@ -19103,9 +19103,9 @@
     "version": 1,
     "id": "895ba07e431b4b1fb1f4b702293610c3",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "validation_reserved",
     "started_at": "2026-11-19T20:51:09.789366Z",
-    "elapsed_seconds": 518.9033088000001,
+    "elapsed_seconds": 523.8506671000002,
     "calls_reserved": 12,
     "responses_received": 12,
     "attempted_paths": [
@@ -20737,7 +20737,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T20:59:48.692176Z",
+    "checkpoint_at": "2026-11-19T20:59:53.639533Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -20762,7 +20762,7 @@
       "pr": null
     },
     "base_sha": "36628d4b1ae482b0f3c18ce0548af47dd2338277",
-    "reservation_deadline": "2026-11-19T21:14:23.557568Z",
+    "reservation_deadline": "2026-11-19T21:21:09.788866Z",
     "last_request": {
       "topic": "computer-science-445ddaa5",
       "generation": 5,
