@@ -19225,7 +19225,7 @@
     "status": "active",
     "phase": "evaluating",
     "started_at": "2026-11-19T20:51:09.789366Z",
-    "elapsed_seconds": 839.6568576000009,
+    "elapsed_seconds": 844.1406607000009,
     "calls_reserved": 18,
     "responses_received": 18,
     "attempted_paths": [
@@ -22480,7 +22480,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T21:05:09.445728Z",
+    "checkpoint_at": "2026-11-19T21:05:13.929532Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -48582,7 +48582,8 @@
     "40ec719a6bc4661a38e0ed27b88f653d1f4a5bad179c2c88875907162c17d09e": 1,
     "3d372b65f516f3ca754a3efb1168f45e9ee0a639919872aac16d65bb0b874f4d": 1,
     "68a6b19e78969c8e73c90b9b798eb8c448582772bab4d5e98bf3f7f5fc157269": 1,
-    "c88a2b09ad2df76c154bd2bfdaaead576c646cab2bf3d1063274abf7b7a2989d": 1
+    "c88a2b09ad2df76c154bd2bfdaaead576c646cab2bf3d1063274abf7b7a2989d": 1,
+    "e10f233100225285465a53bbbf0c45a30b028a36435014b6f875ecfbdca4f7f8": 1
   },
   "invalid_proposals": {
     "9fee84ff84d9689d5dfad3c6fe703f665c86a6d2a18f6f2293d1638835cd347c": {
@@ -61426,6 +61427,7 @@
     },
     "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
     "review_repair_key": "e10f233100225285465a53bbbf0c45a30b028a36435014b6f875ecfbdca4f7f8",
-    "author_repair_pending": true
+    "author_repair_pending": true,
+    "repair_reserved": true
   }
 }
