@@ -34,9 +34,20 @@ Treat this contract's abstract nouns as review concepts, not preferred prose. Te
 
 When reviewing multiple notes or a batch rewrite, inspect every explicitly named target and state which other changed notes were sampled. Compare them for repeated rubric vocabulary, sentence openings, paragraph shapes, and decision-rule formulas. Use aggregate vocabulary or length metrics only to locate passages worth reading; movement in a metric is not proof of improvement. Let each topic retain its own useful explanatory shape.
 
-Examples, mechanism walk-throughs, comparisons, numbers, diagrams, pitfalls, tradeoffs, Questions, References, and other headings are optional explanatory devices. Do not fail a note solely because one is absent. When `# Questions` exists, flag prompts that merely paraphrase nearby prose or test trivial vocabulary. Judge whether questions sound like realistic spoken interview questions and whether answers are neutral, professional, plain, and clear on the first read while preserving the technical target and useful detail without a forced template or cadence. Technical accuracy remains the highest-priority dimension.
+Examples, mechanism walk-throughs, comparisons, numbers, diagrams, pitfalls, tradeoffs, Questions, References, and other headings are optional explanatory devices. Do not fail a note solely because one is absent. When `# Questions` exists, flag prompts that merely paraphrase nearby prose or test trivial vocabulary. Judge whether questions sound like realistic spoken interview questions and whether answers are neutral, professional, plain, and clear on the first read while preserving the technical target and useful detail, without a template or cadence beyond the stored Qard preferences. Technical accuracy remains the highest-priority dimension.
 
 Every finding must identify concrete evidence, its effect on a purpose or hard contract, and an actionable fix. Do not invent findings to avoid a clean result. Recommend a split only when the note contains conceptually separable topics that would be independently useful; length alone is not a split reason. Ask the main agent before proposing a material scope change beyond the reviewed note.
+
+## Writing preferences
+
+The user's current writing preferences live in two stores that only the `note-polish` and `qard-polish` skills update:
+
+- `.rulesync/skill-feedback/note-polish.json` governs note prose.
+- `.rulesync/skill-feedback/qard-polish.json` governs Qard questions and answers.
+
+Read both before reviewing; when file tools are unavailable, use the copies supplied with this contract. Apply each store's `general` rules and the `topics` entry for the note's top-level subject, the first folder below `Vault/Home` as a slug such as `ai-and-ml` or `software-architecture`. A Qard rule does not govern note prose and a note rule does not govern Qards. Rules about how a proposal is shown in conversation do not apply to saved text.
+
+This contract and `AGENTS.md` own authority, identity, structure and review protocol. The stores own wording, explanation and choice of explanatory device, and decide every writing choice this contract leaves open. A clear departure from an applicable rule is a Medium finding naming the rule key when the reviewed work wrote or changed that text, or when no baseline is supplied for a newly authored note. In text the reviewed work left untouched, list it under Non-blocking suggestions unless it independently harms understanding. When a stored rule contradicts a hard rule, apply the hard rule and report the contradiction instead of failing the note for either.
 
 ## Output format
 

@@ -22,7 +22,7 @@ Use a sequential editorial loop. Diagnose each card independently. A useful repa
   python3 <skill-dir>/scripts/feedback.py show --topic <top-topic-slug>
   ```
 
-  Omit the selector when the broad topic is unknown. General rules always apply; broad-topic rules refine them within that subject. Resolve the top-level subject from the note's taxonomy, not its title or a card's subtopic. Pass the applicable rules to both author and reviewer. A current user instruction takes precedence over stored preferences.
+  Omit the selector when the broad topic is unknown. General rules always apply; broad-topic rules refine them within that subject. Resolve the top-level subject from the note's taxonomy, not its title or a card's subtopic. Author and reviewer load the Qard and note stores themselves under their contracts, as does the scheduled improvement pipeline; pass them the topic slug and any user feedback not yet stored. A current user instruction takes precedence over stored preferences.
 - For a marked-card queue, distinguish current indexed cards from historical state with no current source. Check whether the filter also includes automatic entries such as Often forgotten. Read [Qard operations](references/qard-operations.md) when inventorying the queue, applying changes or changing study flags.
 
 ## Diagnose and propose

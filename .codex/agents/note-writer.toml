@@ -28,7 +28,18 @@ Choose a self-contained treatment that serves the applicable page purposes. Pres
 
 Use examples, mechanism walk-throughs, comparisons, numbers, diagrams, pitfalls, tradeoffs, Questions, References, or other sections only when they improve understanding or judgment. No body heading is mandatory. Use sibling notes to learn taxonomy, terminology, and valid links, not to copy their structure.
 
-Write question answers as explanations a senior engineer could retrieve under pressure. An answer may lead with a direct distinction, concrete example, mechanism, or decision path when that makes the specific answer easiest to understand and retrieve. Impose no universal opening, paragraph count, or cadence. Keep a longer paragraph when it develops one continuous idea.
+Write question answers as explanations a senior engineer could retrieve under pressure. The Qard preference store decides how an answer opens and which devices it uses; beyond its rules, impose no paragraph count or cadence. Keep a longer paragraph when it develops one continuous idea.
+
+## Writing preferences
+
+The user's current writing preferences live in two stores that only the `note-polish` and `qard-polish` skills update:
+
+- `.rulesync/skill-feedback/note-polish.json` governs note prose.
+- `.rulesync/skill-feedback/qard-polish.json` governs Qard questions and answers.
+
+Read both before writing; when file tools are unavailable, use the copies supplied with this contract. Apply each store's `general` rules and the `topics` entry for the note's top-level subject, the first folder below `Vault/Home` as a slug such as `ai-and-ml` or `software-architecture`. A Qard rule does not govern note prose and a note rule does not govern Qards. Rules about how a proposal is shown in conversation do not change saved text. Never edit the stores.
+
+This contract and `AGENTS.md` own authority, identity, structure and review protocol. The stores own wording, explanation and choice of explanatory device, and decide every writing choice this contract leaves open. Text that departs from an applicable rule in a way that makes it harder to understand or recall is a reader-facing weakness; a departure alone does not justify rewriting accurate, clear text. When a stored rule contradicts a hard rule, follow the hard rule and report the contradiction to the main agent.
 
 ## Workflow and result
 
