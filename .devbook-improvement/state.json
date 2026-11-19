@@ -11112,51 +11112,46 @@
       }
     },
     "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md": {
-      "content_hash": "57d2f2036412dbb9980fdababa6eeb3ae253395e59be4e9ee4866ec848e29022",
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "content_hash": "efc8a53b1d891824ba78d68cc85561d6333ce0451ed20b65a519fdacf1afcb35",
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
       "outcome": "keep",
       "repair_input_hash": "",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_process": "focused-whole-note-v1",
       "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "keep_review": {
-        "content_hash": "57d2f2036412dbb9980fdababa6eeb3ae253395e59be4e9ee4866ec848e29022",
-        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "content_hash": "efc8a53b1d891824ba78d68cc85561d6333ce0451ed20b65a519fdacf1afcb35",
+        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
         "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
         "review": {
           "path": "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md",
           "verdict": "CLEAN",
-          "summary": "The note introduces VCS and Git's distributed model quickly. It then covers the working tree/index/repository/remote flow, Git versus hosting platforms, monorepo versus multiple repositories, and SemVer. Git command semantics and SemVer precedence rules are stated accurately and with their conditions, and no defect warrants an edit.",
-          "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx card-map block; Questions are optional and absent; References are bare links.",
+          "summary": "Whole-note audit found no factual, structural or readability defect. The Git state flow, command semantics, host-versus-Git split, monorepo tradeoff table and SemVer rules are accurate and compact. Keeping it unchanged avoids cosmetic churn.",
+          "page_type": "FolderNote — keeps FolderNote tag and protected Datacore folder-map block; Questions optional; references are bare links; fenced blocks have language identifiers.",
           "current_text_evidence": [
             {
               "quote": "`fetch` downloads objects and updates remote-tracking refs without integrating them into the current branch.",
               "line_start": 37,
-              "reason": "Correct fetch/pull/restore/reset/revert semantics, with the mode caveat for reset and the reason revert is used for published history."
-            },
-            {
-              "quote": "Host-side rules, issues, workflow history, permissions, and secrets do not move with it automatically.",
-              "line_start": 43,
-              "reason": "Draws the Git-versus-host boundary accurately and ends with a clear decision criterion."
+              "reason": "Accurate distinction of fetch, pull, restore, reset and revert, with the reset-mode caveat stated."
             },
             {
               "quote": "The deciding evidence is cross-repository coordination, CI fan-out, release coupling, and access boundaries—not repository count alone.",
               "line_start": 55,
-              "reason": "Table and prose give decision conditions rather than a slogan, and they do not repeat each other."
+              "reason": "The monorepo comparison names the conditions that change the decision."
             },
             {
               "quote": "Prerelease identifiers sort below the corresponding normal version; build metadata does not affect precedence.",
               "line_start": 59,
-              "reason": "Matches SemVer 2.0.0 precedence rules and includes the public-API precondition."
+              "reason": "Consistent with SemVer 2.0.0 precedence rules; the public-API prerequisite is stated first."
             },
             {
-              "quote": "The version number is a claim, not proof.",
-              "line_start": 61,
-              "reason": "Direct, judgment-bearing prose that separates SemVer from commit-convention automation."
+              "quote": "A repository can move between hosts without changing its commit graph.",
+              "line_start": 43,
+              "reason": "Cleanly separates Git semantics from host features, so the hosting decision is framed correctly."
             }
           ],
           "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the sections share one topic (versioning and collaboration practice), each is compact, and none is independently large enough to need its own note.",
+          "split_suggestion": "No split: the sections (Git states, hosting, repository strategy, SemVer) are brief and form one coherent version-control overview.",
           "findings": [],
           "source_checks": [],
           "rejection_equivalence": [],
@@ -11169,6 +11164,59 @@
           }
         },
         "review_process": "focused-whole-note-v1"
+      },
+      "keep_review_history": {
+        "1d028c580ec2db9d53ecd07a3cf610aa0dd61fec7f1cdd86e1ff1146d5ee0028": {
+          "content_hash": "57d2f2036412dbb9980fdababa6eeb3ae253395e59be4e9ee4866ec848e29022",
+          "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+          "review": {
+            "path": "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md",
+            "verdict": "CLEAN",
+            "summary": "The note introduces VCS and Git's distributed model quickly. It then covers the working tree/index/repository/remote flow, Git versus hosting platforms, monorepo versus multiple repositories, and SemVer. Git command semantics and SemVer precedence rules are stated accurately and with their conditions, and no defect warrants an edit.",
+            "page_type": "FolderNote — keeps the FolderNote tag and the protected datacorejsx card-map block; Questions are optional and absent; References are bare links.",
+            "current_text_evidence": [
+              {
+                "quote": "`fetch` downloads objects and updates remote-tracking refs without integrating them into the current branch.",
+                "line_start": 37,
+                "reason": "Correct fetch/pull/restore/reset/revert semantics, with the mode caveat for reset and the reason revert is used for published history."
+              },
+              {
+                "quote": "Host-side rules, issues, workflow history, permissions, and secrets do not move with it automatically.",
+                "line_start": 43,
+                "reason": "Draws the Git-versus-host boundary accurately and ends with a clear decision criterion."
+              },
+              {
+                "quote": "The deciding evidence is cross-repository coordination, CI fan-out, release coupling, and access boundaries—not repository count alone.",
+                "line_start": 55,
+                "reason": "Table and prose give decision conditions rather than a slogan, and they do not repeat each other."
+              },
+              {
+                "quote": "Prerelease identifiers sort below the corresponding normal version; build metadata does not affect precedence.",
+                "line_start": 59,
+                "reason": "Matches SemVer 2.0.0 precedence rules and includes the public-API precondition."
+              },
+              {
+                "quote": "The version number is a claim, not proof.",
+                "line_start": 61,
+                "reason": "Direct, judgment-bearing prose that separates SemVer from commit-convention automation."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the sections share one topic (versioning and collaboration practice), each is compact, and none is independently large enough to need its own note.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          },
+          "review_process": "focused-whole-note-v1"
+        }
       }
     },
     "Vault/Home/Networks/Architecture & Ops/CDN.md": {
@@ -19587,7 +19635,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-19T07:41:39.910595Z",
-    "elapsed_seconds": 647.5899540999997,
+    "elapsed_seconds": 651.5361710999997,
     "calls_reserved": 18,
     "responses_received": 18,
     "attempted_paths": [
@@ -20164,7 +20212,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T07:52:27.500072Z",
+    "checkpoint_at": "2026-11-19T07:52:31.446289Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
@@ -56935,100 +56983,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "5b261511fa644217ba9caf57468fa93e",
-    "topic_id": "devops-e491b463",
-    "batch": {
-      "topic": "DevOps",
-      "topic_id": "devops-e491b463",
-      "notes": [
-        {
-          "path": "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md",
-          "content": "---\ntopic: [DevOps]\nsubtopic: [Version Control Systems]\nsummary: \"Tracks file changes over time, enabling collaboration, branching, merging, and reverting.\"\nlevel: [\"4\"]\npriority: High\ntags: [FolderNote]\n\npublish: true\nstatus: In Progress\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.511Z\"\n---\n\nA version control system (VCS) records versions of tracked files so a team can compare, branch, merge, and restore repository history. Git is distributed: a normal clone contains a local object database and refs, so most history operations do not depend on the hosting service.\n\nGit's recovery boundary is explicit. A committed snapshot is durable while it remains reachable or recoverable from local records. An untracked file or an edit Git never captured cannot be reconstructed from Git history.\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# Working Tree, Index, Repository, and Remote\n\nGit moves snapshots through distinct states:\n\n```text\nworking tree --git add--> index --git commit--> local commit graph\nremote-tracking refs <--git fetch-- remote refs\nlocal refs --git push-------------------------> remote refs\n```\n\nThe **working tree** contains checked-out files. The **index** is the proposed next snapshot. A **commit** stores a snapshot and parent links in the local object database. A **branch** is a movable ref to a commit. A **remote-tracking ref** is the last fetched view of a remote ref.\n\n`fetch` downloads objects and updates remote-tracking refs without integrating them into the current branch. `pull` fetches and then merges or rebases according to configuration. `restore` changes working-tree or index content. `reset` can move a ref and replace index or working-tree state, so its mode matters. A published mistake is usually reversed with a new `revert` commit so shared commit identities remain valid.\n\n# Git and Hosting Platforms\n\nGit defines objects, commits, refs, remotes, and transfer protocols. GitHub, GitLab, and Azure DevOps host repositories and add identity, permissions, pull requests, protected branches, issues, automation, and policy.\n\nA repository can move between hosts without changing its commit graph. Host-side rules, issues, workflow history, permissions, and secrets do not move with it automatically. The hosting decision is therefore about governance, integrations, compliance, and operating cost rather than Git semantics.\n\n# Repository Strategy\n\n| Boundary | Monorepo | Multiple repositories |\n| --- | --- | --- |\n| Cross-component change | One atomic commit and review | Coordinated versions and rollout |\n| Dependency policy | One graph can enforce consistency | Each repository owns its cadence |\n| Access control | Requires reliable path ownership | Repository boundary is explicit |\n| CI | Needs affected-component execution at scale | Smaller pipelines; integration moves downstream |\n| Release | Shared source can still release independently | Independent by default |\n\nA monorepo fits when atomic cross-component changes and shared dependency policy justify build-graph and ownership tooling. Multiple repositories fit when access isolation and independent lifecycles dominate. The deciding evidence is cross-repository coordination, CI fan-out, release coupling, and access boundaries—not repository count alone.\n\n# Semantic Versioning and the Release Contract\n\nSemantic Versioning only works after a project defines its public API. `MAJOR.MINOR.PATCH` means incompatible API change, backward-compatible functionality, and backward-compatible fix. Prerelease identifiers sort below the corresponding normal version; build metadata does not affect precedence.\n\nThe version number is a claim, not proof. API diffs, consumer tests, migration checks, and deprecation policy establish whether a change is compatible. Commit-message or PR-title conventions may automate version selection, but those are repository policy layered on SemVer.\n\n# References\n\n- [Pro Git book](https://git-scm.com/book/en/v2)\n- [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html)\n- [GitHub pull request documentation](https://docs.github.com/en/pull-requests)\n",
-          "hash": "efc8a53b1d891824ba78d68cc85561d6333ce0451ed20b65a519fdacf1afcb35",
-          "topic": "DevOps",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against current text and general Git/SemVer knowledge. The state-flow diagram is correct: add stages to the index, commit writes to the local graph, fetch updates remote-tracking refs, and push updates remote refs. The definitions of fetch, pull, restore, reset and revert are accurate, and the reset caveat is stated. The Git-versus-host section correctly separates Git semantics from host features. The monorepo table presents tradeoffs with the conditions that change the decision. The SemVer section is consistent with the 2.0.0 spec: a public API must be defined, prerelease versions sort below the release, and build metadata is ignored in precedence. The code fence has a language identifier, FolderNote tag and Datacore block are preserved, and references are bare, relevant links. There are no cards and no known violations. The prose is already direct and compact, so edits would be cosmetic churn."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md": "efc8a53b1d891824ba78d68cc85561d6333ce0451ed20b65a519fdacf1afcb35"
-    },
-    "feedback_keys": [],
-    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-19T07:52:04.515210Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/DevOps/Version Control Systems/Version Control Systems.md",
-          "verdict": "CLEAN",
-          "summary": "Whole-note audit found no factual, structural or readability defect. The Git state flow, command semantics, host-versus-Git split, monorepo tradeoff table and SemVer rules are accurate and compact. Keeping it unchanged avoids cosmetic churn.",
-          "page_type": "FolderNote — keeps FolderNote tag and protected Datacore folder-map block; Questions optional; references are bare links; fenced blocks have language identifiers.",
-          "current_text_evidence": [
-            {
-              "quote": "`fetch` downloads objects and updates remote-tracking refs without integrating them into the current branch.",
-              "line_start": 37,
-              "reason": "Accurate distinction of fetch, pull, restore, reset and revert, with the reset-mode caveat stated."
-            },
-            {
-              "quote": "The deciding evidence is cross-repository coordination, CI fan-out, release coupling, and access boundaries—not repository count alone.",
-              "line_start": 55,
-              "reason": "The monorepo comparison names the conditions that change the decision."
-            },
-            {
-              "quote": "Prerelease identifiers sort below the corresponding normal version; build metadata does not affect precedence.",
-              "line_start": 59,
-              "reason": "Consistent with SemVer 2.0.0 precedence rules; the public-API prerequisite is stated first."
-            },
-            {
-              "quote": "A repository can move between hosts without changing its commit graph.",
-              "line_start": 43,
-              "reason": "Cleanly separates Git semantics from host features, so the hosting decision is framed correctly."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the sections (Git states, hosting, repository strategy, SemVer) are brief and form one coherent version-control overview.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The complete note is accurate, direct, well ordered and rule-compliant, with no known violations, no cards and no edits proposed. The keep disposition is justified.",
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
