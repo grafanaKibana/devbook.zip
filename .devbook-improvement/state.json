@@ -18887,11 +18887,11 @@
     "version": 1,
     "id": "895ba07e431b4b1fb1f4b702293610c3",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-19T20:51:09.789366Z",
-    "elapsed_seconds": 234.05689939999996,
+    "elapsed_seconds": 254.23179119999995,
     "calls_reserved": 6,
-    "responses_received": 5,
+    "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Patterns/Sliding Window.md",
       "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md"
@@ -20263,7 +20263,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T20:55:03.845779Z",
+    "checkpoint_at": "2026-11-19T20:55:24.020656Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -58412,6 +58412,137 @@
       "Vault/Home/Computer Science/Algorithms/Patterns/Two Heaps.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-19T20:54:59.050337Z"
+    "prepared_at": "2026-11-19T20:54:59.050337Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The note was audited in full and independently. It is accurate, readable and well ordered, and no edit is needed. No edits, feedback or rejected-proposal equivalents apply to this note.",
+        "notes": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Patterns/Two Heaps.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains the lower max-heap and upper min-heap partition, both invariants, insertion and rebalancing, and the odd and even median read. It adds correct complexity, a Top-K contrast, the deletion limitation and a sound C# example. It has no concrete defect, so keeping it unchanged is justified.",
+            "page_type": "Concept — Algorithms pattern note. Optional Questions are absent, which is allowed. The References section has one bare link. Fenced blocks have language identifiers, and the steptrace and complexity blocks and the tabs markers are preserved.",
+            "current_text_evidence": [
+              {
+                "quote": "2. `lower.Count` equals `upper.Count` or exceeds it by one.",
+                "line_start": 19,
+                "reason": "The size invariant is stated exactly. It matches the rebalancing branches in the code, which keep lower equal to or one larger than upper."
+              },
+              {
+                "quote": "A value no greater than `lower.Peek()` enters `lower`.",
+                "line_start": 21,
+                "reason": "The insertion rule is correct. It is consistent with the example's `value <= lower.Peek()` check."
+              },
+              {
+                "quote": "Top-K discards values outside its `k` survivors, while Two Heaps retains everything because either half may affect a later median.",
+                "line_start": 114,
+                "reason": "The contrast with Top-K is accurate and states the condition that changes the choice of pattern."
+              },
+              {
+                "quote": "Arbitrary deletion changes the mechanism.",
+                "line_start": 116,
+                "reason": "The note names the limit of the pattern. The claim that the basic heap API needs an O(n) scan to find an element holds, including for the O(n) Remove added in .NET 9."
+              },
+              {
+                "quote": "Widening before negation handles `int.MinValue`, and widening before the even-count sum prevents overflow.",
+                "line_start": 146,
+                "reason": "The numeric edge cases are explained correctly, and the code does widen to long in both places."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the note covers one cohesive pattern, the running median. The deletion and Top-K contrasts are short boundary notes, not separable topics.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Two Heaps.md",
+          "citation_index": 2,
+          "reported_line_start": 114,
+          "resolved_line_start": 112
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Two Heaps.md",
+          "citation_index": 3,
+          "reported_line_start": 116,
+          "resolved_line_start": 114
+        },
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Two Heaps.md",
+          "citation_index": 4,
+          "reported_line_start": 146,
+          "resolved_line_start": 152
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Computer Science/Algorithms/Patterns/Two Heaps.md": "456c743ea9a7571300b3d8923ecb2eb4c9d99dc23450260a045adf3f36e20652"
+      },
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The note was audited in full and independently. It is accurate, readable and well ordered, and no edit is needed. No edits, feedback or rejected-proposal equivalents apply to this note.",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Two Heaps.md",
+          "verdict": "CLEAN",
+          "summary": "The note explains the lower max-heap and upper min-heap partition, both invariants, insertion and rebalancing, and the odd and even median read. It adds correct complexity, a Top-K contrast, the deletion limitation and a sound C# example. It has no concrete defect, so keeping it unchanged is justified.",
+          "page_type": "Concept — Algorithms pattern note. Optional Questions are absent, which is allowed. The References section has one bare link. Fenced blocks have language identifiers, and the steptrace and complexity blocks and the tabs markers are preserved.",
+          "current_text_evidence": [
+            {
+              "quote": "2. `lower.Count` equals `upper.Count` or exceeds it by one.",
+              "line_start": 19,
+              "reason": "The size invariant is stated exactly. It matches the rebalancing branches in the code, which keep lower equal to or one larger than upper."
+            },
+            {
+              "quote": "A value no greater than `lower.Peek()` enters `lower`.",
+              "line_start": 21,
+              "reason": "The insertion rule is correct. It is consistent with the example's `value <= lower.Peek()` check."
+            },
+            {
+              "quote": "Top-K discards values outside its `k` survivors, while Two Heaps retains everything because either half may affect a later median.",
+              "line_start": 112,
+              "reason": "The contrast with Top-K is accurate and states the condition that changes the choice of pattern."
+            },
+            {
+              "quote": "Arbitrary deletion changes the mechanism.",
+              "line_start": 114,
+              "reason": "The note names the limit of the pattern. The claim that the basic heap API needs an O(n) scan to find an element holds, including for the O(n) Remove added in .NET 9."
+            },
+            {
+              "quote": "Widening before negation handles `int.MinValue`, and widening before the even-count sum prevents overflow.",
+              "line_start": 152,
+              "reason": "The numeric edge cases are explained correctly, and the code does widen to long in both places."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the note covers one cohesive pattern, the running median. The deletion and Top-K contrasts are short boundary notes, not separable topics.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
