@@ -27,7 +27,10 @@ test('a note moved outside Obsidian leaves stale Qard records and a stale deck/t
     'Home/Programming/Kept.md': '---\r\nqard-deck: Programming\r\nqard-topic: Kept\r\n---\r\nBody\r\n',
     'Assets/Qard/Lessons/lesson.json': JSON.stringify({ notes: [OLD, 'Home/Programming/Kept.md'], sourceSnapshots: [{ path: OLD, text: 'Body' }] }),
     'Assets/Qard/Checks/Programming/check.json': JSON.stringify({ questions: [{ source: { path: OLD } }] }),
-    'Assets/Qard/Courses/Programming Mastery.md': '| ID | Notes |\n| --- | --- |\n| types | [[Home/Programming/NET/Old]] [[Home/Programming/Kept\\|Kept]] [[Home/Topics.base]] |\n',
+    'Assets/Qard/Courses/Programming Mastery.md': '---\nqard-mastery: Programming\n---\n\n| Objective | Label | ID | Group | State | Due | Needs | Notes | Evidence |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n'
+      + '| Explain | Types | types | Basics | new | | | [[Home/Programming/NET/Old]] [[Home/Programming/Kept\\|Kept]] | |\n'
+      + '| Apply | Plain | plain | Basics | new | | | Home/Programming/NET/Old | |\n',
+    'Assets/Qard/Qard.md': '[[Home/Topics.base]]\n',
     'Home/Topics.base': '',
     'Qard/Source links.json': JSON.stringify({ version: 1, notes: { n0: { path: OLD, text: 'Body' } }, links: {} })
   });
@@ -38,7 +41,8 @@ test('a note moved outside Obsidian leaves stale Qard records and a stale deck/t
   assert.deepEqual(stale.problems, []);
   assert.deepEqual(stale.references.map(item => `${item.file} ${item.where}`), [
     'Assets/Qard/Checks/Programming/check.json .questions[].source.path',
-    'Assets/Qard/Courses/Programming Mastery.md wikilink',
+    'Assets/Qard/Courses/Programming Mastery.md objective types',
+    'Assets/Qard/Courses/Programming Mastery.md objective plain',
     'Assets/Qard/Lessons/lesson.json .notes[]',
     'Assets/Qard/Lessons/lesson.json .sourceSnapshots[].path',
     'Qard/Source links.json .notes.n0.path'

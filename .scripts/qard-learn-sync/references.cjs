@@ -2,6 +2,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { inspectCourse } = require('./core.cjs');
 
 const NOTE = /^Home\/.+\.md$/;
 
@@ -29,6 +30,14 @@ function wikilinks(text, vault) {
     .map(target => ({ where: 'wikilink', note: target.replace(/\.md$/, '') + '.md' }));
 }
 
+function courseLinks(text, notes) {
+  return inspectCourse(text).rows.flatMap(row => row.notes.map(link => {
+    const exact = link.replace(/\.md$/, '') + '.md';
+    const matches = notes.has(exact) ? [exact] : [...notes.keys()].filter(note => note.endsWith('/' + exact));
+    return { where: `objective ${row.id}`, note: matches.length === 1 ? matches[0] : exact };
+  }));
+}
+
 // The interview template seeds both fields from the note path; a differing value is either stale or a deliberate override.
 function seedFor(note) {
   const parts = note.replace(/\.md$/, '').split('/').slice(1);
@@ -52,7 +61,10 @@ function inspectReferences({ repoRoot = path.resolve(__dirname, '../..'), paths 
     for (const file of files(path.join(vault, root), ['.json', '.md'])) {
       const text = fs.readFileSync(file, 'utf8');
       let found;
-      try { found = file.endsWith('.json') ? jsonPaths(JSON.parse(text)) : wikilinks(text, vault); }
+      try {
+        found = file.endsWith('.json') ? jsonPaths(JSON.parse(text))
+          : relative(file).startsWith('Assets/Qard/Courses/') ? courseLinks(text, notes) : wikilinks(text, vault);
+      }
       catch (error) { result.problems.push(`${relative(file)}: ${error.message}`); continue; }
       for (const reference of found) {
         const exists = notes.has(reference.note);
