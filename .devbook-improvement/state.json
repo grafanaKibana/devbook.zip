@@ -19103,11 +19103,11 @@
     "version": 1,
     "id": "895ba07e431b4b1fb1f4b702293610c3",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-19T20:51:09.789366Z",
-    "elapsed_seconds": 580.6661998000003,
+    "elapsed_seconds": 593.4324795000002,
     "calls_reserved": 13,
-    "responses_received": 12,
+    "responses_received": 13,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Patterns/Sliding Window.md",
       "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md",
@@ -22212,7 +22212,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T21:00:50.455068Z",
+    "checkpoint_at": "2026-11-19T21:01:03.221347Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -60543,5 +60543,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "895ba07e431b4b1fb1f4b702293610c3",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Fibonacci Search.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Searches a sorted array by shrinking a Fibonacci-sized window around an offset.\"\nlevel: [\"4\"]\npriority: Low\nstatus: New\npublish: true\ncreated: \"2026-08-10T10:51:19.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-08-10T07:55:26.057Z\"\n---\n\nFibonacci Search locates a value in a sorted, random-access array without repeatedly dividing the search interval. It keeps three consecutive Fibonacci numbers large enough to cover the candidate range and probes at `offset + F(k-2)`.\n\nEvery possible target index stays greater than `offset` and inside the current Fibonacci window. A value below the target advances the offset. A value above it keeps the offset and contracts the window to its left component. Like [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]], the algorithm repeatedly discards part of the candidate range. Its distinction is the Fibonacci offset arithmetic.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{ \"algorithm\": \"fibonacci-search\", \"array\": [2, 5, 8, 13, 21, 34, 55, 89, 144], \"target\": 55 }\n```\n\nThe trace grows a Fibonacci window that covers the nine values, then probes from an offset initially set before index `0`. Each comparison either advances the offset past a proven-small prefix or contracts the live range to the smaller Fibonacci component. A final one-element check handles the remaining candidate after the main window reaches size one.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Fibonacci Search complexity\",\n  \"variables\": {\n    \"inputSize\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of elements in the sorted array\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"cases\",\n      \"entries\": [\n        {\n          \"kind\": \"case\",\n          \"role\": \"Best\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        },\n        {\n          \"kind\": \"case\",\n          \"role\": \"Average\",\n          \"formula\": \"O(log n)\",\n          \"curveId\": \"log-n\"\n        },\n        {\n          \"kind\": \"case\",\n          \"role\": \"Worst\",\n          \"formula\": \"O(log n)\",\n          \"curveId\": \"log-n\"\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"cases\",\n      \"entries\": [\n        {\n          \"kind\": \"case\",\n          \"role\": \"Best\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        },\n        {\n          \"kind\": \"case\",\n          \"role\": \"Average\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        },\n        {\n          \"kind\": \"case\",\n          \"role\": \"Worst\",\n          \"formula\": \"O(1)\",\n          \"curveId\": \"constant\"\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# Boundaries\n\nThe array must be sorted under the same comparison used by the search. Otherwise, neither discarded side is proven irrelevant. Random access is required as well because the algorithm jumps to computed indices. A forward-only stream cannot do that.\n\nDuplicates are safe, though the returned match is arbitrary. A lower-bound or upper-bound [[Home/Computer Science/Algorithms/Search Algorithms/Binary Search|Binary Search]] is clearer when the first or last duplicate matters. The covering Fibonacci number should use a wider integer type so it cannot overflow near the maximum array length.\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> public static int FibonacciSearch(int[] values, int target)\n> {\n>     long fib2 = 0;\n>     long fib1 = 1;\n>     long fib = fib1 + fib2;\n>\n>     while (fib < values.Length)\n>     {\n>         fib2 = fib1;\n>         fib1 = fib;\n>         fib = fib1 + fib2;\n>     }\n>\n>     var offset = -1;\n>     while (fib > 1)\n>     {\n>         var probe = (int)Math.Min(offset + fib2, values.Length - 1L);\n>         if (values[probe] < target)\n>         {\n>             fib = fib1;\n>             fib1 = fib2;\n>             fib2 = fib - fib1;\n>             offset = probe;\n>         }\n>         else if (values[probe] > target)\n>         {\n>             fib = fib2;\n>             fib1 -= fib2;\n>             fib2 = fib - fib1;\n>         }\n>         else\n>         {\n>             return probe;\n>         }\n>     }\n>\n>     var last = offset + 1;\n>     return fib1 == 1 && last < values.Length && values[last] == target ? last : -1;\n> }\n> ```\n>\n> The `long` Fibonacci state protects the covering-number calculation. Array probes are clamped back into the valid `int` index range.\n\n# References\n\n- [David E. Ferguson, “Fibonaccian Searching”](https://doi.org/10.1145/367487.367496)\n- [NIST Dictionary of Algorithms and Data Structures: Fibonaccian search](https://www.nist.gov/dads/HTML/fibonaccianSearch.html)\n",
+          "hash": "01ec56e01d472f0b48cd2bdb2fc3490a013808036cb0fe44648da8c60b3d3fc7",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Fibonacci Search.md",
+          "outcome": "keep",
+          "reason": "I read the whole note and traced the C# code. Setup uses fib2=0, fib1=1, fib=1, then grows the window until it covers n. The probe is offset+F(k-2), clamped to n-1. The 'less than' branch advances the offset and steps the Fibonacci state down by one. The 'greater than' branch steps it down by two. The final one-element check at offset+1 matches the standard algorithm. It also handles an empty array (returns -1) and a single-element array correctly. The prose agrees with the code: sorted order and random access are required, duplicates return an arbitrary match, and the covering number needs a wider integer type. The O(log n) time and O(1) space entries are correct, and the Ferguson and NIST references fit the topic. The note has no cards and no known violations. The wording is clear and the technical detail is worth keeping, so no edit is warranted."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Search Algorithms/Fibonacci Search.md": "01ec56e01d472f0b48cd2bdb2fc3490a013808036cb0fe44648da8c60b3d3fc7"
+    },
+    "feedback_keys": [],
+    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Search Algorithms/Fibonacci Search.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-19T21:01:03.221336Z"
+  }
 }
