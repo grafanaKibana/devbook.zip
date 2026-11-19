@@ -111,52 +111,6 @@ body.tabsdown-alignment-equal-width
   gap: 0.5rem;
   overflow-x: auto;
   scrollbar-width: none;
-  scroll-padding-inline: 4rem;
-}
-
-/* Edge fades follow the strip's own scroll position; a strip that fits has no
- * scroll timeline, so both lengths stay 0 and the mask is opaque. */
-@property --dc-qi-fade-start {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0px;
-}
-
-@property --dc-qi-fade-end {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0px;
-}
-
-@supports (animation-timeline: scroll()) {
-  .dc-questions-index .dc-qi-tabs .tabsdown__tablist {
-    mask-image: linear-gradient(
-      to right,
-      transparent,
-      #000 var(--dc-qi-fade-start),
-      #000 calc(100% - var(--dc-qi-fade-end)),
-      transparent
-    );
-    animation: dc-qi-tabs-fade linear both;
-    animation-timeline: scroll(self inline);
-  }
-}
-
-@keyframes dc-qi-tabs-fade {
-  from {
-    --dc-qi-fade-start: 0px;
-    --dc-qi-fade-end: 4rem;
-  }
-  8% {
-    --dc-qi-fade-start: 4rem;
-  }
-  92% {
-    --dc-qi-fade-end: 4rem;
-  }
-  to {
-    --dc-qi-fade-start: 4rem;
-    --dc-qi-fade-end: 0px;
-  }
 }
 
 .dc-questions-index .dc-qi-tabs .tabsdown__tab:focus-visible {
