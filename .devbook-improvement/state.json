@@ -18887,11 +18887,11 @@
     "version": 1,
     "id": "895ba07e431b4b1fb1f4b702293610c3",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-19T20:51:09.789366Z",
-    "elapsed_seconds": 112.54709430000004,
+    "elapsed_seconds": 126.81718780000004,
     "calls_reserved": 3,
-    "responses_received": 2,
+    "responses_received": 3,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Patterns/Sliding Window.md"
     ],
@@ -18967,7 +18967,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T20:53:02.335962Z",
+    "checkpoint_at": "2026-11-19T20:53:16.606060Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -56419,5 +56419,70 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "895ba07e431b4b1fb1f4b702293610c3",
+    "topic_id": "computer-science-445ddaa5",
+    "batch": {
+      "topic": "Computer Science",
+      "topic_id": "computer-science-445ddaa5",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md",
+          "content": "---\ntopic: [Computer Science]\nsubtopic: [Algorithms]\nsummary: \"Finds the k largest or smallest values with a size-k heap over a stream.\"\nlevel: [\"4\"]\npriority: Medium\nstatus: New\npublish: true\ncreated: \"2026-07-10T06:24:36.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-10T05:59:31.416Z\"\n---\n\nA latency feed produces millions of samples. The dashboard needs only the ten slowest.\n\nA size-`k` heap avoids sorting or retaining the whole feed. Finding the `k` **largest** values requires a **min**-heap. Once full, its root is the smallest retained winner. A new value replaces that root only when it is larger, and the heap never grows beyond `k`. After one pass it holds the largest `min(k, n)` values, even if the input arrived as a stream. Finding the `k` smallest reverses the polarity and uses a max-heap.\n\n%% tabs %%\n\n%% tab: Visualization %%\n\n```steptrace\n{\"algorithm\":\"top-k-elements\",\"array\":[12,3,17,8,25,5,19,14],\"k\":3}\n```\n\nThe trace keeps the internal heap-array order visible rather than sorting the answer after the scan. Its final `[17, 25, 19]` is a valid min-heap containing the three largest values: `17` is the weakest winner at the root, while `25` and `19` need no ordering relative to each other.\n\nThe StepTrace uses a binary tree because that shape makes parent-child repairs easy to see. .NET's `PriorityQueue<TElement, TPriority>` uses an array-backed quaternary min-heap; both arities enforce the same invariant that every parent is no larger than its children.\n\nThe invariant carried across the scan is that the heap contains every value seen until it reaches `k`; once full, it contains the `k` largest values seen so far, with the `k`-th largest at the root. Each later element `x` faces one comparison against the root:\n\n- `x > root` proves `x` belongs to the top `k` — it beats the current weakest survivor. The root leaves, `x` enters, and the heap again holds the `k` largest seen so far.\n- `x ≤ root` need not be retained. If `x < root`, it cannot qualify because it is smaller than every retained winner. If `x = root`, replacing the root would leave the retained value multiset unchanged. Discarding `x` therefore preserves the invariant.\n\nThe polarity is the load-bearing choice. Exposing the *minimum* of the retained set at the root makes the \"does this element deserve to be kept\" test direct and ensures eviction removes the weakest survivor. A max-heap of size `k` would expose the *largest* retained element, which is never the one to drop, so it cannot support this scan.\n\nBecause the heap never exceeds `k` entries, it retains only the current candidates rather than materializing the full input. That fixed capacity is what lets the input arrive as a stream.\n\n%% tab: Complexity %%\n\n```complexity\n{\n  \"version\": 2,\n  \"label\": \"Top-K Elements complexity\",\n  \"variables\": {\n    \"inputSize\": {\n      \"symbol\": \"n\",\n      \"description\": \"number of elements processed to select the top k\"\n    },\n    \"keyRange\": {\n      \"symbol\": \"k\",\n      \"description\": \"number of requested results and heap capacity\"\n    }\n  },\n  \"resources\": {\n    \"time\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (sort all elements)\",\n          \"formula\": \"O(n log n)\",\n          \"curveId\": \"n-log-n\"\n        },\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Top-K (bounded heap)\",\n          \"formula\": \"O(n log k)\",\n          \"curveFrom\": \"linear\",\n          \"curveTo\": \"n-log-n\"\n        }\n      ]\n    },\n    \"space\": {\n      \"mode\": \"comparison\",\n      \"entries\": [\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Naive (sort all elements)\",\n          \"formula\": \"O(n)\",\n          \"curveId\": \"linear\"\n        },\n        {\n          \"kind\": \"approach\",\n          \"label\": \"Top-K (bounded heap)\",\n          \"formula\": \"O(k)\",\n          \"curveFrom\": \"constant\",\n          \"curveTo\": \"linear\"\n        }\n      ]\n    }\n  }\n}\n```\n\n%% endtabs %%\n\n# When the Assumptions Stop Holding\n\nUsing a size-`k` max-heap for the `k` largest keeps the wrong side of the partition. Its root is the strongest retained element, so replacing that root eventually collects the `k` smallest. The min-heap invariant and its operations are described further in [[Home/Computer Science/Data Structures/Trees/Heap-like/Heap|Heap]].\n\nFor known-size input with `k ≥ n`, return every value and skip the heap. Sort only if the caller requires ranked output, using an in-memory algorithm such as [[Home/Computer Science/Algorithms/Sorting Algorithms/Quick Sort|Quick Sort]] or [[Home/Computer Science/Algorithms/Sorting Algorithms/Heap Sort|Heap Sort]]. A stream that ends before the heap fills follows the same rule and returns everything it produced.\n\n# Diagram and C# Implementation\n\n> [!ABSTRACT]- Streaming min-heap for the k largest\n>\n> ```mermaid\n> flowchart TD\n>   A[Empty min-heap, capacity k] --> B{More input}\n>   B -->|No| Z[Heap holds the largest min(k,n) values]\n>   B -->|Yes| C[Read next element x]\n>   C --> D{Heap size less than k}\n>   D -->|Yes| E[Push x]\n>   D -->|No| F{x greater than root}\n>   F -->|Yes| G[Pop root, push x]\n>   F -->|No| H[Discard x]\n>   E --> B\n>   G --> B\n>   H --> B\n> ```\n\n> [!EXAMPLE]- C# implementation\n>\n> ```csharp\n> // Streaming: k largest via a size-k min-heap.\n> public static int[] KLargest(IEnumerable<int> stream, int k)\n> {\n>     ArgumentNullException.ThrowIfNull(stream);\n>     if (k <= 0)\n>         throw new ArgumentOutOfRangeException(nameof(k), k, \"k must be positive.\");\n>\n>     var heap = new PriorityQueue<int, int>();   // min-heap: priority == value\n>     foreach (int x in stream)\n>     {\n>         if (heap.Count < k)\n>         {\n>             heap.Enqueue(x, x);                 // still filling the first k\n>         }\n>         else if (x > heap.Peek())               // x beats the weakest survivor\n>         {\n>             heap.DequeueEnqueue(x, x);          // replace the weakest survivor in one operation\n>         }\n>         // else: x cannot improve the retained top k, discard it\n>     }\n>     return heap.UnorderedItems.Select(e => e.Element).ToArray();\n> }\n> ```\n> `KLargest` returns all values seen when the stream contains fewer than `k`. Otherwise it returns exactly `k`. `UnorderedItems` exposes no enumeration-order guarantee, so callers must treat the returned order as unspecified.\n\n# References\n\n- [C. A. R. Hoare, \"Algorithm 65: Find\"](https://doi.org/10.1145/366622.366647)\n- [Kth Largest Element in an Array](https://leetcode.com/problems/kth-largest-element-in-an-array/)\n",
+          "hash": "80078f632d88c09da60cbc24167bbfda1ebe34255c6d4a31bc1b3a79f0f99510",
+          "topic": "Computer Science",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md",
+          "expected_hash": "80078f632d88c09da60cbc24167bbfda1ebe34255c6d4a31bc1b3a79f0f99510",
+          "before": ">   B -->|No| Z[Heap holds the largest min(k,n) values]",
+          "after": ">   B -->|No| Z[\"Heap holds the largest min(k,n) values\"]",
+          "reason": "Quotes the node label so the parentheses in min(k,n) are not parsed as Mermaid node-shape syntax.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Final node states the heap holds the largest min(k,n) values"
+          ],
+          "sources": [],
+          "feedback_keys": [],
+          "problem": "The Mermaid node label contains unquoted parentheses inside square brackets, which Mermaid's flowchart parser can reject, leaving the diagram unrendered.",
+          "reader_benefit": "The flowchart renders reliably and shows the terminal state of the scan."
+        }
+      ],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md",
+          "outcome": "changed",
+          "reason": "Audited the whole note: heap polarity, equality handling, quaternary PriorityQueue, DequeueEnqueue use, complexity and C# code are correct. Only the flowchart label needed quoting so the diagram renders."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md": "80078f632d88c09da60cbc24167bbfda1ebe34255c6d4a31bc1b3a79f0f99510"
+    },
+    "feedback_keys": [],
+    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-19T20:53:16.606032Z"
+  }
 }
