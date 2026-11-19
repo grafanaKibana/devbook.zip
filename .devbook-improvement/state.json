@@ -18947,14 +18947,15 @@
     "version": 1,
     "id": "895ba07e431b4b1fb1f4b702293610c3",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-19T20:51:09.789366Z",
-    "elapsed_seconds": 259.45022379999995,
+    "elapsed_seconds": 264.9961928999999,
     "calls_reserved": 6,
     "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Patterns/Sliding Window.md",
-      "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md"
+      "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md",
+      "Vault/Home/Computer Science/Algorithms/Patterns/Two Heaps.md"
     ],
     "accepted_records": [
       {
@@ -20320,10 +20321,83 @@
             "prepared_at": "2026-11-19T20:53:16.606032Z"
           }
         }
+      },
+      {
+        "path": "Vault/Home/Computer Science/Algorithms/Patterns/Two Heaps.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Patterns/Two Heaps.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note. The intro states the lower max-heap and upper min-heap, both invariants (partition order, size difference of at most one), the insertion rule, rebalancing by moving a root, and the median read for odd and even counts. All of this is correct. The complexity block is correct: O(log n) insert, O(1) median read, O(n log n) for n values, O(n) space. The Top-K contrast is accurate. The claim that PriorityQueue has no efficient arbitrary removal matches .NET, which has no Remove method until recent versions. The C# example is sound: the negative long priority handles int.MinValue, the even-count sum is widened to avoid overflow, and an empty queue throws. The rebalance branches keep lower.Count equal to upper.Count or one larger. Frontmatter, the fenced code languages and the single reference are valid. There are no cards and no known violations. I found no defect or learning gap that would justify an edit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note was audited in full and independently. It is accurate, readable and well ordered, and no edit is needed. No edits, feedback or rejected-proposal equivalents apply to this note.",
+            "notes": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Patterns/Two Heaps.md",
+                "verdict": "CLEAN",
+                "summary": "The note explains the lower max-heap and upper min-heap partition, both invariants, insertion and rebalancing, and the odd and even median read. It adds correct complexity, a Top-K contrast, the deletion limitation and a sound C# example. It has no concrete defect, so keeping it unchanged is justified.",
+                "page_type": "Concept — Algorithms pattern note. Optional Questions are absent, which is allowed. The References section has one bare link. Fenced blocks have language identifiers, and the steptrace and complexity blocks and the tabs markers are preserved.",
+                "current_text_evidence": [
+                  {
+                    "quote": "2. `lower.Count` equals `upper.Count` or exceeds it by one.",
+                    "line_start": 19,
+                    "reason": "The size invariant is stated exactly. It matches the rebalancing branches in the code, which keep lower equal to or one larger than upper."
+                  },
+                  {
+                    "quote": "A value no greater than `lower.Peek()` enters `lower`.",
+                    "line_start": 21,
+                    "reason": "The insertion rule is correct. It is consistent with the example's `value <= lower.Peek()` check."
+                  },
+                  {
+                    "quote": "Top-K discards values outside its `k` survivors, while Two Heaps retains everything because either half may affect a later median.",
+                    "line_start": 112,
+                    "reason": "The contrast with Top-K is accurate and states the condition that changes the choice of pattern."
+                  },
+                  {
+                    "quote": "Arbitrary deletion changes the mechanism.",
+                    "line_start": 114,
+                    "reason": "The note names the limit of the pattern. The claim that the basic heap API needs an O(n) scan to find an element holds, including for the O(n) Remove added in .NET 9."
+                  },
+                  {
+                    "quote": "Widening before negation handles `int.MinValue`, and widening before the even-count sum prevents overflow.",
+                    "line_start": 152,
+                    "reason": "The numeric edge cases are explained correctly, and the code does widen to long in both places."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one cohesive pattern, the running median. The deletion and Top-K contrasts are short boundary notes, not separable topics.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 6
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T20:55:29.239088Z",
+    "checkpoint_at": "2026-11-19T20:55:34.785058Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
