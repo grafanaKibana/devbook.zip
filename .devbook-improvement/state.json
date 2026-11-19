@@ -19223,9 +19223,9 @@
     "version": 1,
     "id": "895ba07e431b4b1fb1f4b702293610c3",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-19T20:51:09.789366Z",
-    "elapsed_seconds": 715.6882236000004,
+    "elapsed_seconds": 720.3335930000004,
     "calls_reserved": 16,
     "responses_received": 16,
     "attempted_paths": [
@@ -19235,7 +19235,8 @@
       "Vault/Home/Computer Science/Algorithms/Patterns/Two Pointers.md",
       "Vault/Home/Computer Science/Algorithms/Search Algorithms/Binary Search.md",
       "Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md",
-      "Vault/Home/Computer Science/Algorithms/Search Algorithms/Fibonacci Search.md"
+      "Vault/Home/Computer Science/Algorithms/Search Algorithms/Fibonacci Search.md",
+      "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md"
     ],
     "accepted_records": [
       {
@@ -22403,10 +22404,83 @@
           },
           "model_calls": 14
         }
+      },
+      {
+        "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note. I hand-traced the quadratic example (target 81 in 12 elements). The first probe is index 7, since 81*11/121 is about 7.4. The second is index 8 and the third is index 9, which matches the prose. The formula, the loop invariant and the lo/hi updates are correct. The zero-denominator guard is correct. The long widening cannot overflow: (2^32-1)*(2^31-1) is below 2^63. The complexity table (O(1) best, O(log log n) average on uniform keys, Θ(n) worst, O(1) space) matches the Perl, Itai and Avni result, and the note states the uniformity condition. The non-uniform failure modes, the arithmetic-key requirement and the Mermaid flow agree with the code. The text is clear, and there are no Qard cards and no known violations. Any remaining edit would be cosmetic, so I left the note unchanged."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note was independently audited and is accurate and clear. The keep is justified, and there are no edits, cards or open findings.",
+            "notes": [
+              {
+                "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole note and hand-traced the quadratic example. The probes land at indices 7, 8 and 9, which matches the prose. The formula, the lo/hi updates, the zero-denominator guard, the long widening and the complexity cases are correct. The explanation runs in a sensible order, from intuition to formula, trace, complexity, failure modes and code. Nothing needs changing, and an edit would be cosmetic.",
+                "page_type": "Concept — no Qard cards; the optional References section is present with one real primary source. Fenced blocks have language identifiers (steptrace, complexity, mermaid, csharp).",
+                "current_text_evidence": [
+                  {
+                    "quote": "A sorted array holds ten million evenly spaced sensor readings",
+                    "line_start": 14,
+                    "reason": "The opening motivates the idea quickly and concretely, and states the key insight that value determines index."
+                  },
+                  {
+                    "quote": "The trace searches for `81` in the quadratic sequence `a[i] = i²`.",
+                    "line_start": 32,
+                    "reason": "Hand trace: pos = 0 + 81*11/121 = 7, then 8, then 9. The 67% figure (81/121) and the undershoot at index 7 are correct."
+                  },
+                  {
+                    "quote": "The expected row assumes uniformly distributed keys.",
+                    "line_start": 103,
+                    "reason": "The O(log log n) average is correctly conditioned on uniformity, and the Θ(n) worst case is shown in the table."
+                  },
+                  {
+                    "quote": "The denominator fails when `a[hi] == a[lo]`.",
+                    "line_start": 113,
+                    "reason": "The zero-span failure mode is explained correctly, with integer and floating-point behavior, and it matches the guard in the code."
+                  },
+                  {
+                    "quote": "Widen an operand to long before subtracting and multiplying",
+                    "line_start": 151,
+                    "reason": "The overflow reasoning is sound: the maximum product is about 2^63 − 2^32 − 2^31 + 1, which is below 2^63."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note covers one algorithm, and its failure modes and implementation depend on the same mechanism.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 16
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T21:03:05.477093Z",
+    "checkpoint_at": "2026-11-19T21:03:10.122463Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
