@@ -2591,7 +2591,6 @@
       69264
     ],
     "check-write|claude-code|opus": [
-      49998,
       31485,
       99819,
       60970,
@@ -2599,7 +2598,8 @@
       59948,
       43540,
       76869,
-      69190
+      69190,
+      34746
     ],
     "check-mark|claude-code|sonnet": [
       11900,
@@ -2620,7 +2620,8 @@
       99057,
       35651,
       76397,
-      51087
+      51087,
+      49568
     ],
     "map|claude-code|sonnet": [
       17670,
@@ -2630,7 +2631,8 @@
       16461,
       18842,
       14376,
-      14447
+      14447,
+      17907
     ],
     "steps|claude-code|opus": [
       292302,
@@ -2638,7 +2640,8 @@
       166212,
       181664,
       235036,
-      228000
+      228000,
+      198624
     ],
     "plan|claude-code|opus": [
       23890
@@ -3641,6 +3644,53 @@
         "costUsd": 0.427944,
         "costCalls": 1
       }
+    },
+    "2026-11-19": {
+      "Writing checks|writer|claude-code|claude-opus-5-5": {
+        "calls": 1,
+        "input": 2,
+        "output": 1367,
+        "cacheRead": 0,
+        "cacheWrite": 55086,
+        "costUsd": 0.468036,
+        "costCalls": 1
+      },
+      "Lesson planning|writer|claude-code|claude-opus-5-5": {
+        "calls": 2,
+        "input": 6,
+        "output": 1673,
+        "cacheRead": 67444,
+        "cacheWrite": 104303,
+        "costUsd": 0.8813968,
+        "costCalls": 2
+      },
+      "Other|marker|codex|gpt-6.1-sol": {
+        "calls": 18,
+        "input": 587085,
+        "output": 10718,
+        "cacheRead": 185344,
+        "cacheWrite": 0,
+        "costUsd": 0,
+        "costCalls": 0
+      },
+      "Lesson planning|tutor|claude-code|claude-sonnet-5-5": {
+        "calls": 1,
+        "input": 6,
+        "output": 1631,
+        "cacheRead": 54944,
+        "cacheWrite": 64328,
+        "costUsd": 0.2846228,
+        "costCalls": 1
+      },
+      "Writing lessons|writer|claude-code|claude-opus-5-5": {
+        "calls": 15,
+        "input": 98,
+        "output": 71443,
+        "cacheRead": 1577075,
+        "cacheWrite": 714055,
+        "costUsd": 7.457107000000001,
+        "costCalls": 15
+      }
     }
   },
   "study": {
@@ -3864,6 +3914,15 @@
       "planning|": 19.2,
       "planning|AI & ML": 26.3,
       "lessons|AI & ML": 1616.4
+    },
+    "2026-11-17": {
+      "browsing|": 5.7
+    },
+    "2026-11-19": {
+      "browsing|": 5.9,
+      "planning|": 1.6,
+      "planning|AI & ML": 11.7,
+      "lessons|AI & ML": 538
     }
   },
   "statistics": {
@@ -4871,6 +4930,15 @@
           "planning|": 19.2,
           "planning|AI & ML": 26.3,
           "lessons|AI & ML": 1616.4
+        },
+        "2026-11-17": {
+          "browsing|": 5.7
+        },
+        "2026-11-19": {
+          "browsing|": 5.9,
+          "planning|": 1.6,
+          "planning|AI & ML": 11.7,
+          "lessons|AI & ML": 538
         }
       },
       "usage": {
@@ -5860,6 +5928,53 @@
             "cacheWrite": 48510,
             "costUsd": 0.427944,
             "costCalls": 1
+          }
+        },
+        "2026-11-19": {
+          "Writing checks|writer|claude-code|claude-opus-5-5": {
+            "calls": 1,
+            "input": 2,
+            "output": 1367,
+            "cacheRead": 0,
+            "cacheWrite": 55086,
+            "costUsd": 0.468036,
+            "costCalls": 1
+          },
+          "Lesson planning|writer|claude-code|claude-opus-5-5": {
+            "calls": 2,
+            "input": 6,
+            "output": 1673,
+            "cacheRead": 67444,
+            "cacheWrite": 104303,
+            "costUsd": 0.881397,
+            "costCalls": 2
+          },
+          "Other|marker|codex|gpt-6.1-sol": {
+            "calls": 18,
+            "input": 587085,
+            "output": 10718,
+            "cacheRead": 185344,
+            "cacheWrite": 0,
+            "costUsd": 0,
+            "costCalls": 0
+          },
+          "Lesson planning|tutor|claude-code|claude-sonnet-5-5": {
+            "calls": 1,
+            "input": 6,
+            "output": 1631,
+            "cacheRead": 54944,
+            "cacheWrite": 64328,
+            "costUsd": 0.284623,
+            "costCalls": 1
+          },
+          "Writing lessons|writer|claude-code|claude-opus-5-5": {
+            "calls": 15,
+            "input": 98,
+            "output": 71443,
+            "cacheRead": 1577075,
+            "cacheWrite": 714055,
+            "costUsd": 7.457108,
+            "costCalls": 15
           }
         }
       }

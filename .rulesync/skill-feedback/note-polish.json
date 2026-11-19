@@ -1,9 +1,13 @@
 {
   "version": 2,
-  "revision": 0,
+  "revision": 4,
   "general": {
     "plain-explanations": "Use straightforward, concrete language. Make the technical cause easy to reconstruct without removing the detail needed to understand it.",
-    "no-long-dashes": "Do not use em dash or en dash characters in authored prose or responses."
+    "no-long-dashes": "Do not use em dash or en dash characters in authored prose or responses.",
+    "familiar-examples": "Illustrate with a domain every developer has lived, such as an online order or basic networking. Do not invent product names, error codes or niche settings that need their own explanation.",
+    "show-with-comparison": "Teach a technique through a shown example the reader can follow step by step, preferably the same input without and with the technique, with short comments in the example naming what differs. An example described only inside a sentence is not enough.",
+    "pitfalls-per-technique": "When a note covers several techniques, put each pitfall under the technique it belongs to and show the failure and its fix in an example, instead of one global pitfalls section.",
+    "no-paper-anchoring": "Explain a technique on its own terms. Do not cite or describe a paper in the prose as the authority for the technique; sources belong in References and can be added or removed."
   },
   "topics": {
     "ai-and-ml": {},
