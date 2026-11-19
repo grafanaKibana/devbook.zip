@@ -19223,11 +19223,11 @@
     "version": 1,
     "id": "895ba07e431b4b1fb1f4b702293610c3",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-19T20:51:09.789366Z",
-    "elapsed_seconds": 775.5615255000007,
+    "elapsed_seconds": 803.7536843000008,
     "calls_reserved": 18,
-    "responses_received": 17,
+    "responses_received": 18,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Patterns/Sliding Window.md",
       "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md",
@@ -22480,7 +22480,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T21:04:05.350396Z",
+    "checkpoint_at": "2026-11-19T21:04:33.542555Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -60937,6 +60937,185 @@
       "Vault/Home/Computer Science/Algorithms/Search Algorithms/Jump Search.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-19T21:04:00.237603Z"
+    "prepared_at": "2026-11-19T21:04:00.237603Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CHANGES REQUIRED",
+        "overall_reason": "The note body is technically sound, but the frontmatter summary says the search \"scans back one block\". The body says the scan runs forward from the previous checkpoint and that no rewind is needed. The keep disposition leaves that contradiction in place.",
+        "notes": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Jump Search.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "I audited the whole note. The trace, block-k proof, C# code, unsorted counterexample, complexity tab and flowchart are correct. The summary line contradicts the body on scan direction, and the keep disposition leaves it unfixed.",
+            "page_type": "Concept — authorable prose with a steptrace/complexity tabbed layout, a Mermaid diagram and C# code. No Questions section. References has one bare link.",
+            "current_text_evidence": [
+              {
+                "quote": "summary: \"Steps a sorted array in fixed blocks of size root n, then scans back one block.\"",
+                "line_start": 4,
+                "reason": "The summary describes a backward scan. The body defines a forward scan from the previous checkpoint."
+              },
+              {
+                "quote": "It then scans forward from the previous checkpoint through the single candidate block.",
+                "line_start": 14,
+                "reason": "The body states the scan direction as forward, which contradicts the summary."
+              },
+              {
+                "quote": "while the retained previous checkpoint avoids any need to rewind.",
+                "line_start": 16,
+                "reason": "The note explicitly rules out rewinding, which conflicts with a summary that says the scan goes back."
+              },
+              {
+                "quote": "The match at index `2` is missed, producing a silent false negative.",
+                "line_start": 127,
+                "reason": "The unsorted counterexample is correct: n=7, block size 2, and a search for 9 stops at index 1 and misses index 2."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: a single algorithm with a coherent set of assumptions and failure modes.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy / terminology",
+                "location": "frontmatter summary, line 4",
+                "evidence": "\"then scans back one block\" versus body \"scans forward from the previous checkpoint\" and \"avoids any need to rewind\".",
+                "effect": "The summary feeds the folder card map. It gives readers a wrong or ambiguous picture of scan direction before they open the note.",
+                "fix": "Reword the summary, for example: \"Jumps a sorted sequence in blocks of about root n, then scans forward through the one candidate block.\""
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [
+              {
+                "fingerprint": "3fd0195aebe22928e501b312bfc8cb752e99596494e9d6ed969ffb179cba4d58",
+                "equivalent": false,
+                "reason": "The rejected proposal targets Tarjan's SCC note. This note has no proposal."
+              },
+              {
+                "fingerprint": "0edee5f0203803acc165c0049d2267a55596a7e6fe24fa880d7877062525177d",
+                "equivalent": false,
+                "reason": "The rejected proposal targets the Cyclic Sort note."
+              },
+              {
+                "fingerprint": "244d8a0f13c2abb4f10f48aecb71e8b61b9b273f632444076a4815a9956f07d9",
+                "equivalent": false,
+                "reason": "The rejected proposal targets the Monotonic Stack and Queue note."
+              },
+              {
+                "fingerprint": "27b8ff207ad19a6687a083b6a903afbf642cb7da722dcef9f41f92da607c9f84",
+                "equivalent": false,
+                "reason": "The rejected proposal targets the Prefix Sum note."
+              },
+              {
+                "fingerprint": "a84e9c6353348559fc2fa8be75d2d5183237375a59e0bfcbdd61e59fbfd9b75f",
+                "equivalent": false,
+                "reason": "The rejected proposal targets the Prefix Sum note."
+              }
+            ],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Jump Search.md",
+          "citation_index": 3,
+          "reported_line_start": 127,
+          "resolved_line_start": 177
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Jump Search.md": "95449f4a3cca43607a1633eeb2148d44008ad557d7e088cf07d49e51eb8cc7c0"
+      },
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CHANGES REQUIRED",
+      "overall_reason": "The note body is technically sound, but the frontmatter summary says the search \"scans back one block\". The body says the scan runs forward from the previous checkpoint and that no rewind is needed. The keep disposition leaves that contradiction in place.",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Jump Search.md",
+          "verdict": "CHANGES REQUIRED",
+          "summary": "I audited the whole note. The trace, block-k proof, C# code, unsorted counterexample, complexity tab and flowchart are correct. The summary line contradicts the body on scan direction, and the keep disposition leaves it unfixed.",
+          "page_type": "Concept — authorable prose with a steptrace/complexity tabbed layout, a Mermaid diagram and C# code. No Questions section. References has one bare link.",
+          "current_text_evidence": [
+            {
+              "quote": "summary: \"Steps a sorted array in fixed blocks of size root n, then scans back one block.\"",
+              "line_start": 4,
+              "reason": "The summary describes a backward scan. The body defines a forward scan from the previous checkpoint."
+            },
+            {
+              "quote": "It then scans forward from the previous checkpoint through the single candidate block.",
+              "line_start": 14,
+              "reason": "The body states the scan direction as forward, which contradicts the summary."
+            },
+            {
+              "quote": "while the retained previous checkpoint avoids any need to rewind.",
+              "line_start": 16,
+              "reason": "The note explicitly rules out rewinding, which conflicts with a summary that says the scan goes back."
+            },
+            {
+              "quote": "The match at index `2` is missed, producing a silent false negative.",
+              "line_start": 177,
+              "reason": "The unsorted counterexample is correct: n=7, block size 2, and a search for 9 stops at index 1 and misses index 2."
+            }
+          ],
+          "target_resolution": "UNRESOLVED",
+          "split_suggestion": "No split: a single algorithm with a coherent set of assumptions and failure modes.",
+          "findings": [
+            {
+              "severity": "Medium",
+              "dimension": "Accuracy / terminology",
+              "location": "frontmatter summary, line 4",
+              "evidence": "\"then scans back one block\" versus body \"scans forward from the previous checkpoint\" and \"avoids any need to rewind\".",
+              "effect": "The summary feeds the folder card map. It gives readers a wrong or ambiguous picture of scan direction before they open the note.",
+              "fix": "Reword the summary, for example: \"Jumps a sorted sequence in blocks of about root n, then scans forward through the one candidate block.\""
+            }
+          ],
+          "source_checks": [],
+          "rejection_equivalence": [
+            {
+              "fingerprint": "3fd0195aebe22928e501b312bfc8cb752e99596494e9d6ed969ffb179cba4d58",
+              "equivalent": false,
+              "reason": "The rejected proposal targets Tarjan's SCC note. This note has no proposal."
+            },
+            {
+              "fingerprint": "0edee5f0203803acc165c0049d2267a55596a7e6fe24fa880d7877062525177d",
+              "equivalent": false,
+              "reason": "The rejected proposal targets the Cyclic Sort note."
+            },
+            {
+              "fingerprint": "244d8a0f13c2abb4f10f48aecb71e8b61b9b273f632444076a4815a9956f07d9",
+              "equivalent": false,
+              "reason": "The rejected proposal targets the Monotonic Stack and Queue note."
+            },
+            {
+              "fingerprint": "27b8ff207ad19a6687a083b6a903afbf642cb7da722dcef9f41f92da607c9f84",
+              "equivalent": false,
+              "reason": "The rejected proposal targets the Prefix Sum note."
+            },
+            {
+              "fingerprint": "a84e9c6353348559fc2fa8be75d2d5183237375a59e0bfcbdd61e59fbfd9b75f",
+              "equivalent": false,
+              "reason": "The rejected proposal targets the Prefix Sum note."
+            }
+          ],
+          "quality": {
+            "accuracy": "FAIL",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": []
+    }
   }
 }
