@@ -19436,11 +19436,11 @@
     "version": 1,
     "id": "5b261511fa644217ba9caf57468fa93e",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-19T07:41:39.910595Z",
-    "elapsed_seconds": 405.14080129999996,
+    "elapsed_seconds": 414.50691229999995,
     "calls_reserved": 11,
-    "responses_received": 10,
+    "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
       "Vault/Home/DevOps/CI CD tools.md",
@@ -19802,7 +19802,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T07:48:25.050917Z",
+    "checkpoint_at": "2026-11-19T07:48:34.417027Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
@@ -56482,5 +56482,54 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "5b261511fa644217ba9caf57468fa93e",
+    "topic_id": "devops-e491b463",
+    "batch": {
+      "topic": "DevOps",
+      "topic_id": "devops-e491b463",
+      "notes": [
+        {
+          "path": "Vault/Home/DevOps/Kubernetes.md",
+          "content": "---\ntopic: [DevOps]\nsubtopic: []\nsummary: \"Orchestrates containers by reconciling reality to a declared desired state.\"\nlevel: [\"2\"]\npriority: High\nstatus: In Progress\n\npublish: true\nqard-deck: \"DevOps\"\nqard-topic: \"Kubernetes\"\nflashcard_uid: \"41eecc4b\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.510Z\"\n---\n\nKubernetes orchestrates containerized workloads by reconciling declared API objects with observed cluster state. Controllers create or replace workload objects, the scheduler assigns Pods to nodes, and node agents start containers through a Container Runtime Interface (CRI)-compatible runtime. A stopped process is therefore replaced because the declared state still requires it, not because an operator reruns a command.\n\n# Core Objects\n\n- **Pod** — the scheduling and lifecycle unit for one or more containers that share networking and can share volumes. Pods are replaceable; their IPs and writable filesystems should not be treated as durable identity.\n- **Deployment** — reconciles replaceable Pod replicas and rollout policy through ReplicaSets. Its replica count is a target, not a guarantee that every replica can serve traffic.\n- **Service** — provides stable discovery and traffic distribution over selected ready Pods even as Pod addresses change.\n- **ConfigMap** — carries non-sensitive configuration outside the image.\n- **Secret** — carries sensitive values, but base64 encoding is not encryption. API access, encryption at rest, and the delivery path remain platform security decisions.\n\nIngress or Gateway resources can describe shared HTTP routing to Services, but a compatible controller must implement them. Declaring an API object does not create behavior unless a controller owns it.\n\n# Reading a Manifest\n\nThis manifest shows the relationships developers commonly encounter; it omits production policy and platform-specific exposure:\n\n```yaml\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: myapi\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: myapi\n  template:\n    metadata:\n      labels:\n        app: myapi\n    spec:\n      containers:\n        - name: api\n          image: registry.example/myapi:1.2.3\n          ports:\n            - containerPort: 8080\n          resources:\n            requests:\n              cpu: 100m\n              memory: 128Mi\n          readinessProbe:\n            httpGet:\n              path: /health/ready\n              port: 8080\n          envFrom:\n            - configMapRef:\n                name: myapi-config\n            - secretRef:\n                name: myapi-secrets\n---\napiVersion: v1\nkind: Service\nmetadata:\n  name: myapi\nspec:\n  selector:\n    app: myapi\n  ports:\n    - port: 80\n      targetPort: 8080\n```\n\n`apiVersion` and `kind` select the API contract. The Deployment's selector must match the Pod-template labels; otherwise it cannot own those Pods. `replicas` is the desired count. The image field selects the runtime artifact; a production release commonly records an immutable digest rather than trusting a movable tag.\n\nResource requests tell the scheduler what capacity a Pod requires. The readiness probe controls whether the Pod becomes a Service endpoint. It should represent the ability to accept traffic, not every optional dependency. `envFrom` injects values from separately managed configuration objects. The Service selector finds the same labels and maps stable port `80` to container port `8080`.\n\n# Application and Platform Ownership\n\nKubernetes owns scheduling and reconciliation of declared objects. The application still owns graceful shutdown, readiness semantics, backward compatibility, idempotency, resource behavior, and data correctness. A retrying Job can execute work twice; Kubernetes cannot make a non-idempotent payment handler safe.\n\nThe platform owns cluster upgrades, capacity, identity, network and admission policy, secret protection, and controller availability. Application repositories should expose the assumptions they make about those services rather than duplicate their implementation.\n\n# When Kubernetes Is the Wrong Boundary\n\nKubernetes earns its complexity when several workloads need multi-node scheduling, replacement, service discovery, controlled rollout, and a shared platform contract. A managed application service or single-host Compose deployment is often simpler when those requirements do not exist. Kubernetes provides mechanisms for availability; it does not create good probes, spare capacity, compatible releases, or reliable data systems automatically.\n\n# Questions\n\n<!-- qard-id: bc9a5b5d-d49f-480f-a7de-7fe709538cac -->\n> [!qard]- What is the difference between a Pod, Deployment, and Service?\n> They separate three concerns. A Pod runs containers. A Deployment declares the desired set of Pods, drives the cluster toward it and rolls out changes to it. A Service gives clients a stable way to reach the Pods behind it while those Pods change.\n>\n> | Object | Responsibility | Identity and lifetime |\n> |---|---|---|\n> | Pod | The smallest unit Kubernetes schedules onto a node: one or more containers that share networking and can share storage. | Replaceable. A replacement is a new Pod, usually with a different IP, so Pod addresses are not durable identity. |\n> | Deployment | Declares how many Pods should run from a Pod template and reconciles actual state toward that count through a ReplicaSet. A template change rolls out through a new ReplicaSet. | A long-lived declaration; the individual Pods it manages come and go. |\n> | Service (typical selector-based ClusterIP) | Selects Pods by label, puts a stable name and virtual IP in front of them and distributes traffic among them. | Stays the same while its set of backend Pods changes. |\n>\n> **How they work together:** a Deployment with `replicas: 3` and the Pod label `app: myapi` declares three desired replicas. If one Pod is deleted or its node fails, the ReplicaSet creates a replacement Pod, usually with a new IP, to converge back toward three. The count is a target, not a guarantee: unschedulable Pods, insufficient quota, image pull errors or failing readiness checks can leave fewer Pods ready to serve. A Service that selects `app: myapi` keeps its name and address throughout. Normally only Pods that pass their readiness check receive Service traffic, so the replacement starts receiving requests once it becomes ready. Clients never have to track Pod IPs.\n>\n> A Deployment never routes traffic, and a Service never creates Pods. In this selector-based setup, they are connected only through the labels on the Pods. A Service without a selector relies on separately managed endpoints, and a headless Service has no virtual IP.\n>\n> [Kubernetes: Pods](https://kubernetes.io/docs/concepts/workloads/pods/) · [Kubernetes: Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) · [Kubernetes: Service API](https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/)\n\n# References\n\n- [Kubernetes documentation](https://kubernetes.io/docs/home/)\n- [Gateway API documentation](https://gateway-api.sigs.k8s.io/)\n",
+          "hash": "fb22aa64cfd59bece5c4db4c3c1c74c53b823557d42cce4343525bed2dbe5cf8",
+          "topic": "DevOps",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "changed"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/DevOps/Kubernetes.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against current text and Kubernetes concepts. The intro correctly describes controllers, the scheduler and CRI runtimes. Core object descriptions are accurate: Pods are replaceable, a Deployment replica count is a target, a Service routes to ready Pods, and Secrets are base64-encoded rather than encrypted. In the manifest, the selector matches the template labels and the Service targetPort maps 80 to 8080. The readiness-probe, requests and envFrom explanations are correct. The ownership and wrong-fit sections state sound conditions. The single Qard asks one focused comparison, and its answer is consistent with the note and with the Pods, Deployments and Service API docs it cites. There are no known violations, no feedback and no open proposals. No defect justifies an edit."
+        }
+      ],
+      "feedback": [],
+      "decisions": []
+    },
+    "source_hashes": {
+      "Vault/Home/DevOps/Kubernetes.md": "fb22aa64cfd59bece5c4db4c3c1c74c53b823557d42cce4343525bed2dbe5cf8"
+    },
+    "feedback_keys": [],
+    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/DevOps/Kubernetes.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-19T07:48:34.417017Z"
+  }
 }
