@@ -7,7 +7,7 @@ priority: Medium
 status: New
 publish: true
 created: "2026-07-10T06:24:36.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-19T20:59:19.174Z"
 published: "2026-07-10T05:55:53.168Z"
 ---
 
@@ -30,7 +30,7 @@ The gallop maintains one fact through every iteration: as long as the loop conti
 - `a[bound] >= target`: the current probe reached or passed the target. The previous probe, `bound/2`, was the last index the loop confirmed as `a[bound/2] < target`, so the target lies in `[bound/2, bound]`.
 - `bound >= n`: the probe galloped past the end before catching the target. The last confirmed `a[bound/2] < target` still holds, so the target, if present, lies in `[bound/2, n − 1]`.
 
-Either way the window is `[bound/2, min(bound, n − 1)]`. Index `0` is checked before the gallop because `bound` starts at `1`.
+Either way the window is `[bound/2, min(bound, n − 1)]`.
 
 The unbounded, indexable variant never references `n`. It generates the indices it probes (`1, 2, 4, …`) and asks only "is `a[bound]` still below the target?" An unknown-length finite source must also report that a probe is past the end so the high bound can be clamped to the last valid index. Index `0` is handled before the loop, since `bound` starts at `1`: if `a[0] == target`, the answer is `0`.
 
