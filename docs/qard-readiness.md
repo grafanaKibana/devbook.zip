@@ -28,8 +28,8 @@ A live rename is a rename event inside a running Obsidian. A file moved with she
 
 2. Move it through the Obsidian CLI with `vault="Vault"` (`move` or `rename`) while the app is running. If the app is unavailable, move the file with file tools and treat the move as offline.
 3. Re-seed `qard-deck` and `qard-topic` when the old values equal the old path's seed: the deck is the first folder below `Home`, the topic is the rest of the path without `.md`. A value that differed from the old seed is a user override and stays as it is. Per-card `qard-location` overrides always stay.
-4. Replace the old path with the new one at every lesson and check location step 1 listed. Change only those path strings; snapshot text, steps, answers, marks, state and evidence keep their content. Do this while no lesson or check is in progress in the app, then read the files back.
-5. For an offline move, also replace the course link, the `Source links.json` path and the wikilinks in other notes. With the app running, never rewrite the Qard plugin `data.json` or a file Qard currently has open.
+4. Replace the old path with the new one at every lesson and check location step 1 listed. Qard keeps loaded lessons and checks in memory and writes that copy back, so edit these files only while Qard is unloaded: after the live rename, disable it with `obsidian plugin:disable id=qard` or close Obsidian, replace the paths, read the files back, then enable it again. Change only the path strings; snapshot text, steps, answers, marks, state and evidence keep their content.
+5. For an offline move, also replace the course link, the `Source links.json` path and the wikilinks in other notes. Never rewrite the Qard plugin `data.json` while the app is running.
 6. If the move empties a deck or renames a topic that an exam selects, tell the user; exam selections are changed in Qard.
 
 ## Splitting, merging or deleting

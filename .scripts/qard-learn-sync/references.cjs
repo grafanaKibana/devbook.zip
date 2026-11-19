@@ -24,7 +24,7 @@ function jsonPaths(value, where = '') {
 }
 
 function wikilinks(text, vault) {
-  return [...text.matchAll(/\[\[(Home\/[^\]|#]+)/g)].map(match => match[1])
+  return [...text.replaceAll('\\|', '|').matchAll(/\[\[(Home\/[^\]|#]+)/g)].map(match => match[1].trim())
     .filter(target => target.endsWith('.md') || !fs.existsSync(path.join(vault, target)))
     .map(target => ({ where: 'wikilink', note: target.replace(/\.md$/, '') + '.md' }));
 }
@@ -63,7 +63,7 @@ function inspectReferences({ repoRoot = path.resolve(__dirname, '../..'), paths 
 
   for (const [note, file] of notes) {
     if (selected && !selected.has(note)) continue;
-    const text = fs.readFileSync(file, 'utf8');
+    const text = fs.readFileSync(file, 'utf8').replace(/\r\n?/g, '\n');
     const actual = { deck: frontmatterValue(text, 'qard-deck'), topic: frontmatterValue(text, 'qard-topic') };
     if (actual.deck === undefined && actual.topic === undefined) continue;
     const expected = seedFor(note);
