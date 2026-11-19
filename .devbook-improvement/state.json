@@ -10567,51 +10567,51 @@
       }
     },
     "Vault/Home/DevOps/Docker.md": {
-      "content_hash": "49866e78a3a3d2d88c8727b08c177a6c74e054b7eea736b24d43502a32e19be9",
-      "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+      "content_hash": "8c58403f545c7c5a982dcede954a836273a8285597adec13165afc9130a783a5",
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
       "outcome": "keep",
       "repair_input_hash": "",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_process": "focused-whole-note-v1",
       "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "keep_review": {
-        "content_hash": "49866e78a3a3d2d88c8727b08c177a6c74e054b7eea736b24d43502a32e19be9",
-        "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+        "content_hash": "8c58403f545c7c5a982dcede954a836273a8285597adec13165afc9130a783a5",
+        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
         "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
         "review": {
           "path": "Vault/Home/DevOps/Docker.md",
           "verdict": "CLEAN",
-          "summary": "The note explains the image, container and runtime boundary, a multi-stage Dockerfile, a Compose file and safety limits accurately and concisely. No concrete defect was found, so leaving it unchanged avoids cosmetic churn.",
-          "page_type": "Concept — typed frontmatter retained; Questions are optional and absent; References are bare descriptive links; fenced blocks carry language identifiers.",
+          "summary": "Independent whole-note audit found the note accurate, ordered from concept to runtime boundary to examples to safety limits, and concise. No concrete defect justifies an edit; keeping it unchanged is correct.",
+          "page_type": "Concept — typed frontmatter present, no Qard cards, optional Questions absent (allowed), References are bare descriptive links, both code fences have language identifiers.",
           "current_text_evidence": [
             {
               "quote": "The image is portable; the complete runtime is not.",
               "line_start": 15,
-              "reason": "The opening states the operating idea and the key boundary quickly and in a direct whiteboard voice."
+              "reason": "Opening states the operating idea and the key limit, so the topic is recoverable quickly."
             },
             {
               "quote": "A Linux container is a host process isolated with namespaces and constrained with cgroups, not a virtual machine.",
               "line_start": 21,
-              "reason": "This gives the accurate mechanism and the Docker Desktop VM and architecture caveat, which supports engineering judgment."
+              "reason": "Technically correct mechanism and the Desktop VM and architecture caveat follow immediately."
             },
             {
               "quote": "`EXPOSE 8080` documents the intended listening port but does not publish it to the host.",
               "line_start": 41,
-              "reason": "This correctly separates EXPOSE from publishing. The .NET 8 images define APP_UID and default to port 8080, so the example is consistent."
+              "reason": "Correct EXPOSE semantics, tied to the example and distinguished from Compose ports."
             },
             {
               "quote": "`depends_on` controls start order but does not prove the database is ready.",
               "line_start": 75,
-              "reason": "This is the correct short-form depends_on semantics. The POSTGRES_PASSWORD_FILE and file-secret example is valid."
+              "reason": "Correct Compose limitation stated with the condition that matters."
             },
             {
               "quote": "a Docker `HEALTHCHECK` does not automatically become a Kubernetes readiness probe.",
               "line_start": 82,
-              "reason": "This is accurate and states a real runtime boundary and its limit."
+              "reason": "Accurate cross-runtime boundary that supports engineering judgment."
             }
           ],
           "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the image/runtime boundary, Dockerfile, Compose and safety limits form one coherent Docker topic, and splitting them would not add independent value.",
+          "split_suggestion": "No split: image, container, Dockerfile, Compose and safety limits form one coherent Docker topic of moderate length; the sections are not independently reusable.",
           "findings": [],
           "source_checks": [],
           "rejection_equivalence": [],
@@ -10624,6 +10624,59 @@
           }
         },
         "review_process": "focused-whole-note-v1"
+      },
+      "keep_review_history": {
+        "30593fae49b87c06cf936a320284bfcbab3c0a7ebb3bce38a117d924646a27cc": {
+          "content_hash": "49866e78a3a3d2d88c8727b08c177a6c74e054b7eea736b24d43502a32e19be9",
+          "rules_hash": "e7e2f4083e3f3c9e8e8ab3131a5784e66ac22f7e0c9570b762cb68c00519b8c1",
+          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+          "review": {
+            "path": "Vault/Home/DevOps/Docker.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains the image, container and runtime boundary, a multi-stage Dockerfile, a Compose file and safety limits accurately and concisely. No concrete defect was found, so leaving it unchanged avoids cosmetic churn.",
+            "page_type": "Concept — typed frontmatter retained; Questions are optional and absent; References are bare descriptive links; fenced blocks carry language identifiers.",
+            "current_text_evidence": [
+              {
+                "quote": "The image is portable; the complete runtime is not.",
+                "line_start": 15,
+                "reason": "The opening states the operating idea and the key boundary quickly and in a direct whiteboard voice."
+              },
+              {
+                "quote": "A Linux container is a host process isolated with namespaces and constrained with cgroups, not a virtual machine.",
+                "line_start": 21,
+                "reason": "This gives the accurate mechanism and the Docker Desktop VM and architecture caveat, which supports engineering judgment."
+              },
+              {
+                "quote": "`EXPOSE 8080` documents the intended listening port but does not publish it to the host.",
+                "line_start": 41,
+                "reason": "This correctly separates EXPOSE from publishing. The .NET 8 images define APP_UID and default to port 8080, so the example is consistent."
+              },
+              {
+                "quote": "`depends_on` controls start order but does not prove the database is ready.",
+                "line_start": 75,
+                "reason": "This is the correct short-form depends_on semantics. The POSTGRES_PASSWORD_FILE and file-secret example is valid."
+              },
+              {
+                "quote": "a Docker `HEALTHCHECK` does not automatically become a Kubernetes readiness probe.",
+                "line_start": 82,
+                "reason": "This is accurate and states a real runtime boundary and its limit."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the image/runtime boundary, Dockerfile, Compose and safety limits form one coherent Docker topic, and splitting them would not add independent value.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          },
+          "review_process": "focused-whole-note-v1"
+        }
       }
     },
     "Vault/Home/DevOps/Infrastructure as Code.md": {
@@ -19337,7 +19390,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-19T07:41:39.910595Z",
-    "elapsed_seconds": 293.8588871,
+    "elapsed_seconds": 298.4146986,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
@@ -19558,7 +19611,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T07:46:33.769000Z",
+    "checkpoint_at": "2026-11-19T07:46:38.324812Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
@@ -56176,105 +56229,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "5b261511fa644217ba9caf57468fa93e",
-    "topic_id": "devops-e491b463",
-    "batch": {
-      "topic": "DevOps",
-      "topic_id": "devops-e491b463",
-      "notes": [
-        {
-          "path": "Vault/Home/DevOps/Docker.md",
-          "content": "---\ntopic: [DevOps]\nsubtopic: []\nsummary: \"Packages an application and its dependencies into an isolated, portable container.\"\nlevel: [\"2\"]\npriority: High\nstatus: In Progress\n\npublish: true\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.509Z\"\n---\n\nDocker builds an OCI-compatible image containing an application and its filesystem dependencies, then starts isolated processes from that image. The image is portable; the complete runtime is not. The host kernel and CPU architecture, networking, mounts, resource limits, injected configuration, security policy, and external services remain environmental inputs.\n\n# Image, Container, and Runtime Boundary\n\nAn **image** is an immutable set of filesystem layers plus configuration such as the entry point and default environment. A **container** is one running instance of that image with a writable layer. Removing the container removes that writable layer unless data lives in a volume or external service.\n\nA Linux container is a host process isolated with namespaces and constrained with cgroups, not a virtual machine. Docker Desktop commonly runs Linux containers inside a Linux VM on macOS or Windows. The image must therefore match the target operating system and CPU architecture, or publish a multi-platform manifest with a compatible variant.\n\n# Reading a Multi-Stage Dockerfile\n\nThis small .NET example teaches stage and runtime boundaries; it is not a production-ready build:\n\n```dockerfile\nFROM mcr.microsoft.com/dotnet/sdk:8.0 AS build\nWORKDIR /src\nCOPY . .\nRUN dotnet publish MyApp.csproj -c Release -o /out\n\nFROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime\nWORKDIR /app\nCOPY --from=build /out .\nUSER $APP_UID\nEXPOSE 8080\nENTRYPOINT [\"dotnet\", \"MyApp.dll\"]\n```\n\n`FROM ... AS build` gives compilation its own stage. The second `FROM` starts a new image that has the runtime but not the SDK. `COPY --from=build` transfers only published output. `USER` avoids running the application as root. `EXPOSE 8080` documents the intended listening port but does not publish it to the host. `ENTRYPOINT` defines the process whose lifetime is the container lifetime.\n\nA real build should use a small `.dockerignore`, lock or review base-image identity, keep private-feed credentials out of layers, scan the final digest, and promote that same digest through environments.\n\n# Reading a Compose File\n\nCompose describes a multi-container application, commonly for local development. This example is intentionally incomplete for production:\n\n```yaml\nservices:\n  api:\n    build: .\n    ports:\n      - \"8080:8080\"\n    depends_on:\n      - db\n\n  db:\n    image: postgres:17\n    environment:\n      POSTGRES_PASSWORD_FILE: /run/secrets/db_password\n    secrets:\n      - db_password\n    volumes:\n      - pgdata:/var/lib/postgresql/data\n\nsecrets:\n  db_password:\n    file: ./secrets/db_password\n\nvolumes:\n  pgdata:\n```\n\n`build` creates the API image from the local Dockerfile. `ports` publishes a container port on the host. `depends_on` controls start order but does not prove the database is ready. The named volume keeps database files outside the replaceable container. The secret is mounted as a file instead of embedded in the image or committed YAML; its source file must remain outside Git.\n\n# Safety Boundaries\n\n- **Privilege** — run as a non-root user and add only required capabilities or mounts. Container isolation does not make root harmless.\n- **Secrets** — keep credentials out of Dockerfile `ARG`/`ENV`, copied files, image history, and tracked Compose values. Inject them at build or run time through the platform's secret mechanism.\n- **State** — treat the writable container layer as disposable. Put durable data in a volume or external service.\n- **Health** — a running process may still be unable to serve traffic. Configure the health mechanism consumed by the actual runtime; a Docker `HEALTHCHECK` does not automatically become a Kubernetes readiness probe.\n- **Artifact identity** — tags can move. A digest identifies the exact image that passed verification.\n\nDocker Compose is suitable when a single-host lifecycle is enough. Kubernetes adds multi-node scheduling and reconciliation when the workload requires them; it does not replace the image or application runtime contract.\n\n# References\n\n- [Docker documentation](https://docs.docker.com/)\n- [.NET Docker samples](https://github.com/dotnet/dotnet-docker/tree/main/samples)\n",
-          "hash": "8c58403f545c7c5a982dcede954a836273a8285597adec13165afc9130a783a5",
-          "topic": "DevOps",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/DevOps/Docker.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its text and known Docker behavior. The opening separates the portable image from environmental runtime inputs. The image/container/writable-layer definitions are correct. The note correctly says a Linux container is a namespaced, cgroup-limited host process, and that Docker Desktop runs Linux containers in a VM. The multi-stage Dockerfile is accurate: the second FROM drops the SDK, COPY --from=build copies only published output, and EXPOSE documents a port without publishing it. USER $APP_UID is valid for the .NET 8 images, which define that variable. The Compose section correctly says depends_on controls start order without proving readiness, and that the secret is mounted as a file. The safety bullets are correct, including the point that a Docker HEALTHCHECK is not a Kubernetes readiness probe. Prose is concise and direct. The note has no Qard cards, no known violations, and the references are valid. No edit is warranted."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/DevOps/Docker.md": "8c58403f545c7c5a982dcede954a836273a8285597adec13165afc9130a783a5"
-    },
-    "feedback_keys": [],
-    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/DevOps/Docker.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-19T07:46:10.838921Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/DevOps/Docker.md",
-          "verdict": "CLEAN",
-          "summary": "Independent whole-note audit found the note accurate, ordered from concept to runtime boundary to examples to safety limits, and concise. No concrete defect justifies an edit; keeping it unchanged is correct.",
-          "page_type": "Concept — typed frontmatter present, no Qard cards, optional Questions absent (allowed), References are bare descriptive links, both code fences have language identifiers.",
-          "current_text_evidence": [
-            {
-              "quote": "The image is portable; the complete runtime is not.",
-              "line_start": 15,
-              "reason": "Opening states the operating idea and the key limit, so the topic is recoverable quickly."
-            },
-            {
-              "quote": "A Linux container is a host process isolated with namespaces and constrained with cgroups, not a virtual machine.",
-              "line_start": 21,
-              "reason": "Technically correct mechanism and the Desktop VM and architecture caveat follow immediately."
-            },
-            {
-              "quote": "`EXPOSE 8080` documents the intended listening port but does not publish it to the host.",
-              "line_start": 41,
-              "reason": "Correct EXPOSE semantics, tied to the example and distinguished from Compose ports."
-            },
-            {
-              "quote": "`depends_on` controls start order but does not prove the database is ready.",
-              "line_start": 75,
-              "reason": "Correct Compose limitation stated with the condition that matters."
-            },
-            {
-              "quote": "a Docker `HEALTHCHECK` does not automatically become a Kubernetes readiness probe.",
-              "line_start": 82,
-              "reason": "Accurate cross-runtime boundary that supports engineering judgment."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: image, container, Dockerfile, Compose and safety limits form one coherent Docker topic of moderate length; the sections are not independently reusable.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The complete note is factually sound (USER $APP_UID works in the .NET 8 images, Compose secrets and POSTGRES_PASSWORD_FILE are valid, and the EXPOSE and depends_on semantics are right). Its prose is direct and well ordered, it has no known violations, and no edit is proposed, so keeping it unchanged is justified.",
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
