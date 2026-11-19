@@ -19388,11 +19388,11 @@
     "version": 1,
     "id": "5b261511fa644217ba9caf57468fa93e",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-19T07:41:39.910595Z",
-    "elapsed_seconds": 334.6044418,
+    "elapsed_seconds": 345.2811099,
     "calls_reserved": 9,
-    "responses_received": 8,
+    "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/DevOps/Deployment Strategies/Deployment Strategies.md",
       "Vault/Home/DevOps/CI CD tools.md",
@@ -19685,7 +19685,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T07:47:14.514556Z",
+    "checkpoint_at": "2026-11-19T07:47:25.191223Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
@@ -56303,5 +56303,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "5b261511fa644217ba9caf57468fa93e",
+    "topic_id": "devops-e491b463",
+    "batch": {
+      "topic": "DevOps",
+      "topic_id": "devops-e491b463",
+      "notes": [
+        {
+          "path": "Vault/Home/DevOps/Infrastructure as Code.md",
+          "content": "---\ntopic: [DevOps]\nsubtopic: []\nsummary: \"Provisioning infrastructure through version-controlled files, making environments repeatable and auditable.\"\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\npublish: true\ncreated: \"2026-06-20T19:32:24.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.509Z\"\n---\n\nInfrastructure as Code (IaC) records intended infrastructure in version-controlled definitions. A tool compares that desired state with observed resources, proposes create, update, replace, or delete operations, then applies the approved change. The definition makes intent reviewable; provider behavior, credentials, quotas, existing data, and regional capacity still affect the result.\n\n# Desired State and the Plan/Apply Loop\n\nDeclarative IaC describes the end state. The tool computes the path from the current state. Imperative automation specifies the steps itself. Both can be repeatable, but declarative tools make the proposed difference an explicit artifact for review.\n\nThis Terraform fragment is for field recognition, not production use:\n\n```hcl\nresource \"aws_s3_bucket\" \"assets\" {\n  bucket = \"myapp-assets-prod\"\n\n  tags = {\n    Environment = \"prod\"\n  }\n}\n```\n\n`resource` declares both a provider type and a local address. `bucket` affects the remote object's identity. `tags` are managed fields, so an out-of-band change may appear as drift and be reverted on the next apply. A plan can reveal replacement or deletion, but it does not make those actions safe automatically.\n\nThe common loop is:\n\n```text\nconfiguration + inputs + observed resources -> plan -> review -> apply -> new observed state\n```\n\nWhen approval must bind to exact operations, apply the saved reviewed plan rather than recomputing it after the gate.\n\n# State and Drift\n\nTerraform-style tools keep **state** that maps configuration addresses to remote objects and records attributes needed to calculate future changes. State is operational data, not source code. It may contain sensitive values and belongs in a protected remote backend with access control, encryption, versioning, and locking.\n\nProvider-native systems such as ARM or CloudFormation keep equivalent deployment state on the provider side rather than in an operator-managed state file.\n\n**Drift** is a difference between declared and observed infrastructure. Refresh and plan can expose drift only for fields the provider reads and manages. Apply can reconcile those fields. Ignored attributes, provider defaults, and external systems remain outside that guarantee. Emergency console changes should be reflected in code before the next reconciliation undoes them or leaves the repository misleading.\n\n# One Authoritative Controller\n\nInfrastructure tools overlap. Terraform can bootstrap machine configuration; Kubernetes controllers can provision cloud resources; configuration-management tools can create infrastructure. The critical question is which controller owns each resource or field. Two reconcilers managing the same value can repeatedly overwrite each other.\n\nSplit ownership by lifecycle and failure impact. Networks, shared data services, application deployments, and runtime configuration often change at different rates and need different permissions. The split should reduce the scope of a destructive plan, not create modules merely for structure.\n\n# Engineering Boundaries\n\n- Review replacements and deletes, not only textual diffs.\n- Promote provider and module versions deliberately; changed defaults can change a plan.\n- Keep state and secrets out of Git.\n- Authenticate CI with short-lived workload identity where the platform supports it.\n- Treat data backup and recovery as separate from resource recreation. Recreating a database resource does not restore its data.\n\n# References\n\n- [Terraform documentation](https://developer.hashicorp.com/terraform/intro)\n- [OpenGitOps principles](https://opengitops.dev/)\n",
+          "hash": "a1c7fbbe56af27fc6af7d740b92d6e95d5cc9ad42d75e1561c8941577791cc18",
+          "topic": "DevOps",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "changed"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/DevOps/Infrastructure as Code.md",
+          "outcome": "keep",
+          "reason": "I read the whole note and found no verified defect, and known_violations is empty. The opening defines IaC as desired state, then a plan, then an apply. The declarative/imperative distinction is stated accurately. The Terraform fragment is labelled as a recognition aid, and its comments on resource type, local address, bucket identity and managed tags are correct. The plan/apply loop correctly says to apply a saved plan when approval must bind to exact operations. The state section is accurate: state maps addresses to remote objects, may hold sensitive values, and needs a protected backend with locking and versioning. It also correctly says ARM and CloudFormation keep state on the provider side. The drift section limits reconciliation to fields the provider reads and manages. The controller-ownership section and the engineering-boundaries list state real conditions, including that recreating a database does not restore its data. The note is compact and each section teaches something distinct. It has no Qard cards, and none is required. The two references are authoritative and carry no trailing annotation. Any edit would be cosmetic."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/DevOps/Infrastructure as Code.md": "a1c7fbbe56af27fc6af7d740b92d6e95d5cc9ad42d75e1561c8941577791cc18"
+    },
+    "feedback_keys": [],
+    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/DevOps/Infrastructure as Code.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-19T07:47:25.191213Z"
+  }
 }
