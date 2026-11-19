@@ -19223,9 +19223,9 @@
     "version": 1,
     "id": "895ba07e431b4b1fb1f4b702293610c3",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-19T20:51:09.789366Z",
-    "elapsed_seconds": 871.8656834000011,
+    "elapsed_seconds": 878.7766332000011,
     "calls_reserved": 19,
     "responses_received": 19,
     "attempted_paths": [
@@ -19236,7 +19236,8 @@
       "Vault/Home/Computer Science/Algorithms/Search Algorithms/Binary Search.md",
       "Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md",
       "Vault/Home/Computer Science/Algorithms/Search Algorithms/Fibonacci Search.md",
-      "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md"
+      "Vault/Home/Computer Science/Algorithms/Search Algorithms/Interpolation Search.md",
+      "Vault/Home/Computer Science/Algorithms/Search Algorithms/Jump Search.md"
     ],
     "accepted_records": [
       {
@@ -22477,10 +22478,21 @@
           },
           "model_calls": 16
         }
+      },
+      {
+        "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Jump Search.md",
+        "outcome": "proposal_blocked",
+        "reason": "proposal must preserve frontmatter exactly",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "proposal must preserve frontmatter exactly",
+          "model_calls": 19
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T21:05:41.654554Z",
+    "checkpoint_at": "2026-11-19T21:05:48.565504Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
