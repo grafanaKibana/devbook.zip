@@ -19632,10 +19632,10 @@
   "focused_workload": {
     "version": 1,
     "id": "5b261511fa644217ba9caf57468fa93e",
-    "status": "active",
-    "phase": "selecting",
+    "status": "sealed",
+    "phase": "sealed",
     "started_at": "2026-11-19T07:41:39.910595Z",
-    "elapsed_seconds": 677.2629713999996,
+    "elapsed_seconds": 681.1908363999996,
     "calls_reserved": 18,
     "responses_received": 18,
     "attempted_paths": [
@@ -20281,7 +20281,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T07:52:57.173089Z",
+    "checkpoint_at": "2026-11-19T07:53:01.100955Z",
     "topic": "DevOps",
     "topic_id": "devops-e491b463",
     "current_batch": {
@@ -20306,7 +20306,9 @@
       "pr": null
     },
     "base_sha": "36628d4b1ae482b0f3c18ce0548af47dd2338277",
-    "reservation_deadline": "2026-11-19T08:07:08.942236Z"
+    "reservation_deadline": "2026-11-19T08:07:08.942236Z",
+    "stop_reason": "topic_exhausted",
+    "sealed_at": "2026-11-19T07:53:01.100960Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
