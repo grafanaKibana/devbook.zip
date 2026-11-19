@@ -9,13 +9,11 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Re-ranking"
 flashcard_uid: "16bb24ca"
 created: "2026-02-27T15:52:18.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-19T20:57:20.066Z"
 published: "2026-07-08T13:14:17.490Z"
 ---
 
-Re-ranking is a second-stage rescoring or reordering pass over candidates returned by [[Retrieval]]. It may use a cross-encoder or LLM, lexical scores such as BM25, rank fusion such as RRF, or a diversity rule such as MMR. First-stage retrieval is built for fast recall across a large corpus. The second stage has a narrower job: improve the short list before context reaches the generator.
-
-But it cannot recover evidence that the first stage missed.
+Re-ranking is a second-stage rescoring or reordering pass over candidates returned by [[Retrieval]]. It may use a cross-encoder or LLM, lexical scores such as BM25, rank fusion such as RRF, or a diversity rule such as MMR. First-stage retrieval is built for fast recall across a large corpus. The second stage has a narrower job: improve the short list before context reaches the generator. It cannot recover evidence that the first stage missed.
 
 First-stage retrieval, whether dense, sparse, or hybrid, might return 20–100 chunks under its initial score. A second stage applies the chosen model, lexical, fusion, or diversity signal. Only the reordered top-k continues to the generator.
 
@@ -135,7 +133,7 @@ Mitigation: the reranker is evaluated on domain query-document pairs before adop
 
 Reranking can only reorder what retrieval found. When the relevant document never enters the candidate set, the fix belongs in [[Chunking]], [[Embeddings|embedding model selection]], query expansion, or another first-stage decision. A stronger reranker cannot recover missing evidence.
 
-Diagnostic: low first-stage candidate Recall@N establishes an upstream ceiling. If Recall@N is high, demotion is established only when relevant evidence inside the first-stage top-k falls outside the reranked top-k at the same k. Low post-rerank Recall@k alone does not establish demotion: evidence can stay beyond k in both orders even after its rank improves, and such exclusion can occur even when the query needs no more relevant evidence than k can hold; on its own it does not show whether a larger k or a better ranking is the right repair.
+Diagnostic: low first-stage candidate Recall@N establishes an upstream ceiling. If Recall@N is high, demotion is established only when relevant evidence inside the first-stage top-k falls outside the reranked top-k at the same k. Low post-rerank Recall@k alone does not establish demotion, because relevant evidence can sit beyond k in both orders even after its rank improves. Such exclusion can occur even when k is large enough to hold all the evidence the query needs. Neither measurement alone shows whether a larger k or a better ranking is the right repair.
 
 # Tradeoffs
 
