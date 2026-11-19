@@ -19103,11 +19103,11 @@
     "version": 1,
     "id": "895ba07e431b4b1fb1f4b702293610c3",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-19T20:51:09.789366Z",
-    "elapsed_seconds": 494.0013147000001,
+    "elapsed_seconds": 518.9033088000001,
     "calls_reserved": 12,
-    "responses_received": 11,
+    "responses_received": 12,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Patterns/Sliding Window.md",
       "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md",
@@ -20737,7 +20737,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T20:59:23.790182Z",
+    "checkpoint_at": "2026-11-19T20:59:48.692176Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -59060,6 +59060,179 @@
       "Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-19T20:59:19.174005Z"
+    "prepared_at": "2026-11-19T20:59:19.174005Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md",
+            "verdict": "CLEAN",
+            "summary": "The note is accurate and coherent. The edit removes a redundant index-0 sentence that the next paragraph already covers in context with the unbounded variant. That is a small but real repetition fix, and no mechanism or condition is lost.",
+            "page_type": "Concept note with steptrace and complexity tabs. No Questions section, so there are no Qards. References are a single primary paper.",
+            "current_text_evidence": [
+              {
+                "quote": "Either way the window is `[bound/2, min(bound, n − 1)]`.",
+                "line_start": 33,
+                "reason": "The window conclusion now ends the invariant explanation without repeating the index-0 pre-check."
+              },
+              {
+                "quote": "Index `0` is handled before the loop, since `bound` starts at `1`: if `a[0] == target`, the answer is `0`.",
+                "line_start": 35,
+                "reason": "The pre-check is explained once, with its reason and result, so the removed sentence was redundant."
+              },
+              {
+                "quote": "The gallop maintains one fact through every iteration",
+                "line_start": 28,
+                "reason": "The invariant argument is correct and supports the window soundness claim. I traced the C# code, including the n/2 cap, and the lower edge still holds."
+              },
+              {
+                "quote": "On `[2, 100, 3, 4, 5]`, a search for `5` stops at index `1` because `100 >= 5`, brackets `[0, 1]`, and misses index `4`.",
+                "line_start": 65,
+                "reason": "The unsorted-input counterexample is correct and states the precondition limit clearly."
+              }
+            ],
+            "target_resolution": "RESOLVED",
+            "split_suggestion": "No split: the note covers one algorithm with its mechanism, complexity, and failure assumptions, and these parts are not independently useful.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [
+              {
+                "fingerprint": "3fd0195aebe22928e501b312bfc8cb752e99596494e9d6ed969ffb179cba4d58",
+                "equivalent": false,
+                "reason": "That rejected proposal renames a variable in a different note (Tarjan). The current edit removes a duplicated sentence here."
+              },
+              {
+                "fingerprint": "0edee5f0203803acc165c0049d2267a55596a7e6fe24fa880d7877062525177d",
+                "equivalent": false,
+                "reason": "That rejected proposal concerns a code-fence blank line in a different note."
+              },
+              {
+                "fingerprint": "244d8a0f13c2abb4f10f48aecb71e8b61b9b273f632444076a4815a9956f07d9",
+                "equivalent": false,
+                "reason": "That rejected proposal concerns a code comment in a different note."
+              },
+              {
+                "fingerprint": "27b8ff207ad19a6687a083b6a903afbf642cb7da722dcef9f41f92da607c9f84",
+                "equivalent": false,
+                "reason": "That rejected proposal concerns a code-fence blank line in a different note."
+              },
+              {
+                "fingerprint": "a84e9c6353348559fc2fa8be75d2d5183237375a59e0bfcbdd61e59fbfd9b75f",
+                "equivalent": false,
+                "reason": "That rejected proposal rewrites prose in a different note."
+              }
+            ],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The whole note was audited and is factually correct. The only defect was the duplicated index-0 statement, and the edit removes it without losing any mechanism or condition. No rejected proposal is equivalent to it.",
+        "change_checks": [
+          {
+            "edit_index": 0,
+            "verdict": "WORTHWHILE",
+            "reason": "The index-0 pre-check was stated twice in adjacent paragraphs. Removing the first mention keeps the fuller explanation next to the unbounded variant and leaves the window formula intact."
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md",
+          "citation_index": 3,
+          "reported_line_start": 65,
+          "resolved_line_start": 150
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md": "d614b562fb455aee75e2e708b2693d7fcf2260ba1c0f55f6d1fd35a5dcb68f59"
+      },
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md",
+          "verdict": "CLEAN",
+          "summary": "The note is accurate and coherent. The edit removes a redundant index-0 sentence that the next paragraph already covers in context with the unbounded variant. That is a small but real repetition fix, and no mechanism or condition is lost.",
+          "page_type": "Concept note with steptrace and complexity tabs. No Questions section, so there are no Qards. References are a single primary paper.",
+          "current_text_evidence": [
+            {
+              "quote": "Either way the window is `[bound/2, min(bound, n − 1)]`.",
+              "line_start": 33,
+              "reason": "The window conclusion now ends the invariant explanation without repeating the index-0 pre-check."
+            },
+            {
+              "quote": "Index `0` is handled before the loop, since `bound` starts at `1`: if `a[0] == target`, the answer is `0`.",
+              "line_start": 35,
+              "reason": "The pre-check is explained once, with its reason and result, so the removed sentence was redundant."
+            },
+            {
+              "quote": "The gallop maintains one fact through every iteration",
+              "line_start": 28,
+              "reason": "The invariant argument is correct and supports the window soundness claim. I traced the C# code, including the n/2 cap, and the lower edge still holds."
+            },
+            {
+              "quote": "On `[2, 100, 3, 4, 5]`, a search for `5` stops at index `1` because `100 >= 5`, brackets `[0, 1]`, and misses index `4`.",
+              "line_start": 150,
+              "reason": "The unsorted-input counterexample is correct and states the precondition limit clearly."
+            }
+          ],
+          "target_resolution": "RESOLVED",
+          "split_suggestion": "No split: the note covers one algorithm with its mechanism, complexity, and failure assumptions, and these parts are not independently useful.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [
+            {
+              "fingerprint": "3fd0195aebe22928e501b312bfc8cb752e99596494e9d6ed969ffb179cba4d58",
+              "equivalent": false,
+              "reason": "That rejected proposal renames a variable in a different note (Tarjan). The current edit removes a duplicated sentence here."
+            },
+            {
+              "fingerprint": "0edee5f0203803acc165c0049d2267a55596a7e6fe24fa880d7877062525177d",
+              "equivalent": false,
+              "reason": "That rejected proposal concerns a code-fence blank line in a different note."
+            },
+            {
+              "fingerprint": "244d8a0f13c2abb4f10f48aecb71e8b61b9b273f632444076a4815a9956f07d9",
+              "equivalent": false,
+              "reason": "That rejected proposal concerns a code comment in a different note."
+            },
+            {
+              "fingerprint": "27b8ff207ad19a6687a083b6a903afbf642cb7da722dcef9f41f92da607c9f84",
+              "equivalent": false,
+              "reason": "That rejected proposal concerns a code-fence blank line in a different note."
+            },
+            {
+              "fingerprint": "a84e9c6353348559fc2fa8be75d2d5183237375a59e0bfcbdd61e59fbfd9b75f",
+              "equivalent": false,
+              "reason": "That rejected proposal rewrites prose in a different note."
+            }
+          ],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The whole note was audited and is factually correct. The only defect was the duplicated index-0 statement, and the edit removes it without losing any mechanism or condition. No rejected proposal is equivalent to it.",
+      "change_checks": [
+        {
+          "edit_index": 0,
+          "verdict": "WORTHWHILE",
+          "reason": "The index-0 pre-check was stated twice in adjacent paragraphs. Removing the first mention keeps the fuller explanation next to the unbounded variant and leaves the window formula intact."
+        }
+      ]
+    }
   }
 }
