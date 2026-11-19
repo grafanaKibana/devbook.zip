@@ -18947,10 +18947,10 @@
     "version": 1,
     "id": "895ba07e431b4b1fb1f4b702293610c3",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "review_reserved",
     "started_at": "2026-11-19T20:51:09.789366Z",
-    "elapsed_seconds": 311.7967997999999,
-    "calls_reserved": 7,
+    "elapsed_seconds": 316.9774116,
+    "calls_reserved": 8,
     "responses_received": 7,
     "attempted_paths": [
       "Vault/Home/Computer Science/Algorithms/Patterns/Sliding Window.md",
@@ -20397,7 +20397,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-19T20:56:21.585665Z",
+    "checkpoint_at": "2026-11-19T20:56:26.766277Z",
     "topic": "Computer Science",
     "topic_id": "computer-science-445ddaa5",
     "current_batch": {
@@ -20422,7 +20422,7 @@
       "pr": null
     },
     "base_sha": "36628d4b1ae482b0f3c18ce0548af47dd2338277",
-    "reservation_deadline": "2026-11-19T21:11:08.511252Z",
+    "reservation_deadline": "2026-11-19T21:11:26.496717Z",
     "last_request": {
       "topic": "computer-science-445ddaa5",
       "generation": 5,
