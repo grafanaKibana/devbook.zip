@@ -323,7 +323,12 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
     var tabs = Array.from(tabsHost.querySelectorAll(".tabsdown__tab"));
     function reveal(panel) {
       var tab = tabs[panels.indexOf(panel)];
-      if (tab) tab.scrollIntoView({ block: "nearest", inline: "nearest" });
+      if (!tab) return;
+      var strip = tab.parentElement;
+      var visible = strip.getBoundingClientRect();
+      var box = tab.getBoundingClientRect();
+      if (box.left >= visible.left && box.right <= visible.right) return;
+      strip.scrollLeft += box.left - visible.left - (visible.width - box.width) / 2;
     }
     tabs.forEach(function (tab, index) { tab.dataset.count = panels[index].dataset.qiCount; });
     reveal(initialPanel);

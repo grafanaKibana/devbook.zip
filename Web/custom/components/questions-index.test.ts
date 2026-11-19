@@ -154,9 +154,14 @@ test("client mounts real Tabsdown topics and preserves hash-scoped navigation", 
   let mounted: any
   let destroyed = false
   const selections: Array<string | null> = []
-  const tabContents = [0, 1].map(() => ({
+  const strip = {
+    scrollLeft: 0,
+    getBoundingClientRect: () => ({ left: 0, right: 100, width: 100 }),
+  }
+  const tabContents = [0, 1].map((index) => ({
     dataset: {} as Record<string, string>,
-    scrollIntoView: () => {},
+    parentElement: strip,
+    getBoundingClientRect: () => ({ left: index * 200, right: index * 200 + 60, width: 60 }),
   }))
   const tabsHost = { querySelectorAll: () => tabContents }
 
@@ -263,6 +268,7 @@ test("client mounts real Tabsdown topics and preserves hash-scoped navigation", 
     tabContents.map((content) => content.dataset.count),
     ["4", "3"],
   )
+  assert.equal(strip.scrollLeft, 180)
   assert.equal(mounted.selection, "ai")
   assert.equal(ai.select.value, "ai/rag")
   assert.equal(

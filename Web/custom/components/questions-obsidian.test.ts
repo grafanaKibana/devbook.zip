@@ -486,7 +486,11 @@ test("QuestionTopics destroys before remount, preserves selection, and cleans up
   const panels = topics.map((topic) => ({ dataset: { topic: topic.name } }))
   const tabs = topics.map((topic) => ({
     dataset: {} as Record<string, unknown>,
-    scrollIntoView: () => {},
+    parentElement: {
+      scrollLeft: 0,
+      getBoundingClientRect: () => ({ left: 0, right: 100, width: 100 }),
+    },
+    getBoundingClientRect: () => ({ left: 0, right: 60, width: 60 }),
     focus: () => events.push(`focus:${topic.name}`),
   }))
   const root = { activeElement: tabs[1] }

@@ -4,7 +4,7 @@ tags: [FolderNote, MetricsIgnore]
 publish: true
 icon: circle-help
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-19T15:58:38.703Z"
+modified: "2026-11-19T16:03:21.743Z"
 published: "2026-07-05T17:03:01.458Z"
 ---
 
@@ -59,15 +59,22 @@ class QuestionTopics extends dc.preact.Component {
     host.querySelectorAll(".tabsdown__tab").forEach((tab, index) => {
       const topic = this.props.topics[index];
       tab.dataset.count = topic?.count ?? "";
-      if (topic?.name === this.props.selection) {
-        tab.scrollIntoView({ block: "nearest", inline: "nearest" });
-      }
+      if (topic?.name === this.props.selection) this.reveal(tab);
     });
     if (this.focusedTopic) {
       const index = this.props.topics.findIndex((topic) => topic.name === this.focusedTopic);
       host.querySelectorAll(".tabsdown__tab")[index]?.focus();
       this.focusedTopic = null;
     }
+  }
+
+  // scrollIntoView would also scroll the page back up to the tabs.
+  reveal(tab) {
+    const strip = tab.parentElement;
+    const visible = strip.getBoundingClientRect();
+    const box = tab.getBoundingClientRect();
+    if (box.left >= visible.left && box.right <= visible.right) return;
+    strip.scrollLeft += box.left - visible.left - (visible.width - box.width) / 2;
   }
 
   componentDidMount() {
