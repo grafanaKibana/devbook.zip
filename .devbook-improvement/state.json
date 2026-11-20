@@ -20153,9 +20153,9 @@
     "version": 1,
     "id": "7c74b21713b8477fad684bf4b97fc256",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-20T20:35:17.360033Z",
-    "elapsed_seconds": 655.4741389000001,
+    "elapsed_seconds": 662.496651,
     "calls_reserved": 15,
     "responses_received": 15,
     "attempted_paths": [
@@ -20164,7 +20164,8 @@
       "Vault/Home/Networks/Protocols/DNS.md",
       "Vault/Home/Networks/Protocols/GraphQL.md",
       "Vault/Home/Networks/Protocols/gRPC.md",
-      "Vault/Home/Networks/Protocols/HTTP 2.md"
+      "Vault/Home/Networks/Protocols/HTTP 2.md",
+      "Vault/Home/Networks/Protocols/HTTP.md"
     ],
     "accepted_records": [
       {
@@ -22010,10 +22011,83 @@
           },
           "model_calls": 13
         }
+      },
+      {
+        "path": "Vault/Home/Networks/Protocols/HTTP.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Networks/Protocols/HTTP.md",
+                "outcome": "keep",
+                "reason": "Audited the whole note against RFC 9110, RFC 9111 and RFC 8446. The method table (safe and idempotent flags, PATCH depends on the patch, DELETE and PUT idempotent) matches RFC 9110. The status table is consistent with the RFCs: 422 is Unprocessable Content, 428 and 412 are used correctly in the If-Match flow, and 503 is described correctly. The caching section is accurate: no-cache permits storage, private and s-maxage behave as described, 304 handling is right, If-None-Match takes precedence over If-Modified-Since, and Vary and Authorization reuse are described correctly. The TLS 1.3 handshake, 0-RTT replay, HSTS and interception explanations are correct. The .NET section is accurate: the default request version is 1.1, the three HttpVersionPolicy values are right, and PooledConnectionLifetime and SocketsHttpHandler behave as described. The C# sample states its limits explicitly. The single Qard card tests one coherent idempotency task, and its answer matches the RFC. There are no known violations, and the ordering, terminology and depth are sound. Any edit would be cosmetic churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/Networks/Protocols/HTTP.md",
+                "verdict": "CLEAN",
+                "summary": "The whole note was read and checked against RFC 9110, RFC 9111, RFC 8446 and .NET HttpClient behavior. It is accurate, well ordered and carries mechanisms plus conditions, so an unchanged keep is justified. The single Qard tests one coherent task and keeps its ID.",
+                "page_type": "Concept — typed frontmatter, optional Questions and References present and valid. Protected Qard ID and qard-deck/qard-topic metadata are intact. The csharp, http and text fences all have language identifiers.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Idempotency describes the intended server effect of repeated identical requests, not identical responses or freedom from races.",
+                    "line_start": 33,
+                    "reason": "States the correct RFC 9110 meaning of idempotency and the lost-response conditional PUT boundary (412 on retry)."
+                  },
+                  {
+                    "quote": "`If-None-Match` takes precedence over `If-Modified-Since` when both are present.",
+                    "line_start": 152,
+                    "reason": "Caching precedence rule is accurate per RFC 9110/9111; the cache-key, Vary and Authorization paragraphs are also correct."
+                  },
+                  {
+                    "quote": "HTTP method idempotency alone is insufficient.",
+                    "line_start": 194,
+                    "reason": "Correctly explains 0-RTT replay risk beyond method semantics, matching RFC 8446 guidance."
+                  },
+                  {
+                    "quote": "The default request version remains HTTP/1.1.",
+                    "line_start": 238,
+                    "reason": "Accurate for HttpClient.DefaultRequestVersion. The three HttpVersionPolicy values are described correctly."
+                  },
+                  {
+                    "quote": "What does HTTP idempotency guarantee about retrying a request?",
+                    "line_start": 267,
+                    "reason": "One bounded, independently gradeable recall task. The answer states its limits and cites RFC 9110 on the answer side."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the sections (method semantics, fields and conditionals, caching, TLS, .NET client) all serve one HTTP operating picture and cross-reference each other. Splitting by topic would be optional rather than needed. Caching and TLS could separate later if the note grows.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "No edits were proposed, and the independent whole-note audit found no factual, structural, question-quality or rule violations. The keep is justified with current-text evidence.",
+            "change_checks": []
+          },
+          "model_calls": 15
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-20T20:46:12.833691Z",
+    "checkpoint_at": "2026-11-20T20:46:19.856203Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
