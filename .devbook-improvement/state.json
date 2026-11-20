@@ -20153,11 +20153,11 @@
     "version": 1,
     "id": "7c74b21713b8477fad684bf4b97fc256",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-20T20:35:17.360033Z",
-    "elapsed_seconds": 691.0476123000001,
+    "elapsed_seconds": 700.0773163000001,
     "calls_reserved": 16,
-    "responses_received": 15,
+    "responses_received": 16,
     "attempted_paths": [
       "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
       "Vault/Home/Networks/OSI Model.md",
@@ -22087,7 +22087,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-20T20:46:48.407164Z",
+    "checkpoint_at": "2026-11-20T20:46:57.436868Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
@@ -64638,5 +64638,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "7c74b21713b8477fad684bf4b97fc256",
+    "topic_id": "networks-ab2c47c3",
+    "batch": {
+      "topic": "Networks",
+      "topic_id": "networks-ab2c47c3",
+      "notes": [
+        {
+          "path": "Vault/Home/Networks/Protocols/Live Streaming.md",
+          "content": "---\ntopic: [Networks]\nsubtopic: [Protocols]\nsummary: \"The ingest, transcoding, packaging, CDN, and playback path for live adaptive video.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: In Progress\npublish: true\ncreated: \"2026-07-18T07:07:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-16T14:12:14.050Z\"\n---\n\nLive streaming distributes media while it is still being captured. The usual path is **ingest → transcode → package → origin → CDN → player**. Latency accumulates at every boundary, especially where a stage waits for a keyframe, segment, network response, or playback buffer.\n\nHTTP adaptive streaming scales well because manifests and media objects can pass through ordinary CDNs. Interactive broadcasts need a shorter feedback loop. WebRTC can reach sub-second targets, but it replaces cache-friendly objects with stateful media sessions and a different cost model.\n\n# End-to-End Path\n\n1. **Capture and ingest.** The encoder compresses source media and sends a contribution feed to an ingest edge. RTMP remains common in encoder tooling. SRT adds recovery for unreliable contribution paths. WHIP standardizes the HTTP signaling used to establish a WebRTC ingest session. WebRTC carries the media.\n2. **Transcode.** The service produces a bitrate ladder, perhaps 1080p at 6 Mb/s, 720p at 3 Mb/s, and 480p at 1.2 Mb/s. Renditions need aligned timelines and keyframes so a player can switch cleanly.\n3. **Package.** The packager writes manifests and addressable media units. HLS uses playlists. MPEG-DASH uses an MPD. Compatible codec, encryption, and profile choices can let both reference the same CMAF fragmented-MP4 objects.\n4. **Origin and CDN.** The origin exposes the current manifest and media. CDN edges cache immutable objects and can collapse simultaneous misses when the provider supports and enables request coalescing, keeping viewer fan-out away from the packager.\n5. **Player.** The player estimates available throughput against buffer health, chooses a rendition, and changes quality before the buffer empties.\n\n```text\ncamera -> encoder -> ingest -> transcoder -> packager -> origin -> CDN edge -> player\n                          \\-> archive/object storage -> replay/VOD manifest\n```\n\n# Latency Is a Budget\n\nA player cannot achieve sub-second glass-to-glass latency while waiting for whole multi-second segments. Encoding, publication, CDN retrieval, and the playback buffer each consume part of the budget. Short segments reduce one delay and create others: more requests, more manifest updates, smaller cache objects, and less room to absorb jitter.\n\nLow-Latency HLS and low-latency DASH expose partial media before a full segment closes. They keep HTTP distribution while tightening encoder, packager, CDN, and player behavior. WebRTC sends media continuously and adapts to congestion on an interactive timescale. Calls, auctions, and remote control often need that path despite its stateful per-viewer cost.\n\n# Protocol Compatibility\n\n| Protocol | Typical role | Browser/device boundary |\n| --- | --- | --- |\n| RTMP | Encoder-to-ingest contribution | Not a modern browser playback protocol. Retain it where encoder support matters |\n| SRT | Loss-tolerant contribution over uncontrolled networks | Common between encoders and media infrastructure, not native browser playback |\n| HLS | Adaptive HTTP playback | Native on Apple platforms. Other browsers commonly use Media Source Extensions through a JavaScript player |\n| MPEG-DASH | Adaptive HTTP playback | Common through Media Source Extensions. Safari support depends on player and codec/container choices |\n| WebRTC with HTTP signaling such as WHIP for ingest | Interactive ingest or playback | Browser-native media stack with sub-second goals. Harder CDN economics and per-session state |\n\nManifest support does not prove playback support. The device must also accept the selected codec and profile, container, encryption scheme, captions, and DRM system.\n\n# Failure Boundaries\n\n- Keep the last valid manifest available briefly during a packager restart. Publishing an empty or malformed live manifest can disconnect the whole audience.\n- Measure capture-to-playback time. CDN request latency covers only one stage.\n- Failover encoders must preserve monotonic timestamps and aligned keyframes.\n- Bound ingest queues. Under overload, dropping frames or shedding a rendition is safer than allowing live latency to grow without limit.\n- Replay finalization should fail independently from the live path so a storage outage does not stop the broadcast.\n\n# References\n\n- [HTTP Live Streaming](https://www.rfc-editor.org/rfc/rfc8216)\n- [Media Source Extensions](https://www.w3.org/TR/media-source-2/)\n- [WebRTC-HTTP Ingestion Protocol](https://www.rfc-editor.org/rfc/rfc9725)\n- [Common Media Application Format](https://www.iso.org/standard/85623.html)\n",
+          "hash": "20a30f70c4105bd2e661f2a2d5718f569db70792d1d67b2f7e67a4c8210f52d1",
+          "topic": "Networks",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Networks/Protocols/Live Streaming.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against the current text and standards knowledge. The pipeline (ingest, transcode, package, origin, CDN, player) is ordered correctly. RTMP and SRT are described as contribution protocols. WHIP is correctly described as HTTP signaling for WebRTC ingest (RFC 9725). HLS and DASH can share CMAF fragmented-MP4 objects. LL-HLS and low-latency DASH deliver partial segments. The compatibility table separates manifest support from codec, DRM and container support. The failure-boundary advice is sound, and the references are real primary sources. The note has no Qard cards and no known violations, and its prose is clear and compact. I found no defect that justifies an edit."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Networks/Protocols/Live Streaming.md": "20a30f70c4105bd2e661f2a2d5718f569db70792d1d67b2f7e67a4c8210f52d1"
+    },
+    "feedback_keys": [],
+    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Networks/Protocols/Live Streaming.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-20T20:46:57.436858Z"
+  }
 }
