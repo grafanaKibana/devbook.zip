@@ -20033,9 +20033,9 @@
     "version": 1,
     "id": "7c74b21713b8477fad684bf4b97fc256",
     "status": "active",
-    "phase": "validation_reserved",
+    "phase": "validation_completed",
     "started_at": "2026-11-20T20:35:17.360033Z",
-    "elapsed_seconds": 463.7027148000001,
+    "elapsed_seconds": 481.57264340000006,
     "calls_reserved": 11,
     "responses_received": 11,
     "attempted_paths": [
@@ -20284,7 +20284,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-20T20:43:01.062263Z",
+    "checkpoint_at": "2026-11-20T20:43:18.932193Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
