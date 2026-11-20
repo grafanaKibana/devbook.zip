@@ -19873,20 +19873,18 @@
   },
   "focused_workload": {
     "version": 1,
-    "id": "89de68a70970474f8de5ed8e10a79c4c",
-    "status": "sealed",
-    "phase": "sealed",
-    "started_at": "2026-11-20T07:33:56.635348Z",
-    "elapsed_seconds": 11.825002300000001,
+    "id": "7c74b21713b8477fad684bf4b97fc256",
+    "status": "active",
+    "phase": "selecting",
+    "started_at": "2026-11-20T20:35:17.360033Z",
+    "elapsed_seconds": 0.0010243,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-20T07:34:08.459771Z",
-    "stop_reason": "awaiting_export",
-    "sealed_at": "2026-11-20T07:34:08.459787Z"
+    "checkpoint_at": "2026-11-20T20:35:17.360695Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
@@ -38067,6 +38065,23 @@
       "summary": "## 1. Note improvements\n\nReviewed 9 notes in Computer Science; improved 2. Calls: 19; elapsed: 914 seconds; stop: call_limit.\n\n- [`Computer Science/Algorithms/Patterns/Top-K Elements.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-computer-science-445ddaa5-g5/Vault/Home/Computer%20Science/Algorithms/Patterns/Top-K%20Elements.md) — The Mermaid node label contains unquoted parentheses inside square brackets, which Mermaid's flowchart parser can reject, leaving the diagram unrendered. Quotes the node label so the parentheses in min(k,n) are not parsed as Mermaid node-shape syntax. The flowchart renders reliably and shows the terminal state of the scan.\n- [`Computer Science/Algorithms/Search Algorithms/Exponential Search.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-computer-science-445ddaa5-g5/Vault/Home/Computer%20Science/Algorithms/Search%20Algorithms/Exponential%20Search.md) — The index-0 pre-check is stated twice within two paragraphs of the Visualization tab. The index-0 pre-check is stated again in the next paragraph, so the first mention is removed. Less repetition; the pre-check is explained once, alongside the unbounded variant.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz export: awaiting the source-bound native export and checks.\n",
       "diff": "diff --git a/Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md b/Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md\nindex a4a9686..1972bb8 100644\n--- a/Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md\t\n+++ b/Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md\t\n@@ -7,7 +7,7 @@ priority: Medium\n status: New\n publish: true\n created: \"2026-07-10T06:24:36.000Z\"\n-modified: \"2026-11-12T10:29:34.513Z\"\n+modified: \"2026-11-19T20:53:16.606Z\"\n published: \"2026-07-10T05:59:31.416Z\"\n ---\n \n@@ -108,7 +108,7 @@ For known-size input with `k ≥ n`, return every value and skip the heap. Sort\n > ```mermaid\n > flowchart TD\n >   A[Empty min-heap, capacity k] --> B{More input}\n->   B -->|No| Z[Heap holds the largest min(k,n) values]\n+>   B -->|No| Z[\"Heap holds the largest min(k,n) values\"]\n >   B -->|Yes| C[Read next element x]\n >   C --> D{Heap size less than k}\n >   D -->|Yes| E[Push x]\ndiff --git a/Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md b/Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md\nindex 2faf9ba..3371d97 100644\n--- a/Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md\t\n+++ b/Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md\t\n@@ -7,7 +7,7 @@ priority: Medium\n status: New\n publish: true\n created: \"2026-07-10T06:24:36.000Z\"\n-modified: \"2026-11-12T10:29:34.513Z\"\n+modified: \"2026-11-19T20:59:19.174Z\"\n published: \"2026-07-10T05:55:53.168Z\"\n ---\n \n@@ -30,7 +30,7 @@ The gallop maintains one fact through every iteration: as long as the loop conti\n - `a[bound] >= target`: the current probe reached or passed the target. The previous probe, `bound/2`, was the last index the loop confirmed as `a[bound/2] < target`, so the target lies in `[bound/2, bound]`.\n - `bound >= n`: the probe galloped past the end before catching the target. The last confirmed `a[bound/2] < target` still holds, so the target, if present, lies in `[bound/2, n − 1]`.\n \n-Either way the window is `[bound/2, min(bound, n − 1)]`. Index `0` is checked before the gallop because `bound` starts at `1`.\n+Either way the window is `[bound/2, min(bound, n − 1)]`.\n \n The unbounded, indexable variant never references `n`. It generates the indices it probes (`1, 2, 4, …`) and asks only \"is `a[bound]` still below the target?\" An unknown-length finite source must also report that a probe is past the end so the high bound can be clamped to the last valid index. Index `0` is handled before the loop, since `bound` starts at `1`: if `a[0] == target`, the answer is `0`.\n \n",
       "question_changes": []
+    },
+    "89de68a70970474f8de5ed8e10a79c4c": {
+      "version": 1,
+      "id": "89de68a70970474f8de5ed8e10a79c4c",
+      "status": "sealed",
+      "phase": "sealed",
+      "started_at": "2026-11-20T07:33:56.635348Z",
+      "elapsed_seconds": 11.825002300000001,
+      "calls_reserved": 0,
+      "responses_received": 0,
+      "attempted_paths": [],
+      "accepted_records": [],
+      "outcomes": [],
+      "feedback_pr": 0,
+      "checkpoint_at": "2026-11-20T07:34:08.459771Z",
+      "stop_reason": "awaiting_export",
+      "sealed_at": "2026-11-20T07:34:08.459787Z"
     }
   },
   "feedback_workloads": {
