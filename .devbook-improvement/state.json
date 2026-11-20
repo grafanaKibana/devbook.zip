@@ -19848,16 +19848,30 @@
     "version": 1,
     "id": "7c74b21713b8477fad684bf4b97fc256",
     "status": "active",
-    "phase": "author_completed",
+    "phase": "selecting",
     "started_at": "2026-11-20T20:35:17.360033Z",
-    "elapsed_seconds": 129.2680937,
+    "elapsed_seconds": 134.4694193,
     "calls_reserved": 3,
     "responses_received": 3,
-    "attempted_paths": [],
+    "attempted_paths": [
+      "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md"
+    ],
     "accepted_records": [],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+        "outcome": "proposal_blocked",
+        "reason": "source URL missing from owning note: https://www.bittorrent.org/beps/bep_0005.html",
+        "result": {
+          "status": "proposal_blocked",
+          "stage": "deterministic_application",
+          "reason": "source URL missing from owning note: https://www.bittorrent.org/beps/bep_0005.html",
+          "model_calls": 3
+        }
+      }
+    ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-20T20:37:26.627640Z",
+    "checkpoint_at": "2026-11-20T20:37:31.828968Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
