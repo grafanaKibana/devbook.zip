@@ -322,7 +322,34 @@ test("missing or unrelated promotion status cannot outlive the bounded deadline"
   }
 })
 
-test("skipped promotion requires the intended alias and fixed OIDC marker", async () => {
+test("a repointed alias may serve the previous build briefly, but not past the bound", async (t) => {
+  let now = 0
+  t.mock.method(Date, "now", () => now)
+  const stale = { source: "c".repeat(40), native }
+  const served = (markers, onMarker = () => {}) => {
+    const f = productionFixture([promotion("skipped")])
+    let fetches = 0
+    const fetch = async (url, request) => {
+      const response = await f.options.fetch(url, request)
+      if (new URL(url).hostname !== "devbook.zip") return response
+      onMarker(++fetches)
+      return { ok: true, json: async () => markers[Math.min(fetches, markers.length) - 1] }
+    }
+    return { options: { ...f.options, fetch, markerRetryMs: 0 }, count: () => fetches }
+  }
+
+  const settling = served([stale, stale, { source, native }])
+  await publishDeployment(settling.options)
+  assert.equal(settling.count(), 3)
+
+  const stuck = served([stale], (fetches) => { if (fetches === 2) now = 60000 })
+  await assert.rejects(publishDeployment(stuck.options), /build identity mismatch/)
+  assert.equal(stuck.count(), 2)
+})
+
+test("skipped promotion requires the intended alias and fixed OIDC marker", async (t) => {
+  let now = 0
+  t.mock.method(Date, "now", () => now)
   const f = productionFixture([promotion("skipped")])
   await publishDeployment(f.options)
   assert.ok(f.calls.some(({ url, request }) => url.hostname === "devbook.zip" && request.headers["x-vercel-trusted-oidc-idp-token"] === "short-lived-http"))
@@ -330,6 +357,7 @@ test("skipped promotion requires the intended alias and fixed OIDC marker", asyn
   await assert.rejects(publishDeployment(f.options), /alias/)
   f.alias.deploymentId = "dpl_one"
   f.marker.source = "c".repeat(40)
+  now = 60000
   await assert.rejects(publishDeployment(f.options), /build identity mismatch/)
 })
 

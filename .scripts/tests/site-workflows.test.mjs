@@ -27,6 +27,7 @@ test("required ci aggregates an actual secret-free candidate export and Quartz b
   assert.equal(site.permissions.contents, "read")
   const commands = job.steps.map((step) => step.run ?? "").join("\n")
   assert.match(commands, /site export/)
+  assert.match(commands, /--timeout-seconds 1200/)
   assert.match(commands, /site verify/)
   assert.ok(job.steps.some((step) => step.run?.includes("site verify") && step.run.includes("--extract")))
   assert.match(commands, /npm run build/)

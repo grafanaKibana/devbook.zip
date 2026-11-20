@@ -224,16 +224,76 @@
       "reply": "Right."
     },
     {
-      "asks": []
+      "asks": [],
+      "answer": {
+        "text": "In a route, instead of replacing null with 0, check if null, and if it is null, do not just auto apptove, either review, or reject this value with logging warning. It should break the chain and do not continue toward step 3",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "In a route, instead of replacing null with 0, check if null",
+            "kind": "correct",
+            "note": "You test for a null amount at the start of the route step, so the check runs after extraction and before the amount is used. You also reject the null-to-0 substitution."
+          },
+          {
+            "quote": "either review, or reject this value with logging warning",
+            "kind": "correct",
+            "note": "Review, reject and logging are explicit failure branches, not a silent fill-in."
+          },
+          {
+            "quote": "It should break the chain and do not continue toward step 3",
+            "kind": "correct",
+            "note": "Stopping the chain keeps the null amount from reaching routing and drafting."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "You put a deterministic null check at the route entry and sent failures to review or rejection with a log, so the claim no longer gets auto-approved.",
+        "score": 3
+      },
+      "reply": "Correct. The check runs on the `amount` field before routing uses it. It tests for null and sends the claim to review or rejection with a warning. It does not substitute 0. Because the chain stops there, the draft stage never sees bad data. Next, consider what a gate like this can't catch: a wrong but non-null amount."
     },
     {
-      "asks": []
+      "asks": [],
+      "answer": {
+        "choice": 1,
+        "confidence": "sure"
+      },
+      "mark": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      },
+      "reply": "Right."
     },
     {
-      "asks": []
+      "asks": [],
+      "answer": {
+        "choice": 1,
+        "confidence": "sure"
+      },
+      "mark": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      },
+      "reply": "Right."
     }
   ],
-  "current": 1,
+  "current": 3,
   "probe": {
     "questions": [],
     "answers": {},
@@ -267,5 +327,30 @@
     ]
   },
   "stepsFor": "[\"When to split a task into calls\",\"You start with no evidence on this objective and a shaky reasoning-budget prerequisite. The lesson begins with the test for a real chain boundary, then covers errors that propagate across stages. It then covers instructions smuggled between calls, and ends on a split-or-not decision that weighs latency against control. Meta prompting and generated knowledge are outside this objective.\",[[\"What makes a chain boundary real\",\"Explain when an intermediate output deserves its own call: it has a schema, can be validated, and changes the next step; this introduces the contrast with splitting one vague prompt into several, and leaves failure handling for later steps.\"],[\"Error propagation and gating\",\"Trace how a bad extraction such as a null error code corrupts later stages, and place a deterministic check that stops the chain; this builds on a real boundary and leaves a calibrated confidence score aside.\"],[\"Instruction smuggling across calls\",\"Explain how untrusted text copied into a later call can act as an instruction, and why delimiters are not a security boundary; this uses the chain stages from before and introduces minimal structured fields and rules kept outside the data.\"],[\"Split or single prompt decision\",\"Decide for a new task whether to chain, naming the validation points, added latency and cost, and the single-prompt baseline; this combines the earlier steps and is the lesson's goal.\"]]]",
-  "accepted": true
+  "accepted": true,
+  "finishedAt": 1795123032518,
+  "close": {
+    "summary": "The lesson covered prompt chaining from **Prompt Composition**. It began with the test for a real chain boundary: an intermediate result that code can check and that decides the next step. It then covered errors that propagate. A failed check stops the chain, and the failed call can be retried with the validation error or passed to a person. A field that is allowed to be missing, such as a null order number, is not a failure. Anything the extraction leaves out is lost to every later call. Next came instruction smuggling, where customer text copied between prompts can be followed as an instruction. The defence is to check hand-off values against an allowed set. The lesson ended with a split-or-not decision that weighed added latency and tokens against control. High stakes alone do not justify a split, and a chain is kept only if it beats a single-prompt baseline end to end.\n\nThe student passed all six checks (1/1, 3/3, 1/1, 1/1) and was sure each time. The objective went from no evidence to solid. The shaky reasoning-budget prerequisite was not tested, so it is still open.",
+    "cards": [
+      {
+        "front": "What makes a prompt-chain boundary worth adding?",
+        "back": "A result in the middle of the task that code can check and that decides the next step. If nothing there can be checked, the split only adds calls, latency and tokens. High stakes alone do not justify it."
+      },
+      {
+        "front": "In a chain, why must the extraction call's JSON keys cover everything later calls need?",
+        "back": "Later calls see only the JSON. Any detail the extraction leaves out is lost for the rest of the chain."
+      },
+      {
+        "front": "How can customer text smuggle an instruction into a later call of a chain, and how does code block it?",
+        "back": "The chain copies text from one prompt into the next. A sentence the customer wrote can reach a later prompt, and the model may follow it as an instruction. Code checks each hand-off value against an allowed set, such as the valid labels, and stops the chain if the value matches none of them."
+      },
+      {
+        "front": "What should code do when a check between chain calls fails, and when is a missing value not a failure?",
+        "back": "Stop the chain so the bad result never reaches later calls. Then retry that call once with the validation error added to the prompt, or pass the case to a person. A missing value is not a failure if the schema allows null, such as a missing order number. In that case, ask the customer for the value before the chain continues."
+      }
+    ],
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-19 Split a task into inspectable calls only where intermediate .md",
+    "nextCheck": "2026-11-22"
+  }
 }

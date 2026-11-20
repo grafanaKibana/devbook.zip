@@ -11,14 +11,14 @@ public static class SiteCommand
     {
         if (args.Length == 0 || args.Contains("--help"))
         {
-            Console.WriteLine("site export --expected-head <sha> --app-bundle <Obsidian.app> --output <directory> [--repo-root <root>]\nsite verify --expected-head <sha> --bundle <bundle.json> [--extract] [--repo-root <root>]\nsite preview [--app-bundle <Obsidian.app>] [--port 8085] [--no-serve] [--repo-root <root>]");
+            Console.WriteLine("site export --expected-head <sha> --app-bundle <Obsidian.app> --output <directory> [--timeout-seconds 600] [--repo-root <root>]\nsite verify --expected-head <sha> --bundle <bundle.json> [--extract] [--repo-root <root>]\nsite preview [--app-bundle <Obsidian.app>] [--port 8085] [--no-serve] [--repo-root <root>]");
             return args.Length == 0 ? 2 : 0;
         }
         try
         {
             var values = new Dictionary<string, string>(StringComparer.Ordinal);
             var flags = new HashSet<string>(StringComparer.Ordinal);
-            string[] valid = ["--repo-root", "--expected-head", "--app-bundle", "--output", "--bundle", "--port"];
+            string[] valid = ["--repo-root", "--expected-head", "--app-bundle", "--output", "--bundle", "--port", "--timeout-seconds"];
             for (var index = 1; index < args.Length; index++)
             {
                 if (args[index] is "--extract" or "--no-serve")
@@ -34,7 +34,7 @@ public static class SiteCommand
             }
             string[] accepted = args[0] switch
             {
-                "export" => ["--repo-root", "--expected-head", "--app-bundle", "--output"],
+                "export" => ["--repo-root", "--expected-head", "--app-bundle", "--output", "--timeout-seconds"],
                 "verify" => ["--repo-root", "--expected-head", "--bundle"],
                 "preview" => ["--repo-root", "--app-bundle", "--port"],
                 _ => throw new UnsafeInput("Unknown site command.")
@@ -46,6 +46,8 @@ public static class SiteCommand
             {
                 if (flags.Count != 0) throw new UnsafeInput("Unsupported site export flag.");
                 string head = Bundle.ExactHead(values["--expected-head"]);
+                int timeoutSeconds = int.Parse(values.GetValueOrDefault("--timeout-seconds", "600"), System.Globalization.CultureInfo.InvariantCulture);
+                if (timeoutSeconds is < 1 or > 1800) throw new UnsafeInput("Export timeout must be between 1 and 1800 seconds.");
                 ProcessResult status = await new SystemProcessRunner().RunAsync(new ProcessRequest("git",
                     ["status", "--porcelain", "--untracked-files=all"], root,
                     new Dictionary<string, string> { ["GIT_OPTIONAL_LOCKS"] = "0" }));
@@ -59,7 +61,7 @@ public static class SiteCommand
                 using var owned = new OwnedExportCheckout("devbook-site-export-");
                 Git.Run(root, "clone", "--no-hardlinks", "--quiet", root, owned.Root);
                 Git.Run(owned.Root, "checkout", "--quiet", "--detach", head);
-                if (renderCheckout is null) await Desktop.ExportCheckoutAsync(owned.Root, head, values["--app-bundle"]);
+                if (renderCheckout is null) await Desktop.ExportCheckoutAsync(owned.Root, head, values["--app-bundle"], timeoutSeconds);
                 else await renderCheckout(owned.Root, head, values["--app-bundle"]);
                 JsonObject bundle = Bundle.FromCheckout(owned.Root, 0, "", head);
                 Bundle.ValidateInputs(bundle, inputs);

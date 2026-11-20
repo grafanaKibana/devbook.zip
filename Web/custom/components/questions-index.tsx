@@ -178,7 +178,12 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
     const renderSections = (node: TreeNode, trail: string[]): any[] => [
       <section id={node.slugId} class="qi-section" data-qi-path={node.path}>
         {node.items.length > 0 && trail.length > 1 && (
-          <h3 class="qi-section-title">{trail.slice(1).join(" / ")}</h3>
+          <h3 class="qi-section-title">
+            {trail.slice(1, -1).map((parent) => (
+              <span class="qi-crumb">{parent}</span>
+            ))}
+            {trail[trail.length - 1]}
+          </h3>
         )}
         {renderGroups(node.items)}
       </section>,
@@ -242,12 +247,17 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
 .questions-index .tabsdown__tab[data-count]::after { content: attr(data-count); margin-inline-start: 0.4em; color: var(--gray); font-size: 0.85em; font-weight: 400; font-variant-numeric: tabular-nums; }
 .questions-index .qi-path { margin: 0.5rem 0 1rem; color: var(--darkgray); font-size: 0.85rem; overflow-wrap: anywhere; }
 .questions-index .qi-section { scroll-margin-top: 2rem; }
-.questions-index .qi-section-title { font-size: 1rem; margin: 1.5rem 0 0.5rem; }
-.questions-index .qi-group + .qi-group { padding-top: 1rem; }
+.questions-index .qi-section:has(.qi-section-title) { margin-top: 2.25rem; padding-top: 1.25rem; border-top: 1px solid var(--lightgray); }
+.questions-index .qi-section-title { display: flex; flex-wrap: wrap; align-items: baseline; margin: 0 0 0.875rem; font-size: 1.2rem; line-height: 1.3; }
+.questions-index .qi-crumb { color: var(--darkgray); font-weight: 400; }
+.questions-index .qi-crumb::after { content: "/"; margin-inline: 0.45em; color: var(--gray); }
+.questions-index .qi-group + .qi-group { padding-top: 1.25rem; }
 .questions-index .qi-item:has(+ .qi-item) { border-bottom: 1px solid var(--lightgray); }
-.questions-index .qi-source { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--darkgray); }
+.questions-index .qi-source { margin-bottom: 0.25rem; font-size: 0.8rem; }
 .questions-index a.internal { padding-block: 0.1rem; }
-.questions-index .qi-source a.internal { padding-inline: 0; background: none; color: inherit; }
+.questions-index .qi-source a.internal { display: inline-block; padding: 0.1rem 0.55rem; }
+.questions-index .qi-source a.internal:hover { background-color: color-mix(in srgb, var(--secondary) 18%, transparent); text-decoration: none; }
+.questions-index .qi-source a.internal:focus-visible { outline: 2px solid var(--secondary); outline-offset: 2px; }
 @container (max-width: 510px) {
   .questions-index .qi-scope-control, .questions-index .qi-scope-control select { width: 100%; max-width: none; }
 }

@@ -265,12 +265,17 @@ async function verifiedDeployment(options) {
   return deployment
 }
 
-async function verifyMarker(options, domain) {
+async function verifyMarker(options, domain, settleMs = 0) {
   if (typeof options.oidcToken !== "string" || !options.oidcToken.trim()) throw new Error("Missing protected deployment OIDC token")
-  const marker = await request(options, `https://${domain}/.well-known/devbook-build.json?source=${options.source}&native=${options.native}`, {
-    headers: { "cache-control": "no-cache, no-store", "x-vercel-trusted-oidc-idp-token": options.oidcToken }, redirect: "error",
-  })
-  if (marker.source !== options.source || marker.native !== options.native) throw new Error("Served site build identity mismatch")
+  const deadline = Date.now() + settleMs
+  while (true) {
+    const marker = await request(options, `https://${domain}/.well-known/devbook-build.json?source=${options.source}&native=${options.native}`, {
+      headers: { "cache-control": "no-cache, no-store", "x-vercel-trusted-oidc-idp-token": options.oidcToken }, redirect: "error",
+    })
+    if (marker.source === options.source && marker.native === options.native) return
+    if (Date.now() >= deadline) throw new Error("Served site build identity mismatch")
+    await new Promise((resolve) => setTimeout(resolve, options.markerRetryMs ?? 2000))
+  }
 }
 
 export async function verifyDeployment(options) {
@@ -279,7 +284,8 @@ export async function verifyDeployment(options) {
   const domain = targets[options.target].domain
   const alias = await request(options, apiUrl(options, `/v4/aliases/${domain}`), { headers: authorization(options) })
   if (alias.deploymentId !== deployment.id || alias.projectId !== options.project) throw new Error("Environment alias does not point to the verified deployment")
-  await verifyMarker(options, domain)
+  // A repointed alias can serve the previous build for a moment.
+  await verifyMarker(options, domain, 60000)
 }
 
 export function deploymentFromOutput(text) {

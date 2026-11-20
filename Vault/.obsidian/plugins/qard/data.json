@@ -2571,7 +2571,6 @@
       8092
     ],
     "tutor|claude-code|sonnet": [
-      13720,
       11967,
       15340,
       12738,
@@ -2579,7 +2578,8 @@
       10858,
       12770,
       12514,
-      12304
+      12304,
+      13951
     ],
     "close|claude-code|opus": [
       21671,
@@ -2588,10 +2588,10 @@
       92838,
       50051,
       19964,
-      69264
+      69264,
+      54091
     ],
     "check-write|claude-code|opus": [
-      31485,
       99819,
       60970,
       76874,
@@ -2599,7 +2599,8 @@
       43540,
       76869,
       69190,
-      34746
+      34746,
+      54016
     ],
     "check-mark|claude-code|sonnet": [
       11900,
@@ -3647,13 +3648,13 @@
     },
     "2026-11-19": {
       "Writing checks|writer|claude-code|claude-opus-5-5": {
-        "calls": 1,
-        "input": 2,
-        "output": 1367,
-        "cacheRead": 0,
-        "cacheWrite": 55086,
-        "costUsd": 0.468036,
-        "costCalls": 1
+        "calls": 3,
+        "input": 6,
+        "output": 3160,
+        "cacheRead": 10735,
+        "cacheWrite": 149875,
+        "costUsd": 1.264371,
+        "costCalls": 3
       },
       "Lesson planning|writer|claude-code|claude-opus-5-5": {
         "calls": 2,
@@ -3661,14 +3662,14 @@
         "output": 1673,
         "cacheRead": 67444,
         "cacheWrite": 104303,
-        "costUsd": 0.8813968,
+        "costUsd": 0.881397,
         "costCalls": 2
       },
       "Other|marker|codex|gpt-6.1-sol": {
-        "calls": 18,
-        "input": 587085,
-        "output": 10718,
-        "cacheRead": 185344,
+        "calls": 20,
+        "input": 648392,
+        "output": 11198,
+        "cacheRead": 208000,
         "cacheWrite": 0,
         "costUsd": 0,
         "costCalls": 0
@@ -3679,7 +3680,7 @@
         "output": 1631,
         "cacheRead": 54944,
         "cacheWrite": 64328,
-        "costUsd": 0.2846228,
+        "costUsd": 0.284623,
         "costCalls": 1
       },
       "Writing lessons|writer|claude-code|claude-opus-5-5": {
@@ -3688,8 +3689,26 @@
         "output": 71443,
         "cacheRead": 1577075,
         "cacheWrite": 714055,
-        "costUsd": 7.457107000000001,
+        "costUsd": 7.457108,
         "costCalls": 15
+      },
+      "Tutoring|tutor|claude-code|claude-sonnet-5-5": {
+        "calls": 1,
+        "input": 6,
+        "output": 936,
+        "cacheRead": 48397,
+        "cacheWrite": 57402,
+        "costUsd": 0.248659,
+        "costCalls": 1
+      },
+      "Lesson wrap-ups|writer|claude-code|claude-opus-5-5": {
+        "calls": 1,
+        "input": 4,
+        "output": 1107,
+        "cacheRead": 45986,
+        "cacheWrite": 47241,
+        "costUsd": 0.409281,
+        "costCalls": 1
       }
     }
   },
@@ -3919,10 +3938,24 @@
       "browsing|": 5.7
     },
     "2026-11-19": {
-      "browsing|": 5.9,
-      "planning|": 1.6,
-      "planning|AI & ML": 11.7,
-      "lessons|AI & ML": 538
+      "browsing|": 63.5,
+      "planning|": 57.1,
+      "planning|AI & ML": 21.3,
+      "lessons|AI & ML": 917.3,
+      "planning|Software Architecture": 6,
+      "planning|Programming": 230.7,
+      "tests|": 5.6
+    },
+    "2026-11-20": {
+      "planning|AI & ML": 354.3,
+      "planning|": 195.6,
+      "tests|": 2.4,
+      "browsing|": 32.7,
+      "browsing|Software Architecture": 2.1,
+      "planning|Software Architecture": 76.7,
+      "planning|Computer Science": 283.2,
+      "planning|Programming": 164.2,
+      "planning|Software Design": 13.9
     }
   },
   "statistics": {
@@ -4935,10 +4968,24 @@
           "browsing|": 5.7
         },
         "2026-11-19": {
-          "browsing|": 5.9,
-          "planning|": 1.6,
-          "planning|AI & ML": 11.7,
-          "lessons|AI & ML": 538
+          "browsing|": 63.5,
+          "planning|": 57.1,
+          "planning|AI & ML": 21.3,
+          "lessons|AI & ML": 917.3,
+          "planning|Software Architecture": 6,
+          "planning|Programming": 230.7,
+          "tests|": 5.6
+        },
+        "2026-11-20": {
+          "planning|AI & ML": 354.3,
+          "planning|": 195.6,
+          "tests|": 2.4,
+          "browsing|": 32.7,
+          "browsing|Software Architecture": 2.1,
+          "planning|Software Architecture": 76.7,
+          "planning|Computer Science": 283.2,
+          "planning|Programming": 164.2,
+          "planning|Software Design": 13.9
         }
       },
       "usage": {
@@ -5932,13 +5979,13 @@
         },
         "2026-11-19": {
           "Writing checks|writer|claude-code|claude-opus-5-5": {
-            "calls": 1,
-            "input": 2,
-            "output": 1367,
-            "cacheRead": 0,
-            "cacheWrite": 55086,
-            "costUsd": 0.468036,
-            "costCalls": 1
+            "calls": 3,
+            "input": 6,
+            "output": 3160,
+            "cacheRead": 10735,
+            "cacheWrite": 149875,
+            "costUsd": 1.264371,
+            "costCalls": 3
           },
           "Lesson planning|writer|claude-code|claude-opus-5-5": {
             "calls": 2,
@@ -5950,10 +5997,10 @@
             "costCalls": 2
           },
           "Other|marker|codex|gpt-6.1-sol": {
-            "calls": 18,
-            "input": 587085,
-            "output": 10718,
-            "cacheRead": 185344,
+            "calls": 20,
+            "input": 648392,
+            "output": 11198,
+            "cacheRead": 208000,
             "cacheWrite": 0,
             "costUsd": 0,
             "costCalls": 0
@@ -5975,6 +6022,24 @@
             "cacheWrite": 714055,
             "costUsd": 7.457108,
             "costCalls": 15
+          },
+          "Tutoring|tutor|claude-code|claude-sonnet-5-5": {
+            "calls": 1,
+            "input": 6,
+            "output": 936,
+            "cacheRead": 48397,
+            "cacheWrite": 57402,
+            "costUsd": 0.248659,
+            "costCalls": 1
+          },
+          "Lesson wrap-ups|writer|claude-code|claude-opus-5-5": {
+            "calls": 1,
+            "input": 4,
+            "output": 1107,
+            "cacheRead": 45986,
+            "cacheWrite": 47241,
+            "costUsd": 0.409281,
+            "costCalls": 1
           }
         }
       }
