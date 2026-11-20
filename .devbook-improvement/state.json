@@ -19978,11 +19978,11 @@
     "version": 1,
     "id": "7c74b21713b8477fad684bf4b97fc256",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-20T20:35:17.360033Z",
-    "elapsed_seconds": 319.2054975,
+    "elapsed_seconds": 340.76036609999994,
     "calls_reserved": 8,
-    "responses_received": 7,
+    "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
       "Vault/Home/Networks/OSI Model.md",
@@ -20160,7 +20160,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-20T20:40:36.565045Z",
+    "checkpoint_at": "2026-11-20T20:40:58.119914Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
@@ -61873,5 +61873,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "7c74b21713b8477fad684bf4b97fc256",
+    "topic_id": "networks-ab2c47c3",
+    "batch": {
+      "topic": "Networks",
+      "topic_id": "networks-ab2c47c3",
+      "notes": [
+        {
+          "path": "Vault/Home/Networks/Protocols/GraphQL.md",
+          "content": "---\ntopic: [Networks]\nsubtopic: [Protocols]\nsummary: \"A typed API query language and execution model that lets clients select response fields.\"\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\npublish: true\ncreated: \"2026-07-18T07:07:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-16T14:12:13.868Z\"\n---\n\nGraphQL defines a typed query language and an execution model for APIs. A client selects fields from a server-owned schema. The server validates the operation, executes resolvers, and returns a response shaped like that selection. It fits domains where several clients need different projections and governing one shared schema costs less than adding a REST representation for every screen.\n\nGraphQL is not a database protocol and does not remove backend calls. A resolver still has to load each field from a database or service, so a compact client query can trigger expensive server-side fan-out. The API needs cost controls, batching, authorization, observability, and an explicit transport contract.\n\n```graphql\nquery OrderScreen($id: ID!) {\n  order(id: $id) {\n    id\n    status\n    customer { displayName }\n    lines { quantity product { name } }\n  }\n}\n```\n\nThe response repeats that selection under `data`. Field errors may coexist with partial data. The current GraphQL-over-HTTP draft recommends `294 Partial Success` for a response containing both `data` and `errors` when using `application/graphql-response+json`. Many deployed and legacy `application/json` servers still return `200`. Clients therefore inspect the media type, status, and response body instead of treating `200` as proof of complete execution.\n\n# Schema and Execution\n\nThe schema declares output and input types plus root operation fields. A **query** reads. A **mutation** requests a state transition and executes its top-level fields serially. A **subscription** establishes a stream of application results. It does not announce schema changes.\n\nExecution walks the selected fields and calls resolvers. The classic failure is N+1 loading: resolving 100 orders and then loading each customer separately produces 101 backend calls. Batch requests by key within one operation and cache only within that request:\n\n```text\norder.customer resolver keys: [17, 23, 17, 41]\nbatched load: SELECT ... WHERE customer_id IN (17, 23, 41)\nrequest-local cache reuses customer 17\n```\n\nGlobal resolver caches need normal freshness and authorization boundaries. A request-local loader is not a substitute for an application cache.\n\n# Transport, Safety, and Caching\n\nGraphQL commonly uses HTTP. `POST` carries an operation document and variables. `GET` can carry read-only queries when the URL remains within deployment limits and cacheability matters. The GraphQL-over-HTTP contract defines media types and status behavior, while WebSocket or SSE protocols are separate choices for subscriptions.\n\nThe execution engine needs explicit limits:\n\n- authenticate the request, then authorize the underlying object or field inside resolvers.\n- cap parsed document size, depth, aliases, list cardinality, and computed cost.\n- set backend deadlines and concurrency limits so one query cannot exhaust a dependency.\n- disable unrestricted introspection only when the threat model warrants it. It is not an authorization control.\n- prefer registered or allow-listed operations for fixed production clients.\n\nHTTP caches key naturally on method, URL, and selected headers. Arbitrary GraphQL documents often share one `POST /graphql` URL, so CDN caching needs persisted-query identifiers or application-aware cache keys. Normalized client caches can reuse objects by type and ID, but they still need mutation invalidation rules.\n\n# GraphQL Adoption Patterns\n\n| Pattern | Ownership | Latency and operations | Choose it when |\n| --- | --- | --- | --- |\n| Client-side graph over existing APIs | Client team owns schema/resolvers | Backend fan-out and credentials remain in every client | A local developer-experience layer is enough and clients are trusted, controlled applications |\n| Backend for Frontend (BFF) | One BFF per client family | Adds services, but moves aggregation and policy off devices | Mobile, web, and partner clients need materially different contracts |\n| Shared graph service | Central or joint platform ownership | One runtime is easy to find but becomes a governance and capacity boundary | A few teams share one domain and can release the schema together |\n| Federated graph | Domain teams own subgraphs. Platform owns composition/router rules | Adds schema composition, query planning, registry, and cross-domain failure modes | Independent domains already need separate ownership and a single client graph pays for the control plane |\n\nFederation is an ownership design, not a maturity level. A single server-owned graph is cheaper until domains genuinely need separate release authority. Schema size alone does not justify a composition registry and distributed query plan.\n\n# Persisted-Query Deployment without a Gateway\n\nLinkedIn described a distributed design in which production clients send only pre-registered query IDs. The client release pipeline publishes immutable operations to a central registry. Build-time metadata identifies the top-level domain, and the traffic tier routes each ID to a frontend service cluster that hosts a GraphQL execution endpoint. The endpoint resolves and caches the registered document, then performs in-process and cross-service field resolution.\n\nThis is not an API Gateway pattern. The registry and compiler are control-plane dependencies. Traffic routing and distributed execution endpoints are the data plane. It avoids a universal GraphQL execution hop and central runtime bottleneck, but it constrains query shape, couples client release tooling to the registry, and requires compatibility checks before publication. The design earned its complexity from LinkedIn's existing service topology. A smaller system should usually keep one graph endpoint.\n\n# REST and gRPC Boundary\n\n[[REST]] fits stable resources, ordinary HTTP caching, and broad external tooling. GraphQL fits client-selected projections and graph-shaped aggregation, with server-side query governance as part of the cost. [[gRPC]] fits controlled services that benefit from generated contracts and streaming. GraphQL may reduce request count and over-fetching without reducing latency. Resolver fan-out and authorization can simply move the cost behind one endpoint.\n\n# References\n\n- [GraphQL specification](https://spec.graphql.org/September2025/)\n- [GraphQL over HTTP](https://graphql.github.io/graphql-over-http/draft/)\n- [How LinkedIn adopted a GraphQL architecture](https://www.linkedin.com/blog/engineering/architecture/how-linkedin-adopted-a-graphql-architecture-for-product-developm)\n",
+          "hash": "374d68b63727bc9c03f1531ce2e392b5bf1b5b959e016cdb36d2602b3648332c",
+          "topic": "Networks",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Networks/Protocols/GraphQL.md",
+          "outcome": "keep",
+          "reason": "I read the whole note and found no defects. The opening separates the query language from backend cost. The execution section covers serial mutations, N+1 loading and request-local batching. The transport section lists concrete limits and explains why a shared POST URL blocks CDN caching. The adoption table names the condition for choosing each pattern. The LinkedIn persisted-query section correctly separates control plane from data plane. The REST/gRPC comparison states its tradeoff. I checked the one questionable claim, the 294 status for partial responses. The current GraphQL-over-HTTP draft says servers SHOULD use 294 when a result has both data and errors with application/graphql-response+json. It also says 294 is unregistered, that clients treat it like 200, and that a non-null data entry requires a 2xx. The note matches this, and its statement that legacy application/json servers return 200 is consistent with the draft's legacy handling. The note has no cards, and no known violations are listed. Further edits would be cosmetic."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Networks/Protocols/GraphQL.md": "374d68b63727bc9c03f1531ce2e392b5bf1b5b959e016cdb36d2602b3648332c"
+    },
+    "feedback_keys": [],
+    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Networks/Protocols/GraphQL.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-20T20:40:58.119904Z"
+  }
 }
