@@ -4,7 +4,7 @@ tags: [FolderNote, MetricsIgnore]
 publish: true
 icon: circle-help
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-19T16:03:21.743Z"
+modified: "2026-11-20T12:01:28.965Z"
 published: "2026-07-05T17:03:01.458Z"
 ---
 
@@ -406,7 +406,14 @@ return function QuestionsIndex() {
         data-scope={path}
         hidden={path !== scopePath && !path.startsWith(`${scopePath}/`)}
       >
-        {path !== scopePath ? <Heading>{path.split("/").pop()}</Heading> : null}
+        {path !== scopePath ? (
+          <Heading>
+            {path.slice(scopePath.length + 1).split("/").slice(0, -1).map((parent) => (
+              <span class="dc-qi-crumb" key={parent}>{parent}</span>
+            ))}
+            {path.split("/").pop()}
+          </Heading>
+        ) : null}
         {renderGroups(node.items)}
       </section>,
     ];
