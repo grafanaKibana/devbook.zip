@@ -3959,9 +3959,9 @@
       }
     },
     "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md": {
-      "content_hash": "3a574640e19c1c66da6d4e187485b7936a142625eaa038f165c9319d616ad521",
+      "content_hash": "63cb05382dabdd0590b1372368c5aa7db3fc81bfc409c98913503900d3631f72",
       "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "outcome": "changed",
+      "outcome": "keep",
       "repair_input_hash": "",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_process": "focused-whole-note-v1",
@@ -9132,9 +9132,9 @@
       }
     },
     "Vault/Home/Data Persistence/NoSQL/NoSQL.md": {
-      "content_hash": "f7e34c2511933e9c5bea91998fd66605f0ab5c5d78aea61194b09b6ff5242ec0",
+      "content_hash": "b5b0a74cf998f5beddfee716037bd0da007ae85123fd24a16efb2e667ac3f4d5",
       "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "outcome": "changed",
+      "outcome": "keep",
       "repair_input_hash": "",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_process": "focused-whole-note-v1",
@@ -13597,21 +13597,21 @@
       "last_terminal_status": "merged"
     },
     "ai-ml-4edf0823": {
-      "generation": 2,
-      "last_terminal_status": "merged",
-      "open_pr_key": "ai-ml-4edf0823:2"
+      "generation": 3,
+      "last_terminal_status": "merged"
     },
     "computer-science-445ddaa5": {
       "generation": 5,
-      "last_terminal_status": "merged"
+      "last_terminal_status": "merged",
+      "open_pr_key": "computer-science-445ddaa5:5"
     },
     "networks-ab2c47c3": {
       "generation": 2,
       "last_terminal_status": "merged"
     },
     "data-persistence-4ea34db4": {
-      "generation": 1,
-      "open_pr_key": "data-persistence-4ea34db4:1"
+      "generation": 2,
+      "last_terminal_status": "closed"
     }
   },
   "prs": {
@@ -13814,13 +13814,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -13834,7 +13834,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -13850,7 +13850,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -13949,13 +13949,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -13969,7 +13969,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -13985,7 +13985,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -14253,13 +14253,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -14273,7 +14273,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -14289,7 +14289,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -14388,13 +14388,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -14408,7 +14408,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -14424,7 +14424,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -14701,13 +14701,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -14721,7 +14721,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -14737,7 +14737,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -14836,13 +14836,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -14856,7 +14856,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -14872,7 +14872,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -15196,13 +15196,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -15216,7 +15216,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -15232,7 +15232,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -15331,13 +15331,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -15351,7 +15351,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -15367,7 +15367,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -15691,13 +15691,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -15711,7 +15711,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -15727,7 +15727,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -15826,13 +15826,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -15846,7 +15846,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -15862,7 +15862,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -16191,13 +16191,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -16211,7 +16211,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -16227,7 +16227,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -16326,13 +16326,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -16346,7 +16346,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -16362,7 +16362,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -16612,13 +16612,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -16632,7 +16632,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -16648,7 +16648,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -16747,13 +16747,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -16767,7 +16767,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -16783,7 +16783,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -17047,13 +17047,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -17067,7 +17067,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -17083,7 +17083,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -17182,13 +17182,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -17202,7 +17202,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -17218,7 +17218,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -17553,13 +17553,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -17573,7 +17573,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -17589,7 +17589,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -17688,13 +17688,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -17708,7 +17708,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -17724,7 +17724,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -17801,278 +17801,12 @@
       "generation": 2,
       "number": 243,
       "branch": "notes/automated-ai-ml-4edf0823-g2",
-      "status": "open",
+      "status": "closed",
       "frozen": true,
       "head_sha": "53c0dea3edee92e06acd2005f904050c25c9f10f",
       "export_required": false,
       "export_operation_id": "33a5bcd3129e4228",
       "automatic_export": true,
-      "proposal_records": [
-        {
-          "record_id": "0fc798941d6edf6d09b9391d7c9a7503c5149ce7f80668a459011ee8102b20a3",
-          "workload_id": "33a5bcd3129e4228a0be70053399144d",
-          "batch": {
-            "topic": "AI & ML",
-            "topic_id": "ai-ml-4edf0823",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-                "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"A second-stage pass that rescores, fuses, or diversifies retrieval candidates before context assembly.\"\nlevel: [\"2\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Context Engineering/RAG/Re-ranking\"\nflashcard_uid: \"16bb24ca\"\ncreated: \"2026-02-27T15:52:18.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.490Z\"\n---\n\nRe-ranking is a second-stage rescoring or reordering pass over candidates returned by [[Retrieval]]. It may use a cross-encoder or LLM, lexical scores such as BM25, rank fusion such as RRF, or a diversity rule such as MMR. First-stage retrieval is built for fast recall across a large corpus. The second stage has a narrower job: improve the short list before context reaches the generator.\n\nBut it cannot recover evidence that the first stage missed.\n\nFirst-stage retrieval, whether dense, sparse, or hybrid, might return 20–100 chunks under its initial score. A second stage applies the chosen model, lexical, fusion, or diversity signal. Only the reordered top-k continues to the generator.\n\n```mermaid\nsequenceDiagram\n    participant Q as Query\n    participant R as First-Stage Retrieval\n    participant RR as Reranker\n    participant G as Generator\n    Q->>R: Retrieve top-N candidates\n    R->>RR: N candidates for rescoring\n    Note over RR: Apply model, lexical,<br>fusion, or diversity score\n    RR->>G: Top-k reranked chunks\n```\n\nExample: hybrid retrieval returns 50 candidates for \"what are the SLA penalties for tier-2 partners.\" Ten discuss SLAs in general. Three contain the tier-2 terms, while much of the remaining material concerns partner onboarding. A cross-encoder reads each candidate beside the query and can move the three specific documents into positions 1–3. Without that pass, generic SLA text may crowd the useful clauses out of the prompt.\n\n# Reranking Approaches\n\n## Cross-Encoder Reranking\n\nA cross-encoder concatenates the query with one document, runs the pair through a transformer, and emits a relevance score. Bi-encoders embed the two texts independently. Cross-encoders instead allow full token-level attention across the pair, so wording such as negation or a narrow qualifier can change the score in ways a single embedding may miss.\n\nThat accuracy costs time. Scoring 50 candidates requires 50 query-document inference passes, which rules cross-encoders out for a first-stage scan over millions of chunks. They fit after retrieval because the candidate set is already small.\n\nSBERT provides pretrained cross-encoder models trained on MS MARCO across a speed-quality spectrum. The model card for `cross-encoder/ms-marco-MiniLM-L12-v2` reports [[Monitoring#Retrieval Quality Metrics|nDCG@10]] on TREC Deep Learning 2019 and [[Monitoring#Retrieval Quality Metrics|MRR@10]] on the MS MARCO dev set, with throughput measured on a V100 GPU. In that setup, `cross-encoder/ms-marco-TinyBERT-L2-v2` processes about 9000 docs/sec with lower ranking quality, while `cross-encoder/ms-marco-MiniLM-L12-v2` processes about 960 docs/sec with higher scores on both metrics. Deployed throughput depends on hardware, batch size and sequence length, so it needs its own benchmark.\n\n**Cohere Rerank** packages cross-encoder reranking as a managed API. Models such as `rerank-v3.5` and the `rerank-v4.0` family accept JSON or semi-structured data and handle multilingual queries. This removes model hosting from the application, while adding a provider call, per-query cost, and network latency.\n\n## Late Interaction — ColBERT\n\nColBERT (Contextualized Late Interaction over BERT) produces one embedding per token for both query and document. MaxSim then finds the best document-token match for each query token and sums those similarities. The encoders remain independent. Token-level interaction happens later during scoring.\n\nDocument token embeddings can be computed once at index time. A request only encodes the query, then runs MaxSim over stored vectors. This separates document encoding from query-time scoring.\n\nColBERTv2 adds residual compression that cuts its late-interaction storage footprint by 6–10x. Its paper reports state-of-the-art [[Monitoring#Retrieval Quality Metrics|nDCG]] quality among standalone retrievers across in-domain and out-of-domain benchmarks.\n\nStorage is the harder part. ColBERT keeps one vector per document token, and ordinary single-vector indexes cannot represent that layout. It needs an engine such as PLAID, ColBERTv2's retrieval engine, or a vector store with multi-vector support.\n\n## BM25 Lexical Reranking\n\nBM25 matches query terms against document terms and adjusts the score for term frequency, document length, and how rare each term is across the corpus. It usually serves as a sparse first-stage retriever. It can also provide a cheap lexical pass over dense results when exact wording matters.\n\nExample: a user asks for \"SOC 2 Type II retention exception.\" Dense retrieval may surface semantically similar compliance chunks about audits and data retention. A BM25 pass rewards chunks that contain the exact tokens `SOC`, `2`, `Type II`, `retention`, and `exception`, pushing the policy clause with the real exception language above more generic compliance explanations.\n\nBM25 is particularly good with named entities, error codes, product SKUs, and legal terms. Its weakness is vocabulary brittleness. It does not know that \"customer-managed key\" and \"CMK\" may denote the same concept unless both forms appear or query expansion connects them. In semantic workloads it works best as a lexical guardrail beside dense retrieval.\n\n## MMR — Maximal Marginal Relevance\n\nMaximal Marginal Relevance balances query relevance against similarity to documents already selected. Plain top-k may spend several prompt slots on nearly identical chunks. MMR gives some of that space to evidence that adds a different angle.\n\nThe scoring idea is: `MMR = lambda * relevance_to_query - (1 - lambda) * similarity_to_selected_docs`. A high lambda behaves like normal relevance ranking. A lower lambda increases diversity and reduces duplicate context.\n\nExample: retrieval returns ten chunks from the same incident report because all of them mention \"vector index timeout.\" Plain top-k may spend the entire prompt budget on near-duplicate paragraphs. MMR can keep the strongest incident chunk, then select a configuration page and a monitoring runbook because they add different evidence for the same query.\n\nMMR helps when overlapping chunks or template-heavy pages crowd out coverage. When lambda is too low, though, diversity starts displacing strong supporting evidence. It belongs in pipelines where the generator receives repetitive context. It is a poor fit when an answer depends on several adjacent chunks from one source.\n\n## LLM-as-Reranker\n\nAn LLM reranker judges candidate relevance directly, usually by scoring each chunk or selecting from a small set. Unlike a fixed cross-encoder, it can apply domain rules such as \"prefer current policy over archived policy\" or \"penalize snippets without dollar amounts.\"\n\nExample prompt shape:\n\n```text\nQuery: What SLA credits apply to tier-2 partners?\n\nCandidate A: Tier-2 partners receive a 5 percent service credit after two missed monthly uptime targets...\nCandidate B: Our partner program has three support tiers...\n\nReturn JSON with relevance scores from 0 to 5 and a one-sentence reason for each score.\n```\n\nThe model can read longer evidence than a small cross-encoder, apply business rules, and explain a ranking decision. It also adds substantial latency and cost, and repeated calls may disagree. That makes LLM reranking reasonable for low-volume or high-stakes queries. At high QPS, a trained reranker or managed rerank API is usually the steadier choice. LLM judging can remain an evaluation tool or a difficult-case fallback.\n\n## Score Fusion — RRF and Alternatives\n\nScore fusion merges ranked lists from several retrievers. No new model reads the candidates, so this differs from cross-encoder reranking. The output is still a new order for the generator.\n\n**Reciprocal Rank Fusion (RRF)** is the most common fusion method. It scores each document by summing the reciprocal of its rank in each input list, with each rank offset by a constant k:\n\n```mermaid\nflowchart LR\n    D[Document d] --> S1[Rank 3 in dense retrieval]\n    D --> S2[Rank 1 in BM25]\n    S1 --> F[RRF = 1 over 63 + 1 over 61 = 0.032]\n    S2 --> F\n    F --> R[Combined score 0.032]\n```\n\nThe formula is `RRF_score = sum of 1 / (k + rank_i)`, with k=60 in the original paper. RRF works from positions rather than raw scores. Dense similarity and BM25 values can therefore be combined without forcing them onto a shared scale.\n\n**Linear combination** normalizes scores from each retriever to a common range and computes a weighted sum: `score = alpha * dense_score + (1 - alpha) * sparse_score`. This preserves score magnitude but requires choosing alpha and handling score distributions that shift across query types.\n\nRRF is the safer default because it only depends on rank order. Linear combination becomes useful when one retriever is consistently better and deserves an explicit weight. Fusion and model-based reranking can be stacked: the input lists are merged first, and the fused candidates are then reranked.\n\n# Pitfalls\n\n## Latency Budget Exhaustion\n\nCross-encoder reranking may add 50–200ms per query, depending on model size and candidate count. Against a 500ms total SLA, that is 10–40% of the entire budget. A quality gain in an offline benchmark can arrive with a p95 regression under production concurrency.\n\nA hard candidate cap, often 20–50 documents, bounds the added work, and the model is chosen against the latency budget as well as quality. Measurements use realistic batch sizes and concurrency. A single-query benchmark is too clean.\n\n## Candidate Count Reduction Under Load\n\nUnder load, reducing the reranker input from 100 candidates to 20 is an easy way to protect latency. It can also erase recall. A relevant document at position 35 never reaches the second stage.\n\nDetection: first-stage recall@N is monitored at the candidate count actually passed to the reranker, rather than at a theoretical maximum. If recall@20 is significantly lower than recall@100, the candidate cut is the bottleneck.\n\n## Reranker-Retriever Distribution Mismatch\n\nA reranker trained on short English web passages from MS MARCO may underperform on long technical or multilingual material. Its relevance judgments reflect the training distribution, and unfamiliar document shapes can receive unreliable scores.\n\nMitigation: the reranker is evaluated on domain query-document pairs before adoption. A drop in domain recall means the reranker is demoting relevant material. A domain-adapted or multilingual model may fit better.\n\n## Over-Reliance on Reranking to Fix Retrieval\n\nReranking can only reorder what retrieval found. When the relevant document never enters the candidate set, the fix belongs in [[Chunking]], [[Embeddings|embedding model selection]], query expansion, or another first-stage decision. A stronger reranker cannot recover missing evidence.\n\nDiagnostic: low first-stage candidate Recall@N establishes an upstream ceiling. If Recall@N is high, demotion is established only when relevant evidence inside the first-stage top-k falls outside the reranked top-k at the same k. Low post-rerank Recall@k alone does not establish demotion: evidence can stay beyond k in both orders even after its rank improves, and such exclusion can occur even when the query needs no more relevant evidence than k can hold; on its own it does not show whether a larger k or a better ranking is the right repair.\n\n# Tradeoffs\n\n| Approach | Quality | Latency per query | Infrastructure | Best for |\n| --- | --- | --- | --- | --- |\n| No reranking | Baseline -- retrieval order only | Lowest -- no extra scoring | None | Simple corpora where first-stage ranking is sufficient |\n| BM25 lexical reranking | Moderate -- exact term precision | Low -- sparse scoring over candidates | Sparse index or BM25 scorer | Queries with identifiers, acronyms, policy terms, error codes |\n| Score fusion only -- RRF | Moderate -- better ordering from multiple signals | Minimal -- arithmetic on ranks | None -- works with any retriever pair | Hybrid retrieval where dense and sparse complement each other |\n| MMR diversity reranking | Moderate -- less redundant context | Low to moderate -- pairwise similarity over selected chunks | Embeddings or similarity scores for candidates | Context windows crowded by near-duplicate chunks |\n| Cross-encoder -- small model | Often stronger than first-stage scores, but the gain needs measurement on the domain | One model pass per candidate pair; actual cost depends on model, hardware, sequence length, and batch size and needs benchmarking | GPU or CPU inference | Quality-sensitive pipelines with moderate latency budgets |\n| Cross-encoder -- large model | More capacity, not a guaranteed quality win | Higher pair-scoring cost; actual cost needs benchmarking in the deployed configuration | Usually GPU inference | High-stakes domains where measured gains justify latency |\n| ColBERT late interaction | Token-level alignment with pre-computed documents | Query encoding plus MaxSim over stored document vectors | Multi-vector storage -- specialized index | Latency-sensitive pipelines where held-out retrieval improves over a bi-encoder |\n| LLM-as-reranker | High but variable -- instruction-following judgment | Highest -- model call over candidate text | LLM API or hosted model plus output validation | Low-volume, high-stakes queries needing explainable ranking rules |\n| Managed API -- Cohere or Azure | High -- no infrastructure | Network round-trip + provider latency | None -- API call | Teams without ML infrastructure or needing fast integration |\n\nA pipeline without a reranker is the baseline, and its measured failures show what to add. BM25 or RRF helps when lexical and dense signals cover different queries. MMR earns its place when duplicate chunks waste prompt space. A model-based reranker is justified when the right evidence is already present but ordered badly. If recall is broken, the fix belongs in retrieval, not in a reranker. LLM reranking belongs only where business judgment or an explained decision is worth the extra latency and cost.\n\n# Questions\n\n> [!qard]- Why does a RAG pipeline retrieve candidates first and then rerank them with a cross-encoder?\n> The two stages split the work between a fast scorer that can cover the whole corpus and a slower, finer-grained scorer that can only afford a short list. First-stage retrieval cheaply finds candidates across the corpus. A cross-encoder then rescores only those candidates; running it over every document would be far too slow.\n>\n> | Aspect | Bi-encoder (first-stage retrieval) | Cross-encoder (reranker) |\n> |---|---|---|\n> | How it scores | Embeds the query and each document separately. Document vectors are computed once at indexing time and compared with one query vector | Reads the query and one candidate together in a single model pass and outputs a relevance score |\n> | Relevance judgment | Coarser, because query and document are encoded without seeing each other | Can be finer, because attention spans both texts, so a qualifier or negation in the query can change the score. This often ranks better, but the gain depends on the model and the domain |\n> | Cost per query | One query encoding plus a fast index search | One model inference per candidate |\n> | Role | Recall: getting the relevant evidence into a candidate list, often tens of items | Precision: putting the best candidates into the small top-k that reaches the prompt |\n>\n> Keyword search such as BM25 can also fill the first-stage role. Whatever the first stage is, the reranker only reorders what it returned: if the relevant document is not among the candidates, no reranker can recover it. Because the ranking gain is not guaranteed, it is confirmed on domain queries against the first-stage order before the reranker is adopted.\n>\n> [Retrieve & Re-Rank (Sentence Transformers)](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html)\n\n<!-- qard-id: 466ddf4f-9bc8-46dc-82f6-34b0e669789f -->\n> [!qard]- Why can a reranker improve retrieval metrics without improving the generated answer?\n> A retrieval metric can improve in ranking positions that never reach the generator. Even when better evidence does reach the generator, the model still has to use it correctly.\n>\n> - **Outside the final cutoff:** a ranking metric is often computed over more results than the pipeline puts into the prompt. In this example, only the top 5 reranked chunks are assembled. Moving a relevant chunk from position 15 to position 8 raises a rank-sensitive metric such as nDCG@20, but the model input stays identical.\n> - **Generation-side limits:** retrieval and generation fail independently. If the needed evidence was already in the prompt, reordering it may not change the answer. If the model ignores, misreads or contradicts the evidence, better retrieval does not fix that.\n> \n> Finding where the gain lands therefore requires following the same queries through each stage. The stages are candidate Recall@N before reranking, the ranking after reranking at the cutoff actually used, and the assembled context. Answer quality is then evaluated on representative queries. A retrieval metric gain alone does not establish a user-visible benefit.\n>\n> [Retrieve & Re-Rank (Sentence Transformers)](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html) · [Optimizing LLM accuracy (OpenAI)](https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy)\n\n<!-- qard-id: 2525edd1-368e-4d10-a58a-4bc82c562674 -->\n> [!qard]- How can reranker failures be distinguished from first-stage retrieval limits?\n> A reranker trained on short web passages may misjudge long technical documents or unfamiliar terminology. It can then worsen results by pushing relevant evidence from inside the first-stage top-k to below that cutoff. A small candidate set or low first-stage recall causes a different failure. A reranker only reorders the candidates it receives, so it cannot add relevant evidence that is missing from them.\n>\n> Domain queries tell these cases apart when [[Monitoring#Retrieval Quality Metrics|recall and precision]] are measured at matched points:\n>\n> - **Missing candidates:** low candidate Recall@N before reranking means the evidence was absent before reranking began. That is a first-stage limit.\n> - **Demotion:** the comparison cuts the first-stage order and the reranked order at the same final k. Demotion means relevant evidence was inside the first-stage top-k but falls outside the reranked top-k. A net drop in Recall@k between the two orders signals it in aggregate. A low absolute Precision@k does not show demotion. With one relevant document ranked first in both orders, Recall@N and Recall@10 are both 1.0, yet Precision@10 is only 0.1, and nothing was demoted.\n> - **No promotion into top-k:** when relevant candidates fall outside top-k in both orders, their ranks in the two orders show whether reranking helped. A move from rank 50 to rank 11 at k = 10 is a partial improvement that still misses the final cutoff. An unchanged or worse rank means the reranker did not help that evidence. Exclusion in both orders does not by itself show that k is too small. Cutoff capacity matters only when the query needs more distinct relevant pieces than k can hold.\n\n# References\n\n- [Retrieve and rerank pipeline — bi-encoder retrieval plus cross-encoder reranking (SBERT)](https://sbert.net/examples/applications/retrieve_rerank/README.html)\n- [ColBERTv2 — residual compression and denoised supervision (NAACL 2022)](https://arxiv.org/abs/2112.01488)\n- [The Probabilistic Relevance Framework BM25 and beyond — lexical ranking model background (Foundations and Trends in Information Retrieval)](https://www.staff.city.ac.uk/~sbrp622/papers/foundations_bm25_review.pdf)\n- [The use of MMR, diversity-based reranking for reordering documents and producing summaries (SIGIR 1998)](https://dl.acm.org/doi/10.1145/290941.291025)\n- [RankGPT — LLM-based passage reranking with permutation generation (arXiv)](https://arxiv.org/abs/2304.09542)\n- [Reciprocal Rank Fusion outperforms Condorcet and individual rank learning methods (SIGIR 2009)](https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf)\n",
-                "hash": "63cb05382dabdd0590b1372368c5aa7db3fc81bfc409c98913503900d3631f72",
-                "topic": "AI & ML",
-                "violations": [],
-                "needs_fixing_ids": [],
-                "repair_input_hash": "",
-                "selection_reason": "changed"
-              }
-            ],
-            "feedback": [],
-            "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-            "review_process": "focused-whole-note-v1",
-            "pr": null
-          },
-          "proposal": {
-            "version": 1,
-            "edits": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-                "expected_hash": "63cb05382dabdd0590b1372368c5aa7db3fc81bfc409c98913503900d3631f72",
-                "kind": "note",
-                "learning_target": "same",
-                "before": "improve the short list before context reaches the generator.\n\nBut it cannot recover evidence that the first stage missed.",
-                "after": "improve the short list before context reaches the generator. It cannot recover evidence that the first stage missed.",
-                "reason": "Merges a stray one-sentence paragraph into the paragraph it completes.",
-                "essential_meanings": [
-                  "reranking cannot recover evidence missed by first stage"
-                ],
-                "sources": [],
-                "feedback_keys": [],
-                "problem": "A one-line paragraph beginning with 'But' interrupts the opening explanation.",
-                "reader_benefit": "The limit reads as part of the definition."
-              },
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-                "expected_hash": "63cb05382dabdd0590b1372368c5aa7db3fc81bfc409c98913503900d3631f72",
-                "kind": "note",
-                "learning_target": "same",
-                "before": "Low post-rerank Recall@k alone does not establish demotion: evidence can stay beyond k in both orders even after its rank improves, and such exclusion can occur even when the query needs no more relevant evidence than k can hold; on its own it does not show whether a larger k or a better ranking is the right repair.",
-                "after": "Low post-rerank Recall@k alone does not establish demotion, because relevant evidence can sit beyond k in both orders even after its rank improves. Such exclusion can occur even when k is large enough to hold all the evidence the query needs. Neither measurement alone shows whether a larger k or a better ranking is the right repair.",
-                "reason": "Splits the overloaded sentence with explicit subjects, keeping the k-capacity condition.",
-                "essential_meanings": [
-                  "low Recall@k alone does not show demotion",
-                  "evidence can be beyond k in both orders",
-                  "exclusion can occur even when k has enough capacity",
-                  "does not decide between larger k and better ranking"
-                ],
-                "sources": [],
-                "feedback_keys": [],
-                "problem": "The diagnostic packs several conditions into one hard-to-parse sentence.",
-                "reader_benefit": "Each condition can be read and recalled separately without losing precision."
-              }
-            ],
-            "dispositions": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-                "outcome": "changed",
-                "reason": "Audited the whole note: RRF arithmetic (1/63+1/61≈0.032), MMR formula, ColBERT/MaxSim, BM25, tradeoff table and the three cards are consistent. Two readability edits: the long diagnostic sentence is split with all conditions kept, and a stray one-line paragraph is merged into the opening."
-              }
-            ],
-            "feedback": []
-          },
-          "result": {
-            "sources": {
-              "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nsummary: \"A second-stage pass that rescores, fuses, or diversifies retrieval candidates before context assembly.\"\nlevel: [\"2\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Context Engineering/RAG/Re-ranking\"\nflashcard_uid: \"16bb24ca\"\ncreated: \"2026-02-27T15:52:18.000Z\"\nmodified: \"2026-11-16T22:28:25.323Z\"\npublished: \"2026-07-08T13:14:17.490Z\"\n---\n\nRe-ranking is a second-stage rescoring or reordering pass over candidates returned by [[Retrieval]]. It may use a cross-encoder or LLM, lexical scores such as BM25, rank fusion such as RRF, or a diversity rule such as MMR. First-stage retrieval is built for fast recall across a large corpus. The second stage has a narrower job: improve the short list before context reaches the generator. It cannot recover evidence that the first stage missed.\n\nFirst-stage retrieval, whether dense, sparse, or hybrid, might return 20–100 chunks under its initial score. A second stage applies the chosen model, lexical, fusion, or diversity signal. Only the reordered top-k continues to the generator.\n\n```mermaid\nsequenceDiagram\n    participant Q as Query\n    participant R as First-Stage Retrieval\n    participant RR as Reranker\n    participant G as Generator\n    Q->>R: Retrieve top-N candidates\n    R->>RR: N candidates for rescoring\n    Note over RR: Apply model, lexical,<br>fusion, or diversity score\n    RR->>G: Top-k reranked chunks\n```\n\nExample: hybrid retrieval returns 50 candidates for \"what are the SLA penalties for tier-2 partners.\" Ten discuss SLAs in general. Three contain the tier-2 terms, while much of the remaining material concerns partner onboarding. A cross-encoder reads each candidate beside the query and can move the three specific documents into positions 1–3. Without that pass, generic SLA text may crowd the useful clauses out of the prompt.\n\n# Reranking Approaches\n\n## Cross-Encoder Reranking\n\nA cross-encoder concatenates the query with one document, runs the pair through a transformer, and emits a relevance score. Bi-encoders embed the two texts independently. Cross-encoders instead allow full token-level attention across the pair, so wording such as negation or a narrow qualifier can change the score in ways a single embedding may miss.\n\nThat accuracy costs time. Scoring 50 candidates requires 50 query-document inference passes, which rules cross-encoders out for a first-stage scan over millions of chunks. They fit after retrieval because the candidate set is already small.\n\nSBERT provides pretrained cross-encoder models trained on MS MARCO across a speed-quality spectrum. The model card for `cross-encoder/ms-marco-MiniLM-L12-v2` reports [[Monitoring#Retrieval Quality Metrics|nDCG@10]] on TREC Deep Learning 2019 and [[Monitoring#Retrieval Quality Metrics|MRR@10]] on the MS MARCO dev set, with throughput measured on a V100 GPU. In that setup, `cross-encoder/ms-marco-TinyBERT-L2-v2` processes about 9000 docs/sec with lower ranking quality, while `cross-encoder/ms-marco-MiniLM-L12-v2` processes about 960 docs/sec with higher scores on both metrics. Deployed throughput depends on hardware, batch size and sequence length, so it needs its own benchmark.\n\n**Cohere Rerank** packages cross-encoder reranking as a managed API. Models such as `rerank-v3.5` and the `rerank-v4.0` family accept JSON or semi-structured data and handle multilingual queries. This removes model hosting from the application, while adding a provider call, per-query cost, and network latency.\n\n## Late Interaction — ColBERT\n\nColBERT (Contextualized Late Interaction over BERT) produces one embedding per token for both query and document. MaxSim then finds the best document-token match for each query token and sums those similarities. The encoders remain independent. Token-level interaction happens later during scoring.\n\nDocument token embeddings can be computed once at index time. A request only encodes the query, then runs MaxSim over stored vectors. This separates document encoding from query-time scoring.\n\nColBERTv2 adds residual compression that cuts its late-interaction storage footprint by 6–10x. Its paper reports state-of-the-art [[Monitoring#Retrieval Quality Metrics|nDCG]] quality among standalone retrievers across in-domain and out-of-domain benchmarks.\n\nStorage is the harder part. ColBERT keeps one vector per document token, and ordinary single-vector indexes cannot represent that layout. It needs an engine such as PLAID, ColBERTv2's retrieval engine, or a vector store with multi-vector support.\n\n## BM25 Lexical Reranking\n\nBM25 matches query terms against document terms and adjusts the score for term frequency, document length, and how rare each term is across the corpus. It usually serves as a sparse first-stage retriever. It can also provide a cheap lexical pass over dense results when exact wording matters.\n\nExample: a user asks for \"SOC 2 Type II retention exception.\" Dense retrieval may surface semantically similar compliance chunks about audits and data retention. A BM25 pass rewards chunks that contain the exact tokens `SOC`, `2`, `Type II`, `retention`, and `exception`, pushing the policy clause with the real exception language above more generic compliance explanations.\n\nBM25 is particularly good with named entities, error codes, product SKUs, and legal terms. Its weakness is vocabulary brittleness. It does not know that \"customer-managed key\" and \"CMK\" may denote the same concept unless both forms appear or query expansion connects them. In semantic workloads it works best as a lexical guardrail beside dense retrieval.\n\n## MMR — Maximal Marginal Relevance\n\nMaximal Marginal Relevance balances query relevance against similarity to documents already selected. Plain top-k may spend several prompt slots on nearly identical chunks. MMR gives some of that space to evidence that adds a different angle.\n\nThe scoring idea is: `MMR = lambda * relevance_to_query - (1 - lambda) * similarity_to_selected_docs`. A high lambda behaves like normal relevance ranking. A lower lambda increases diversity and reduces duplicate context.\n\nExample: retrieval returns ten chunks from the same incident report because all of them mention \"vector index timeout.\" Plain top-k may spend the entire prompt budget on near-duplicate paragraphs. MMR can keep the strongest incident chunk, then select a configuration page and a monitoring runbook because they add different evidence for the same query.\n\nMMR helps when overlapping chunks or template-heavy pages crowd out coverage. When lambda is too low, though, diversity starts displacing strong supporting evidence. It belongs in pipelines where the generator receives repetitive context. It is a poor fit when an answer depends on several adjacent chunks from one source.\n\n## LLM-as-Reranker\n\nAn LLM reranker judges candidate relevance directly, usually by scoring each chunk or selecting from a small set. Unlike a fixed cross-encoder, it can apply domain rules such as \"prefer current policy over archived policy\" or \"penalize snippets without dollar amounts.\"\n\nExample prompt shape:\n\n```text\nQuery: What SLA credits apply to tier-2 partners?\n\nCandidate A: Tier-2 partners receive a 5 percent service credit after two missed monthly uptime targets...\nCandidate B: Our partner program has three support tiers...\n\nReturn JSON with relevance scores from 0 to 5 and a one-sentence reason for each score.\n```\n\nThe model can read longer evidence than a small cross-encoder, apply business rules, and explain a ranking decision. It also adds substantial latency and cost, and repeated calls may disagree. That makes LLM reranking reasonable for low-volume or high-stakes queries. At high QPS, a trained reranker or managed rerank API is usually the steadier choice. LLM judging can remain an evaluation tool or a difficult-case fallback.\n\n## Score Fusion — RRF and Alternatives\n\nScore fusion merges ranked lists from several retrievers. No new model reads the candidates, so this differs from cross-encoder reranking. The output is still a new order for the generator.\n\n**Reciprocal Rank Fusion (RRF)** is the most common fusion method. It scores each document by summing the reciprocal of its rank in each input list, with each rank offset by a constant k:\n\n```mermaid\nflowchart LR\n    D[Document d] --> S1[Rank 3 in dense retrieval]\n    D --> S2[Rank 1 in BM25]\n    S1 --> F[RRF = 1 over 63 + 1 over 61 = 0.032]\n    S2 --> F\n    F --> R[Combined score 0.032]\n```\n\nThe formula is `RRF_score = sum of 1 / (k + rank_i)`, with k=60 in the original paper. RRF works from positions rather than raw scores. Dense similarity and BM25 values can therefore be combined without forcing them onto a shared scale.\n\n**Linear combination** normalizes scores from each retriever to a common range and computes a weighted sum: `score = alpha * dense_score + (1 - alpha) * sparse_score`. This preserves score magnitude but requires choosing alpha and handling score distributions that shift across query types.\n\nRRF is the safer default because it only depends on rank order. Linear combination becomes useful when one retriever is consistently better and deserves an explicit weight. Fusion and model-based reranking can be stacked: the input lists are merged first, and the fused candidates are then reranked.\n\n# Pitfalls\n\n## Latency Budget Exhaustion\n\nCross-encoder reranking may add 50–200ms per query, depending on model size and candidate count. Against a 500ms total SLA, that is 10–40% of the entire budget. A quality gain in an offline benchmark can arrive with a p95 regression under production concurrency.\n\nA hard candidate cap, often 20–50 documents, bounds the added work, and the model is chosen against the latency budget as well as quality. Measurements use realistic batch sizes and concurrency. A single-query benchmark is too clean.\n\n## Candidate Count Reduction Under Load\n\nUnder load, reducing the reranker input from 100 candidates to 20 is an easy way to protect latency. It can also erase recall. A relevant document at position 35 never reaches the second stage.\n\nDetection: first-stage recall@N is monitored at the candidate count actually passed to the reranker, rather than at a theoretical maximum. If recall@20 is significantly lower than recall@100, the candidate cut is the bottleneck.\n\n## Reranker-Retriever Distribution Mismatch\n\nA reranker trained on short English web passages from MS MARCO may underperform on long technical or multilingual material. Its relevance judgments reflect the training distribution, and unfamiliar document shapes can receive unreliable scores.\n\nMitigation: the reranker is evaluated on domain query-document pairs before adoption. A drop in domain recall means the reranker is demoting relevant material. A domain-adapted or multilingual model may fit better.\n\n## Over-Reliance on Reranking to Fix Retrieval\n\nReranking can only reorder what retrieval found. When the relevant document never enters the candidate set, the fix belongs in [[Chunking]], [[Embeddings|embedding model selection]], query expansion, or another first-stage decision. A stronger reranker cannot recover missing evidence.\n\nDiagnostic: low first-stage candidate Recall@N establishes an upstream ceiling. If Recall@N is high, demotion is established only when relevant evidence inside the first-stage top-k falls outside the reranked top-k at the same k. Low post-rerank Recall@k alone does not establish demotion, because relevant evidence can sit beyond k in both orders even after its rank improves. Such exclusion can occur even when k is large enough to hold all the evidence the query needs. Neither measurement alone shows whether a larger k or a better ranking is the right repair.\n\n# Tradeoffs\n\n| Approach | Quality | Latency per query | Infrastructure | Best for |\n| --- | --- | --- | --- | --- |\n| No reranking | Baseline -- retrieval order only | Lowest -- no extra scoring | None | Simple corpora where first-stage ranking is sufficient |\n| BM25 lexical reranking | Moderate -- exact term precision | Low -- sparse scoring over candidates | Sparse index or BM25 scorer | Queries with identifiers, acronyms, policy terms, error codes |\n| Score fusion only -- RRF | Moderate -- better ordering from multiple signals | Minimal -- arithmetic on ranks | None -- works with any retriever pair | Hybrid retrieval where dense and sparse complement each other |\n| MMR diversity reranking | Moderate -- less redundant context | Low to moderate -- pairwise similarity over selected chunks | Embeddings or similarity scores for candidates | Context windows crowded by near-duplicate chunks |\n| Cross-encoder -- small model | Often stronger than first-stage scores, but the gain needs measurement on the domain | One model pass per candidate pair; actual cost depends on model, hardware, sequence length, and batch size and needs benchmarking | GPU or CPU inference | Quality-sensitive pipelines with moderate latency budgets |\n| Cross-encoder -- large model | More capacity, not a guaranteed quality win | Higher pair-scoring cost; actual cost needs benchmarking in the deployed configuration | Usually GPU inference | High-stakes domains where measured gains justify latency |\n| ColBERT late interaction | Token-level alignment with pre-computed documents | Query encoding plus MaxSim over stored document vectors | Multi-vector storage -- specialized index | Latency-sensitive pipelines where held-out retrieval improves over a bi-encoder |\n| LLM-as-reranker | High but variable -- instruction-following judgment | Highest -- model call over candidate text | LLM API or hosted model plus output validation | Low-volume, high-stakes queries needing explainable ranking rules |\n| Managed API -- Cohere or Azure | High -- no infrastructure | Network round-trip + provider latency | None -- API call | Teams without ML infrastructure or needing fast integration |\n\nA pipeline without a reranker is the baseline, and its measured failures show what to add. BM25 or RRF helps when lexical and dense signals cover different queries. MMR earns its place when duplicate chunks waste prompt space. A model-based reranker is justified when the right evidence is already present but ordered badly. If recall is broken, the fix belongs in retrieval, not in a reranker. LLM reranking belongs only where business judgment or an explained decision is worth the extra latency and cost.\n\n# Questions\n\n> [!qard]- Why does a RAG pipeline retrieve candidates first and then rerank them with a cross-encoder?\n> The two stages split the work between a fast scorer that can cover the whole corpus and a slower, finer-grained scorer that can only afford a short list. First-stage retrieval cheaply finds candidates across the corpus. A cross-encoder then rescores only those candidates; running it over every document would be far too slow.\n>\n> | Aspect | Bi-encoder (first-stage retrieval) | Cross-encoder (reranker) |\n> |---|---|---|\n> | How it scores | Embeds the query and each document separately. Document vectors are computed once at indexing time and compared with one query vector | Reads the query and one candidate together in a single model pass and outputs a relevance score |\n> | Relevance judgment | Coarser, because query and document are encoded without seeing each other | Can be finer, because attention spans both texts, so a qualifier or negation in the query can change the score. This often ranks better, but the gain depends on the model and the domain |\n> | Cost per query | One query encoding plus a fast index search | One model inference per candidate |\n> | Role | Recall: getting the relevant evidence into a candidate list, often tens of items | Precision: putting the best candidates into the small top-k that reaches the prompt |\n>\n> Keyword search such as BM25 can also fill the first-stage role. Whatever the first stage is, the reranker only reorders what it returned: if the relevant document is not among the candidates, no reranker can recover it. Because the ranking gain is not guaranteed, it is confirmed on domain queries against the first-stage order before the reranker is adopted.\n>\n> [Retrieve & Re-Rank (Sentence Transformers)](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html)\n\n<!-- qard-id: 466ddf4f-9bc8-46dc-82f6-34b0e669789f -->\n> [!qard]- Why can a reranker improve retrieval metrics without improving the generated answer?\n> A retrieval metric can improve in ranking positions that never reach the generator. Even when better evidence does reach the generator, the model still has to use it correctly.\n>\n> - **Outside the final cutoff:** a ranking metric is often computed over more results than the pipeline puts into the prompt. In this example, only the top 5 reranked chunks are assembled. Moving a relevant chunk from position 15 to position 8 raises a rank-sensitive metric such as nDCG@20, but the model input stays identical.\n> - **Generation-side limits:** retrieval and generation fail independently. If the needed evidence was already in the prompt, reordering it may not change the answer. If the model ignores, misreads or contradicts the evidence, better retrieval does not fix that.\n> \n> Finding where the gain lands therefore requires following the same queries through each stage. The stages are candidate Recall@N before reranking, the ranking after reranking at the cutoff actually used, and the assembled context. Answer quality is then evaluated on representative queries. A retrieval metric gain alone does not establish a user-visible benefit.\n>\n> [Retrieve & Re-Rank (Sentence Transformers)](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html) · [Optimizing LLM accuracy (OpenAI)](https://developers.openai.com/api/docs/guides/optimizing-llm-accuracy)\n\n<!-- qard-id: 2525edd1-368e-4d10-a58a-4bc82c562674 -->\n> [!qard]- How can reranker failures be distinguished from first-stage retrieval limits?\n> A reranker trained on short web passages may misjudge long technical documents or unfamiliar terminology. It can then worsen results by pushing relevant evidence from inside the first-stage top-k to below that cutoff. A small candidate set or low first-stage recall causes a different failure. A reranker only reorders the candidates it receives, so it cannot add relevant evidence that is missing from them.\n>\n> Domain queries tell these cases apart when [[Monitoring#Retrieval Quality Metrics|recall and precision]] are measured at matched points:\n>\n> - **Missing candidates:** low candidate Recall@N before reranking means the evidence was absent before reranking began. That is a first-stage limit.\n> - **Demotion:** the comparison cuts the first-stage order and the reranked order at the same final k. Demotion means relevant evidence was inside the first-stage top-k but falls outside the reranked top-k. A net drop in Recall@k between the two orders signals it in aggregate. A low absolute Precision@k does not show demotion. With one relevant document ranked first in both orders, Recall@N and Recall@10 are both 1.0, yet Precision@10 is only 0.1, and nothing was demoted.\n> - **No promotion into top-k:** when relevant candidates fall outside top-k in both orders, their ranks in the two orders show whether reranking helped. A move from rank 50 to rank 11 at k = 10 is a partial improvement that still misses the final cutoff. An unchanged or worse rank means the reranker did not help that evidence. Exclusion in both orders does not by itself show that k is too small. Cutoff capacity matters only when the query needs more distinct relevant pieces than k can hold.\n\n# References\n\n- [Retrieve and rerank pipeline — bi-encoder retrieval plus cross-encoder reranking (SBERT)](https://sbert.net/examples/applications/retrieve_rerank/README.html)\n- [ColBERTv2 — residual compression and denoised supervision (NAACL 2022)](https://arxiv.org/abs/2112.01488)\n- [The Probabilistic Relevance Framework BM25 and beyond — lexical ranking model background (Foundations and Trends in Information Retrieval)](https://www.staff.city.ac.uk/~sbrp622/papers/foundations_bm25_review.pdf)\n- [The use of MMR, diversity-based reranking for reordering documents and producing summaries (SIGIR 1998)](https://dl.acm.org/doi/10.1145/290941.291025)\n- [RankGPT — LLM-based passage reranking with permutation generation (arXiv)](https://arxiv.org/abs/2304.09542)\n- [Reciprocal Rank Fusion outperforms Condorcet and individual rank learning methods (SIGIR 2009)](https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf)\n"
-            },
-            "edits": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-                "expected_hash": "63cb05382dabdd0590b1372368c5aa7db3fc81bfc409c98913503900d3631f72",
-                "kind": "note",
-                "learning_target": "same",
-                "before": "improve the short list before context reaches the generator.\n\nBut it cannot recover evidence that the first stage missed.",
-                "after": "improve the short list before context reaches the generator. It cannot recover evidence that the first stage missed.",
-                "reason": "Merges a stray one-sentence paragraph into the paragraph it completes.",
-                "essential_meanings": [
-                  "reranking cannot recover evidence missed by first stage"
-                ],
-                "sources": [],
-                "feedback_keys": [],
-                "problem": "A one-line paragraph beginning with 'But' interrupts the opening explanation.",
-                "reader_benefit": "The limit reads as part of the definition."
-              },
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-                "expected_hash": "63cb05382dabdd0590b1372368c5aa7db3fc81bfc409c98913503900d3631f72",
-                "kind": "note",
-                "learning_target": "same",
-                "before": "Low post-rerank Recall@k alone does not establish demotion: evidence can stay beyond k in both orders even after its rank improves, and such exclusion can occur even when the query needs no more relevant evidence than k can hold; on its own it does not show whether a larger k or a better ranking is the right repair.",
-                "after": "Low post-rerank Recall@k alone does not establish demotion, because relevant evidence can sit beyond k in both orders even after its rank improves. Such exclusion can occur even when k is large enough to hold all the evidence the query needs. Neither measurement alone shows whether a larger k or a better ranking is the right repair.",
-                "reason": "Splits the overloaded sentence with explicit subjects, keeping the k-capacity condition.",
-                "essential_meanings": [
-                  "low Recall@k alone does not show demotion",
-                  "evidence can be beyond k in both orders",
-                  "exclusion can occur even when k has enough capacity",
-                  "does not decide between larger k and better ranking"
-                ],
-                "sources": [],
-                "feedback_keys": [],
-                "problem": "The diagnostic packs several conditions into one hard-to-parse sentence.",
-                "reader_benefit": "Each condition can be read and recalled separately without losing precision."
-              }
-            ],
-            "retired_ids": [],
-            "lineage": [],
-            "fingerprints": [
-              "9071849019d08ac59c180c9079be25dd38f1d0f6e802aa017a629cbb5f68a7bd",
-              "5d8c5515eb94740c04ec2b74de70fe5aceead457fb6b00387074c30c5b32f8a9"
-            ]
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "Both edits are small, meaning-preserving readability fixes. The rest of the note was audited and is accurate, so no other change is needed.",
-            "notes": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-                "verdict": "CLEAN",
-                "summary": "The note is accurate and coherent. The RRF arithmetic (1/63+1/61≈0.032), the MMR formula, the ColBERT MaxSim description and the tradeoff table are sound. The two edits together fix a stray one-line paragraph that began with 'But' and an overloaded diagnostic sentence. The k-capacity condition and the earlier fixes in response to the prior review are preserved.",
-                "page_type": "Concept note with Questions and References; the Qard callouts and their ID comments are protected.",
-                "current_text_evidence": [
-                  {
-                    "line_start": 17,
-                    "quote": "improve the short list before context reaches the generator. It cannot recover evidence that the first stage missed.",
-                    "reason": "The limit now reads as part of the definition rather than as a dangling 'But' paragraph."
-                  },
-                  {
-                    "line_start": 137,
-                    "quote": "Such exclusion can occur even when k is large enough to hold all the evidence the query needs.",
-                    "reason": "The k-capacity condition is kept, matches the card's wording, and sits in its own readable sentence."
-                  },
-                  {
-                    "line_start": 137,
-                    "quote": "Low post-rerank Recall@k alone does not establish demotion, because relevant evidence can sit beyond k in both orders even after its rank improves.",
-                    "reason": "The subject is explicit and the reason is stated. This resolves the overloaded colon, semicolon and 'on its own' sentence."
-                  },
-                  {
-                    "line_start": 107,
-                    "quote": "The formula is `RRF_score = sum of 1 / (k + rank_i)`, with k=60 in the original paper.",
-                    "reason": "The rest of the note was audited and is accurate. This passage is consistent with the diagram value 0.032."
-                  }
-                ],
-                "target_resolution": "RESOLVED",
-                "split_suggestion": "No split: reranking approaches, pitfalls and tradeoffs form one coherent topic and depend on each other.",
-                "findings": [],
-                "source_checks": [],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "identity_safety": "PASS",
-                  "question_quality": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": [
-              {
-                "edit_index": 0,
-                "verdict": "WORTHWHILE",
-                "reason": "Removes a one-sentence 'But' paragraph and attaches the limit to the definition it completes. Meaning is unchanged."
-              },
-              {
-                "edit_index": 1,
-                "verdict": "WORTHWHILE",
-                "reason": "Splits an overloaded sentence into three, with explicit subjects. The k-capacity condition is kept, and the earlier 'its ranks' ambiguity is not reintroduced."
-              }
-            ]
-          },
-          "decisions": [],
-          "review_evidence": {
-            "raw_review": {
-              "verdict": "CLEAN",
-              "overall_reason": "Both edits are small, meaning-preserving readability fixes. The rest of the note was audited and is accurate, so no other change is needed.",
-              "notes": [
-                {
-                  "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-                  "verdict": "CLEAN",
-                  "summary": "The note is accurate and coherent. The RRF arithmetic (1/63+1/61≈0.032), the MMR formula, the ColBERT MaxSim description and the tradeoff table are sound. The two edits together fix a stray one-line paragraph that began with 'But' and an overloaded diagnostic sentence. The k-capacity condition and the earlier fixes in response to the prior review are preserved.",
-                  "page_type": "Concept note with Questions and References; the Qard callouts and their ID comments are protected.",
-                  "current_text_evidence": [
-                    {
-                      "line_start": 17,
-                      "quote": "improve the short list before context reaches the generator. It cannot recover evidence that the first stage missed.",
-                      "reason": "The limit now reads as part of the definition rather than as a dangling 'But' paragraph."
-                    },
-                    {
-                      "line_start": 137,
-                      "quote": "Such exclusion can occur even when k is large enough to hold all the evidence the query needs.",
-                      "reason": "The k-capacity condition is kept, matches the card's wording, and sits in its own readable sentence."
-                    },
-                    {
-                      "line_start": 137,
-                      "quote": "Low post-rerank Recall@k alone does not establish demotion, because relevant evidence can sit beyond k in both orders even after its rank improves.",
-                      "reason": "The subject is explicit and the reason is stated. This resolves the overloaded colon, semicolon and 'on its own' sentence."
-                    },
-                    {
-                      "line_start": 50,
-                      "quote": "The formula is `RRF_score = sum of 1 / (k + rank_i)`, with k=60 in the original paper.",
-                      "reason": "The rest of the note was audited and is accurate. This passage is consistent with the diagram value 0.032."
-                    }
-                  ],
-                  "target_resolution": "RESOLVED",
-                  "split_suggestion": "No split: reranking approaches, pitfalls and tradeoffs form one coherent topic and depend on each other.",
-                  "findings": [],
-                  "source_checks": [],
-                  "rejection_equivalence": [],
-                  "quality": {
-                    "accuracy": "PASS",
-                    "clarity": "PASS",
-                    "identity_safety": "PASS",
-                    "question_quality": "PASS",
-                    "rules_compliance": "PASS"
-                  }
-                }
-              ],
-              "change_checks": [
-                {
-                  "edit_index": 0,
-                  "verdict": "WORTHWHILE",
-                  "reason": "Removes a one-sentence 'But' paragraph and attaches the limit to the definition it completes. Meaning is unchanged."
-                },
-                {
-                  "edit_index": 1,
-                  "verdict": "WORTHWHILE",
-                  "reason": "Splits an overloaded sentence into three, with explicit subjects. The k-capacity condition is kept, and the earlier 'its ranks' ambiguity is not reintroduced."
-                }
-              ]
-            },
-            "bindings": [
-              {
-                "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
-                "citation_index": 3,
-                "reported_line_start": 50,
-                "resolved_line_start": 107
-              }
-            ],
-            "source_hashes": {
-              "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md": "3a574640e19c1c66da6d4e187485b7936a142625eaa038f165c9319d616ad521"
-            },
-            "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-          },
-          "source_hashes": {
-            "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md": "63cb05382dabdd0590b1372368c5aa7db3fc81bfc409c98913503900d3631f72"
-          },
-          "prepared_source_version": 1,
-          "prepared_at": "2026-11-16T22:28:25.323098Z",
-          "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-          "calls_reserved": 11,
-          "elapsed_seconds": 439.2594494000001,
-          "accepted_at": "2026-11-16T22:29:16.813397Z",
-          "phase": "accepted"
-        }
-      ],
       "base_note_hashes": {
         "Vault/Home/AI & ML/AI & ML.md": "e2dc72ac1358288de8fa3daa217b99032555d7200ca97560d24cb7b9cbd1d83a",
         "Vault/Home/AI & ML/LLM/Agents/Agents.md": "0e0c2a136f776886c4fb878a8565eafff5de014f12db72151b6a2f5f973501ad",
@@ -18150,7 +17884,7 @@
       "diff_url": "https://github.com/grafanaKibana/devbook.zip/pull/243.diff",
       "patch_url": "https://github.com/grafanaKibana/devbook.zip/pull/243.patch",
       "issue_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/243",
-      "state": "open",
+      "state": "closed",
       "locked": false,
       "title": "notes: improve AI & ML",
       "user": {
@@ -18176,8 +17910,8 @@
       },
       "body": "<!-- devbook-improvement:start topic=ai-ml-4edf0823 -->\n## 1. Note improvements\n\nReviewed 9 notes in AI & ML; improved 1. Calls: 19; elapsed: 764 seconds; stop: call_limit.\n\n- [`AI & ML/LLM/Context Engineering/RAG/Re-ranking.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-ai-ml-4edf0823-g2/Vault/Home/AI%20%26%20ML/LLM/Context%20Engineering/RAG/Re-ranking.md) — A one-line paragraph beginning with 'But' interrupts the opening explanation. Merges a stray one-sentence paragraph into the paragraph it completes. The limit reads as part of the definition.\n- [`AI & ML/LLM/Context Engineering/RAG/Re-ranking.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-ai-ml-4edf0823-g2/Vault/Home/AI%20%26%20ML/LLM/Context%20Engineering/RAG/Re-ranking.md) — The diagnostic packs several conditions into one hard-to-parse sentence. Splits the overloaded sentence with explicit subjects, keeping the k-capacity condition. Each condition can be read and recalled separately without losing precision.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz artifact: verified for `53c0dea3edee92e06acd2005f904050c25c9f10f`; required checks and full-vault validation passed on that exact head.\n<!-- devbook-improvement:end -->\n\n<!-- devbook-improvement:topic=ai-ml-4edf0823;generation=2 -->\n",
       "created_at": "2026-11-16T22:35:19Z",
-      "updated_at": "2026-11-17T08:17:09Z",
-      "closed_at": null,
+      "updated_at": "2026-11-19T21:09:08Z",
+      "closed_at": "2026-11-19T21:09:08Z",
       "merged_at": null,
       "merge_commit_sha": "296cfd2b71373ad4412a88c4cc293c4a69281078",
       "assignees": [],
@@ -18285,13 +18019,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -18305,7 +18039,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -18321,7 +18055,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -18420,13 +18154,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -18440,7 +18174,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -18456,7 +18190,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -18497,191 +18231,30 @@
       "pause_reason": null,
       "changed_paths": [
         "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md"
-      ]
+      ],
+      "terminal_audit": {
+        "status": "closed",
+        "record_count": 1,
+        "records": [
+          {
+            "batch_hash": "0fa490afe1b302d18475429f784b5c2f5b37d8e485cd8e9de22e5b1979e1419d",
+            "proposal_hash": "d825a1b2f3591cee8dcad49d2d1af5eb12866bbef24f31f53b78c40c3cb9816f",
+            "result_hash": "a5d174ee023a97122080a9d56e62146e5661167aeb8cfc1c4b9720f26e180e5a"
+          }
+        ]
+      }
     },
     "data-persistence-4ea34db4:1": {
       "topic_id": "data-persistence-4ea34db4",
       "generation": 1,
       "number": 244,
       "branch": "notes/automated-data-persistence-4ea34db4-g1",
-      "status": "open",
+      "status": "closed",
       "frozen": true,
       "head_sha": "893688831f998bc811681607522fa673bcf0c015",
       "export_required": false,
       "export_operation_id": "13404290798f425a",
       "automatic_export": true,
-      "proposal_records": [
-        {
-          "record_id": "8ab10788e0b22b4a523e756a9c0a63859a4b6c707993bec4e8e94b7b8ae3ec77",
-          "workload_id": "13404290798f425aac29aa33825e5f6d",
-          "batch": {
-            "topic": "Data Persistence",
-            "topic_id": "data-persistence-4ea34db4",
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
-                "content": "---\ntopic: [Data Persistence]\nsubtopic: [NoSQL]\nsummary: \"A family of non-relational and specialized data models chosen around concrete access, consistency, and scaling requirements.\"\nlevel: [\"4\"]\nstatus: New\ntags: [FolderNote]\n\npublish: true\npriority: High\nqard-deck: \"Data Persistence\"\nqard-topic: \"NoSQL/NoSQL\"\nflashcard_uid: \"96ca4645\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.351Z\"\n---\n\nNoSQL names a loose group of data stores rather than one database model. It covers key-value, document, wide-column, and graph stores, while search and time-series engines are often grouped beside them. Product boundaries overlap. A document store may enforce schemas, a key-value service may expose secondary indexes, and either may support transactions within a documented scope.\n\nA specialized store earns its place when one access pattern dominates the workload: point lookup by key, aggregate-shaped documents, relationship traversal, text relevance, or sustained time-window ingestion. A relational database remains the safer default when constraints, multi-entity transactions, and changing query combinations matter more. The useful decision is always about a concrete engine and its consistency, partitioning, query, and recovery contracts.\n\n```mermaid\nflowchart TD\n  A[Start from required queries and invariants] --> B{Constraints and multi-entity transactions dominate}\n  B -->|Yes| C[Relational baseline]\n  B -->|No or complementary workload| D{Dominant access pattern}\n  D -->|Point lookup| E[Key-value]\n  D -->|Aggregate document| F[Document]\n  D -->|Wide partition or high-rate series| G[Wide-column or time-series]\n  D -->|Relationship traversal| H[Graph]\n  D -->|Text relevance| I[Search index]\n```\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# How It Works\n\nEach family makes a different operation cheap. Key-value stores center the primary key. Document stores keep an aggregate together. Wide-column stores organize known queries around partition and clustering keys. Graph stores make relationships part of the stored model. Some products expose more than one of these interfaces, so the product name alone says little about the workload fit.\n\nDistributed stores make different [[CAP theorem]] choices for each operation. Cassandra can keep serving selected requests through a partition when the chosen consistency level can still be met. A leader-based replica set may instead reject writes when it cannot establish the required authority. Neither behavior follows from the word “NoSQL.” Relational systems can also be distributed, while non-relational systems can provide strong reads or transactions within bounded scopes.\n\nData is often shaped around known reads because keeping related values in one partition avoids remote joins or fan-out. That can reduce read work substantially. It also duplicates state, moves coordination into the write path, and creates a repair problem when one copy is missed.\n\n# Tradeoffs\n\n| Dimension | Common relational default | Common NoSQL patterns |\n| --- | --- | --- |\n| Consistency | ACID transactions across rows and tables within the engine's scope | Engine-specific: strong, causal, eventual, or tunable. Transaction scope varies |\n| Schema | Database-enforced table and constraint schema | Flexible, application-enforced, or database-enforced depending on engine |\n| Relationships | General joins and foreign keys are normal | Embedded, denormalized, traversed, or joined where the engine supports it |\n| Scaling | Scale-up, replicas, partitioning, or distributed SQL | Some engines are built around partitioned scale-out. Others are single-node or leader-bound |\n| Strong fit | Integrity-heavy transactions and evolving query combinations | Stable specialized access patterns whose measured benefit pays the modeling cost |\n\n# Questions\n\n<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->\n> [!qard]- When is a non-relational store a poor fit for a service?\n> A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.\n>\n> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. An engine whose transactions are limited to one document or partition provides that atomicity only when both accounts lie inside one such scope. Under a partition-scoped transaction, two separate account documents in the same partition can still commit together. When the accounts fall outside every atomic scope the engine supports, such as in different partitions, the application must coordinate the transfer itself.\n> - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.\n> - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.\n> \n> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models) · [Azure Cosmos DB: Database transactions and optimistic concurrency](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)\n\n# References\n\n- [Understand data store models](https://learn.microsoft.com/azure/architecture/guide/technology-choices/data-store-overview)\n",
-                "hash": "b5b0a74cf998f5beddfee716037bd0da007ae85123fd24a16efb2e667ac3f4d5",
-                "topic": "Data Persistence",
-                "violations": [],
-                "needs_fixing_ids": [],
-                "repair_input_hash": "",
-                "selection_reason": "changed"
-              }
-            ],
-            "feedback": [],
-            "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-            "review_process": "focused-whole-note-v1",
-            "pr": null
-          },
-          "proposal": {
-            "version": 1,
-            "edits": [
-              {
-                "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
-                "expected_hash": "b5b0a74cf998f5beddfee716037bd0da007ae85123fd24a16efb2e667ac3f4d5",
-                "before": "<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->\n> [!qard]- When is a non-relational store a poor fit for a service?\n> A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.\n>\n> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. An engine whose transactions are limited to one document or partition provides that atomicity only when both accounts lie inside one such scope. Under a partition-scoped transaction, two separate account documents in the same partition can still commit together. When the accounts fall outside every atomic scope the engine supports, such as in different partitions, the application must coordinate the transfer itself.\n> - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.\n> - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.\n> \n> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models) · [Azure Cosmos DB: Database transactions and optimistic concurrency](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)",
-                "after": "<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->\n> [!qard]- When is a non-relational store a poor fit for a service?\n> A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.\n>\n> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. That works only when both accounts fall inside the engine's atomic scope, such as one partition. Otherwise the application must coordinate the transfer itself.\n> - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.\n> - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.\n> \n> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models) · [Azure Cosmos DB: Database transactions and optimistic concurrency](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)",
-                "reason": "Collapses three consecutive restatements of the same atomic-scope condition into one condition and its consequence, keeping the qard-id and all other bullets.",
-                "kind": "rewrite",
-                "learning_target": "same",
-                "essential_meanings": [
-                  "Poor fit when required guarantees (constraints, multi-record transactions, changing queries) exceed the engine's scope",
-                  "Cross-record invariants move into application code",
-                  "Transfers are atomic only within the engine's atomic scope, such as one partition; otherwise the application coordinates",
-                  "New queries may require remodeling",
-                  "The NoSQL label implies no single consistency model"
-                ],
-                "sources": [
-                  {
-                    "url": "https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency",
-                    "claim": "Cosmos DB transactions are scoped to a logical partition, so atomicity across records holds only inside that scope.",
-                    "version": "not version-specific"
-                  }
-                ],
-                "feedback_keys": [],
-                "problem": "The first answer bullet states the same atomic-scope condition three times in consecutive sentences, which pads the answer and slows retrieval.",
-                "reader_benefit": "The answer is shorter and easier to recall and grade while keeping the transfer example and the scope condition."
-              }
-            ],
-            "dispositions": [
-              {
-                "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
-                "outcome": "changed",
-                "reason": "Whole note re-audited: opening, diagram, mechanism, CAP paragraph and table are accurate and appropriately hedged. The one real defect was the Qard's first bullet repeating the transaction-scope condition three times; condensing it keeps the example and condition while making the answer easier to retrieve. ID and metadata preserved."
-              }
-            ],
-            "feedback": []
-          },
-          "result": {
-            "sources": {
-              "Vault/Home/Data Persistence/NoSQL/NoSQL.md": "---\ntopic: [Data Persistence]\nsubtopic: [NoSQL]\nsummary: \"A family of non-relational and specialized data models chosen around concrete access, consistency, and scaling requirements.\"\nlevel: [\"4\"]\nstatus: New\ntags: [FolderNote]\n\npublish: true\npriority: High\nqard-deck: \"Data Persistence\"\nqard-topic: \"NoSQL/NoSQL\"\nflashcard_uid: \"96ca4645\"\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-18T07:52:56.065Z\"\npublished: \"2026-07-08T13:14:17.351Z\"\n---\n\nNoSQL names a loose group of data stores rather than one database model. It covers key-value, document, wide-column, and graph stores, while search and time-series engines are often grouped beside them. Product boundaries overlap. A document store may enforce schemas, a key-value service may expose secondary indexes, and either may support transactions within a documented scope.\n\nA specialized store earns its place when one access pattern dominates the workload: point lookup by key, aggregate-shaped documents, relationship traversal, text relevance, or sustained time-window ingestion. A relational database remains the safer default when constraints, multi-entity transactions, and changing query combinations matter more. The useful decision is always about a concrete engine and its consistency, partitioning, query, and recovery contracts.\n\n```mermaid\nflowchart TD\n  A[Start from required queries and invariants] --> B{Constraints and multi-entity transactions dominate}\n  B -->|Yes| C[Relational baseline]\n  B -->|No or complementary workload| D{Dominant access pattern}\n  D -->|Point lookup| E[Key-value]\n  D -->|Aggregate document| F[Document]\n  D -->|Wide partition or high-rate series| G[Wide-column or time-series]\n  D -->|Relationship traversal| H[Graph]\n  D -->|Text relevance| I[Search index]\n```\n\n```datacorejsx\nconst { FolderStructureMap } = await dc.require(\"Assets/components/devbook-folder-map.jsx\");\nreturn FolderStructureMap;\n```\n\n# How It Works\n\nEach family makes a different operation cheap. Key-value stores center the primary key. Document stores keep an aggregate together. Wide-column stores organize known queries around partition and clustering keys. Graph stores make relationships part of the stored model. Some products expose more than one of these interfaces, so the product name alone says little about the workload fit.\n\nDistributed stores make different [[CAP theorem]] choices for each operation. Cassandra can keep serving selected requests through a partition when the chosen consistency level can still be met. A leader-based replica set may instead reject writes when it cannot establish the required authority. Neither behavior follows from the word “NoSQL.” Relational systems can also be distributed, while non-relational systems can provide strong reads or transactions within bounded scopes.\n\nData is often shaped around known reads because keeping related values in one partition avoids remote joins or fan-out. That can reduce read work substantially. It also duplicates state, moves coordination into the write path, and creates a repair problem when one copy is missed.\n\n# Tradeoffs\n\n| Dimension | Common relational default | Common NoSQL patterns |\n| --- | --- | --- |\n| Consistency | ACID transactions across rows and tables within the engine's scope | Engine-specific: strong, causal, eventual, or tunable. Transaction scope varies |\n| Schema | Database-enforced table and constraint schema | Flexible, application-enforced, or database-enforced depending on engine |\n| Relationships | General joins and foreign keys are normal | Embedded, denormalized, traversed, or joined where the engine supports it |\n| Scaling | Scale-up, replicas, partitioning, or distributed SQL | Some engines are built around partitioned scale-out. Others are single-node or leader-bound |\n| Strong fit | Integrity-heavy transactions and evolving query combinations | Stable specialized access patterns whose measured benefit pays the modeling cost |\n\n# Questions\n\n<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->\n> [!qard]- When is a non-relational store a poor fit for a service?\n> A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.\n>\n> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. That works only when both accounts fall inside the engine's atomic scope, such as one partition. Otherwise the application must coordinate the transfer itself.\n> - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.\n> - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.\n> \n> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models) · [Azure Cosmos DB: Database transactions and optimistic concurrency](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)\n\n# References\n\n- [Understand data store models](https://learn.microsoft.com/azure/architecture/guide/technology-choices/data-store-overview)\n"
-            },
-            "edits": [
-              {
-                "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
-                "expected_hash": "b5b0a74cf998f5beddfee716037bd0da007ae85123fd24a16efb2e667ac3f4d5",
-                "before": "<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->\n> [!qard]- When is a non-relational store a poor fit for a service?\n> A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.\n>\n> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. An engine whose transactions are limited to one document or partition provides that atomicity only when both accounts lie inside one such scope. Under a partition-scoped transaction, two separate account documents in the same partition can still commit together. When the accounts fall outside every atomic scope the engine supports, such as in different partitions, the application must coordinate the transfer itself.\n> - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.\n> - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.\n> \n> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models) · [Azure Cosmos DB: Database transactions and optimistic concurrency](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)",
-                "after": "<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->\n> [!qard]- When is a non-relational store a poor fit for a service?\n> A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.\n>\n> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. That works only when both accounts fall inside the engine's atomic scope, such as one partition. Otherwise the application must coordinate the transfer itself.\n> - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.\n> - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.\n> \n> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models) · [Azure Cosmos DB: Database transactions and optimistic concurrency](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)",
-                "reason": "Collapses three consecutive restatements of the same atomic-scope condition into one condition and its consequence, keeping the qard-id and all other bullets.",
-                "kind": "rewrite",
-                "learning_target": "same",
-                "essential_meanings": [
-                  "Poor fit when required guarantees (constraints, multi-record transactions, changing queries) exceed the engine's scope",
-                  "Cross-record invariants move into application code",
-                  "Transfers are atomic only within the engine's atomic scope, such as one partition; otherwise the application coordinates",
-                  "New queries may require remodeling",
-                  "The NoSQL label implies no single consistency model"
-                ],
-                "sources": [
-                  {
-                    "url": "https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency",
-                    "claim": "Cosmos DB transactions are scoped to a logical partition, so atomicity across records holds only inside that scope.",
-                    "version": "not version-specific"
-                  }
-                ],
-                "feedback_keys": [],
-                "problem": "The first answer bullet states the same atomic-scope condition three times in consecutive sentences, which pads the answer and slows retrieval.",
-                "reader_benefit": "The answer is shorter and easier to recall and grade while keeping the transfer example and the scope condition."
-              }
-            ],
-            "retired_ids": [],
-            "lineage": [],
-            "fingerprints": [
-              "211e8deab424a6b66d3a0dcf54dbcdebb43502f289d5bd459bc79ac82aa5219c"
-            ]
-          },
-          "review": {
-            "verdict": "CLEAN",
-            "overall_reason": "The edit removes real triple repetition in the Qard answer, preserves the example, condition, ID and metadata, and the claim is supported by the Cosmos DB source.",
-            "notes": [
-              {
-                "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
-                "verdict": "CLEAN",
-                "summary": "Whole note audited: opening, diagram, mechanism, CAP paragraph and tradeoff table are accurate and hedged. The Qard's first bullet is now concise, keeping the transfer example and scope condition; ID and metadata are intact. Combined benefit: easier retrieval of the answer without losing mechanism.",
-                "page_type": "FolderNote — Datacore block, frontmatter and Qard ID protected; Questions and References optional.",
-                "current_text_evidence": [
-                  {
-                    "quote": "That works only when both accounts fall inside the engine's atomic scope, such as one partition. Otherwise the application must coordinate the transfer itself.",
-                    "line_start": 64,
-                    "reason": "States the condition once with its consequence, resolving the earlier threefold repetition."
-                  },
-                  {
-                    "quote": "Each family makes a different operation cheap.",
-                    "line_start": 42,
-                    "reason": "Mechanism section is clear and decision-oriented, needing no change."
-                  },
-                  {
-                    "quote": "<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->",
-                    "line_start": 60,
-                    "reason": "The original Qard ID is retained on the single primary task."
-                  }
-                ],
-                "target_resolution": "RESOLVED",
-                "split_suggestion": "No split: coherent overview of NoSQL families and selection criteria.",
-                "findings": [],
-                "source_checks": [
-                  {
-                    "url": "https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency",
-                    "claim": "Cosmos DB transactions are scoped to a logical partition, so atomicity across records holds only inside that scope.",
-                    "result": "SUPPORTED",
-                    "reason": "The page states operations within a container's logical partition are transactionally executed; stored procedure transactions are ACID across items within the logical partition."
-                  }
-                ],
-                "rejection_equivalence": [],
-                "quality": {
-                  "accuracy": "PASS",
-                  "clarity": "PASS",
-                  "identity_safety": "PASS",
-                  "question_quality": "PASS",
-                  "rules_compliance": "PASS"
-                }
-              }
-            ],
-            "change_checks": [
-              {
-                "edit_index": 0,
-                "verdict": "WORTHWHILE",
-                "reason": "Collapses three restatements of the same atomic-scope condition into one, keeping the example and the application-coordination consequence; ID and other bullets unchanged and facts supported."
-              }
-            ]
-          },
-          "decisions": [],
-          "review_evidence": null,
-          "source_hashes": {
-            "Vault/Home/Data Persistence/NoSQL/NoSQL.md": "b5b0a74cf998f5beddfee716037bd0da007ae85123fd24a16efb2e667ac3f4d5"
-          },
-          "prepared_source_version": 1,
-          "prepared_at": "2026-11-18T07:52:56.065982Z",
-          "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-          "calls_reserved": 11,
-          "elapsed_seconds": 437.6771854000001,
-          "accepted_at": "2026-11-18T07:53:46.998335Z",
-          "phase": "accepted"
-        }
-      ],
       "base_note_hashes": {
         "Vault/Home/Data Persistence/ACID.md": "75be43eeef26d447f1f8a9aff4b70e0a97fadc9881470d9649b15b62100a089c",
         "Vault/Home/Data Persistence/Caching.md": "ac8804a7b21acc84d9f3be1366c3c9ee96fd9a2ba11a64563dc31e4f6e214cd2",
@@ -18713,7 +18286,7 @@
       "diff_url": "https://github.com/grafanaKibana/devbook.zip/pull/244.diff",
       "patch_url": "https://github.com/grafanaKibana/devbook.zip/pull/244.patch",
       "issue_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/244",
-      "state": "open",
+      "state": "closed",
       "locked": false,
       "title": "notes: improve Data Persistence",
       "user": {
@@ -18739,8 +18312,8 @@
       },
       "body": "<!-- devbook-improvement:start topic=data-persistence-4ea34db4 -->\n## 1. Note improvements\n\nReviewed 8 notes in Data Persistence; improved 1. Calls: 19; elapsed: 745 seconds; stop: call_limit.\n\n- No prose-only note changes.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 1\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- [`Data Persistence/NoSQL/NoSQL.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-data-persistence-4ea34db4-g1/Vault/Home/Data%20Persistence/NoSQL/NoSQL.md)\n  - Before: “When is a non-relational store a poor fit for a service?” — A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are cons\n  - After: “When is a non-relational store a poor fit for a service?” — A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are cons\n  - Rationale: The first answer bullet states the same atomic-scope condition three times in consecutive sentences, which pads the answer and slows retrieval. Collapses three consecutive restatements of the same atomic-scope condition into one condition and its consequence, keeping the qard-id and all other bullets. The answer is shorter and easier to recall and grade while keeping the transfer example and the scope condition. [Cosmos DB transactions are scoped to a logical partition, so atomicity across records holds only inside that scope.](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz artifact: verified for `893688831f998bc811681607522fa673bcf0c015`; required checks and full-vault validation passed on that exact head.\n<!-- devbook-improvement:end -->\n\n<!-- devbook-improvement:topic=data-persistence-4ea34db4;generation=1 -->\n",
       "created_at": "2026-11-18T07:59:25Z",
-      "updated_at": "2026-11-18T20:54:18Z",
-      "closed_at": null,
+      "updated_at": "2026-11-19T21:09:10Z",
+      "closed_at": "2026-11-19T21:09:10Z",
       "merged_at": null,
       "merge_commit_sha": "c0375389ab9d983be6463da2a9c94277e4720d7b",
       "assignees": [],
@@ -18848,13 +18421,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -18868,7 +18441,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -18884,7 +18457,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -18983,13 +18556,13 @@
           "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
           "created_at": "2026-02-10T15:48:40Z",
           "updated_at": "2026-11-10T13:01:04Z",
-          "pushed_at": "2026-11-19T21:06:05Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
           "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
           "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
           "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
           "svn_url": "https://github.com/grafanaKibana/devbook.zip",
           "homepage": "https://devbook.zip",
-          "size": 322583,
+          "size": 305044,
           "stargazers_count": 0,
           "watchers_count": 0,
           "language": "TypeScript",
@@ -19003,7 +18576,7 @@
           "mirror_url": null,
           "archived": false,
           "disabled": false,
-          "open_issues_count": 11,
+          "open_issues_count": 12,
           "license": {
             "key": "mit",
             "name": "MIT License",
@@ -19019,7 +18592,7 @@
           "topics": [],
           "visibility": "public",
           "forks": 0,
-          "open_issues": 11,
+          "open_issues": 12,
           "watchers": 0,
           "default_branch": "main"
         }
@@ -19060,7 +18633,18 @@
       "pause_reason": null,
       "changed_paths": [
         "Vault/Home/Data Persistence/NoSQL/NoSQL.md"
-      ]
+      ],
+      "terminal_audit": {
+        "status": "closed",
+        "record_count": 1,
+        "records": [
+          {
+            "batch_hash": "f3f48757c46e534687e6a13b84bb44dea67a17389670acdf0014722e5eda993a",
+            "proposal_hash": "f9e2915f39eeb01270abee10fe84dbebb20ada579106b26d1846237f03d68999",
+            "result_hash": "17e6abf9cc52eb6ad9746e89d295ddc8b8cfd8232304ab045cf0fab6e6be26da"
+          }
+        ]
+      }
     },
     "computer-science-445ddaa5:5": {
       "topic_id": "computer-science-445ddaa5",
@@ -19068,7 +18652,7 @@
       "number": 248,
       "branch": "notes/automated-computer-science-445ddaa5-g5",
       "status": "open",
-      "frozen": false,
+      "frozen": true,
       "head_sha": "7eac331cb883da31756143a0e761334fffb7b667",
       "export_required": false,
       "export_operation_id": "895ba07e431b4b1f",
@@ -19694,7 +19278,363 @@
         "Vault/Home/Computer Science/Memory Hierarchy.md": "e634cb9dc1a55a38d1ce0b9fc7302341368610950f01eaf521bc5bd5527da9c6"
       },
       "export_verified_head": "7eac331cb883da31756143a0e761334fffb7b667",
-      "export_check_status": "success"
+      "export_check_status": "success",
+      "url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/248",
+      "id": 5402970453,
+      "node_id": "PR_kwDORNIvbs8AAAABQgrJVQ",
+      "html_url": "https://github.com/grafanaKibana/devbook.zip/pull/248",
+      "diff_url": "https://github.com/grafanaKibana/devbook.zip/pull/248.diff",
+      "patch_url": "https://github.com/grafanaKibana/devbook.zip/pull/248.patch",
+      "issue_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/248",
+      "state": "open",
+      "locked": false,
+      "title": "notes: improve Computer Science",
+      "user": {
+        "login": "grafanaKibana",
+        "id": 45916288,
+        "node_id": "MDQ6VXNlcjQ1OTE2Mjg4",
+        "avatar_url": "https://avatars.githubusercontent.com/u/45916288?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/grafanaKibana",
+        "html_url": "https://github.com/grafanaKibana",
+        "followers_url": "https://api.github.com/users/grafanaKibana/followers",
+        "following_url": "https://api.github.com/users/grafanaKibana/following{/other_user}",
+        "gists_url": "https://api.github.com/users/grafanaKibana/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/grafanaKibana/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/grafanaKibana/subscriptions",
+        "organizations_url": "https://api.github.com/users/grafanaKibana/orgs",
+        "repos_url": "https://api.github.com/users/grafanaKibana/repos",
+        "events_url": "https://api.github.com/users/grafanaKibana/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/grafanaKibana/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "body": "<!-- devbook-improvement:start topic=computer-science-445ddaa5 -->\n## 1. Note improvements\n\nReviewed 9 notes in Computer Science; improved 2. Calls: 19; elapsed: 914 seconds; stop: call_limit.\n\n- [`Computer Science/Algorithms/Patterns/Top-K Elements.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-computer-science-445ddaa5-g5/Vault/Home/Computer%20Science/Algorithms/Patterns/Top-K%20Elements.md) — The Mermaid node label contains unquoted parentheses inside square brackets, which Mermaid's flowchart parser can reject, leaving the diagram unrendered. Quotes the node label so the parentheses in min(k,n) are not parsed as Mermaid node-shape syntax. The flowchart renders reliably and shows the terminal state of the scan.\n- [`Computer Science/Algorithms/Search Algorithms/Exponential Search.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-computer-science-445ddaa5-g5/Vault/Home/Computer%20Science/Algorithms/Search%20Algorithms/Exponential%20Search.md) — The index-0 pre-check is stated twice within two paragraphs of the Visualization tab. The index-0 pre-check is stated again in the next paragraph, so the first mention is removed. Less repetition; the pre-check is explained once, alongside the unbounded variant.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz artifact: verified for `7eac331cb883da31756143a0e761334fffb7b667`; required checks and full-vault validation passed on that exact head.\n<!-- devbook-improvement:end -->\n\n<!-- devbook-improvement:topic=computer-science-445ddaa5;generation=5 -->\n",
+      "created_at": "2026-11-19T21:07:01Z",
+      "updated_at": "2026-11-20T07:42:08Z",
+      "closed_at": null,
+      "merged_at": null,
+      "merge_commit_sha": "7d337652bd9d25c271df2d2f472ba77007001c49",
+      "assignees": [],
+      "requested_reviewers": [],
+      "requested_teams": [],
+      "labels": [],
+      "milestone": null,
+      "draft": false,
+      "commits_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/248/commits",
+      "review_comments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/248/comments",
+      "review_comment_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/comments{/number}",
+      "comments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/248/comments",
+      "statuses_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/7eac331cb883da31756143a0e761334fffb7b667",
+      "head": {
+        "label": "grafanaKibana:notes/automated-computer-science-445ddaa5-g5",
+        "ref": "notes/automated-computer-science-445ddaa5-g5",
+        "sha": "7eac331cb883da31756143a0e761334fffb7b667",
+        "user": {
+          "login": "grafanaKibana",
+          "id": 45916288,
+          "node_id": "MDQ6VXNlcjQ1OTE2Mjg4",
+          "avatar_url": "https://avatars.githubusercontent.com/u/45916288?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/grafanaKibana",
+          "html_url": "https://github.com/grafanaKibana",
+          "followers_url": "https://api.github.com/users/grafanaKibana/followers",
+          "following_url": "https://api.github.com/users/grafanaKibana/following{/other_user}",
+          "gists_url": "https://api.github.com/users/grafanaKibana/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/grafanaKibana/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/grafanaKibana/subscriptions",
+          "organizations_url": "https://api.github.com/users/grafanaKibana/orgs",
+          "repos_url": "https://api.github.com/users/grafanaKibana/repos",
+          "events_url": "https://api.github.com/users/grafanaKibana/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/grafanaKibana/received_events",
+          "type": "User",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "repo": {
+          "id": 1154625390,
+          "node_id": "R_kgDORNIvbg",
+          "name": "devbook.zip",
+          "full_name": "grafanaKibana/devbook.zip",
+          "private": false,
+          "owner": {
+            "login": "grafanaKibana",
+            "id": 45916288,
+            "node_id": "MDQ6VXNlcjQ1OTE2Mjg4",
+            "avatar_url": "https://avatars.githubusercontent.com/u/45916288?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/grafanaKibana",
+            "html_url": "https://github.com/grafanaKibana",
+            "followers_url": "https://api.github.com/users/grafanaKibana/followers",
+            "following_url": "https://api.github.com/users/grafanaKibana/following{/other_user}",
+            "gists_url": "https://api.github.com/users/grafanaKibana/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/grafanaKibana/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/grafanaKibana/subscriptions",
+            "organizations_url": "https://api.github.com/users/grafanaKibana/orgs",
+            "repos_url": "https://api.github.com/users/grafanaKibana/repos",
+            "events_url": "https://api.github.com/users/grafanaKibana/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/grafanaKibana/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "html_url": "https://github.com/grafanaKibana/devbook.zip",
+          "description": "Personal knowledge system with RAG Agent, linked to the Obsidian vault, rendered to the Static Web",
+          "fork": false,
+          "url": "https://api.github.com/repos/grafanaKibana/devbook.zip",
+          "forks_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/forks",
+          "keys_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/keys{/key_id}",
+          "collaborators_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/collaborators{/collaborator}",
+          "teams_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/teams",
+          "hooks_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/hooks",
+          "issue_events_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/events{/number}",
+          "events_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/events",
+          "assignees_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/assignees{/user}",
+          "branches_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/branches{/branch}",
+          "tags_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/tags",
+          "blobs_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/blobs{/sha}",
+          "git_tags_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/tags{/sha}",
+          "git_refs_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/refs{/sha}",
+          "trees_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/trees{/sha}",
+          "statuses_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/{sha}",
+          "languages_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/languages",
+          "stargazers_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/stargazers",
+          "contributors_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/contributors",
+          "subscribers_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/subscribers",
+          "subscription_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/subscription",
+          "commits_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/commits{/sha}",
+          "git_commits_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/commits{/sha}",
+          "comments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/comments{/number}",
+          "issue_comment_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/comments{/number}",
+          "contents_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/contents/{+path}",
+          "compare_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/compare/{base}...{head}",
+          "merges_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/merges",
+          "archive_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/{archive_format}{/ref}",
+          "downloads_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/downloads",
+          "issues_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues{/number}",
+          "pulls_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls{/number}",
+          "milestones_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/milestones{/number}",
+          "notifications_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/notifications{?since,all,participating}",
+          "labels_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/labels{/name}",
+          "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
+          "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
+          "created_at": "2026-02-10T15:48:40Z",
+          "updated_at": "2026-11-10T13:01:04Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
+          "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
+          "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
+          "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
+          "svn_url": "https://github.com/grafanaKibana/devbook.zip",
+          "homepage": "https://devbook.zip",
+          "size": 305044,
+          "stargazers_count": 0,
+          "watchers_count": 0,
+          "language": "TypeScript",
+          "has_issues": true,
+          "has_projects": true,
+          "has_downloads": false,
+          "has_wiki": false,
+          "has_pages": true,
+          "has_discussions": true,
+          "forks_count": 0,
+          "mirror_url": null,
+          "archived": false,
+          "disabled": false,
+          "open_issues_count": 12,
+          "license": {
+            "key": "mit",
+            "name": "MIT License",
+            "spdx_id": "MIT",
+            "url": "https://api.github.com/licenses/mit",
+            "node_id": "MDc6TGljZW5zZTEz"
+          },
+          "allow_forking": true,
+          "is_template": false,
+          "web_commit_signoff_required": false,
+          "has_pull_requests": true,
+          "pull_request_creation_policy": "all",
+          "topics": [],
+          "visibility": "public",
+          "forks": 0,
+          "open_issues": 12,
+          "watchers": 0,
+          "default_branch": "main"
+        }
+      },
+      "base": {
+        "label": "grafanaKibana:main",
+        "ref": "main",
+        "sha": "36628d4b1ae482b0f3c18ce0548af47dd2338277",
+        "user": {
+          "login": "grafanaKibana",
+          "id": 45916288,
+          "node_id": "MDQ6VXNlcjQ1OTE2Mjg4",
+          "avatar_url": "https://avatars.githubusercontent.com/u/45916288?v=4",
+          "gravatar_id": "",
+          "url": "https://api.github.com/users/grafanaKibana",
+          "html_url": "https://github.com/grafanaKibana",
+          "followers_url": "https://api.github.com/users/grafanaKibana/followers",
+          "following_url": "https://api.github.com/users/grafanaKibana/following{/other_user}",
+          "gists_url": "https://api.github.com/users/grafanaKibana/gists{/gist_id}",
+          "starred_url": "https://api.github.com/users/grafanaKibana/starred{/owner}{/repo}",
+          "subscriptions_url": "https://api.github.com/users/grafanaKibana/subscriptions",
+          "organizations_url": "https://api.github.com/users/grafanaKibana/orgs",
+          "repos_url": "https://api.github.com/users/grafanaKibana/repos",
+          "events_url": "https://api.github.com/users/grafanaKibana/events{/privacy}",
+          "received_events_url": "https://api.github.com/users/grafanaKibana/received_events",
+          "type": "User",
+          "user_view_type": "public",
+          "site_admin": false
+        },
+        "repo": {
+          "id": 1154625390,
+          "node_id": "R_kgDORNIvbg",
+          "name": "devbook.zip",
+          "full_name": "grafanaKibana/devbook.zip",
+          "private": false,
+          "owner": {
+            "login": "grafanaKibana",
+            "id": 45916288,
+            "node_id": "MDQ6VXNlcjQ1OTE2Mjg4",
+            "avatar_url": "https://avatars.githubusercontent.com/u/45916288?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/grafanaKibana",
+            "html_url": "https://github.com/grafanaKibana",
+            "followers_url": "https://api.github.com/users/grafanaKibana/followers",
+            "following_url": "https://api.github.com/users/grafanaKibana/following{/other_user}",
+            "gists_url": "https://api.github.com/users/grafanaKibana/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/grafanaKibana/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/grafanaKibana/subscriptions",
+            "organizations_url": "https://api.github.com/users/grafanaKibana/orgs",
+            "repos_url": "https://api.github.com/users/grafanaKibana/repos",
+            "events_url": "https://api.github.com/users/grafanaKibana/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/grafanaKibana/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "html_url": "https://github.com/grafanaKibana/devbook.zip",
+          "description": "Personal knowledge system with RAG Agent, linked to the Obsidian vault, rendered to the Static Web",
+          "fork": false,
+          "url": "https://api.github.com/repos/grafanaKibana/devbook.zip",
+          "forks_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/forks",
+          "keys_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/keys{/key_id}",
+          "collaborators_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/collaborators{/collaborator}",
+          "teams_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/teams",
+          "hooks_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/hooks",
+          "issue_events_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/events{/number}",
+          "events_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/events",
+          "assignees_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/assignees{/user}",
+          "branches_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/branches{/branch}",
+          "tags_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/tags",
+          "blobs_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/blobs{/sha}",
+          "git_tags_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/tags{/sha}",
+          "git_refs_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/refs{/sha}",
+          "trees_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/trees{/sha}",
+          "statuses_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/{sha}",
+          "languages_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/languages",
+          "stargazers_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/stargazers",
+          "contributors_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/contributors",
+          "subscribers_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/subscribers",
+          "subscription_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/subscription",
+          "commits_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/commits{/sha}",
+          "git_commits_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/git/commits{/sha}",
+          "comments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/comments{/number}",
+          "issue_comment_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/comments{/number}",
+          "contents_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/contents/{+path}",
+          "compare_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/compare/{base}...{head}",
+          "merges_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/merges",
+          "archive_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/{archive_format}{/ref}",
+          "downloads_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/downloads",
+          "issues_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues{/number}",
+          "pulls_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls{/number}",
+          "milestones_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/milestones{/number}",
+          "notifications_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/notifications{?since,all,participating}",
+          "labels_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/labels{/name}",
+          "releases_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/releases{/id}",
+          "deployments_url": "https://api.github.com/repos/grafanaKibana/devbook.zip/deployments",
+          "created_at": "2026-02-10T15:48:40Z",
+          "updated_at": "2026-11-10T13:01:04Z",
+          "pushed_at": "2026-11-20T20:35:33Z",
+          "git_url": "git://github.com/grafanaKibana/devbook.zip.git",
+          "ssh_url": "git@github.com:grafanaKibana/devbook.zip.git",
+          "clone_url": "https://github.com/grafanaKibana/devbook.zip.git",
+          "svn_url": "https://github.com/grafanaKibana/devbook.zip",
+          "homepage": "https://devbook.zip",
+          "size": 305044,
+          "stargazers_count": 0,
+          "watchers_count": 0,
+          "language": "TypeScript",
+          "has_issues": true,
+          "has_projects": true,
+          "has_downloads": false,
+          "has_wiki": false,
+          "has_pages": true,
+          "has_discussions": true,
+          "forks_count": 0,
+          "mirror_url": null,
+          "archived": false,
+          "disabled": false,
+          "open_issues_count": 12,
+          "license": {
+            "key": "mit",
+            "name": "MIT License",
+            "spdx_id": "MIT",
+            "url": "https://api.github.com/licenses/mit",
+            "node_id": "MDc6TGljZW5zZTEz"
+          },
+          "allow_forking": true,
+          "is_template": false,
+          "web_commit_signoff_required": false,
+          "has_pull_requests": true,
+          "pull_request_creation_policy": "all",
+          "topics": [],
+          "visibility": "public",
+          "forks": 0,
+          "open_issues": 12,
+          "watchers": 0,
+          "default_branch": "main"
+        }
+      },
+      "_links": {
+        "self": {
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/248"
+        },
+        "html": {
+          "href": "https://github.com/grafanaKibana/devbook.zip/pull/248"
+        },
+        "issue": {
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/248"
+        },
+        "comments": {
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/issues/248/comments"
+        },
+        "review_comments": {
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/248/comments"
+        },
+        "review_comment": {
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/comments{/number}"
+        },
+        "commits": {
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/pulls/248/commits"
+        },
+        "statuses": {
+          "href": "https://api.github.com/repos/grafanaKibana/devbook.zip/statuses/7eac331cb883da31756143a0e761334fffb7b667"
+        }
+      },
+      "author_association": "OWNER",
+      "auto_merge": null,
+      "assignee": null,
+      "active_lock_reason": null,
+      "blocked_topic_ids": [],
+      "review_started_head_sha": "7eac331cb883da31756143a0e761334fffb7b667",
+      "base_conflict": false,
+      "pause_reason": null,
+      "changed_paths": [
+        "Vault/Home/Computer Science/Algorithms/Patterns/Top-K Elements.md",
+        "Vault/Home/Computer Science/Algorithms/Search Algorithms/Exponential Search.md"
+      ]
     }
   },
   "feedback": {
@@ -19862,6 +19802,39 @@
       "after": "Mixing the half-open prefix definition with closed endpoints shifts the result by one element, for example `prefix[r] - prefix[l]` for an inclusive range omits `a[r]`. Single-element and full-array queries expose the mismatch quickly.",
       "lineage": [],
       "reconsidered_by": []
+    },
+    {
+      "fingerprint": "211e8deab424a6b66d3a0dcf54dbcdebb43502f289d5bd459bc79ac82aa5219c",
+      "semantic_fingerprint": "f5b6611c1cb11982525d1e8e49896da2a7778763dac20a87d2df92e5d2c951b5",
+      "path": "Vault/Home/Data Persistence/NoSQL/NoSQL.md",
+      "kind": "rewrite",
+      "learning_target": "same",
+      "before": "<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->\n> [!qard]- When is a non-relational store a poor fit for a service?\n> A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.\n>\n> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. An engine whose transactions are limited to one document or partition provides that atomicity only when both accounts lie inside one such scope. Under a partition-scoped transaction, two separate account documents in the same partition can still commit together. When the accounts fall outside every atomic scope the engine supports, such as in different partitions, the application must coordinate the transfer itself.\n> - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.\n> - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.\n> \n> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models) · [Azure Cosmos DB: Database transactions and optimistic concurrency](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)",
+      "after": "<!-- qard-id: 510a2738-ff3d-447d-a2eb-c48661cd012d -->\n> [!qard]- When is a non-relational store a poor fit for a service?\n> A non-relational store is a poor fit when the service's correctness depends on guarantees that the chosen engine cannot provide within the required scope. Those guarantees are constraints, transactions across related records, or support for a changing set of queries.\n>\n> - **Invariants move into application code.** If the database cannot enforce a rule across records, the application must enforce it, coordinate concurrent writes and repair copies that drift apart. For example, a transfer between two account records needs both balance changes to commit or fail together. That works only when both accounts fall inside the engine's atomic scope, such as one partition. Otherwise the application must coordinate the transfer itself.\n> - **New queries can require remodeling.** Data in such stores is often shaped around known reads. A query the model was not designed for may need another index, a duplicated record or a different layout.\n> - **The label decides little.** “NoSQL” names no single consistency or transaction model. Some engines provide strong reads or transactions within a bounded scope, while others offer eventual or tunable consistency. The fit therefore depends on the concrete engine and the scope of each operation.\n> \n> [Microsoft: Understand data store models](https://learn.microsoft.com/en-us/azure/architecture/data-guide/technology-choices/understand-data-store-models) · [Azure Cosmos DB: Database transactions and optimistic concurrency](https://learn.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency)",
+      "lineage": [],
+      "reconsidered_by": []
+    },
+    {
+      "fingerprint": "9071849019d08ac59c180c9079be25dd38f1d0f6e802aa017a629cbb5f68a7bd",
+      "semantic_fingerprint": "16f6856fd34fbdbe73341c9cd7c2421acb04ef2abd2e1c769c4197ee30fdbfe4",
+      "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+      "kind": "note",
+      "learning_target": "same",
+      "before": "improve the short list before context reaches the generator.\n\nBut it cannot recover evidence that the first stage missed.",
+      "after": "improve the short list before context reaches the generator. It cannot recover evidence that the first stage missed.",
+      "lineage": [],
+      "reconsidered_by": []
+    },
+    {
+      "fingerprint": "5d8c5515eb94740c04ec2b74de70fe5aceead457fb6b00387074c30c5b32f8a9",
+      "semantic_fingerprint": "162f4ef08e61394f6bae1c18929aafa8037a5d2a8b9a3e7eea45e292ccad29dd",
+      "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md",
+      "kind": "note",
+      "learning_target": "same",
+      "before": "Low post-rerank Recall@k alone does not establish demotion: evidence can stay beyond k in both orders even after its rank improves, and such exclusion can occur even when the query needs no more relevant evidence than k can hold; on its own it does not show whether a larger k or a better ranking is the right repair.",
+      "after": "Low post-rerank Recall@k alone does not establish demotion, because relevant evidence can sit beyond k in both orders even after its rank improves. Such exclusion can occur even when k is large enough to hold all the evidence the query needs. Neither measurement alone shows whether a larger k or a better ranking is the right repair.",
+      "lineage": [],
+      "reconsidered_by": []
     }
   ],
   "retired_ids": {},
@@ -19877,14 +19850,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-20T20:35:17.360033Z",
-    "elapsed_seconds": 11.1023378,
+    "elapsed_seconds": 24.2417945,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-20T20:35:28.461883Z"
+    "checkpoint_at": "2026-11-20T20:35:41.601344Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
