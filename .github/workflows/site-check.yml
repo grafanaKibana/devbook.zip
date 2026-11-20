@@ -54,7 +54,8 @@ jobs:
         run: |
           set -euo pipefail
           dotnet run --project DevBook.Tooling -- site export --repo-root .. \
-            --expected-head "$SOURCE_SHA" --app-bundle "$APP_BUNDLE" --output "$OUTPUT"
+            --expected-head "$SOURCE_SHA" --app-bundle "$APP_BUNDLE" --output "$OUTPUT" \
+            --timeout-seconds 1200
           dotnet run --project DevBook.Tooling -- site verify --repo-root .. \
             --expected-head "$SOURCE_SHA" --bundle "$OUTPUT/bundle.json" --extract
       - name: Build and validate Quartz
