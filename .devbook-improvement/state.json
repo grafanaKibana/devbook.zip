@@ -13834,6 +13834,66 @@
         },
         "review_process": "focused-whole-note-v1"
       }
+    },
+    "Vault/Home/Networks/Protocols/HTTP.md": {
+      "content_hash": "641c134c84c46ceec2ca6c60d718c234b35c3e009f7b84cdb42c5d4607d24bcf",
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "outcome": "keep",
+      "repair_input_hash": "",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "keep_review": {
+        "content_hash": "641c134c84c46ceec2ca6c60d718c234b35c3e009f7b84cdb42c5d4607d24bcf",
+        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review": {
+          "path": "Vault/Home/Networks/Protocols/HTTP.md",
+          "verdict": "CLEAN",
+          "summary": "The whole note was read and checked against RFC 9110, RFC 9111, RFC 8446 and .NET HttpClient behavior. It is accurate, well ordered and carries mechanisms plus conditions, so an unchanged keep is justified. The single Qard tests one coherent task and keeps its ID.",
+          "page_type": "Concept — typed frontmatter, optional Questions and References present and valid. Protected Qard ID and qard-deck/qard-topic metadata are intact. The csharp, http and text fences all have language identifiers.",
+          "current_text_evidence": [
+            {
+              "quote": "Idempotency describes the intended server effect of repeated identical requests, not identical responses or freedom from races.",
+              "line_start": 33,
+              "reason": "States the correct RFC 9110 meaning of idempotency and the lost-response conditional PUT boundary (412 on retry)."
+            },
+            {
+              "quote": "`If-None-Match` takes precedence over `If-Modified-Since` when both are present.",
+              "line_start": 152,
+              "reason": "Caching precedence rule is accurate per RFC 9110/9111; the cache-key, Vary and Authorization paragraphs are also correct."
+            },
+            {
+              "quote": "HTTP method idempotency alone is insufficient.",
+              "line_start": 194,
+              "reason": "Correctly explains 0-RTT replay risk beyond method semantics, matching RFC 8446 guidance."
+            },
+            {
+              "quote": "The default request version remains HTTP/1.1.",
+              "line_start": 238,
+              "reason": "Accurate for HttpClient.DefaultRequestVersion. The three HttpVersionPolicy values are described correctly."
+            },
+            {
+              "quote": "What does HTTP idempotency guarantee about retrying a request?",
+              "line_start": 267,
+              "reason": "One bounded, independently gradeable recall task. The answer states its limits and cites RFC 9110 on the answer side."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the sections (method semantics, fields and conditionals, caching, TLS, .NET client) all serve one HTTP operating picture and cross-reference each other. Splitting by topic would be optional rather than needed. Caching and TLS could separate later if the note grows.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        },
+        "review_process": "focused-whole-note-v1"
+      }
     }
   },
   "topics": {
@@ -20095,7 +20155,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-20T20:35:17.360033Z",
-    "elapsed_seconds": 651.5540826,
+    "elapsed_seconds": 655.4741389000001,
     "calls_reserved": 15,
     "responses_received": 15,
     "attempted_paths": [
@@ -21953,7 +22013,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-20T20:46:08.913634Z",
+    "checkpoint_at": "2026-11-20T20:46:12.833691Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
@@ -64504,105 +64564,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "7c74b21713b8477fad684bf4b97fc256",
-    "topic_id": "networks-ab2c47c3",
-    "batch": {
-      "topic": "Networks",
-      "topic_id": "networks-ab2c47c3",
-      "notes": [
-        {
-          "path": "Vault/Home/Networks/Protocols/HTTP.md",
-          "content": "---\ntopic: [Networks]\nsubtopic: [Protocols]\nsummary: \"A stateless request-response protocol carrying web and API messages across reusable connections.\"\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\n\npublish: true\nqard-deck: \"Networks\"\nqard-topic: \"Protocols/HTTP\"\nflashcard_uid: \"bf424dee\"\ncreated: \"2026-02-28T20:52:28.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.361Z\"\n---\n\nHTTP is the message contract behind browsers, APIs, webhooks, and service health checks. A request names a target and carries a method, fields, and optional content. The response reports an outcome and may carry a representation.\n\nThose semantics are separate from the connection carrying them. HTTP/1.1, HTTP/2, and HTTP/3 preserve the same method and status model while changing framing, multiplexing, and transport behavior.\n\n# Methods, Statuses, and Replay Safety\n\n| Method | Intended semantics | Safe | Idempotent | Retry decision |\n|---|---|---|---|---|\n| `GET` | Transfer a current representation | Yes | Yes | Retryable within the request deadline when replay is acceptable |\n| `HEAD` | Transfer GET metadata without response content | Yes | Yes | Same boundary as `GET` |\n| `POST` | Process content according to the target resource | No | No | Retryable only with explicit dedupe/idempotency or proof it was not processed |\n| `PUT` | Create or replace the target state with the supplied representation | No | Yes | Retries keep their preconditions, and an unknown first outcome requires reconciliation |\n| `PATCH` | Apply a media-type-defined patch | No | Depends on patch | Retryable only when the patch operation is idempotent or deduplicated |\n| `DELETE` | Remove the target association | No | Yes | Repeat responses need a defined contract, and uncertain completions require reconciliation |\n\nIdempotency describes the intended server effect of repeated identical requests, not identical responses or freedom from races. If a conditional `PUT` commits but its response is lost, an identical retry can return `412 Precondition Failed` because the first request advanced the entity tag. The client should fetch or otherwise reconcile current state rather than remove `If-Match` and overwrite a concurrent change.\n\n| Status | Boundary meaning |\n|---|---|\n| 201 Created | New resource and optional `Location` target |\n| 400 Bad Request | Request malformed or invalid framing |\n| 401 Unauthorized | Challenge required |\n| 403 Forbidden | Request understood, denied |\n| 409 Conflict | Current resource state conflicts |\n| 412 Precondition Failed | `If-Match`/state precondition violated |\n| 422 Unprocessable Content | Syntax is understood, but the instructions cannot be processed |\n| 429 Too Many Requests | Retry policy applies, and any `Retry-After` is honored |\n| 502 Bad Gateway | Gateway cannot consume upstream response |\n| 503 Service Unavailable | Server temporarily unable to handle the request, commonly overload or maintenance; `Retry-After` may bound retry timing |\n\nAn unknown status is interpreted by class for generic handling. Retry and security policy still need an explicit rule. An unregistered value supplies neither. Diagnostics should retain the raw code and the intermediary or product that generated it.\n\n# Connection Models and Versions\n\n| Version | Transport | What changes |\n|---|---|---|\n| HTTP/1.1 | TCP | Persistent connections. Limited request ordering in practice |\n| HTTP/2 | TCP + streams | Multiplexed streams with flow-control and scheduling |\n| HTTP/3 | QUIC + streams | Removes transport-level HOL for independent streams |\n\n# Fields, Content, and Conditional Requests\n\nFields carry several different contracts:\n\n- representation metadata: `Content-Type` and content-coding fields\n- routing and identity: `Host`, `Location`, and explicitly trusted forwarding fields\n- negotiation: `Accept`, `Accept-Encoding`, and `Accept-Language`\n- validators: `ETag`, `If-Match`, `If-None-Match`\n- response semantics: status, challenge headers, `Range` + `Content-Range`\n\nHTTP/1.1 uses `Content-Length`, chunked transfer coding, or connection closure to delimit content according to its message rules. HTTP/2 and HTTP/3 carry content in frames instead. Range requests combine `Range`, `206 Partial Content`, and `Content-Range` for resumable downloads and media seeking.\n\nConnection-specific fields are scoped to one hop. A proxy must remove fields named by `Connection` and must not forward HTTP/1.1-only connection metadata into HTTP/2 or HTTP/3.\n\nOptimistic concurrency belongs to this header contract:\n\n- A `GET /orders/42` response returns a validator such as `ETag: \"17\"`.\n- The client sends `If-Match: \"17\"` with the state-changing request.\n- The server returns `428 Precondition Required` when the validator is missing and `412 Precondition Failed` when another writer has advanced the version.\n- The storage write performs the same comparison atomically. An application-side read, comparison, then unconditional save still has a race.\n\n```csharp\napp.MapPut(\"/orders/{id:long}\", async (\n    long id,\n    UpdateOrder request,\n    HttpRequest http,\n    OrdersDb db,\n    CancellationToken ct) =>\n{\n    if (!http.Headers.TryGetValue(\"If-Match\", out var raw))\n    {\n        return Results.StatusCode(StatusCodes.Status428PreconditionRequired);\n    }\n\n    // Restricted single-tag demonstration, not a complete If-Match evaluator.\n    // It accepts one canonical strong tag issued by this API, such as \"17\".\n    // Omitted RFC 9110 handling: a list matches when any member strongly matches\n    // the current tag, and \"*\" matches when the order exists. This sketch answers\n    // both forms with 412, even when full evaluation would succeed.\n    var tag = raw.ToString();\n    if (tag.Length < 3 ||\n        !long.TryParse(tag.AsSpan(1, tag.Length - 2), NumberStyles.None,\n            CultureInfo.InvariantCulture, out var expectedVersion) ||\n        tag != '\"' + expectedVersion.ToString(CultureInfo.InvariantCulture) + '\"')\n    {\n        return Results.StatusCode(StatusCodes.Status412PreconditionFailed);\n    }\n\n    var affected = await db.Database.ExecuteSqlInterpolatedAsync($\"\"\"\n        UPDATE orders\n        SET shipping_address = {request.ShippingAddress}, version = version + 1\n        WHERE id = {id} AND version = {expectedVersion}\n        \"\"\", ct);\n\n    return affected == 1\n        ? Results.NoContent()\n        : Results.StatusCode(StatusCodes.Status412PreconditionFailed);\n});\n```\n\nZero modified rows means the caller must re-read and merge deliberately before retrying. A stale payload is not made safe by replaying it with the new version.\n\n# Freshness, Validators, and Cache Keys\n\nHTTP caching reuses a stored response only when the request matches its cache key and the response is fresh or validates successfully. The performance win is avoiding origin work and transfer. The cost is a correctness contract around staleness, authorization, representation variants, and invalidation.\n\n## Freshness Policy\n\n```http\nCache-Control: public, max-age=60, s-maxage=300, must-revalidate\n```\n\n| Directive | Effect |\n|---|---|\n| `max-age=60` | A cache can reuse the response for 60 seconds from its calculated age |\n| `s-maxage=300` | A shared cache uses 300 seconds instead of `max-age` |\n| `no-cache` | Storage is allowed, but every reuse requires successful validation |\n| `no-store` | The cache must not store the response |\n| `private` | Shared caches must not store the response. A private cache may |\n| `must-revalidate` | A stale response cannot be reused without successful validation, except where the specification explicitly permits it |\n\nWithout explicit freshness, a cache can apply a heuristic to eligible responses. An API that cares about reuse or staleness needs to state that policy.\n\n## Validators and Preconditions\n\n```http\nGET /catalog/42 HTTP/1.1\nIf-None-Match: \"catalog-v9\"\n\nHTTP/1.1 304 Not Modified\nETag: \"catalog-v9\"\nCache-Control: private, max-age=0, must-revalidate\n```\n\n`304 Not Modified` carries no representation content. The cache updates stored metadata and reuses its prior content. `If-None-Match` takes precedence over `If-Modified-Since` when both are present. Weak entity tags can validate semantic equivalence for caching but are unsuitable for `If-Match` lost-update protection.\n\n## Cache Keys and `Vary`\n\nThe primary cache key includes the target URI and method according to cache rules. `Vary` adds selected request fields:\n\n```http\nVary: Accept-Encoding, Accept-Language\n```\n\nOmitting a relevant field can cross-serve the wrong representation. Adding a high-cardinality field such as raw `User-Agent` can fragment the cache until reuse disappears. Normalization is safe only when an explicit application or intermediary contract defines it. Arbitrary query sorting or decoding can change resource identity.\n\nA shared cache normally cannot reuse a response to a request carrying `Authorization` unless the response explicitly permits shared reuse under RFC 9111. Even then, its key and representation must not mix identities. Private user data belongs in a private cache, and `no-store` applies when storage itself is unacceptable.\n\nCaching pitfalls are contract failures rather than tuning details:\n\n- `no-cache` does not provide secrecy because it permits storage.\n- Some error responses are heuristically cacheable. Transient failures need an explicit short policy or `no-store`.\n- Long freshness windows require versioned URLs, purge controls, or an accepted stale window with clear invalidation ownership.\n\n# HTTPS, TLS, and Transport Trust\n\nHTTPS is HTTP carried through TLS. TLS authenticates the server certificate, establishes symmetric traffic keys, and protects HTTP bytes from undetected modification or passive reading. It does not authenticate the application user, make the origin trustworthy, or prevent an authorized endpoint from logging plaintext.\n\n## TLS 1.3 Handshake\n\n```text\nClientHello: versions, key share, cipher suites, SNI, ALPN\nServerHello: selected version, key share, cipher suite\n[encrypted] EncryptedExtensions, Certificate, CertificateVerify, Finished\n[encrypted] client Finished\napplication data\n```\n\nThe ClientHello and ServerHello remain visible because they negotiate the shared secret and protocol. After ServerHello, handshake traffic keys protect the server certificate and most remaining handshake metadata. An observer can still infer endpoints, timing, sizes, and any unencrypted ClientHello fields. Encrypted client hello is a separate deployment capability.\n\nThe client validates the certificate chain to a trusted root, the requested hostname against the leaf certificate's subject alternative names, the validity interval, and applicable revocation or policy signals. A successful handshake proves control of the certificate's private key under the client's trust policy, not ownership of a business identity.\n\n## Resumption and 0-RTT\n\nTLS 1.3 resumption can send early application data before the server completes the new handshake. An attacker can replay captured 0-RTT data to another accepting server instance. Early data must therefore be rejected or restricted to operations whose replay is harmless under the complete application contract.\n\nHTTP method idempotency alone is insufficient. A repeated `GET` can consume a one-time token, emit an audit event, or trigger billing even though GET is defined as safe. Authentication, purchases, state transitions, and one-time links stay out of 0-RTT unless the application has explicit anti-replay state.\n\n## HSTS and the First Visit\n\n`Strict-Transport-Security` tells a browser that received the header over valid HTTPS to rewrite future HTTP attempts to HTTPS for the stated `max-age`. `includeSubDomains` extends the policy, so it is safe to enable only when every covered host supports HTTPS.\n\nHSTS cannot protect the first visit before the browser knows the policy. Browser preload lists close that gap for accepted domains, but preload is a long-lived operational commitment with removal delay. A safe deployment redirects HTTP to HTTPS, sends HSTS only over HTTPS, and treats preload readiness as a separate rollout gate.\n\n## TLS Interception and Trust Stores\n\nAn enterprise or debugging proxy can inspect HTTPS only when the client trusts a CA controlled by that proxy. The proxy terminates one TLS connection and creates a second connection to the origin. The connections have different traffic keys. Hostname validation succeeds because the proxy issues a matching leaf certificate from the installed root.\n\nTrust-store modification is privileged configuration. Certificate pinning can narrow trust for controlled clients, but it increases rotation and recovery risk and is not a general browser defense.\n\n# Connection Pooling, DNS, and HTTP Versions in .NET\n\n`HttpClient` is a request API over a connection pool owned by `SocketsHttpHandler`. Correct operation depends less on disposing the client than on bounding connection lifetime, concurrency, timeouts, and retries. Reusing a client avoids repeated TCP/TLS setup and ephemeral-port exhaustion. Rotating pooled connections lets DNS changes take effect.\n\n## Lifetime and DNS\n\nLong-lived clients can be created directly or through `IHttpClientFactory`. Creating and disposing one client with its own disposable handler per request destroys connection pools, forces fresh handshakes, and leaves closed TCP connections in `TIME_WAIT`.\n\n```csharp\nvar handler = new SocketsHttpHandler\n{\n    PooledConnectionLifetime = TimeSpan.FromMinutes(5),\n    MaxConnectionsPerServer = 100,\n    ConnectTimeout = TimeSpan.FromSeconds(3)\n};\n\nvar client = new HttpClient(handler)\n{\n    Timeout = TimeSpan.FromSeconds(10),\n    DefaultRequestVersion = HttpVersion.Version20,\n    DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower\n};\n```\n\nDNS TTL does not close an established connection. `PooledConnectionLifetime` limits how long a connection remains eligible for reuse. The next connection resolves the hostname again. The useful lifetime depends on endpoint churn and connection-setup cost. There is no universal value.\n\n`IHttpClientFactory` centralizes named or typed client configuration and rotates handlers. Its default handler lifetime is an implementation default, not a DNS guarantee: active connections and application retry behavior still determine when traffic leaves an old endpoint.\n\n## HTTP Version Policy\n\nThe default request version remains HTTP/1.1. When the application requires a specific negotiation boundary, it sets both the desired version and `HttpVersionPolicy`:\n\n| Policy | Behavior |\n|---|---|\n| `RequestVersionExact` | Fails when the requested version cannot be used |\n| `RequestVersionOrLower` | Prefers the requested version and falls back |\n| `RequestVersionOrHigher` | Uses the requested version or negotiates upward |\n\nHTTP/2 and HTTP/3 support also depends on TLS/ALPN, operating system, server, proxy, and runtime capabilities. When protocol behavior matters, diagnostics record the negotiated response version.\n\n## Deadlines, Retries, and Caller Load\n\nConnect, request, and caller cancellation need separate budgets. A single broad timeout hides whether time was spent waiting for a pool slot, connecting, receiving headers, or streaming content.\n\nRetry policy is a contract:\n\n- Retries of transient failures stay within one end-to-end deadline.\n- An idempotent method reduces state risk but does not prove replay safety. Request bodies, one-time credentials, downstream effects, and unknown commit results still matter.\n- Non-idempotent operations need an application idempotency key with durable deduplication before automatic retry.\n\nConnections return to the pool after content consumption when `HttpResponseMessage` is disposed and large bodies are streamed with `HttpCompletionOption.ResponseHeadersRead`. Concurrency also needs a bound: an unbounded caller queue can overload the destination even when the handler limits open connections.\n\n# HTTP API Interoperability\n\n[[REST]] fits resource APIs that need broad HTTP interoperability and ordinary caching semantics. GRPC fits controlled peers where schema-first contracts and streaming dominate. GraphQL fits clients that need projection control and can pay for query governance.\n\n# Questions\n\n<!-- qard-id: 4c4c1b1f-db4e-4e7a-98e9-c9a49ac03838 -->\n> [!qard]- What does HTTP idempotency guarantee about retrying a request?\n> An idempotent HTTP method guarantees that sending the same request several times has the same intended effect on the server as sending it once. A client can therefore resend such a request after a communication failure, for example when the connection closes before the response arrives, even though the first attempt may already have succeeded.\n>\n> `PUT`, `DELETE` and the safe methods, such as `GET` and `HEAD`, are idempotent. `POST` is not.\n>\n> The guarantee is narrower than identical behavior:\n>\n> - **Responses can differ.** A retried `DELETE` leaves the resource deleted, but the second response can report that the resource no longer exists.\n> - **Only the requested effect is covered.** The server can still log, audit or record history separately for each copy of the request.\n> - **Method semantics do not make a particular retry harmless.** The request body must be replayable, the retry must fit within the caller's deadline and credentials must still be valid. A request that carries a single-use value, such as a one-time token, cannot simply be replayed.\n> \n> For a non-idempotent method such as `POST`, an automatic retry is appropriate only when the client knows the operation is idempotent for that resource or can detect that the first attempt was never applied.\n>\n> [RFC 9110: Idempotent methods](https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.2)\n\n# References\n\n- [HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110)\n- [RFC 9111: HTTP Caching](https://www.rfc-editor.org/rfc/rfc9111)\n- [TLS 1.3](https://www.rfc-editor.org/rfc/rfc8446)\n- [HttpClient guidelines](https://learn.microsoft.com/dotnet/fundamentals/networking/http/httpclient-guidelines)\n",
-          "hash": "641c134c84c46ceec2ca6c60d718c234b35c3e009f7b84cdb42c5d4607d24bcf",
-          "topic": "Networks",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Networks/Protocols/HTTP.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against RFC 9110, RFC 9111 and RFC 8446. The method table (safe and idempotent flags, PATCH depends on the patch, DELETE and PUT idempotent) matches RFC 9110. The status table is consistent with the RFCs: 422 is Unprocessable Content, 428 and 412 are used correctly in the If-Match flow, and 503 is described correctly. The caching section is accurate: no-cache permits storage, private and s-maxage behave as described, 304 handling is right, If-None-Match takes precedence over If-Modified-Since, and Vary and Authorization reuse are described correctly. The TLS 1.3 handshake, 0-RTT replay, HSTS and interception explanations are correct. The .NET section is accurate: the default request version is 1.1, the three HttpVersionPolicy values are right, and PooledConnectionLifetime and SocketsHttpHandler behave as described. The C# sample states its limits explicitly. The single Qard card tests one coherent idempotency task, and its answer matches the RFC. There are no known violations, and the ordering, terminology and depth are sound. Any edit would be cosmetic churn."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/Networks/Protocols/HTTP.md": "641c134c84c46ceec2ca6c60d718c234b35c3e009f7b84cdb42c5d4607d24bcf"
-    },
-    "feedback_keys": [],
-    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Networks/Protocols/HTTP.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-20T20:45:37.185550Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "notes": [
-        {
-          "path": "Vault/Home/Networks/Protocols/HTTP.md",
-          "verdict": "CLEAN",
-          "summary": "The whole note was read and checked against RFC 9110, RFC 9111, RFC 8446 and .NET HttpClient behavior. It is accurate, well ordered and carries mechanisms plus conditions, so an unchanged keep is justified. The single Qard tests one coherent task and keeps its ID.",
-          "page_type": "Concept — typed frontmatter, optional Questions and References present and valid. Protected Qard ID and qard-deck/qard-topic metadata are intact. The csharp, http and text fences all have language identifiers.",
-          "current_text_evidence": [
-            {
-              "quote": "Idempotency describes the intended server effect of repeated identical requests, not identical responses or freedom from races.",
-              "line_start": 33,
-              "reason": "States the correct RFC 9110 meaning of idempotency and the lost-response conditional PUT boundary (412 on retry)."
-            },
-            {
-              "quote": "`If-None-Match` takes precedence over `If-Modified-Since` when both are present.",
-              "line_start": 152,
-              "reason": "Caching precedence rule is accurate per RFC 9110/9111; the cache-key, Vary and Authorization paragraphs are also correct."
-            },
-            {
-              "quote": "HTTP method idempotency alone is insufficient.",
-              "line_start": 194,
-              "reason": "Correctly explains 0-RTT replay risk beyond method semantics, matching RFC 8446 guidance."
-            },
-            {
-              "quote": "The default request version remains HTTP/1.1.",
-              "line_start": 238,
-              "reason": "Accurate for HttpClient.DefaultRequestVersion. The three HttpVersionPolicy values are described correctly."
-            },
-            {
-              "quote": "What does HTTP idempotency guarantee about retrying a request?",
-              "line_start": 267,
-              "reason": "One bounded, independently gradeable recall task. The answer states its limits and cites RFC 9110 on the answer side."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the sections (method semantics, fields and conditionals, caching, TLS, .NET client) all serve one HTTP operating picture and cross-reference each other. Splitting by topic would be optional rather than needed. Caching and TLS could separate later if the note grows.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "No edits were proposed, and the independent whole-note audit found no factual, structural, question-quality or rule violations. The keep is justified with current-text evidence.",
-      "change_checks": []
-    }
-  }
+  "parked_author_proposals": {}
 }
