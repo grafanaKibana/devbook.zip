@@ -20213,11 +20213,11 @@
     "version": 1,
     "id": "7c74b21713b8477fad684bf4b97fc256",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-20T20:35:17.360033Z",
-    "elapsed_seconds": 774.8611753000001,
+    "elapsed_seconds": 791.2908210000002,
     "calls_reserved": 19,
-    "responses_received": 18,
+    "responses_received": 19,
     "attempted_paths": [
       "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
       "Vault/Home/Networks/OSI Model.md",
@@ -22221,7 +22221,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-20T20:48:12.220729Z",
+    "checkpoint_at": "2026-11-20T20:48:28.650375Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
@@ -64819,6 +64819,125 @@
       "Vault/Home/Networks/Protocols/Ports.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-20T20:48:07.948109Z"
+    "prepared_at": "2026-11-20T20:48:07.948109Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/Networks/Protocols/Ports.md",
+            "verdict": "CLEAN",
+            "summary": "The whole note was read and checked. The opening states the operating idea: a registered port is a default, not proof of what runs. The table's ports, transports and caveats are accurate and concise. The only blemish is one trailing period in a table cell, which is cosmetic, so leaving the note unchanged is justified.",
+            "page_type": "Concept — frontmatter is typed, there is no Questions section (optional), the single reference is a bare link, and the code fence has a language identifier.",
+            "current_text_evidence": [
+              {
+                "quote": "IANA registrations provide shared defaults, not proof of what a deployment actually runs.",
+                "line_start": 14,
+                "reason": "States the key boundary up front, so the idea is recoverable before the table."
+              },
+              {
+                "quote": "TCP is required for AXFR and for IXFR responses that do not fit in one UDP message. Compact IXFR can use UDP.",
+                "line_start": 22,
+                "reason": "Gives the DNS transport condition and its exception, which is accurate and not oversimplified."
+              },
+              {
+                "quote": "HTTP/1.1 and HTTP/2 use TLS over TCP. HTTP/3 uses QUIC over UDP",
+                "line_start": 29,
+                "reason": "Explains why HTTPS appears on both transports, with the mechanism."
+              },
+              {
+                "quote": "Frequently moved, but changing the port is noise reduction rather than authentication",
+                "line_start": 19,
+                "reason": "Decided engineering judgment, stated impersonally."
+              },
+              {
+                "quote": "nc -vz db.internal.example 5432",
+                "line_start": 38,
+                "reason": "The bash fence has a language identifier and the example shows verifying the listener rather than trusting the number."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: one coherent reference table with a short framing paragraph. Splitting would add no independent value.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The note is accurate and clear and has no concrete rule violations. The author's keep is supported: the whole note holds up on independent reading, and the one trailing period is cosmetic. No edits were proposed, so no decisions or sources need checking.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/Networks/Protocols/Ports.md",
+          "citation_index": 4,
+          "reported_line_start": 38,
+          "resolved_line_start": 39
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/Networks/Protocols/Ports.md": "1b769755ab45c5c689d9b3fc4c3e6f5dbcc05132df413b2563a20c04ab40b579"
+      },
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/Networks/Protocols/Ports.md",
+          "verdict": "CLEAN",
+          "summary": "The whole note was read and checked. The opening states the operating idea: a registered port is a default, not proof of what runs. The table's ports, transports and caveats are accurate and concise. The only blemish is one trailing period in a table cell, which is cosmetic, so leaving the note unchanged is justified.",
+          "page_type": "Concept — frontmatter is typed, there is no Questions section (optional), the single reference is a bare link, and the code fence has a language identifier.",
+          "current_text_evidence": [
+            {
+              "quote": "IANA registrations provide shared defaults, not proof of what a deployment actually runs.",
+              "line_start": 14,
+              "reason": "States the key boundary up front, so the idea is recoverable before the table."
+            },
+            {
+              "quote": "TCP is required for AXFR and for IXFR responses that do not fit in one UDP message. Compact IXFR can use UDP.",
+              "line_start": 22,
+              "reason": "Gives the DNS transport condition and its exception, which is accurate and not oversimplified."
+            },
+            {
+              "quote": "HTTP/1.1 and HTTP/2 use TLS over TCP. HTTP/3 uses QUIC over UDP",
+              "line_start": 29,
+              "reason": "Explains why HTTPS appears on both transports, with the mechanism."
+            },
+            {
+              "quote": "Frequently moved, but changing the port is noise reduction rather than authentication",
+              "line_start": 19,
+              "reason": "Decided engineering judgment, stated impersonally."
+            },
+            {
+              "quote": "nc -vz db.internal.example 5432",
+              "line_start": 39,
+              "reason": "The bash fence has a language identifier and the example shows verifying the listener rather than trusting the number."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: one coherent reference table with a short framing paragraph. Splitting would add no independent value.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "NOT APPLICABLE",
+            "identity_safety": "NOT APPLICABLE",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The note is accurate and clear and has no concrete rule violations. The author's keep is supported: the whole note holds up on independent reading, and the one trailing period is cosmetic. No edits were proposed, so no decisions or sources need checking.",
+      "change_checks": []
+    }
   }
 }
