@@ -10,7 +10,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Prompt Engineering/Prompt Engineering"
 flashcard_uid: "008ceb7e"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-19T19:50:06.148Z"
 published: "2026-07-08T13:14:17.482Z"
 ---
 
@@ -131,7 +131,7 @@ flowchart TD
     J --> K
 ```
 
-Strict output shape needs structured output or schema validation. Examples can clarify semantics that the schema cannot express. A task that cannot fit one instruction may need [[Prompt Composition]]. In both cases, representative evaluation matters more than eliciting hidden reasoning traces; meta prompting is only one way to generate candidate instructions.
+Strict output shape needs structured output or schema validation. Examples can clarify semantics that the schema cannot express. A task that cannot fit one instruction may need [[Prompt Composition]]. In both cases, representative evaluation matters more than eliciting hidden reasoning traces; meta prompting, covered in [[Automated Prompt Optimization]], is only one way to generate candidate instructions.
 
 # Pitfalls
 

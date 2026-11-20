@@ -1,10 +1,7 @@
 ---
-topic:
-  - AI & ML
-subtopic:
-  - LLM
-level:
-  - "2"
+topic: [AI & ML]
+subtopic: [LLM]
+level: ["2"]
 priority: High
 status: Established
 publish: true
@@ -12,7 +9,7 @@ qard-deck: AI & ML
 qard-topic: LLM/Context Engineering/RAG/Chunking
 flashcard_uid: 6bf1b415
 created: 2026-02-27T12:56:16.000Z
-modified: "2026-11-19T18:51:19.159Z"
+modified: "2026-11-19T19:50:06.148Z"
 published: 2026-07-08T13:14:17.484Z
 ---
 
