@@ -20033,15 +20033,16 @@
     "version": 1,
     "id": "7c74b21713b8477fad684bf4b97fc256",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-20T20:35:17.360033Z",
-    "elapsed_seconds": 371.6290631,
+    "elapsed_seconds": 377.9206151,
     "calls_reserved": 9,
     "responses_received": 9,
     "attempted_paths": [
       "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
       "Vault/Home/Networks/OSI Model.md",
-      "Vault/Home/Networks/Protocols/DNS.md"
+      "Vault/Home/Networks/Protocols/DNS.md",
+      "Vault/Home/Networks/Protocols/GraphQL.md"
     ],
     "accepted_records": [],
     "outcomes": [
@@ -20212,10 +20213,78 @@
           },
           "model_calls": 7
         }
+      },
+      {
+        "path": "Vault/Home/Networks/Protocols/GraphQL.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/Networks/Protocols/GraphQL.md",
+                "outcome": "keep",
+                "reason": "I read the whole note and found no defects. The opening separates the query language from backend cost. The execution section covers serial mutations, N+1 loading and request-local batching. The transport section lists concrete limits and explains why a shared POST URL blocks CDN caching. The adoption table names the condition for choosing each pattern. The LinkedIn persisted-query section correctly separates control plane from data plane. The REST/gRPC comparison states its tradeoff. I checked the one questionable claim, the 294 status for partial responses. The current GraphQL-over-HTTP draft says servers SHOULD use 294 when a result has both data and errors with application/graphql-response+json. It also says 294 is unregistered, that clients treat it like 200, and that a non-null data entry requires a 2xx. The note matches this, and its statement that legacy application/json servers return 200 is consistent with the draft's legacy handling. The note has no cards, and no known violations are listed. Further edits would be cosmetic."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The note is accurate and coherent. No known violations exist, and no edits are proposed. The one risky claim, the 294 status, matches the draft spec.",
+            "notes": [
+              {
+                "path": "Vault/Home/Networks/Protocols/GraphQL.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole note. It explains the operating idea first: a typed query language whose cost moves to resolvers. It then covers execution and N+1 batching, transport limits and caching, adoption patterns, the LinkedIn persisted-query design, and the REST/gRPC tradeoff. It is accurate, concise and ordered sensibly. No defects need an edit. The note has no cards.",
+                "page_type": "Concept — no required headings; Questions are optional and absent; References are bare link bullets; the code fences carry language identifiers (graphql, text).",
+                "current_text_evidence": [
+                  {
+                    "quote": "recommends `294 Partial Success` for a response containing both `data` and `errors`",
+                    "line_start": 29,
+                    "reason": "The claim matches the current draft: servers SHOULD use 294 with application/graphql-response+json, and the note limits the recommendation to that media type."
+                  },
+                  {
+                    "quote": "resolving 100 orders and then loading each customer separately produces 101 backend calls",
+                    "line_start": 35,
+                    "reason": "Concrete and correct N+1 arithmetic, followed by a request-local batching example."
+                  },
+                  {
+                    "quote": "Federation is an ownership design, not a maturity level.",
+                    "line_start": 68,
+                    "reason": "States the condition that changes the engineering decision, so the adoption table is not just a list."
+                  },
+                  {
+                    "quote": "This is not an API Gateway pattern. The registry and compiler are control-plane dependencies.",
+                    "line_start": 74,
+                    "reason": "Separates control plane from data plane precisely and states the tradeoffs and the condition for using the design."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: transport, schema execution, adoption patterns and the REST/gRPC comparison all serve one coherent GraphQL topic. The LinkedIn section is short and supports the adoption decision.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": []
+          },
+          "model_calls": 9
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-20T20:41:28.988612Z",
+    "checkpoint_at": "2026-11-20T20:41:35.280164Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
