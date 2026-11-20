@@ -19850,14 +19850,14 @@
     "status": "active",
     "phase": "author_completed",
     "started_at": "2026-11-20T20:35:17.360033Z",
-    "elapsed_seconds": 123.7023482,
+    "elapsed_seconds": 129.2680937,
     "calls_reserved": 3,
     "responses_received": 3,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-20T20:37:21.061902Z",
+    "checkpoint_at": "2026-11-20T20:37:26.627640Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
@@ -47556,15 +47556,40 @@
       },
       "proposal": {
         "version": 1,
-        "edits": [],
+        "edits": [
+          {
+            "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+            "expected_hash": "bd3fa45ddc253293e34b23644f356bb510f058aeaf82390565a5bda85752fa74",
+            "before": "Key: SHA1(\"ubuntu-22.04.iso\")\n     → Hash determines which peer(s) are responsible for this key\n     → Those peers store the list of peers that have the file",
+            "after": "Key: infohash = SHA1(bencoded info dictionary of the torrent)\n     → Nodes whose IDs are closest to the infohash (XOR distance) are responsible for it\n     → Those nodes store the list of peers that have the torrent",
+            "reason": "The example derived the key from a file name, but BitTorrent DHT keys are infohashes of the torrent metadata, in the same 160-bit space as node IDs.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "DHT key is the torrent infohash, not a file name",
+              "responsibility is by closeness in the ID space"
+            ],
+            "sources": [
+              {
+                "url": "https://www.bittorrent.org/beps/bep_0005.html",
+                "claim": "The DHT identifies a torrent by its infohash, in the same 160-bit space as node IDs, and closeness is measured by XOR.",
+                "version": "BEP 5 (BitTorrent DHT Protocol)"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The DHT example hashes a file name, contradicting the note's own infohash discussion and misstating how keys are formed.",
+            "reader_benefit": "The reader learns that the key comes from torrent metadata and that responsibility follows ID-space closeness."
+          }
+        ],
         "dispositions": [
           {
             "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
-            "outcome": "keep",
-            "reason": "Audited the whole note against its text and well-known primary sources (Kademlia paper, IPFS docs, WebRTC/ICE RFC 8445 behavior). The opening defines P2P and notes that central services may remain. The DHT section correctly describes partial routing tables and logarithmic lookup under healthy tables, and notes the infohash must still be discovered. The spectrum, applications and tradeoffs table are accurate and appropriately hedged. The pitfalls correctly say bucket sizes are DHT-specific, content addressing does not prove lookup completeness, and ICE and TURN are described correctly. The WebRTC steps are consistent with ICE nomination by the controlling agent. References are real and topic-specific. There are no Qard cards, so there are no card-granularity issues, and there are no known violations. I found no factual error or readability weakness that justifies an edit."
+            "outcome": "changed",
+            "reason": "The rest of the note was audited and is accurate and well hedged. The only defect was the DHT key example, which hashed a filename. It now uses the torrent infohash and XOR closeness, as in BEP 5, so the example agrees with the later infohash sentence."
           }
         ],
-        "feedback": []
+        "feedback": [],
+        "decisions": []
       },
       "source_hashes": {
         "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md": "bd3fa45ddc253293e34b23644f356bb510f058aeaf82390565a5bda85752fa74"
@@ -47576,74 +47601,10 @@
         "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md": ""
       },
       "prepared_source_version": 1,
-      "prepared_at": "2026-11-20T20:35:59.482889Z",
-      "review_evidence": {
-        "raw_review": {
-          "verdict": "CHANGES REQUIRED",
-          "notes": [
-            {
-              "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
-              "verdict": "CHANGES REQUIRED",
-              "summary": "The note is mostly accurate and well hedged. The DHT example, however, derives the key from a filename, which misstates how BitTorrent and IPFS keys are formed. The proposed keep leaves that error unresolved.",
-              "page_type": "Concept — impersonal whiteboard voice. Questions are absent, which is allowed. The References section has bare links. The text fence has a language identifier.",
-              "current_text_evidence": [
-                {
-                  "quote": "Key: SHA1(\"ubuntu-22.04.iso\")",
-                  "line_start": 23,
-                  "reason": "The example hashes a filename. A BitTorrent DHT key is the infohash, a SHA1 of the bencoded info dictionary. IPFS uses a content identifier derived from the content. A name-derived key contradicts the note's own content-addressing and infohash discussion."
-                },
-                {
-                  "quote": "The torrent identifier still has to arrive through a magnet link, metadata exchange, or another discovery channel.",
-                  "line_start": 28,
-                  "reason": "This sentence is accurate, and it shows that the key is an infohash rather than a filename."
-                },
-                {
-                  "quote": "Exact bucket sizes and replication rules belong to the specific DHT.",
-                  "line_start": 67,
-                  "reason": "The sentence is correctly hedged. It is one example of the careful treatment of version-specific details elsewhere in the note."
-                }
-              ],
-              "target_resolution": "UNRESOLVED",
-              "split_suggestion": "No split: P2P, DHT lookup, the architecture spectrum and WebRTC setup are one coherent topic at this depth.",
-              "findings": [
-                {
-                  "severity": "Medium",
-                  "dimension": "Accuracy",
-                  "location": "# How Peers Find Each Other: DHT, code block (line 23)",
-                  "evidence": "Key: SHA1(\"ubuntu-22.04.iso\")",
-                  "effect": "The block teaches that the DHT key comes from a file name. Real BitTorrent keys are infohashes of the torrent metadata, and IPFS keys are content-derived identifiers. This misleads the reader about content addressing.",
-                  "fix": "Change the example to a key derived from content or torrent metadata, for example Key: infohash = SHA1(bencoded info dictionary of the torrent). Then adjust the explanation to say that the key is derived from metadata."
-                }
-              ],
-              "source_checks": [],
-              "rejection_equivalence": [],
-              "quality": {
-                "accuracy": "FAIL",
-                "clarity": "PASS",
-                "question_quality": "NOT APPLICABLE",
-                "identity_safety": "NOT APPLICABLE",
-                "rules_compliance": "PASS"
-              }
-            }
-          ],
-          "overall_reason": "The keep disposition overlooks a real accuracy defect. The DHT example derives the key from a filename instead of an infohash or content identifier. The target stays unresolved, and no edit was proposed to fix it.",
-          "change_checks": []
-        },
-        "bindings": [
-          {
-            "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
-            "citation_index": 2,
-            "reported_line_start": 67,
-            "resolved_line_start": 72
-          }
-        ],
-        "source_hashes": {
-          "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md": "bd3fa45ddc253293e34b23644f356bb510f058aeaf82390565a5bda85752fa74"
-        },
-        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-      },
-      "completed_review": {
+      "prepared_at": "2026-11-20T20:37:21.061868Z",
+      "review_repair_key": "5ef0afc7037eb2920ddc7bdf8af0d3c734aa725442d7a81ca5724f18ea70f520",
+      "repair_reserved": true,
+      "repair_review": {
         "verdict": "CHANGES REQUIRED",
         "notes": [
           {
@@ -47694,58 +47655,25 @@
         "overall_reason": "The keep disposition overlooks a real accuracy defect. The DHT example derives the key from a filename instead of an infohash or content identifier. The target stays unresolved, and no edit was proposed to fix it.",
         "change_checks": []
       },
+      "repair_previous_proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+            "outcome": "keep",
+            "reason": "Audited the whole note against its text and well-known primary sources (Kademlia paper, IPFS docs, WebRTC/ICE RFC 8445 behavior). The opening defines P2P and notes that central services may remain. The DHT section correctly describes partial routing tables and logarithmic lookup under healthy tables, and notes the infohash must still be discovered. The spectrum, applications and tradeoffs table are accurate and appropriately hedged. The pitfalls correctly say bucket sizes are DHT-specific, content addressing does not prove lookup completeness, and ICE and TURN are described correctly. The WebRTC steps are consistent with ICE nomination by the controlling agent. References are real and topic-specific. There are no Qard cards, so there are no card-granularity issues, and there are no known violations. I found no factual error or readability weakness that justifies an edit."
+          }
+        ],
+        "feedback": []
+      },
+      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "feedback_snapshot": [],
       "blocked_review": {
-        "verdict": "CHANGES REQUIRED",
-        "notes": [
-          {
-            "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
-            "verdict": "CHANGES REQUIRED",
-            "summary": "The note is mostly accurate and well hedged. The DHT example, however, derives the key from a filename, which misstates how BitTorrent and IPFS keys are formed. The proposed keep leaves that error unresolved.",
-            "page_type": "Concept — impersonal whiteboard voice. Questions are absent, which is allowed. The References section has bare links. The text fence has a language identifier.",
-            "current_text_evidence": [
-              {
-                "quote": "Key: SHA1(\"ubuntu-22.04.iso\")",
-                "line_start": 23,
-                "reason": "The example hashes a filename. A BitTorrent DHT key is the infohash, a SHA1 of the bencoded info dictionary. IPFS uses a content identifier derived from the content. A name-derived key contradicts the note's own content-addressing and infohash discussion."
-              },
-              {
-                "quote": "The torrent identifier still has to arrive through a magnet link, metadata exchange, or another discovery channel.",
-                "line_start": 28,
-                "reason": "This sentence is accurate, and it shows that the key is an infohash rather than a filename."
-              },
-              {
-                "quote": "Exact bucket sizes and replication rules belong to the specific DHT.",
-                "line_start": 72,
-                "reason": "The sentence is correctly hedged. It is one example of the careful treatment of version-specific details elsewhere in the note."
-              }
-            ],
-            "target_resolution": "UNRESOLVED",
-            "split_suggestion": "No split: P2P, DHT lookup, the architecture spectrum and WebRTC setup are one coherent topic at this depth.",
-            "findings": [
-              {
-                "severity": "Medium",
-                "dimension": "Accuracy",
-                "location": "# How Peers Find Each Other: DHT, code block (line 23)",
-                "evidence": "Key: SHA1(\"ubuntu-22.04.iso\")",
-                "effect": "The block teaches that the DHT key comes from a file name. Real BitTorrent keys are infohashes of the torrent metadata, and IPFS keys are content-derived identifiers. This misleads the reader about content addressing.",
-                "fix": "Change the example to a key derived from content or torrent metadata, for example Key: infohash = SHA1(bencoded info dictionary of the torrent). Then adjust the explanation to say that the key is derived from metadata."
-              }
-            ],
-            "source_checks": [],
-            "rejection_equivalence": [],
-            "quality": {
-              "accuracy": "FAIL",
-              "clarity": "PASS",
-              "question_quality": "NOT APPLICABLE",
-              "identity_safety": "NOT APPLICABLE",
-              "rules_compliance": "PASS"
-            }
-          }
-        ],
-        "overall_reason": "The keep disposition overlooks a real accuracy defect. The DHT example derives the key from a filename instead of an infohash or content identifier. The target stays unresolved, and no edit was proposed to fix it.",
-        "change_checks": []
+        "stage": "deterministic_application",
+        "reason": "source URL missing from owning note: https://www.bittorrent.org/beps/bep_0005.html"
       },
-      "feedback_snapshot": []
+      "failed_at": "2026-11-20T20:37:26.627232Z"
     },
     "computer-science-445ddaa5": {
       "workload_id": "895ba07e431b4b1fb1f4b702293610c3",
@@ -59470,6 +59398,368 @@
         "reason": "source URL missing from owning note: https://www.bittorrent.org/beps/bep_0005.html"
       },
       "failed_at": "2026-11-12T07:34:03.464766Z"
+    },
+    "f48e6182902c5f4b1bd9165741ae49f0126a8abc5391dc382e6d55342cb62738": {
+      "workload_id": "7c74b21713b8477fad684bf4b97fc256",
+      "topic_id": "networks-ab2c47c3",
+      "batch": {
+        "topic": "Networks",
+        "topic_id": "networks-ab2c47c3",
+        "notes": [
+          {
+            "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+            "content": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"An architecture where peers act as both client and server, avoiding a central bottleneck.\"\nlevel: [\"1\"]\npriority: Medium\nstatus: In Progress\npublish: true\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.358Z\"\n---\n\nPeer-to-peer architecture moves some resource discovery, storage, or transfer from dedicated servers to participating nodes. A peer can consume and provide the same resource. Central services may still handle bootstrap, identity, coordination, or relaying.\n\nDistributing the data path can add capacity as peers join and remove one central transfer bottleneck. It also introduces churn, partial trust, uneven connectivity, and data-availability problems. The architecture is only as decentralized as its remaining control and discovery dependencies.\n\n# How Peers Find Each Other: DHT\n\nDistributed hash tables provide decentralized key lookup in systems such as BitTorrent and IPFS. A DHT assigns responsibility for key/value records across participating nodes without one directory:\n\n```text\nKey: SHA1(\"ubuntu-22.04.iso\")\n     → Hash determines which peer(s) are responsible for this key\n     → Those peers store the list of peers that have the file\n```\n\nEach peer keeps a routing table containing only part of the network. Kademlia-style lookup repeatedly queries nodes whose identifiers are closer to the target. With a healthy, well-distributed table, the number of rounds grows logarithmically with network size. BitTorrent's DHT locates peers for an infohash without requiring a tracker. The torrent identifier still has to arrive through a magnet link, metadata exchange, or another discovery channel.\n\n# P2P Architecture Spectrum\n\n\"Pure P2P\" is one end of a spectrum, not the only option:\n\n- **Structured vs unstructured** — structured networks route a key through an identifier space. Unstructured networks search by flooding or gossip, trading simple membership for higher and less predictable lookup cost.\n- **Peer-only data path** — peers exchange payloads directly, while bootstrap information may still come from a known node or static configuration.\n- **Hybrid / super-peer** — trackers, rendezvous services, or capable peers coordinate discovery while bulk data remains peer-to-peer.\n- **Signaling-assisted** — WebRTC applications use an application-defined signaling channel to exchange offers, answers, and candidates before ICE checks connectivity. Media may flow directly or through a TURN relay.\n\nMost deployed systems are hybrids. \"Peer-to-peer\" describes an important data or coordination path, not proof that every dependency is decentralized.\n\n# Real-World Applications\n\n| Application | P2P use | Why P2P |\n|---|---|---|\n| BitTorrent | File distribution | Scales with demand — more seeders = faster downloads |\n| IPFS | Content-addressed retrieval | Verifiable content identifiers and provider-independent retrieval |\n| WebRTC | Browser video/audio | Direct peer connections reduce server relay cost |\n| Blockchain | Replicated transaction protocol | Agreement among mutually distrustful participants under the protocol's assumptions |\n| Skype (original) | VoIP routing | Reduced server infrastructure cost |\n\n# Tradeoffs\n\n| Dimension | P2P | Client-Server |\n|---|---|---|\n| Scalability | Can gain transfer/storage capacity from peers. Control paths may still bottleneck | Capacity is provisioned by service owners |\n| Single point of failure | Depends on bootstrap, discovery, identity, and relay design | Central service needs redundancy |\n| Consistency | Protocol-specific. Replicas and membership make coordination expensive | Central authority can serialize decisions more directly |\n| Coordination | Discovery, churn, trust, and NAT traversal are part of the design | Clients use a known service endpoint |\n| Latency | Variable across peer paths and relay use | Managed infrastructure gives more control, but the network path still varies |\n\nP2P fits workloads where participants can contribute useful bandwidth, storage, or direct connectivity and where variable membership is acceptable. Client-server remains simpler when one authority owns access control and ordering or when latency and availability require tightly managed infrastructure.\n\n# Pitfalls\n\n**NAT traversal failure**\nNAT and firewall behavior can prevent candidate pairs from connecting directly. ICE checks available host, server-reflexive, and relay candidates, then selects a working pair. TURN must be provisioned as a supported path rather than treated as an exceptional implementation detail.\n\n**DHT poisoning**\nA malicious participant can advertise misleading routing information or surround a target in the identifier space. Defenses depend on the protocol: constrained node identifiers, diverse routing-table entries, authenticated records, and content-address verification protect different boundaries. Content addressing detects bytes that do not match an expected identifier. It does not prove that lookup results are complete or available.\n\n**Churn instability**\nPeers join and leave continuously, so routing entries and provider records become stale. Periodic bucket refresh, record expiration, replication, and parallel lookup keep the overlay usable. Exact bucket sizes and replication rules belong to the specific DHT. They are not universal Kademlia constants.\n\n# WebRTC Connection Setup\n\n```text\n// ICE candidate exchange (simplified)\n1. Peer A creates RTCPeerConnection\n2. Peer A gathers ICE candidates (STUN → public IP/port)\n3. Peer A sends offer + candidates to Peer B via signaling server\n4. Peer B responds with answer + its own candidates\n5. ICE checks prioritized candidate pairs; the controlling peer nominates a valid pair\n6. A TURN relay candidate may be selected when direct checks fail or policy requires relaying\n```\n\n# References\n\n- [Kademlia: A Peer-to-peer Information System](https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf)\n- [How IPFS works](https://docs.ipfs.tech/concepts/how-ipfs-works/)\n- [WebRTC for the Curious](https://webrtcforthecurious.com/)\n",
+            "hash": "bd3fa45ddc253293e34b23644f356bb510f058aeaf82390565a5bda85752fa74",
+            "topic": "Networks",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [
+          {
+            "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+            "expected_hash": "bd3fa45ddc253293e34b23644f356bb510f058aeaf82390565a5bda85752fa74",
+            "before": "Key: SHA1(\"ubuntu-22.04.iso\")\n     → Hash determines which peer(s) are responsible for this key\n     → Those peers store the list of peers that have the file",
+            "after": "Key: infohash = SHA1(bencoded info dictionary of the torrent)\n     → Nodes whose IDs are closest to the infohash (XOR distance) are responsible for it\n     → Those nodes store the list of peers that have the torrent",
+            "reason": "The example derived the key from a file name, but BitTorrent DHT keys are infohashes of the torrent metadata, in the same 160-bit space as node IDs.",
+            "kind": "note",
+            "learning_target": "same",
+            "essential_meanings": [
+              "DHT key is the torrent infohash, not a file name",
+              "responsibility is by closeness in the ID space"
+            ],
+            "sources": [
+              {
+                "url": "https://www.bittorrent.org/beps/bep_0005.html",
+                "claim": "The DHT identifies a torrent by its infohash, in the same 160-bit space as node IDs, and closeness is measured by XOR.",
+                "version": "BEP 5 (BitTorrent DHT Protocol)"
+              }
+            ],
+            "feedback_keys": [],
+            "problem": "The DHT example hashes a file name, contradicting the note's own infohash discussion and misstating how keys are formed.",
+            "reader_benefit": "The reader learns that the key comes from torrent metadata and that responsibility follows ID-space closeness."
+          }
+        ],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+            "outcome": "changed",
+            "reason": "The rest of the note was audited and is accurate and well hedged. The only defect was the DHT key example, which hashed a filename. It now uses the torrent infohash and XOR closeness, as in BEP 5, so the example agrees with the later infohash sentence."
+          }
+        ],
+        "feedback": [],
+        "decisions": []
+      },
+      "source_hashes": {
+        "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md": "bd3fa45ddc253293e34b23644f356bb510f058aeaf82390565a5bda85752fa74"
+      },
+      "feedback_keys": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-20T20:37:21.061868Z",
+      "review_repair_key": "5ef0afc7037eb2920ddc7bdf8af0d3c734aa725442d7a81ca5724f18ea70f520",
+      "repair_reserved": true,
+      "repair_review": {
+        "verdict": "CHANGES REQUIRED",
+        "notes": [
+          {
+            "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is mostly accurate and well hedged. The DHT example, however, derives the key from a filename, which misstates how BitTorrent and IPFS keys are formed. The proposed keep leaves that error unresolved.",
+            "page_type": "Concept — impersonal whiteboard voice. Questions are absent, which is allowed. The References section has bare links. The text fence has a language identifier.",
+            "current_text_evidence": [
+              {
+                "quote": "Key: SHA1(\"ubuntu-22.04.iso\")",
+                "line_start": 23,
+                "reason": "The example hashes a filename. A BitTorrent DHT key is the infohash, a SHA1 of the bencoded info dictionary. IPFS uses a content identifier derived from the content. A name-derived key contradicts the note's own content-addressing and infohash discussion."
+              },
+              {
+                "quote": "The torrent identifier still has to arrive through a magnet link, metadata exchange, or another discovery channel.",
+                "line_start": 28,
+                "reason": "This sentence is accurate, and it shows that the key is an infohash rather than a filename."
+              },
+              {
+                "quote": "Exact bucket sizes and replication rules belong to the specific DHT.",
+                "line_start": 72,
+                "reason": "The sentence is correctly hedged. It is one example of the careful treatment of version-specific details elsewhere in the note."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: P2P, DHT lookup, the architecture spectrum and WebRTC setup are one coherent topic at this depth.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy",
+                "location": "# How Peers Find Each Other: DHT, code block (line 23)",
+                "evidence": "Key: SHA1(\"ubuntu-22.04.iso\")",
+                "effect": "The block teaches that the DHT key comes from a file name. Real BitTorrent keys are infohashes of the torrent metadata, and IPFS keys are content-derived identifiers. This misleads the reader about content addressing.",
+                "fix": "Change the example to a key derived from content or torrent metadata, for example Key: infohash = SHA1(bencoded info dictionary of the torrent). Then adjust the explanation to say that the key is derived from metadata."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The keep disposition overlooks a real accuracy defect. The DHT example derives the key from a filename instead of an infohash or content identifier. The target stays unresolved, and no edit was proposed to fix it.",
+        "change_checks": []
+      },
+      "repair_previous_proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+            "outcome": "keep",
+            "reason": "Audited the whole note against its text and well-known primary sources (Kademlia paper, IPFS docs, WebRTC/ICE RFC 8445 behavior). The opening defines P2P and notes that central services may remain. The DHT section correctly describes partial routing tables and logarithmic lookup under healthy tables, and notes the infohash must still be discovered. The spectrum, applications and tradeoffs table are accurate and appropriately hedged. The pitfalls correctly say bucket sizes are DHT-specific, content addressing does not prove lookup completeness, and ICE and TURN are described correctly. The WebRTC steps are consistent with ICE nomination by the controlling agent. References are real and topic-specific. There are no Qard cards, so there are no card-granularity issues, and there are no known violations. I found no factual error or readability weakness that justifies an edit."
+          }
+        ],
+        "feedback": []
+      },
+      "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "feedback_snapshot": [],
+      "blocked_review": {
+        "stage": "deterministic_application",
+        "reason": "source URL missing from owning note: https://www.bittorrent.org/beps/bep_0005.html"
+      },
+      "failed_at": "2026-11-20T20:37:26.627232Z"
+    },
+    "98cb2e96e3586227cfec6dc3e58ad69ad475476c3c0d41104e9385b6d4a86881": {
+      "workload_id": "7c74b21713b8477fad684bf4b97fc256",
+      "topic_id": "networks-ab2c47c3",
+      "batch": {
+        "topic": "Networks",
+        "topic_id": "networks-ab2c47c3",
+        "notes": [
+          {
+            "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+            "content": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"An architecture where peers act as both client and server, avoiding a central bottleneck.\"\nlevel: [\"1\"]\npriority: Medium\nstatus: In Progress\npublish: true\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.358Z\"\n---\n\nPeer-to-peer architecture moves some resource discovery, storage, or transfer from dedicated servers to participating nodes. A peer can consume and provide the same resource. Central services may still handle bootstrap, identity, coordination, or relaying.\n\nDistributing the data path can add capacity as peers join and remove one central transfer bottleneck. It also introduces churn, partial trust, uneven connectivity, and data-availability problems. The architecture is only as decentralized as its remaining control and discovery dependencies.\n\n# How Peers Find Each Other: DHT\n\nDistributed hash tables provide decentralized key lookup in systems such as BitTorrent and IPFS. A DHT assigns responsibility for key/value records across participating nodes without one directory:\n\n```text\nKey: SHA1(\"ubuntu-22.04.iso\")\n     → Hash determines which peer(s) are responsible for this key\n     → Those peers store the list of peers that have the file\n```\n\nEach peer keeps a routing table containing only part of the network. Kademlia-style lookup repeatedly queries nodes whose identifiers are closer to the target. With a healthy, well-distributed table, the number of rounds grows logarithmically with network size. BitTorrent's DHT locates peers for an infohash without requiring a tracker. The torrent identifier still has to arrive through a magnet link, metadata exchange, or another discovery channel.\n\n# P2P Architecture Spectrum\n\n\"Pure P2P\" is one end of a spectrum, not the only option:\n\n- **Structured vs unstructured** — structured networks route a key through an identifier space. Unstructured networks search by flooding or gossip, trading simple membership for higher and less predictable lookup cost.\n- **Peer-only data path** — peers exchange payloads directly, while bootstrap information may still come from a known node or static configuration.\n- **Hybrid / super-peer** — trackers, rendezvous services, or capable peers coordinate discovery while bulk data remains peer-to-peer.\n- **Signaling-assisted** — WebRTC applications use an application-defined signaling channel to exchange offers, answers, and candidates before ICE checks connectivity. Media may flow directly or through a TURN relay.\n\nMost deployed systems are hybrids. \"Peer-to-peer\" describes an important data or coordination path, not proof that every dependency is decentralized.\n\n# Real-World Applications\n\n| Application | P2P use | Why P2P |\n|---|---|---|\n| BitTorrent | File distribution | Scales with demand — more seeders = faster downloads |\n| IPFS | Content-addressed retrieval | Verifiable content identifiers and provider-independent retrieval |\n| WebRTC | Browser video/audio | Direct peer connections reduce server relay cost |\n| Blockchain | Replicated transaction protocol | Agreement among mutually distrustful participants under the protocol's assumptions |\n| Skype (original) | VoIP routing | Reduced server infrastructure cost |\n\n# Tradeoffs\n\n| Dimension | P2P | Client-Server |\n|---|---|---|\n| Scalability | Can gain transfer/storage capacity from peers. Control paths may still bottleneck | Capacity is provisioned by service owners |\n| Single point of failure | Depends on bootstrap, discovery, identity, and relay design | Central service needs redundancy |\n| Consistency | Protocol-specific. Replicas and membership make coordination expensive | Central authority can serialize decisions more directly |\n| Coordination | Discovery, churn, trust, and NAT traversal are part of the design | Clients use a known service endpoint |\n| Latency | Variable across peer paths and relay use | Managed infrastructure gives more control, but the network path still varies |\n\nP2P fits workloads where participants can contribute useful bandwidth, storage, or direct connectivity and where variable membership is acceptable. Client-server remains simpler when one authority owns access control and ordering or when latency and availability require tightly managed infrastructure.\n\n# Pitfalls\n\n**NAT traversal failure**\nNAT and firewall behavior can prevent candidate pairs from connecting directly. ICE checks available host, server-reflexive, and relay candidates, then selects a working pair. TURN must be provisioned as a supported path rather than treated as an exceptional implementation detail.\n\n**DHT poisoning**\nA malicious participant can advertise misleading routing information or surround a target in the identifier space. Defenses depend on the protocol: constrained node identifiers, diverse routing-table entries, authenticated records, and content-address verification protect different boundaries. Content addressing detects bytes that do not match an expected identifier. It does not prove that lookup results are complete or available.\n\n**Churn instability**\nPeers join and leave continuously, so routing entries and provider records become stale. Periodic bucket refresh, record expiration, replication, and parallel lookup keep the overlay usable. Exact bucket sizes and replication rules belong to the specific DHT. They are not universal Kademlia constants.\n\n# WebRTC Connection Setup\n\n```text\n// ICE candidate exchange (simplified)\n1. Peer A creates RTCPeerConnection\n2. Peer A gathers ICE candidates (STUN → public IP/port)\n3. Peer A sends offer + candidates to Peer B via signaling server\n4. Peer B responds with answer + its own candidates\n5. ICE checks prioritized candidate pairs; the controlling peer nominates a valid pair\n6. A TURN relay candidate may be selected when direct checks fail or policy requires relaying\n```\n\n# References\n\n- [Kademlia: A Peer-to-peer Information System](https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf)\n- [How IPFS works](https://docs.ipfs.tech/concepts/how-ipfs-works/)\n- [WebRTC for the Curious](https://webrtcforthecurious.com/)\n",
+            "hash": "bd3fa45ddc253293e34b23644f356bb510f058aeaf82390565a5bda85752fa74",
+            "topic": "Networks",
+            "violations": [],
+            "needs_fixing_ids": [],
+            "repair_input_hash": "",
+            "selection_reason": "new"
+          }
+        ],
+        "feedback": [],
+        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+        "review_process": "focused-whole-note-v1",
+        "pr": null
+      },
+      "proposal": {
+        "version": 1,
+        "edits": [],
+        "dispositions": [
+          {
+            "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+            "outcome": "keep",
+            "reason": "Audited the whole note against its text and well-known primary sources (Kademlia paper, IPFS docs, WebRTC/ICE RFC 8445 behavior). The opening defines P2P and notes that central services may remain. The DHT section correctly describes partial routing tables and logarithmic lookup under healthy tables, and notes the infohash must still be discovered. The spectrum, applications and tradeoffs table are accurate and appropriately hedged. The pitfalls correctly say bucket sizes are DHT-specific, content addressing does not prove lookup completeness, and ICE and TURN are described correctly. The WebRTC steps are consistent with ICE nomination by the controlling agent. References are real and topic-specific. There are no Qard cards, so there are no card-granularity issues, and there are no known violations. I found no factual error or readability weakness that justifies an edit."
+          }
+        ],
+        "feedback": []
+      },
+      "source_hashes": {
+        "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md": "bd3fa45ddc253293e34b23644f356bb510f058aeaf82390565a5bda85752fa74"
+      },
+      "feedback_keys": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "repair_inputs": {
+        "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md": ""
+      },
+      "prepared_source_version": 1,
+      "prepared_at": "2026-11-20T20:35:59.482889Z",
+      "review_evidence": {
+        "raw_review": {
+          "verdict": "CHANGES REQUIRED",
+          "notes": [
+            {
+              "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+              "verdict": "CHANGES REQUIRED",
+              "summary": "The note is mostly accurate and well hedged. The DHT example, however, derives the key from a filename, which misstates how BitTorrent and IPFS keys are formed. The proposed keep leaves that error unresolved.",
+              "page_type": "Concept — impersonal whiteboard voice. Questions are absent, which is allowed. The References section has bare links. The text fence has a language identifier.",
+              "current_text_evidence": [
+                {
+                  "quote": "Key: SHA1(\"ubuntu-22.04.iso\")",
+                  "line_start": 23,
+                  "reason": "The example hashes a filename. A BitTorrent DHT key is the infohash, a SHA1 of the bencoded info dictionary. IPFS uses a content identifier derived from the content. A name-derived key contradicts the note's own content-addressing and infohash discussion."
+                },
+                {
+                  "quote": "The torrent identifier still has to arrive through a magnet link, metadata exchange, or another discovery channel.",
+                  "line_start": 28,
+                  "reason": "This sentence is accurate, and it shows that the key is an infohash rather than a filename."
+                },
+                {
+                  "quote": "Exact bucket sizes and replication rules belong to the specific DHT.",
+                  "line_start": 67,
+                  "reason": "The sentence is correctly hedged. It is one example of the careful treatment of version-specific details elsewhere in the note."
+                }
+              ],
+              "target_resolution": "UNRESOLVED",
+              "split_suggestion": "No split: P2P, DHT lookup, the architecture spectrum and WebRTC setup are one coherent topic at this depth.",
+              "findings": [
+                {
+                  "severity": "Medium",
+                  "dimension": "Accuracy",
+                  "location": "# How Peers Find Each Other: DHT, code block (line 23)",
+                  "evidence": "Key: SHA1(\"ubuntu-22.04.iso\")",
+                  "effect": "The block teaches that the DHT key comes from a file name. Real BitTorrent keys are infohashes of the torrent metadata, and IPFS keys are content-derived identifiers. This misleads the reader about content addressing.",
+                  "fix": "Change the example to a key derived from content or torrent metadata, for example Key: infohash = SHA1(bencoded info dictionary of the torrent). Then adjust the explanation to say that the key is derived from metadata."
+                }
+              ],
+              "source_checks": [],
+              "rejection_equivalence": [],
+              "quality": {
+                "accuracy": "FAIL",
+                "clarity": "PASS",
+                "question_quality": "NOT APPLICABLE",
+                "identity_safety": "NOT APPLICABLE",
+                "rules_compliance": "PASS"
+              }
+            }
+          ],
+          "overall_reason": "The keep disposition overlooks a real accuracy defect. The DHT example derives the key from a filename instead of an infohash or content identifier. The target stays unresolved, and no edit was proposed to fix it.",
+          "change_checks": []
+        },
+        "bindings": [
+          {
+            "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+            "citation_index": 2,
+            "reported_line_start": 67,
+            "resolved_line_start": 72
+          }
+        ],
+        "source_hashes": {
+          "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md": "bd3fa45ddc253293e34b23644f356bb510f058aeaf82390565a5bda85752fa74"
+        },
+        "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+        "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+      },
+      "completed_review": {
+        "verdict": "CHANGES REQUIRED",
+        "notes": [
+          {
+            "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is mostly accurate and well hedged. The DHT example, however, derives the key from a filename, which misstates how BitTorrent and IPFS keys are formed. The proposed keep leaves that error unresolved.",
+            "page_type": "Concept — impersonal whiteboard voice. Questions are absent, which is allowed. The References section has bare links. The text fence has a language identifier.",
+            "current_text_evidence": [
+              {
+                "quote": "Key: SHA1(\"ubuntu-22.04.iso\")",
+                "line_start": 23,
+                "reason": "The example hashes a filename. A BitTorrent DHT key is the infohash, a SHA1 of the bencoded info dictionary. IPFS uses a content identifier derived from the content. A name-derived key contradicts the note's own content-addressing and infohash discussion."
+              },
+              {
+                "quote": "The torrent identifier still has to arrive through a magnet link, metadata exchange, or another discovery channel.",
+                "line_start": 28,
+                "reason": "This sentence is accurate, and it shows that the key is an infohash rather than a filename."
+              },
+              {
+                "quote": "Exact bucket sizes and replication rules belong to the specific DHT.",
+                "line_start": 72,
+                "reason": "The sentence is correctly hedged. It is one example of the careful treatment of version-specific details elsewhere in the note."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: P2P, DHT lookup, the architecture spectrum and WebRTC setup are one coherent topic at this depth.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy",
+                "location": "# How Peers Find Each Other: DHT, code block (line 23)",
+                "evidence": "Key: SHA1(\"ubuntu-22.04.iso\")",
+                "effect": "The block teaches that the DHT key comes from a file name. Real BitTorrent keys are infohashes of the torrent metadata, and IPFS keys are content-derived identifiers. This misleads the reader about content addressing.",
+                "fix": "Change the example to a key derived from content or torrent metadata, for example Key: infohash = SHA1(bencoded info dictionary of the torrent). Then adjust the explanation to say that the key is derived from metadata."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The keep disposition overlooks a real accuracy defect. The DHT example derives the key from a filename instead of an infohash or content identifier. The target stays unresolved, and no edit was proposed to fix it.",
+        "change_checks": []
+      },
+      "blocked_review": {
+        "verdict": "CHANGES REQUIRED",
+        "notes": [
+          {
+            "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
+            "verdict": "CHANGES REQUIRED",
+            "summary": "The note is mostly accurate and well hedged. The DHT example, however, derives the key from a filename, which misstates how BitTorrent and IPFS keys are formed. The proposed keep leaves that error unresolved.",
+            "page_type": "Concept — impersonal whiteboard voice. Questions are absent, which is allowed. The References section has bare links. The text fence has a language identifier.",
+            "current_text_evidence": [
+              {
+                "quote": "Key: SHA1(\"ubuntu-22.04.iso\")",
+                "line_start": 23,
+                "reason": "The example hashes a filename. A BitTorrent DHT key is the infohash, a SHA1 of the bencoded info dictionary. IPFS uses a content identifier derived from the content. A name-derived key contradicts the note's own content-addressing and infohash discussion."
+              },
+              {
+                "quote": "The torrent identifier still has to arrive through a magnet link, metadata exchange, or another discovery channel.",
+                "line_start": 28,
+                "reason": "This sentence is accurate, and it shows that the key is an infohash rather than a filename."
+              },
+              {
+                "quote": "Exact bucket sizes and replication rules belong to the specific DHT.",
+                "line_start": 72,
+                "reason": "The sentence is correctly hedged. It is one example of the careful treatment of version-specific details elsewhere in the note."
+              }
+            ],
+            "target_resolution": "UNRESOLVED",
+            "split_suggestion": "No split: P2P, DHT lookup, the architecture spectrum and WebRTC setup are one coherent topic at this depth.",
+            "findings": [
+              {
+                "severity": "Medium",
+                "dimension": "Accuracy",
+                "location": "# How Peers Find Each Other: DHT, code block (line 23)",
+                "evidence": "Key: SHA1(\"ubuntu-22.04.iso\")",
+                "effect": "The block teaches that the DHT key comes from a file name. Real BitTorrent keys are infohashes of the torrent metadata, and IPFS keys are content-derived identifiers. This misleads the reader about content addressing.",
+                "fix": "Change the example to a key derived from content or torrent metadata, for example Key: infohash = SHA1(bencoded info dictionary of the torrent). Then adjust the explanation to say that the key is derived from metadata."
+              }
+            ],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "FAIL",
+              "clarity": "PASS",
+              "question_quality": "NOT APPLICABLE",
+              "identity_safety": "NOT APPLICABLE",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The keep disposition overlooks a real accuracy defect. The DHT example derives the key from a filename instead of an infohash or content identifier. The target stays unresolved, and no edit was proposed to fix it.",
+        "change_checks": []
+      },
+      "feedback_snapshot": []
     }
   },
   "completed_review_holds": {
@@ -61192,144 +61482,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "7c74b21713b8477fad684bf4b97fc256",
-    "topic_id": "networks-ab2c47c3",
-    "batch": {
-      "topic": "Networks",
-      "topic_id": "networks-ab2c47c3",
-      "notes": [
-        {
-          "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
-          "content": "---\ntopic: [Networks]\nsubtopic: [Architecture & Ops]\nsummary: \"An architecture where peers act as both client and server, avoiding a central bottleneck.\"\nlevel: [\"1\"]\npriority: Medium\nstatus: In Progress\npublish: true\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.358Z\"\n---\n\nPeer-to-peer architecture moves some resource discovery, storage, or transfer from dedicated servers to participating nodes. A peer can consume and provide the same resource. Central services may still handle bootstrap, identity, coordination, or relaying.\n\nDistributing the data path can add capacity as peers join and remove one central transfer bottleneck. It also introduces churn, partial trust, uneven connectivity, and data-availability problems. The architecture is only as decentralized as its remaining control and discovery dependencies.\n\n# How Peers Find Each Other: DHT\n\nDistributed hash tables provide decentralized key lookup in systems such as BitTorrent and IPFS. A DHT assigns responsibility for key/value records across participating nodes without one directory:\n\n```text\nKey: SHA1(\"ubuntu-22.04.iso\")\n     → Hash determines which peer(s) are responsible for this key\n     → Those peers store the list of peers that have the file\n```\n\nEach peer keeps a routing table containing only part of the network. Kademlia-style lookup repeatedly queries nodes whose identifiers are closer to the target. With a healthy, well-distributed table, the number of rounds grows logarithmically with network size. BitTorrent's DHT locates peers for an infohash without requiring a tracker. The torrent identifier still has to arrive through a magnet link, metadata exchange, or another discovery channel.\n\n# P2P Architecture Spectrum\n\n\"Pure P2P\" is one end of a spectrum, not the only option:\n\n- **Structured vs unstructured** — structured networks route a key through an identifier space. Unstructured networks search by flooding or gossip, trading simple membership for higher and less predictable lookup cost.\n- **Peer-only data path** — peers exchange payloads directly, while bootstrap information may still come from a known node or static configuration.\n- **Hybrid / super-peer** — trackers, rendezvous services, or capable peers coordinate discovery while bulk data remains peer-to-peer.\n- **Signaling-assisted** — WebRTC applications use an application-defined signaling channel to exchange offers, answers, and candidates before ICE checks connectivity. Media may flow directly or through a TURN relay.\n\nMost deployed systems are hybrids. \"Peer-to-peer\" describes an important data or coordination path, not proof that every dependency is decentralized.\n\n# Real-World Applications\n\n| Application | P2P use | Why P2P |\n|---|---|---|\n| BitTorrent | File distribution | Scales with demand — more seeders = faster downloads |\n| IPFS | Content-addressed retrieval | Verifiable content identifiers and provider-independent retrieval |\n| WebRTC | Browser video/audio | Direct peer connections reduce server relay cost |\n| Blockchain | Replicated transaction protocol | Agreement among mutually distrustful participants under the protocol's assumptions |\n| Skype (original) | VoIP routing | Reduced server infrastructure cost |\n\n# Tradeoffs\n\n| Dimension | P2P | Client-Server |\n|---|---|---|\n| Scalability | Can gain transfer/storage capacity from peers. Control paths may still bottleneck | Capacity is provisioned by service owners |\n| Single point of failure | Depends on bootstrap, discovery, identity, and relay design | Central service needs redundancy |\n| Consistency | Protocol-specific. Replicas and membership make coordination expensive | Central authority can serialize decisions more directly |\n| Coordination | Discovery, churn, trust, and NAT traversal are part of the design | Clients use a known service endpoint |\n| Latency | Variable across peer paths and relay use | Managed infrastructure gives more control, but the network path still varies |\n\nP2P fits workloads where participants can contribute useful bandwidth, storage, or direct connectivity and where variable membership is acceptable. Client-server remains simpler when one authority owns access control and ordering or when latency and availability require tightly managed infrastructure.\n\n# Pitfalls\n\n**NAT traversal failure**\nNAT and firewall behavior can prevent candidate pairs from connecting directly. ICE checks available host, server-reflexive, and relay candidates, then selects a working pair. TURN must be provisioned as a supported path rather than treated as an exceptional implementation detail.\n\n**DHT poisoning**\nA malicious participant can advertise misleading routing information or surround a target in the identifier space. Defenses depend on the protocol: constrained node identifiers, diverse routing-table entries, authenticated records, and content-address verification protect different boundaries. Content addressing detects bytes that do not match an expected identifier. It does not prove that lookup results are complete or available.\n\n**Churn instability**\nPeers join and leave continuously, so routing entries and provider records become stale. Periodic bucket refresh, record expiration, replication, and parallel lookup keep the overlay usable. Exact bucket sizes and replication rules belong to the specific DHT. They are not universal Kademlia constants.\n\n# WebRTC Connection Setup\n\n```text\n// ICE candidate exchange (simplified)\n1. Peer A creates RTCPeerConnection\n2. Peer A gathers ICE candidates (STUN → public IP/port)\n3. Peer A sends offer + candidates to Peer B via signaling server\n4. Peer B responds with answer + its own candidates\n5. ICE checks prioritized candidate pairs; the controlling peer nominates a valid pair\n6. A TURN relay candidate may be selected when direct checks fail or policy requires relaying\n```\n\n# References\n\n- [Kademlia: A Peer-to-peer Information System](https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf)\n- [How IPFS works](https://docs.ipfs.tech/concepts/how-ipfs-works/)\n- [WebRTC for the Curious](https://webrtcforthecurious.com/)\n",
-          "hash": "bd3fa45ddc253293e34b23644f356bb510f058aeaf82390565a5bda85752fa74",
-          "topic": "Networks",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "new"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [
-        {
-          "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
-          "expected_hash": "bd3fa45ddc253293e34b23644f356bb510f058aeaf82390565a5bda85752fa74",
-          "before": "Key: SHA1(\"ubuntu-22.04.iso\")\n     → Hash determines which peer(s) are responsible for this key\n     → Those peers store the list of peers that have the file",
-          "after": "Key: infohash = SHA1(bencoded info dictionary of the torrent)\n     → Nodes whose IDs are closest to the infohash (XOR distance) are responsible for it\n     → Those nodes store the list of peers that have the torrent",
-          "reason": "The example derived the key from a file name, but BitTorrent DHT keys are infohashes of the torrent metadata, in the same 160-bit space as node IDs.",
-          "kind": "note",
-          "learning_target": "same",
-          "essential_meanings": [
-            "DHT key is the torrent infohash, not a file name",
-            "responsibility is by closeness in the ID space"
-          ],
-          "sources": [
-            {
-              "url": "https://www.bittorrent.org/beps/bep_0005.html",
-              "claim": "The DHT identifies a torrent by its infohash, in the same 160-bit space as node IDs, and closeness is measured by XOR.",
-              "version": "BEP 5 (BitTorrent DHT Protocol)"
-            }
-          ],
-          "feedback_keys": [],
-          "problem": "The DHT example hashes a file name, contradicting the note's own infohash discussion and misstating how keys are formed.",
-          "reader_benefit": "The reader learns that the key comes from torrent metadata and that responsibility follows ID-space closeness."
-        }
-      ],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
-          "outcome": "changed",
-          "reason": "The rest of the note was audited and is accurate and well hedged. The only defect was the DHT key example, which hashed a filename. It now uses the torrent infohash and XOR closeness, as in BEP 5, so the example agrees with the later infohash sentence."
-        }
-      ],
-      "feedback": [],
-      "decisions": []
-    },
-    "source_hashes": {
-      "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md": "bd3fa45ddc253293e34b23644f356bb510f058aeaf82390565a5bda85752fa74"
-    },
-    "feedback_keys": [],
-    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-20T20:37:21.061868Z",
-    "review_repair_key": "5ef0afc7037eb2920ddc7bdf8af0d3c734aa725442d7a81ca5724f18ea70f520",
-    "repair_reserved": true,
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "notes": [
-        {
-          "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The note is mostly accurate and well hedged. The DHT example, however, derives the key from a filename, which misstates how BitTorrent and IPFS keys are formed. The proposed keep leaves that error unresolved.",
-          "page_type": "Concept — impersonal whiteboard voice. Questions are absent, which is allowed. The References section has bare links. The text fence has a language identifier.",
-          "current_text_evidence": [
-            {
-              "quote": "Key: SHA1(\"ubuntu-22.04.iso\")",
-              "line_start": 23,
-              "reason": "The example hashes a filename. A BitTorrent DHT key is the infohash, a SHA1 of the bencoded info dictionary. IPFS uses a content identifier derived from the content. A name-derived key contradicts the note's own content-addressing and infohash discussion."
-            },
-            {
-              "quote": "The torrent identifier still has to arrive through a magnet link, metadata exchange, or another discovery channel.",
-              "line_start": 28,
-              "reason": "This sentence is accurate, and it shows that the key is an infohash rather than a filename."
-            },
-            {
-              "quote": "Exact bucket sizes and replication rules belong to the specific DHT.",
-              "line_start": 72,
-              "reason": "The sentence is correctly hedged. It is one example of the careful treatment of version-specific details elsewhere in the note."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: P2P, DHT lookup, the architecture spectrum and WebRTC setup are one coherent topic at this depth.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Accuracy",
-              "location": "# How Peers Find Each Other: DHT, code block (line 23)",
-              "evidence": "Key: SHA1(\"ubuntu-22.04.iso\")",
-              "effect": "The block teaches that the DHT key comes from a file name. Real BitTorrent keys are infohashes of the torrent metadata, and IPFS keys are content-derived identifiers. This misleads the reader about content addressing.",
-              "fix": "Change the example to a key derived from content or torrent metadata, for example Key: infohash = SHA1(bencoded info dictionary of the torrent). Then adjust the explanation to say that the key is derived from metadata."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "FAIL",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "overall_reason": "The keep disposition overlooks a real accuracy defect. The DHT example derives the key from a filename instead of an infohash or content identifier. The target stays unresolved, and no edit was proposed to fix it.",
-      "change_checks": []
-    },
-    "repair_previous_proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
-          "outcome": "keep",
-          "reason": "Audited the whole note against its text and well-known primary sources (Kademlia paper, IPFS docs, WebRTC/ICE RFC 8445 behavior). The opening defines P2P and notes that central services may remain. The DHT section correctly describes partial routing tables and logarithmic lookup under healthy tables, and notes the infohash must still be discovered. The spectrum, applications and tradeoffs table are accurate and appropriately hedged. The pitfalls correctly say bucket sizes are DHT-specific, content addressing does not prove lookup completeness, and ICE and TURN are described correctly. The WebRTC steps are consistent with ICE nomination by the controlling agent. References are real and topic-specific. There are no Qard cards, so there are no card-granularity issues, and there are no known violations. I found no factual error or readability weakness that justifies an edit."
-        }
-      ],
-      "feedback": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
-  }
+  "parked_author_proposals": {}
 }
