@@ -32922,7 +32922,7 @@
       "prepared_source_version": 1,
       "prepared_at": "2026-11-19T20:59:19.174005Z",
       "phase": "pr_updated",
-      "updated_at": "2026-11-19T21:07:08Z",
+      "updated_at": "2026-11-20T07:35:15Z",
       "evidence": {
         "commit_sha": "7eac331cb883da31756143a0e761334fffb7b667",
         "branch_sha": "7eac331cb883da31756143a0e761334fffb7b667",
@@ -32941,7 +32941,19 @@
         },
         "export_attempts": 2,
         "export_last_dispatch_at": "2026-11-20T07:34:04Z",
-        "reason": "Same-workflow native artifact render queued"
+        "reason": "Same-workflow native artifact render queued",
+        "export_artifact_hash": "9efab0fd48e9f1034fb4c5774fb88f782b5f09a9a70b85db61d9a54a2c2fccd4",
+        "export_source_sha": "7eac331cb883da31756143a0e761334fffb7b667",
+        "export_inputs_hash": "449bf2f59750ab1aa0007b8498c46c34f2713cc99b9f5bfc070479cfc240af8f",
+        "export_transport": {
+          "artifact_id": "14576696427",
+          "digest": "sha256:ea28c85bcced9b7e6d7384847a264ae7578dee79853922138c6eed313c43d23d",
+          "run_id": "44615507234",
+          "run_attempt": "1",
+          "bundle_sha256": "5ab50dcd0ca4671847707120b866c7420fae91e66f830196a0e64182a6e74dd7"
+        },
+        "export_phase": "artifact_registered",
+        "export_refresh_registered": false
       }
     }
   },
