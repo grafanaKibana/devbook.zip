@@ -8,7 +8,7 @@ status: In Progress
 
 publish: true
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-20T20:42:20.208Z"
 published: "2026-07-08T13:14:17.363Z"
 ---
 
@@ -34,7 +34,7 @@ sequenceDiagram
   Server->>Client: HEADERS frame with END_STREAM grpc-status grpc-message
 ```
 
-The final gRPC status normally travels in HTTP/2 trailers rather than being expressed only by the HTTP status code. A transport-level load balancer cannot inspect that application status or distribute individual streams because it sees connections. GRPC-Web uses its own framing so browser clients can receive equivalent status information despite browser API limits around trailers.
+The final gRPC status normally travels in HTTP/2 trailers rather than being expressed only by the HTTP status code. A transport-level load balancer cannot inspect that application status or distribute individual streams because it sees connections. gRPC-Web uses its own framing so browser clients can receive equivalent status information despite browser API limits around trailers.
 
 ## Flow Control and Backpressure
 
