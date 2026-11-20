@@ -19,6 +19,41 @@ if [[ "$SDK_VERSION" != 10.0.100 ]]; then
     exit 1
 fi
 
+# Regenerate agent configs when their rulesync source is staged, with or without Vault source.
+# The feedback store is read in place and has no generated copy.
+if [[ "${DEVBOOK_QUARTZ_MAINTENANCE:-}" != 1 ]]; then
+    RULESYNC_STAGED=0
+    while IFS= read -r -d '' file; do
+        case "$file" in
+            .rulesync/skill-feedback/*) ;;
+            .rulesync/*|rulesync.jsonc) RULESYNC_STAGED=1 ;;
+        esac
+    done < <(git diff --cached --name-only -z --no-renames)
+
+    if [[ $RULESYNC_STAGED -eq 1 ]]; then
+        echo "[pre-commit] Regenerating agent configs from .rulesync..."
+        # A throwaway output root names every generated path, so outputs left
+        # unstaged by an earlier run are staged too.
+        RULESYNC_PROBE="$(mktemp -d)"
+        if ! npx --yes rulesync@latest generate --silent --output-roots "$RULESYNC_PROBE" \
+            || ! npx --yes rulesync@latest generate; then
+            rm -rf "$RULESYNC_PROBE"
+            echo "[pre-commit] rulesync generate failed; run it manually, then commit again." >&2
+            exit 1
+        fi
+        RULESYNC_OUTPUTS=()
+        while IFS= read -r -d '' file; do
+            file="${file#"$RULESYNC_PROBE"/}"
+            [[ -e "$file" ]] && RULESYNC_OUTPUTS+=("$file")
+        done < <(find "$RULESYNC_PROBE" -type f -print0)
+        rm -rf "$RULESYNC_PROBE"
+        if [[ ${#RULESYNC_OUTPUTS[@]} -gt 0 ]]; then
+            git --literal-pathspecs add -- "${RULESYNC_OUTPUTS[@]}"
+        fi
+        echo "[pre-commit] ✓ Agent configs regenerated and staged"
+    fi
+fi
+
 # Hold the source lock across maintenance and date preparation.
 if [[ "${DEVBOOK_QUARTZ_MAINTENANCE:-}" != 1 ]]; then
     cd "$REPO_ROOT/.scripts"
@@ -34,37 +69,6 @@ while IFS= read -r -d '' file; do
     STAGED_VAULT+=("$file")
     [[ "$file" =~ \.(md|MD)$ ]] && STAGED_MD+=("$file")
 done < <(git diff --cached --name-only -z --no-renames)
-
-# Regenerate agent configs when their rulesync source is staged.
-# The feedback store is read in place and has no generated copy.
-RULESYNC_STAGED=0
-while IFS= read -r -d '' file; do
-    case "$file" in
-        .rulesync/skill-feedback/*) ;;
-        .rulesync/*|rulesync.jsonc) RULESYNC_STAGED=1 ;;
-    esac
-done < <(git diff --cached --name-only -z --no-renames)
-
-if [[ $RULESYNC_STAGED -eq 1 ]]; then
-    rulesync_dirty() {
-        { git -c core.quotePath=false diff --name-only
-          git -c core.quotePath=false ls-files --others --exclude-standard; } | sort -u
-    }
-    RULESYNC_BEFORE="$(rulesync_dirty)"
-    echo "[pre-commit] Regenerating agent configs from .rulesync..."
-    if ! npx --yes rulesync@latest generate; then
-        echo "[pre-commit] rulesync generate failed; run it manually, then commit again." >&2
-        exit 1
-    fi
-    RULESYNC_GENERATED=()
-    while IFS= read -r file; do
-        [[ -n "$file" ]] && RULESYNC_GENERATED+=("$file")
-    done < <(comm -13 <(printf '%s\n' "$RULESYNC_BEFORE") <(rulesync_dirty))
-    if [[ ${#RULESYNC_GENERATED[@]} -gt 0 ]]; then
-        git --literal-pathspecs add -A -- "${RULESYNC_GENERATED[@]}"
-        echo "[pre-commit] ✓ Agent configs regenerated (${#RULESYNC_GENERATED[@]} files)"
-    fi
-fi
 
 # If no staged Vault files, skip vault automations.
 if [[ ${#STAGED_VAULT[@]} -eq 0 ]]; then
