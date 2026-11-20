@@ -20033,10 +20033,10 @@
     "version": 1,
     "id": "7c74b21713b8477fad684bf4b97fc256",
     "status": "active",
-    "phase": "evaluating",
+    "phase": "author_reserved",
     "started_at": "2026-11-20T20:35:17.360033Z",
-    "elapsed_seconds": 518.9594432,
-    "calls_reserved": 11,
+    "elapsed_seconds": 526.814255,
+    "calls_reserved": 12,
     "responses_received": 11,
     "attempted_paths": [
       "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
@@ -21819,7 +21819,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-20T20:43:56.318993Z",
+    "checkpoint_at": "2026-11-20T20:44:04.173805Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
@@ -21844,7 +21844,7 @@
       "pr": null
     },
     "base_sha": "36628d4b1ae482b0f3c18ce0548af47dd2338277",
-    "reservation_deadline": "2026-11-20T21:05:17.359548Z",
+    "reservation_deadline": "2026-11-20T20:59:03.694346Z",
     "last_request": {
       "topic": "networks-ab2c47c3",
       "generation": 2,
