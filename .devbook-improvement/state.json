@@ -35606,11 +35606,13 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-20T20:42:20.208264Z",
-    "phase": "branch_updated",
-    "updated_at": "2026-11-20T20:49:38Z",
+    "phase": "pr_updated",
+    "updated_at": "2026-11-20T20:49:47Z",
     "evidence": {
       "commit_sha": "c430edad8fa75691d72f13dc4ca8bf7222dfcef4",
-      "branch_sha": "c430edad8fa75691d72f13dc4ca8bf7222dfcef4"
+      "branch_sha": "c430edad8fa75691d72f13dc4ca8bf7222dfcef4",
+      "pr_number": 252,
+      "created": true
     }
   },
   "export_operations": {
