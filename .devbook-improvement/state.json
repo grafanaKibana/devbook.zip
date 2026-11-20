@@ -19923,11 +19923,11 @@
     "version": 1,
     "id": "7c74b21713b8477fad684bf4b97fc256",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-20T20:35:17.360033Z",
-    "elapsed_seconds": 240.58891759999995,
+    "elapsed_seconds": 253.08137249999996,
     "calls_reserved": 6,
-    "responses_received": 5,
+    "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/Networks/Architecture & Ops/Peer-2-Peer.md",
       "Vault/Home/Networks/OSI Model.md"
@@ -20036,7 +20036,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-20T20:39:17.948485Z",
+    "checkpoint_at": "2026-11-20T20:39:30.440919Z",
     "topic": "Networks",
     "topic_id": "networks-ab2c47c3",
     "current_batch": {
@@ -61749,5 +61749,53 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {}
+  "parked_author_proposals": {},
+  "pending_author_proposal": {
+    "workload_id": "7c74b21713b8477fad684bf4b97fc256",
+    "topic_id": "networks-ab2c47c3",
+    "batch": {
+      "topic": "Networks",
+      "topic_id": "networks-ab2c47c3",
+      "notes": [
+        {
+          "path": "Vault/Home/Networks/Protocols/DNS.md",
+          "content": "---\ntopic: [Networks]\nsubtopic: [Protocols]\nsummary: \"The internet's distributed directory mapping hostnames to records like IP addresses.\"\nlevel: [\"3\"]\npriority: Medium\nstatus: In Progress\npublish: true\ncreated: \"2026-02-10T01:40:47.000Z\"\nmodified: \"2026-11-12T10:29:34.513Z\"\npublished: \"2026-07-08T13:14:17.360Z\"\n---\n\nDNS (Domain Name System) maps names to typed records in a distributed hierarchy. Before opening a transport connection, an application usually resolves a name through local caches, static host mappings, and a recursive resolver.\n\nMost lookups end in a cache. A miss can send the recursive resolver through referrals from a root server to a TLD server and finally to the zone's authoritative server.\n\n```mermaid\nsequenceDiagram\n  participant Client\n  participant Resolver as Recursive Resolver\n  participant Root as Root Server\n  participant TLD as .com TLD Server\n  participant Auth as Authoritative Server\n\n  Client->>Resolver: Query api.example.com\n  Resolver->>Root: Where are .com zones?\n  Root->>Resolver: TLD server address\n  Resolver->>TLD: Where is example.com?\n  TLD->>Resolver: Authoritative server address\n  Resolver->>Auth: What is api.example.com?\n  Auth->>Resolver: 203.0.113.42 (TTL 300)\n  Resolver->>Client: 203.0.113.42\n```\n\nWhen a name is a CNAME, the resolver follows the alias chain toward the requested terminal record, bounded by loop and implementation limits. NXDOMAIN and NODATA answers can also be cached for SOA-derived intervals, so creating a missing name does not become visible everywhere at once.\n\n![[Networks/Networks-DNS-18120000-1.png|theme-aware]]\n\n# Resolution and Transport\n\nClassic DNS often uses UDP for ordinary queries, but TCP is a full protocol transport rather than an optional afterthought. General-purpose implementations must support it. Resolvers use it for truncated responses (`TC=1`), and zone transfers use it as well. Encrypted resolver protocols have separate mappings: DoT runs DNS over TLS, while DoH carries DNS messages over HTTPS.\n\n| Type | Lookup direction | Payload | Example |\n|---|---|---|---|\n| `A` | Name → address | IPv4 | `api.example.com → 203.0.113.42` |\n| `AAAA` | Name → address | IPv6 | `api.example.com → 2001:db8::1` |\n| `CNAME` | Alias → target | Name | `www.example.com → example.com` |\n| `MX` | Mail domain → exchanger | Hostnames with preference | `example.com → 10 mail.example.com` |\n| `TXT` | Name → text values | One or more strings | SPF, DKIM selectors, verification |\n| `NS` | Zone → nameserver | Hostname | Delegates `example.com` |\n| `SOA` | Zone metadata | Serial, refresh, retry timers | Drives negative TTL behavior |\n| `PTR` | Reversed name → host | Domain name | `42.113.0.203.in-addr.arpa → api.example.com` |\n| `SRV` | Service locator | Target, port, priority | `_sip._tcp.example.com → 10 5 5060 sip1.example.com` |\n\n![[Networks/Networks-DNS-18120000.png|theme-aware]]\n\n# Cache Windows, Failover, and Traffic Steering\n\nDNS operations are cache operations. An authoritative change is only the beginning: recursive resolvers, operating systems, browsers, and applications may continue using the previous answer until its TTL expires. A safe migration controls the cache window before changing the destination and keeps the old destination healthy while stale answers remain possible.\n\nSuppose `api.example.com` has a TTL of 86,400 seconds and must move from `203.0.113.10` to `203.0.113.20`:\n\n1. Lower the TTL to 300 seconds while the old address is still authoritative.\n2. Wait at least 86,400 seconds: one complete old-TTL window. A resolver that cached the old record immediately before the reduction can legally keep it for that long.\n3. Verify the reduced TTL through several recursive resolvers with `dig @resolver api.example.com A`.\n4. Change the address and keep both old and new endpoints able to serve traffic for the expected stale-answer window.\n5. Monitor traffic, errors, certificate coverage, and dependencies from both destinations.\n6. Raise the TTL only after rollback is no longer likely.\n\nNegative answers have their own SOA-derived cache lifetime. Creating a previously missing name can remain invisible until cached NXDOMAIN or NODATA answers expire.\n\nTraffic-steering mechanisms have different boundaries:\n\n| Mechanism | What changes | Boundary to remember |\n|---|---|---|\n| Multiple A/AAAA records | Returns several addresses | Clients choose and cache differently. This is not health-aware by itself |\n| Weighted answer | Returns destinations in configured proportions | Resolver caching and client concentration make percentages approximate |\n| Geographic or latency policy | Chooses an answer from resolver or client-network signals | Resolver location may not equal user location. EDNS Client Subnet has privacy and cache costs |\n| Health-aware failover | Stops returning a failed endpoint | Existing caches still contain the failed answer until TTL expiry |\n| Anycast | BGP advertises one address from many sites | Routing selects the site. DNS still returns the same address |\n\nShort TTLs speed answer changes but increase authoritative and recursive query load. Long TTLs improve cache efficiency but extend rollback and failover windows. Pick the TTL from the recovery contract, not a universal number.\n\n## Diagnostic Sequence\n\n```bash\ndig api.example.com A\ndig @1.1.1.1 api.example.com A\ndig +trace api.example.com\ndig example.com SOA\ndig +dnssec api.example.com A\ndig -x 203.0.113.20\n```\n\nCompare the local answer with a known recursive resolver, then use `+trace` to inspect delegation and authoritative data. Check the returned TTL, CNAME chain, authoritative nameservers, and SOA serial before blaming application networking. A correct authoritative answer with a stale recursive answer is a cache-window problem. Different authoritative answers usually indicate incomplete zone publication or split-horizon policy.\n\n# DNS Security and Encrypted Transport\n\nDNS security has two different channels. DNSSEC authenticates signed record sets so a validating resolver can detect forged or modified DNS data. DNS-over-TLS (DoT) and DNS-over-HTTPS (DoH) encrypt the connection between a client and its recursive resolver. Neither control provides the other's guarantee.\n\n## DNSSEC Data Authentication\n\nAn authoritative zone signs record sets with a zone-signing key. The resolver obtains the corresponding DNSKEY record and validates a chain of DS delegations from a configured trust anchor, normally the DNS root. A valid signature proves that the signed answer came from the key owner and was not changed. It does not hide the queried name or make the returned service trustworthy.\n\n```text\nroot trust anchor\n  -> DS for .com\n  -> DNSKEY for .com\n  -> DS for example.com\n  -> DNSKEY for example.com\n  -> RRSIG over api.example.com A\n```\n\nAn authenticated denial response uses NSEC or NSEC3 records to prove that a requested name or type does not exist. Operators must rotate keys without breaking the DS/DNSKEY chain, monitor signature expiry, and verify positive and negative answers before a registrar or DNS-provider migration.\n\n## Encrypted Resolver Transport\n\nDoT carries DNS messages over TLS, conventionally on port 853. DoH carries DNS requests over HTTPS and can share port 443 with other web traffic. Both authenticate the configured resolver's TLS endpoint and protect the client-resolver hop from passive observation and on-path modification.\n\nAfter that hop, the resolver still performs recursion and contacts authoritative infrastructure. DoT or DoH does not authenticate those answers, constrain what the resolver returns, or hide queries from the resolver. DNSSEC validation at the resolver or validating client authenticates signed data across those hops.\n\n## Threat-to-control Map\n\n| Threat | Primary control | Residual boundary |\n|---|---|---|\n| Blind forged UDP response | Query-ID/source-port entropy. DNSSEC validation | Unsigned zones cannot provide DNSSEC authenticity |\n| On-path observation between client and resolver | DoT or DoH | The recursive resolver still sees the query |\n| Malicious or compromised resolver returning a signed-zone forgery | DNSSEC validation | The resolver can still block, delay, or alter unsigned data |\n| Stale but correctly signed answer | TTL and signature validity | DNSSEC authenticates data. It does not guarantee freshness beyond protocol validity |\n| Domain points to a malicious service | TLS/application authentication and authorization | DNSSEC authenticates the DNS owner, not the service's business behavior |\n\n# Pitfalls\n\n- Long TTLs preserve stale answers longer than expected.\n- CNAME at zone apex cannot coexist with other zone-root records.\n- DNSSEC is not payload confidentiality.\n- Encrypted resolver transport moves trust to the configured recursive resolver. It does not make that resolver invisible or infallible.\n\n# References\n\n- [Domain Names: Concepts and Facilities](https://www.rfc-editor.org/rfc/rfc1034)\n- [DNS Security Introduction and Requirements](https://www.rfc-editor.org/rfc/rfc4033)\n- [DNS Queries over HTTPS](https://www.rfc-editor.org/rfc/rfc8484)\n- [Route 53 routing policies](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html)\n",
+          "hash": "e330bd23e0f45b859d7ecff5423e8c8da83784b4a40e844fadd228c744bd6c61",
+          "topic": "Networks",
+          "violations": [],
+          "needs_fixing_ids": [],
+          "repair_input_hash": "",
+          "selection_reason": "new"
+        }
+      ],
+      "feedback": [],
+      "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+      "review_process": "focused-whole-note-v1",
+      "pr": null
+    },
+    "proposal": {
+      "version": 1,
+      "edits": [],
+      "dispositions": [
+        {
+          "path": "Vault/Home/Networks/Protocols/DNS.md",
+          "outcome": "keep",
+          "reason": "Audited the whole note against current text and RFC 1034, 4033, 7766 and 8484. The resolution walkthrough and diagram, TCP and truncation statement, and record-type table are accurate. The TTL migration steps are sound: wait one full old-TTL window, keep both endpoints serving, and raise the TTL only after rollback is unlikely. The negative-caching, steering-boundary, DNSSEC chain, DoT/DoH versus DNSSEC and threat-map sections are correct and consistently distinguish data authentication from transport encryption. Frontmatter is valid. The only code fence is `bash` and the other is `text`. The note has no cards, so there are no card-quality issues. There are no known violations. The few wording nuances I noticed, such as DoT authentication profiles, are not errors, and rewording them would be churn."
+        }
+      ],
+      "feedback": []
+    },
+    "source_hashes": {
+      "Vault/Home/Networks/Protocols/DNS.md": "e330bd23e0f45b859d7ecff5423e8c8da83784b4a40e844fadd228c744bd6c61"
+    },
+    "feedback_keys": [],
+    "rules_hash": "8b3ed060e67e8b75dbb85fb7eebca26705d5b6f9849dcdf7b72851251b0dfe50",
+    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+    "repair_inputs": {
+      "Vault/Home/Networks/Protocols/DNS.md": ""
+    },
+    "prepared_source_version": 1,
+    "prepared_at": "2026-11-20T20:39:30.440909Z"
+  }
 }
