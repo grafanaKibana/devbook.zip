@@ -1,0 +1,4 @@
+interface:
+  display_name: "Qard Polish"
+  short_description: "Improve Qards and learn from your feedback"
+  default_prompt: "Use $qard-polish to improve the marked Qards one by one, show saved and proposed versions, and learn from my feedback."

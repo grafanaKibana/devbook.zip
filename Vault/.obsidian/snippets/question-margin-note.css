@@ -17,13 +17,20 @@
     + .el-div .callout:is([data-callout="question"], [data-callout="qard"])
   )
   .callout:is([data-callout="question"], [data-callout="qard"]),
+/* Qard's hidden ID comment renders as an empty section between two cards. */
+.el-div:has(.callout:is([data-callout="question"], [data-callout="qard"])):has(
+    + div:empty + .el-div .callout:is([data-callout="question"], [data-callout="qard"])
+  )
+  .callout:is([data-callout="question"], [data-callout="qard"]),
 .el-blockquote:has(.callout:is([data-callout="question"], [data-callout="qard"])):has(
     + .el-blockquote .callout:is([data-callout="question"], [data-callout="qard"])
   )
   .callout:is([data-callout="question"], [data-callout="qard"]),
+/* Live Preview keeps the blank line, and Qard's ID comment, as editor lines. */
 .markdown-source-view.is-live-preview
   .cm-callout:has(.callout:is([data-callout="question"], [data-callout="qard"])):has(
-    + .cm-callout .callout:is([data-callout="question"], [data-callout="qard"])
+    + .cm-line + .cm-callout .callout:is([data-callout="question"], [data-callout="qard"]),
+    + .cm-line + .cm-line + .cm-callout .callout:is([data-callout="question"], [data-callout="qard"])
   )
   .callout:is([data-callout="question"], [data-callout="qard"]),
 .dc-questions-index
@@ -100,8 +107,14 @@ body.tabsdown-alignment-equal-width
   .dc-qi-tabs
   > .tabsdown.tabsdown--mounted
   > .tabsdown__tablist {
-  flex-wrap: wrap;
-  overflow-x: visible;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dc-questions-index .dc-qi-tabs .tabsdown__tab:focus-visible {
+  outline-offset: -2px;
 }
 
 .dc-questions-index
@@ -109,38 +122,52 @@ body.tabsdown-alignment-equal-width
   > .tabsdown.tabsdown--mounted
   > .tabsdown__tablist
   > .tabsdown__tab {
-  flex: 1 1 var(--tabsdown-equal-wrap-basis);
-  min-inline-size: 0;
-  white-space: normal;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
-.dc-questions-index .dc-qi-controls {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+.dc-questions-index .tabsdown__tab[data-count]::after {
+  margin-inline-start: 0.4em;
+  color: var(--text-faint);
+  font-size: 0.85em;
+  font-weight: var(--font-normal);
+  font-variant-numeric: tabular-nums;
+  content: attr(data-count);
+}
+
+.dc-questions-index .dc-qi-head {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
-  margin-block: 1.5rem 2rem;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  margin-block: 1.75rem 0.5rem;
 }
 
-.dc-questions-index .dc-qi-controls > label {
-  color: var(--text-muted);
-  font-size: var(--font-small);
-  font-weight: var(--font-semibold);
+.dc-questions-index .dc-qi-head > h2 {
+  margin: 0;
 }
 
-.dc-questions-index .dc-qi-controls > select {
-  inline-size: 100%;
-  min-block-size: 2.75rem;
-  padding-inline: 0.75rem;
+.dc-questions-index .dc-qi-head > select {
+  max-inline-size: min(100%, 18rem);
+  min-block-size: 2.25rem;
+  padding-inline: 0.75rem 2rem;
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--input-radius, var(--radius-s));
-  background-color: var(--background-primary);
-  color: var(--text-normal);
+  box-shadow: none;
+  background-color: transparent;
+  color: var(--text-muted);
   font: inherit;
-  font-weight: var(--font-normal);
+  font-size: var(--font-small);
+  text-overflow: ellipsis;
 }
 
-.dc-questions-index .dc-qi-controls > select:focus-visible {
+.dc-questions-index .dc-qi-head > select:hover {
+  border-color: var(--background-modifier-border-hover);
+  color: var(--text-normal);
+}
+
+.dc-questions-index .dc-qi-head > select:focus-visible {
   outline: 2px solid var(--interactive-accent);
   outline-offset: 2px;
 }
@@ -152,23 +179,66 @@ body.tabsdown-alignment-equal-width
   line-height: 1.4;
 }
 
-.dc-questions-index .dc-qi-results h3,
-.dc-questions-index .dc-qi-results h4,
-.dc-questions-index .dc-qi-results h5,
-.dc-questions-index .dc-qi-results h6 {
-  margin-block: 2rem 0.75rem;
+.dc-questions-index .dc-qi-section:has(> :is(h3, h4, h5, h6)) {
+  margin-block-start: 2.25rem;
+  padding-block-start: 1.25rem;
+  border-block-start: 1px solid var(--background-modifier-border);
 }
 
-.dc-questions-index .dc-qi-question {
-  padding-block: 0.15rem 0.8rem;
+.dc-questions-index .dc-qi-results :is(h3, h4, h5, h6) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin-block: 0 0.875rem;
+  color: var(--text-normal);
+  font-size: 1.2em;
+  font-weight: var(--font-semibold);
+  line-height: 1.3;
+}
+
+.dc-questions-index .dc-qi-crumb {
+  color: var(--text-muted);
+  font-weight: var(--font-normal);
+}
+
+.dc-questions-index .dc-qi-crumb::after {
+  margin-inline: 0.45em;
+  color: var(--text-faint);
+  content: "/";
+}
+
+.dc-questions-index .dc-qi-group + .dc-qi-group {
+  padding-block-start: 1.25rem;
+}
+
+.dc-questions-index .dc-qi-question:has(+ .dc-qi-question) {
   border-block-end: 1px solid var(--background-modifier-border);
 }
 
 .dc-questions-index .dc-qi-source {
-  margin-block-start: -0.2rem;
-  padding-inline: 0.5rem;
-  color: var(--text-muted);
-  font-size: var(--font-small);
+  margin-block-end: 0.25rem;
+  font-size: var(--font-smaller);
+  font-weight: var(--font-semibold);
+}
+
+.dc-questions-index .dc-qi-source a {
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: var(--radius-s);
+  background-color: hsla(var(--interactive-accent-hsl), 0.12);
+  color: var(--text-accent);
+  text-decoration: none;
+}
+
+.dc-questions-index .dc-qi-source a:hover {
+  background-color: hsla(var(--interactive-accent-hsl), 0.22);
+  color: var(--text-accent-hover);
+  text-decoration: none;
+}
+
+.dc-questions-index .dc-qi-source a:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
 }
 
 .dc-questions-index .dc-qi-source p {
@@ -182,8 +252,8 @@ body.tabsdown-alignment-equal-width
 }
 
 @container (max-width: 36rem) {
-  .dc-questions-index .dc-qi-controls {
-    grid-template-columns: 1fr;
-    gap: 0.4rem;
+  .dc-questions-index .dc-qi-head > select {
+    inline-size: 100%;
+    max-inline-size: none;
   }
 }

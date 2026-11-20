@@ -4,7 +4,6 @@ order: 20
 color: "#ef4444"
 topic: [Computer Science]
 subtopic: []
-summary: "Core CS reasoning for software engineering: data structures, algorithms, complexity analysis, and operating-system mechanisms."
 tags: [FolderNote]
 publish: true
 level: ["4"]
@@ -14,8 +13,9 @@ qard-deck: "Computer Science"
 qard-topic: "Computer Science"
 flashcard_uid: "827a68f2"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T17:10:31.241Z"
 published: "2026-07-08T13:28:37.342Z"
+summary: "Core CS reasoning for software engineering: data structures, algorithms, complexity analysis, and operating-system mechanisms."
 ---
 
 Computer science supplies the model behind software engineering decisions: how data is organized, how work scales ([[Home/Computer Science/Big O Notation|Big O]]), and how an operating system executes and isolates programs. Those fundamentals show up in ordinary .NET work whenever a collection is chosen, a slow path is diagnosed, or a design tradeoff needs a mechanical explanation.

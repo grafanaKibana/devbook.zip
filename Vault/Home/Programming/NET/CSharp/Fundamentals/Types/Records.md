@@ -1,7 +1,6 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: "Data-centric C# types with generated value equality, ToString, and with-expressions."
 level: ["4"]
 priority: Medium
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Records"
 flashcard_uid: "c03985b0"
 created: "2026-02-18T19:18:52.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.328Z"
 ---
 

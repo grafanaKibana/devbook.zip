@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "An LLM running in an action loop to complete engineering tasks end to end."
 publish: true
 status: In Progress
 level: ["2"]
@@ -10,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Harness Engineering/Tooling/Coding Agents"
 flashcard_uid: "4e540b65"
 created: "2026-08-16T07:07:41.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-08-20T20:41:15.495Z"
 ---
 

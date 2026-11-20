@@ -92,13 +92,13 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 - **Home:** whole-vault progress followed by topic cards.
 - **FolderNote:** introductory prose, one direct-child card map, retained useful content, and optional Questions and References when they carry useful content.
 - **Concept note:** opening content that makes the operating idea and its boundary recoverable, with no mandatory body section; examples, visualizations, Questions, References, and other explanatory devices appear only when the topic earns them. References, where present, are bare descriptive link bullets; `AGENTS.md` owns this note contract.
-- **Questions:** cross-vault aggregation with root topics rendered by Tabsdown in both readers. Topic tabs wrap across rows, and all topic questions load when the page opens. One active topic and a native Subtopic selector narrow visibility to that scope and its descendants. Options expose every hierarchy level with full ancestry and counts; answers and source links retain their existing renderers.
+- **Questions:** cross-vault aggregation with root topics rendered by Tabsdown in both readers. Topic tabs keep one row at their natural width and scroll with edge fades when they do not fit, and all topic questions load when the page opens. One active topic and a native Subtopic selector narrow visibility to that scope and its descendants. Options expose every hierarchy level with full ancestry and counts; answers and source links retain their existing renderers.
 - **Roadmap:** generated spatial overview; never hand-edited.
 
 ### Navigation rules
 
 - The physical folder tree and FolderNotes are the taxonomy.
-- Topic title, summary, icon, color, and order come from FolderNote frontmatter.
+- Topic title, icon, color, and order come from FolderNote frontmatter. Top-level topic `summary` frontmatter supplies descriptions on Home cards; FolderNote maps show titles and counts without descriptions.
 - Published FolderNotes hide unpublished children; authoring views may show them.
 - Cards replace direct-child navigation, not useful prose, diagrams, questions, or references.
 - Use search, Explorer, FolderNote maps, and contextual prose links instead of standalone link lists.
@@ -136,9 +136,9 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 ### Spacing and layout rhythm
 
 - Use `0.25rem` to `1rem` spacing inside cards and controls; use larger gaps between page sections.
-- Cards align title, summary, and footer regions without forcing equal content.
-- Home starts with its learning overview, without a welcome heading. Ten topic cards form three, four, and three cards in complete desktop rows. Other inventories use balanced complete rows in topic/keyboard order. The dashboard container switches from one column to paired cards at `28rem`, three-card rows at `42rem`, and up to four cards at `62rem`. Content sets row height; titles and summaries wrap without clamping, and progress stays at the bottom. The page scrolls, and the desktop grid keeps its `2rem` end gutter. Search is centred over the main content track: pages without a right rail share that track's desktop offset, and tablet content has symmetric outer margins.
-- FolderNote maps wrap content-sized cards instead of truncating long titles.
+- Home cards align title, summary, and footer regions without forcing equal content.
+- Home starts with its learning overview, without a welcome heading. Ten topic cards form three, four, and three cards in complete desktop rows. Other inventories use balanced complete rows in topic/keyboard order. The dashboard container switches from one column to paired cards at `28rem`, three-card rows at `42rem`, and up to four cards at `62rem`. Content sets row height; titles wrap without clamping, and progress stays at the bottom. The page scrolls, and the desktop grid keeps its `2rem` end gutter. Search is centred over the main content track: pages without a right rail share that track's desktop offset, and tablet content has symmetric outer margins.
+- FolderNote maps use balanced full-width rows with at most one card's difference between row counts. Container widths of `28rem`, `42rem`, `56rem`, and `70rem` allow up to two, three, four, and five cards per row. Larger rows come first; titles wrap, and cards keep a `3.5rem` minimum body height.
 - Pages without a right rail (FolderNotes, tag pages, Questions, About) give their content the full track; on desktop that track keeps a `2rem` end gutter mirroring the sidebar inset.
 - Callout bodies never widen past the callout: wide code, tables, and diagrams scroll inside their own box.
 - Visualizations keep stage geometry stable across state changes.
@@ -255,15 +255,15 @@ Their main jobs are to find a topic, understand its scope, inspect the mechanism
 
 ## Responsive behavior
 
-| Surface      | Current contract                                                                                                                                                                             |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Home cards   | Balanced complete rows, 3–4–3 for ten desktop topics; container breakpoints at `28rem`, `42rem`, and `62rem`; full content wraps                                                             |
-| Quartz shell | Mobile footer one row; no-share labels center; Graph hides; Explorer scrolls                                                                                                                 |
-| Home page    | Scrolls at every size; all summaries, counts, bars, and the legend stay visible                                                                                                              |
-| StepTrace    | Mounted-instance compact mode below `704px`; footer fits `320px` without shrinking `44px` controls                                                                                           |
-| Complexity   | One resource panel at full width at every size; the tab strip scrolls before it wraps, and the figure never gains a horizontal scroller                                                      |
-| Folder maps  | Content-sized wrapping cards; compact treatment in narrow containers                                                                                                                         |
-| Questions    | Tabsdown topic tabs wrap across rows without horizontal scrolling; the native Subtopic selector stacks below its label. Topic and subtopic choices scope the same questions in both readers. |
+| Surface      | Current contract                                                                                                                                                                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Home cards   | Balanced complete rows, 3–4–3 for ten desktop topics; container breakpoints at `28rem`, `42rem`, and `62rem`; full content wraps                                                                                                                 |
+| Quartz shell | Mobile footer one row; no-share labels center; Graph hides; Explorer scrolls                                                                                                                                                                     |
+| Home page    | Scrolls at every size; all counts, bars, and the legend stay visible                                                                                                                                                                             |
+| StepTrace    | Mounted-instance compact mode below `704px`; footer fits `320px` without shrinking `44px` controls                                                                                                                                               |
+| Complexity   | One resource panel at full width at every size; the tab strip scrolls before it wraps, and the figure never gains a horizontal scroller                                                                                                          |
+| Folder maps  | Balanced full-width rows of up to five cards; row counts differ by at most one                                                                                                                                                                   |
+| Questions    | Tabsdown topic tabs stay on one row and scroll with edge fades before they wrap; the native Subtopic selector shares the topic heading row and stacks below it when narrow. Topic and subtopic choices scope the same questions in both readers. |
 
 Prefer container queries or mounted-instance measurement for content components. Use viewport media queries only for true page-shell behavior.
 

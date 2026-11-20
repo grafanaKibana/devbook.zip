@@ -58,6 +58,42 @@ dotnet run --project Platform/DevBook/DevBook.API/DevBook.API.csproj
 
 Ingest publishable notes before trying retrieval. This playground makes the mechanics visible; it is not a production assistant. Evaluation measures retrieval of evidence, rather than grading generated answers.
 
+## How notes and cards are written and improved
+
+Every note and Qard card goes through the same author role, the same independent reviewer and the same rules, whether the change starts in a chat session or in the scheduled pipeline.
+
+```mermaid
+flowchart LR
+    N[New or edited note] --> W
+    NP[note-polish skill] --> W
+    QP[qard-polish skill] --> W
+    CI[Scheduled improvement pipeline] --> W
+
+    C[AGENTS.md and role contracts] --> W
+    C --> R
+    S[(Writing preference stores)] --> W
+    S --> R
+    NP -- reusable feedback --> S
+    QP -- reusable feedback --> S
+
+    W[Author: note-writer] --> R[Reviewer: note-reviewer, read-only]
+    R -- changes required --> W
+    R -- CLEAN --> Q[Qard readiness and Learn coverage]
+    Q --> D[Ready: local commit or topic PR]
+```
+
+| Entry point | Use it for | Who accepts the change |
+| --- | --- | --- |
+| `note-polish` skill | Improving an existing note, one proposal at a time | The user, per proposal |
+| `qard-polish` skill | Repairing cards one by one, starting with those marked **Needs fixing** | The user, per card |
+| Improvement pipeline | Scheduled whole-note refinement, up to five notes per topic PR | The user, by reviewing and merging the PR |
+
+- **Rules.** [AGENTS.md](AGENTS.md) and the [writer](.rulesync/subagents/note-writer.md) and [reviewer](.rulesync/subagents/note-reviewer.md) contracts own structure, card identity and the review protocol.
+- **Preferences.** The [note](.rulesync/skill-feedback/note-polish.json) and [Qard](.rulesync/skill-feedback/qard-polish.json) stores hold the wording and explanation preferences learned from feedback. Only the two skills write them; the author, the reviewer and the pipeline read them, so no rule is copied anywhere else.
+- **Review gate.** A change is finished only when the reviewer returns `CLEAN` for the complete note.
+- **Qard readiness.** After a move, rename, split, merge or card change, decks, course links, lessons and checks are repaired by the [readiness procedure](docs/qard-readiness.md).
+- **Pipeline.** The [improvement runbook](.scripts/DevBook.Tooling/README.md) covers selection, budgets, topic PRs and activation.
+
 ## Repository structure
 
 | Path | Role |

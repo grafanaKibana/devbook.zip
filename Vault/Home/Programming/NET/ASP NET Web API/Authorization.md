@@ -1,13 +1,12 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: "Deciding what an authenticated user may do via roles, claims, or policies."
 level: ["1"]
 priority: Medium
 status: In Progress
 publish: true
 created: "2026-02-19T23:08:30.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.366Z"
 ---
 

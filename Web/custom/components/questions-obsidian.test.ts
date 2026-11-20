@@ -272,14 +272,15 @@ class DatacoreHarness {
 const questionSnapshot = (harness: DatacoreHarness) =>
   harness
     .allNodes("div")
-    .filter((node) => node.props.class === "dc-qi-question")
-    .map((question) => {
-      const children = childrenOf(question.props.children) as VNode[]
-      return {
+    .filter((node) => node.props.class === "dc-qi-group")
+    .flatMap((group) => {
+      const [sourceNode, ...questions] = childrenOf(group.props.children) as VNode[]
+      const source = (childrenOf(sourceNode.props.children)[0] as VNode).props.content
+      return questions.map((question) => ({
         key: question.key,
-        question: children[0].props.content,
-        source: (childrenOf(children[1].props.children)[0] as VNode).props.content,
-      }
+        question: (childrenOf(question.props.children)[0] as VNode).props.content,
+        source,
+      }))
     })
 
 test("production extraction accepts legacy and Qard cards once while ignoring lookalikes", async () => {
@@ -484,6 +485,12 @@ test("QuestionTopics destroys before remount, preserves selection, and cleans up
   const topics = vnode.props.topics as Topic[]
   const panels = topics.map((topic) => ({ dataset: { topic: topic.name } }))
   const tabs = topics.map((topic) => ({
+    dataset: {} as Record<string, unknown>,
+    parentElement: {
+      scrollLeft: 0,
+      getBoundingClientRect: () => ({ left: 0, right: 100, width: 100 }),
+    },
+    getBoundingClientRect: () => ({ left: 0, right: 60, width: 60 }),
     focus: () => events.push(`focus:${topic.name}`),
   }))
   const root = { activeElement: tabs[1] }
@@ -503,7 +510,7 @@ test("QuestionTopics destroys before remount, preserves selection, and cleans up
     latestOptions?.tabs.map(({ id, label, panel }) => ({ id, label, panel })),
     topics.map((topic, index) => ({
       id: topic.name,
-      label: `${topic.label} (${topic.count})`,
+      label: topic.label,
       panel: panels[index],
     })),
   )

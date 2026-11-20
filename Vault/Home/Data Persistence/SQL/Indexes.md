@@ -1,13 +1,12 @@
 ---
 topic: [Data Persistence]
 subtopic: [SQL]
-summary: "Index structures across database engines and the operators, storage layouts, and mutation costs each structure serves."
 publish: true
 level: ["4"]
 priority: High
 status: In Progress
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.352Z"
 ---
 

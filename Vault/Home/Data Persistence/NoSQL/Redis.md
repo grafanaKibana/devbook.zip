@@ -1,13 +1,12 @@
 ---
 topic: [Data Persistence]
 subtopic: [NoSQL]
-summary: "Redis data structures, persistence, replication, clustering, and the failure contracts behind common use cases."
 level: ["3"]
 priority: High
 status: In Progress
 publish: true
 created: "2026-07-18T07:07:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-16T14:47:46.724Z"
 ---
 

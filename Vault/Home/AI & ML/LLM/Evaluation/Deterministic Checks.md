@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Executable checks that reject malformed or policy-violating output before semantic evaluation."
 level: ["3"]
 priority: Medium
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Evaluation/Deterministic Checks"
 flashcard_uid: "29dd80f1"
 created: "2026-02-16T21:15:26.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.474Z"
 ---
 

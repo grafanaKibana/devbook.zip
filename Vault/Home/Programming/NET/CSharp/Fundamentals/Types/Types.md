@@ -2,7 +2,6 @@
 title: C# Types
 topic: [Programming]
 subtopic: [NET]
-summary: "How C# types define shape, behavior, and value versus reference assignment semantics."
 tags: [FolderNote]
 publish: true
 status: New
@@ -12,7 +11,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Types"
 flashcard_uid: "a5c39ae2"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-12T21:09:36.103Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.329Z"
 ---
 

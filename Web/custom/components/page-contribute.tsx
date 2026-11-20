@@ -8,27 +8,17 @@ import type {
 import { lucideInner } from "../lib/lucide-icons"
 import { canonicalUrl } from "../seo"
 
-// Per-page contribution links (issue #145). Rendered on the article's
-// content-meta row by ContentMetaRow, which owns the styling.
-//
-// The repo identity is hard-coded: a rename silently breaks every link and is
-// not derivable from cfg.baseUrl, so keep it in one place. "Edit" targets the
-// Vault source (Vault/Home/…), never the generated content/ copy the Syncer
-// overwrites; relativePath preserves the real filename where the slug is lossy
-// (folder notes slugify to …/index, and "AI & ML" would be mangled).
+// The repo identity is not derivable from cfg.baseUrl. "Edit" targets the Vault
+// source, never the generated content/ copy; relativePath keeps the real
+// filename where the slug is lossy (folder notes, "AI & ML").
 const REPO = "grafanaKibana/devbook.zip"
 const BRANCH = "main"
 const VAULT_ROOT = "Vault/Home"
 
-// Guard against content/Vault drift. Quartz builds from Web/content, which the
-// Syncer regenerates from the vault; if that copy drifts — e.g. a folder is
-// renamed in the vault but content/ isn't re-synced — the computed edit URL
-// points at a Vault/Home path that no longer exists, sending contributors to
-// edit the wrong (or a nonexistent) source. So only offer the Edit link when the
-// vault source file is actually on disk at build. The vault sits beside Web/ at
-// the repo root, so resolve it from the build cwd (Web/). When the vault tree is
-// absent from the build context we can't check, so we don't guard — render as
-// before (no regression); Report never needs a source path.
+const EDIT_EXCLUDED_SLUGS = ["questions"]
+
+// content/ can drift from the vault, so offer Edit only when the source file
+// exists. A build context without the vault tree cannot check and keeps Edit.
 const VAULT_DIR = path.resolve(process.cwd(), "..", VAULT_ROOT)
 const vaultVisible = existsSync(VAULT_DIR)
 const sourceExistsCache = new Map<string, boolean>()
@@ -55,7 +45,7 @@ export const PageContribute: QuartzComponentConstructor = () => {
     const relPath = fileData.relativePath as string | undefined
     if (!relPath) return null
 
-    const hasSource = vaultHasSource(relPath)
+    const canEdit = vaultHasSource(relPath) && !EDIT_EXCLUDED_SLUGS.includes(fileData.slug!)
     const editPath = [...VAULT_ROOT.split("/"), ...relPath.split("/")]
       .map(encodeURIComponent)
       .join("/")
@@ -70,7 +60,7 @@ export const PageContribute: QuartzComponentConstructor = () => {
 
     return (
       <div class="page-contribute">
-        {hasSource && (
+        {canEdit && (
           <a href={editUrl} target="_blank" rel="noopener noreferrer">
             <svg
               xmlns="http://www.w3.org/2000/svg"

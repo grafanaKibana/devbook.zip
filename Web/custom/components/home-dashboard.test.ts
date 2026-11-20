@@ -137,13 +137,21 @@ test("source and keyboard order follows visual row-major order", async () => {
   }
 })
 
-test("rendered topic summaries remain complete and unclamped", async () => {
-  const summary =
-    "A deliberately long summary whose final sentinel must remain available to both readers. SUMMARY_END"
+test("topic cards show summaries while preserving titles and progress", async () => {
+  const html = await renderDashboard(1, "Restored topic summary", ["Established"])
+  assert.match(html, /class="dc-topic-summary">Restored topic summary<\/p>/)
+  assert.match(html, /class="db-card-title">Topic 00<\/span>/)
+  assert.match(html, /1 note/)
+  assert.match(html, /100% overall note development/)
+})
+
+test("topic summaries remain complete and missing summaries leave no empty paragraph", async () => {
+  const summary = "A deliberately long topic summary that must wrap without truncation. SUMMARY_END"
   const html = await renderDashboard(1, summary)
-  const css = /<style>([\s\S]*?)<\/style>/.exec(html)?.[1] ?? ""
-  assert.match(html, new RegExp(`${summary.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</p>`))
-  assert.doesNotMatch(css, /(?:line-clamp|text-overflow|max-height)/)
+  assert.ok(html.includes(`${summary}</p>`))
+  assert.doesNotMatch(html, /line-clamp|text-overflow/)
+  const withoutSummary = await renderDashboard(1, "")
+  assert.doesNotMatch(withoutSummary, /<p class="dc-topic-summary">/)
 })
 
 test("note development counts all three stages and weights them independently of study", async () => {

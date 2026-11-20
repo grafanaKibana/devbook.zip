@@ -1,7 +1,6 @@
 ---
 topic: [DevOps]
 subtopic: [Deployment Strategies]
-summary: "How new versions reach production, balancing risk, cost, and rollback speed."
 publish: true
 status: In Progress
 priority: Medium
@@ -11,7 +10,7 @@ qard-deck: "DevOps"
 qard-topic: "Deployment Strategies/Deployment Strategies"
 flashcard_uid: "f7d6b407"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.508Z"
 ---
 

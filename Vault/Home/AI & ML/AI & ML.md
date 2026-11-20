@@ -4,7 +4,6 @@ order: 70
 color: "#10b981"
 topic: [AI & ML]
 subtopic: []
-summary: "How learning systems are built, evaluated, and operated: classic ML, LLMs, and agent tooling."
 tags: [FolderNote]
 publish: true
 level: ["3"]
@@ -14,8 +13,9 @@ qard-deck: "AI & ML"
 qard-topic: "AI & ML"
 flashcard_uid: "792c6bf3"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T17:10:31.241Z"
 published: "2026-07-08T13:28:37.402Z"
+summary: "How learning systems are built, evaluated, and operated: classic ML, LLMs, and agent tooling."
 ---
 
 AI & ML covers the engineering around systems that learn from data or use trained models. The section moves from classic machine learning to LLM applications and the tooling used to build them. Model choice matters, but production results usually turn on the data and on how the system is evaluated and operated. A gradient-boosted tree and an LLM can fail for the same reason: an impressive model cannot rescue weak evidence or missing monitoring.

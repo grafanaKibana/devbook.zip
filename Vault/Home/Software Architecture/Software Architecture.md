@@ -4,7 +4,6 @@ order: 50
 color: "#eab308"
 topic: [Software Architecture]
 subtopic: []
-summary: "Structuring software with clear boundaries and explicit tradeoffs so it can evolve sustainably."
 tags: [FolderNote]
 publish: true
 priority: High
@@ -14,8 +13,9 @@ qard-deck: "Software Architecture"
 qard-topic: "Software Architecture"
 flashcard_uid: "bffcd2eb"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T17:10:31.241Z"
 published: "2026-07-15T11:49:57.319Z"
+summary: "Structuring software with clear boundaries and explicit tradeoffs so it can evolve sustainably."
 ---
 
 Software architecture decides which code changes together, which state has one authority, and which failures can be isolated. Those boundaries range from in-process modules to independently deployed services. A boundary is useful when it contains a real change, scaling, or failure cost. Splitting a system without that pressure only adds coordination.

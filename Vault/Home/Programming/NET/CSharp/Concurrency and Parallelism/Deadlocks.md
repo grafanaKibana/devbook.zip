@@ -1,7 +1,6 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: "When execution paths wait forever on resources each other holds, halting progress."
 level: ["4"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Deadlocks"
 flashcard_uid: "f9642578"
 created: "2026-02-18T20:04:43.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-17T09:54:57.676Z"
 published: "2026-07-08T13:28:37.367Z"
 ---
 
@@ -215,24 +214,6 @@ public async Task UpdateAsync()
 > For example, if `First` locks A then B while `Second` locks B then A, two threads can each hold one lock and wait for the other. Changing `Second` to lock A then B removes the cycle.
 >
 > [Microsoft: Dynamic-link library best practices](https://learn.microsoft.com/en-us/windows/win32/Dlls/dynamic-link-library-best-practices) · [Microsoft: `lock` statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock)
-
-<!-- qard-id: 17deb6e3-a3c1-4265-9148-1a96302dca83 -->
-> [!qard]- When does blocking on an incomplete task deadlock a UI thread?
-> Blocking deadlocks a UI thread when the task cannot complete without running code on that same UI thread. This happens when an `await` inside the task captured the UI `SynchronizationContext`, which runs continuations only on the UI thread.
->
-> The cycle forms in five steps:
->
-> 1. A UI event handler calls an async method, such as `LoadDataAsync()`.
-> 2. Inside it, `await` on incomplete I/O captures the UI context, and the method returns an incomplete task.
-> 3. The handler calls `.Result` or `.Wait()` on that task, blocking the UI thread.
-> 4. The I/O completes, and the rest of `LoadDataAsync()` is queued to run on the UI thread.
-> 5. The UI thread waits for the task, while the task waits for the UI thread. Neither can proceed.
-> 
-> Awaiting through the whole call chain breaks the cycle, because the handler yields the UI thread instead of blocking it. `ConfigureAwait(false)` in library code avoids capturing the context for those awaits, but it does not make blocking on asynchronous code a safe general bridge.
->
-> Without a single-threaded context, as in ASP.NET Core, this particular cycle does not form. Blocking still holds a thread-pool thread for each waiting call and can starve the pool under load.
->
-> [Microsoft: Common async bugs](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/common-async-bugs) · [Microsoft: Synchronous wrappers for async methods](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/synchronous-wrappers-for-asynchronous-methods)
 
 <!-- qard-id: 7c1fe64c-c539-4207-887a-8a8ad04d355b -->
 > [!qard]- How can a production .NET deadlock be diagnosed?

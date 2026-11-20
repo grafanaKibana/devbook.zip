@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Applying guardrails across an LLM system to limit security threats and unsupported output."
 tags: [FolderNote]
 publish: true
 level: ["3"]
@@ -11,7 +10,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Safety/Safety"
 flashcard_uid: "920e124b"
 created: "2026-07-13T19:23:03.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-13T19:25:45.048Z"
 ---
 

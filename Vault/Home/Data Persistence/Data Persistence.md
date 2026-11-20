@@ -4,7 +4,6 @@ order: 30
 color: "#f97316"
 topic: [Data Persistence]
 subtopic: []
-summary: "How software stores and protects state across restarts using SQL, NoSQL, and caching."
 tags: [FolderNote]
 publish: true
 priority: High
@@ -14,8 +13,9 @@ qard-deck: "Data Persistence"
 qard-topic: "Data Persistence"
 flashcard_uid: "d03cdcde"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T17:10:31.241Z"
 published: "2026-07-08T13:28:37.342Z"
+summary: "How software stores and protects state across restarts using SQL, NoSQL, and caching."
 ---
 
 Data persistence is the part of a system that must survive process and machine restarts. A storage choice fixes more than where bytes live: it sets the available consistency guarantees, the shape of efficient queries, and much of the operating cost. A weak isolation choice can corrupt business state under concurrency. An unnecessary cache creates a stale-read path that the original system never had.

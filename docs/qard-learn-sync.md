@@ -5,13 +5,13 @@ DevBook Learn Sync is a local companion plugin. It watches the source notes alre
 | Source event | Automatic behavior |
 | --- | --- |
 | A card is added, removed or edited in a linked note | Update that objective's source revision and last-change date |
-| Linked note content or its summary changes | Record the source change against its existing objectives |
+| Linked note body changes | Record the source change against its existing objectives |
 | A source file or folder is renamed while the plugin is running | Maintain the explicit source links |
 | A source disappears | Report the missing source and retain its objective and progress |
 | A note with cards has no objective in its subject course | Show an unassigned-note warning with its path and card count; leave the course unchanged |
 | A closed completed lesson exists, but its existing objective becomes new with empty due and evidence | Report possible progress loss; keep the warning until the records are reconciled |
 
-The plugin does not create objectives or tests, rewrite learning targets, infer prerequisites, or change states, due dates or assessment evidence. Card schedules, review history, note statuses and Qard settings remain under their existing owners. Unrelated metadata, including stock Qard identity bookkeeping, does not trigger a source-content update.
+The plugin does not create objectives or tests, rewrite learning targets, infer prerequisites, or change states, due dates or assessment evidence. Card schedules, review history, note statuses and Qard settings remain under their existing owners. Frontmatter metadata and stock Qard identity bookkeeping do not trigger a source-content update.
 
 ## Daily use
 
@@ -33,7 +33,7 @@ Course records stay under `Assets/Qard/Courses`, hidden by the existing navigati
 
 The companion's installation baseline, acknowledgement state and pending rename events live in its ignored `.obsidian/plugins/devbook-learn-sync/data.json`. It does not use a visible metadata note. The first live course writes happen through Obsidian's public `Vault.process()` API, merging against current contents so an assessment completed during the scan is retained. Course tables are validated before writing; malformed tables are reported and left intact.
 
-File renames require an actual vault rename event. Moves made while Obsidian is closed cannot be safely inferred from a matching filename and are reported as missing links. Obsidian's per-file atomic updates do not replace cross-device sync conflict resolution.
+File renames require an actual vault rename event. Moves made while Obsidian is closed cannot be safely inferred from a matching filename and are reported as missing links. [Qard readiness](qard-readiness.md) owns the author's repair steps for such moves. Obsidian's per-file atomic updates do not replace cross-device sync conflict resolution.
 
 ## Installation and verification
 

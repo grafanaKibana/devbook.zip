@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "createdAt": 1795123086568,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "composed-prompts",
+  "title": "Split a task into inspectable calls only where intermediate outputs can be validated, accounting for propagated errors, latency, and untrusted instructions",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "goal": "explain",
+      "objective": "composed-prompts",
+      "prompt": "A team writes product announcement emails with an LLM. It replaces one prompt with a chain of three calls. Call 1 brainstorms ideas as free text. Call 2 writes a draft from those ideas. Call 3 polishes the draft. Application code passes each output unchanged into the next prompt and does not check it.\n\nExplain why this chain adds no safety over the single prompt, and what it costs in return.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Explains that because no check validates an intermediate output before the next call uses it, a wrong or bad intermediate result passes straight into the next call and the chain has no point where it stops, so mistakes are no more contained than inside one prompt.",
+          "marks": 1
+        },
+        {
+          "point": "Names a cost of the extra calls: added latency or tokens per request, or more hand-offs where a wrong value or injected instruction can pass along.",
+          "marks": 1
+        }
+      ],
+      "model": "No code checks the brainstorm or the draft before the next call uses it, so nothing can reject a bad intermediate result or stop the chain. A wrong idea or a flawed draft flows straight into the next call, just as a mistake stays hidden inside one prompt. The chain still adds two calls to every request, which means more latency and tokens, and two more hand-offs where a wrong value or a hostile instruction can be carried forward.\n\n*Optional:* The split earns its cost only when code validates each intermediate output, for example against a fixed shape, allowed values or trusted facts, and a failed check stops the chain before the next call.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md",
+        "heading": "Prompt Chaining"
+      }
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

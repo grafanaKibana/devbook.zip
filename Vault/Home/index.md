@@ -1,11 +1,10 @@
 ---
 title: Home
-summary: A .NET and AI engineering knowledge base with notes, examples, and questions.
 tags: [FolderNote, MetricsIgnore]
 publish: true
 icon: home
 created: "2026-07-05T15:34:15.000Z"
-modified: "2026-11-12T21:09:36.103Z"
+modified: "2026-11-16T17:10:31.241Z"
 published: "2026-07-06T07:55:35.732Z"
 ---
 
@@ -70,10 +69,9 @@ return function TopicDashboard() {
   };
 
   // Topics are the direct-child folders of ROOT — their FolderNote sits two path
-  // segments below ROOT (ROOT/<Folder>/<name>.md). Title, description, colour,
-  // icon, and order all come from that note's frontmatter (summary = the card
-  // description, exactly like the child cards in the shared folder map), so there
-  // is no hard-coded topic list to keep in sync.
+  // segments below ROOT (ROOT/<Folder>/<name>.md). Title, summary, colour, icon,
+  // and order come from that note and its frontmatter, so there is no hard-coded
+  // topic list to keep in sync.
   const isTopicHub = (p) =>
     hasTag(p, "FolderNote") &&
     !hasTag(p, "MetricsIgnore") &&
@@ -93,7 +91,7 @@ return function TopicDashboard() {
       return {
         fn,
         title: fn.$name,
-        desc: firstString(fn.value("summary")),
+        summary: firstString(fn.value("summary")),
         rgb,
         iconSvg,
         ...statsFor(dir),
@@ -101,7 +99,7 @@ return function TopicDashboard() {
     });
 
   // Balance complete rows in topic order: ten desktop cards form 3–4–3.
-  // Intrinsic row heights let every title, summary and progress footer fit.
+  // Intrinsic row heights let every title, summary, and progress footer fit.
   const cards = baseCards;
   const bentoFor = (minSpan) => {
     const tiles = [];
@@ -160,7 +158,7 @@ return function TopicDashboard() {
 
   // Layout + the home-only "1c" card treatment (claude.ai design "DevBook Page B
   // - Glow"). The card's base chrome (.db-card border, radius, neutral surface and
-  // the single soft corner glow via .db-card::before, .db-card-title, -summary)
+  // the single soft corner glow via .db-card::before and .db-card-title)
   // comes from the shared CARD_CSS. On top of it the home cards add the 1c signature
   // pieces, which are home-only and NOT shared with the FolderNote hubs:
   //   • .dc-topic-chip  — a tinted rounded tile holding the topic icon, in place of
@@ -186,9 +184,9 @@ return function TopicDashboard() {
 .dc-topic-title { display: flex; gap: 0.6rem; align-items: center; line-height: 1.25; }
 .dc-topic-chip { display: grid; place-items: center; flex: 0 0 auto; width: 2.25rem; height: 2.25rem; border-radius: 0.625rem; background: rgba(var(--topic-rgb), 0.13); color: rgb(var(--topic-rgb)); }
 .dc-topic-chip svg { display: block; width: 1.3rem; height: 1.3rem; }
+.dc-topic-dashboard p.dc-topic-summary { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; line-height: 1.45; overflow-wrap: anywhere; }
 .dc-topic-spacer { flex: 1 0 auto; min-height: 0.55em; }
 .dc-topic-foot { display: flex; flex-direction: column; gap: 4px; }
-.dc-topic-grid p.db-card-summary { display: block; overflow-wrap: anywhere; }
 .dc-topic-cap { font-size: 0.8125rem; line-height: 1.3; font-variant-numeric: tabular-nums; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0.5rem; color: var(--text-muted, var(--darkgray, #5f6b7a)); }
 .dc-topic-cap strong { color: var(--text-normal, var(--dark, #1f2937)); font-weight: 600; }
 .dc-topic-bar { box-sizing: border-box; position: relative; width: 100%; height: 11px; margin-top: 0.15rem; padding: 2px; border-radius: 999px; border: 1px solid rgba(var(--topic-rgb), 0.5); background: var(--background-primary, var(--light, #ffffff)); overflow: hidden; }
@@ -301,7 +299,7 @@ p.dc-progress-note { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray
                 <span class="dc-topic-chip" dangerouslySetInnerHTML={{ __html: c.iconSvg }} />
                 <span class="db-card-title">{c.title}</span>
               </div>
-              {c.desc ? <p class="db-card-summary">{c.desc}</p> : null}
+              {c.summary ? <p class="dc-topic-summary">{c.summary}</p> : null}
               <div class="dc-topic-spacer" />
               <div class="dc-topic-foot">
                 <div class="dc-topic-cap"><span>{plural(c.total, "note")}</span>{" "}<strong>{c.pct}%</strong></div>

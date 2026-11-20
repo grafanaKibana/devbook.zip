@@ -1,7 +1,6 @@
 ---
 topic: [Software Architecture]
 subtopic: [Distributed Systems]
-summary: "Horizontal scaling adds service instances. Stateless handlers are simplest, while stateful services need partitioning, replication, and routing."
 level: ["2"]
 priority: High
 status: New
@@ -10,7 +9,7 @@ qard-deck: "Software Architecture"
 qard-topic: "Distributed Systems/Scalability Patterns/Horizontal Scaling"
 flashcard_uid: "07349cc0"
 created: "2026-02-28T20:52:28.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.389Z"
 ---
 

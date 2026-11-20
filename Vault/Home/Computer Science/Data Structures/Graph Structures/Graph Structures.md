@@ -1,14 +1,13 @@
 ---
 topic: [Computer Science]
 subtopic: [Data Structures]
-summary: "Graphs and disjoint sets for modelling relationships with cycles and multiple paths."
 tags: [FolderNote]
 level: ["4"]
 priority: Medium
 status: In Progress
 publish: true
 created: "2026-07-09T18:37:04.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-10T14:39:34.299Z"
 ---
 

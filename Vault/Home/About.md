@@ -1,11 +1,10 @@
 ---
 title: About
-summary: "The purpose, scope, and AI-assisted authorship of this software engineering notebook."
 publish: true
 tags: [MetricsIgnore]
 icon: heart
 created: "2026-07-12T07:42:37.000Z"
-modified: "2026-08-13T19:23:03.000Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-12T06:14:03.364Z"
 ---
 

@@ -1,7 +1,6 @@
 ---
 topic: [Software Architecture]
 subtopic: [Application Architecture]
-summary: "How a codebase is shaped into layers and modules, and where responsibilities live."
 tags: [FolderNote]
 publish: true
 priority: High
@@ -11,7 +10,7 @@ qard-deck: "Software Architecture"
 qard-topic: "Application Architecture/Application Architecture"
 flashcard_uid: "3f90569b"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-15T11:47:54.747Z"
 ---
 

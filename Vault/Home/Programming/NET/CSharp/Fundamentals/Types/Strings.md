@@ -1,7 +1,6 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: "An immutable C# reference type where any text change creates a new value."
 level: ["4"]
 priority: Medium
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Strings"
 flashcard_uid: "d65a72cc"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.328Z"
 ---
 

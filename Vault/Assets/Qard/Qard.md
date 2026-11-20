@@ -7,7 +7,6 @@ status: In Progress
 tags: [FolderNote, MetricsIgnore]
 publish: false
 icon: graduation-cap
-summary: "Qard sections and the daily learning, review, and interview-preparation routine."
 ---
 
 The routine is **Today → one Learn objective → its cards → delayed checks**. Learn tracks understanding; flashcards schedule memory reviews. One topic stays the learning focus while earlier subjects continue through Today.

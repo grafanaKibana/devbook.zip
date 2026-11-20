@@ -1,7 +1,6 @@
 ---
 topic: [Software Architecture]
 subtopic: [Application Architecture]
-summary: "Keeps a small, stable core defining extension points and extends behavior through plug-ins that implement those points without modifying the core."
 level: ["3"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Software Architecture"
 qard-topic: "Application Architecture/Plug-in Architecture (MicroKernel)"
 flashcard_uid: "9959d912"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.367Z"
 ---
 

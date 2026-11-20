@@ -1890,32 +1890,17 @@ blockquote {
     opacity var(--dur-1) var(--ease-out);
 }
 
-// Questions alone use wrapped Tabsdown topic controls. Component CSS is emitted
-// in `quartz-base`; this unlayered, mounted-only rule must outrank Tabsdown.
+// Questions topic tabs keep their natural width on one row and scroll past the
+// edge. Component CSS is emitted in `quartz-base`; this unlayered, mounted-only
+// rule must outrank Tabsdown.
 .questions-index .tabsdown.tabsdown--mounted {
-  --tabsdown-overflow-wrap: wrap;
-  --tabsdown-overflow-x: visible;
-  --tabsdown-equal-width-flex: 1 1 max-content;
-  --tabsdown-equal-width-min-inline-size: var(--tabsdown-tab-min-size);
-  --tabsdown-equal-width-white-space: normal;
-}
+  --tabsdown-equal-width-flex: 0 0 auto;
+  --tabsdown-equal-width-min-inline-size: 0;
+  --tabsdown-equal-width-white-space: nowrap;
 
-// ============================================================================
-// Tabsdown overflow cue. A scrolling tab strip otherwise gives no sign that more
-// tabs sit past its edge. The fades are driven by the strip's own scroll
-// position, so each shows only while that edge still hides a tab; a strip that
-// fits has no scroll timeline, its fade lengths stay 0px, and the mask is opaque.
-// ============================================================================
-@property --tabsdown-fade-start {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0px;
-}
-
-@property --tabsdown-fade-end {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0px;
+  > .tabsdown__tablist > .tabsdown__tab {
+    padding-inline: 0.75rem;
+  }
 }
 
 // The strip is a scroll container, which clips the block axis too, so an outset
@@ -1941,36 +1926,3 @@ blockquote {
   }
 }
 
-@supports (animation-timeline: scroll()) {
-  .tabsdown.tabsdown-overflow-scroll > .tabsdown__tablist {
-    // Snapping and the tabs' focus scrolling stop a tab clear of the fades, so
-    // neither a snapped label nor a focused tab's ring sits under one.
-    scroll-padding-inline: 4rem;
-    mask-image: linear-gradient(
-      to right,
-      transparent,
-      #000 var(--tabsdown-fade-start),
-      #000 calc(100% - var(--tabsdown-fade-end)),
-      transparent
-    );
-    animation: tabsdown-overflow-fade linear both;
-    animation-timeline: scroll(self inline);
-  }
-}
-
-@keyframes tabsdown-overflow-fade {
-  from {
-    --tabsdown-fade-start: 0px;
-    --tabsdown-fade-end: 4rem;
-  }
-  8% {
-    --tabsdown-fade-start: 4rem;
-  }
-  92% {
-    --tabsdown-fade-end: 4rem;
-  }
-  to {
-    --tabsdown-fade-start: 4rem;
-    --tabsdown-fade-end: 0px;
-  }
-}

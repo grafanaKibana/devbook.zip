@@ -1,7 +1,6 @@
 ---
 topic: [Computer Science]
 subtopic: [Algorithms]
-summary: "Caches pure function results by arguments so repeated subproblems return without recomputation."
 level: ["4"]
 priority: Medium
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Computer Science"
 qard-topic: "Algorithms/Paradigms/Memoization"
 flashcard_uid: "0f376618"
 created: "2026-07-12T19:33:38.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-12T20:39:23.957Z"
 ---
 

@@ -1,7 +1,6 @@
 ---
 topic: [Software Architecture]
 subtopic: [Patterns]
-summary: "Creational patterns abstract object instantiation so a system stays independent of how its objects are created, composed, and represented."
 tags: [FolderNote]
 level: ["3"]
 priority: High
@@ -11,7 +10,7 @@ qard-deck: "Software Architecture"
 qard-topic: "Patterns/Design Patterns/Creational/Creational"
 flashcard_uid: "0bc64c56"
 created: "2026-03-05T22:12:32.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-15T11:47:55.128Z"
 ---
 

@@ -2,7 +2,6 @@
 title: RAG Evaluation
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Decomposes into retrieval, generation, and end-to-end layers so regressions isolate to one layer."
 level: ["2"]
 priority: High
 tags: [FolderNote]
@@ -12,7 +11,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Evaluation/Evaluation"
 flashcard_uid: "4c492fb9"
 created: "2026-06-12T18:21:46.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-11T21:45:16.245Z"
 ---
 

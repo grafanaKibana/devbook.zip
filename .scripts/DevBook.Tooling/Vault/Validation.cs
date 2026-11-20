@@ -400,6 +400,29 @@ public static class Validation
             .Select(path => new Issue("attachment.location", System.IO.Path.GetRelativePath(root, path).Replace('\\', '/'), 1, "attachments belong under `Vault/Assets/`, never beside notes")).ToArray();
     }
 
+    public static IReadOnlyList<Issue> ValidatePropertyTypes(string root)
+    {
+        const string relative = "Vault/.obsidian/types.json";
+        string path = System.IO.Path.Combine(root, "Vault", ".obsidian", "types.json");
+        if (!File.Exists(path))
+        {
+            return [];
+        }
+        JsonNode? types;
+        try
+        {
+            types = JsonNode.Parse(File.ReadAllText(path))?["types"];
+        }
+        catch (System.Text.Json.JsonException error)
+        {
+            return [new("frontmatter.types", relative, 1, $"Obsidian property types are unreadable: {error.Message}")];
+        }
+        return new[] { ("topic", "multitext"), ("subtopic", "multitext"), ("level", "multitext"), ("priority", "text"), ("status", "text") }
+            .Where(expected => types?[expected.Item1] is JsonValue value && value.TryGetValue(out string? actual) && actual != expected.Item2)
+            .Select(expected => new Issue("frontmatter.types", relative, 1, $"Obsidian types `{expected.Item1}` differently from the frontmatter contract; set it to `{expected.Item2}` so property edits keep the validated shape", expected.Item1))
+            .ToArray();
+    }
+
     public static IReadOnlyList<Issue> ValidateRoadmap(string root)
     {
         string canvasPath = System.IO.Path.Combine(root, "Vault", "Home", "Roadmap.canvas");
@@ -481,6 +504,7 @@ public static class Validation
         {
             issues.AddRange(ValidateExpectedHubs(root, allNotes, Directory.EnumerateDirectories(home, "*", SearchOption.AllDirectories)));
             issues.AddRange(ValidateAttachmentLocations(root, Directory.EnumerateFiles(vault, "*", SearchOption.AllDirectories)));
+            issues.AddRange(ValidatePropertyTypes(root));
             issues.AddRange(ValidateRoadmap(root));
             issues.AddRange(ValidateStepTrace(root));
         }

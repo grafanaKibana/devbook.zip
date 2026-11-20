@@ -1,7 +1,6 @@
 ---
 topic: [Data Persistence]
 subtopic: [SQL]
-summary: "Horizontal partitioning strategies, workload fit, and the operational threshold for splitting rows across database instances."
 level: ["4"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Data Persistence"
 qard-topic: "SQL/Sharding"
 flashcard_uid: "7f93ffe2"
 created: "2026-02-28T20:52:28.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.355Z"
 ---
 

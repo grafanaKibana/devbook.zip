@@ -1,13 +1,12 @@
 ---
 topic: [Data Persistence]
 subtopic: [SQL]
-summary: "Keeping copies of data on multiple nodes to spread reads and survive failures."
 level: ["4"]
 priority: High
 status: In Progress
 publish: true
 created: "2026-02-28T20:52:28.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.354Z"
 ---
 

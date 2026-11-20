@@ -1,7 +1,6 @@
 ---
 topic: [Computer Science]
 subtopic: []
-summary: "Describes how time or space grows with input size by retaining the dominant term and ignoring constants."
 level: ["3"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Computer Science"
 qard-topic: "Big O Notation"
 flashcard_uid: "0c3fdd6d"
 created: "2026-07-12T19:33:38.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-12T20:39:23.958Z"
 ---
 

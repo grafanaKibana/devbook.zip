@@ -1,13 +1,12 @@
 ---
 topic: [Computer Science]
 subtopic: [Algorithms]
-summary: "Builds a solution by repeatedly making the locally best choice and never reconsidering. Exact only when a proof connects the rule to the optimum."
 level: ["4"]
 priority: High
 status: In Progress
 publish: true
 created: "2026-06-20T05:33:50.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.336Z"
 ---
 

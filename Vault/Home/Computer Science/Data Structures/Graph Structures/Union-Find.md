@@ -1,13 +1,12 @@
 ---
 topic: [Computer Science]
 subtopic: [Data Structures]
-summary: "Answers incremental connectivity queries through find, union by rank, and path compression."
 level: ["3"]
 priority: Medium
 status: In Progress
 publish: true
 created: "2026-06-30T08:23:11.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-12T14:27:20.418Z"
 ---
 

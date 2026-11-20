@@ -273,6 +273,26 @@ public sealed class SiteArtifactTests
         public Task<ProcessResult> RunAsync(ProcessRequest request, CancellationToken cancellationToken = default) => run(request);
     }
 
+    [Theory]
+    [InlineData("0")]
+    [InlineData("1801")]
+    [InlineData("soon")]
+    public async Task PublicExportRejectsATimeoutOutsideItsBound(string timeout)
+    {
+        using var fixture = new ArtifactFixture();
+        var rendered = false;
+
+        int result = await SiteCommand.RunAsync(["export", "--repo-root", fixture.Root, "--expected-head", fixture.Head,
+            "--app-bundle", "unused-test-app", "--output", fixture.Root + "-artifact", "--timeout-seconds", timeout], (_, _, _) =>
+        {
+            rendered = true;
+            return Task.CompletedTask;
+        });
+
+        result.Should().Be(1);
+        rendered.Should().BeFalse();
+    }
+
     [Fact]
     public async Task PublicExportRendersAnOwnedCloneWithoutBorrowingLiveSettings()
     {

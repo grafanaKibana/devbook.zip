@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "createdAt": 1794865904252,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "retrieval-units",
+  "title": "Choose retrieval units that keep conditions with their rules, preserve source metadata, and balance matching precision against missing context",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "prompt": "A RAG system indexes API documentation. One paragraph says \"`limit` accepts values up to 1000.\" The next paragraph adds \"When `include=details` is set, `limit` is capped at 100.\" With small chunks, retrieval returns only the first paragraph, so answers miss the cap. Making every chunk much larger would keep both paragraphs together, but each match would become less precise.\n\nExplain how parent-child chunking gets the cap to the generator while keeping retrieval matching as precise as it is with small chunks.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "States that the similarity search runs against small child chunks, so query matching stays precise.",
+          "marks": 1
+        },
+        {
+          "point": "States that a matched child is expanded to (mapped to) its larger parent span before generation, so the generator also receives the adjacent paragraph with the cap. Any valid child-to-parent mapping is acceptable.",
+          "marks": 1
+        }
+      ],
+      "model": "Parent-child chunking searches only small child chunks, so each match is as precise as with small chunks. A matched child is then expanded to its larger parent span, which contains the neighbouring paragraph, so the generator receives the cap as well.\n\n*Optional detail:* the mapping is usually a parent ID stored on each child, so expansion is a lookup rather than a second similarity search.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+        "heading": "Parent-Child Chunking"
+      },
+      "objective": "retrieval-units",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "mcq",
+      "prompt": "During ingestion, a structure-aware splitter stores each chunk with its source document ID and heading path (for example, `Data Retention > Policy Rules`). Which statement best explains why this metadata is attached to every chunk?",
+      "options": [
+        "It puts heading text into every embedding, which raises similarity scores for any query about the document.",
+        "It lets the splitter drop overlap, because the stored boundaries show where each neighbouring chunk begins.",
+        "It lets a retrieved chunk be traced and cited to its exact place in the source, and filtered by section at query time.",
+        "It keeps chunks within the embedding model's input limit by recording where oversized sections must be split."
+      ],
+      "answer": 2,
+      "marks": 1,
+      "rubric": [
+        {
+          "point": "Selects the option on citation traceability and section-level filtering.",
+          "marks": 1
+        }
+      ],
+      "model": "**It lets a retrieved chunk be traced and cited to its exact place in the source, and filtered by section at query time.** The metadata comes from the chunk's structural ancestors. Adding it during ingestion is cheaper than reconstructing it later.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+        "heading": "Structure-Aware Chunking"
+      },
+      "objective": "retrieval-units",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

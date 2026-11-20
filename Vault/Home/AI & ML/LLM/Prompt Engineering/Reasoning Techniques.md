@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Making intermediate reasoning explicit with Chain-of-Thought, Self-Consistency, and Tree of Thoughts."
 level: ["3"]
 priority: Medium
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Prompt Engineering/Reasoning Techniques"
 flashcard_uid: "cd09ceaf"
 created: "2026-02-28T13:40:02.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.482Z"
 ---
 

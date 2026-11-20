@@ -1,14 +1,13 @@
 ---
 topic: [Computer Science]
 subtopic: [Data Structures]
-summary: "Sequence structures like arrays, lists, stacks, queues, and buffers, defined by access order."
 tags: [FolderNote]
 level: ["4"]
 priority: Medium
 publish: true
 status: In Progress
 created: "2026-07-09T18:37:04.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-10T14:39:34.303Z"
 ---
 

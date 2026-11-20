@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Decides what evidence enters the prompt, balancing recall, precision, and latency across search methods."
 level: ["2"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Retrieval"
 flashcard_uid: "6dc71082"
 created: "2026-02-27T12:56:16.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.490Z"
 ---
 

@@ -1,7 +1,6 @@
 ---
 topic: [Data Persistence]
 subtopic: [ORMs]
-summary: "Microsoft's .NET ORM: maps C# classes to tables, translates LINQ, and manages migrations."
 level: ["4"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Data Persistence"
 qard-topic: "ORMs/Entity Framework"
 flashcard_uid: "920a0510"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.381Z"
 ---
 

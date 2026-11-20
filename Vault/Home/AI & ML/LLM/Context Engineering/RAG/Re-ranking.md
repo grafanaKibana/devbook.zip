@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "A second-stage pass that rescores, fuses, or diversifies retrieval candidates before context assembly."
 level: ["2"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Re-ranking"
 flashcard_uid: "16bb24ca"
 created: "2026-02-27T15:52:18.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.490Z"
 ---
 

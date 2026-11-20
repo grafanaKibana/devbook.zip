@@ -1,13 +1,12 @@
 ---
 topic: [Security]
 subtopic: [Authentication]
-summary: "Federated login through an identity provider, with separate sessions and trust at every application."
 level: ["3"]
 priority: High
 status: In Progress
 publish: true
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.501Z"
 ---
 

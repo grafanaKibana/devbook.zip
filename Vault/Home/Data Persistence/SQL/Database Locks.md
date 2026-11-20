@@ -1,13 +1,12 @@
 ---
 topic: [Data Persistence]
 subtopic: [SQL]
-summary: "How the database engine serializes conflicting access to enforce isolation — lock modes, granularity, and escalation — and how locking differs from MVCC and from in-process locks."
 level: ["4"]
 priority: Medium
 status: New
 publish: true
 created: "2026-07-15T09:25:25.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-15T09:08:04.269Z"
 ---
 

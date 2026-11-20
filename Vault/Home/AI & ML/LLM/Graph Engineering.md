@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Designing an agentic system's execution topology, state transitions, and recovery boundaries."
 level: ["3"]
 priority: Medium
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Graph Engineering"
 flashcard_uid: "ef968013"
 created: "2026-08-24T16:37:16.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-08-24T16:11:29.262Z"
 ---
 

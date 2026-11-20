@@ -23,6 +23,7 @@ _site/
 .omc/
 .claude/launch.json
 .impeccable/
+/.rulesync/skill-feedback/*.lock
 
 # Obsidian
 # Quartz Syncer settings contain machine-local paths and personal state.

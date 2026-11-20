@@ -1,7 +1,6 @@
 ---
 topic: [Software Architecture]
 subtopic: [System Architecture]
-summary: "A style where services communicate by publishing and consuming events instead of calling each other directly."
 level: ["2"]
 priority: High
 status: In Progress
@@ -11,7 +10,7 @@ qard-deck: "Software Architecture"
 qard-topic: "System Architecture/Event-Driven Architecture"
 flashcard_uid: "784f3460"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.398Z"
 ---
 

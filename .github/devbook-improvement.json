@@ -46,7 +46,9 @@
       ".agents/skills/obsidian-markdown/SKILL.md",
       "Vault/Templates/Pages/Template - Concept Page.md",
       "Vault/Templates/Pages/Template - Index.md",
-      "Vault/Templates/Blocks/Template - Callout.md"
+      "Vault/Templates/Blocks/Template - Callout.md",
+      ".rulesync/skill-feedback/note-polish.json",
+      ".rulesync/skill-feedback/qard-polish.json"
     ]
   },
   "automatic_export": true,

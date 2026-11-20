@@ -137,19 +137,26 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
 
     const total = countItems(root)
 
-    const renderCallout = (item: Item, key: number) => {
-      const tree: HastRoot = { type: "root", children: [item.node] }
-      const href = resolveRelative(fileData.slug!, item.sourceSlug)
-      return (
-        <div class="qi-item" key={key}>
-          {htmlToJsx(tree)}
+    const renderGroups = (items: Item[]) => {
+      const groups = new Map<FullSlug, Item[]>()
+      for (const item of items) {
+        if (!groups.has(item.sourceSlug)) groups.set(item.sourceSlug, [])
+        groups.get(item.sourceSlug)!.push(item)
+      }
+      return [...groups.entries()].map(([sourceSlug, group]) => (
+        <div class="qi-group" key={sourceSlug}>
           <div class="qi-source">
-            <a class="internal" href={href}>
-              {item.sourceTitle}
+            <a class="internal" href={resolveRelative(fileData.slug!, sourceSlug)}>
+              {group[0].sourceTitle}
             </a>
           </div>
+          {group.map((item, key) => (
+            <div class="qi-item" key={key}>
+              {htmlToJsx({ type: "root", children: [item.node] } as HastRoot)}
+            </div>
+          ))}
         </div>
-      )
+      ))
     }
 
     const renderOptions = (node: TreeNode, trail: string[]): any[] => [
@@ -160,7 +167,7 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
         data-qi-trail={trail.join(" / ")}
         data-qi-count={countItems(node)}
       >
-        {trail.length === 1 ? `All ${node.title}` : trail.slice(1).join(" / ")}
+        {trail.length === 1 ? "All subtopics" : trail.slice(1).join(" / ")}
         {` (${countItems(node)})`}
       </option>,
       ...sortedEntries(node.children).flatMap(([, child]) =>
@@ -171,9 +178,14 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
     const renderSections = (node: TreeNode, trail: string[]): any[] => [
       <section id={node.slugId} class="qi-section" data-qi-path={node.path}>
         {node.items.length > 0 && trail.length > 1 && (
-          <h3 class="qi-section-title">{trail.slice(1).join(" / ")}</h3>
+          <h3 class="qi-section-title">
+            {trail.slice(1, -1).map((parent) => (
+              <span class="qi-crumb">{parent}</span>
+            ))}
+            {trail[trail.length - 1]}
+          </h3>
         )}
-        {node.items.map(renderCallout)}
+        {renderGroups(node.items)}
       </section>,
       ...sortedEntries(node.children).flatMap(([, child]) =>
         renderSections(child, [...trail, child.title]),
@@ -196,18 +208,20 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
               data-qi-count={countItems(topic)}
               aria-labelledby={`qi-title-${topic.slugId}`}
             >
-              <div class="qi-scope-control" hidden>
-                <label for={`qi-scope-${topic.slugId}`}>Subtopic</label>
-                <select
-                  id={`qi-scope-${topic.slugId}`}
-                  aria-controls={`qi-results-${topic.slugId}`}
-                >
-                  {renderOptions(topic, [topic.title])}
-                </select>
+              <div class="qi-head">
+                <h2 id={`qi-title-${topic.slugId}`} class="qi-title">
+                  {topic.title}
+                </h2>
+                <div class="qi-scope-control" hidden>
+                  <select
+                    id={`qi-scope-${topic.slugId}`}
+                    aria-label="Subtopic"
+                    aria-controls={`qi-results-${topic.slugId}`}
+                  >
+                    {renderOptions(topic, [topic.title])}
+                  </select>
+                </div>
               </div>
-              <h2 id={`qi-title-${topic.slugId}`} class="qi-title">
-                {topic.title}
-              </h2>
               <p class="qi-path" hidden />
               <div id={`qi-results-${topic.slugId}`}>
                 {countItems(topic) === 0 && <p>No questions in this topic yet.</p>}
@@ -224,20 +238,28 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
 .questions-index { container-type: inline-size; }
 .questions-index [hidden] { display: none !important; }
 .questions-index .qi-total { color: var(--darkgray); margin: 0 0 1rem; font-size: 0.85rem; }
-.questions-index .qi-scope-control { display: grid; grid-template-columns: 5rem minmax(0, 1fr); align-items: center; gap: 0.75rem; padding: 1rem 0; border-block: 1px solid var(--lightgray); margin-bottom: 1.5rem; }
-.questions-index .qi-scope-control label { color: var(--darkgray); font-size: 0.85rem; }
-.questions-index .qi-scope-control select { width: 100%; min-width: 0; max-width: 100%; min-height: 2.75rem; padding: 0.5rem; border: 1px solid var(--lightgray); border-radius: 0.3rem; background: var(--light); color: var(--dark); font: inherit; font-size: 0.9rem; }
+.questions-index .qi-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1.5rem; margin: 1.75rem 0 0.5rem; }
+.questions-index .qi-head .qi-title { margin: 0; }
+.questions-index .qi-scope-control { min-width: 0; max-width: min(100%, 18rem); }
+.questions-index .qi-scope-control select { max-width: 100%; min-height: 2.25rem; padding: 0.25rem 0.5rem; border: 1px solid var(--lightgray); border-radius: 0.3rem; background: transparent; color: var(--darkgray); font: inherit; font-size: 0.85rem; text-overflow: ellipsis; cursor: pointer; }
+.questions-index .qi-scope-control select:hover { border-color: var(--gray); color: var(--dark); }
+.questions-index .qi-scope-control select:focus-visible { outline: 2px solid var(--secondary); outline-offset: 2px; }
+.questions-index .tabsdown__tab[data-count]::after { content: attr(data-count); margin-inline-start: 0.4em; color: var(--gray); font-size: 0.85em; font-weight: 400; font-variant-numeric: tabular-nums; }
 .questions-index .qi-path { margin: 0.5rem 0 1rem; color: var(--darkgray); font-size: 0.85rem; overflow-wrap: anywhere; }
 .questions-index .qi-section { scroll-margin-top: 2rem; }
-.questions-index .qi-section-title { font-size: 1rem; margin: 1.5rem 0 0.5rem; }
-.questions-index .qi-item { padding-bottom: 0.75rem; }
+.questions-index .qi-section:has(.qi-section-title) { margin-top: 2.25rem; padding-top: 1.25rem; border-top: 1px solid var(--lightgray); }
+.questions-index .qi-section-title { display: flex; flex-wrap: wrap; align-items: baseline; margin: 0 0 0.875rem; font-size: 1.2rem; line-height: 1.3; }
+.questions-index .qi-crumb { color: var(--darkgray); font-weight: 400; }
+.questions-index .qi-crumb::after { content: "/"; margin-inline: 0.45em; color: var(--gray); }
+.questions-index .qi-group + .qi-group { padding-top: 1.25rem; }
 .questions-index .qi-item:has(+ .qi-item) { border-bottom: 1px solid var(--lightgray); }
-.questions-index .qi-source { padding: 0 0.5rem; font-size: 0.8rem; font-style: italic; color: var(--darkgray); }
-.questions-index .qi-source::before { content: "— from "; }
+.questions-index .qi-source { margin-bottom: 0.25rem; font-size: 0.8rem; }
 .questions-index a.internal { padding-block: 0.1rem; }
-.questions-index .qi-source a.internal { padding-inline: 0.35rem; }
+.questions-index .qi-source a.internal { display: inline-block; padding: 0.1rem 0.55rem; }
+.questions-index .qi-source a.internal:hover { background-color: color-mix(in srgb, var(--secondary) 18%, transparent); text-decoration: none; }
+.questions-index .qi-source a.internal:focus-visible { outline: 2px solid var(--secondary); outline-offset: 2px; }
 @container (max-width: 510px) {
-  .questions-index .qi-scope-control { grid-template-columns: minmax(0, 1fr); gap: 0.375rem; }
+  .questions-index .qi-scope-control, .questions-index .qi-scope-control select { width: 100%; max-width: none; }
 }
 `
 
@@ -276,6 +298,7 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
       var panel = option.closest(".qi-topic-panel");
       if (controller) controller.setSelection(panel.dataset.qiTopic);
       choose(panel, option.value, false);
+      if (controller) reveal(panel);
       return panel;
     }
     function change(event) {
@@ -293,7 +316,7 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
       tabs: panels.map(function (panel) {
         return {
           id: panel.dataset.qiTopic,
-          label: panel.dataset.qiLabel + " (" + panel.dataset.qiCount + ")",
+          label: panel.dataset.qiLabel,
           panel: panel,
         };
       }),
@@ -304,9 +327,21 @@ export const QuestionsIndex: QuartzComponentConstructor = () => {
           return;
         }
         var panel = panels.find(function (item) { return item.dataset.qiTopic === selection; });
-        if (panel) choose(panel, panel.dataset.qiTopic, true);
+        if (panel) { choose(panel, panel.dataset.qiTopic, true); reveal(panel); }
       },
     });
+    var tabs = Array.from(tabsHost.querySelectorAll(".tabsdown__tab"));
+    function reveal(panel) {
+      var tab = tabs[panels.indexOf(panel)];
+      if (!tab) return;
+      var strip = tab.parentElement;
+      var visible = strip.getBoundingClientRect();
+      var box = tab.getBoundingClientRect();
+      if (box.left >= visible.left && box.right <= visible.right) return;
+      strip.scrollLeft += box.left - visible.left - (visible.width - box.width) / 2;
+    }
+    tabs.forEach(function (tab, index) { tab.dataset.count = panels[index].dataset.qiCount; });
+    reveal(initialPanel);
     root.addEventListener("change", change);
     window.addEventListener("hashchange", fromHash);
     window.addCleanup(function () {

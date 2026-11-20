@@ -1,7 +1,6 @@
 ---
 topic: [Security]
 subtopic: [Security]
-summary: "Keeping credentials out of source code, distributing them to workloads, and rotating safely."
 level: ["3"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Security"
 qard-topic: "Secrets Management"
 flashcard_uid: "f1a26a0e"
 created: "2026-06-20T19:32:24.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.504Z"
 ---
 

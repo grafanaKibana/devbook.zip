@@ -1,7 +1,6 @@
 ---
 topic: [Networks]
 subtopic: [Protocols]
-summary: "A stateless request-response protocol carrying web and API messages across reusable connections."
 level: ["3"]
 priority: High
 status: In Progress
@@ -11,7 +10,7 @@ qard-deck: "Networks"
 qard-topic: "Protocols/HTTP"
 flashcard_uid: "bf424dee"
 created: "2026-02-28T20:52:28.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.361Z"
 ---
 

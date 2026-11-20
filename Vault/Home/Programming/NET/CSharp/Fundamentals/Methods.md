@@ -1,7 +1,6 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: "C#'s unit of behavior, covering parameter modifiers and dispatch keywords."
 level: ["4"]
 priority: Medium
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Methods"
 flashcard_uid: "a3e803d0"
 created: "2026-02-15T16:27:13.000Z"
-modified: "2026-11-12T21:09:36.103Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.325Z"
 ---
 

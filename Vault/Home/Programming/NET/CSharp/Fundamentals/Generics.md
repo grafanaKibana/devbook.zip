@@ -1,7 +1,6 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: "Type-safe, reusable code without duplicating logic per type, including constraints and variance."
 level: ["4"]
 priority: Medium
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Generics"
 flashcard_uid: "3fc98b91"
 created: "2026-02-18T20:04:43.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.325Z"
 ---
 

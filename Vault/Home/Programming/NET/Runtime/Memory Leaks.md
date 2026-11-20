@@ -1,7 +1,6 @@
 ---
 topic: [Programming]
 subtopic: [NET]
-summary: "Useless objects still reachable from GC roots, plus unfreed unmanaged memory and handles."
 level: ["4"]
 priority: High
 status: In Progress
@@ -11,7 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/Runtime/Memory Leaks"
 flashcard_uid: "e5a2c1b5"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-17T09:54:57.676Z"
 published: "2026-07-08T13:28:37.373Z"
 ---
 
@@ -223,9 +222,9 @@ public class MyClass
 }
 ```
 
-A live `System.Threading.Timer` schedules callbacks on thread-pool threads. It does not own a dedicated thread. The local-only timer in this sample is not a stable leak because an active timer does not keep itself alive. Once no reference reaches the timer, the GC may collect it and callbacks may stop.
+A live `System.Threading.Timer` schedules callbacks on thread-pool threads. It does not own a dedicated thread. What keeps it alive is the runtime's timer queue: a scheduled timer has an entry in a queue reachable from a static field, and that entry holds the callback delegate. The delegate holds the object whose method it is, so `MyClass` stays reachable from a static root for as long as the timer is scheduled. The timer in this sample is only a local variable, yet it survives too, because the single-argument constructor passes the timer itself as the callback state and the queue entry holds that state. Each `MyClass` instance therefore keeps ticking and stays in memory for the life of the process.
 
-A retention leak needs a longer-lived root that reaches the timer, whose callback delegate then reaches `MyClass`. Keeping the timer in a field supports reliable operation and deterministic disposal, but the field alone is not proof of a leak: an otherwise unreachable owner-timer cycle is still collectible. The actual fault is a timer retained beyond the owner's intended lifetime without cancellation or disposal.
+Storing the timer in a field does not change the retention: the path already runs from the queue to the callback target, and from the target to the timer. An object with a running timer is not collected until the timer is disposed, and `Dispose` ends the retention by removing the queue entry. The timer itself is collected only when nothing reachable references it, for example a timer created with an explicit state argument, held only in a local, whose callback and state do not lead back to it. That timer silently stops firing, which is a correctness bug rather than a leak. The actual fault is a timer left running beyond the owner's intended lifetime, and a field gives the owner a handle to dispose it.
 
 # Unreleased Unmanaged Memory
 
@@ -373,15 +372,18 @@ The governing rule is ownership, not syntax. Each subscription, cache entry, tim
 # Questions
 
 <!-- qard-id: fd0bb1da-7714-4709-b6a3-752467733b71 -->
-> [!qard]- Can a .NET application leak memory even though it has garbage collection?
-> Yes. The garbage collector reclaims a managed object only when the object is no longer reachable, and it cannot tell that a reachable object is no longer needed. Resources outside the managed heap can also leak.
+> [!qard]- How can a .NET application leak memory when it has a garbage collector?
+> The garbage collector frees only objects that nothing references any more. The usual leak is an object the program no longer needs but something long-lived still references. It is a leak because this keeps happening, so memory grows over time instead of staying at a fixed amount. The fix is to remove the reference, not to force the GC.
 >
-> - **Managed retention:** an object stays alive while a chain of references from a GC root, such as a static field or a local variable on a thread's stack, still reaches it. An unbounded cache held in a static field keeps its entries reachable. So does a long-lived publisher whose event still holds a subscriber's handler. The GC is working correctly here: it never reclaims data the program can still reach.
-> - **Unmanaged resources:** native memory and operating-system resources, such as files or network connections, must be released explicitly, and the GC does not know how to release them. If neither the owner's `Dispose` call nor a finalizable wrapper such as `SafeHandle` releases them, they stay allocated even after the managed wrapper object is collected.
-> 
-> Rising memory alone does not prove a leak, because heap growth, caches and allocators can keep memory high for legitimate reasons. A leak is established by the reference path that keeps unwanted objects alive, or by a native allocation that is never released.
+> | Common cause | What keeps the memory alive |
+> |---|---|
+> | Static collection that only grows | A static field lives for the whole process. Every item added stays reachable until it is removed. A cache without eviction is the common case. |
+> | Event handler never unsubscribed | The publisher's event holds the subscriber's handler. A long-lived publisher keeps a short-lived subscriber alive. |
+> | Lambda that uses instance members | The lambda captures `this`. Whatever stores the lambda keeps the whole object alive. |
+> | Timer never disposed | The timer holds its callback. The callback holds the object whose method it calls. |
+> | Resource never disposed | Files, database connections and network sockets are not memory the GC manages. Without `Dispose`, normally called through `using`, they stay open far longer than needed and can run out. |
 >
-> [Microsoft: Fundamentals of garbage collection](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) · [Microsoft: Implement a Dispose method](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) · [Microsoft: Debug a memory leak in .NET](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-memory-leak)
+> [Microsoft: Fundamentals of garbage collection](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) · [Microsoft: Debug a memory leak in .NET](https://learn.microsoft.com/en-us/dotnet/core/diagnostics/debug-memory-leak) · [Microsoft: Implement a Dispose method](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose)
 
 > [!qard]- How can a suspected memory leak in a running .NET application be diagnosed?
 > Diagnosis first confirms a sustained growth trend, then follows the kind of memory that is growing until evidence explains why it is retained. For managed memory, that evidence is the reference path from a GC root to objects that are no longer needed.
@@ -398,75 +400,89 @@ The governing rule is ownership, not syntax. Each subscription, cache entry, tim
 
 <!-- qard-id: 1bdc896e-a0a2-42f6-94be-29c7f63cf28b -->
 > [!qard]- Why is `using` needed when .NET already has garbage collection?
-> The garbage collector frees managed memory when allocations or low system memory trigger a collection, not when code has finished with an object. Many objects also hold resources other than managed memory, such as files, network connections or database connections. Those resources are limited, and the GC does not know how to release them. At best, a finalizer releases them at an unpredictable time later, so a resource can stay open long after its last use or be exhausted.
+> `using` is needed because some objects hold something other than memory, such as an open file or a database connection. The garbage collector does not release the file or the connection when the code is done with the object. `using` releases them as soon as the block ends.
 >
-> `using` makes the release deterministic. The compiler wraps the scope in `try`/`finally` and calls `Dispose` on the `IDisposable` object in the `finally` block. The resource is therefore released as soon as control leaves the scope, whether normally or through an exception. `await using` does the same for `IAsyncDisposable` by awaiting `DisposeAsync`.
+> The problem is that these resources are scarce and other code is waiting for them. An open file can stay locked, so other code cannot write to the file. A database connection that is not returned leaves the connection pool one short, and when the pool is empty, new requests wait or fail. The garbage collector runs when the application needs memory, not when files or connections run short. The file or the connection can therefore stay open long after its last use.
+>
+> `using` solves this by making the release part of the code itself. The compiler turns the `using` block into `try`/`finally` and calls `Dispose` in `finally`, where `Dispose` closes the file or returns the connection to the pool. Because `finally` runs both on normal exit and when an exception is thrown, the file or the connection is released the moment the block ends, without waiting for the garbage collector.
+>
+> The code as written:
 >
 > ```csharp
 > using (var stream = File.OpenRead(path))
 > {
 >     // reads from stream
 > }
-> // stream.Dispose() has run here, even if reading threw
 > ```
 >
-> Disposal releases the resource, not the object's managed memory. The GC still reclaims that memory later, once the object is unreachable.
+> Roughly what the compiler generates:
+>
+> ```csharp
+> var stream = File.OpenRead(path);
+> try
+> {
+>     // reads from stream
+> }
+> finally
+> {
+>     if (stream != null)
+>         stream.Dispose(); // closes the file
+> }
+> ```
+>
+> `Dispose` releases only the file. The garbage collector still frees the `stream` object's memory later.
 >
 > [Microsoft: using statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/using) · [Microsoft: Fundamentals of garbage collection](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/fundamentals) · [Microsoft: Implement a Dispose method](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose)
 
 <!-- qard-id: 5e311685-41d1-44ae-baf9-516faaecaf4d -->
-> [!qard]- How do `IDisposable` and a finalizer differ?
-> `Dispose` is deterministic cleanup that the owning code calls when it has finished with a resource. A finalizer is an optional fallback that the garbage collector runs at an unpredictable time after it finds the object unreachable, so that cleanup can still happen if `Dispose` was never called. `IDisposable` itself requires only the `Dispose` method, not a finalizer.
+> [!qard]- What is the difference between `Dispose` and a finalizer?
+> `Dispose` and a finalizer both release a resource that is not memory, such as an open file or a database connection. The difference is who calls them and when. The code calls `Dispose` itself, at the moment the code is done with the resource. The garbage collector runs a finalizer at some unknown later time, as a safety net for when `Dispose` was forgotten.
 >
-> | Aspect | `IDisposable.Dispose` | Finalizer |
+> | Aspect | `Dispose` | Finalizer |
 > |---|---|---|
-> | Trigger | Owning code calls it, directly or through `using`. | The GC queues it to run after finding the object unreachable. |
-> | Timing | Runs at a known point, so scarce resources are released promptly. | Runs at an unpredictable time after the object becomes unreachable. .NET 5 and later do not run finalizers when the application exits, so it may never run. |
-> | What it can safely clean up | Managed `IDisposable` objects the type owns, plus its unmanaged resources. | Only unmanaged resources the object owns directly. Other managed objects may already have been finalized, because finalization order is undefined. |
-> | Cost | An ordinary method call. | Each finalizable object adds an entry that the GC must process in its finalization queue. |
+> | Who calls it | The code, usually through `using`. | The garbage collector. |
+> | When it runs | At the moment the code is done with the resource. | At an unknown time after nothing references the object any more. |
+> | What it is for | Releasing the resource right away, so other code can use the resource. | A safety net, so the resource is still released when `Dispose` was never called. |
 >
-> When a type defines its own finalizer, the two work together. `Dispose` performs the cleanup and calls `GC.SuppressFinalize`, so the finalizer runs only when disposal was missed. Most types can avoid an own-type finalizer altogether. A type whose native handle is wrapped in a `SafeHandle` needs no finalizer of its own, because `SafeHandle` already provides finalization for that handle. A custom finalizer is justified only for an unmanaged resource that the type owns directly and that no safe wrapper can hold.
+> The two work together. Once `Dispose` has released the resource, `Dispose` calls `GC.SuppressFinalize` to tell the garbage collector that the finalizer is no longer needed. Most classes need only `Dispose`, because the types that actually hold the resource, such as `FileStream`, already carry their own safety net.
 >
-> [Microsoft: Implement a Dispose method](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) · [Microsoft: Finalizers](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers) · [Microsoft: SafeHandle](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle)
+> [Microsoft: Implement a Dispose method](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) · [Microsoft: Finalizers](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)
 
 <!-- qard-id: 56cd4094-8fef-44ac-9e9c-50873f2193f8 -->
-> [!qard]- How does the .NET dispose pattern work?
-> The pattern routes both cleanup paths through one method, `Dispose(bool disposing)`. Its argument tells it whether owning code called `Dispose` or a finalizer is running.
+> [!qard]- What is the dispose pattern?
+> The dispose pattern is the standard way a .NET class releases a resource that is not memory, such as an open file or a database connection. The class implements `IDisposable`, so the code can release the resource at a known moment by calling `Dispose`, usually through `using`. When the class also has a finalizer as a safety net, the pattern is how `Dispose` and the finalizer share one cleanup method.
 >
-> - **Explicit path:** owning code calls the public, non-virtual `Dispose()`, which calls `Dispose(true)` and then `GC.SuppressFinalize(this)`. With `disposing` set to `true`, the method releases both the managed `IDisposable` objects the type owns and its unmanaged resources. Suppressing finalization tells the GC that cleanup is already done, so it does not run the finalizer.
-> - **Finalizer path:** if `Dispose` was never called and the type has a finalizer, the finalizer calls `Dispose(false)`. That call releases only unmanaged resources the object owns directly. It does not touch other managed objects, because finalization order is undefined and they may already have been finalized.
-> - **Repeated calls:** `Dispose(bool)` records that disposal has happened and returns early on later calls. Calling `Dispose` more than once is therefore harmless and never releases the same resource twice.
-> - **Inheritance:** in an unsealed type, `Dispose(bool)` is `protected virtual`. A derived class overrides it to release its own resources and then calls `base.Dispose(disposing)`.
+> The pattern has a fixed shape because cleanup must stay correct in several situations. The comments in the code show which situation each part handles.
 > 
 > ```csharp
-> public class NativeBuffer : IDisposable
+> public class LogWriter : IDisposable
 > {
->     private IntPtr _buffer = Marshal.AllocHGlobal(1024);
+>     private readonly FileStream _file = File.OpenWrite("app.log");
 >     private bool _disposed;
 > 
+>     // The one method that the code and using call.
 >     public void Dispose()
 >     {
->         Dispose(true);
->         GC.SuppressFinalize(this);
+>         Dispose(true); // true: the code asked for cleanup
+>         GC.SuppressFinalize(this); // cleanup is done, so a finalizer added by a derived class need not run
 >     }
 > 
+>     // Shared cleanup. disposing is true when the code called Dispose,
+>     // false when a finalizer is running.
+>     // A derived class overrides this and calls base.Dispose(disposing).
 >     protected virtual void Dispose(bool disposing)
 >     {
->         if (_disposed) return;
+>         if (_disposed) return; // a second call returns early and is harmless
 >         if (disposing)
 >         {
->             // Owned managed IDisposable fields are disposed here.
+>             _file.Dispose(); // releases the owned file
 >         }
->         Marshal.FreeHGlobal(_buffer);
->         _buffer = IntPtr.Zero;
 >         _disposed = true;
 >     }
-> 
->     ~NativeBuffer() => Dispose(false);
 > }
 > ```
 >
-> This type needs a finalizer only because it holds a raw native pointer directly. When a `SafeHandle` owns the native resource, the type implements `Dispose()` and `Dispose(bool)` without a finalizer, and the `SafeHandle` supplies the finalization fallback.
+> `LogWriter` has no finalizer, because `FileStream` already carries a safety net of its own. A finalizer is added only when the class itself holds a raw native resource. That finalizer calls `Dispose(false)`, which skips `_file` because the garbage collector may already have finalized `_file`.
 >
 > [Microsoft: Implement a Dispose method](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose) · [Microsoft: Finalizers](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)
 

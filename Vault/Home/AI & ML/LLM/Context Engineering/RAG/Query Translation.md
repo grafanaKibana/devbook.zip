@@ -1,7 +1,6 @@
 ---
 topic: [AI & ML]
 subtopic: [LLM]
-summary: "Rewrites a user question into retrieval-optimized variants so phrasing mismatches don't sink retrieval."
 level: ["2"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Context Engineering/RAG/Query Translation"
 flashcard_uid: "cffd0779"
 created: "2026-02-27T12:56:16.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.415Z"
 ---
 

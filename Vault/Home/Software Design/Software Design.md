@@ -4,15 +4,15 @@ order: 60
 color: "#84cc16"
 topic: [Software Design]
 subtopic: []
-summary: "How code is structured at the module and class scale — the principles, paradigms, and testing discipline that shape good design."
 tags: [FolderNote]
 publish: true
 status: New
 level: ["4"]
 priority: High
 created: "2026-07-15T12:08:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T17:10:31.241Z"
 published: "2026-07-15T11:53:27.615Z"
+summary: "How code is structured at the module and class scale — the principles, paradigms, and testing discipline that shape good design."
 ---
 
 Software design determines how far a code change travels. If adding a payment method requires edits in checkout, invoicing, and unrelated tests, the code has put behavior or dependencies in the wrong places. A useful design gives each change a clear home, keeps state close to the rules that use it, and makes collaboration and failure visible in the code.

@@ -1,13 +1,12 @@
 ---
 topic: [Computer Science]
 subtopic: [Algorithms]
-summary: "Heapifies the array, then repeatedly extracts the maximum into a growing sorted suffix."
 level: ["4"]
 status: New
 publish: true
 priority: Medium
 created: "2026-06-20T05:33:50.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.340Z"
 ---
 

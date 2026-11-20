@@ -1,7 +1,6 @@
 ---
 topic: [Networks]
 subtopic: [Protocols]
-summary: "Full-duplex, message-oriented communication over a long-lived connection or HTTP stream for real-time apps."
 level: ["3"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Networks"
 qard-topic: "Protocols/WebSockets"
 flashcard_uid: "d66e2a8b"
 created: "2026-06-20T08:45:59.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.363Z"
 ---
 

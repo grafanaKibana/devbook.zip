@@ -1,13 +1,12 @@
 ---
 topic: [Software Architecture]
 subtopic: [Patterns]
-summary: "Caps how many requests a client can make in a period so one caller cannot exhaust shared resources."
 priority: High
 publish: true
 level: ["3"]
 status: In Progress
 created: "2026-02-28T16:25:46.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.457Z"
 ---
 

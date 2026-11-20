@@ -1,7 +1,6 @@
 ---
 topic: [Software Architecture]
 subtopic: [System Architecture]
-summary: "A single deployable application intentionally split into strict modules with explicit boundaries, gaining microservices benefits without the distributed systems tax."
 level: ["3"]
 priority: High
 status: In Progress
@@ -10,7 +9,7 @@ qard-deck: "Software Architecture"
 qard-topic: "System Architecture/Modular Monolith"
 flashcard_uid: "63d5a8b8"
 created: "2026-03-06T22:43:56.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:14:17.460Z"
 ---
 

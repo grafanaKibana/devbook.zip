@@ -1,7 +1,6 @@
 ---
 topic: [Software Architecture]
 subtopic: [System Architecture]
-summary: "A style splitting a system into independently deployable services, each aligned to a business capability and owning its own data."
 level: ["3"]
 priority: Medium
 status: In Progress
@@ -11,7 +10,7 @@ qard-deck: "Software Architecture"
 qard-topic: "System Architecture/Microservices"
 flashcard_uid: "538ccd0d"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-12T10:29:34.513Z"
+modified: "2026-11-16T16:48:56.427Z"
 published: "2026-07-08T13:28:37.398Z"
 ---
 
