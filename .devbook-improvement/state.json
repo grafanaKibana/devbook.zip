@@ -20612,17 +20612,19 @@
   "focused_workload": {
     "version": 1,
     "id": "096dbe7841c045bfaf03c7e9af959507",
-    "status": "active",
-    "phase": "selecting",
+    "status": "sealed",
+    "phase": "sealed",
     "started_at": "2026-11-21T19:32:44.032316Z",
-    "elapsed_seconds": 9.90885,
+    "elapsed_seconds": 15.2291806,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-21T19:32:53.940630Z"
+    "checkpoint_at": "2026-11-21T19:32:59.260961Z",
+    "stop_reason": "awaiting_export",
+    "sealed_at": "2026-11-21T19:32:59.260980Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
