@@ -20604,7 +20604,11 @@
   ],
   "retired_ids": {},
   "cooldown": null,
-  "lease": null,
+  "lease": {
+    "owner": "44941149076:1",
+    "acquired_at": "2026-11-21T19:32:33Z",
+    "expires_at": "2026-11-21T20:12:33Z"
+  },
   "focused_workload": {
     "version": 1,
     "id": "9701442a461d49649ef1318d843c9b77",
