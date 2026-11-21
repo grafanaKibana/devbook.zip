@@ -5,7 +5,7 @@
 </picture>
 
 <p align="center">
-A structured collection of software engineering notes covering 11 topic areas, designed for learning and interview preparation at a Senior .NET / AI engineering level.
+Software engineering notes and interview cards, written in Obsidian and published at devbook.zip.
 </p>
 
 <p align="center">
@@ -19,9 +19,9 @@ A structured collection of software engineering notes covering 11 topic areas, d
 
 ## Get started
 
-Browse the published topic pages. The collection covers 11 areas: programming, computer science, data persistence, networks, architecture, development practices, security, SDLC, DevOps, cloud, and AI & ML. Notes support learning, recall, and interview preparation at a Senior .NET / AI engineering level.
+Read the notes at [devbook.zip](https://devbook.zip). Topics: programming, computer science, data persistence, networks, software architecture, software design, security, DevOps, cloud, and AI & ML.
 
-The site publishes the eligible subset of the Obsidian vault. Reading does not require Obsidian, a database, or backend credentials.
+The site publishes the notes marked `publish: true` in the Obsidian vault. Reading does not require Obsidian, a database, or backend credentials.
 
 ## Local setup
 
@@ -48,7 +48,7 @@ The workflow is tested on macOS; Linux is unverified, and native Windows and mob
 
 ### Run the RAG playground
 
-`Platform/DevBook/` is a personal .NET 10 learning proof of concept for retrieval and agent mechanics. It exposes ingestion, vector search, and an ask endpoint over the notes, with separate retrieval evaluations.
+`Platform/DevBook/` is a .NET 10 proof of concept, not a production assistant. It exposes ingestion, vector search, and an ask endpoint over the notes, with separate retrieval evaluations.
 
 Before running it, follow the [backend prerequisites](Platform/DevBook/README.md#prerequisites): the host requires MongoDB Atlas search support and OpenAI configuration. Keep credentials in user-secrets or environment variables. Then, from the repository root:
 
@@ -56,11 +56,11 @@ Before running it, follow the [backend prerequisites](Platform/DevBook/README.md
 dotnet run --project Platform/DevBook/DevBook.API/DevBook.API.csproj
 ```
 
-Ingest publishable notes before trying retrieval. This playground makes the mechanics visible; it is not a production assistant. Evaluation measures retrieval of evidence, rather than grading generated answers.
+Ingest publishable notes before trying retrieval.
 
 ## How notes and cards are written and improved
 
-Every note and Qard card goes through the same author role, the same independent reviewer and the same rules, whether the change starts in a chat session or in the scheduled pipeline.
+Every note and Qard card change is written by the `note-writer` agent and checked by the read-only `note-reviewer` agent against the same rules, whichever entry point starts it.
 
 ```mermaid
 flowchart LR
@@ -89,7 +89,7 @@ flowchart LR
 | Improvement pipeline | Scheduled whole-note refinement, up to five notes per topic PR | The user, by reviewing and merging the PR |
 
 - **Rules.** [AGENTS.md](AGENTS.md) and the [writer](.rulesync/subagents/note-writer.md) and [reviewer](.rulesync/subagents/note-reviewer.md) contracts own structure, card identity and the review protocol.
-- **Preferences.** The [note](.rulesync/skill-feedback/note-polish.json) and [Qard](.rulesync/skill-feedback/qard-polish.json) stores hold the wording and explanation preferences learned from feedback. Only the two skills write them; the author, the reviewer and the pipeline read them, so no rule is copied anywhere else.
+- **Preferences.** The [note](.rulesync/skill-feedback/note-polish.json) and [Qard](.rulesync/skill-feedback/qard-polish.json) stores hold the wording and explanation preferences learned from feedback. Only the two skills write them; the author, the reviewer and the pipeline read them.
 - **Review gate.** A change is finished only when the reviewer returns `CLEAN` for the complete note.
 - **Qard readiness.** After a move, rename, split, merge or card change, decks, course links, lessons and checks are repaired by the [readiness procedure](docs/qard-readiness.md).
 - **Pipeline.** The [improvement runbook](.scripts/DevBook.Tooling/README.md) covers selection, budgets, topic PRs and activation.

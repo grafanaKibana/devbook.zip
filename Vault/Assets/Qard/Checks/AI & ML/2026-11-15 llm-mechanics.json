@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "createdAt": 1794847628983,
+  "createdAt": 1795096647552,
   "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
   "course": "AI & ML",
   "objective": "llm-mechanics",
@@ -12,21 +12,47 @@
     {
       "id": "c1",
       "type": "short",
-      "goal": "explain",
       "objective": "llm-mechanics",
-      "prompt": "Two pretrained transformers are compared for writing open-ended text, such as continuing a story from a prompt:\n\n- **Model A** is decoder-only. It was pretrained on next-token prediction with a causal attention mask, so each position attends only to earlier tokens.\n- **Model B** is encoder-only. It was pretrained on masked-token prediction with bidirectional attention: some input tokens are hidden, and each position can attend to tokens on both sides.\n\nModel B could still be forced to produce text, for example by appending a mask token, predicting it and repeating. Explain why Model A's pretraining directly trains the step used to continue a prompt, while Model B's pretraining does not.",
+      "goal": "explain",
+      "prompt": "A team needs a model that writes a short summary of each long support ticket. They are choosing between two pretrained checkpoints: **BERT** and **T5**. Explain why T5 can generate the summary text, while BERT on its own cannot. Base your answer on how each model is built.",
       "marks": 2,
       "rubric": [
         {
-          "point": "Model A: the causal mask plus next-token objective trains the model to predict the next token from the preceding prefix only. That is the same step used at generation time (predict, append, repeat), so training and autoregressive generation match.",
+          "point": "BERT is encoder-only: it outputs contextual representations (one vector per token or a pooled vector) for a task head and has no autoregressive decoder to produce new tokens.",
           "marks": 1
         },
         {
-          "point": "Model B: masked-token pretraining trains it to fill in hidden tokens within a sequence, typically using context on both sides, and it outputs contextual representations for a task head. It is never trained to repeatedly extend a prefix and has no autoregressive decoder, so any append-and-predict loop runs outside its training setup. Credit any answer conveying this training mismatch; do not require a claim that generation is impossible.",
+          "point": "T5 is an encoder-decoder: the encoder reads the ticket, and the decoder generates the summary tokens one at a time (autoregressively) while attending to the encoder's output.",
           "marks": 1
         }
       ],
-      "model": "**Model A:** The causal mask means each position predicts the next token from earlier tokens only. Generation uses exactly that step: predict the next token, append it and repeat. Pretraining therefore directly trains the continuation path.\n\n**Model B:** It was trained to fill in masked tokens inside a sequence, usually with context on both sides, and to produce contextual representations for a task head. It was never trained to extend a prefix one token at a time and has no autoregressive decoder. A loop that appends and predicts masks can run, but it differs from how the model was trained, so it is not a reliable way to generate open-ended text.",
+      "model": "BERT is encoder-only. It turns the input into contextual vectors for a task head, and it has no autoregressive decoder, so it cannot produce new text token by token. T5 is an encoder-decoder. Its encoder reads the ticket, and its decoder generates the summary one token at a time while attending to the encoder output.",
+      "source": {
+        "path": "Home/AI & ML/LLM/LLM.md",
+        "heading": "Transformer Families"
+      }
+    },
+    {
+      "id": "c2",
+      "type": "mcq",
+      "objective": "llm-mechanics",
+      "goal": "explain",
+      "prompt": "A GPT-style decoder-only model is pretrained on next-token prediction. After pretraining, the same stack can continue any prompt one token at a time. Which statement best explains why?",
+      "options": [
+        "Its attention is bidirectional, so each position sees the whole sentence and can fill in whatever text is missing.",
+        "A causal mask lets each position attend only to earlier positions, so training to predict the next token matches how generation works.",
+        "Its very large parameter count stores enough text that it can recall a continuation for any prompt it is given.",
+        "Instruction fine-tuning after pretraining adds a separate decoder that turns the model's representations into text."
+      ],
+      "answer": 1,
+      "marks": 1,
+      "rubric": [
+        {
+          "point": "Selects the causal-mask explanation: each position predicts from earlier positions only, so next-token training matches token-by-token continuation.",
+          "marks": 1
+        }
+      ],
+      "model": "**B.** The causal mask means each position predicts only from earlier tokens. Training on next-token prediction therefore teaches exactly the step used at inference: append a token, then predict the next one.",
       "source": {
         "path": "Home/AI & ML/LLM/LLM.md",
         "heading": "Transformer Families"
