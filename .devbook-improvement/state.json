@@ -20615,14 +20615,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-21T19:32:44.032316Z",
-    "elapsed_seconds": 0.0010878,
+    "elapsed_seconds": 5.681708199999999,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-21T19:32:44.032963Z"
+    "checkpoint_at": "2026-11-21T19:32:49.713488Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
