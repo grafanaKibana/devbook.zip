@@ -21007,11 +21007,11 @@
     "version": 1,
     "id": "e8c4d2c56c1b4b4ea6d2f82b910f28a6",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-22T07:08:33.289104Z",
-    "elapsed_seconds": 224.44535929999986,
+    "elapsed_seconds": 250.62848039999986,
     "calls_reserved": 6,
-    "responses_received": 5,
+    "responses_received": 6,
     "attempted_paths": [
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
       "Vault/Home/AI & ML/AI & ML.md"
@@ -22470,7 +22470,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-22T07:12:17.734036Z",
+    "checkpoint_at": "2026-11-22T07:12:43.917121Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -63436,6 +63436,141 @@
       "Vault/Home/AI & ML/LLM/Agents/Agents.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-22T07:12:12.240033Z"
+    "prepared_at": "2026-11-22T07:12:12.240033Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+            "verdict": "CLEAN",
+            "summary": "I read the whole note independently. The workflow versus agent distinction, the simplicity ladder, the loop diagram, the memory table and the five cards are accurate and coherent, and no concrete error or essential learning gap was found. One optional polish item: the body uses em dashes in the two hub-link parentheticals and in the three design principles, which departs from the stored no-long-dashes rule. The author's keep reason wrongly says there are no long dashes in body text. The text is untouched, it does not harm understanding, and the contract makes this non-blocking, so it does not change the verdict.",
+            "page_type": "FolderNote: card map Datacore block protected; Questions and References optional and present; wikilinks and fences (datacorejsx, mermaid) valid.",
+            "current_text_evidence": [
+              {
+                "quote": "An agentic system gives an LLM control over part of a workflow",
+                "line_start": 17,
+                "reason": "The opening defines the topic and the workflows versus agents boundary directly, matching Anthropic's Building Effective Agents."
+              },
+              {
+                "quote": "Autonomous agents earn their extra complexity only when the task is genuinely open-ended and unpredictable.",
+                "line_start": 22,
+                "reason": "This states the simplicity ladder (single call, then workflow, then agent) with its deciding condition."
+              },
+              {
+                "quote": "That flexibility costs more model calls and introduces compounding error.",
+                "line_start": 59,
+                "reason": "This gives the cost and failure mechanism, and the three design principles that follow it give concrete containment."
+              },
+              {
+                "quote": "Embeddings are a rebuildable search projection over canonical content, not the only copy of a fact.",
+                "line_start": 83,
+                "reason": "The memory section keeps its mechanism and limits visible, including the point that authorization is checked before ranking."
+              },
+              {
+                "quote": "Errors compound because each step builds on what earlier steps produced.",
+                "line_start": 98,
+                "reason": "The card gives an answer-first, single-task explanation. The separate controls card is a different task, so no bundling occurs and original IDs are retained."
+              },
+              {
+                "quote": "The usual default is the simplest design that meets the need",
+                "line_start": 95,
+                "reason": "The first card keeps its comparison focused, answers in the question's terms and ends with a primary-source link."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: workflows, autonomous agents and memory form one coherent overview hub. Patterns and evaluation already live in their own notes, and the memory section is compact.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "No edits proposed, and the independent whole-note audit found no High or Medium defect. Content matches Anthropic's Building Effective Agents and ReAct. The cards each test one gradeable task and keep their IDs. The em dashes are non-blocking polish in untouched text.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+          "citation_index": 4,
+          "reported_line_start": 98,
+          "resolved_line_start": 106
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+          "citation_index": 5,
+          "reported_line_start": 95,
+          "resolved_line_start": 100
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Agents/Agents.md": "84c172ecfb7ecbb65573c20be00d5af97eef54a0ec423aa23159c3948662af42"
+      },
+      "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+          "verdict": "CLEAN",
+          "summary": "I read the whole note independently. The workflow versus agent distinction, the simplicity ladder, the loop diagram, the memory table and the five cards are accurate and coherent, and no concrete error or essential learning gap was found. One optional polish item: the body uses em dashes in the two hub-link parentheticals and in the three design principles, which departs from the stored no-long-dashes rule. The author's keep reason wrongly says there are no long dashes in body text. The text is untouched, it does not harm understanding, and the contract makes this non-blocking, so it does not change the verdict.",
+          "page_type": "FolderNote: card map Datacore block protected; Questions and References optional and present; wikilinks and fences (datacorejsx, mermaid) valid.",
+          "current_text_evidence": [
+            {
+              "quote": "An agentic system gives an LLM control over part of a workflow",
+              "line_start": 17,
+              "reason": "The opening defines the topic and the workflows versus agents boundary directly, matching Anthropic's Building Effective Agents."
+            },
+            {
+              "quote": "Autonomous agents earn their extra complexity only when the task is genuinely open-ended and unpredictable.",
+              "line_start": 22,
+              "reason": "This states the simplicity ladder (single call, then workflow, then agent) with its deciding condition."
+            },
+            {
+              "quote": "That flexibility costs more model calls and introduces compounding error.",
+              "line_start": 59,
+              "reason": "This gives the cost and failure mechanism, and the three design principles that follow it give concrete containment."
+            },
+            {
+              "quote": "Embeddings are a rebuildable search projection over canonical content, not the only copy of a fact.",
+              "line_start": 83,
+              "reason": "The memory section keeps its mechanism and limits visible, including the point that authorization is checked before ranking."
+            },
+            {
+              "quote": "Errors compound because each step builds on what earlier steps produced.",
+              "line_start": 106,
+              "reason": "The card gives an answer-first, single-task explanation. The separate controls card is a different task, so no bundling occurs and original IDs are retained."
+            },
+            {
+              "quote": "The usual default is the simplest design that meets the need",
+              "line_start": 100,
+              "reason": "The first card keeps its comparison focused, answers in the question's terms and ends with a primary-source link."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: workflows, autonomous agents and memory form one coherent overview hub. Patterns and evaluation already live in their own notes, and the memory section is compact.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "No edits proposed, and the independent whole-note audit found no High or Medium defect. Content matches Anthropic's Building Effective Agents and ReAct. The cards each test one gradeable task and keep their IDs. The em dashes are non-blocking polish in untouched text.",
+      "change_checks": []
+    }
   }
 }
