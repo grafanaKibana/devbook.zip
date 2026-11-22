@@ -9,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Agents/Evaluation/Trajectory Evaluation"
 flashcard_uid: "4a7a9900"
 created: "2026-06-12T18:50:14.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-22T07:17:42.871Z"
 published: "2026-07-08T13:28:37.404Z"
 ---
 
@@ -71,7 +71,7 @@ Same outcome, same superset verdict; the judge separates the clean path from the
 | --- | --- | --- | --- |
 | Reference match (strict) | Any deviation from the one correct path | Lowest to run | More than one valid path exists |
 | Reference match (subset/superset) | Missing required work / out-of-bounds actions | Low | Path quality within bounds (bloat, detours) |
-| LLM judge over the trace | Plan quality, redundancy, recovery | High — judge call per run, long context | Traces exceed the judge's reliable context window |
+| LLM judge over the trace | Plan quality, redundancy, recovery | High: a judge call per run and long context | Traces exceed the judge's reliable context window |
 
 Reference matching fits when the valid procedures are few and knowable. Subset mode is especially effective as a hard safety gate because forbidden tools fail deterministically. A judge fits when decomposition is open-ended. In either case, outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] belong beside the path score. A polished trajectory that missed the task is still a failure.
 

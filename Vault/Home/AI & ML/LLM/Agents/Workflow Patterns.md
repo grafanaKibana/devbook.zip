@@ -9,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Agents/Workflow Patterns"
 flashcard_uid: "27b2b0a4"
 created: "2026-07-13T19:23:03.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-22T07:19:27.758Z"
 published: "2026-07-13T19:05:02.499Z"
 ---
 
@@ -40,7 +40,7 @@ flowchart LR
 
 Routing classifies the input and sends it to one predefined path. Each branch can use a different prompt, tool set, or model. A refund path can become stricter without changing general question answering. Applying the same decision to model choice produces [[Home/AI & ML/LLM/Model Selection and Routing|model routing]].
 
-It fits distinct categories with different handling. General questions might use a small model, technical cases a larger one, and refunds a constrained workflow with explicit policy checks. The router now becomes a failure boundary: a perfect specialist cannot recover a request sent to the wrong branch.
+It fits distinct categories with different handling. General questions might use a small model, technical cases a larger one, and refunds a constrained workflow with explicit policy checks. The router becomes a single point of failure: a perfect specialist cannot recover a request sent to the wrong branch.
 
 ## Parallelization
 
@@ -124,4 +124,4 @@ This pattern fits work where feedback improves the output and the evaluator can 
 
 # References
 
-- [Patterns for Basic Agent Workflows — cookbook (Anthropic)](https://platform.claude.com/cookbook/patterns-agents-basic-workflows)
+- [Patterns for Basic Agent Workflows (Anthropic cookbook)](https://platform.claude.com/cookbook/patterns-agents-basic-workflows)
