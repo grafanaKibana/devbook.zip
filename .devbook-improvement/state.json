@@ -21165,16 +21165,17 @@
     "version": 1,
     "id": "e8c4d2c56c1b4b4ea6d2f82b910f28a6",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-22T07:08:33.289104Z",
-    "elapsed_seconds": 395.8039394999999,
+    "elapsed_seconds": 400.6242204999999,
     "calls_reserved": 10,
     "responses_received": 10,
     "attempted_paths": [
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
       "Vault/Home/AI & ML/AI & ML.md",
       "Vault/Home/AI & ML/LLM/Agents/Agents.md",
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md"
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md"
     ],
     "accepted_records": [
       {
@@ -22778,10 +22779,83 @@
           },
           "model_calls": 8
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
+                "outcome": "keep",
+                "reason": "Audited the whole folder note. The outcome/process split, the mermaid map, the five measurement bullets, the pass^k reliability explanation, the scorecard example and the tradeoffs table are consistent with each other. They also match the sibling Tool-Call and Trajectory notes: selection, arguments, validity and necessity; reference matching versus rubric judgment. The reference to LangSmith trajectory evaluation fits the claims about reference-match and LLM-judge scoring. The note has no cards and no known violations. Wikilinks point to existing sibling topics. The code fences have language identifiers and the prose has no long dashes. The mixed-step claim that reference traces are costly to maintain is a reasonable judgment, not a factual error. No edit would improve accuracy or clarity enough to justify churn."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
+                "verdict": "CLEAN",
+                "summary": "The whole note was read. The outcome/process split, tool-call/trajectory/efficiency/robustness bullets, pass^k reliability explanation, scorecard and tradeoffs table are accurate and consistent. No edit is needed, and the keep is justified.",
+                "page_type": "FolderNote: keeps tags [FolderNote] and the protected datacorejsx map. Questions are absent, which is optional. References has one bare descriptive link.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Agent evaluation separates the **outcome** (was the task completed?) from the **process** (was the route sound and efficient?).",
+                    "line_start": 15,
+                    "reason": "The opening states the operating idea quickly, and the rest of the note builds on this split."
+                  },
+                  {
+                    "quote": "Check the resulting state, not the agent's claim about it.",
+                    "line_start": 38,
+                    "reason": "Gives the concrete mechanism for outcome verification, with examples of asserting a row, running tests and diffing a file."
+                  },
+                  {
+                    "quote": "A task that passes 6 runs out of 10 is materially different from one that passes every time",
+                    "line_start": 44,
+                    "reason": "Motivates the pass^k reliability metric with a correct, concrete contrast to the mean pass rate."
+                  },
+                  {
+                    "quote": "Reliability: solved on 5/5 runs  (pass^5 = 1.0)",
+                    "line_start": 65,
+                    "reason": "The scorecard arithmetic matches the pass^k definition and the stated k=5."
+                  },
+                  {
+                    "quote": "Gate releases on **verifiable task success plus efficiency limits**.",
+                    "line_start": 77,
+                    "reason": "Gives a decided engineering recommendation, with the condition that changes it (many valid routes) stated right after."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the note is a coherent hub for agent evaluation, and the sibling topics (Tool-Call, Trajectory, Benchmarks) already live as separate notes.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "NOT APPLICABLE",
+                  "identity_safety": "NOT APPLICABLE",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is accurate, well ordered and free of known violations. The keep is supported by current-text evidence and no edits are proposed.",
+            "change_checks": []
+          },
+          "model_calls": 10
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-22T07:15:09.092583Z",
+    "checkpoint_at": "2026-11-22T07:15:13.912865Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
