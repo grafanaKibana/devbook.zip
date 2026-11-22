@@ -21165,11 +21165,11 @@
     "version": 1,
     "id": "e8c4d2c56c1b4b4ea6d2f82b910f28a6",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-22T07:08:33.289104Z",
-    "elapsed_seconds": 554.0795878000001,
+    "elapsed_seconds": 581.2626624000002,
     "calls_reserved": 14,
-    "responses_received": 13,
+    "responses_received": 14,
     "attempted_paths": [
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
       "Vault/Home/AI & ML/AI & ML.md",
@@ -24994,7 +24994,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-22T07:17:47.368234Z",
+    "checkpoint_at": "2026-11-22T07:18:14.551309Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -66474,6 +66474,231 @@
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-22T07:17:42.871632Z"
+    "prepared_at": "2026-11-22T07:17:42.871632Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The single edit removes the only remaining long dash in authored prose, which the no-long-dashes rule requires. It keeps the meaning, and the rest of the note is accurate and consistent.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+            "verdict": "CLEAN",
+            "summary": "The note explains the four reference-match modes, the judge alternative, step versus episode scoring, a worked example, a tradeoff table and pitfalls, and all of it is coherent. The only defect was one em dash in the table, now a colon. The cost meaning (one judge call per run plus long context) is preserved.",
+            "page_type": "Concept: authorable concept note with an optional Questions section and a References section. The Qard ID is preserved and untouched.",
+            "current_text_evidence": [
+              {
+                "quote": "Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls.",
+                "line_start": 16,
+                "reason": "The opening states the problem quickly and concretely, so no rewrite is needed."
+              },
+              {
+                "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                "line_start": 26,
+                "reason": "Subset and superset directions are stated correctly and are consistent with the Qard answer and the example."
+              },
+              {
+                "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+                "line_start": 64,
+                "reason": "The example shows why reference matching alone misses waste, which supports the tradeoff discussion."
+              },
+              {
+                "quote": "High: a judge call per run and long context",
+                "line_start": 73,
+                "reason": "The em dash is replaced with a colon, so the no-long-dashes rule is met and the cost meaning is unchanged."
+              },
+              {
+                "quote": "Several valid paths do not automatically require a judge.",
+                "line_start": 96,
+                "reason": "The Qard answer states the exception to its own rule, so it is balanced. It is one focused comparison task with an answer-side source link."
+              }
+            ],
+            "target_resolution": "RESOLVED",
+            "split_suggestion": "No split: the note covers one coherent topic, trajectory scoring methods, and its parts depend on each other.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [
+              {
+                "fingerprint": "3fd0195aebe22928e501b312bfc8cb752e99596494e9d6ed969ffb179cba4d58",
+                "equivalent": false,
+                "reason": "It concerns a different note and an unrelated code rename."
+              },
+              {
+                "fingerprint": "0edee5f0203803acc165c0049d2267a55596a7e6fe24fa880d7877062525177d",
+                "equivalent": false,
+                "reason": "It concerns a different note, in a code fence."
+              },
+              {
+                "fingerprint": "244d8a0f13c2abb4f10f48aecb71e8b61b9b273f632444076a4815a9956f07d9",
+                "equivalent": false,
+                "reason": "It concerns a different note."
+              },
+              {
+                "fingerprint": "27b8ff207ad19a6687a083b6a903afbf642cb7da722dcef9f41f92da607c9f84",
+                "equivalent": false,
+                "reason": "It concerns a different note."
+              },
+              {
+                "fingerprint": "a84e9c6353348559fc2fa8be75d2d5183237375a59e0bfcbdd61e59fbfd9b75f",
+                "equivalent": false,
+                "reason": "It concerns a different note."
+              },
+              {
+                "fingerprint": "211e8deab424a6b66d3a0dcf54dbcdebb43502f289d5bd459bc79ac82aa5219c",
+                "equivalent": false,
+                "reason": "It concerns a different note."
+              },
+              {
+                "fingerprint": "9071849019d08ac59c180c9079be25dd38f1d0f6e802aa017a629cbb5f68a7bd",
+                "equivalent": false,
+                "reason": "It concerns a different note."
+              },
+              {
+                "fingerprint": "5d8c5515eb94740c04ec2b74de70fe5aceead457fb6b00387074c30c5b32f8a9",
+                "equivalent": false,
+                "reason": "It concerns a different note."
+              }
+            ],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": [
+          {
+            "edit_index": 0,
+            "verdict": "WORTHWHILE",
+            "reason": "The em dash in the table cell was a real violation of the no-long-dashes rule. The colon form keeps the cost meaning and changes nothing else, so no metadata is affected."
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "citation_index": 2,
+          "reported_line_start": 64,
+          "resolved_line_start": 65
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "citation_index": 3,
+          "reported_line_start": 73,
+          "resolved_line_start": 74
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "citation_index": 4,
+          "reported_line_start": 96,
+          "resolved_line_start": 111
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "86975027b9d14a2766980a16abde771b48190bcbec1e68c3475a8809ba59fc25"
+      },
+      "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The single edit removes the only remaining long dash in authored prose, which the no-long-dashes rule requires. It keeps the meaning, and the rest of the note is accurate and consistent.",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+          "verdict": "CLEAN",
+          "summary": "The note explains the four reference-match modes, the judge alternative, step versus episode scoring, a worked example, a tradeoff table and pitfalls, and all of it is coherent. The only defect was one em dash in the table, now a colon. The cost meaning (one judge call per run plus long context) is preserved.",
+          "page_type": "Concept: authorable concept note with an optional Questions section and a References section. The Qard ID is preserved and untouched.",
+          "current_text_evidence": [
+            {
+              "quote": "Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls.",
+              "line_start": 16,
+              "reason": "The opening states the problem quickly and concretely, so no rewrite is needed."
+            },
+            {
+              "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+              "line_start": 26,
+              "reason": "Subset and superset directions are stated correctly and are consistent with the Qard answer and the example."
+            },
+            {
+              "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+              "line_start": 65,
+              "reason": "The example shows why reference matching alone misses waste, which supports the tradeoff discussion."
+            },
+            {
+              "quote": "High: a judge call per run and long context",
+              "line_start": 74,
+              "reason": "The em dash is replaced with a colon, so the no-long-dashes rule is met and the cost meaning is unchanged."
+            },
+            {
+              "quote": "Several valid paths do not automatically require a judge.",
+              "line_start": 111,
+              "reason": "The Qard answer states the exception to its own rule, so it is balanced. It is one focused comparison task with an answer-side source link."
+            }
+          ],
+          "target_resolution": "RESOLVED",
+          "split_suggestion": "No split: the note covers one coherent topic, trajectory scoring methods, and its parts depend on each other.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [
+            {
+              "fingerprint": "3fd0195aebe22928e501b312bfc8cb752e99596494e9d6ed969ffb179cba4d58",
+              "equivalent": false,
+              "reason": "It concerns a different note and an unrelated code rename."
+            },
+            {
+              "fingerprint": "0edee5f0203803acc165c0049d2267a55596a7e6fe24fa880d7877062525177d",
+              "equivalent": false,
+              "reason": "It concerns a different note, in a code fence."
+            },
+            {
+              "fingerprint": "244d8a0f13c2abb4f10f48aecb71e8b61b9b273f632444076a4815a9956f07d9",
+              "equivalent": false,
+              "reason": "It concerns a different note."
+            },
+            {
+              "fingerprint": "27b8ff207ad19a6687a083b6a903afbf642cb7da722dcef9f41f92da607c9f84",
+              "equivalent": false,
+              "reason": "It concerns a different note."
+            },
+            {
+              "fingerprint": "a84e9c6353348559fc2fa8be75d2d5183237375a59e0bfcbdd61e59fbfd9b75f",
+              "equivalent": false,
+              "reason": "It concerns a different note."
+            },
+            {
+              "fingerprint": "211e8deab424a6b66d3a0dcf54dbcdebb43502f289d5bd459bc79ac82aa5219c",
+              "equivalent": false,
+              "reason": "It concerns a different note."
+            },
+            {
+              "fingerprint": "9071849019d08ac59c180c9079be25dd38f1d0f6e802aa017a629cbb5f68a7bd",
+              "equivalent": false,
+              "reason": "It concerns a different note."
+            },
+            {
+              "fingerprint": "5d8c5515eb94740c04ec2b74de70fe5aceead457fb6b00387074c30c5b32f8a9",
+              "equivalent": false,
+              "reason": "It concerns a different note."
+            }
+          ],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": [
+        {
+          "edit_index": 0,
+          "verdict": "WORTHWHILE",
+          "reason": "The em dash in the table cell was a real violation of the no-long-dashes rule. The colon form keeps the cost meaning and changes nothing else, so no metadata is affected."
+        }
+      ]
+    }
   }
 }
