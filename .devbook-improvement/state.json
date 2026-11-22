@@ -45661,11 +45661,13 @@
     "automatic_export": true,
     "prepared_source_version": 1,
     "prepared_at": "2026-11-22T07:19:27.758843Z",
-    "phase": "branch_updated",
-    "updated_at": "2026-11-22T07:23:52Z",
+    "phase": "pr_updated",
+    "updated_at": "2026-11-22T07:24:01Z",
     "evidence": {
       "commit_sha": "8d2f4ffb2c5c8b85d39c04928269e6a8f2d99df0",
-      "branch_sha": "8d2f4ffb2c5c8b85d39c04928269e6a8f2d99df0"
+      "branch_sha": "8d2f4ffb2c5c8b85d39c04928269e6a8f2d99df0",
+      "pr_number": 253,
+      "created": true
     }
   },
   "export_operations": {
