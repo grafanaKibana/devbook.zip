@@ -21114,15 +21114,16 @@
     "version": 1,
     "id": "e8c4d2c56c1b4b4ea6d2f82b910f28a6",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-22T07:08:33.289104Z",
-    "elapsed_seconds": 327.1835500999998,
+    "elapsed_seconds": 332.67803619999984,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
       "Vault/Home/AI & ML/AI & ML.md",
-      "Vault/Home/AI & ML/LLM/Agents/Agents.md"
+      "Vault/Home/AI & ML/LLM/Agents/Agents.md",
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md"
     ],
     "accepted_records": [
       {
@@ -22653,10 +22654,83 @@
           },
           "model_calls": 6
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+                "outcome": "keep",
+                "reason": "I read the whole note and found no defect that justifies an edit. The opening separates a benchmark's uses (shortlisting, harness checks) from what it can't do (final selection). The benchmark table matches the cited papers: SWE-bench resolves issues against hidden tests, tau-bench reports pass^k with a simulated user and domain policy, GAIA uses exact match, WebArena uses self-hosted web apps, AgentBench spans 8 environments, and BFCL scores AST and executable accuracy. The leaderboard-reading section handles the conditions correctly: scaffold control isolates the model, pass@1 versus pass^k, contamination, and missing cost and latency. The worked example is internally consistent and says it exposes missing evidence rather than naming a winner. The single Qard asks one gradeable question, its answer opens with the direct reply, and it cites the tau-bench paper. The wikilinks point to sibling notes that explain the related concepts. Rewording or adding cards would be churn without a reader benefit."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "Independent whole-note audit found no accuracy, clarity, question-quality or rules defect. No edits were proposed, and the keep is justified by current-text evidence.",
+            "change_checks": [],
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+                "verdict": "CLEAN",
+                "summary": "The note reads in a sensible order: purpose and limits, benchmark table, how to read leaderboards, why public scores miss internal workloads, then a worked example. The prose is plain and conditions are stated (scaffold held fixed, pass@1 vs pass^k, contamination, missing cost data). The single Qard tests one dependent task with a direct opening answer and a primary-source link. A rewrite would only be churn.",
+                "page_type": "Concept: applies the concept-note voice and optional Questions/References rules. No special-page protection.",
+                "current_text_evidence": [
+                  {
+                    "quote": "A leaderboard score cannot make the final selection.",
+                    "line_start": 18,
+                    "reason": "The opening states the key boundary: public scores shortlist, private evaluation decides, with the reason (system-level measurement, leakage, distribution mismatch)."
+                  },
+                  {
+                    "quote": "`pass^k` requires the task to succeed on every one of `k` attempts, so it exposes intermittent failures that an average hides.",
+                    "line_start": 36,
+                    "reason": "Gives the reliability metric with its mechanism and why it differs from pass@1; consistent with the tau-bench paper."
+                  },
+                  {
+                    "quote": "Human verification improves issue and test quality; it does not isolate public tasks from training.",
+                    "line_start": 37,
+                    "reason": "Handles the contamination condition precisely, without overclaiming what Verified guarantees."
+                  },
+                  {
+                    "quote": "The example exposes missing evidence rather than a winner.",
+                    "line_start": 61,
+                    "reason": "The worked example is internally consistent and draws the correct conclusion, keeping the model-isolation and system-comparison questions separate."
+                  },
+                  {
+                    "quote": "> [!qard]- Why can one base model produce very different results on the same agent benchmark?",
+                    "line_start": 66,
+                    "reason": "One interview-style question testing one dependent explanation (scaffold and run conditions); answer opens with the direct reply, cites tau-bench, and has no long dashes."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: the benchmark survey, leaderboard-reading rules and the example form one coherent topic and are most useful together.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ]
+          },
+          "model_calls": 8
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-22T07:14:00.472193Z",
+    "checkpoint_at": "2026-11-22T07:14:05.966680Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
