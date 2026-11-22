@@ -38662,7 +38662,7 @@
       "prepared_source_version": 1,
       "prepared_at": "2026-11-22T07:19:27.758843Z",
       "phase": "pr_updated",
-      "updated_at": "2026-11-22T19:55:18Z",
+      "updated_at": "2026-11-22T19:55:31Z",
       "evidence": {
         "commit_sha": "8d2f4ffb2c5c8b85d39c04928269e6a8f2d99df0",
         "branch_sha": "8d2f4ffb2c5c8b85d39c04928269e6a8f2d99df0",
@@ -38693,7 +38693,11 @@
           "bundle_sha256": "adda41af918bb38813b35c214f912fa847b9c829291d32280ed5ae988bf330a1"
         },
         "export_phase": "artifact_registered",
-        "export_refresh_registered": false
+        "export_refresh_registered": false,
+        "validation_head": "8d2f4ffb2c5c8b85d39c04928269e6a8f2d99df0",
+        "validation_attempts": 1,
+        "validation_last_dispatch_at": "2026-11-22T19:55:29Z",
+        "export_validation_dispatch_attempted_at": "2026-11-22T19:55:29Z"
       }
     }
   },
