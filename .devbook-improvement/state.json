@@ -21007,13 +21007,14 @@
     "version": 1,
     "id": "e8c4d2c56c1b4b4ea6d2f82b910f28a6",
     "status": "active",
-    "phase": "review_completed",
+    "phase": "selecting",
     "started_at": "2026-11-22T07:08:33.289104Z",
-    "elapsed_seconds": 174.0838316999999,
+    "elapsed_seconds": 178.5617160999999,
     "calls_reserved": 4,
     "responses_received": 4,
     "attempted_paths": [
-      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md"
+      "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
+      "Vault/Home/AI & ML/AI & ML.md"
     ],
     "accepted_records": [
       {
@@ -22402,10 +22403,74 @@
             "prepared_at": "2026-11-22T07:09:20.954649Z"
           }
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/AI & ML.md",
+        "outcome": "no_worthwhile_changes",
+        "reason": "",
+        "result": {
+          "status": "no_worthwhile_changes",
+          "proposal": {
+            "version": 1,
+            "edits": [],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/AI & ML.md",
+                "outcome": "keep",
+                "reason": "I read the whole folder note. The opening paragraph states the section's scope: classic ML, then LLM applications and tooling. It also gives the useful boundary that production results depend on data, evaluation and operation more than on model choice. The Datacore folder map block is protected and unchanged. The single Qard card asks one direct, bounded question. Its first paragraph answers it: classic ML fits when the task is a defined prediction with representative labels and a metric, and when measurement on the real workload shows it meets the objective with a better balance of quality, latency, cost and maintenance. The bullets explain why task fit alone does not decide, because LLMs can also classify, and why both options need the same measurement. The claims agree with the cited Google problem-framing and Rules of ML guidance. The qard-id and its metadata are intact. The note has no em or en dashes and no known violations. The References list holds one relevant bare link. No factual or clarity defect was found, so any edit would be cosmetic churn."
+              }
+            ],
+            "feedback": [],
+            "decisions": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/AI & ML.md",
+                "verdict": "CLEAN",
+                "summary": "I read the whole folder note. The opening gives scope and the key boundary (data, evaluation and operation matter more than model choice). The single Qard asks one bounded question and answers it first, with conditions and an exception. No defect was found, so an edit would be churn.",
+                "page_type": "FolderNote: the Datacore folder map is protected and unchanged. The Questions and References sections are optional and present, and both are useful.",
+                "current_text_evidence": [
+                  {
+                    "quote": "an impressive model cannot rescue weak evidence or missing monitoring",
+                    "line_start": 21,
+                    "reason": "The opening states the operating idea and boundary in plain, decided prose, and the note has no em or en dashes."
+                  },
+                  {
+                    "quote": "The first condition makes classic ML a strong candidate. Only the second decides.",
+                    "line_start": 32,
+                    "reason": "The answer-first paragraph resolves the question and separates the necessary condition from the decisive one."
+                  },
+                  {
+                    "quote": "both options are evaluated against the same simple, observable objective on the same data",
+                    "line_start": 36,
+                    "reason": "The comparison names the condition that changes the decision, so the answer does not claim either approach is inherently better."
+                  }
+                ],
+                "target_resolution": "JUSTIFIED UNCHANGED",
+                "split_suggestion": "No split: a short hub note with one card, and no separable topics.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "overall_reason": "The note is accurate and clear, the card is a single recall task with its ID intact, and no concrete defect justifies an edit. The empty edit set is correct.",
+            "change_checks": []
+          },
+          "model_calls": 4
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-22T07:11:27.372474Z",
+    "checkpoint_at": "2026-11-22T07:11:31.850368Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
