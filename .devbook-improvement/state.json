@@ -21165,9 +21165,9 @@
     "version": 1,
     "id": "e8c4d2c56c1b4b4ea6d2f82b910f28a6",
     "status": "active",
-    "phase": "validation_completed",
+    "phase": "selecting",
     "started_at": "2026-11-22T07:08:33.289104Z",
-    "elapsed_seconds": 605.1333513000002,
+    "elapsed_seconds": 609.7440003000002,
     "calls_reserved": 14,
     "responses_received": 14,
     "attempted_paths": [
@@ -21176,7 +21176,8 @@
       "Vault/Home/AI & ML/LLM/Agents/Agents.md",
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md",
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md"
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md"
     ],
     "accepted_records": [
       {
@@ -25310,10 +25311,1373 @@
             "prepared_at": "2026-11-22T07:16:07.985423Z"
           }
         }
+      },
+      {
+        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+        "outcome": "proposed",
+        "reason": "",
+        "result": {
+          "status": "proposed",
+          "topic": "AI & ML",
+          "proposal": {
+            "version": 1,
+            "edits": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                "expected_hash": "e2ef95be7363d302d2cb7e3a5dddcdde75ee3df805786476c95b77cb6d38e7c6",
+                "before": "High — judge call per run, long context",
+                "after": "High: a judge call per run and long context",
+                "reason": "Removes the only em dash in authored prose, as the note-polish rule no-long-dashes requires, without changing the meaning.",
+                "kind": "note",
+                "learning_target": "same",
+                "essential_meanings": [
+                  "LLM judge cost is one model call per run plus long context"
+                ],
+                "sources": [],
+                "feedback_keys": [],
+                "problem": "The tradeoffs table cell uses an em dash, which the vault's prose rule forbids.",
+                "reader_benefit": "Consistent punctuation with the vault style, and the cost reads as a plain phrase."
+              }
+            ],
+            "dispositions": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                "outcome": "changed",
+                "reason": "Audited the whole note: the four comparison modes (strict, unordered, subset, superset) and the subset/superset directions match LangSmith's trajectory evals; the example, tradeoff table, pitfalls and the single Qard are consistent with each other and with the opening. The only defect found was an em dash in the table, now replaced with a colon."
+              }
+            ],
+            "feedback": []
+          },
+          "review": {
+            "verdict": "CLEAN",
+            "overall_reason": "The single edit removes the only remaining long dash in authored prose, which the no-long-dashes rule requires. It keeps the meaning, and the rest of the note is accurate and consistent.",
+            "notes": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                "verdict": "CLEAN",
+                "summary": "The note explains the four reference-match modes, the judge alternative, step versus episode scoring, a worked example, a tradeoff table and pitfalls, and all of it is coherent. The only defect was one em dash in the table, now a colon. The cost meaning (one judge call per run plus long context) is preserved.",
+                "page_type": "Concept: authorable concept note with an optional Questions section and a References section. The Qard ID is preserved and untouched.",
+                "current_text_evidence": [
+                  {
+                    "quote": "Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls.",
+                    "line_start": 16,
+                    "reason": "The opening states the problem quickly and concretely, so no rewrite is needed."
+                  },
+                  {
+                    "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                    "line_start": 26,
+                    "reason": "Subset and superset directions are stated correctly and are consistent with the Qard answer and the example."
+                  },
+                  {
+                    "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+                    "line_start": 65,
+                    "reason": "The example shows why reference matching alone misses waste, which supports the tradeoff discussion."
+                  },
+                  {
+                    "quote": "High: a judge call per run and long context",
+                    "line_start": 74,
+                    "reason": "The em dash is replaced with a colon, so the no-long-dashes rule is met and the cost meaning is unchanged."
+                  },
+                  {
+                    "quote": "Several valid paths do not automatically require a judge.",
+                    "line_start": 111,
+                    "reason": "The Qard answer states the exception to its own rule, so it is balanced. It is one focused comparison task with an answer-side source link."
+                  }
+                ],
+                "target_resolution": "RESOLVED",
+                "split_suggestion": "No split: the note covers one coherent topic, trajectory scoring methods, and its parts depend on each other.",
+                "findings": [],
+                "source_checks": [],
+                "rejection_equivalence": [
+                  {
+                    "fingerprint": "3fd0195aebe22928e501b312bfc8cb752e99596494e9d6ed969ffb179cba4d58",
+                    "equivalent": false,
+                    "reason": "It concerns a different note and an unrelated code rename."
+                  },
+                  {
+                    "fingerprint": "0edee5f0203803acc165c0049d2267a55596a7e6fe24fa880d7877062525177d",
+                    "equivalent": false,
+                    "reason": "It concerns a different note, in a code fence."
+                  },
+                  {
+                    "fingerprint": "244d8a0f13c2abb4f10f48aecb71e8b61b9b273f632444076a4815a9956f07d9",
+                    "equivalent": false,
+                    "reason": "It concerns a different note."
+                  },
+                  {
+                    "fingerprint": "27b8ff207ad19a6687a083b6a903afbf642cb7da722dcef9f41f92da607c9f84",
+                    "equivalent": false,
+                    "reason": "It concerns a different note."
+                  },
+                  {
+                    "fingerprint": "a84e9c6353348559fc2fa8be75d2d5183237375a59e0bfcbdd61e59fbfd9b75f",
+                    "equivalent": false,
+                    "reason": "It concerns a different note."
+                  },
+                  {
+                    "fingerprint": "211e8deab424a6b66d3a0dcf54dbcdebb43502f289d5bd459bc79ac82aa5219c",
+                    "equivalent": false,
+                    "reason": "It concerns a different note."
+                  },
+                  {
+                    "fingerprint": "9071849019d08ac59c180c9079be25dd38f1d0f6e802aa017a629cbb5f68a7bd",
+                    "equivalent": false,
+                    "reason": "It concerns a different note."
+                  },
+                  {
+                    "fingerprint": "5d8c5515eb94740c04ec2b74de70fe5aceead457fb6b00387074c30c5b32f8a9",
+                    "equivalent": false,
+                    "reason": "It concerns a different note."
+                  }
+                ],
+                "quality": {
+                  "accuracy": "PASS",
+                  "clarity": "PASS",
+                  "question_quality": "PASS",
+                  "identity_safety": "PASS",
+                  "rules_compliance": "PASS"
+                }
+              }
+            ],
+            "change_checks": [
+              {
+                "edit_index": 0,
+                "verdict": "WORTHWHILE",
+                "reason": "The em dash in the table cell was a real violation of the no-long-dashes rule. The colon form keeps the cost meaning and changes nothing else, so no metadata is affected."
+              }
+            ]
+          },
+          "review_evidence": {
+            "raw_review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The single edit removes the only remaining long dash in authored prose, which the no-long-dashes rule requires. It keeps the meaning, and the rest of the note is accurate and consistent.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains the four reference-match modes, the judge alternative, step versus episode scoring, a worked example, a tradeoff table and pitfalls, and all of it is coherent. The only defect was one em dash in the table, now a colon. The cost meaning (one judge call per run plus long context) is preserved.",
+                  "page_type": "Concept: authorable concept note with an optional Questions section and a References section. The Qard ID is preserved and untouched.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls.",
+                      "line_start": 16,
+                      "reason": "The opening states the problem quickly and concretely, so no rewrite is needed."
+                    },
+                    {
+                      "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                      "line_start": 26,
+                      "reason": "Subset and superset directions are stated correctly and are consistent with the Qard answer and the example."
+                    },
+                    {
+                      "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+                      "line_start": 64,
+                      "reason": "The example shows why reference matching alone misses waste, which supports the tradeoff discussion."
+                    },
+                    {
+                      "quote": "High: a judge call per run and long context",
+                      "line_start": 73,
+                      "reason": "The em dash is replaced with a colon, so the no-long-dashes rule is met and the cost meaning is unchanged."
+                    },
+                    {
+                      "quote": "Several valid paths do not automatically require a judge.",
+                      "line_start": 96,
+                      "reason": "The Qard answer states the exception to its own rule, so it is balanced. It is one focused comparison task with an answer-side source link."
+                    }
+                  ],
+                  "target_resolution": "RESOLVED",
+                  "split_suggestion": "No split: the note covers one coherent topic, trajectory scoring methods, and its parts depend on each other.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [
+                    {
+                      "fingerprint": "3fd0195aebe22928e501b312bfc8cb752e99596494e9d6ed969ffb179cba4d58",
+                      "equivalent": false,
+                      "reason": "It concerns a different note and an unrelated code rename."
+                    },
+                    {
+                      "fingerprint": "0edee5f0203803acc165c0049d2267a55596a7e6fe24fa880d7877062525177d",
+                      "equivalent": false,
+                      "reason": "It concerns a different note, in a code fence."
+                    },
+                    {
+                      "fingerprint": "244d8a0f13c2abb4f10f48aecb71e8b61b9b273f632444076a4815a9956f07d9",
+                      "equivalent": false,
+                      "reason": "It concerns a different note."
+                    },
+                    {
+                      "fingerprint": "27b8ff207ad19a6687a083b6a903afbf642cb7da722dcef9f41f92da607c9f84",
+                      "equivalent": false,
+                      "reason": "It concerns a different note."
+                    },
+                    {
+                      "fingerprint": "a84e9c6353348559fc2fa8be75d2d5183237375a59e0bfcbdd61e59fbfd9b75f",
+                      "equivalent": false,
+                      "reason": "It concerns a different note."
+                    },
+                    {
+                      "fingerprint": "211e8deab424a6b66d3a0dcf54dbcdebb43502f289d5bd459bc79ac82aa5219c",
+                      "equivalent": false,
+                      "reason": "It concerns a different note."
+                    },
+                    {
+                      "fingerprint": "9071849019d08ac59c180c9079be25dd38f1d0f6e802aa017a629cbb5f68a7bd",
+                      "equivalent": false,
+                      "reason": "It concerns a different note."
+                    },
+                    {
+                      "fingerprint": "5d8c5515eb94740c04ec2b74de70fe5aceead457fb6b00387074c30c5b32f8a9",
+                      "equivalent": false,
+                      "reason": "It concerns a different note."
+                    }
+                  ],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": [
+                {
+                  "edit_index": 0,
+                  "verdict": "WORTHWHILE",
+                  "reason": "The em dash in the table cell was a real violation of the no-long-dashes rule. The colon form keeps the cost meaning and changes nothing else, so no metadata is affected."
+                }
+              ]
+            },
+            "bindings": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                "citation_index": 2,
+                "reported_line_start": 64,
+                "resolved_line_start": 65
+              },
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                "citation_index": 3,
+                "reported_line_start": 73,
+                "resolved_line_start": 74
+              },
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                "citation_index": 4,
+                "reported_line_start": 96,
+                "resolved_line_start": 111
+              }
+            ],
+            "source_hashes": {
+              "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "86975027b9d14a2766980a16abde771b48190bcbec1e68c3475a8809ba59fc25"
+            },
+            "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
+            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+          },
+          "candidate": {
+            "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Trajectory Evaluation\"\nflashcard_uid: \"4a7a9900\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-11-22T07:17:42.871Z\"\npublished: \"2026-07-08T13:28:37.404Z\"\n---\n\nTrajectory evaluation scores the path from task to result: tool calls, observations, and intermediate decisions in order. Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls. [[Tool-Call Evaluation|tool-call scoring]] can flag individual mistakes, but it does not explain whether the sequence as a whole was sensible.\n\nTwo scorer families cover that gap. Reference matching compares the trace with a known-good path. A trace judge reads the transcript against a rubric. The second approach reuses [[LLM-as-a-Judge]] machinery, but feeds it agent decisions instead of a final answer.\n\n# Reference-trajectory Match\n\nA reference path records the calls a correct solve should contain. The comparison mode defines how much variation remains valid:\n\n- **Strict** requires the same tools, arguments, and order. It fits a task with one valid procedure.\n- **Unordered** requires the same calls but ignores order. It fits independent reads.\n- **Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`). It is useful for safety boundaries, such as proving a read-only task never invoked a write tool.\n- **Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration. It confirms that required calls appear in the recorded trajectory.\n\nReference matching is cheap and objective once the paths exist. Its coverage is narrow. An unanticipated but correct solution fails, while a bloated superset trace passes as long as the required calls appear somewhere.\n\n# LLM-as-judge over the Trace\n\nWhen many paths can work, a judge can score the transcript against a rubric covering plan quality, tool choice, wasted work, and recovery. This captures reasoning that no fixed path can enumerate. It costs a model call per trajectory.\n\n```mermaid\nflowchart LR\n    TR[Agent trajectory] --> RM{Known-good path exists?}\n    RM -->|yes, few valid paths| REF[Reference match: strict/unordered/subset/superset]\n    RM -->|no, many valid paths| J[LLM judge over the trace vs rubric]\n    REF --> SC[Path score]\n    J --> SC\n```\n\n# Step-level Vs Episode-level\n\nEpisode-level scoring assigns one verdict to the run. It is cheap enough for a release gate, but a failure only says the path was bad.\n\nStep-level scoring asks whether each next action made sense given the state at that point. It localizes the first bad decision and the recovery that followed. The price is one judgment per step plus enough running context to judge it. A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.\n\n# Example\n\nTwo evaluations of the same support task, run as reference-match plus judge:\n\n```text\nReference (superset mode): {lookup_order, issue_refund, send_email} must all appear\n\nAgent A path: lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)\n  - Judge (1-5): 5  \"minimal, correct order, no wasted calls\"\n\nAgent B path: search_orders -> lookup_order -> lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)   <- match alone hides the waste\n  - Judge (1-5): 3  \"redundant lookup_order, unnecessary initial search\"\n\nSame outcome, same superset verdict; the judge separates the clean path from the wasteful one.\n```\n\n# Tradeoffs\n\n| Approach | Catches | Cost | Breaks when |\n| --- | --- | --- | --- |\n| Reference match (strict) | Any deviation from the one correct path | Lowest to run | More than one valid path exists |\n| Reference match (subset/superset) | Missing required work / out-of-bounds actions | Low | Path quality within bounds (bloat, detours) |\n| LLM judge over the trace | Plan quality, redundancy, recovery | High: a judge call per run and long context | Traces exceed the judge's reliable context window |\n\nReference matching fits when the valid procedures are few and knowable. Subset mode is especially effective as a hard safety gate because forbidden tools fail deterministically. A judge fits when decomposition is open-ended. In either case, outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] belong beside the path score. A polished trajectory that missed the task is still a failure.\n\n# Pitfalls\n\n## Reference Brittleness Penalizes Valid Alternate Paths\n\nA strict match can reject a correct solve because it used `search` followed by `filter` instead of one `query`. At that point the metric measures conformity to the author’s path. Unordered matching tolerates a different order of the same calls, and superset matching tolerates extra calls, but neither accepts `search` and `filter` in place of `query`. That decomposition passes only when it is listed as another reference path or accepted by a custom rule. A judge fits tasks where valid decompositions cannot be listed.\n\n## Judge Degrades on Long Traces\n\nWhen trace length passes the range where the judge has been validated against human labels, the trace is chunked or scored at step level instead. Agreement on short traces does not establish that boundary.\n\n## Outcome Leakage Inflates Path Scores\n\nVisible task success can make a judge rationalize a messy path. Reliable path scoring therefore hides the outcome from the trajectory scorer or evaluates path and outcome in separate calls. Otherwise a lucky recovery becomes evidence of good process.\n\n# Questions\n\n<!-- qard-id: 520c7686-9751-4f5d-b51e-53db694c08ed -->\n> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?\n> Reference matching is the better scorer when the acceptable tool-call paths are few enough to write down and the rule for comparing them is clear. It is then cheap, deterministic and repeatable. An LLM judge fits better when many different paths can be correct, because it scores the trace against a rubric instead of a list of paths. The cost is an extra model call and less deterministic scores.\n>\n> | Aspect | Reference matching | LLM judge over the trace |\n> |---|---|---|\n> | What it needs | One or more known-good tool-call paths and a comparison mode. | A rubric describing good behavior, such as plan quality, tool choice, wasted work and recovery. |\n> | Alternative valid paths | Accepted only if listed or tolerated by the mode; an unanticipated correct path fails. | Can be accepted without being listed, because the rubric describes qualities rather than one path. |\n> | Cost and repeatability | No model call; the same trace always gets the same score. | A model call per scored trajectory; scores for the same trace can vary between runs. |\n>\n> The comparison mode sets how much variation counts as acceptable:\n>\n> - **Strict:** same calls in the same order; fits a task with one valid procedure.\n> - **Unordered:** same calls in any order; fits independent reads.\n> - **Subset:** every agent call must appear in the reference, so unlisted tools fail. This can forbid writes in a read-only task.\n> - **Superset:** every reference call must appear in the trace, and extra calls are allowed. This enforces required steps, but a wasteful trace that contains them still passes.\n> \n> Several valid paths do not automatically require a judge. A richer set of references, or a hybrid rule such as a subset gate plus a judge for path quality, may be enough.\n>\n> [Trajectory evaluation (LangSmith)](https://docs.langchain.com/langsmith/trajectory-evals)\n\n# References\n\n- [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)\n- [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688)\n"
+          },
+          "summary": "## 1. Note improvements\n\n- [`AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-ai-ml-4edf0823-g3/Vault/Home/AI%20%26%20ML/LLM/Agents/Evaluation/Trajectory%20Evaluation.md) — The tradeoffs table cell uses an em dash, which the vault's prose rule forbids. Removes the only em dash in authored prose, as the note-polish rule no-long-dashes requires, without changing the meaning. Consistent punctuation with the vault style, and the cost reads as a plain phrase.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz export: awaiting the source-bound native export and checks.\n\nOwner review or size limits freeze unrelated additions; requested fixes and export can continue.\n",
+          "validation": [
+            {
+              "check": "dotnet run --no-cache --file DevBook.Tooling/Scripts/ValidateVault.cs -- --all --repo-root ..",
+              "result": "passed"
+            }
+          ],
+          "question_changes": [],
+          "diff": "diff --git a/Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md b/Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md\nindex b153aff..0b83812 100644\n--- a/Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md\t\n+++ b/Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md\t\n@@ -9,7 +9,7 @@ qard-deck: \"AI & ML\"\n qard-topic: \"LLM/Agents/Evaluation/Trajectory Evaluation\"\n flashcard_uid: \"4a7a9900\"\n created: \"2026-06-12T18:50:14.000Z\"\n-modified: \"2026-11-16T16:48:56.427Z\"\n+modified: \"2026-11-22T07:17:42.871Z\"\n published: \"2026-07-08T13:28:37.404Z\"\n ---\n \n@@ -71,7 +71,7 @@ Same outcome, same superset verdict; the judge separates the clean path from the\n | --- | --- | --- | --- |\n | Reference match (strict) | Any deviation from the one correct path | Lowest to run | More than one valid path exists |\n | Reference match (subset/superset) | Missing required work / out-of-bounds actions | Low | Path quality within bounds (bloat, detours) |\n-| LLM judge over the trace | Plan quality, redundancy, recovery | High — judge call per run, long context | Traces exceed the judge's reliable context window |\n+| LLM judge over the trace | Plan quality, redundancy, recovery | High: a judge call per run and long context | Traces exceed the judge's reliable context window |\n \n Reference matching fits when the valid procedures are few and knowable. Subset mode is especially effective as a hard safety gate because forbidden tools fail deterministically. A judge fits when decomposition is open-ended. In either case, outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] belong beside the path score. A polished trajectory that missed the task is still a failure.\n \n",
+          "model_calls": 14,
+          "accepted_record": {
+            "record_id": "652f5b116cb0139f00adae2d7b66e942222d5a64e8d4e0654cf679722c190f49",
+            "workload_id": "e8c4d2c56c1b4b4ea6d2f82b910f28a6",
+            "batch": {
+              "topic": "AI & ML",
+              "topic_id": "ai-ml-4edf0823",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                  "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Trajectory Evaluation\"\nflashcard_uid: \"4a7a9900\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-11-16T16:48:56.427Z\"\npublished: \"2026-07-08T13:28:37.404Z\"\n---\n\nTrajectory evaluation scores the path from task to result: tool calls, observations, and intermediate decisions in order. Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls. [[Tool-Call Evaluation|tool-call scoring]] can flag individual mistakes, but it does not explain whether the sequence as a whole was sensible.\n\nTwo scorer families cover that gap. Reference matching compares the trace with a known-good path. A trace judge reads the transcript against a rubric. The second approach reuses [[LLM-as-a-Judge]] machinery, but feeds it agent decisions instead of a final answer.\n\n# Reference-trajectory Match\n\nA reference path records the calls a correct solve should contain. The comparison mode defines how much variation remains valid:\n\n- **Strict** requires the same tools, arguments, and order. It fits a task with one valid procedure.\n- **Unordered** requires the same calls but ignores order. It fits independent reads.\n- **Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`). It is useful for safety boundaries, such as proving a read-only task never invoked a write tool.\n- **Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration. It confirms that required calls appear in the recorded trajectory.\n\nReference matching is cheap and objective once the paths exist. Its coverage is narrow. An unanticipated but correct solution fails, while a bloated superset trace passes as long as the required calls appear somewhere.\n\n# LLM-as-judge over the Trace\n\nWhen many paths can work, a judge can score the transcript against a rubric covering plan quality, tool choice, wasted work, and recovery. This captures reasoning that no fixed path can enumerate. It costs a model call per trajectory.\n\n```mermaid\nflowchart LR\n    TR[Agent trajectory] --> RM{Known-good path exists?}\n    RM -->|yes, few valid paths| REF[Reference match: strict/unordered/subset/superset]\n    RM -->|no, many valid paths| J[LLM judge over the trace vs rubric]\n    REF --> SC[Path score]\n    J --> SC\n```\n\n# Step-level Vs Episode-level\n\nEpisode-level scoring assigns one verdict to the run. It is cheap enough for a release gate, but a failure only says the path was bad.\n\nStep-level scoring asks whether each next action made sense given the state at that point. It localizes the first bad decision and the recovery that followed. The price is one judgment per step plus enough running context to judge it. A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.\n\n# Example\n\nTwo evaluations of the same support task, run as reference-match plus judge:\n\n```text\nReference (superset mode): {lookup_order, issue_refund, send_email} must all appear\n\nAgent A path: lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)\n  - Judge (1-5): 5  \"minimal, correct order, no wasted calls\"\n\nAgent B path: search_orders -> lookup_order -> lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)   <- match alone hides the waste\n  - Judge (1-5): 3  \"redundant lookup_order, unnecessary initial search\"\n\nSame outcome, same superset verdict; the judge separates the clean path from the wasteful one.\n```\n\n# Tradeoffs\n\n| Approach | Catches | Cost | Breaks when |\n| --- | --- | --- | --- |\n| Reference match (strict) | Any deviation from the one correct path | Lowest to run | More than one valid path exists |\n| Reference match (subset/superset) | Missing required work / out-of-bounds actions | Low | Path quality within bounds (bloat, detours) |\n| LLM judge over the trace | Plan quality, redundancy, recovery | High — judge call per run, long context | Traces exceed the judge's reliable context window |\n\nReference matching fits when the valid procedures are few and knowable. Subset mode is especially effective as a hard safety gate because forbidden tools fail deterministically. A judge fits when decomposition is open-ended. In either case, outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] belong beside the path score. A polished trajectory that missed the task is still a failure.\n\n# Pitfalls\n\n## Reference Brittleness Penalizes Valid Alternate Paths\n\nA strict match can reject a correct solve because it used `search` followed by `filter` instead of one `query`. At that point the metric measures conformity to the author’s path. Unordered matching tolerates a different order of the same calls, and superset matching tolerates extra calls, but neither accepts `search` and `filter` in place of `query`. That decomposition passes only when it is listed as another reference path or accepted by a custom rule. A judge fits tasks where valid decompositions cannot be listed.\n\n## Judge Degrades on Long Traces\n\nWhen trace length passes the range where the judge has been validated against human labels, the trace is chunked or scored at step level instead. Agreement on short traces does not establish that boundary.\n\n## Outcome Leakage Inflates Path Scores\n\nVisible task success can make a judge rationalize a messy path. Reliable path scoring therefore hides the outcome from the trajectory scorer or evaluates path and outcome in separate calls. Otherwise a lucky recovery becomes evidence of good process.\n\n# Questions\n\n<!-- qard-id: 520c7686-9751-4f5d-b51e-53db694c08ed -->\n> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?\n> Reference matching is the better scorer when the acceptable tool-call paths are few enough to write down and the rule for comparing them is clear. It is then cheap, deterministic and repeatable. An LLM judge fits better when many different paths can be correct, because it scores the trace against a rubric instead of a list of paths. The cost is an extra model call and less deterministic scores.\n>\n> | Aspect | Reference matching | LLM judge over the trace |\n> |---|---|---|\n> | What it needs | One or more known-good tool-call paths and a comparison mode. | A rubric describing good behavior, such as plan quality, tool choice, wasted work and recovery. |\n> | Alternative valid paths | Accepted only if listed or tolerated by the mode; an unanticipated correct path fails. | Can be accepted without being listed, because the rubric describes qualities rather than one path. |\n> | Cost and repeatability | No model call; the same trace always gets the same score. | A model call per scored trajectory; scores for the same trace can vary between runs. |\n>\n> The comparison mode sets how much variation counts as acceptable:\n>\n> - **Strict:** same calls in the same order; fits a task with one valid procedure.\n> - **Unordered:** same calls in any order; fits independent reads.\n> - **Subset:** every agent call must appear in the reference, so unlisted tools fail. This can forbid writes in a read-only task.\n> - **Superset:** every reference call must appear in the trace, and extra calls are allowed. This enforces required steps, but a wasteful trace that contains them still passes.\n> \n> Several valid paths do not automatically require a judge. A richer set of references, or a hybrid rule such as a subset gate plus a judge for path quality, may be enough.\n>\n> [Trajectory evaluation (LangSmith)](https://docs.langchain.com/langsmith/trajectory-evals)\n\n# References\n\n- [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)\n- [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688)\n",
+                  "hash": "e2ef95be7363d302d2cb7e3a5dddcdde75ee3df805786476c95b77cb6d38e7c6",
+                  "topic": "AI & ML",
+                  "violations": [],
+                  "needs_fixing_ids": [],
+                  "repair_input_hash": "",
+                  "selection_reason": "changed"
+                }
+              ],
+              "feedback": [],
+              "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
+              "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+              "review_process": "focused-whole-note-v1",
+              "pr": null
+            },
+            "proposal": {
+              "version": 1,
+              "edits": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                  "expected_hash": "e2ef95be7363d302d2cb7e3a5dddcdde75ee3df805786476c95b77cb6d38e7c6",
+                  "before": "High — judge call per run, long context",
+                  "after": "High: a judge call per run and long context",
+                  "reason": "Removes the only em dash in authored prose, as the note-polish rule no-long-dashes requires, without changing the meaning.",
+                  "kind": "note",
+                  "learning_target": "same",
+                  "essential_meanings": [
+                    "LLM judge cost is one model call per run plus long context"
+                  ],
+                  "sources": [],
+                  "feedback_keys": [],
+                  "problem": "The tradeoffs table cell uses an em dash, which the vault's prose rule forbids.",
+                  "reader_benefit": "Consistent punctuation with the vault style, and the cost reads as a plain phrase."
+                }
+              ],
+              "dispositions": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                  "outcome": "changed",
+                  "reason": "Audited the whole note: the four comparison modes (strict, unordered, subset, superset) and the subset/superset directions match LangSmith's trajectory evals; the example, tradeoff table, pitfalls and the single Qard are consistent with each other and with the opening. The only defect found was an em dash in the table, now replaced with a colon."
+                }
+              ],
+              "feedback": []
+            },
+            "result": {
+              "sources": {
+                "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Trajectory Evaluation\"\nflashcard_uid: \"4a7a9900\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-11-22T07:17:42.871Z\"\npublished: \"2026-07-08T13:28:37.404Z\"\n---\n\nTrajectory evaluation scores the path from task to result: tool calls, observations, and intermediate decisions in order. Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls. [[Tool-Call Evaluation|tool-call scoring]] can flag individual mistakes, but it does not explain whether the sequence as a whole was sensible.\n\nTwo scorer families cover that gap. Reference matching compares the trace with a known-good path. A trace judge reads the transcript against a rubric. The second approach reuses [[LLM-as-a-Judge]] machinery, but feeds it agent decisions instead of a final answer.\n\n# Reference-trajectory Match\n\nA reference path records the calls a correct solve should contain. The comparison mode defines how much variation remains valid:\n\n- **Strict** requires the same tools, arguments, and order. It fits a task with one valid procedure.\n- **Unordered** requires the same calls but ignores order. It fits independent reads.\n- **Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`). It is useful for safety boundaries, such as proving a read-only task never invoked a write tool.\n- **Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration. It confirms that required calls appear in the recorded trajectory.\n\nReference matching is cheap and objective once the paths exist. Its coverage is narrow. An unanticipated but correct solution fails, while a bloated superset trace passes as long as the required calls appear somewhere.\n\n# LLM-as-judge over the Trace\n\nWhen many paths can work, a judge can score the transcript against a rubric covering plan quality, tool choice, wasted work, and recovery. This captures reasoning that no fixed path can enumerate. It costs a model call per trajectory.\n\n```mermaid\nflowchart LR\n    TR[Agent trajectory] --> RM{Known-good path exists?}\n    RM -->|yes, few valid paths| REF[Reference match: strict/unordered/subset/superset]\n    RM -->|no, many valid paths| J[LLM judge over the trace vs rubric]\n    REF --> SC[Path score]\n    J --> SC\n```\n\n# Step-level Vs Episode-level\n\nEpisode-level scoring assigns one verdict to the run. It is cheap enough for a release gate, but a failure only says the path was bad.\n\nStep-level scoring asks whether each next action made sense given the state at that point. It localizes the first bad decision and the recovery that followed. The price is one judgment per step plus enough running context to judge it. A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.\n\n# Example\n\nTwo evaluations of the same support task, run as reference-match plus judge:\n\n```text\nReference (superset mode): {lookup_order, issue_refund, send_email} must all appear\n\nAgent A path: lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)\n  - Judge (1-5): 5  \"minimal, correct order, no wasted calls\"\n\nAgent B path: search_orders -> lookup_order -> lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)   <- match alone hides the waste\n  - Judge (1-5): 3  \"redundant lookup_order, unnecessary initial search\"\n\nSame outcome, same superset verdict; the judge separates the clean path from the wasteful one.\n```\n\n# Tradeoffs\n\n| Approach | Catches | Cost | Breaks when |\n| --- | --- | --- | --- |\n| Reference match (strict) | Any deviation from the one correct path | Lowest to run | More than one valid path exists |\n| Reference match (subset/superset) | Missing required work / out-of-bounds actions | Low | Path quality within bounds (bloat, detours) |\n| LLM judge over the trace | Plan quality, redundancy, recovery | High: a judge call per run and long context | Traces exceed the judge's reliable context window |\n\nReference matching fits when the valid procedures are few and knowable. Subset mode is especially effective as a hard safety gate because forbidden tools fail deterministically. A judge fits when decomposition is open-ended. In either case, outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] belong beside the path score. A polished trajectory that missed the task is still a failure.\n\n# Pitfalls\n\n## Reference Brittleness Penalizes Valid Alternate Paths\n\nA strict match can reject a correct solve because it used `search` followed by `filter` instead of one `query`. At that point the metric measures conformity to the author’s path. Unordered matching tolerates a different order of the same calls, and superset matching tolerates extra calls, but neither accepts `search` and `filter` in place of `query`. That decomposition passes only when it is listed as another reference path or accepted by a custom rule. A judge fits tasks where valid decompositions cannot be listed.\n\n## Judge Degrades on Long Traces\n\nWhen trace length passes the range where the judge has been validated against human labels, the trace is chunked or scored at step level instead. Agreement on short traces does not establish that boundary.\n\n## Outcome Leakage Inflates Path Scores\n\nVisible task success can make a judge rationalize a messy path. Reliable path scoring therefore hides the outcome from the trajectory scorer or evaluates path and outcome in separate calls. Otherwise a lucky recovery becomes evidence of good process.\n\n# Questions\n\n<!-- qard-id: 520c7686-9751-4f5d-b51e-53db694c08ed -->\n> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?\n> Reference matching is the better scorer when the acceptable tool-call paths are few enough to write down and the rule for comparing them is clear. It is then cheap, deterministic and repeatable. An LLM judge fits better when many different paths can be correct, because it scores the trace against a rubric instead of a list of paths. The cost is an extra model call and less deterministic scores.\n>\n> | Aspect | Reference matching | LLM judge over the trace |\n> |---|---|---|\n> | What it needs | One or more known-good tool-call paths and a comparison mode. | A rubric describing good behavior, such as plan quality, tool choice, wasted work and recovery. |\n> | Alternative valid paths | Accepted only if listed or tolerated by the mode; an unanticipated correct path fails. | Can be accepted without being listed, because the rubric describes qualities rather than one path. |\n> | Cost and repeatability | No model call; the same trace always gets the same score. | A model call per scored trajectory; scores for the same trace can vary between runs. |\n>\n> The comparison mode sets how much variation counts as acceptable:\n>\n> - **Strict:** same calls in the same order; fits a task with one valid procedure.\n> - **Unordered:** same calls in any order; fits independent reads.\n> - **Subset:** every agent call must appear in the reference, so unlisted tools fail. This can forbid writes in a read-only task.\n> - **Superset:** every reference call must appear in the trace, and extra calls are allowed. This enforces required steps, but a wasteful trace that contains them still passes.\n> \n> Several valid paths do not automatically require a judge. A richer set of references, or a hybrid rule such as a subset gate plus a judge for path quality, may be enough.\n>\n> [Trajectory evaluation (LangSmith)](https://docs.langchain.com/langsmith/trajectory-evals)\n\n# References\n\n- [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)\n- [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688)\n"
+              },
+              "edits": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                  "expected_hash": "e2ef95be7363d302d2cb7e3a5dddcdde75ee3df805786476c95b77cb6d38e7c6",
+                  "before": "High — judge call per run, long context",
+                  "after": "High: a judge call per run and long context",
+                  "reason": "Removes the only em dash in authored prose, as the note-polish rule no-long-dashes requires, without changing the meaning.",
+                  "kind": "note",
+                  "learning_target": "same",
+                  "essential_meanings": [
+                    "LLM judge cost is one model call per run plus long context"
+                  ],
+                  "sources": [],
+                  "feedback_keys": [],
+                  "problem": "The tradeoffs table cell uses an em dash, which the vault's prose rule forbids.",
+                  "reader_benefit": "Consistent punctuation with the vault style, and the cost reads as a plain phrase."
+                }
+              ],
+              "retired_ids": [],
+              "lineage": [],
+              "fingerprints": [
+                "e1cad09d50cd737ebe7d6414584e6275e7c30f3dbb95127d72f455a68d04417f"
+              ]
+            },
+            "review": {
+              "verdict": "CLEAN",
+              "overall_reason": "The single edit removes the only remaining long dash in authored prose, which the no-long-dashes rule requires. It keeps the meaning, and the rest of the note is accurate and consistent.",
+              "notes": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                  "verdict": "CLEAN",
+                  "summary": "The note explains the four reference-match modes, the judge alternative, step versus episode scoring, a worked example, a tradeoff table and pitfalls, and all of it is coherent. The only defect was one em dash in the table, now a colon. The cost meaning (one judge call per run plus long context) is preserved.",
+                  "page_type": "Concept: authorable concept note with an optional Questions section and a References section. The Qard ID is preserved and untouched.",
+                  "current_text_evidence": [
+                    {
+                      "quote": "Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls.",
+                      "line_start": 16,
+                      "reason": "The opening states the problem quickly and concretely, so no rewrite is needed."
+                    },
+                    {
+                      "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                      "line_start": 26,
+                      "reason": "Subset and superset directions are stated correctly and are consistent with the Qard answer and the example."
+                    },
+                    {
+                      "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+                      "line_start": 65,
+                      "reason": "The example shows why reference matching alone misses waste, which supports the tradeoff discussion."
+                    },
+                    {
+                      "quote": "High: a judge call per run and long context",
+                      "line_start": 74,
+                      "reason": "The em dash is replaced with a colon, so the no-long-dashes rule is met and the cost meaning is unchanged."
+                    },
+                    {
+                      "quote": "Several valid paths do not automatically require a judge.",
+                      "line_start": 111,
+                      "reason": "The Qard answer states the exception to its own rule, so it is balanced. It is one focused comparison task with an answer-side source link."
+                    }
+                  ],
+                  "target_resolution": "RESOLVED",
+                  "split_suggestion": "No split: the note covers one coherent topic, trajectory scoring methods, and its parts depend on each other.",
+                  "findings": [],
+                  "source_checks": [],
+                  "rejection_equivalence": [
+                    {
+                      "fingerprint": "3fd0195aebe22928e501b312bfc8cb752e99596494e9d6ed969ffb179cba4d58",
+                      "equivalent": false,
+                      "reason": "It concerns a different note and an unrelated code rename."
+                    },
+                    {
+                      "fingerprint": "0edee5f0203803acc165c0049d2267a55596a7e6fe24fa880d7877062525177d",
+                      "equivalent": false,
+                      "reason": "It concerns a different note, in a code fence."
+                    },
+                    {
+                      "fingerprint": "244d8a0f13c2abb4f10f48aecb71e8b61b9b273f632444076a4815a9956f07d9",
+                      "equivalent": false,
+                      "reason": "It concerns a different note."
+                    },
+                    {
+                      "fingerprint": "27b8ff207ad19a6687a083b6a903afbf642cb7da722dcef9f41f92da607c9f84",
+                      "equivalent": false,
+                      "reason": "It concerns a different note."
+                    },
+                    {
+                      "fingerprint": "a84e9c6353348559fc2fa8be75d2d5183237375a59e0bfcbdd61e59fbfd9b75f",
+                      "equivalent": false,
+                      "reason": "It concerns a different note."
+                    },
+                    {
+                      "fingerprint": "211e8deab424a6b66d3a0dcf54dbcdebb43502f289d5bd459bc79ac82aa5219c",
+                      "equivalent": false,
+                      "reason": "It concerns a different note."
+                    },
+                    {
+                      "fingerprint": "9071849019d08ac59c180c9079be25dd38f1d0f6e802aa017a629cbb5f68a7bd",
+                      "equivalent": false,
+                      "reason": "It concerns a different note."
+                    },
+                    {
+                      "fingerprint": "5d8c5515eb94740c04ec2b74de70fe5aceead457fb6b00387074c30c5b32f8a9",
+                      "equivalent": false,
+                      "reason": "It concerns a different note."
+                    }
+                  ],
+                  "quality": {
+                    "accuracy": "PASS",
+                    "clarity": "PASS",
+                    "question_quality": "PASS",
+                    "identity_safety": "PASS",
+                    "rules_compliance": "PASS"
+                  }
+                }
+              ],
+              "change_checks": [
+                {
+                  "edit_index": 0,
+                  "verdict": "WORTHWHILE",
+                  "reason": "The em dash in the table cell was a real violation of the no-long-dashes rule. The colon form keeps the cost meaning and changes nothing else, so no metadata is affected."
+                }
+              ]
+            },
+            "decisions": [],
+            "review_evidence": {
+              "raw_review": {
+                "verdict": "CLEAN",
+                "overall_reason": "The single edit removes the only remaining long dash in authored prose, which the no-long-dashes rule requires. It keeps the meaning, and the rest of the note is accurate and consistent.",
+                "notes": [
+                  {
+                    "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                    "verdict": "CLEAN",
+                    "summary": "The note explains the four reference-match modes, the judge alternative, step versus episode scoring, a worked example, a tradeoff table and pitfalls, and all of it is coherent. The only defect was one em dash in the table, now a colon. The cost meaning (one judge call per run plus long context) is preserved.",
+                    "page_type": "Concept: authorable concept note with an optional Questions section and a References section. The Qard ID is preserved and untouched.",
+                    "current_text_evidence": [
+                      {
+                        "quote": "Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls.",
+                        "line_start": 16,
+                        "reason": "The opening states the problem quickly and concretely, so no rewrite is needed."
+                      },
+                      {
+                        "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                        "line_start": 26,
+                        "reason": "Subset and superset directions are stated correctly and are consistent with the Qard answer and the example."
+                      },
+                      {
+                        "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+                        "line_start": 64,
+                        "reason": "The example shows why reference matching alone misses waste, which supports the tradeoff discussion."
+                      },
+                      {
+                        "quote": "High: a judge call per run and long context",
+                        "line_start": 73,
+                        "reason": "The em dash is replaced with a colon, so the no-long-dashes rule is met and the cost meaning is unchanged."
+                      },
+                      {
+                        "quote": "Several valid paths do not automatically require a judge.",
+                        "line_start": 96,
+                        "reason": "The Qard answer states the exception to its own rule, so it is balanced. It is one focused comparison task with an answer-side source link."
+                      }
+                    ],
+                    "target_resolution": "RESOLVED",
+                    "split_suggestion": "No split: the note covers one coherent topic, trajectory scoring methods, and its parts depend on each other.",
+                    "findings": [],
+                    "source_checks": [],
+                    "rejection_equivalence": [
+                      {
+                        "fingerprint": "3fd0195aebe22928e501b312bfc8cb752e99596494e9d6ed969ffb179cba4d58",
+                        "equivalent": false,
+                        "reason": "It concerns a different note and an unrelated code rename."
+                      },
+                      {
+                        "fingerprint": "0edee5f0203803acc165c0049d2267a55596a7e6fe24fa880d7877062525177d",
+                        "equivalent": false,
+                        "reason": "It concerns a different note, in a code fence."
+                      },
+                      {
+                        "fingerprint": "244d8a0f13c2abb4f10f48aecb71e8b61b9b273f632444076a4815a9956f07d9",
+                        "equivalent": false,
+                        "reason": "It concerns a different note."
+                      },
+                      {
+                        "fingerprint": "27b8ff207ad19a6687a083b6a903afbf642cb7da722dcef9f41f92da607c9f84",
+                        "equivalent": false,
+                        "reason": "It concerns a different note."
+                      },
+                      {
+                        "fingerprint": "a84e9c6353348559fc2fa8be75d2d5183237375a59e0bfcbdd61e59fbfd9b75f",
+                        "equivalent": false,
+                        "reason": "It concerns a different note."
+                      },
+                      {
+                        "fingerprint": "211e8deab424a6b66d3a0dcf54dbcdebb43502f289d5bd459bc79ac82aa5219c",
+                        "equivalent": false,
+                        "reason": "It concerns a different note."
+                      },
+                      {
+                        "fingerprint": "9071849019d08ac59c180c9079be25dd38f1d0f6e802aa017a629cbb5f68a7bd",
+                        "equivalent": false,
+                        "reason": "It concerns a different note."
+                      },
+                      {
+                        "fingerprint": "5d8c5515eb94740c04ec2b74de70fe5aceead457fb6b00387074c30c5b32f8a9",
+                        "equivalent": false,
+                        "reason": "It concerns a different note."
+                      }
+                    ],
+                    "quality": {
+                      "accuracy": "PASS",
+                      "clarity": "PASS",
+                      "question_quality": "PASS",
+                      "identity_safety": "PASS",
+                      "rules_compliance": "PASS"
+                    }
+                  }
+                ],
+                "change_checks": [
+                  {
+                    "edit_index": 0,
+                    "verdict": "WORTHWHILE",
+                    "reason": "The em dash in the table cell was a real violation of the no-long-dashes rule. The colon form keeps the cost meaning and changes nothing else, so no metadata is affected."
+                  }
+                ]
+              },
+              "bindings": [
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                  "citation_index": 2,
+                  "reported_line_start": 64,
+                  "resolved_line_start": 65
+                },
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                  "citation_index": 3,
+                  "reported_line_start": 73,
+                  "resolved_line_start": 74
+                },
+                {
+                  "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                  "citation_index": 4,
+                  "reported_line_start": 96,
+                  "resolved_line_start": 111
+                }
+              ],
+              "source_hashes": {
+                "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "86975027b9d14a2766980a16abde771b48190bcbec1e68c3475a8809ba59fc25"
+              },
+              "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
+              "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+            },
+            "source_hashes": {
+              "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "e2ef95be7363d302d2cb7e3a5dddcdde75ee3df805786476c95b77cb6d38e7c6"
+            },
+            "prepared_source_version": 1,
+            "prepared_at": "2026-11-22T07:17:42.871632Z",
+            "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
+            "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+            "calls_reserved": 14,
+            "elapsed_seconds": 605.1317502000002,
+            "accepted_at": "2026-11-22T07:18:38.420505Z",
+            "phase": "accepted"
+          },
+          "publication_request": {
+            "topic": "ai-ml-4edf0823",
+            "generation": 3,
+            "branch": "notes/automated-ai-ml-4edf0823-g3",
+            "base_sources": {
+              "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Trajectory Evaluation\"\nflashcard_uid: \"4a7a9900\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-11-16T16:48:56.427Z\"\npublished: \"2026-07-08T13:28:37.404Z\"\n---\n\nTrajectory evaluation scores the path from task to result: tool calls, observations, and intermediate decisions in order. Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls. [[Tool-Call Evaluation|tool-call scoring]] can flag individual mistakes, but it does not explain whether the sequence as a whole was sensible.\n\nTwo scorer families cover that gap. Reference matching compares the trace with a known-good path. A trace judge reads the transcript against a rubric. The second approach reuses [[LLM-as-a-Judge]] machinery, but feeds it agent decisions instead of a final answer.\n\n# Reference-trajectory Match\n\nA reference path records the calls a correct solve should contain. The comparison mode defines how much variation remains valid:\n\n- **Strict** requires the same tools, arguments, and order. It fits a task with one valid procedure.\n- **Unordered** requires the same calls but ignores order. It fits independent reads.\n- **Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`). It is useful for safety boundaries, such as proving a read-only task never invoked a write tool.\n- **Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration. It confirms that required calls appear in the recorded trajectory.\n\nReference matching is cheap and objective once the paths exist. Its coverage is narrow. An unanticipated but correct solution fails, while a bloated superset trace passes as long as the required calls appear somewhere.\n\n# LLM-as-judge over the Trace\n\nWhen many paths can work, a judge can score the transcript against a rubric covering plan quality, tool choice, wasted work, and recovery. This captures reasoning that no fixed path can enumerate. It costs a model call per trajectory.\n\n```mermaid\nflowchart LR\n    TR[Agent trajectory] --> RM{Known-good path exists?}\n    RM -->|yes, few valid paths| REF[Reference match: strict/unordered/subset/superset]\n    RM -->|no, many valid paths| J[LLM judge over the trace vs rubric]\n    REF --> SC[Path score]\n    J --> SC\n```\n\n# Step-level Vs Episode-level\n\nEpisode-level scoring assigns one verdict to the run. It is cheap enough for a release gate, but a failure only says the path was bad.\n\nStep-level scoring asks whether each next action made sense given the state at that point. It localizes the first bad decision and the recovery that followed. The price is one judgment per step plus enough running context to judge it. A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.\n\n# Example\n\nTwo evaluations of the same support task, run as reference-match plus judge:\n\n```text\nReference (superset mode): {lookup_order, issue_refund, send_email} must all appear\n\nAgent A path: lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)\n  - Judge (1-5): 5  \"minimal, correct order, no wasted calls\"\n\nAgent B path: search_orders -> lookup_order -> lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)   <- match alone hides the waste\n  - Judge (1-5): 3  \"redundant lookup_order, unnecessary initial search\"\n\nSame outcome, same superset verdict; the judge separates the clean path from the wasteful one.\n```\n\n# Tradeoffs\n\n| Approach | Catches | Cost | Breaks when |\n| --- | --- | --- | --- |\n| Reference match (strict) | Any deviation from the one correct path | Lowest to run | More than one valid path exists |\n| Reference match (subset/superset) | Missing required work / out-of-bounds actions | Low | Path quality within bounds (bloat, detours) |\n| LLM judge over the trace | Plan quality, redundancy, recovery | High — judge call per run, long context | Traces exceed the judge's reliable context window |\n\nReference matching fits when the valid procedures are few and knowable. Subset mode is especially effective as a hard safety gate because forbidden tools fail deterministically. A judge fits when decomposition is open-ended. In either case, outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] belong beside the path score. A polished trajectory that missed the task is still a failure.\n\n# Pitfalls\n\n## Reference Brittleness Penalizes Valid Alternate Paths\n\nA strict match can reject a correct solve because it used `search` followed by `filter` instead of one `query`. At that point the metric measures conformity to the author’s path. Unordered matching tolerates a different order of the same calls, and superset matching tolerates extra calls, but neither accepts `search` and `filter` in place of `query`. That decomposition passes only when it is listed as another reference path or accepted by a custom rule. A judge fits tasks where valid decompositions cannot be listed.\n\n## Judge Degrades on Long Traces\n\nWhen trace length passes the range where the judge has been validated against human labels, the trace is chunked or scored at step level instead. Agreement on short traces does not establish that boundary.\n\n## Outcome Leakage Inflates Path Scores\n\nVisible task success can make a judge rationalize a messy path. Reliable path scoring therefore hides the outcome from the trajectory scorer or evaluates path and outcome in separate calls. Otherwise a lucky recovery becomes evidence of good process.\n\n# Questions\n\n<!-- qard-id: 520c7686-9751-4f5d-b51e-53db694c08ed -->\n> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?\n> Reference matching is the better scorer when the acceptable tool-call paths are few enough to write down and the rule for comparing them is clear. It is then cheap, deterministic and repeatable. An LLM judge fits better when many different paths can be correct, because it scores the trace against a rubric instead of a list of paths. The cost is an extra model call and less deterministic scores.\n>\n> | Aspect | Reference matching | LLM judge over the trace |\n> |---|---|---|\n> | What it needs | One or more known-good tool-call paths and a comparison mode. | A rubric describing good behavior, such as plan quality, tool choice, wasted work and recovery. |\n> | Alternative valid paths | Accepted only if listed or tolerated by the mode; an unanticipated correct path fails. | Can be accepted without being listed, because the rubric describes qualities rather than one path. |\n> | Cost and repeatability | No model call; the same trace always gets the same score. | A model call per scored trajectory; scores for the same trace can vary between runs. |\n>\n> The comparison mode sets how much variation counts as acceptable:\n>\n> - **Strict:** same calls in the same order; fits a task with one valid procedure.\n> - **Unordered:** same calls in any order; fits independent reads.\n> - **Subset:** every agent call must appear in the reference, so unlisted tools fail. This can forbid writes in a read-only task.\n> - **Superset:** every reference call must appear in the trace, and extra calls are allowed. This enforces required steps, but a wasteful trace that contains them still passes.\n> \n> Several valid paths do not automatically require a judge. A richer set of references, or a hybrid rule such as a subset gate plus a judge for path quality, may be enough.\n>\n> [Trajectory evaluation (LangSmith)](https://docs.langchain.com/langsmith/trajectory-evals)\n\n# References\n\n- [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)\n- [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688)\n"
+            },
+            "pr_sources": {
+              "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Trajectory Evaluation\"\nflashcard_uid: \"4a7a9900\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-11-22T07:17:42.871Z\"\npublished: \"2026-07-08T13:28:37.404Z\"\n---\n\nTrajectory evaluation scores the path from task to result: tool calls, observations, and intermediate decisions in order. Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls. [[Tool-Call Evaluation|tool-call scoring]] can flag individual mistakes, but it does not explain whether the sequence as a whole was sensible.\n\nTwo scorer families cover that gap. Reference matching compares the trace with a known-good path. A trace judge reads the transcript against a rubric. The second approach reuses [[LLM-as-a-Judge]] machinery, but feeds it agent decisions instead of a final answer.\n\n# Reference-trajectory Match\n\nA reference path records the calls a correct solve should contain. The comparison mode defines how much variation remains valid:\n\n- **Strict** requires the same tools, arguments, and order. It fits a task with one valid procedure.\n- **Unordered** requires the same calls but ignores order. It fits independent reads.\n- **Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`). It is useful for safety boundaries, such as proving a read-only task never invoked a write tool.\n- **Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration. It confirms that required calls appear in the recorded trajectory.\n\nReference matching is cheap and objective once the paths exist. Its coverage is narrow. An unanticipated but correct solution fails, while a bloated superset trace passes as long as the required calls appear somewhere.\n\n# LLM-as-judge over the Trace\n\nWhen many paths can work, a judge can score the transcript against a rubric covering plan quality, tool choice, wasted work, and recovery. This captures reasoning that no fixed path can enumerate. It costs a model call per trajectory.\n\n```mermaid\nflowchart LR\n    TR[Agent trajectory] --> RM{Known-good path exists?}\n    RM -->|yes, few valid paths| REF[Reference match: strict/unordered/subset/superset]\n    RM -->|no, many valid paths| J[LLM judge over the trace vs rubric]\n    REF --> SC[Path score]\n    J --> SC\n```\n\n# Step-level Vs Episode-level\n\nEpisode-level scoring assigns one verdict to the run. It is cheap enough for a release gate, but a failure only says the path was bad.\n\nStep-level scoring asks whether each next action made sense given the state at that point. It localizes the first bad decision and the recovery that followed. The price is one judgment per step plus enough running context to judge it. A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.\n\n# Example\n\nTwo evaluations of the same support task, run as reference-match plus judge:\n\n```text\nReference (superset mode): {lookup_order, issue_refund, send_email} must all appear\n\nAgent A path: lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)\n  - Judge (1-5): 5  \"minimal, correct order, no wasted calls\"\n\nAgent B path: search_orders -> lookup_order -> lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)   <- match alone hides the waste\n  - Judge (1-5): 3  \"redundant lookup_order, unnecessary initial search\"\n\nSame outcome, same superset verdict; the judge separates the clean path from the wasteful one.\n```\n\n# Tradeoffs\n\n| Approach | Catches | Cost | Breaks when |\n| --- | --- | --- | --- |\n| Reference match (strict) | Any deviation from the one correct path | Lowest to run | More than one valid path exists |\n| Reference match (subset/superset) | Missing required work / out-of-bounds actions | Low | Path quality within bounds (bloat, detours) |\n| LLM judge over the trace | Plan quality, redundancy, recovery | High: a judge call per run and long context | Traces exceed the judge's reliable context window |\n\nReference matching fits when the valid procedures are few and knowable. Subset mode is especially effective as a hard safety gate because forbidden tools fail deterministically. A judge fits when decomposition is open-ended. In either case, outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] belong beside the path score. A polished trajectory that missed the task is still a failure.\n\n# Pitfalls\n\n## Reference Brittleness Penalizes Valid Alternate Paths\n\nA strict match can reject a correct solve because it used `search` followed by `filter` instead of one `query`. At that point the metric measures conformity to the author’s path. Unordered matching tolerates a different order of the same calls, and superset matching tolerates extra calls, but neither accepts `search` and `filter` in place of `query`. That decomposition passes only when it is listed as another reference path or accepted by a custom rule. A judge fits tasks where valid decompositions cannot be listed.\n\n## Judge Degrades on Long Traces\n\nWhen trace length passes the range where the judge has been validated against human labels, the trace is chunked or scored at step level instead. Agreement on short traces does not establish that boundary.\n\n## Outcome Leakage Inflates Path Scores\n\nVisible task success can make a judge rationalize a messy path. Reliable path scoring therefore hides the outcome from the trajectory scorer or evaluates path and outcome in separate calls. Otherwise a lucky recovery becomes evidence of good process.\n\n# Questions\n\n<!-- qard-id: 520c7686-9751-4f5d-b51e-53db694c08ed -->\n> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?\n> Reference matching is the better scorer when the acceptable tool-call paths are few enough to write down and the rule for comparing them is clear. It is then cheap, deterministic and repeatable. An LLM judge fits better when many different paths can be correct, because it scores the trace against a rubric instead of a list of paths. The cost is an extra model call and less deterministic scores.\n>\n> | Aspect | Reference matching | LLM judge over the trace |\n> |---|---|---|\n> | What it needs | One or more known-good tool-call paths and a comparison mode. | A rubric describing good behavior, such as plan quality, tool choice, wasted work and recovery. |\n> | Alternative valid paths | Accepted only if listed or tolerated by the mode; an unanticipated correct path fails. | Can be accepted without being listed, because the rubric describes qualities rather than one path. |\n> | Cost and repeatability | No model call; the same trace always gets the same score. | A model call per scored trajectory; scores for the same trace can vary between runs. |\n>\n> The comparison mode sets how much variation counts as acceptable:\n>\n> - **Strict:** same calls in the same order; fits a task with one valid procedure.\n> - **Unordered:** same calls in any order; fits independent reads.\n> - **Subset:** every agent call must appear in the reference, so unlisted tools fail. This can forbid writes in a read-only task.\n> - **Superset:** every reference call must appear in the trace, and extra calls are allowed. This enforces required steps, but a wasteful trace that contains them still passes.\n> \n> Several valid paths do not automatically require a judge. A richer set of references, or a hybrid rule such as a subset gate plus a judge for path quality, may be enough.\n>\n> [Trajectory evaluation (LangSmith)](https://docs.langchain.com/langsmith/trajectory-evals)\n\n# References\n\n- [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)\n- [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688)\n"
+            },
+            "expected_sources": {
+              "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Trajectory Evaluation\"\nflashcard_uid: \"4a7a9900\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-11-16T16:48:56.427Z\"\npublished: \"2026-07-08T13:28:37.404Z\"\n---\n\nTrajectory evaluation scores the path from task to result: tool calls, observations, and intermediate decisions in order. Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls. [[Tool-Call Evaluation|tool-call scoring]] can flag individual mistakes, but it does not explain whether the sequence as a whole was sensible.\n\nTwo scorer families cover that gap. Reference matching compares the trace with a known-good path. A trace judge reads the transcript against a rubric. The second approach reuses [[LLM-as-a-Judge]] machinery, but feeds it agent decisions instead of a final answer.\n\n# Reference-trajectory Match\n\nA reference path records the calls a correct solve should contain. The comparison mode defines how much variation remains valid:\n\n- **Strict** requires the same tools, arguments, and order. It fits a task with one valid procedure.\n- **Unordered** requires the same calls but ignores order. It fits independent reads.\n- **Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`). It is useful for safety boundaries, such as proving a read-only task never invoked a write tool.\n- **Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration. It confirms that required calls appear in the recorded trajectory.\n\nReference matching is cheap and objective once the paths exist. Its coverage is narrow. An unanticipated but correct solution fails, while a bloated superset trace passes as long as the required calls appear somewhere.\n\n# LLM-as-judge over the Trace\n\nWhen many paths can work, a judge can score the transcript against a rubric covering plan quality, tool choice, wasted work, and recovery. This captures reasoning that no fixed path can enumerate. It costs a model call per trajectory.\n\n```mermaid\nflowchart LR\n    TR[Agent trajectory] --> RM{Known-good path exists?}\n    RM -->|yes, few valid paths| REF[Reference match: strict/unordered/subset/superset]\n    RM -->|no, many valid paths| J[LLM judge over the trace vs rubric]\n    REF --> SC[Path score]\n    J --> SC\n```\n\n# Step-level Vs Episode-level\n\nEpisode-level scoring assigns one verdict to the run. It is cheap enough for a release gate, but a failure only says the path was bad.\n\nStep-level scoring asks whether each next action made sense given the state at that point. It localizes the first bad decision and the recovery that followed. The price is one judgment per step plus enough running context to judge it. A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.\n\n# Example\n\nTwo evaluations of the same support task, run as reference-match plus judge:\n\n```text\nReference (superset mode): {lookup_order, issue_refund, send_email} must all appear\n\nAgent A path: lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)\n  - Judge (1-5): 5  \"minimal, correct order, no wasted calls\"\n\nAgent B path: search_orders -> lookup_order -> lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)   <- match alone hides the waste\n  - Judge (1-5): 3  \"redundant lookup_order, unnecessary initial search\"\n\nSame outcome, same superset verdict; the judge separates the clean path from the wasteful one.\n```\n\n# Tradeoffs\n\n| Approach | Catches | Cost | Breaks when |\n| --- | --- | --- | --- |\n| Reference match (strict) | Any deviation from the one correct path | Lowest to run | More than one valid path exists |\n| Reference match (subset/superset) | Missing required work / out-of-bounds actions | Low | Path quality within bounds (bloat, detours) |\n| LLM judge over the trace | Plan quality, redundancy, recovery | High — judge call per run, long context | Traces exceed the judge's reliable context window |\n\nReference matching fits when the valid procedures are few and knowable. Subset mode is especially effective as a hard safety gate because forbidden tools fail deterministically. A judge fits when decomposition is open-ended. In either case, outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] belong beside the path score. A polished trajectory that missed the task is still a failure.\n\n# Pitfalls\n\n## Reference Brittleness Penalizes Valid Alternate Paths\n\nA strict match can reject a correct solve because it used `search` followed by `filter` instead of one `query`. At that point the metric measures conformity to the author’s path. Unordered matching tolerates a different order of the same calls, and superset matching tolerates extra calls, but neither accepts `search` and `filter` in place of `query`. That decomposition passes only when it is listed as another reference path or accepted by a custom rule. A judge fits tasks where valid decompositions cannot be listed.\n\n## Judge Degrades on Long Traces\n\nWhen trace length passes the range where the judge has been validated against human labels, the trace is chunked or scored at step level instead. Agreement on short traces does not establish that boundary.\n\n## Outcome Leakage Inflates Path Scores\n\nVisible task success can make a judge rationalize a messy path. Reliable path scoring therefore hides the outcome from the trajectory scorer or evaluates path and outcome in separate calls. Otherwise a lucky recovery becomes evidence of good process.\n\n# Questions\n\n<!-- qard-id: 520c7686-9751-4f5d-b51e-53db694c08ed -->\n> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?\n> Reference matching is the better scorer when the acceptable tool-call paths are few enough to write down and the rule for comparing them is clear. It is then cheap, deterministic and repeatable. An LLM judge fits better when many different paths can be correct, because it scores the trace against a rubric instead of a list of paths. The cost is an extra model call and less deterministic scores.\n>\n> | Aspect | Reference matching | LLM judge over the trace |\n> |---|---|---|\n> | What it needs | One or more known-good tool-call paths and a comparison mode. | A rubric describing good behavior, such as plan quality, tool choice, wasted work and recovery. |\n> | Alternative valid paths | Accepted only if listed or tolerated by the mode; an unanticipated correct path fails. | Can be accepted without being listed, because the rubric describes qualities rather than one path. |\n> | Cost and repeatability | No model call; the same trace always gets the same score. | A model call per scored trajectory; scores for the same trace can vary between runs. |\n>\n> The comparison mode sets how much variation counts as acceptable:\n>\n> - **Strict:** same calls in the same order; fits a task with one valid procedure.\n> - **Unordered:** same calls in any order; fits independent reads.\n> - **Subset:** every agent call must appear in the reference, so unlisted tools fail. This can forbid writes in a read-only task.\n> - **Superset:** every reference call must appear in the trace, and extra calls are allowed. This enforces required steps, but a wasteful trace that contains them still passes.\n> \n> Several valid paths do not automatically require a judge. A richer set of references, or a hybrid rule such as a subset gate plus a judge for path quality, may be enough.\n>\n> [Trajectory evaluation (LangSmith)](https://docs.langchain.com/langsmith/trajectory-evals)\n\n# References\n\n- [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)\n- [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688)\n"
+            },
+            "candidate": {
+              "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Trajectory Evaluation\"\nflashcard_uid: \"4a7a9900\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-11-22T07:17:42.871Z\"\npublished: \"2026-07-08T13:28:37.404Z\"\n---\n\nTrajectory evaluation scores the path from task to result: tool calls, observations, and intermediate decisions in order. Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls. [[Tool-Call Evaluation|tool-call scoring]] can flag individual mistakes, but it does not explain whether the sequence as a whole was sensible.\n\nTwo scorer families cover that gap. Reference matching compares the trace with a known-good path. A trace judge reads the transcript against a rubric. The second approach reuses [[LLM-as-a-Judge]] machinery, but feeds it agent decisions instead of a final answer.\n\n# Reference-trajectory Match\n\nA reference path records the calls a correct solve should contain. The comparison mode defines how much variation remains valid:\n\n- **Strict** requires the same tools, arguments, and order. It fits a task with one valid procedure.\n- **Unordered** requires the same calls but ignores order. It fits independent reads.\n- **Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`). It is useful for safety boundaries, such as proving a read-only task never invoked a write tool.\n- **Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration. It confirms that required calls appear in the recorded trajectory.\n\nReference matching is cheap and objective once the paths exist. Its coverage is narrow. An unanticipated but correct solution fails, while a bloated superset trace passes as long as the required calls appear somewhere.\n\n# LLM-as-judge over the Trace\n\nWhen many paths can work, a judge can score the transcript against a rubric covering plan quality, tool choice, wasted work, and recovery. This captures reasoning that no fixed path can enumerate. It costs a model call per trajectory.\n\n```mermaid\nflowchart LR\n    TR[Agent trajectory] --> RM{Known-good path exists?}\n    RM -->|yes, few valid paths| REF[Reference match: strict/unordered/subset/superset]\n    RM -->|no, many valid paths| J[LLM judge over the trace vs rubric]\n    REF --> SC[Path score]\n    J --> SC\n```\n\n# Step-level Vs Episode-level\n\nEpisode-level scoring assigns one verdict to the run. It is cheap enough for a release gate, but a failure only says the path was bad.\n\nStep-level scoring asks whether each next action made sense given the state at that point. It localizes the first bad decision and the recovery that followed. The price is one judgment per step plus enough running context to judge it. A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.\n\n# Example\n\nTwo evaluations of the same support task, run as reference-match plus judge:\n\n```text\nReference (superset mode): {lookup_order, issue_refund, send_email} must all appear\n\nAgent A path: lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)\n  - Judge (1-5): 5  \"minimal, correct order, no wasted calls\"\n\nAgent B path: search_orders -> lookup_order -> lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)   <- match alone hides the waste\n  - Judge (1-5): 3  \"redundant lookup_order, unnecessary initial search\"\n\nSame outcome, same superset verdict; the judge separates the clean path from the wasteful one.\n```\n\n# Tradeoffs\n\n| Approach | Catches | Cost | Breaks when |\n| --- | --- | --- | --- |\n| Reference match (strict) | Any deviation from the one correct path | Lowest to run | More than one valid path exists |\n| Reference match (subset/superset) | Missing required work / out-of-bounds actions | Low | Path quality within bounds (bloat, detours) |\n| LLM judge over the trace | Plan quality, redundancy, recovery | High: a judge call per run and long context | Traces exceed the judge's reliable context window |\n\nReference matching fits when the valid procedures are few and knowable. Subset mode is especially effective as a hard safety gate because forbidden tools fail deterministically. A judge fits when decomposition is open-ended. In either case, outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] belong beside the path score. A polished trajectory that missed the task is still a failure.\n\n# Pitfalls\n\n## Reference Brittleness Penalizes Valid Alternate Paths\n\nA strict match can reject a correct solve because it used `search` followed by `filter` instead of one `query`. At that point the metric measures conformity to the author’s path. Unordered matching tolerates a different order of the same calls, and superset matching tolerates extra calls, but neither accepts `search` and `filter` in place of `query`. That decomposition passes only when it is listed as another reference path or accepted by a custom rule. A judge fits tasks where valid decompositions cannot be listed.\n\n## Judge Degrades on Long Traces\n\nWhen trace length passes the range where the judge has been validated against human labels, the trace is chunked or scored at step level instead. Agreement on short traces does not establish that boundary.\n\n## Outcome Leakage Inflates Path Scores\n\nVisible task success can make a judge rationalize a messy path. Reliable path scoring therefore hides the outcome from the trajectory scorer or evaluates path and outcome in separate calls. Otherwise a lucky recovery becomes evidence of good process.\n\n# Questions\n\n<!-- qard-id: 520c7686-9751-4f5d-b51e-53db694c08ed -->\n> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?\n> Reference matching is the better scorer when the acceptable tool-call paths are few enough to write down and the rule for comparing them is clear. It is then cheap, deterministic and repeatable. An LLM judge fits better when many different paths can be correct, because it scores the trace against a rubric instead of a list of paths. The cost is an extra model call and less deterministic scores.\n>\n> | Aspect | Reference matching | LLM judge over the trace |\n> |---|---|---|\n> | What it needs | One or more known-good tool-call paths and a comparison mode. | A rubric describing good behavior, such as plan quality, tool choice, wasted work and recovery. |\n> | Alternative valid paths | Accepted only if listed or tolerated by the mode; an unanticipated correct path fails. | Can be accepted without being listed, because the rubric describes qualities rather than one path. |\n> | Cost and repeatability | No model call; the same trace always gets the same score. | A model call per scored trajectory; scores for the same trace can vary between runs. |\n>\n> The comparison mode sets how much variation counts as acceptable:\n>\n> - **Strict:** same calls in the same order; fits a task with one valid procedure.\n> - **Unordered:** same calls in any order; fits independent reads.\n> - **Subset:** every agent call must appear in the reference, so unlisted tools fail. This can forbid writes in a read-only task.\n> - **Superset:** every reference call must appear in the trace, and extra calls are allowed. This enforces required steps, but a wasteful trace that contains them still passes.\n> \n> Several valid paths do not automatically require a judge. A richer set of references, or a hybrid rule such as a subset gate plus a judge for path quality, may be enough.\n>\n> [Trajectory evaluation (LangSmith)](https://docs.langchain.com/langsmith/trajectory-evals)\n\n# References\n\n- [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)\n- [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688)\n"
+            },
+            "title": "notes: improve AI & ML",
+            "body": "<!-- devbook-improvement:start topic=ai-ml-4edf0823 -->\n## 1. Note improvements\n\n- [`AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md`](https://github.com/grafanaKibana/devbook.zip/blob/notes/automated-ai-ml-4edf0823-g3/Vault/Home/AI%20%26%20ML/LLM/Agents/Evaluation/Trajectory%20Evaluation.md) — The tradeoffs table cell uses an em dash, which the vault's prose rule forbids. Removes the only em dash in authored prose, as the note-polish rule no-long-dashes requires, without changing the meaning. Consistent punctuation with the vault style, and the cost reads as a plain phrase.\n\n## 2. Questions and answers\n\n- Added: 0\n- Rewritten: 0\n- Split: 0\n- Proposed for removal: 0\n- Replaced: 0\n\n## 3. Significant question changes\n\n- No significant question changes.\n\n## 4. User feedback\n\n- No owner feedback in this workload.\n\n<!-- devbook-export-validation -->Quartz export: awaiting the source-bound native export and checks.\n\nOwner review or size limits freeze unrelated additions; requested fixes and export can continue.\n<!-- devbook-improvement:end -->\n",
+            "feedback_revision": {
+              "allowlist": [
+                "45916288:grafanaKibana"
+              ],
+              "processed": {}
+            },
+            "expected_base_sha": "eeaad1b2325511471bc7d8132fb9fede94b4ae5b",
+            "expected_branch_sha": null,
+            "expected_pr_number": null,
+            "freeze": false,
+            "pending_feedback": [],
+            "edits": [
+              {
+                "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                "expected_hash": "e2ef95be7363d302d2cb7e3a5dddcdde75ee3df805786476c95b77cb6d38e7c6",
+                "before": "High — judge call per run, long context",
+                "after": "High: a judge call per run and long context",
+                "reason": "Removes the only em dash in authored prose, as the note-polish rule no-long-dashes requires, without changing the meaning.",
+                "kind": "note",
+                "learning_target": "same",
+                "essential_meanings": [
+                  "LLM judge cost is one model call per run plus long context"
+                ],
+                "sources": [],
+                "feedback_keys": [],
+                "problem": "The tradeoffs table cell uses an em dash, which the vault's prose rule forbids.",
+                "reader_benefit": "Consistent punctuation with the vault style, and the cost reads as a plain phrase."
+              }
+            ],
+            "operation_receipts": {
+              "version": 2,
+              "workload_id": "e8c4d2c56c1b4b4ea6d2f82b910f28a6",
+              "records": [
+                {
+                  "record_id": "652f5b116cb0139f00adae2d7b66e942222d5a64e8d4e0654cf679722c190f49",
+                  "workload_id": "e8c4d2c56c1b4b4ea6d2f82b910f28a6",
+                  "batch": {
+                    "topic": "AI & ML",
+                    "topic_id": "ai-ml-4edf0823",
+                    "notes": [
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Trajectory Evaluation\"\nflashcard_uid: \"4a7a9900\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-11-16T16:48:56.427Z\"\npublished: \"2026-07-08T13:28:37.404Z\"\n---\n\nTrajectory evaluation scores the path from task to result: tool calls, observations, and intermediate decisions in order. Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls. [[Tool-Call Evaluation|tool-call scoring]] can flag individual mistakes, but it does not explain whether the sequence as a whole was sensible.\n\nTwo scorer families cover that gap. Reference matching compares the trace with a known-good path. A trace judge reads the transcript against a rubric. The second approach reuses [[LLM-as-a-Judge]] machinery, but feeds it agent decisions instead of a final answer.\n\n# Reference-trajectory Match\n\nA reference path records the calls a correct solve should contain. The comparison mode defines how much variation remains valid:\n\n- **Strict** requires the same tools, arguments, and order. It fits a task with one valid procedure.\n- **Unordered** requires the same calls but ignores order. It fits independent reads.\n- **Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`). It is useful for safety boundaries, such as proving a read-only task never invoked a write tool.\n- **Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration. It confirms that required calls appear in the recorded trajectory.\n\nReference matching is cheap and objective once the paths exist. Its coverage is narrow. An unanticipated but correct solution fails, while a bloated superset trace passes as long as the required calls appear somewhere.\n\n# LLM-as-judge over the Trace\n\nWhen many paths can work, a judge can score the transcript against a rubric covering plan quality, tool choice, wasted work, and recovery. This captures reasoning that no fixed path can enumerate. It costs a model call per trajectory.\n\n```mermaid\nflowchart LR\n    TR[Agent trajectory] --> RM{Known-good path exists?}\n    RM -->|yes, few valid paths| REF[Reference match: strict/unordered/subset/superset]\n    RM -->|no, many valid paths| J[LLM judge over the trace vs rubric]\n    REF --> SC[Path score]\n    J --> SC\n```\n\n# Step-level Vs Episode-level\n\nEpisode-level scoring assigns one verdict to the run. It is cheap enough for a release gate, but a failure only says the path was bad.\n\nStep-level scoring asks whether each next action made sense given the state at that point. It localizes the first bad decision and the recovery that followed. The price is one judgment per step plus enough running context to judge it. A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.\n\n# Example\n\nTwo evaluations of the same support task, run as reference-match plus judge:\n\n```text\nReference (superset mode): {lookup_order, issue_refund, send_email} must all appear\n\nAgent A path: lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)\n  - Judge (1-5): 5  \"minimal, correct order, no wasted calls\"\n\nAgent B path: search_orders -> lookup_order -> lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)   <- match alone hides the waste\n  - Judge (1-5): 3  \"redundant lookup_order, unnecessary initial search\"\n\nSame outcome, same superset verdict; the judge separates the clean path from the wasteful one.\n```\n\n# Tradeoffs\n\n| Approach | Catches | Cost | Breaks when |\n| --- | --- | --- | --- |\n| Reference match (strict) | Any deviation from the one correct path | Lowest to run | More than one valid path exists |\n| Reference match (subset/superset) | Missing required work / out-of-bounds actions | Low | Path quality within bounds (bloat, detours) |\n| LLM judge over the trace | Plan quality, redundancy, recovery | High — judge call per run, long context | Traces exceed the judge's reliable context window |\n\nReference matching fits when the valid procedures are few and knowable. Subset mode is especially effective as a hard safety gate because forbidden tools fail deterministically. A judge fits when decomposition is open-ended. In either case, outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] belong beside the path score. A polished trajectory that missed the task is still a failure.\n\n# Pitfalls\n\n## Reference Brittleness Penalizes Valid Alternate Paths\n\nA strict match can reject a correct solve because it used `search` followed by `filter` instead of one `query`. At that point the metric measures conformity to the author’s path. Unordered matching tolerates a different order of the same calls, and superset matching tolerates extra calls, but neither accepts `search` and `filter` in place of `query`. That decomposition passes only when it is listed as another reference path or accepted by a custom rule. A judge fits tasks where valid decompositions cannot be listed.\n\n## Judge Degrades on Long Traces\n\nWhen trace length passes the range where the judge has been validated against human labels, the trace is chunked or scored at step level instead. Agreement on short traces does not establish that boundary.\n\n## Outcome Leakage Inflates Path Scores\n\nVisible task success can make a judge rationalize a messy path. Reliable path scoring therefore hides the outcome from the trajectory scorer or evaluates path and outcome in separate calls. Otherwise a lucky recovery becomes evidence of good process.\n\n# Questions\n\n<!-- qard-id: 520c7686-9751-4f5d-b51e-53db694c08ed -->\n> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?\n> Reference matching is the better scorer when the acceptable tool-call paths are few enough to write down and the rule for comparing them is clear. It is then cheap, deterministic and repeatable. An LLM judge fits better when many different paths can be correct, because it scores the trace against a rubric instead of a list of paths. The cost is an extra model call and less deterministic scores.\n>\n> | Aspect | Reference matching | LLM judge over the trace |\n> |---|---|---|\n> | What it needs | One or more known-good tool-call paths and a comparison mode. | A rubric describing good behavior, such as plan quality, tool choice, wasted work and recovery. |\n> | Alternative valid paths | Accepted only if listed or tolerated by the mode; an unanticipated correct path fails. | Can be accepted without being listed, because the rubric describes qualities rather than one path. |\n> | Cost and repeatability | No model call; the same trace always gets the same score. | A model call per scored trajectory; scores for the same trace can vary between runs. |\n>\n> The comparison mode sets how much variation counts as acceptable:\n>\n> - **Strict:** same calls in the same order; fits a task with one valid procedure.\n> - **Unordered:** same calls in any order; fits independent reads.\n> - **Subset:** every agent call must appear in the reference, so unlisted tools fail. This can forbid writes in a read-only task.\n> - **Superset:** every reference call must appear in the trace, and extra calls are allowed. This enforces required steps, but a wasteful trace that contains them still passes.\n> \n> Several valid paths do not automatically require a judge. A richer set of references, or a hybrid rule such as a subset gate plus a judge for path quality, may be enough.\n>\n> [Trajectory evaluation (LangSmith)](https://docs.langchain.com/langsmith/trajectory-evals)\n\n# References\n\n- [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)\n- [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688)\n",
+                        "hash": "e2ef95be7363d302d2cb7e3a5dddcdde75ee3df805786476c95b77cb6d38e7c6",
+                        "topic": "AI & ML",
+                        "violations": [],
+                        "needs_fixing_ids": [],
+                        "repair_input_hash": "",
+                        "selection_reason": "changed"
+                      }
+                    ],
+                    "feedback": [],
+                    "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
+                    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+                    "review_process": "focused-whole-note-v1",
+                    "pr": null
+                  },
+                  "proposal": {
+                    "version": 1,
+                    "edits": [
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "expected_hash": "e2ef95be7363d302d2cb7e3a5dddcdde75ee3df805786476c95b77cb6d38e7c6",
+                        "before": "High — judge call per run, long context",
+                        "after": "High: a judge call per run and long context",
+                        "reason": "Removes the only em dash in authored prose, as the note-polish rule no-long-dashes requires, without changing the meaning.",
+                        "kind": "note",
+                        "learning_target": "same",
+                        "essential_meanings": [
+                          "LLM judge cost is one model call per run plus long context"
+                        ],
+                        "sources": [],
+                        "feedback_keys": [],
+                        "problem": "The tradeoffs table cell uses an em dash, which the vault's prose rule forbids.",
+                        "reader_benefit": "Consistent punctuation with the vault style, and the cost reads as a plain phrase."
+                      }
+                    ],
+                    "dispositions": [
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "outcome": "changed",
+                        "reason": "Audited the whole note: the four comparison modes (strict, unordered, subset, superset) and the subset/superset directions match LangSmith's trajectory evals; the example, tradeoff table, pitfalls and the single Qard are consistent with each other and with the opening. The only defect found was an em dash in the table, now replaced with a colon."
+                      }
+                    ],
+                    "feedback": []
+                  },
+                  "result": {
+                    "sources": {
+                      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Trajectory Evaluation\"\nflashcard_uid: \"4a7a9900\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-11-22T07:17:42.871Z\"\npublished: \"2026-07-08T13:28:37.404Z\"\n---\n\nTrajectory evaluation scores the path from task to result: tool calls, observations, and intermediate decisions in order. Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls. [[Tool-Call Evaluation|tool-call scoring]] can flag individual mistakes, but it does not explain whether the sequence as a whole was sensible.\n\nTwo scorer families cover that gap. Reference matching compares the trace with a known-good path. A trace judge reads the transcript against a rubric. The second approach reuses [[LLM-as-a-Judge]] machinery, but feeds it agent decisions instead of a final answer.\n\n# Reference-trajectory Match\n\nA reference path records the calls a correct solve should contain. The comparison mode defines how much variation remains valid:\n\n- **Strict** requires the same tools, arguments, and order. It fits a task with one valid procedure.\n- **Unordered** requires the same calls but ignores order. It fits independent reads.\n- **Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`). It is useful for safety boundaries, such as proving a read-only task never invoked a write tool.\n- **Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration. It confirms that required calls appear in the recorded trajectory.\n\nReference matching is cheap and objective once the paths exist. Its coverage is narrow. An unanticipated but correct solution fails, while a bloated superset trace passes as long as the required calls appear somewhere.\n\n# LLM-as-judge over the Trace\n\nWhen many paths can work, a judge can score the transcript against a rubric covering plan quality, tool choice, wasted work, and recovery. This captures reasoning that no fixed path can enumerate. It costs a model call per trajectory.\n\n```mermaid\nflowchart LR\n    TR[Agent trajectory] --> RM{Known-good path exists?}\n    RM -->|yes, few valid paths| REF[Reference match: strict/unordered/subset/superset]\n    RM -->|no, many valid paths| J[LLM judge over the trace vs rubric]\n    REF --> SC[Path score]\n    J --> SC\n```\n\n# Step-level Vs Episode-level\n\nEpisode-level scoring assigns one verdict to the run. It is cheap enough for a release gate, but a failure only says the path was bad.\n\nStep-level scoring asks whether each next action made sense given the state at that point. It localizes the first bad decision and the recovery that followed. The price is one judgment per step plus enough running context to judge it. A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.\n\n# Example\n\nTwo evaluations of the same support task, run as reference-match plus judge:\n\n```text\nReference (superset mode): {lookup_order, issue_refund, send_email} must all appear\n\nAgent A path: lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)\n  - Judge (1-5): 5  \"minimal, correct order, no wasted calls\"\n\nAgent B path: search_orders -> lookup_order -> lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)   <- match alone hides the waste\n  - Judge (1-5): 3  \"redundant lookup_order, unnecessary initial search\"\n\nSame outcome, same superset verdict; the judge separates the clean path from the wasteful one.\n```\n\n# Tradeoffs\n\n| Approach | Catches | Cost | Breaks when |\n| --- | --- | --- | --- |\n| Reference match (strict) | Any deviation from the one correct path | Lowest to run | More than one valid path exists |\n| Reference match (subset/superset) | Missing required work / out-of-bounds actions | Low | Path quality within bounds (bloat, detours) |\n| LLM judge over the trace | Plan quality, redundancy, recovery | High: a judge call per run and long context | Traces exceed the judge's reliable context window |\n\nReference matching fits when the valid procedures are few and knowable. Subset mode is especially effective as a hard safety gate because forbidden tools fail deterministically. A judge fits when decomposition is open-ended. In either case, outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] belong beside the path score. A polished trajectory that missed the task is still a failure.\n\n# Pitfalls\n\n## Reference Brittleness Penalizes Valid Alternate Paths\n\nA strict match can reject a correct solve because it used `search` followed by `filter` instead of one `query`. At that point the metric measures conformity to the author’s path. Unordered matching tolerates a different order of the same calls, and superset matching tolerates extra calls, but neither accepts `search` and `filter` in place of `query`. That decomposition passes only when it is listed as another reference path or accepted by a custom rule. A judge fits tasks where valid decompositions cannot be listed.\n\n## Judge Degrades on Long Traces\n\nWhen trace length passes the range where the judge has been validated against human labels, the trace is chunked or scored at step level instead. Agreement on short traces does not establish that boundary.\n\n## Outcome Leakage Inflates Path Scores\n\nVisible task success can make a judge rationalize a messy path. Reliable path scoring therefore hides the outcome from the trajectory scorer or evaluates path and outcome in separate calls. Otherwise a lucky recovery becomes evidence of good process.\n\n# Questions\n\n<!-- qard-id: 520c7686-9751-4f5d-b51e-53db694c08ed -->\n> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?\n> Reference matching is the better scorer when the acceptable tool-call paths are few enough to write down and the rule for comparing them is clear. It is then cheap, deterministic and repeatable. An LLM judge fits better when many different paths can be correct, because it scores the trace against a rubric instead of a list of paths. The cost is an extra model call and less deterministic scores.\n>\n> | Aspect | Reference matching | LLM judge over the trace |\n> |---|---|---|\n> | What it needs | One or more known-good tool-call paths and a comparison mode. | A rubric describing good behavior, such as plan quality, tool choice, wasted work and recovery. |\n> | Alternative valid paths | Accepted only if listed or tolerated by the mode; an unanticipated correct path fails. | Can be accepted without being listed, because the rubric describes qualities rather than one path. |\n> | Cost and repeatability | No model call; the same trace always gets the same score. | A model call per scored trajectory; scores for the same trace can vary between runs. |\n>\n> The comparison mode sets how much variation counts as acceptable:\n>\n> - **Strict:** same calls in the same order; fits a task with one valid procedure.\n> - **Unordered:** same calls in any order; fits independent reads.\n> - **Subset:** every agent call must appear in the reference, so unlisted tools fail. This can forbid writes in a read-only task.\n> - **Superset:** every reference call must appear in the trace, and extra calls are allowed. This enforces required steps, but a wasteful trace that contains them still passes.\n> \n> Several valid paths do not automatically require a judge. A richer set of references, or a hybrid rule such as a subset gate plus a judge for path quality, may be enough.\n>\n> [Trajectory evaluation (LangSmith)](https://docs.langchain.com/langsmith/trajectory-evals)\n\n# References\n\n- [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)\n- [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688)\n"
+                    },
+                    "edits": [
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "expected_hash": "e2ef95be7363d302d2cb7e3a5dddcdde75ee3df805786476c95b77cb6d38e7c6",
+                        "before": "High — judge call per run, long context",
+                        "after": "High: a judge call per run and long context",
+                        "reason": "Removes the only em dash in authored prose, as the note-polish rule no-long-dashes requires, without changing the meaning.",
+                        "kind": "note",
+                        "learning_target": "same",
+                        "essential_meanings": [
+                          "LLM judge cost is one model call per run plus long context"
+                        ],
+                        "sources": [],
+                        "feedback_keys": [],
+                        "problem": "The tradeoffs table cell uses an em dash, which the vault's prose rule forbids.",
+                        "reader_benefit": "Consistent punctuation with the vault style, and the cost reads as a plain phrase."
+                      }
+                    ],
+                    "retired_ids": [],
+                    "lineage": [],
+                    "fingerprints": [
+                      "e1cad09d50cd737ebe7d6414584e6275e7c30f3dbb95127d72f455a68d04417f"
+                    ]
+                  },
+                  "review": {
+                    "verdict": "CLEAN",
+                    "overall_reason": "The single edit removes the only remaining long dash in authored prose, which the no-long-dashes rule requires. It keeps the meaning, and the rest of the note is accurate and consistent.",
+                    "notes": [
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "verdict": "CLEAN",
+                        "summary": "The note explains the four reference-match modes, the judge alternative, step versus episode scoring, a worked example, a tradeoff table and pitfalls, and all of it is coherent. The only defect was one em dash in the table, now a colon. The cost meaning (one judge call per run plus long context) is preserved.",
+                        "page_type": "Concept: authorable concept note with an optional Questions section and a References section. The Qard ID is preserved and untouched.",
+                        "current_text_evidence": [
+                          {
+                            "quote": "Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls.",
+                            "line_start": 16,
+                            "reason": "The opening states the problem quickly and concretely, so no rewrite is needed."
+                          },
+                          {
+                            "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                            "line_start": 26,
+                            "reason": "Subset and superset directions are stated correctly and are consistent with the Qard answer and the example."
+                          },
+                          {
+                            "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+                            "line_start": 65,
+                            "reason": "The example shows why reference matching alone misses waste, which supports the tradeoff discussion."
+                          },
+                          {
+                            "quote": "High: a judge call per run and long context",
+                            "line_start": 74,
+                            "reason": "The em dash is replaced with a colon, so the no-long-dashes rule is met and the cost meaning is unchanged."
+                          },
+                          {
+                            "quote": "Several valid paths do not automatically require a judge.",
+                            "line_start": 111,
+                            "reason": "The Qard answer states the exception to its own rule, so it is balanced. It is one focused comparison task with an answer-side source link."
+                          }
+                        ],
+                        "target_resolution": "RESOLVED",
+                        "split_suggestion": "No split: the note covers one coherent topic, trajectory scoring methods, and its parts depend on each other.",
+                        "findings": [],
+                        "source_checks": [],
+                        "rejection_equivalence": [
+                          {
+                            "fingerprint": "3fd0195aebe22928e501b312bfc8cb752e99596494e9d6ed969ffb179cba4d58",
+                            "equivalent": false,
+                            "reason": "It concerns a different note and an unrelated code rename."
+                          },
+                          {
+                            "fingerprint": "0edee5f0203803acc165c0049d2267a55596a7e6fe24fa880d7877062525177d",
+                            "equivalent": false,
+                            "reason": "It concerns a different note, in a code fence."
+                          },
+                          {
+                            "fingerprint": "244d8a0f13c2abb4f10f48aecb71e8b61b9b273f632444076a4815a9956f07d9",
+                            "equivalent": false,
+                            "reason": "It concerns a different note."
+                          },
+                          {
+                            "fingerprint": "27b8ff207ad19a6687a083b6a903afbf642cb7da722dcef9f41f92da607c9f84",
+                            "equivalent": false,
+                            "reason": "It concerns a different note."
+                          },
+                          {
+                            "fingerprint": "a84e9c6353348559fc2fa8be75d2d5183237375a59e0bfcbdd61e59fbfd9b75f",
+                            "equivalent": false,
+                            "reason": "It concerns a different note."
+                          },
+                          {
+                            "fingerprint": "211e8deab424a6b66d3a0dcf54dbcdebb43502f289d5bd459bc79ac82aa5219c",
+                            "equivalent": false,
+                            "reason": "It concerns a different note."
+                          },
+                          {
+                            "fingerprint": "9071849019d08ac59c180c9079be25dd38f1d0f6e802aa017a629cbb5f68a7bd",
+                            "equivalent": false,
+                            "reason": "It concerns a different note."
+                          },
+                          {
+                            "fingerprint": "5d8c5515eb94740c04ec2b74de70fe5aceead457fb6b00387074c30c5b32f8a9",
+                            "equivalent": false,
+                            "reason": "It concerns a different note."
+                          }
+                        ],
+                        "quality": {
+                          "accuracy": "PASS",
+                          "clarity": "PASS",
+                          "question_quality": "PASS",
+                          "identity_safety": "PASS",
+                          "rules_compliance": "PASS"
+                        }
+                      }
+                    ],
+                    "change_checks": [
+                      {
+                        "edit_index": 0,
+                        "verdict": "WORTHWHILE",
+                        "reason": "The em dash in the table cell was a real violation of the no-long-dashes rule. The colon form keeps the cost meaning and changes nothing else, so no metadata is affected."
+                      }
+                    ]
+                  },
+                  "decisions": [],
+                  "review_evidence": {
+                    "raw_review": {
+                      "verdict": "CLEAN",
+                      "overall_reason": "The single edit removes the only remaining long dash in authored prose, which the no-long-dashes rule requires. It keeps the meaning, and the rest of the note is accurate and consistent.",
+                      "notes": [
+                        {
+                          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                          "verdict": "CLEAN",
+                          "summary": "The note explains the four reference-match modes, the judge alternative, step versus episode scoring, a worked example, a tradeoff table and pitfalls, and all of it is coherent. The only defect was one em dash in the table, now a colon. The cost meaning (one judge call per run plus long context) is preserved.",
+                          "page_type": "Concept: authorable concept note with an optional Questions section and a References section. The Qard ID is preserved and untouched.",
+                          "current_text_evidence": [
+                            {
+                              "quote": "Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls.",
+                              "line_start": 16,
+                              "reason": "The opening states the problem quickly and concretely, so no rewrite is needed."
+                            },
+                            {
+                              "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                              "line_start": 26,
+                              "reason": "Subset and superset directions are stated correctly and are consistent with the Qard answer and the example."
+                            },
+                            {
+                              "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+                              "line_start": 64,
+                              "reason": "The example shows why reference matching alone misses waste, which supports the tradeoff discussion."
+                            },
+                            {
+                              "quote": "High: a judge call per run and long context",
+                              "line_start": 73,
+                              "reason": "The em dash is replaced with a colon, so the no-long-dashes rule is met and the cost meaning is unchanged."
+                            },
+                            {
+                              "quote": "Several valid paths do not automatically require a judge.",
+                              "line_start": 96,
+                              "reason": "The Qard answer states the exception to its own rule, so it is balanced. It is one focused comparison task with an answer-side source link."
+                            }
+                          ],
+                          "target_resolution": "RESOLVED",
+                          "split_suggestion": "No split: the note covers one coherent topic, trajectory scoring methods, and its parts depend on each other.",
+                          "findings": [],
+                          "source_checks": [],
+                          "rejection_equivalence": [
+                            {
+                              "fingerprint": "3fd0195aebe22928e501b312bfc8cb752e99596494e9d6ed969ffb179cba4d58",
+                              "equivalent": false,
+                              "reason": "It concerns a different note and an unrelated code rename."
+                            },
+                            {
+                              "fingerprint": "0edee5f0203803acc165c0049d2267a55596a7e6fe24fa880d7877062525177d",
+                              "equivalent": false,
+                              "reason": "It concerns a different note, in a code fence."
+                            },
+                            {
+                              "fingerprint": "244d8a0f13c2abb4f10f48aecb71e8b61b9b273f632444076a4815a9956f07d9",
+                              "equivalent": false,
+                              "reason": "It concerns a different note."
+                            },
+                            {
+                              "fingerprint": "27b8ff207ad19a6687a083b6a903afbf642cb7da722dcef9f41f92da607c9f84",
+                              "equivalent": false,
+                              "reason": "It concerns a different note."
+                            },
+                            {
+                              "fingerprint": "a84e9c6353348559fc2fa8be75d2d5183237375a59e0bfcbdd61e59fbfd9b75f",
+                              "equivalent": false,
+                              "reason": "It concerns a different note."
+                            },
+                            {
+                              "fingerprint": "211e8deab424a6b66d3a0dcf54dbcdebb43502f289d5bd459bc79ac82aa5219c",
+                              "equivalent": false,
+                              "reason": "It concerns a different note."
+                            },
+                            {
+                              "fingerprint": "9071849019d08ac59c180c9079be25dd38f1d0f6e802aa017a629cbb5f68a7bd",
+                              "equivalent": false,
+                              "reason": "It concerns a different note."
+                            },
+                            {
+                              "fingerprint": "5d8c5515eb94740c04ec2b74de70fe5aceead457fb6b00387074c30c5b32f8a9",
+                              "equivalent": false,
+                              "reason": "It concerns a different note."
+                            }
+                          ],
+                          "quality": {
+                            "accuracy": "PASS",
+                            "clarity": "PASS",
+                            "question_quality": "PASS",
+                            "identity_safety": "PASS",
+                            "rules_compliance": "PASS"
+                          }
+                        }
+                      ],
+                      "change_checks": [
+                        {
+                          "edit_index": 0,
+                          "verdict": "WORTHWHILE",
+                          "reason": "The em dash in the table cell was a real violation of the no-long-dashes rule. The colon form keeps the cost meaning and changes nothing else, so no metadata is affected."
+                        }
+                      ]
+                    },
+                    "bindings": [
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "citation_index": 2,
+                        "reported_line_start": 64,
+                        "resolved_line_start": 65
+                      },
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "citation_index": 3,
+                        "reported_line_start": 73,
+                        "resolved_line_start": 74
+                      },
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "citation_index": 4,
+                        "reported_line_start": 96,
+                        "resolved_line_start": 111
+                      }
+                    ],
+                    "source_hashes": {
+                      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "86975027b9d14a2766980a16abde771b48190bcbec1e68c3475a8809ba59fc25"
+                    },
+                    "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
+                    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+                  },
+                  "source_hashes": {
+                    "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "e2ef95be7363d302d2cb7e3a5dddcdde75ee3df805786476c95b77cb6d38e7c6"
+                  },
+                  "prepared_source_version": 1,
+                  "prepared_at": "2026-11-22T07:17:42.871632Z",
+                  "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
+                  "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+                  "calls_reserved": 14,
+                  "elapsed_seconds": 605.1317502000002,
+                  "accepted_at": "2026-11-22T07:18:38.420505Z",
+                  "phase": "accepted"
+                }
+              ],
+              "proposal_history": [
+                {
+                  "record_id": "652f5b116cb0139f00adae2d7b66e942222d5a64e8d4e0654cf679722c190f49",
+                  "workload_id": "e8c4d2c56c1b4b4ea6d2f82b910f28a6",
+                  "batch": {
+                    "topic": "AI & ML",
+                    "topic_id": "ai-ml-4edf0823",
+                    "notes": [
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Trajectory Evaluation\"\nflashcard_uid: \"4a7a9900\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-11-16T16:48:56.427Z\"\npublished: \"2026-07-08T13:28:37.404Z\"\n---\n\nTrajectory evaluation scores the path from task to result: tool calls, observations, and intermediate decisions in order. Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls. [[Tool-Call Evaluation|tool-call scoring]] can flag individual mistakes, but it does not explain whether the sequence as a whole was sensible.\n\nTwo scorer families cover that gap. Reference matching compares the trace with a known-good path. A trace judge reads the transcript against a rubric. The second approach reuses [[LLM-as-a-Judge]] machinery, but feeds it agent decisions instead of a final answer.\n\n# Reference-trajectory Match\n\nA reference path records the calls a correct solve should contain. The comparison mode defines how much variation remains valid:\n\n- **Strict** requires the same tools, arguments, and order. It fits a task with one valid procedure.\n- **Unordered** requires the same calls but ignores order. It fits independent reads.\n- **Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`). It is useful for safety boundaries, such as proving a read-only task never invoked a write tool.\n- **Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration. It confirms that required calls appear in the recorded trajectory.\n\nReference matching is cheap and objective once the paths exist. Its coverage is narrow. An unanticipated but correct solution fails, while a bloated superset trace passes as long as the required calls appear somewhere.\n\n# LLM-as-judge over the Trace\n\nWhen many paths can work, a judge can score the transcript against a rubric covering plan quality, tool choice, wasted work, and recovery. This captures reasoning that no fixed path can enumerate. It costs a model call per trajectory.\n\n```mermaid\nflowchart LR\n    TR[Agent trajectory] --> RM{Known-good path exists?}\n    RM -->|yes, few valid paths| REF[Reference match: strict/unordered/subset/superset]\n    RM -->|no, many valid paths| J[LLM judge over the trace vs rubric]\n    REF --> SC[Path score]\n    J --> SC\n```\n\n# Step-level Vs Episode-level\n\nEpisode-level scoring assigns one verdict to the run. It is cheap enough for a release gate, but a failure only says the path was bad.\n\nStep-level scoring asks whether each next action made sense given the state at that point. It localizes the first bad decision and the recovery that followed. The price is one judgment per step plus enough running context to judge it. A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.\n\n# Example\n\nTwo evaluations of the same support task, run as reference-match plus judge:\n\n```text\nReference (superset mode): {lookup_order, issue_refund, send_email} must all appear\n\nAgent A path: lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)\n  - Judge (1-5): 5  \"minimal, correct order, no wasted calls\"\n\nAgent B path: search_orders -> lookup_order -> lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)   <- match alone hides the waste\n  - Judge (1-5): 3  \"redundant lookup_order, unnecessary initial search\"\n\nSame outcome, same superset verdict; the judge separates the clean path from the wasteful one.\n```\n\n# Tradeoffs\n\n| Approach | Catches | Cost | Breaks when |\n| --- | --- | --- | --- |\n| Reference match (strict) | Any deviation from the one correct path | Lowest to run | More than one valid path exists |\n| Reference match (subset/superset) | Missing required work / out-of-bounds actions | Low | Path quality within bounds (bloat, detours) |\n| LLM judge over the trace | Plan quality, redundancy, recovery | High — judge call per run, long context | Traces exceed the judge's reliable context window |\n\nReference matching fits when the valid procedures are few and knowable. Subset mode is especially effective as a hard safety gate because forbidden tools fail deterministically. A judge fits when decomposition is open-ended. In either case, outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] belong beside the path score. A polished trajectory that missed the task is still a failure.\n\n# Pitfalls\n\n## Reference Brittleness Penalizes Valid Alternate Paths\n\nA strict match can reject a correct solve because it used `search` followed by `filter` instead of one `query`. At that point the metric measures conformity to the author’s path. Unordered matching tolerates a different order of the same calls, and superset matching tolerates extra calls, but neither accepts `search` and `filter` in place of `query`. That decomposition passes only when it is listed as another reference path or accepted by a custom rule. A judge fits tasks where valid decompositions cannot be listed.\n\n## Judge Degrades on Long Traces\n\nWhen trace length passes the range where the judge has been validated against human labels, the trace is chunked or scored at step level instead. Agreement on short traces does not establish that boundary.\n\n## Outcome Leakage Inflates Path Scores\n\nVisible task success can make a judge rationalize a messy path. Reliable path scoring therefore hides the outcome from the trajectory scorer or evaluates path and outcome in separate calls. Otherwise a lucky recovery becomes evidence of good process.\n\n# Questions\n\n<!-- qard-id: 520c7686-9751-4f5d-b51e-53db694c08ed -->\n> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?\n> Reference matching is the better scorer when the acceptable tool-call paths are few enough to write down and the rule for comparing them is clear. It is then cheap, deterministic and repeatable. An LLM judge fits better when many different paths can be correct, because it scores the trace against a rubric instead of a list of paths. The cost is an extra model call and less deterministic scores.\n>\n> | Aspect | Reference matching | LLM judge over the trace |\n> |---|---|---|\n> | What it needs | One or more known-good tool-call paths and a comparison mode. | A rubric describing good behavior, such as plan quality, tool choice, wasted work and recovery. |\n> | Alternative valid paths | Accepted only if listed or tolerated by the mode; an unanticipated correct path fails. | Can be accepted without being listed, because the rubric describes qualities rather than one path. |\n> | Cost and repeatability | No model call; the same trace always gets the same score. | A model call per scored trajectory; scores for the same trace can vary between runs. |\n>\n> The comparison mode sets how much variation counts as acceptable:\n>\n> - **Strict:** same calls in the same order; fits a task with one valid procedure.\n> - **Unordered:** same calls in any order; fits independent reads.\n> - **Subset:** every agent call must appear in the reference, so unlisted tools fail. This can forbid writes in a read-only task.\n> - **Superset:** every reference call must appear in the trace, and extra calls are allowed. This enforces required steps, but a wasteful trace that contains them still passes.\n> \n> Several valid paths do not automatically require a judge. A richer set of references, or a hybrid rule such as a subset gate plus a judge for path quality, may be enough.\n>\n> [Trajectory evaluation (LangSmith)](https://docs.langchain.com/langsmith/trajectory-evals)\n\n# References\n\n- [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)\n- [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688)\n",
+                        "hash": "e2ef95be7363d302d2cb7e3a5dddcdde75ee3df805786476c95b77cb6d38e7c6",
+                        "topic": "AI & ML",
+                        "violations": [],
+                        "needs_fixing_ids": [],
+                        "repair_input_hash": "",
+                        "selection_reason": "changed"
+                      }
+                    ],
+                    "feedback": [],
+                    "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
+                    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+                    "review_process": "focused-whole-note-v1",
+                    "pr": null
+                  },
+                  "proposal": {
+                    "version": 1,
+                    "edits": [
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "expected_hash": "e2ef95be7363d302d2cb7e3a5dddcdde75ee3df805786476c95b77cb6d38e7c6",
+                        "before": "High — judge call per run, long context",
+                        "after": "High: a judge call per run and long context",
+                        "reason": "Removes the only em dash in authored prose, as the note-polish rule no-long-dashes requires, without changing the meaning.",
+                        "kind": "note",
+                        "learning_target": "same",
+                        "essential_meanings": [
+                          "LLM judge cost is one model call per run plus long context"
+                        ],
+                        "sources": [],
+                        "feedback_keys": [],
+                        "problem": "The tradeoffs table cell uses an em dash, which the vault's prose rule forbids.",
+                        "reader_benefit": "Consistent punctuation with the vault style, and the cost reads as a plain phrase."
+                      }
+                    ],
+                    "dispositions": [
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "outcome": "changed",
+                        "reason": "Audited the whole note: the four comparison modes (strict, unordered, subset, superset) and the subset/superset directions match LangSmith's trajectory evals; the example, tradeoff table, pitfalls and the single Qard are consistent with each other and with the opening. The only defect found was an em dash in the table, now replaced with a colon."
+                      }
+                    ],
+                    "feedback": []
+                  },
+                  "result": {
+                    "sources": {
+                      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nlevel: [\"3\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Trajectory Evaluation\"\nflashcard_uid: \"4a7a9900\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-11-22T07:17:42.871Z\"\npublished: \"2026-07-08T13:28:37.404Z\"\n---\n\nTrajectory evaluation scores the path from task to result: tool calls, observations, and intermediate decisions in order. Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls. [[Tool-Call Evaluation|tool-call scoring]] can flag individual mistakes, but it does not explain whether the sequence as a whole was sensible.\n\nTwo scorer families cover that gap. Reference matching compares the trace with a known-good path. A trace judge reads the transcript against a rubric. The second approach reuses [[LLM-as-a-Judge]] machinery, but feeds it agent decisions instead of a final answer.\n\n# Reference-trajectory Match\n\nA reference path records the calls a correct solve should contain. The comparison mode defines how much variation remains valid:\n\n- **Strict** requires the same tools, arguments, and order. It fits a task with one valid procedure.\n- **Unordered** requires the same calls but ignores order. It fits independent reads.\n- **Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`). It is useful for safety boundaries, such as proving a read-only task never invoked a write tool.\n- **Superset** requires every reference step to appear in the trace (`agent ⊇ reference`) while allowing exploration. It confirms that required calls appear in the recorded trajectory.\n\nReference matching is cheap and objective once the paths exist. Its coverage is narrow. An unanticipated but correct solution fails, while a bloated superset trace passes as long as the required calls appear somewhere.\n\n# LLM-as-judge over the Trace\n\nWhen many paths can work, a judge can score the transcript against a rubric covering plan quality, tool choice, wasted work, and recovery. This captures reasoning that no fixed path can enumerate. It costs a model call per trajectory.\n\n```mermaid\nflowchart LR\n    TR[Agent trajectory] --> RM{Known-good path exists?}\n    RM -->|yes, few valid paths| REF[Reference match: strict/unordered/subset/superset]\n    RM -->|no, many valid paths| J[LLM judge over the trace vs rubric]\n    REF --> SC[Path score]\n    J --> SC\n```\n\n# Step-level Vs Episode-level\n\nEpisode-level scoring assigns one verdict to the run. It is cheap enough for a release gate, but a failure only says the path was bad.\n\nStep-level scoring asks whether each next action made sense given the state at that point. It localizes the first bad decision and the recovery that followed. The price is one judgment per step plus enough running context to judge it. A practical setup gates every run at episode level, then expands failed or high-risk traces into step-level analysis.\n\n# Example\n\nTwo evaluations of the same support task, run as reference-match plus judge:\n\n```text\nReference (superset mode): {lookup_order, issue_refund, send_email} must all appear\n\nAgent A path: lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)\n  - Judge (1-5): 5  \"minimal, correct order, no wasted calls\"\n\nAgent B path: search_orders -> lookup_order -> lookup_order -> issue_refund -> send_email\n  - Superset match: PASS (all required present)   <- match alone hides the waste\n  - Judge (1-5): 3  \"redundant lookup_order, unnecessary initial search\"\n\nSame outcome, same superset verdict; the judge separates the clean path from the wasteful one.\n```\n\n# Tradeoffs\n\n| Approach | Catches | Cost | Breaks when |\n| --- | --- | --- | --- |\n| Reference match (strict) | Any deviation from the one correct path | Lowest to run | More than one valid path exists |\n| Reference match (subset/superset) | Missing required work / out-of-bounds actions | Low | Path quality within bounds (bloat, detours) |\n| LLM judge over the trace | Plan quality, redundancy, recovery | High: a judge call per run and long context | Traces exceed the judge's reliable context window |\n\nReference matching fits when the valid procedures are few and knowable. Subset mode is especially effective as a hard safety gate because forbidden tools fail deterministically. A judge fits when decomposition is open-ended. In either case, outcome and efficiency metrics from [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]] belong beside the path score. A polished trajectory that missed the task is still a failure.\n\n# Pitfalls\n\n## Reference Brittleness Penalizes Valid Alternate Paths\n\nA strict match can reject a correct solve because it used `search` followed by `filter` instead of one `query`. At that point the metric measures conformity to the author’s path. Unordered matching tolerates a different order of the same calls, and superset matching tolerates extra calls, but neither accepts `search` and `filter` in place of `query`. That decomposition passes only when it is listed as another reference path or accepted by a custom rule. A judge fits tasks where valid decompositions cannot be listed.\n\n## Judge Degrades on Long Traces\n\nWhen trace length passes the range where the judge has been validated against human labels, the trace is chunked or scored at step level instead. Agreement on short traces does not establish that boundary.\n\n## Outcome Leakage Inflates Path Scores\n\nVisible task success can make a judge rationalize a messy path. Reliable path scoring therefore hides the outcome from the trajectory scorer or evaluates path and outcome in separate calls. Otherwise a lucky recovery becomes evidence of good process.\n\n# Questions\n\n<!-- qard-id: 520c7686-9751-4f5d-b51e-53db694c08ed -->\n> [!qard]- When is reference matching a better way to score an agent's trajectory than an LLM judge?\n> Reference matching is the better scorer when the acceptable tool-call paths are few enough to write down and the rule for comparing them is clear. It is then cheap, deterministic and repeatable. An LLM judge fits better when many different paths can be correct, because it scores the trace against a rubric instead of a list of paths. The cost is an extra model call and less deterministic scores.\n>\n> | Aspect | Reference matching | LLM judge over the trace |\n> |---|---|---|\n> | What it needs | One or more known-good tool-call paths and a comparison mode. | A rubric describing good behavior, such as plan quality, tool choice, wasted work and recovery. |\n> | Alternative valid paths | Accepted only if listed or tolerated by the mode; an unanticipated correct path fails. | Can be accepted without being listed, because the rubric describes qualities rather than one path. |\n> | Cost and repeatability | No model call; the same trace always gets the same score. | A model call per scored trajectory; scores for the same trace can vary between runs. |\n>\n> The comparison mode sets how much variation counts as acceptable:\n>\n> - **Strict:** same calls in the same order; fits a task with one valid procedure.\n> - **Unordered:** same calls in any order; fits independent reads.\n> - **Subset:** every agent call must appear in the reference, so unlisted tools fail. This can forbid writes in a read-only task.\n> - **Superset:** every reference call must appear in the trace, and extra calls are allowed. This enforces required steps, but a wasteful trace that contains them still passes.\n> \n> Several valid paths do not automatically require a judge. A richer set of references, or a hybrid rule such as a subset gate plus a judge for path quality, may be enough.\n>\n> [Trajectory evaluation (LangSmith)](https://docs.langchain.com/langsmith/trajectory-evals)\n\n# References\n\n- [Trajectory evaluations -- reference-match modes and LLM-judge scoring of agent trajectories (LangSmith docs)](https://docs.langchain.com/langsmith/trajectory-evals)\n- [AgentBench -- evaluating LLMs as agents across eight interactive environments (Liu et al., 2023)](https://arxiv.org/abs/2308.03688)\n"
+                    },
+                    "edits": [
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "expected_hash": "e2ef95be7363d302d2cb7e3a5dddcdde75ee3df805786476c95b77cb6d38e7c6",
+                        "before": "High — judge call per run, long context",
+                        "after": "High: a judge call per run and long context",
+                        "reason": "Removes the only em dash in authored prose, as the note-polish rule no-long-dashes requires, without changing the meaning.",
+                        "kind": "note",
+                        "learning_target": "same",
+                        "essential_meanings": [
+                          "LLM judge cost is one model call per run plus long context"
+                        ],
+                        "sources": [],
+                        "feedback_keys": [],
+                        "problem": "The tradeoffs table cell uses an em dash, which the vault's prose rule forbids.",
+                        "reader_benefit": "Consistent punctuation with the vault style, and the cost reads as a plain phrase."
+                      }
+                    ],
+                    "retired_ids": [],
+                    "lineage": [],
+                    "fingerprints": [
+                      "e1cad09d50cd737ebe7d6414584e6275e7c30f3dbb95127d72f455a68d04417f"
+                    ]
+                  },
+                  "review": {
+                    "verdict": "CLEAN",
+                    "overall_reason": "The single edit removes the only remaining long dash in authored prose, which the no-long-dashes rule requires. It keeps the meaning, and the rest of the note is accurate and consistent.",
+                    "notes": [
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "verdict": "CLEAN",
+                        "summary": "The note explains the four reference-match modes, the judge alternative, step versus episode scoring, a worked example, a tradeoff table and pitfalls, and all of it is coherent. The only defect was one em dash in the table, now a colon. The cost meaning (one judge call per run plus long context) is preserved.",
+                        "page_type": "Concept: authorable concept note with an optional Questions section and a References section. The Qard ID is preserved and untouched.",
+                        "current_text_evidence": [
+                          {
+                            "quote": "Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls.",
+                            "line_start": 16,
+                            "reason": "The opening states the problem quickly and concretely, so no rewrite is needed."
+                          },
+                          {
+                            "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                            "line_start": 26,
+                            "reason": "Subset and superset directions are stated correctly and are consistent with the Qard answer and the example."
+                          },
+                          {
+                            "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+                            "line_start": 65,
+                            "reason": "The example shows why reference matching alone misses waste, which supports the tradeoff discussion."
+                          },
+                          {
+                            "quote": "High: a judge call per run and long context",
+                            "line_start": 74,
+                            "reason": "The em dash is replaced with a colon, so the no-long-dashes rule is met and the cost meaning is unchanged."
+                          },
+                          {
+                            "quote": "Several valid paths do not automatically require a judge.",
+                            "line_start": 111,
+                            "reason": "The Qard answer states the exception to its own rule, so it is balanced. It is one focused comparison task with an answer-side source link."
+                          }
+                        ],
+                        "target_resolution": "RESOLVED",
+                        "split_suggestion": "No split: the note covers one coherent topic, trajectory scoring methods, and its parts depend on each other.",
+                        "findings": [],
+                        "source_checks": [],
+                        "rejection_equivalence": [
+                          {
+                            "fingerprint": "3fd0195aebe22928e501b312bfc8cb752e99596494e9d6ed969ffb179cba4d58",
+                            "equivalent": false,
+                            "reason": "It concerns a different note and an unrelated code rename."
+                          },
+                          {
+                            "fingerprint": "0edee5f0203803acc165c0049d2267a55596a7e6fe24fa880d7877062525177d",
+                            "equivalent": false,
+                            "reason": "It concerns a different note, in a code fence."
+                          },
+                          {
+                            "fingerprint": "244d8a0f13c2abb4f10f48aecb71e8b61b9b273f632444076a4815a9956f07d9",
+                            "equivalent": false,
+                            "reason": "It concerns a different note."
+                          },
+                          {
+                            "fingerprint": "27b8ff207ad19a6687a083b6a903afbf642cb7da722dcef9f41f92da607c9f84",
+                            "equivalent": false,
+                            "reason": "It concerns a different note."
+                          },
+                          {
+                            "fingerprint": "a84e9c6353348559fc2fa8be75d2d5183237375a59e0bfcbdd61e59fbfd9b75f",
+                            "equivalent": false,
+                            "reason": "It concerns a different note."
+                          },
+                          {
+                            "fingerprint": "211e8deab424a6b66d3a0dcf54dbcdebb43502f289d5bd459bc79ac82aa5219c",
+                            "equivalent": false,
+                            "reason": "It concerns a different note."
+                          },
+                          {
+                            "fingerprint": "9071849019d08ac59c180c9079be25dd38f1d0f6e802aa017a629cbb5f68a7bd",
+                            "equivalent": false,
+                            "reason": "It concerns a different note."
+                          },
+                          {
+                            "fingerprint": "5d8c5515eb94740c04ec2b74de70fe5aceead457fb6b00387074c30c5b32f8a9",
+                            "equivalent": false,
+                            "reason": "It concerns a different note."
+                          }
+                        ],
+                        "quality": {
+                          "accuracy": "PASS",
+                          "clarity": "PASS",
+                          "question_quality": "PASS",
+                          "identity_safety": "PASS",
+                          "rules_compliance": "PASS"
+                        }
+                      }
+                    ],
+                    "change_checks": [
+                      {
+                        "edit_index": 0,
+                        "verdict": "WORTHWHILE",
+                        "reason": "The em dash in the table cell was a real violation of the no-long-dashes rule. The colon form keeps the cost meaning and changes nothing else, so no metadata is affected."
+                      }
+                    ]
+                  },
+                  "decisions": [],
+                  "review_evidence": {
+                    "raw_review": {
+                      "verdict": "CLEAN",
+                      "overall_reason": "The single edit removes the only remaining long dash in authored prose, which the no-long-dashes rule requires. It keeps the meaning, and the rest of the note is accurate and consistent.",
+                      "notes": [
+                        {
+                          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                          "verdict": "CLEAN",
+                          "summary": "The note explains the four reference-match modes, the judge alternative, step versus episode scoring, a worked example, a tradeoff table and pitfalls, and all of it is coherent. The only defect was one em dash in the table, now a colon. The cost meaning (one judge call per run plus long context) is preserved.",
+                          "page_type": "Concept: authorable concept note with an optional Questions section and a References section. The Qard ID is preserved and untouched.",
+                          "current_text_evidence": [
+                            {
+                              "quote": "Outcome scoring cannot distinguish a four-step solve from a lucky recovery after six wrong calls.",
+                              "line_start": 16,
+                              "reason": "The opening states the problem quickly and concretely, so no rewrite is needed."
+                            },
+                            {
+                              "quote": "**Subset** requires every agent call to belong to the allowed reference set (`agent ⊆ reference`).",
+                              "line_start": 26,
+                              "reason": "Subset and superset directions are stated correctly and are consistent with the Qard answer and the example."
+                            },
+                            {
+                              "quote": "Same outcome, same superset verdict; the judge separates the clean path from the wasteful one.",
+                              "line_start": 64,
+                              "reason": "The example shows why reference matching alone misses waste, which supports the tradeoff discussion."
+                            },
+                            {
+                              "quote": "High: a judge call per run and long context",
+                              "line_start": 73,
+                              "reason": "The em dash is replaced with a colon, so the no-long-dashes rule is met and the cost meaning is unchanged."
+                            },
+                            {
+                              "quote": "Several valid paths do not automatically require a judge.",
+                              "line_start": 96,
+                              "reason": "The Qard answer states the exception to its own rule, so it is balanced. It is one focused comparison task with an answer-side source link."
+                            }
+                          ],
+                          "target_resolution": "RESOLVED",
+                          "split_suggestion": "No split: the note covers one coherent topic, trajectory scoring methods, and its parts depend on each other.",
+                          "findings": [],
+                          "source_checks": [],
+                          "rejection_equivalence": [
+                            {
+                              "fingerprint": "3fd0195aebe22928e501b312bfc8cb752e99596494e9d6ed969ffb179cba4d58",
+                              "equivalent": false,
+                              "reason": "It concerns a different note and an unrelated code rename."
+                            },
+                            {
+                              "fingerprint": "0edee5f0203803acc165c0049d2267a55596a7e6fe24fa880d7877062525177d",
+                              "equivalent": false,
+                              "reason": "It concerns a different note, in a code fence."
+                            },
+                            {
+                              "fingerprint": "244d8a0f13c2abb4f10f48aecb71e8b61b9b273f632444076a4815a9956f07d9",
+                              "equivalent": false,
+                              "reason": "It concerns a different note."
+                            },
+                            {
+                              "fingerprint": "27b8ff207ad19a6687a083b6a903afbf642cb7da722dcef9f41f92da607c9f84",
+                              "equivalent": false,
+                              "reason": "It concerns a different note."
+                            },
+                            {
+                              "fingerprint": "a84e9c6353348559fc2fa8be75d2d5183237375a59e0bfcbdd61e59fbfd9b75f",
+                              "equivalent": false,
+                              "reason": "It concerns a different note."
+                            },
+                            {
+                              "fingerprint": "211e8deab424a6b66d3a0dcf54dbcdebb43502f289d5bd459bc79ac82aa5219c",
+                              "equivalent": false,
+                              "reason": "It concerns a different note."
+                            },
+                            {
+                              "fingerprint": "9071849019d08ac59c180c9079be25dd38f1d0f6e802aa017a629cbb5f68a7bd",
+                              "equivalent": false,
+                              "reason": "It concerns a different note."
+                            },
+                            {
+                              "fingerprint": "5d8c5515eb94740c04ec2b74de70fe5aceead457fb6b00387074c30c5b32f8a9",
+                              "equivalent": false,
+                              "reason": "It concerns a different note."
+                            }
+                          ],
+                          "quality": {
+                            "accuracy": "PASS",
+                            "clarity": "PASS",
+                            "question_quality": "PASS",
+                            "identity_safety": "PASS",
+                            "rules_compliance": "PASS"
+                          }
+                        }
+                      ],
+                      "change_checks": [
+                        {
+                          "edit_index": 0,
+                          "verdict": "WORTHWHILE",
+                          "reason": "The em dash in the table cell was a real violation of the no-long-dashes rule. The colon form keeps the cost meaning and changes nothing else, so no metadata is affected."
+                        }
+                      ]
+                    },
+                    "bindings": [
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "citation_index": 2,
+                        "reported_line_start": 64,
+                        "resolved_line_start": 65
+                      },
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "citation_index": 3,
+                        "reported_line_start": 73,
+                        "resolved_line_start": 74
+                      },
+                      {
+                        "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md",
+                        "citation_index": 4,
+                        "reported_line_start": 96,
+                        "resolved_line_start": 111
+                      }
+                    ],
+                    "source_hashes": {
+                      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "86975027b9d14a2766980a16abde771b48190bcbec1e68c3475a8809ba59fc25"
+                    },
+                    "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
+                    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+                  },
+                  "source_hashes": {
+                    "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "e2ef95be7363d302d2cb7e3a5dddcdde75ee3df805786476c95b77cb6d38e7c6"
+                  },
+                  "prepared_source_version": 1,
+                  "prepared_at": "2026-11-22T07:17:42.871632Z",
+                  "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
+                  "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+                  "calls_reserved": 14,
+                  "elapsed_seconds": 605.1317502000002,
+                  "accepted_at": "2026-11-22T07:18:38.420505Z",
+                  "phase": "accepted"
+                }
+              ],
+              "topic_id": "ai-ml-4edf0823",
+              "generation": 3,
+              "base_note_hashes": {
+                "Vault/Home/AI & ML/AI & ML.md": "1fb56a58c39c7055af7ae358388f990010815b68f804e338fffd41c2571f8ac0",
+                "Vault/Home/AI & ML/LLM/Agents/Agents.md": "84c172ecfb7ecbb65573c20be00d5af97eef54a0ec423aa23159c3948662af42",
+                "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md": "8394cc5e1250012fa56fa50b8fdf12f96e9353472cd1fd06a71a8182cb4a24ab",
+                "Vault/Home/AI & ML/LLM/Agents/Evaluation/Evaluation.md": "5a71a8113846c31f82d9c3afc025d4d034337da14e8d5d4a368358d088d7a34f",
+                "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": "64d4bd0891285e18b2386894ef1b972c99484eed252153072e3a7ea67787a567",
+                "Vault/Home/AI & ML/LLM/Agents/Evaluation/Trajectory Evaluation.md": "e2ef95be7363d302d2cb7e3a5dddcdde75ee3df805786476c95b77cb6d38e7c6",
+                "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md": "a10ecaeb8acf388adea98d49992d946c88750c8371eb994715465650b3a8d5ec",
+                "Vault/Home/AI & ML/LLM/Context Engineering/Context Engineering.md": "7b9ca13bd93aa0b3e8a42a82300f2066bf4661aca8a6f67723c20c088073770b",
+                "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md": "abfb6a41413d40ee10e6a2713f71f82cd75a9d2e1d5fddeb56d5f29dd72a3eb8",
+                "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Component-Level Evaluation.md": "ec5606f2f2f9835a75b4b6cb78661bf59c4c6bb6c00dd981a10cde494beb91fc",
+                "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation Metrics.md": "663fbf09583ccfb2954c8541a8d7d6ee499bd87cb97336f838a8e810e5acd273",
+                "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Evaluation.md": "2df097768049603c9b153c348d1a4de47773021ad1f041d5fb9bff4f5a0713c3",
+                "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Evaluation/Retrieval Evaluation Sets.md": "1e225b1f5bb750db1314bfe694ee582bc7bfd3889497624bc27840fe606e8dc1",
+                "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Monitoring.md": "eb8a0766646551ac7c797c4c578449d2e3a2707123ac9cb7ae87ab803691c7da",
+                "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Query Translation.md": "704e0bf976e6c21a20435aefc5f315c0a1e4b035d66ed4cd9ef0463fee1eed62",
+                "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Caching.md": "30de8135ff2e6b5815ad1c812b56b8f62f8edea3f29cb78d8c3ff5fc65206182",
+                "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG Patterns.md": "122f5e4a1e7be3641c80fa3c1819492cd864ddb07465898e33fc44b5dc7a1285",
+                "Vault/Home/AI & ML/LLM/Context Engineering/RAG/RAG.md": "211430cb141c44979599bcde2e2c3a24056410f2b12eab95a4311f2d764fcfd8",
+                "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Re-ranking.md": "d02285e3b7a77dd5e47a61535b593f1bccc17daa227b690ed03ac2421849fe3a",
+                "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Retrieval.md": "73c9007c5629fcce9071fcacfa5d24e36e4ec246c14892c730dd9d06cd47c7b0",
+                "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Vector Databases.md": "82134e90b66a7e4b15aecdbf9538ce0ea0050df6d9b5f7b6574fc941db93117c",
+                "Vault/Home/AI & ML/LLM/Embeddings.md": "3b8ebb46cbfc9939093031ba11a7313d36bf92efacdadb79a3fab72250f1526a",
+                "Vault/Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md": "78536f845ecca5ac0320c0dd5127656fb3f59ba1d2e212e17c37f2e47c9e3edd",
+                "Vault/Home/AI & ML/LLM/Evaluation/Deterministic Checks.md": "dcb83edb277fa2b88ed9a70b1b06adc8588e86153ad2343768d8faa00981d8a2",
+                "Vault/Home/AI & ML/LLM/Evaluation/Evaluation.md": "51b97e619ffe8d87d6cc9033ed5681c31fe1db70864019912e356bdbb8d21d28",
+                "Vault/Home/AI & ML/LLM/Evaluation/Golden Test Set and Regression Runs.md": "6fde2cc3bb423f85eb7dae097bf5dcbfd309f559672ad3cceb3708334ffc49ec",
+                "Vault/Home/AI & ML/LLM/Evaluation/LLM-as-a-Judge.md": "e90ba75b8b27121a1a616c6ff6612e335eac6a4c3a9c1d0962308a79f9a8de95",
+                "Vault/Home/AI & ML/LLM/Evaluation/Online Evaluation and AB Tests.md": "393cf0151bfd2440fdacf6055ad85d5038ae3bc50ddcb91277f0690379194b24",
+                "Vault/Home/AI & ML/LLM/Fine-tuning.md": "688c3430cec8a126e47b7ab0624f87fb696dda2a2d9c224c14d6a7846c1a402c",
+                "Vault/Home/AI & ML/LLM/Generation.md": "25aa0c1c4adf9222866fc1ac90497f26c8221c6a4a569bb11e31da68d5f486ac",
+                "Vault/Home/AI & ML/LLM/Graph Engineering.md": "4781d6c97bb70a343d3ac9a9169232d8d997964336c60061ff3bc8796ce17307",
+                "Vault/Home/AI & ML/LLM/Harness Engineering/Harness Engineering.md": "b6d2ea846c68dcd349bae643bdd32fc64e725874fcfa041996de8fd6ce18d1f2",
+                "Vault/Home/AI & ML/LLM/Harness Engineering/Model Context Protocol.md": "7aba7559611cda87c69119347b0011499faf0f1c340ee6ddc351147e47bb95b1",
+                "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Agent Instructions.md": "dca77a734ae90bad5eb812e600de40f9600d7ad71612aeae1d0e14ca3599b878",
+                "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Coding Agents.md": "434e760cd35da01a3d0cbe0503b72cdc54ff3c4c4efbe9ac73939389e6e094d6",
+                "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Hooks.md": "b000f5cf9111c13241134c83b31834826db87faa98cf3e17d7caf2b81f325bb2",
+                "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Plugins.md": "9794166b5be22ebc32064fbded86d16451b889a0dd2deb3eee594fa9f5647560",
+                "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Skills.md": "cebfbfde2ed34213173313289dae1905a96ada8cd9cf242f5e8899d9cfa71a5e",
+                "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tool Design.md": "a1068a0ec368c963de099f3c339187402ec099b55aac3ea42d2b3ac6f2839893",
+                "Vault/Home/AI & ML/LLM/Harness Engineering/Tooling/Tooling.md": "8b53d50abbcce4055802c37412cf7953d623d249d410ababb236aa781b931f8e",
+                "Vault/Home/AI & ML/LLM/LLM Caching.md": "dd94af4bc282dd711be370698123214fe3fd3326ffc706410f9312f3ede9b295",
+                "Vault/Home/AI & ML/LLM/LLM.md": "8485da800bf1311c0dd5d291ce59fbad0846be50eeae63aaa9526cdceafe1fb7",
+                "Vault/Home/AI & ML/LLM/Loop Engineering/Agent Loop.md": "6115e6b6e5ee1f019e7ca7b1c4afeac5b19652ab1800c9dbd0d0f0b2087ab834",
+                "Vault/Home/AI & ML/LLM/Loop Engineering/Loop Engineering.md": "2d16016fcb50653abc905a1d03b1ecfc323e64dd3a0a9765dcd218ef23d8c9dc",
+                "Vault/Home/AI & ML/LLM/Loop Engineering/Multi-Agentic Systems.md": "1880c7fba00595dfb5ea519824058e3e1674fce7f0ea7fda95e7080e91594099",
+                "Vault/Home/AI & ML/LLM/Model Selection and Routing.md": "7624f7616d52ea288e23a55f5de031bddbf32e14f01f117d348db5c8185c6a65",
+                "Vault/Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md": "32fc96c2db8721c2d2c028a62406e8ea2afa4039bf5abd5058778c0575025d92",
+                "Vault/Home/AI & ML/LLM/Prompt Engineering/In-Context Learning.md": "aec8d4df69222de966f87c667bbbf0bb3164f184eb2da627cf0972c833e9438d",
+                "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Composition.md": "84a9b61a52dd8b2026e8a931706afe4db890354045854a3046a0786df7063ac0",
+                "Vault/Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md": "c5d22bbbd3a9765204fad456821d1e9b830706eb5d317a01f3d51844840f4d16",
+                "Vault/Home/AI & ML/LLM/Prompt Engineering/Reasoning Techniques.md": "cc5123752230fa4edc23e921b9773c2683af3a8b34ad6e1db5b49a053bf8600a",
+                "Vault/Home/AI & ML/LLM/Safety/Guardrails.md": "afc0a0cfbe6eed93b9fc57ec3645c0605bf5667fff29c8e18414ba0554a005b4",
+                "Vault/Home/AI & ML/LLM/Safety/Hallucinations.md": "e3cf7bc75a4119db0b6feb92737ef44a7d5957cc9690992dcb4f0010639a3936",
+                "Vault/Home/AI & ML/LLM/Safety/LLM Watermarking.md": "9fb296e634e4ebf27f937fbab9cfb9deb9eaf3c24bc2a58ed1b708677f013038",
+                "Vault/Home/AI & ML/LLM/Safety/OWASP vulnerabilities on AI LLM.md": "fa865b251b7224dfa1843108142d6d44fcd86855ab497a615401a12b68298ad9",
+                "Vault/Home/AI & ML/LLM/Safety/Safety.md": "2ce7ea36243c2e95bf4cf62227de059a6f26b3ef9123f1b95a13211d3182db63",
+                "Vault/Home/AI & ML/Machine Learning/Data Drift.md": "e14e09b9ed4fef63ca13c38ce6b5204593da1a29fcaada6923d4f9a0008b0900",
+                "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md": "923797fcde40b9c70932b6e3912172f558c2e1ff7f8df3b21024125c194eb07a",
+                "Vault/Home/AI & ML/Machine Learning/Evaluation/Classification Evaluation.md": "95e2f48cde85a4bf6ebf9b989e3ad19ba86332d4e2705eae6fdbea7af37e5137",
+                "Vault/Home/AI & ML/Machine Learning/Evaluation/Evaluation.md": "396d9ad2e2c2a2e3e59040606b6808e32c746773ee93bd2bc7b790edf5dab86e",
+                "Vault/Home/AI & ML/Machine Learning/Evaluation/ROC-AUC and PR-AUC.md": "6dd7d020012ecf6568c0b86901d3845e4d784ea25a21777c9e87ed9e4d644760",
+                "Vault/Home/AI & ML/Machine Learning/Machine Learning.md": "2508c9a2a150b3a0b04070ed05b896a832e9472f9c99b321371e245cfa53798b",
+                "Vault/Home/AI & ML/Machine Learning/Natural Language Processing.md": "5cf76bfb71e5a38388be1231ba07cf87bbcc57d357c800f3e91eab184bba431b",
+                "Vault/Home/AI & ML/Machine Learning/Spectrum Of Automations.md": "7ea992af24787663a541333b609c87fe20181e2015e571aa034497b4324e6b26",
+                "Vault/Home/AI & ML/Machine Learning/Types/Types.md": "e4e018d986f6092929fc27b757b201d18ccbb4866f2b3a64a0861e1581f3773f",
+                "Vault/Home/AI & ML/Responsible AI.md": "9c2072d5e3705b46b55b00dc2126b46c72ddb199502e92024c43a9f262852cf4"
+              }
+            },
+            "export_required": true,
+            "automatic_export": true,
+            "prepared_source_version": 1,
+            "prepared_at": "2026-11-22T07:17:42.871632Z"
+          }
+        }
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-22T07:18:38.421997Z",
+    "checkpoint_at": "2026-11-22T07:18:43.032648Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
