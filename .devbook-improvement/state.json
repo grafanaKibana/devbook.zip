@@ -21165,11 +21165,11 @@
     "version": 1,
     "id": "e8c4d2c56c1b4b4ea6d2f82b910f28a6",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-22T07:08:33.289104Z",
-    "elapsed_seconds": 459.5791764,
+    "elapsed_seconds": 479.15399790000004,
     "calls_reserved": 12,
-    "responses_received": 11,
+    "responses_received": 12,
     "attempted_paths": [
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
       "Vault/Home/AI & ML/AI & ML.md",
@@ -22855,7 +22855,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-22T07:16:12.867821Z",
+    "checkpoint_at": "2026-11-22T07:16:32.442643Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -64065,6 +64065,191 @@
       "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-22T07:16:07.985423Z"
+    "prepared_at": "2026-11-22T07:16:07.985423Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "overall_reason": "The five edits only replace long dashes with colons or commas, which satisfies the no-long-dashes rule. Meaning is unchanged, and the rest of the note and its single card were independently checked and found sound.",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+            "verdict": "CLEAN",
+            "summary": "Whole note read. Explanation order runs from the failure taxonomy to metrics, ground truth, a worked example, tradeoffs and pitfalls. It is accurate and coherent. The only defects were five long dashes in two tables and the example. The edits removed them with no change in meaning, and no long dashes remain.",
+            "page_type": "Concept: AI & ML / LLM agent evaluation. The Questions and References sections are optional and present. The no-long-dashes note rule applies.",
+            "current_text_evidence": [
+              {
+                "quote": "Four properties are scored separately: validity, selection, arguments, and necessity.",
+                "line_start": 18,
+                "reason": "The opening states the operating idea and the diagnostic limit (leads, not root causes). It needs no rewrite."
+              },
+              {
+                "quote": "| Argument match | Arguments equal the expected values: exact for ids and enums, semantic for free text |",
+                "line_start": 49,
+                "reason": "The dash was replaced with a colon. The meaning is intact and the table stays readable."
+              },
+              {
+                "quote": "Verdict: schema-valid call, wrong target order, which deterministic",
+                "line_start": 74,
+                "reason": "The example now reads cleanly without a long dash, and it still explains why deterministic checks miss the error."
+              },
+              {
+                "quote": "| Reference match | Wrong tool, wrong argument values | Medium: needs labeled traces |",
+                "line_start": 82,
+                "reason": "The tradeoffs table uses colons consistently. Cost, coverage and blind spots remain accurate."
+              },
+              {
+                "quote": "Why should tool selection and argument accuracy be measured separately?",
+                "line_start": 115,
+                "reason": "The card tests one dependent behavior-and-why explanation. It is a direct question, the answer comes first, the card ID comment is retained, and a primary-source link is on the answer side."
+              }
+            ],
+            "target_resolution": "RESOLVED",
+            "split_suggestion": "No split: the note covers one cohesive topic (evaluating tool calls). It is compact, and separating validity, selection, arguments and necessity would fragment a coherent explanation.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "change_checks": [
+          {
+            "edit_index": 0,
+            "verdict": "WORTHWHILE",
+            "reason": "Removes an em dash from the metrics table per the style rule. Meaning is unchanged."
+          },
+          {
+            "edit_index": 1,
+            "verdict": "WORTHWHILE",
+            "reason": "Removes an em dash from the tradeoffs table. The cost meaning is preserved."
+          },
+          {
+            "edit_index": 2,
+            "verdict": "WORTHWHILE",
+            "reason": "Removes an em dash from the tradeoffs table. The cost meaning is preserved."
+          },
+          {
+            "edit_index": 3,
+            "verdict": "WORTHWHILE",
+            "reason": "Removes an em dash from the tradeoffs table. The cost meaning is preserved."
+          },
+          {
+            "edit_index": 4,
+            "verdict": "WORTHWHILE",
+            "reason": "Removes an em dash from the worked example. The sentence stays accurate and readable."
+          }
+        ],
+        "decision_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+          "citation_index": 1,
+          "reported_line_start": 49,
+          "resolved_line_start": 48
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+          "citation_index": 2,
+          "reported_line_start": 74,
+          "resolved_line_start": 73
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+          "citation_index": 4,
+          "reported_line_start": 115,
+          "resolved_line_start": 104
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md": "c34180e03f908696a62d4aa3be5ef07c93fb8ff03dfc3166fe88018b15600a6c"
+      },
+      "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The five edits only replace long dashes with colons or commas, which satisfies the no-long-dashes rule. Meaning is unchanged, and the rest of the note and its single card were independently checked and found sound.",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Tool-Call Evaluation.md",
+          "verdict": "CLEAN",
+          "summary": "Whole note read. Explanation order runs from the failure taxonomy to metrics, ground truth, a worked example, tradeoffs and pitfalls. It is accurate and coherent. The only defects were five long dashes in two tables and the example. The edits removed them with no change in meaning, and no long dashes remain.",
+          "page_type": "Concept: AI & ML / LLM agent evaluation. The Questions and References sections are optional and present. The no-long-dashes note rule applies.",
+          "current_text_evidence": [
+            {
+              "quote": "Four properties are scored separately: validity, selection, arguments, and necessity.",
+              "line_start": 18,
+              "reason": "The opening states the operating idea and the diagnostic limit (leads, not root causes). It needs no rewrite."
+            },
+            {
+              "quote": "| Argument match | Arguments equal the expected values: exact for ids and enums, semantic for free text |",
+              "line_start": 48,
+              "reason": "The dash was replaced with a colon. The meaning is intact and the table stays readable."
+            },
+            {
+              "quote": "Verdict: schema-valid call, wrong target order, which deterministic",
+              "line_start": 73,
+              "reason": "The example now reads cleanly without a long dash, and it still explains why deterministic checks miss the error."
+            },
+            {
+              "quote": "| Reference match | Wrong tool, wrong argument values | Medium: needs labeled traces |",
+              "line_start": 82,
+              "reason": "The tradeoffs table uses colons consistently. Cost, coverage and blind spots remain accurate."
+            },
+            {
+              "quote": "Why should tool selection and argument accuracy be measured separately?",
+              "line_start": 104,
+              "reason": "The card tests one dependent behavior-and-why explanation. It is a direct question, the answer comes first, the card ID comment is retained, and a primary-source link is on the answer side."
+            }
+          ],
+          "target_resolution": "RESOLVED",
+          "split_suggestion": "No split: the note covers one cohesive topic (evaluating tool calls). It is compact, and separating validity, selection, arguments and necessity would fragment a coherent explanation.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": [
+        {
+          "edit_index": 0,
+          "verdict": "WORTHWHILE",
+          "reason": "Removes an em dash from the metrics table per the style rule. Meaning is unchanged."
+        },
+        {
+          "edit_index": 1,
+          "verdict": "WORTHWHILE",
+          "reason": "Removes an em dash from the tradeoffs table. The cost meaning is preserved."
+        },
+        {
+          "edit_index": 2,
+          "verdict": "WORTHWHILE",
+          "reason": "Removes an em dash from the tradeoffs table. The cost meaning is preserved."
+        },
+        {
+          "edit_index": 3,
+          "verdict": "WORTHWHILE",
+          "reason": "Removes an em dash from the tradeoffs table. The cost meaning is preserved."
+        },
+        {
+          "edit_index": 4,
+          "verdict": "WORTHWHILE",
+          "reason": "Removes an em dash from the worked example. The sentence stays accurate and readable."
+        }
+      ],
+      "decision_checks": []
+    }
   }
 }
