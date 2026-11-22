@@ -1622,56 +1622,51 @@
       }
     },
     "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md": {
-      "content_hash": "f7a0e9bca233bb7c0cf6158e4b7a1823a0717947ef0c016b68d859f2c2f0d43c",
-      "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+      "content_hash": "8394cc5e1250012fa56fa50b8fdf12f96e9353472cd1fd06a71a8182cb4a24ab",
+      "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
       "outcome": "keep",
       "repair_input_hash": "",
       "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
       "review_process": "focused-whole-note-v1",
       "violation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "keep_review": {
-        "content_hash": "f7a0e9bca233bb7c0cf6158e4b7a1823a0717947ef0c016b68d859f2c2f0d43c",
-        "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+        "content_hash": "8394cc5e1250012fa56fa50b8fdf12f96e9353472cd1fd06a71a8182cb4a24ab",
+        "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
         "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
         "review": {
           "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
           "verdict": "CLEAN",
-          "summary": "Whole-note audit found no accurate-content, structure, or card defects. The opening states the use and limit of benchmarks, the table matches the cited benchmarks, the leaderboard section carries the needed conditions, and the example correctly refuses to name a winner. Remaining overlap (tau vs τ, example closing paragraph) is cosmetic, so keeping the note unchanged is justified.",
-          "page_type": "Concept — authorable prose with optional Questions and References; no special-page protection.",
+          "summary": "The note reads in a sensible order: purpose and limits, benchmark table, how to read leaderboards, why public scores miss internal workloads, then a worked example. The prose is plain and conditions are stated (scaffold held fixed, pass@1 vs pass^k, contamination, missing cost data). The single Qard tests one dependent task with a direct opening answer and a primary-source link. A rewrite would only be churn.",
+          "page_type": "Concept: applies the concept-note voice and optional Questions/References rules. No special-page protection.",
           "current_text_evidence": [
             {
               "quote": "A leaderboard score cannot make the final selection.",
-              "line_start": 19,
-              "reason": "States the operating idea and key boundary early: score measures a whole system, so public suites only shortlist."
-            },
-            {
-              "quote": "| AgentBench | 8 environments | Interactive tasks across OS, DB, web, games | per-environment success |",
-              "line_start": 29,
-              "reason": "Table facts (8 environments, per-environment success) match the AgentBench paper; the other rows likewise match their sources."
+              "line_start": 18,
+              "reason": "The opening states the key boundary: public scores shortlist, private evaluation decides, with the reason (system-level measurement, leakage, distribution mismatch)."
             },
             {
               "quote": "`pass^k` requires the task to succeed on every one of `k` attempts, so it exposes intermittent failures that an average hides.",
-              "line_start": 37,
-              "reason": "Correct mechanism distinction from average success, with the condition that changes the decision."
+              "line_start": 36,
+              "reason": "Gives the reliability metric with its mechanism and why it differs from pass@1; consistent with the tau-bench paper."
             },
             {
               "quote": "Human verification improves issue and test quality; it does not isolate public tasks from training.",
-              "line_start": 38,
-              "reason": "Precise, hedged contamination claim that separates curation from leakage."
+              "line_start": 37,
+              "reason": "Handles the contamination condition precisely, without overclaiming what Verified guarantees."
             },
             {
               "quote": "The example exposes missing evidence rather than a winner.",
-              "line_start": 62,
-              "reason": "The worked example correctly concludes the systems are not comparable instead of choosing one."
+              "line_start": 61,
+              "reason": "The worked example is internally consistent and draws the correct conclusion, keeping the model-isolation and system-comparison questions separate."
             },
             {
               "quote": "> [!qard]- Why can one base model produce very different results on the same agent benchmark?",
-              "line_start": 67,
-              "reason": "A single dependent task (scaffold and run conditions affect score), a direct question with a finite answer, an answer-side tau-bench source, and a retained ID."
+              "line_start": 66,
+              "reason": "One interview-style question testing one dependent explanation (scaffold and run conditions); answer opens with the direct reply, cites tau-bench, and has no long dashes."
             }
           ],
           "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the benchmark table, leaderboard reading rules and worked example all serve one decision (using public scores to shortlist, not select), and the note is compact.",
+          "split_suggestion": "No split: the benchmark survey, leaderboard-reading rules and the example form one coherent topic and are most useful together.",
           "findings": [],
           "source_checks": [],
           "rejection_equivalence": [],
@@ -1785,6 +1780,62 @@
             ],
             "target_resolution": "JUSTIFIED UNCHANGED",
             "split_suggestion": "No split: the benchmark table, reading rules and worked example form one coherent evaluation topic, and the neighboring evaluation notes are already linked.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          },
+          "review_process": "focused-whole-note-v1"
+        },
+        "8da8cd81f1220bba3ba0c345831914949768d1edb26c32f2a4bc37b567d19e5b": {
+          "content_hash": "f7a0e9bca233bb7c0cf6158e4b7a1823a0717947ef0c016b68d859f2c2f0d43c",
+          "rules_hash": "b630341d2ee4eb309ccd408e54f17f196c3f4a8ee3828f3ca777904953e45d42",
+          "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
+          "review": {
+            "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
+            "verdict": "CLEAN",
+            "summary": "Whole-note audit found no accurate-content, structure, or card defects. The opening states the use and limit of benchmarks, the table matches the cited benchmarks, the leaderboard section carries the needed conditions, and the example correctly refuses to name a winner. Remaining overlap (tau vs τ, example closing paragraph) is cosmetic, so keeping the note unchanged is justified.",
+            "page_type": "Concept — authorable prose with optional Questions and References; no special-page protection.",
+            "current_text_evidence": [
+              {
+                "quote": "A leaderboard score cannot make the final selection.",
+                "line_start": 19,
+                "reason": "States the operating idea and key boundary early: score measures a whole system, so public suites only shortlist."
+              },
+              {
+                "quote": "| AgentBench | 8 environments | Interactive tasks across OS, DB, web, games | per-environment success |",
+                "line_start": 29,
+                "reason": "Table facts (8 environments, per-environment success) match the AgentBench paper; the other rows likewise match their sources."
+              },
+              {
+                "quote": "`pass^k` requires the task to succeed on every one of `k` attempts, so it exposes intermittent failures that an average hides.",
+                "line_start": 37,
+                "reason": "Correct mechanism distinction from average success, with the condition that changes the decision."
+              },
+              {
+                "quote": "Human verification improves issue and test quality; it does not isolate public tasks from training.",
+                "line_start": 38,
+                "reason": "Precise, hedged contamination claim that separates curation from leakage."
+              },
+              {
+                "quote": "The example exposes missing evidence rather than a winner.",
+                "line_start": 62,
+                "reason": "The worked example correctly concludes the systems are not comparable instead of choosing one."
+              },
+              {
+                "quote": "> [!qard]- Why can one base model produce very different results on the same agent benchmark?",
+                "line_start": 67,
+                "reason": "A single dependent task (scaffold and run conditions affect score), a direct question with a finite answer, an answer-side tau-bench source, and a retained ID."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the benchmark table, leaderboard reading rules and worked example all serve one decision (using public scores to shortlist, not select), and the note is compact.",
             "findings": [],
             "source_checks": [],
             "rejection_equivalence": [],
@@ -21065,7 +21116,7 @@
     "status": "active",
     "phase": "review_completed",
     "started_at": "2026-11-22T07:08:33.289104Z",
-    "elapsed_seconds": 322.7986655999998,
+    "elapsed_seconds": 327.1835500999998,
     "calls_reserved": 8,
     "responses_received": 8,
     "attempted_paths": [
@@ -22605,7 +22656,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-22T07:13:56.087308Z",
+    "checkpoint_at": "2026-11-22T07:14:00.472193Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -63602,105 +63653,5 @@
       "feedback_snapshot": []
     }
   },
-  "parked_author_proposals": {},
-  "pending_author_proposal": {
-    "workload_id": "e8c4d2c56c1b4b4ea6d2f82b910f28a6",
-    "topic_id": "ai-ml-4edf0823",
-    "batch": {
-      "topic": "AI & ML",
-      "topic_id": "ai-ml-4edf0823",
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
-          "content": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nlevel: [\"3\"]\npriority: Medium\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Agents/Evaluation/Agent Benchmarks\"\nflashcard_uid: \"f16dc5d5\"\ncreated: \"2026-06-12T18:50:14.000Z\"\nmodified: \"2026-11-16T16:48:56.427Z\"\npublished: \"2026-07-08T13:28:37.403Z\"\n---\n\nAgent benchmarks run a model and its scaffold against a fixed public task suite. The tasks usually require several actions: edit a repository until hidden tests pass, operate a website, or combine browsing with calculation. These suites are useful for narrowing a model shortlist and checking whether an evaluation harness produces plausible results.\n\nA leaderboard score cannot make the final selection. It measures the model, prompt, tools, retry policy, and agent loop as one system. Public tasks may also leak into training data, and their distribution rarely resembles a production workload. A private [[Building an Evaluation Set]] must replay the actual tools, tasks, and failure costs before one candidate is selected.\n\n# The Major Benchmarks\n\n| Benchmark | Domain | Task | Headline metric | What it stresses |\n| --- | --- | --- | --- | --- |\n| SWE-bench (and Verified) | Software engineering | Resolve a real GitHub issue so the repo's hidden tests pass | % issues resolved | Long-horizon code navigation and editing. Verifiable end state |\n| tau-bench | Customer-service tools | Complete a transaction under a domain policy, with a simulated user | pass^1 and pass^k | Tool use, policy adherence, reliability across repeated runs |\n| GAIA | General assistant | Answer real-world questions needing browsing, files, and reasoning | % correct (exact-match) | Multi-tool, multi-step reasoning. Easy for humans, hard for models |\n| WebArena | Web navigation | Accomplish goals in self-hosted real web apps | task success rate | Grounded web interaction over long action sequences |\n| AgentBench | 8 environments | Interactive tasks across OS, DB, web, games | per-environment success | Breadth of agentic ability in one harness |\n| BFCL | Function calling | Select and fill the correct function call(s) | AST / executable accuracy | Tool selection and argument correctness, incl. \"no call needed\" |\n\nThe useful comparison starts with task shape. BFCL isolates the unit measured by [[Tool-Call Evaluation]]. SWE-bench Verified tests long-running coding work with an executable end state. τ-bench exposes reliability under policy constraints, while GAIA and WebArena cover browsing-heavy agents. A high score on the wrong task shape says little.\n\n# How to Read an Agent Leaderboard\n\n- **A fixed scaffold isolates the base model.** Planning, retries, tool descriptions, and context management can move the score as much as the base model. A score difference can be attributed to the model only when those parts are held constant. Complete systems with different scaffolds can still be compared as systems when they run the same tasks under the same attempt and cost budgets and report their run conditions, but that comparison does not isolate the model.\n- **Reliability needs its own metric.** `pass@1` reports average success across attempts. `pass^k` requires the task to succeed on every one of `k` attempts, so it exposes intermittent failures that an average hides.\n- **The age and curation of the set affect scores.** Scores on an old public suite may rise because examples or solutions entered training data. Human verification improves issue and test quality; it does not isolate public tasks from training. Public suites such as SWE-bench Verified are therefore potentially contaminated for frontier comparisons, and fresh private or rolling held-out tasks reduce that risk.\n- **Operating metrics may be absent.** Leaderboards often omit token cost, wall-clock latency, and tool-call count. A winning system that spends several dollars and forty calls per task may be the wrong production choice. Those measurements belong in [[Home/AI & ML/LLM/Agents/Evaluation/Evaluation|Agent Evaluation]].\n\n# Why Public Scores Miss Internal Workloads\n\nA benchmark samples one task distribution with its own tools, policies, and error formats. Internal agents face another. A model can lead GAIA and still mishandle a company-specific tool whose description is ambiguous or whose failures require recovery.\n\nPublic scores therefore filter candidates. Private evaluations decide between them. That private set should replay representative work through the real scaffold and score both individual [[Tool-Call Evaluation|tool-call]] decisions and the full [[Trajectory Evaluation|trajectory]]. Cost and repeated-run reliability belong beside task success.\n\n# Example\n\nTwo coding agents reported on SWE-bench Verified:\n\n```text\nSystem A: 48% resolved, single attempt (pass@1), scaffold X, cost unreported\nSystem B: 45% resolved, but pass^3 = 41% and $0.30/task, scaffold Y\n\nNaive read: A wins (48 > 45).\nEngineering read: reliability is not comparable. B reports pass^3 and cost;\nA reports neither, and the systems use different scaffolds. A system choice\nrequires running each with its own scaffold on the same repos, attempt count,\nand budget, with repeated trials.\n```\n\nThe example exposes missing evidence rather than a winner. System B reports repeated-run reliability and cost. System A does not. Its `48%` cannot be called lucky or unreliable from one aggregate alone. Comparing the two complete systems requires repeated trials for both on the same tasks, attempt count, and budget, with each keeping its own scaffold. A shared scaffold is required only to isolate the base model, which is a separate question from choosing between the systems.\n\n# Questions\n\n<!-- qard-id: 0d0c25bd-07f5-4f8d-a204-f23e5016b1ad -->\n> [!qard]- Why can one base model produce very different results on the same agent benchmark?\n> Because an agent benchmark scores a whole system, not the model alone. The result reflects the model together with its scaffold: prompts and policies, tool descriptions, planning and retry logic, context management, and the loop that runs it. Changing the scaffold can move the score even when the base model stays the same.\n>\n> Run conditions also matter. An agent can solve a task on one attempt and fail it on the next. τ-bench reports `pass^k`, the chance that all `k` trials of a task succeed, which exposes inconsistency that a single-attempt score hides.\n>\n> A fair model comparison therefore holds the task set, scaffold and run conditions constant and varies only the model. Comparing scaffolds is a separate experiment with the model held fixed. A leaderboard score describes one benchmark setup, not intrinsic model quality.\n>\n> [τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains](https://arxiv.org/html/2406.12045)\n\n# References\n\n- [SWE-bench -- can language models resolve real-world GitHub issues (Jimenez et al., 2023)](https://arxiv.org/abs/2310.06770)\n- [GAIA -- a benchmark for general AI assistants (Mialon et al., 2023)](https://arxiv.org/abs/2311.12983)\n- [WebArena -- a realistic web environment for autonomous agents (Zhou et al., 2023)](https://arxiv.org/abs/2307.13854)\n- [tau-bench -- tool-agent-user interaction with pass^k reliability (Yao et al., Sierra, 2024)](https://arxiv.org/abs/2406.12045)\n- [Berkeley Function-Calling Leaderboard -- tool selection and argument accuracy (Gorilla, UC Berkeley)](https://gorilla.cs.berkeley.edu/blogs/8_berkeley_function_calling_leaderboard.html)\n",
-          "hash": "8394cc5e1250012fa56fa50b8fdf12f96e9353472cd1fd06a71a8182cb4a24ab",
-          "topic": "AI & ML",
-          "violations": [],
-          "needs_fixing_ids": [],
-          "repair_input_hash": "",
-          "selection_reason": "changed"
-        }
-      ],
-      "feedback": [],
-      "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
-      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-      "review_process": "focused-whole-note-v1",
-      "pr": null
-    },
-    "proposal": {
-      "version": 1,
-      "edits": [],
-      "dispositions": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
-          "outcome": "keep",
-          "reason": "I read the whole note and found no defect that justifies an edit. The opening separates a benchmark's uses (shortlisting, harness checks) from what it can't do (final selection). The benchmark table matches the cited papers: SWE-bench resolves issues against hidden tests, tau-bench reports pass^k with a simulated user and domain policy, GAIA uses exact match, WebArena uses self-hosted web apps, AgentBench spans 8 environments, and BFCL scores AST and executable accuracy. The leaderboard-reading section handles the conditions correctly: scaffold control isolates the model, pass@1 versus pass^k, contamination, and missing cost and latency. The worked example is internally consistent and says it exposes missing evidence rather than naming a winner. The single Qard asks one gradeable question, its answer opens with the direct reply, and it cites the tau-bench paper. The wikilinks point to sibling notes that explain the related concepts. Rewording or adding cards would be churn without a reader benefit."
-        }
-      ],
-      "feedback": []
-    },
-    "source_hashes": {
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md": "8394cc5e1250012fa56fa50b8fdf12f96e9353472cd1fd06a71a8182cb4a24ab"
-    },
-    "feedback_keys": [],
-    "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
-    "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "repair_inputs": {
-      "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md": ""
-    },
-    "prepared_source_version": 1,
-    "prepared_at": "2026-11-22T07:13:32.698954Z",
-    "completed_review": {
-      "verdict": "CLEAN",
-      "overall_reason": "Independent whole-note audit found no accuracy, clarity, question-quality or rules defect. No edits were proposed, and the keep is justified by current-text evidence.",
-      "change_checks": [],
-      "notes": [
-        {
-          "path": "Vault/Home/AI & ML/LLM/Agents/Evaluation/Agent Benchmarks.md",
-          "verdict": "CLEAN",
-          "summary": "The note reads in a sensible order: purpose and limits, benchmark table, how to read leaderboards, why public scores miss internal workloads, then a worked example. The prose is plain and conditions are stated (scaffold held fixed, pass@1 vs pass^k, contamination, missing cost data). The single Qard tests one dependent task with a direct opening answer and a primary-source link. A rewrite would only be churn.",
-          "page_type": "Concept: applies the concept-note voice and optional Questions/References rules. No special-page protection.",
-          "current_text_evidence": [
-            {
-              "quote": "A leaderboard score cannot make the final selection.",
-              "line_start": 18,
-              "reason": "The opening states the key boundary: public scores shortlist, private evaluation decides, with the reason (system-level measurement, leakage, distribution mismatch)."
-            },
-            {
-              "quote": "`pass^k` requires the task to succeed on every one of `k` attempts, so it exposes intermittent failures that an average hides.",
-              "line_start": 36,
-              "reason": "Gives the reliability metric with its mechanism and why it differs from pass@1; consistent with the tau-bench paper."
-            },
-            {
-              "quote": "Human verification improves issue and test quality; it does not isolate public tasks from training.",
-              "line_start": 37,
-              "reason": "Handles the contamination condition precisely, without overclaiming what Verified guarantees."
-            },
-            {
-              "quote": "The example exposes missing evidence rather than a winner.",
-              "line_start": 61,
-              "reason": "The worked example is internally consistent and draws the correct conclusion, keeping the model-isolation and system-comparison questions separate."
-            },
-            {
-              "quote": "> [!qard]- Why can one base model produce very different results on the same agent benchmark?",
-              "line_start": 66,
-              "reason": "One interview-style question testing one dependent explanation (scaffold and run conditions); answer opens with the direct reply, cites tau-bench, and has no long dashes."
-            }
-          ],
-          "target_resolution": "JUSTIFIED UNCHANGED",
-          "split_suggestion": "No split: the benchmark survey, leaderboard-reading rules and the example form one coherent topic and are most useful together.",
-          "findings": [],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "PASS",
-            "clarity": "PASS",
-            "question_quality": "PASS",
-            "identity_safety": "PASS",
-            "rules_compliance": "PASS"
-          }
-        }
-      ]
-    }
-  }
+  "parked_author_proposals": {}
 }
