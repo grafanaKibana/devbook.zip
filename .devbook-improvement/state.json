@@ -21165,11 +21165,11 @@
     "version": 1,
     "id": "e8c4d2c56c1b4b4ea6d2f82b910f28a6",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-22T07:08:33.289104Z",
-    "elapsed_seconds": 659.2898562,
+    "elapsed_seconds": 690.4528519,
     "calls_reserved": 16,
-    "responses_received": 15,
+    "responses_received": 16,
     "attempted_paths": [
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
       "Vault/Home/AI & ML/AI & ML.md",
@@ -26677,7 +26677,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-22T07:19:32.578504Z",
+    "checkpoint_at": "2026-11-22T07:20:03.741499Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -67925,6 +67925,110 @@
       "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-22T07:19:27.758843Z"
+    "prepared_at": "2026-11-22T07:19:27.758843Z",
+    "completed_review": {
+      "verdict": "CLEAN",
+      "overall_reason": "The note is accurate and well ordered. Both edits are small, correct and serve a real weakness. No unsupported claims, no bundled cards, no remaining rule violations.",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Agents/Workflow Patterns.md",
+          "verdict": "CLEAN",
+          "summary": "I read the whole note. The five pattern descriptions match Anthropic's Building Effective AI Agents, and the Research system figures are correctly attributed to that system. The two edits remove an em dash and trailing annotation from the reference, and replace the vague 'now becomes a failure boundary' with the concrete 'single point of failure'. Together they fix the vault's no-long-dashes rule and sharpen one risk statement. Nothing else needed changing.",
+          "page_type": "Concept note. Applies the concept-note voice, the optional Questions and References rules, and the Qard card rules.",
+          "current_text_evidence": [
+            {
+              "quote": "Five workflow patterns cover the space between one",
+              "line_start": 16,
+              "reason": "The opening states the operating idea and the control-flow boundary quickly, with the patterns' differences following in plain order."
+            },
+            {
+              "quote": "The router becomes a single point of failure:",
+              "line_start": 43,
+              "reason": "The routing risk is now concrete: a perfect specialist cannot recover a request sent to the wrong branch."
+            },
+            {
+              "quote": "The number belongs to that system and evaluation, not to the pattern in general.",
+              "line_start": 74,
+              "reason": "The 90.2% statistic is correctly scoped and does not overclaim for the pattern."
+            },
+            {
+              "quote": "> [!qard]- Why is the orchestrator-workers pattern harder to operate than ordinary parallelization",
+              "line_start": 110,
+              "reason": "The card is one dependent behavior-and-why explanation. It is not bundled, is worded directly, and gives an answer-first reply with its mechanism and conditions."
+            },
+            {
+              "quote": "- [Patterns for Basic Agent Workflows (Anthropic cookbook)](https://platform.claude.com/cookbook/patterns-agents-basic-workflows)",
+              "line_start": 127,
+              "reason": "The reference is a bare descriptive link with no em dash and no trailing annotation."
+            }
+          ],
+          "target_resolution": "RESOLVED",
+          "split_suggestion": "No split: the five patterns form one coherent comparison along the same axis, which is who chooses the next step.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [
+            {
+              "fingerprint": "3fd0195aebe22928e501b312bfc8cb752e99596494e9d6ed969ffb179cba4d58",
+              "equivalent": false,
+              "reason": "A different note and unrelated code edit."
+            },
+            {
+              "fingerprint": "0edee5f0203803acc165c0049d2267a55596a7e6fe24fa880d7877062525177d",
+              "equivalent": false,
+              "reason": "A different note, about code-block spacing."
+            },
+            {
+              "fingerprint": "244d8a0f13c2abb4f10f48aecb71e8b61b9b273f632444076a4815a9956f07d9",
+              "equivalent": false,
+              "reason": "A different note, about code-block spacing."
+            },
+            {
+              "fingerprint": "27b8ff207ad19a6687a083b6a903afbf642cb7da722dcef9f41f92da607c9f84",
+              "equivalent": false,
+              "reason": "A different note, about code-block spacing."
+            },
+            {
+              "fingerprint": "a84e9c6353348559fc2fa8be75d2d5183237375a59e0bfcbdd61e59fbfd9b75f",
+              "equivalent": false,
+              "reason": "A different note, about prefix sum prose."
+            },
+            {
+              "fingerprint": "211e8deab424a6b66d3a0dcf54dbcdebb43502f289d5bd459bc79ac82aa5219c",
+              "equivalent": false,
+              "reason": "A different note, about NoSQL."
+            },
+            {
+              "fingerprint": "9071849019d08ac59c180c9079be25dd38f1d0f6e802aa017a629cbb5f68a7bd",
+              "equivalent": false,
+              "reason": "A different note, about re-ranking."
+            },
+            {
+              "fingerprint": "5d8c5515eb94740c04ec2b74de70fe5aceead457fb6b00387074c30c5b32f8a9",
+              "equivalent": false,
+              "reason": "A different note, about re-ranking."
+            }
+          ],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "change_checks": [
+        {
+          "edit_index": 0,
+          "verdict": "WORTHWHILE",
+          "reason": "The em dash and trailing annotation in the reference title conflict with the no-long-dashes rule and the bare-descriptive-link rule. The new title is plain and the URL is unchanged."
+        },
+        {
+          "edit_index": 1,
+          "verdict": "WORTHWHILE",
+          "reason": "'Now becomes a failure boundary' is vague. 'Single point of failure' is accurate for a router and keeps the meaning intact, since the next clause still says a wrong branch cannot be recovered."
+        }
+      ]
+    }
   }
 }
