@@ -21216,11 +21216,11 @@
     "version": 1,
     "id": "e8c4d2c56c1b4b4ea6d2f82b910f28a6",
     "status": "active",
-    "phase": "review_reserved",
+    "phase": "review_completed",
     "started_at": "2026-11-22T07:08:33.289104Z",
-    "elapsed_seconds": 853.7892588,
+    "elapsed_seconds": 874.3882419,
     "calls_reserved": 20,
-    "responses_received": 19,
+    "responses_received": 20,
     "attempted_paths": [
       "Vault/Home/AI & ML/Machine Learning/Evaluation/Calibration.md",
       "Vault/Home/AI & ML/AI & ML.md",
@@ -28049,7 +28049,7 @@
       }
     ],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-22T07:22:47.077908Z",
+    "checkpoint_at": "2026-11-22T07:23:07.676891Z",
     "topic": "AI & ML",
     "topic_id": "ai-ml-4edf0823",
     "current_batch": {
@@ -69179,6 +69179,137 @@
       "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-22T07:22:41.068148Z"
+    "prepared_at": "2026-11-22T07:22:41.068148Z",
+    "review_evidence": {
+      "raw_review": {
+        "verdict": "CLEAN",
+        "notes": [
+          {
+            "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+            "verdict": "CLEAN",
+            "summary": "Independent read of the whole note found no factual, editorial or card-quality defect that warrants an edit. The opening, selection table, six strategy sections, baselines, tradeoff table and cards are consistent with each other and with the Azure AI Search and LangChain behavior they describe.",
+            "page_type": "Concept: AI & ML / LLM / RAG note with optional Questions and References present; Qard cards and IDs are protected.",
+            "current_text_evidence": [
+              {
+                "quote": "Chunking sets the unit of retrieval: whatever the splitter emits is what gets embedded, matched against a query and passed to the model.",
+                "line_start": 19,
+                "reason": "The opening states the operating idea and the core tradeoff immediately, so the topic is quick to re-enter."
+              },
+              {
+                "quote": "Overlap is the only protection against a bad cut.",
+                "line_start": 41,
+                "reason": "Within the fixed-size section this is accurate: no other mechanism in that splitter protects a cut. Later sections cover the other strategies, so it is not misleading."
+              },
+              {
+                "quote": "Custom separators for table and code-block delimiters only make those positions preferred split points",
+                "line_start": 74,
+                "reason": "Preserves a precise limit and its remedy (an atomic-unit policy) instead of a slogan. This matches how the recursive splitter behaves."
+              },
+              {
+                "quote": "A distance breakpoint runs the other way, so a higher percentile produces fewer, larger chunks.",
+                "line_start": 104,
+                "reason": "Resolves the threshold-direction ambiguity in semantic chunking, which is a common source of error."
+              },
+              {
+                "quote": "Model-selected boundaries are not inherently more accurate, so agentic chunking has to beat that corpus baseline",
+                "line_start": 160,
+                "reason": "Closes the tradeoff section with a decision condition that is consistent with the agentic section."
+              }
+            ],
+            "target_resolution": "JUSTIFIED UNCHANGED",
+            "split_suggestion": "No split: the six strategies share one decision frame (the selection table, baselines and tradeoff table) and are most useful together. Each strategy section is compact enough to stay in this note.",
+            "findings": [],
+            "source_checks": [],
+            "rejection_equivalence": [],
+            "quality": {
+              "accuracy": "PASS",
+              "clarity": "PASS",
+              "question_quality": "PASS",
+              "identity_safety": "PASS",
+              "rules_compliance": "PASS"
+            }
+          }
+        ],
+        "overall_reason": "The note is accurate and clear, and it keeps its mechanisms, conditions and exceptions. Each card tests one gradeable task with an answer-first opening, existing IDs are intact, and no em or en dashes appear in prose. The last card overlaps the chunk-size card, but it works as a short overview and is not a defect. There are no edits, and the unchanged note is justified.",
+        "change_checks": []
+      },
+      "bindings": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+          "citation_index": 2,
+          "reported_line_start": 74,
+          "resolved_line_start": 75
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+          "citation_index": 3,
+          "reported_line_start": 104,
+          "resolved_line_start": 115
+        },
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+          "citation_index": 4,
+          "reported_line_start": 160,
+          "resolved_line_start": 178
+        }
+      ],
+      "source_hashes": {
+        "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md": "abfb6a41413d40ee10e6a2713f71f82cd75a9d2e1d5fddeb56d5f29dd72a3eb8"
+      },
+      "rules_hash": "8aec00234d467c6e4e60a81b46cf1365a13e0ad2f05872c08b4cf9997031b8d9",
+      "evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
+    },
+    "completed_review": {
+      "verdict": "CLEAN",
+      "notes": [
+        {
+          "path": "Vault/Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+          "verdict": "CLEAN",
+          "summary": "Independent read of the whole note found no factual, editorial or card-quality defect that warrants an edit. The opening, selection table, six strategy sections, baselines, tradeoff table and cards are consistent with each other and with the Azure AI Search and LangChain behavior they describe.",
+          "page_type": "Concept: AI & ML / LLM / RAG note with optional Questions and References present; Qard cards and IDs are protected.",
+          "current_text_evidence": [
+            {
+              "quote": "Chunking sets the unit of retrieval: whatever the splitter emits is what gets embedded, matched against a query and passed to the model.",
+              "line_start": 19,
+              "reason": "The opening states the operating idea and the core tradeoff immediately, so the topic is quick to re-enter."
+            },
+            {
+              "quote": "Overlap is the only protection against a bad cut.",
+              "line_start": 41,
+              "reason": "Within the fixed-size section this is accurate: no other mechanism in that splitter protects a cut. Later sections cover the other strategies, so it is not misleading."
+            },
+            {
+              "quote": "Custom separators for table and code-block delimiters only make those positions preferred split points",
+              "line_start": 75,
+              "reason": "Preserves a precise limit and its remedy (an atomic-unit policy) instead of a slogan. This matches how the recursive splitter behaves."
+            },
+            {
+              "quote": "A distance breakpoint runs the other way, so a higher percentile produces fewer, larger chunks.",
+              "line_start": 115,
+              "reason": "Resolves the threshold-direction ambiguity in semantic chunking, which is a common source of error."
+            },
+            {
+              "quote": "Model-selected boundaries are not inherently more accurate, so agentic chunking has to beat that corpus baseline",
+              "line_start": 178,
+              "reason": "Closes the tradeoff section with a decision condition that is consistent with the agentic section."
+            }
+          ],
+          "target_resolution": "JUSTIFIED UNCHANGED",
+          "split_suggestion": "No split: the six strategies share one decision frame (the selection table, baselines and tradeoff table) and are most useful together. Each strategy section is compact enough to stay in this note.",
+          "findings": [],
+          "source_checks": [],
+          "rejection_equivalence": [],
+          "quality": {
+            "accuracy": "PASS",
+            "clarity": "PASS",
+            "question_quality": "PASS",
+            "identity_safety": "PASS",
+            "rules_compliance": "PASS"
+          }
+        }
+      ],
+      "overall_reason": "The note is accurate and clear, and it keeps its mechanisms, conditions and exceptions. Each card tests one gradeable task with an answer-first opening, existing IDs are intact, and no em or en dashes appear in prose. The last card overlaps the chunk-size card, but it works as a short overview and is not a defect. There are no edits, and the unchanged note is justified.",
+      "change_checks": []
+    }
   }
 }
