@@ -22584,14 +22584,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-23T07:55:37.984844Z",
-    "elapsed_seconds": 0.0009441,
+    "elapsed_seconds": 6.1615864,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-23T07:55:37.985413Z"
+    "checkpoint_at": "2026-11-23T07:55:44.145981Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
