@@ -9,7 +9,7 @@ qard-deck: "AI & ML"
 qard-topic: "LLM/Agents/Evaluation/Tool-Call Evaluation"
 flashcard_uid: "1d83d54c"
 created: "2026-06-12T18:50:14.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-22T07:16:07.985Z"
 published: "2026-07-08T13:28:37.404Z"
 ---
 
@@ -45,7 +45,7 @@ flowchart TD
 | --- | --- | --- |
 | Invalid-call rate | Fraction of calls that are malformed, unknown, or schema-invalid | Deterministic |
 | Tool-selection accuracy | Right tool chosen for the step (incl. correctly choosing *no* call) | Reference or judge |
-| Argument match | Arguments equal the expected values — exact for ids/enums, semantic for free text | Reference (exact) + judge (semantic) |
+| Argument match | Arguments equal the expected values: exact for ids and enums, semantic for free text | Reference (exact) + judge (semantic) |
 | Redundant-call rate | Duplicate or no-progress calls per task | Deterministic (hash of tool+args) + judge |
 | Calls-per-task | Total calls vs the minimum a clean solve needs | Counter |
 
@@ -70,7 +70,7 @@ Agent call: issue_refund(order_id="4851", amount="full")
 - Arguments:  order_id 4851 != expected 4815           [reference: FAIL]
 - Necessary:  refund operation needed, not a repeat    [PASS]
 
-Verdict: schema-valid call, wrong target order — the failure deterministic
+Verdict: schema-valid call, wrong target order, which deterministic
 checks cannot see. Caught only because the reference pinned order_id=4815.
 ```
 
@@ -78,9 +78,9 @@ checks cannot see. Caught only because the reference pinned order_id=4815.
 
 | Scorer | Catches | Cost | Blind to |
 | --- | --- | --- | --- |
-| Deterministic checks | Malformed calls and unknown tools via schema validation; exact duplicates via comparison with earlier calls | Lowest — runs pre-execution | Semantically wrong arguments, wrong tool choice |
-| Reference match | Wrong tool, wrong argument values | Medium — needs labeled traces | Valid alternate tools/paths the reference didn't list |
-| LLM judge | Tool-choice reasonableness, necessity, semantic args | Highest — a judge call per step, plus judge bias | Subtle value errors a reference would pin exactly |
+| Deterministic checks | Malformed calls and unknown tools via schema validation; exact duplicates via comparison with earlier calls | Lowest: runs pre-execution | Semantically wrong arguments, wrong tool choice |
+| Reference match | Wrong tool, wrong argument values | Medium: needs labeled traces | Valid alternate tools/paths the reference didn't list |
+| LLM judge | Tool-choice reasonableness, necessity, semantic args | Highest: a judge call per step, plus judge bias | Subtle value errors a reference would pin exactly |
 
 Deterministic validity checks fit every call: they are cheap and can block malformed requests before execution. Reference matching fits tools where a wrong value is expensive, such as payments or deletion. A judge fits open-ended selection and necessity decisions, provided its scores are calibrated against human labels. Otherwise it may reward a longer trace simply because the trace looks more thorough.
 

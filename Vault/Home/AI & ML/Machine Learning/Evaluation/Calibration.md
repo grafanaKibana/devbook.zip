@@ -6,7 +6,7 @@ priority: Medium
 status: In Progress
 publish: true
 created: "2026-06-11T07:39:53.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-22T07:09:20.954Z"
 published: "2026-07-08T13:14:17.492Z"
 ---
 
@@ -81,9 +81,9 @@ Token-level [[Generation|logprobs]] are sometimes treated as LLM confidence. The
 
 | Method | Data needed | Flexibility | Effect on accuracy | Best for |
 | --- | --- | --- | --- | --- |
-| Platt scaling | Low | Low — assumes sigmoid distortion | Ranking stays. Thresholded labels may change | Small calibration sets. SVM-style scores |
-| Isotonic regression | High | High — any monotonic distortion | Does not reverse score order, but stepwise ties can change ranking metrics. Thresholded labels may change | Larger sets where the distortion is non-sigmoid |
-| Temperature scaling | Low | Low — single global scalar | Unchanged (argmax preserved) | Neural network logits. Overconfidence |
+| Platt scaling | Low | Low, assumes sigmoid distortion | Ranking stays. Thresholded labels may change | Small calibration sets. SVM-style scores |
+| Isotonic regression | High | High, any monotonic distortion | Does not reverse score order, but stepwise ties can change ranking metrics. Thresholded labels may change | Larger sets where the distortion is non-sigmoid |
+| Temperature scaling | Low | Low, single global scalar | Unchanged (argmax preserved) | Neural network logits. Overconfidence |
 | Retrain with a proper scoring loss | Full retrain | Built into training | Can change | Training is controlled and calibration belongs in the model objective |
 
 Start with the curve and a proper scoring rule on held-out data. Ranking-only systems may not need calibrated probabilities. When a formula or person acts on the number, choose the smallest correction that matches the observed shape: temperature scaling for a global logit error, Platt for a sigmoid-shaped distortion, or isotonic with enough data for a more irregular monotonic mapping. Recheck after model or distribution changes.
