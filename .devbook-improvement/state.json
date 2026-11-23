@@ -22941,16 +22941,16 @@
     "version": 1,
     "id": "c5ff137277bf40d3a31145a9dd52684e",
     "status": "active",
-    "phase": "author_reserved",
+    "phase": "author_completed",
     "started_at": "2026-11-23T07:55:37.984844Z",
-    "elapsed_seconds": 125.841213,
+    "elapsed_seconds": 156.8346044,
     "calls_reserved": 3,
-    "responses_received": 2,
+    "responses_received": 3,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-23T07:57:43.825612Z",
+    "checkpoint_at": "2026-11-23T07:58:14.819009Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -60523,12 +60523,59 @@
     },
     "proposal": {
       "version": 1,
-      "edits": [],
+      "edits": [
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+          "expected_hash": "f2c61d6d647863b8447721f64df6e6822881e5678f79342a31874254bf3277b5",
+          "before": "PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare `pg_last_wal_replay_lsn()` (or an equivalent replay-position signal) with the required commit LSN.",
+          "after": "Before PostgreSQL 19, application or custom database logic must poll and compare `pg_last_wal_replay_lsn()` (or an equivalent replay-position signal) with the required commit LSN. PostgreSQL 19 adds the top-level `WAIT FOR LSN` command, which in its default `standby_replay` mode waits on a standby until replay reaches the target, with an optional `TIMEOUT`. It compares only the numeric LSN and ignores timelines, and recovery conflicts can interrupt the wait.",
+          "reason": "The earlier sentence stated that polling is required, which is outdated for PostgreSQL 19, where a built-in wait command exists.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Before PostgreSQL 19 polling replay LSN is needed",
+            "PostgreSQL 19 provides WAIT FOR LSN with standby_replay default and timeout",
+            "WAIT FOR LSN ignores timelines and can be interrupted by recovery conflicts"
+          ],
+          "sources": [
+            {
+              "url": "https://www.postgresql.org/docs/19/sql-wait-for.html",
+              "claim": "WAIT FOR LSN syntax, default standby_replay mode, TIMEOUT option, numeric-only LSN comparison without timelines, top-level only, recovery conflict interruption",
+              "version": "PostgreSQL 19"
+            }
+          ],
+          "feedback_keys": [],
+          "problem": "The read-your-writes passage says PostgreSQL has no built-in wait and polling is required, which is version-incomplete for PostgreSQL 19.",
+          "reader_benefit": "Readers get the correct version-specific options for waiting on a replay position, with the command's limits."
+        },
+        {
+          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
+          "expected_hash": "f2c61d6d647863b8447721f64df6e6822881e5678f79342a31874254bf3277b5",
+          "before": "- [PostgreSQL warm standby](https://www.postgresql.org/docs/current/warm-standby.html)",
+          "after": "- [PostgreSQL warm standby](https://www.postgresql.org/docs/current/warm-standby.html)\n- [PostgreSQL WAIT FOR](https://www.postgresql.org/docs/19/sql-wait-for.html)",
+          "reason": "Adds the primary source for the new WAIT FOR LSN claim.",
+          "kind": "note",
+          "learning_target": "same",
+          "essential_meanings": [
+            "Reference to the WAIT FOR documentation"
+          ],
+          "sources": [
+            {
+              "url": "https://www.postgresql.org/docs/19/sql-wait-for.html",
+              "claim": "Documents WAIT FOR LSN",
+              "version": "PostgreSQL 19"
+            }
+          ],
+          "feedback_keys": [],
+          "problem": "The new WAIT FOR LSN statement needs a primary reference.",
+          "reader_benefit": "Readers can verify the command's behavior in official documentation."
+        }
+      ],
       "dispositions": [
         {
           "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-          "outcome": "keep",
-          "reason": "I read the whole note and found no verified defect that justifies an edit. The models section keeps the mechanisms and limits together. Single-leader failover separates quorum from fencing. The SQL Server section covers CLUSTER_TYPE NONE (manual failover, read scale) and EXTERNAL with Pacemaker, which matches Microsoft's availability group documentation. The multi-leader section covers LWW, CRDTs and application-level resolution, and notes that peer-to-peer replication relies on write partitioning. The leaderless section correctly says W+R>N gives overlap but not linearizability, and it separates DynamoDB's documented consistency modes from the Dynamo paper's quorum model. The lag section ties each anomaly (read-your-writes, monotonic reads, consistent prefix) to a position-token fix. Its PostgreSQL details (pg_last_wal_replay_lsn, pg_current_wal_lsn, replication slots with max_slot_wal_keep_size) match the PostgreSQL warm standby and monitoring documentation. The note's later sections, on failover, CAP/PACELC, tradeoffs and pitfalls, repeat some earlier points. That repetition is tolerable because each section applies the point to a different decision. The note has no Qard cards and no known violations. The prose avoids long dashes and the code fence has a language identifier. The references are bare descriptive links. Editing would add churn, not clarity."
+          "outcome": "changed",
+          "reason": "The whole note was audited. Quorum versus fencing, W+R>N, DynamoDB modes, SQL Server cluster types and slot handling are sound. The read-your-writes passage was version-incomplete because PostgreSQL 19 adds WAIT FOR LSN. The edit now states the version split and the command's limits, and adds the primary reference."
         }
       ],
       "feedback": []
@@ -60543,8 +60590,10 @@
       "Vault/Home/Data Persistence/SQL/Replication.md": ""
     },
     "prepared_source_version": 1,
-    "prepared_at": "2026-11-23T07:56:24.268672Z",
-    "blocked_review": {
+    "prepared_at": "2026-11-23T07:58:14.818971Z",
+    "review_repair_key": "8ab458bb12c7c6c22532d634c2c0a1fab5e4e94af88669df077fdb2805ba640b",
+    "repair_reserved": true,
+    "repair_review": {
       "verdict": "CHANGES REQUIRED",
       "overall_reason": "The keep disposition leaves one version-specific factual gap. The read-your-writes passage says application logic must poll for a replay position. PostgreSQL 19 documents a built-in WAIT FOR LSN command for this, so the note misleads for current versions.",
       "notes": [
@@ -60607,60 +60656,6 @@
       ],
       "feedback": []
     },
-    "repair_review": {
-      "verdict": "CHANGES REQUIRED",
-      "overall_reason": "The keep disposition leaves one version-specific factual gap. The read-your-writes passage says application logic must poll for a replay position. PostgreSQL 19 documents a built-in WAIT FOR LSN command for this, so the note misleads for current versions.",
-      "notes": [
-        {
-          "path": "Vault/Home/Data Persistence/SQL/Replication.md",
-          "verdict": "CHANGES REQUIRED",
-          "summary": "The note is generally accurate and well organized. It separates quorum from fencing, and W+R>N overlap from linearizability. It also separates DynamoDB's documented modes from the Dynamo quorum model. The read-your-writes passage is outdated for PostgreSQL 19, which adds a WAIT FOR LSN command, so the keep is not justified.",
-          "page_type": "Concept note (Data Persistence/SQL). It has no Qard cards, so the Qard and identity rules do not apply. The rules checked were typed frontmatter, MD040 on the code fence, no long dashes, and bare reference links.",
-          "current_text_evidence": [
-            {
-              "quote": "PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll and compare",
-              "line_start": 59,
-              "reason": "This states that polling is required. PostgreSQL 19 documents WAIT FOR LSN (default mode standby_replay) as a built-in wait for a replay position, so the claim is version-incomplete and misleading."
-            },
-            {
-              "quote": "A voting quorum prevents two candidates in the same voting configuration from both winning a majority.",
-              "line_start": 25,
-              "reason": "The quorum versus fencing distinction is correct and well explained. This is a strong passage to preserve."
-            },
-            {
-              "quote": "`W + R > N` creates overlap between the acknowledged write and read sets, but overlap alone does not serialize concurrent writes",
-              "line_start": 41,
-              "reason": "The quorum overlap condition is accurate and properly bounded."
-            }
-          ],
-          "target_resolution": "UNRESOLVED",
-          "split_suggestion": "No split: the models, lag, routing tokens, failover and pitfalls form one coherent replication topic. Splitting would separate the mechanisms from the consistency consequences they depend on.",
-          "findings": [
-            {
-              "severity": "Medium",
-              "dimension": "Accuracy",
-              "location": "# Replication Lag, item 1 (Read-your-writes), line 59",
-              "evidence": "The note says \"PostgreSQL has no built-in `pg_wait_for_lsn`. Application or custom database logic must poll\". The PostgreSQL 19 docs describe `WAIT FOR LSN 'lsn' WITH (MODE ..., TIMEOUT ..., NO_THROW)`. Its default `standby_replay` mode waits until `pg_last_wal_replay_lsn()` reaches the target, and it must run as a top-level command.",
-              "effect": "A reader on PostgreSQL 19 or later is told polling is the only option and misses the built-in mechanism. The Position Token section also describes only comparison logic.",
-              "fix": "State the version split. Before PostgreSQL 19, the application polls `pg_last_wal_replay_lsn()`. From PostgreSQL 19, the `WAIT FOR LSN` command with a timeout can wait for the replay position. Note its limits: it compares only the numeric LSN, ignores timelines, and can be interrupted by recovery conflicts. Add the PostgreSQL WAIT FOR reference to # References."
-            }
-          ],
-          "source_checks": [],
-          "rejection_equivalence": [],
-          "quality": {
-            "accuracy": "FAIL",
-            "clarity": "PASS",
-            "question_quality": "NOT APPLICABLE",
-            "identity_safety": "NOT APPLICABLE",
-            "rules_compliance": "PASS"
-          }
-        }
-      ],
-      "change_checks": []
-    },
-    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e",
-    "review_repair_key": "8ab458bb12c7c6c22532d634c2c0a1fab5e4e94af88669df077fdb2805ba640b",
-    "author_repair_pending": true,
-    "repair_reserved": true
+    "previous_evaluation_hash": "6bd9590532969da6878add98321495dea296f20bb82edd2b539b05ea9b10733e"
   }
 }
