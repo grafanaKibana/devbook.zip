@@ -1,0 +1,395 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+      "text": "---\ntopic: [AI & ML]\nsubtopic: [LLM]\nlevel: [\"3\"]\npriority: Low\nstatus: In Progress\npublish: true\nqard-deck: \"AI & ML\"\nqard-topic: \"LLM/Prompt Engineering/Automated Prompt Optimization\"\ncreated: \"2026-02-28T13:40:02.000Z\"\nmodified: \"2026-11-19T19:50:06.148Z\"\npublished: \"2026-07-08T13:14:17.480Z\"\n---\n\nTuning a prompt by hand works for a few prompts, but each model upgrade, new domain or changed example turns every wording change into another experiment, and the experiments multiply with the prompts. Prompt optimization runs that experiment as a loop: candidates are proposed, each candidate is scored on a fixed set of examples, and the best one is kept.\n\nThe loop does not remove judgment, because someone still decides which examples are in the set, what counts as a correct output and what score is good enough to release, so a poor example set selects a poor prompt just as consistently as a good set selects a good one. The techniques differ in what they improve:\n\n- **Meta prompting.** The instruction, by hand. A model drafts one rewrite from failed outputs, and a person decides whether to keep it.\n- **Automatic Prompt Engineer (APE).** The instruction, by search. A model proposes many instructions, and a set of examples with known answers picks the winner.\n- **Active-Prompt.** The worked examples in the prompt. The questions the model is unsure about are found first, so a person writes examples only for those.\n- **Directional Stimulus Prompting (DSP).** A hint for each input. A small trained model writes the hint, which is added to the large model's prompt.\n\n# Meta Prompting\n\nA prompt that keeps failing in the same way is slow to fix by hand, because each wording change is a guess that has to be tried before anyone knows whether it helped. Meta prompting gives a model the current prompt and the outputs that went wrong and asks the model to write a better prompt, so the rewrite starts from the actual failures. The rewriting happens while the prompt is being developed, so it adds no calls per request. The same approach also covers drafting a first prompt from a task description and asking a model to list the weaknesses of an existing prompt.\n\n```text\n# Current prompt and the output that went wrong\nSummarize this incident report.\nReport: \"14:02 deploy of the checkout service. 14:05 payments start failing.\n14:20 deploy rolled back, payments recover.\nCause: the deploy removed a database column that the payment code still read.\"\n\n-> Checkout payments failed for a short time after a deploy and were restored by a rollback.\n# No times and no cause, although the report has both.\n\n# Meta prompt: the current prompt, the failed output and the requirement go to a model\nThe prompt \"Summarize this incident report.\" produced the summary below.\nSummary: \"Checkout payments failed for a short time after a deploy and were restored by a rollback.\"\nThe summary must state the timeline, the root cause and the actions taken.\nRewrite the prompt so that the output is JSON with the keys timeline, root_cause, actions.\n\n-> Summarize the incident report as JSON with the keys timeline, root_cause and actions.\n   timeline lists each event with its time, root_cause is one sentence,\n   actions lists what was done. Return only the JSON.\n# The candidate prompt. Each new rule answers something the failed summary lacked.\n\n# Candidate prompt on the same report\n-> {\"timeline\": [\"14:02 deploy of the checkout service\", \"14:05 payments start failing\",\n                 \"14:20 deploy rolled back, payments recover\"],\n    \"root_cause\": \"The deploy removed a database column that the payment code still read.\",\n    \"actions\": [\"Rolled back the deploy\"]}\n```\n\nThe rewrite is only a candidate at this point, because it has been tried on the one report it was written for. Meta prompting keeps a person in the revision loop. The automated methods that follow turn the same candidate-and-evaluator idea into a search process that proposes and scores prompt variants without a manual edit at each step.\n\n## Pitfalls\n\n### A rewrite that fixes the failure and breaks other reports\n\nThe model that wrote the candidate saw only the failed summary, so the candidate's rules fit that failure and can go wrong on a report that looks different.\n\n```text\n# Candidate prompt on a report where the cause is not known yet\nReport: \"09:10 search returns errors. 09:25 search service restarted, errors stop.\nCause still under investigation.\"\n\n-> {\"timeline\": [\"09:10 search returns errors\", \"09:25 search service restarted, errors stop\"],\n    \"root_cause\": \"The search service ran out of memory.\",\n    \"actions\": [\"Restarted the search service\"]}\n# The prompt demands a root cause, so the model made one up.\n\n# Fix: the candidate is scored on reports that were not used for the rewrite,\n# including this one. The invented cause shows up there, and the prompt gets one more rule:\nUse null for a key when the report does not state the value.\n\n-> {\"timeline\": [\"09:10 search returns errors\", \"09:25 search service restarted, errors stop\"],\n    \"root_cause\": null,\n    \"actions\": [\"Restarted the search service\"]}\n```\n\nReports the rewrite never saw are what reveal this before release, because the report that caused the rewrite can only confirm that the old failure is gone. The prompt is versioned together with its evaluator so that a score can be traced to the pair that produced it. A rollback threshold, an error rate in production at which the previous prompt version is restored, limits the damage from regressions the evaluation misses.\n\n# Automatic Prompt Engineer (APE)\n\nMeta prompting yields one rewrite at a time, and a person has to judge that rewrite without a score, so comparing many wordings by hand does not scale. Automatic Prompt Engineer (APE) has a model propose many candidate instructions, runs each candidate on a set of examples with known answers, and keeps the candidate with the highest score, so the example set does the choosing instead of a person's impression.\n\n```text\n# Task: sort shop customer messages into refund_request, delivery_question, account_question.\n\n# Example set with known answers (five shown, a real set is larger)\n\"The headphones arrived broken, I want my money back.\"   -> refund_request\n\"Where is my parcel? It was due on Monday.\"              -> delivery_question\n\"I cannot log in after changing my email.\"               -> account_question\n\"The parcel never came, please return my payment.\"       -> refund_request\n\"Can the courier leave the box with a neighbour?\"        -> delivery_question\n\n# Step 1: a model proposes candidate instructions. The three labels are added to each.\nA: \"Classify the message.\"\nB: \"Decide what the customer is complaining about and pick a label.\"\nC: \"Pick the label for what the customer wants to happen next.\"\n\n# Step 2: each candidate labels every example, and code counts the correct labels.\nA: 3 of 5   # twice answered \"complaint\", which is not one of the labels\nB: 4 of 5   # \"parcel never came, return my payment\" became delivery_question\nC: 5 of 5\n\n# Step 3: C is kept, because the count decided and nobody compared wordings by eye.\n```\n\nB and C differ by a few words and still score differently, which is why the search tries many wordings instead of trusting one. The search costs one model call per candidate per example, 15 calls here, and the winner belongs to the model and the task it was scored on, so the search is rerun when either changes.\n\n## Pitfalls\n\n### A small example set rewards luck\n\nA candidate can win the search because of one or two messages, so a win on a small set may not hold on other messages.\n\n```text\n# Search set: the five messages above\nB: 4 of 5\nC: 5 of 5        # C wins by a single message\n\n# Test set: 200 other messages that the search never used\nB: 176 of 200\nC: 171 of 200    # the lead is gone\n\n# Fix: the winner of the search is confirmed on the separate test set before release.\n```\n\nThe search set and the final test set stay separate because a candidate picked for its score on one set has already been fitted to that set, so only messages the search never used can confirm the win. A set that is small, or that leaves out kinds of messages production receives, rewards noise in the same way. No fixed number of examples is enough for every case, because the number depends on the metric, on how small a difference between candidates still matters, and on how much error is acceptable.\n\n### A benchmark win that is not a product win\n\nAn instruction that raises the score on a public benchmark may do nothing, or harm, on the task the product runs.\n\n```text\n# Two instruction endings, scored on a public math benchmark (numbers are illustrative)\n\"Answer directly.\"                      61 of 100\n\"Work through the problem in steps.\"    78 of 100\n\n# The same two endings on 100 shop messages\n\"Answer directly.\"                      93 of 100\n\"Work through the problem in steps.\"    90 of 100   # the label is sometimes buried in the explanation\n\n# Fix: candidates are scored on messages shaped like production traffic.\n```\n\nThe math benchmark rewards step-by-step arithmetic, which sorting customer messages does not need, so the gain does not carry over. Public benchmarks compare methods under controlled conditions, while a release decision needs examples that look like production traffic and a metric tied to what a wrong label costs.\n\n# Active-Prompt\n\nA worked example, a question with its reasoning written out as described in [[Reasoning Techniques]], is expensive because a person has to write it, and the effort is wasted on questions the model already gets right. Active-Prompt has the model answer each question several times and treats disagreement between those answers as a sign that the model is unsure, so a person writes worked examples only for the questions where the answers split.\n\n```text\n# Each shop message is labelled five times by the model, with no worked examples in the prompt.\n\n\"Where is my parcel? It was due on Monday.\"\n-> delivery_question x5\n# All five agree, so a worked example here would teach the model nothing new. Skipped.\n\n\"I cannot log in after changing my email.\"\n-> account_question x5\n# Skipped for the same reason.\n\n\"The parcel never came, please return my payment.\"\n-> refund_request x3, delivery_question x2\n# The answers split, so the model is unsure. This message goes to a person.\n\n# The person writes the worked example, which is added to the prompt:\nMessage: \"The parcel never came, please return my payment.\"\nReasoning: The missing parcel is the cause, but the customer asks for the payment back, so the request is a refund.\nLabel: refund_request\n```\n\nA person still writes every worked example, so the method only decides where that effort goes. The selection costs several model calls per message, five here, across the whole pool of messages, and the pool needs no known answers because the disagreement is measured between the model's own answers.\n\n## Pitfalls\n\n### Disagreement caused by an unclear question\n\nThe answers can also split because the message itself is unclear, and a worked example for such a message would teach the model a guess.\n\n```text\n\"It still has not worked.\"\n-> account_question x2, delivery_question x2, refund_request x1\n# The message does not say what \"it\" is, so no label is clearly right.\n\n# Fix: the person marks the message as unclear and removes it from the pool\n# instead of writing a worked example for it.\n```\n\n# Directional Stimulus Prompting\n\nA large model usually cannot be retrained for one task, and a fixed instruction says the same thing for every input, so it cannot name what matters in one particular input. Directional Stimulus Prompting (DSP) trains a small model to write a short hint for each input, and the hint is added to the large model's prompt.\n\n```text\n# Input: a support conversation\nCustomer: My order 1234 came with broken headphones.\nAgent: Sorry about that. A replacement can ship tomorrow, or the payment can be returned.\nCustomer: Replacement please, but to my office address, not home.\nAgent: Done. It ships tomorrow to the office address.\n\n# Without a hint\nSummarize the conversation in one sentence.\n-> The customer reported broken headphones and the agent resolved the issue.\n# True, but what was agreed is missing.\n\n# With a hint: the small model reads the conversation and writes a few keywords.\nSummarize the conversation in one sentence.\nHint: replacement, ships tomorrow, office address\n-> The broken headphones from order 1234 will be replaced, shipping tomorrow to the office address.\n# The hint line is the only difference between the two prompts.\n```\n\nThe small model learns which hints lead to good summaries from example conversations with good summaries, so DSP needs training data and a training run, and a hint model trained for summaries does not write useful hints for another task. The small model also runs on every request, which makes DSP the one technique in this note that adds a model call per request instead of work during development only.\n\n# Tradeoffs\n\n| Technique | What it improves | What it needs | What it costs |\n| --- | --- | --- | --- |\n| Meta prompting | The instruction, one rewrite at a time. | Failed outputs and a person to review the rewrite. | A person's time per rewrite. The rewrite has no score until it is tried on other inputs. |\n| APE | The instruction, picked from many candidates. | Examples with known answers and a separate test set. | One model call per candidate per example. |\n| Active-Prompt | The worked examples in the prompt. | A pool of questions and a person to write the examples. | Several model calls per question, then the writing time. |\n| DSP | A hint for each input. | Training data and a trained small model. | One extra model call on every request. |\n\nHand tuning stays cheaper for a few stable prompts, while automation pays off when prompts are retuned often and quality can be scored reliably enough to guide a search, because a search is only as good as the score it follows.\n\n# Questions\n\n<!-- qard-id: 637042dc-8641-4fbe-9f1a-25620b16a717 -->\n> [!qard]- What is meta prompting?\n> Meta prompting is using a model to write or improve a prompt. It fits when a prompt keeps failing in the same way and the failed outputs are at hand, or when a first prompt has to be drafted from a task description, while one obvious wording fix is quicker by hand. The work happens during prompt development, so it adds no calls per request.\n>\n> The model receives the current prompt, the outputs that went wrong and the requirement, and returns a rewrite whose new rules answer those failures, which replaces guessing at wording by hand. The rewrite is only a candidate, because the model saw only the failures, so the rewrite is scored on inputs it was not written from before a person lets it replace the current prompt.\n>\n> For example, the prompt of a support bot, \"Answer customer questions about orders\", is rewritten and tried again until the bot's replies on the trial conversations are acceptable. Along the way a rewrite that forbade refund promises made the bot refuse to explain the refund policy, so that reply went back to the model and the rule was narrowed to explain the policy without promising a refund.\n>\n> ```mermaid\n> flowchart LR\n>   A[\"Bot promises refunds it cannot grant\"] -->|\"prompt and failed replies\"| B[\"Model rewrites the prompt\"]\n>   B --> C[\"Try on other conversations\"]\n>   C --> D{\"All replies acceptable?\"}\n>   D -->|\"no: new failed replies go back\"| B\n>   D -->|\"yes\"| E[\"New prompt replaces the old one\"]\n> ```\n>\n> Sources: [OpenAI model optimization](https://developers.openai.com/api/docs/guides/model-optimization) · [OpenAI evals](https://developers.openai.com/api/docs/guides/evals)\n\n# References\n\n- [Zhou et al. 2022 - Large Language Models Are Human-Level Prompt Engineers (APE)](https://arxiv.org/abs/2211.01910)\n- [Diao et al. 2023 - Active Prompting with Chain-of-Thought for Large Language Models](https://arxiv.org/abs/2302.12246)\n- [Li et al. 2023 - Directional Stimulus Prompting](https://arxiv.org/abs/2302.11520)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1795362801134,
+  "topic": "Optimize candidate prompts or demonstrations against an explicit evaluator while separating validation data from the final held-out comparison",
+  "notes": [
+    "Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md"
+  ],
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "prompt-search",
+  "steps": [
+    {
+      "title": "The evaluator and the candidate loop",
+      "explain": "You already know that scores can only be compared when every prompt runs on the same fixed set of cases. Prompt optimization builds a loop on that rule ([[Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization|Automated Prompt Optimization]]):\n\n1. **Propose candidates.** A model writes many versions of the part being tuned. That can be the instruction wording (as in [[Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization#Automatic Prompt Engineer (APE)|APE]]) or the set of demonstrations, meaning the worked input→output examples placed in the prompt.\n2. **Run each candidate on the same fixed set.** Every case in the set has a known correct answer.\n3. **Score with an explicit evaluator.** The evaluator is a rule written down in advance, usually code, that turns each output into a score: exact match, a label check, a JSON validity check, and so on. The same evaluator scores every candidate.\n4. **Keep the highest scorer.**\n\n```mermaid\ngraph LR\n  A[\"Model proposes<br/>candidate prompts\"] --> B[\"Run each candidate<br/>on the same fixed set\"]\n  B --> C[\"Explicit evaluator<br/>scores every output\"]\n  C --> D[\"Keep the highest score\"]\n```\n\nThe evaluator has to be explicit because it is the only thing doing the choosing. Nobody reads the outputs and picks the one that seems best. The loop keeps whatever the rule rewards, so the rule has to say exactly what counts as correct.\n\n**Example.** The task is to label customer messages as `refund`, `delivery` or `account`. The evaluator counts a case as correct only when the output is exactly the known label. Here two candidate sets of demonstrations run on the same set of cases:\n\n- Candidate 1 gets most labels right but sometimes replies with a full sentence, like \"This is a refund request.\" The evaluator counts that sentence as wrong.\n- Candidate 2 always outputs a bare label and gets slightly more cases right under that rule.\n\nThe loop keeps Candidate 2. A person skimming the outputs might have preferred Candidate 1's readable sentences, but the evaluator's rule decides. If sentences should count as correct, the evaluator has to be changed before the search runs, not overruled afterwards.\n\nThe note's own worked case is three instructions scored 3, 4 and 5 out of 5 by code that counts correct labels. There C is kept \"because the count decided and nobody compared wordings by eye\". A loop like this is only as good as the score it follows. Which data it should be scored on comes next.",
+      "connect": "This step puts your fixed-set rule to work: a search proposes candidates, an explicit evaluator scores them all on the same set, and the best is kept. Later steps ask whether that winner's score can be trusted, and which data each stage should use.",
+      "checkFirst": false,
+      "check": {
+        "id": "k1",
+        "type": "calc",
+        "goal": "apply",
+        "objective": "prompt-search",
+        "prompt": "A prompt search tunes a prompt that pulls the total out of an invoice. The **evaluator** is code that counts an output as correct only if the output is exactly the known total, written as a bare number with two decimals (for example `120.00`). Anything else counts as wrong.\n\nThe fixed set has four invoices. Their known totals are `120.00`, `45.50`, `980.00` and `12.99`. Three candidates, each with a different set of demonstrations, produce these outputs in that order:\n\n| Candidate | Invoice 1 | Invoice 2 | Invoice 3 | Invoice 4 |\n|---|---|---|---|---|\n| P | `120.00` | `45.50` | `980` | `12.99 EUR` |\n| Q | `Total: 120.00` | `Total: 45.50` | `Total: 980.00` | `Total: 12.99` |\n| R | `120.00` | `54.50` | `980.00` | `12.99` |\n\nWhich candidate does the search keep, and what is its score out of 4?",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "The kept candidate is R.",
+            "marks": 1
+          },
+          {
+            "point": "R's score is 3 out of 4.",
+            "marks": 1
+          }
+        ],
+        "model": "The search keeps **R**, with a score of **3 out of 4**.\n\nFor reference, P scores 2 (`980` and `12.99 EUR` break the format), Q scores 0 (every output has a `Total:` prefix), and R scores 3 (only `54.50` is wrong).",
+        "source": {
+          "path": "Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+          "heading": "Automatic Prompt Engineer (APE)"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Picks Q, reasoning that all four of its totals are the right numbers.",
+          "reteach": "The search does not judge outputs by what a person can read in them. It keeps whatever the **explicit evaluator** scores highest. Here the evaluator wants a bare number, so every `Total: …` output scores zero, even though the numbers are correct. If a prefix should be allowed, the evaluator has to be rewritten before the search runs. Overruling the score afterwards would bring back the person's impression that the loop exists to replace."
+        },
+        {
+          "signs": "Picks P, or gives P or R a score of 4, by treating `980` or `12.99 EUR` as correct because the value matches.",
+          "reteach": "The evaluator in this question states the rule exactly: a bare number with two decimals. `980` has no decimals and `12.99 EUR` has a unit, so both count as wrong, and P scores 2. Apply the written rule to every output in the same way. That consistency is what makes the candidates' scores comparable."
+        },
+        {
+          "signs": "Says the candidates cannot be compared, or asks for more cases before choosing.",
+          "reteach": "All three candidates ran on the same fixed set under the same evaluator, which is exactly the condition for comparable scores. Within this loop the decision is simply the highest score, so R is kept. Whether four cases are enough to trust that win is a separate question, handled in the next step."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Why the search winner is biased",
+      "explain": "The loop from the previous step keeps the candidate with the highest score on a fixed set. That rule has a side effect: on average, the winner's score on that set is too optimistic.\n\n**Why.** A candidate's score on a small set mixes two things:\n\n- **Real quality.** How well the wording works on messages of this kind in general.\n- **Evaluation noise.** Whether the particular examples in the set happen to suit that wording. On a borderline message, a wording can get the right label by chance. On a different set of examples, the same wording could score a little higher or lower.\n\nPicking the top score picks on the sum of the two. A candidate whose noise happened to be positive is more likely to come first than one whose noise was negative. So selection favours positive noise, and the winner's score tends to sit above its real level. This holds on average across searches. It does not prove that any particular winner was lucky, and the winner may also be truly the best. The same reason explains why a final test set is used only once: after a set has been used to make a choice, its score for that choice is no longer a fair measurement.\n\nHow much the score is inflated depends on the candidates and the set:\n\n- **Set size.** On a small set each example moves the score a lot, so noise is large compared with real differences.\n- **Number of independent chances.** More candidates with separate noise give more chances for one of them to draw a high score. Near-copies of one wording mostly share the same noise, so they add few new chances.\n- **Quality gaps.** If one candidate is clearly better than the rest, it tends to win on quality and noise matters less. If candidates are close, noise decides more often.\n\n**Example from the note.** An APE-style search sorts shop messages into three labels, using five examples:\n\n```text\nSearch set (5 messages):           B 4/5   C 5/5    -> C wins by one message\n200 messages the search never saw: B 176   C 171    -> the lead is gone\n```\n\nC's one-message lead did not hold on new messages. Only messages that played no part in the choice could show that. This is why the data is split: one set to choose the candidate, and a separate one to measure the winner ([[Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization#A small example set rewards luck|A small example set rewards luck]]). The note adds that no fixed set size is always enough. The right size depends on the metric, on the smallest difference between candidates that still matters, and on how much error is acceptable.",
+      "connect": "Step 1 built the loop that keeps the best-scoring candidate. This step shows that keeping the best tends to inflate its score on the selection set. That is why step 3 gives selection and the final comparison separate data.",
+      "checkFirst": false,
+      "check": {
+        "id": "k2",
+        "type": "mcq",
+        "goal": "apply",
+        "objective": "prompt-search",
+        "prompt": "Two teams run prompt searches for the same classification task. Each team scores its candidate instructions on the **same 20 labelled examples** and keeps the candidate with the highest score. Team X compares **2** candidates. Team Y compares **60** candidates.\n\nAssume every candidate in both teams has **the same true performance** on new messages. Each candidate's score on the 20 examples equals that true performance plus evaluation noise. The noise is nonzero, has zero mean, is independent across candidates and has the same distribution for every candidate.\n\nAveraged over many such searches, which team's winning score on those 20 examples tends to overstate the winner's performance on new messages more? New messages are ones that neither search used. Choose the team and the reason.",
+        "options": [
+          "Team Y, because taking the top of many independent noisy scores gives more chances for a candidate with large positive noise to come first, so the winner's score tends to be inflated more.",
+          "Team X, because with only two candidates the winner's lead comes from a single comparison, so that lead is more likely to be pure chance.",
+          "Neither, because both teams scored on the same 20 examples, so both winning scores are equally fair estimates of performance on new messages.",
+          "Team Y, because sixty wordings produced in bulk are likely to be weaker than two chosen ones, so its winner scores worse on new messages."
+        ],
+        "answer": 0,
+        "marks": 1,
+        "rubric": [
+          {
+            "point": "Chooses Team Y because, with equal true performance, the winner is decided by noise alone, and the maximum of more independent zero-mean noise draws is larger on average, so the winning score is inflated more.",
+            "marks": 1
+          }
+        ],
+        "model": "**Team Y.** All candidates are equally good, so the top score is true performance plus the largest noise draw. The largest of 60 independent draws is on average higher than the largest of 2, so Team Y's winning score overstates new-message performance more.",
+        "source": {
+          "path": "Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+          "heading": "A small example set rewards luck"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Chooses Team X, arguing that a choice between only two candidates is more likely to come down to chance.",
+          "reteach": "Here every candidate has the same true performance, so both teams' choices come down to chance. The question asks how far the winner's **reported score** sits above that shared true level. The winner's score is true performance plus the largest noise draw. The largest of 2 zero-mean draws is a little above zero on average; the largest of 60 is much further above. So Team Y's inflation is larger."
+        },
+        {
+          "signs": "Chooses 'neither', reasoning that the same evaluation set makes the scores equally trustworthy.",
+          "reteach": "A shared set makes scores **comparable**, but it does not make the winner's score **unbiased**. Each single score has zero-mean noise, yet picking the highest one selects the candidate whose noise was most positive. With more independent candidates competing, that selected noise is larger on average."
+        },
+        {
+          "signs": "Chooses Team Y, but because bulk-generated candidates are assumed to be worse.",
+          "reteach": "The question rules this out: every candidate has the same true performance, so Team Y's winner is no worse on new messages than Team X's. The difference is only in the reported search score. Taking the maximum of 60 noisy scores picks a larger positive noise draw than taking the maximum of 2, so Y's winning score overstates more."
+        }
+      ],
+      "figure": ""
+    },
+    null,
+    {
+      "title": "Design a prompt search end to end",
+      "explain": "Two rules you already accept carry this design. Candidates can only be compared on one fixed set. A final test set is used once. A full prompt search needs four decisions, and each one follows from those rules.\n\n**Example task.** A shop wants a prompt that labels product reviews `safety_issue` or `no_safety_issue`. The current prompt is the **baseline**. The team has a few hundred production reviews that people have labelled.\n\n**1. Evaluator.** Code compares each predicted label with the known label and turns the errors into one number. The number has to reflect what each error costs. A missed safety report costs far more than a false alarm, so plain accuracy is the wrong score. One workable rule is a weighted cost: each missed `safety_issue` review adds 10, each false alarm adds 1, and **lower cost ranks higher**. The weight of 10 is the team's judgement of the relative cost. It isn't a law. With one number per candidate, a trade-off has a defined result. A candidate with 1 fewer miss and 5 more false alarms comes out ahead (−10 + 5), and one with 1 fewer miss and 15 more false alarms comes out behind. The same cost rule is used for selection and for the final comparison. The reviews come from production rather than a public benchmark, because a benchmark win may not carry over to the product ([[Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization#A benchmark win that is not a product win|benchmark win vs product win]]).\n\n**2. Split.** The labelled reviews are divided into separate pools before the search starts:\n- **Development examples.** A handful of reviews the current prompt gets wrong. A model reads them to propose new instructions.\n- **Validation set.** The fixed set that scores every candidate and picks the winner.\n- **Held-out set.** Nobody looks at it during the search.\n\nOne rule decides where each review goes: **data a candidate was built from, or selected on, can't give that candidate a trustworthy score.** A candidate written from certain reviews is shaped to handle those reviews. Its score on them says little about other reviews ([[Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization#A rewrite that fixes the failure and breaks other reports|a rewrite that breaks other reports]]).\n\n**3. Candidates.** A model proposes many instructions from the development examples. Each candidate labels every validation review, and the evaluator computes its cost. The lowest validation cost wins. This is the APE loop ([[Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization#Automatic Prompt Engineer (APE)|APE]]).\n\n**4. Release comparison.** The winner and the baseline each run once on the held-out set and are scored with the same cost rule. The winner is released only if its cost is lower than the baseline's by a margin that matters. Otherwise the current prompt stays. The winner was chosen *for* its validation score, so only reviews the search never touched can confirm it ([[Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization#A small example set rewards luck|small sets reward luck]]). The prompt is versioned together with its evaluator, and the search is rerun when the model or the task changes.\n\n```mermaid\ngraph LR\n  D[\"Development examples\"] -->|\"propose\"| C[\"Candidate instructions\"]\n  C -->|\"cost of each\"| V[\"Validation set\"]\n  V -->|\"lowest cost\"| W[\"Winner\"]\n  W --> H[\"Held-out set<br/>(used once, same cost rule)\"]\n  B[\"Baseline prompt\"] --> H\n  H --> R{\"Winner's cost clearly lower?\"}\n  R -->|\"yes\"| S[\"Release winner\"]\n  R -->|\"no\"| K[\"Keep baseline\"]\n```",
+      "connect": "The earlier steps built the loop, explained why its winner is biased, and gave validation data and held-out data separate jobs. This step combines those pieces into one design for a new task: one ranking rule throughout, a job for every pool, and no candidate scored on data it was built from.",
+      "checkFirst": false,
+      "check": {
+        "id": "k4",
+        "type": "short",
+        "goal": "apply",
+        "objective": "prompt-search",
+        "prompt": "A team searches for the best **few-shot prompt** for routing support tickets to the right team. A candidate is a fixed instruction plus 5 demonstrations. A demonstration is a labelled ticket copied into the prompt as a worked example, so its correct route is visible to the model. The evaluator is code that counts correctly routed tickets, and a higher count ranks higher.\n\nThey have 400 tickets with known routes:\n- 100 tickets are set aside as a held-out set. Nobody touches them until the final comparison against the current prompt.\n- Each of 30 candidates gets 5 demonstrations drawn at random from the other 300 tickets.\n- Every candidate is then scored on those same 300 tickets, and the highest count wins the search.\n\nExplain what is wrong with how the 300 tickets are used, and how it can affect which candidate wins the search.",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "Identifies that each candidate is scored on tickets that also appear in its own prompt as demonstrations, so data the candidate was built from also scores it (no separation between a demonstration pool and a validation set).",
+            "marks": 1
+          },
+          {
+            "point": "Explains the effect on selection: the visible answers on those scored tickets can inflate validation counts, and candidates may benefit from them by different amounts, so the ranking can partly reflect that benefit rather than routing of unseen tickets. The winner is therefore not a trustworthy pick. Credit does not depend on claiming the model always copies demonstration answers or that the winner definitely changes.",
+            "marks": 1
+          }
+        ],
+        "model": "Each candidate's 5 demonstrations come from the same 300 tickets it is scored on, so part of its score comes from tickets whose correct routes sit in its own prompt. Those visible answers can raise its count. Candidates may gain different amounts from that exposure, so the ranking can partly reflect that gain rather than how well each candidate routes unseen tickets. The validation scores are contaminated, and the search winner isn't a trustworthy pick.\n\n*(Optional, not required: each candidate has exactly 5 demonstration tickets among the scored tickets, so the problem is unequal benefit, not unequal overlap. The fix is to split the 300 into a demonstration pool and a separate validation set.)*",
+        "source": {
+          "path": "Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+          "heading": "Automatic Prompt Engineer (APE)"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Says the plan is fine because the 100 held-out tickets stay untouched, so any problem will be caught at the end.",
+          "reteach": "The held-out set protects only the **final** comparison. The search still picks its winner from validation scores. If those scores are contaminated, the search may pick a weaker candidate. The held-out check can then only reject that candidate. It can't recover a better one the search passed over. Validation scores have to be honest too, so a candidate shouldn't be scored on tickets that sit inside its own prompt."
+        },
+        {
+          "signs": "Blames the size of the set or the number of candidates (\"300 is too small\", \"30 candidates is too many\") and doesn't mention the overlap.",
+          "reteach": "Size affects how noisy the scores are, but this problem would remain at any size. Each candidate is scored partly on its own demonstrations, whose correct answers it can see. The model can still get them wrong, but the visible answers can raise its score, and the size of that boost can differ between candidates. Data a candidate was built from can't give it a trustworthy score, so demonstrations and validation tickets must come from separate pools."
+        },
+        {
+          "signs": "Says one candidate wins simply because it has more demonstrations among the scored tickets, or because candidates were scored on different sets.",
+          "reteach": "All 30 candidates are scored on the same 300 tickets, and each one has exactly 5 demonstrations inside that set, so the overlap count is the same for all of them. What can differ is how much each candidate gains from seeing those answers. That gain contaminates the ranking. A shared set makes scores comparable only when no candidate has seen any of the scored answers in advance."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [
+        {
+          "q": "How i would know that correct answer is 54.50?",
+          "a": "You wouldn't know it from the loop itself. The \"known correct answer\" has to come from outside the loop, before any candidate runs.\n\nTypical sources:\n- A person labels each case by hand. For the refund/delivery/account task, someone reads each message and writes down its label.\n- Existing records already hold the truth, such as past tickets with the label an agent assigned.\n\nThe evaluator only compares a candidate's output to that stored answer. It doesn't work out the answer itself.\n\nThe note says this too: the set has \"examples with known answers\", and someone still decides \"what counts as a correct output\" ([[Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization|Automated Prompt Optimization]]).\n\nI don't see a 54.50 in this note or in this step's example, so I can't say where that figure comes from. If you saw it in another exercise, tell me which one. The same rule applies: the value is only \"correct\" because someone fixed it in advance, for example by calculating it or taking it from a record."
+        },
+        {
+          "q": "But if not, why my answer is 4/4 considered wrong, while all formats are correct?",
+          "a": "I can't see your answer or the evaluator's rule, so I can't say exactly why it failed. The likely cause is that the evaluator doesn't judge \"format correct.\" It compares each output to one stored answer under a fixed rule, such as exact match.\n\nIn the example, \"This is a refund request.\" counts as wrong because it isn't exactly `refund`, even though a person would accept it.\n\nA 4/4 that looks right to you can still be marked wrong for three reasons:\n- the rule is stricter than you assumed, for example exact string match\n- the stored answers differ from what you expected\n- the evaluator checks something other than format\n\nPaste your answer, the expected answers and the rule. Then I can point to the exact mismatch.\n\nIf your outputs should count as correct, the rule has to change before the search runs. The note says someone still decides \"what counts as a correct output\" ([[Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization|Automated Prompt Optimization]])."
+        }
+      ],
+      "answer": {
+        "text": "The candidate R should have max score since all its results are in the expected format, so score sould be 4/4 if all labels have correct value. P and Q candidates have fluctuation in format that will be scored as failed on check",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "The candidate R should have max score since all its results are in the expected format",
+            "kind": "wrong",
+            "note": "R's invoice 2 output is `54.50`, not `45.50`, so a correct format alone doesn't make it correct. The evaluator checks the exact value too."
+          },
+          {
+            "quote": "score sould be 4/4 if all labels have correct value",
+            "kind": "wrong",
+            "note": "You hedged on values but never checked them. R's second output has transposed digits, so R scores 3/4, not 4/4."
+          },
+          {
+            "quote": "P and Q candidates have fluctuation in format that will be scored as failed on check",
+            "kind": "correct",
+            "note": "You correctly saw that format deviations (`980`, `12.99 EUR`, the `Total:` prefix) fail the exact-match evaluator."
+          }
+        ],
+        "mistake": "careless",
+        "feedback": "You chose R, but you didn't compare its values with the known totals, so you missed that invoice 2 is wrong.",
+        "score": 0
+      },
+      "reply": "Your pick of R holds, but the score isn't 4/4. You checked format and skipped the values. Compare each R output with the known totals. Invoice 2 should be `45.50`, and R gave something different. Recount R's correct cases. Then count P's, which also lose points on format."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "choice": 1,
+        "confidence": "guess"
+      },
+      "mark": {
+        "awarded": [
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "Picked B. Team X, because with only two candidates the winner's lead comes from a single comparison, so that lead is more likely to be pure chance.",
+            "kind": "wrong",
+            "note": "Fewer candidates means fewer chances for a large positive noise draw, so the winner's score is inflated less. Team X's pick is noise too, but the maximum of 2 draws is lower on average than the maximum of 60."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "Inflation grows with the number of independent noisy candidates, so Team Y overstates more, not Team X.",
+        "score": 0
+      },
+      "reply": "Not quite. Since all candidates are equally good, the winner is just whoever drew the highest noise. Think about the maximum of 2 random draws versus the maximum of 60. Which is larger on average? That gap is the inflation. Having more independent chances means the top score is more likely to include a big lucky boost.",
+      "reteach": "Here every candidate has the same true performance, so both teams' choices come down to chance. The question asks how far the winner's **reported score** sits above that shared true level. The winner's score is true performance plus the largest noise draw. The largest of 2 zero-mean draws is a little above zero on average; the largest of 60 is much further above. So Team Y's inflation is larger."
+    },
+    {
+      "asks": []
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "t",
+        "unknown": true
+      },
+      "mark": {
+        "score": 0,
+        "awarded": [
+          false,
+          false
+        ],
+        "annotations": [],
+        "mistake": "unknown",
+        "feedback": "You said you didn't know. The model answer shows what was needed."
+      },
+      "reply": "No problem. Read the explanation, then look at the model answer."
+    }
+  ],
+  "current": 3,
+  "probe": {
+    "questions": [
+      {
+        "id": "p1",
+        "type": "mcq",
+        "goal": "recognise",
+        "objective": "learning-pipeline",
+        "prompt": "A team tries several candidate models, picks the one with the best score, and then wants an unbiased estimate of how the chosen model will perform on new data. Which use of data gives that estimate?",
+        "options": [
+          "Report the best candidate's score on the validation set, since that set was not used for training",
+          "Score the chosen model once on a test set that was never used to train or compare candidates",
+          "Score the chosen model again on the training set after selection is finished",
+          "Average the validation scores of all candidates to cancel out lucky picks"
+        ],
+        "answer": 1,
+        "rubric": [
+          {
+            "point": "Chooses the untouched test set used once after selection",
+            "marks": 1
+          }
+        ],
+        "model": "Score the chosen model once on a test set never used for training or comparing candidates. The validation score is biased upward because the winner was picked for it.",
+        "marks": 1,
+        "source": {
+          "path": "Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+          "heading": "A small example set rewards luck"
+        }
+      },
+      {
+        "id": "p2",
+        "type": "short",
+        "goal": "apply",
+        "objective": "evaluation-system",
+        "prompt": "Two engineers each change a support bot's prompt. Both use the same written scoring rubric, but each scores their version on a different handful of conversations they picked themselves, and both report a higher score. What must change about the conversations used so the two scores can be compared fairly?",
+        "rubric": [
+          {
+            "point": "Both versions are run on the same fixed set of cases (not separately self-picked ones), so only the prompt differs",
+            "marks": 1
+          }
+        ],
+        "model": "Run both prompts on the same fixed set of conversations, so the prompt is the only thing that differs.",
+        "marks": 1,
+        "source": {
+          "path": "Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+          "heading": "Automatic Prompt Engineer (APE)"
+        }
+      }
+    ],
+    "answers": {
+      "p1": {
+        "choice": 1,
+        "confidence": "sure"
+      },
+      "p2": {
+        "text": "There should be a shared static conversation set that will be used across everyone, so each change testing isnt biased and show only how prompt changing the result, without fluctuation of the test data",
+        "confidence": "sure"
+      }
+    },
+    "note": "Checks validation-versus-held-out test separation and the need for one shared fixed case set when comparing candidate prompts; composed-prompts already taught.",
+    "submitted": true,
+    "marks": {
+      "p1": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      },
+      "p2": {
+        "awarded": [
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "shared static conversation set that will be used across everyone",
+            "kind": "correct",
+            "note": "You name one fixed set used for every version, which is what makes the two scores comparable."
+          },
+          {
+            "quote": "show only how prompt changing the result, without fluctuation of the test data",
+            "kind": "insight",
+            "note": "You identified the reason: with the data held constant, only the prompt can explain a score difference."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "Full marks: a fixed shared case set isolates the prompt as the only variable.",
+        "score": 1
+      }
+    },
+    "findings": "You know a final test set stays untouched and that comparisons need a fixed shared set. Not yet shown: running the search itself, where a validation set picks the winning candidate and the held-out set confirms it once."
+  },
+  "map": {
+    "title": "Searching prompts without fitting the evaluator",
+    "plan": "You already know that a fixed case set makes scores comparable and that a final test set is used once. The lesson builds the search loop on that: an explicit evaluator scores candidates on validation data, then the winner is compared once on held-out data. It ends with a scenario where you design the whole split.",
+    "mermaid": "graph TD\nA[\"Fixed case set makes scores comparable\"] --> B[\"Explicit evaluator: examples, correctness, score\"]\nC[\"Test set used once after selection\"] --> D[\"Validation set picks the winner\"]\nB --> E[\"Candidate loop: propose, score, keep best\"]\nE --> D\nD --> F[\"Held-out comparison confirms winner vs baseline\"]\nF --> G[\"Design a prompt search with correct data separation\"]",
+    "objective": "prompt-search",
+    "steps": [
+      {
+        "title": "The evaluator and the candidate loop",
+        "why": "Explain how candidate instructions or demonstrations are proposed, scored by an explicit evaluator on a fixed set, and the best kept; builds on your fixed-set answer, and leaves data splitting to the next step."
+      },
+      {
+        "title": "Why the search winner is biased",
+        "why": "Explain that a candidate picked for its validation score has been fitted to that set, so a small set rewards luck; this is the reason for the split and uses your test-set-used-once knowledge."
+      },
+      {
+        "title": "Validation versus held-out comparison",
+        "why": "Assign validation data to selecting among candidates and the untouched held-out set to one final comparison of winner against baseline, including that tuning again on held-out data breaks it."
+      },
+      {
+        "title": "Design a prompt search end to end",
+        "why": "Apply all of it to a new task: choose the evaluator, the split, the candidates and the final release comparison, and justify each choice."
+      }
+    ]
+  },
+  "stepsFor": "[\"Searching prompts without fitting the evaluator\",\"You already know that a fixed case set makes scores comparable and that a final test set is used once. The lesson builds the search loop on that: an explicit evaluator scores candidates on validation data, then the winner is compared once on held-out data. It ends with a scenario where you design the whole split.\",[[\"The evaluator and the candidate loop\",\"Explain how candidate instructions or demonstrations are proposed, scored by an explicit evaluator on a fixed set, and the best kept; builds on your fixed-set answer, and leaves data splitting to the next step.\"],[\"Why the search winner is biased\",\"Explain that a candidate picked for its validation score has been fitted to that set, so a small set rewards luck; this is the reason for the split and uses your test-set-used-once knowledge.\"],[\"Validation versus held-out comparison\",\"Assign validation data to selecting among candidates and the untouched held-out set to one final comparison of winner against baseline, including that tuning again on held-out data breaks it.\"],[\"Design a prompt search end to end\",\"Apply all of it to a new task: choose the evaluator, the split, the candidates and the final release comparison, and justify each choice.\"]]]",
+  "accepted": true,
+  "finishedAt": 1795363953574,
+  "close": {
+    "summary": "The lesson built the prompt-search loop from the note's APE section: an explicit evaluator scores every candidate against known answers on a shared validation set, the highest scorer wins, and the winner is compared once on a held-out set the search never touched. It then covered why the winner's validation score is inflated (the maximum of several noisy scores carries the luck that put it on top, and more candidates mean more inflation) and closed with designing the full split for a new task.\n\nComing in, the student knew a final test set stays untouched and that comparisons need a fixed shared case set. In the checks, the student treated format compliance as correctness and did not compare the candidate's values against the known totals, so a wrong invoice passed. On selection bias the student reversed the direction, saying fewer candidates inflate more. The end-to-end split design was not attempted. The core gap is the evaluator's role (reference comparison, not format checking) and the mechanics of winner bias; the validation/held-out roles themselves are still only partly shown.",
+    "cards": [
+      {
+        "front": "In a prompt search, what does the evaluator compare each candidate output against, and why is a correctly formatted output not automatically a correct one?",
+        "back": "Against the known answer for that example (the reference value or label). Format is a gate, not the score: a well-formed output with a wrong value scores as wrong. Only agreement with the reference counts."
+      },
+      {
+        "front": "Why does the search winner's validation score overstate its true quality, and what makes the overstatement larger?",
+        "back": "The winner is the maximum of several noisy scores, so picking the max also picks favorable noise. More independent candidates give more chances for one to look good by luck, so inflation grows with the number of candidates. A held-out comparison corrects it."
+      },
+      {
+        "front": "What are the distinct roles of the validation set and the held-out set in a prompt search?",
+        "back": "Validation set: fixed and shared, scored repeatedly, picks the winning candidate. Held-out set: used once, confirms the winner on data the search never saw. Choosing among candidates on the held-out set turns it into another validation set with the same bias."
+      },
+      {
+        "front": "Given a few hundred labelled examples, how is the data split to optimize a prompt against an explicit evaluator?",
+        "back": "Small drafting set the proposer may see (optional); one fixed validation set every candidate is scored on; one held-out set reserved for a single final comparison of the winner. Keep the held-out set untouched until the end and never reuse it for selection."
+      }
+    ],
+    "noteEdit": {
+      "path": "Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+      "heading": "A small example set rewards luck",
+      "text": "The winner's score on the search set overstates what the prompt does on new messages, because the winner is the highest of several noisy scores and the highest score includes the luck that put it on top. The overstatement grows with the number of candidates searched: ten candidates give more chances for one to look good by accident than two do, so a wide search needs the separate test set more, not less. The test set confirms the winner once; scoring several candidates on it and picking again would turn it into a second search set with the same bias."
+    },
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-22 Optimize candidate prompts or demonstrations against an expl.md",
+    "nextCheck": "2026-11-25"
+  }
+}

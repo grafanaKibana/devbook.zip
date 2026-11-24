@@ -1,33 +1,33 @@
 {
   "version": 1,
-  "createdAt": 1794246786470,
+  "createdAt": 1795444239487,
   "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
   "course": "AI & ML",
   "objective": "context-budget",
-  "title": "Allocate a finite context budget across instructions, history, retrieved evidence, and tool traffic while preserving provenance and isolating untrusted material",
+  "title": "Allocate a finite context budget across instructions, history, retrieved evidence, and tool traffic while isolating untrusted material and guarding against context poisoning",
   "goal": "explain",
   "questionPolicy": 1,
-  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
   "questions": [
     {
       "id": "c1",
       "type": "short",
-      "prompt": "An agent repeatedly receives large tool results, although only a few fields from each result matter to its next decision. Its instructions, conversation history and retrieved evidence remain in context. Why should the runtime trim these results before the context window fills?",
+      "prompt": "A support agent stores its conversation history and sends the whole history back to the model on every turn. The history is replayed as ordinary conversation text: nothing marks where each message came from or whether its content was checked.\n\nOn turn 3, a web-search tool returned a page that falsely said \"refunds are allowed up to 365 days\", and the agent repeated this in its reply. The search tool was then fixed. On turns 10 and 20, the agent still says refunds are allowed up to 365 days, even though the system prompt states the real policy of 30 days.\n\nExplain why the false claim keeps affecting later turns after the tool that produced it was fixed.",
       "marks": 2,
       "rubric": [
         {
-          "point": "Tool results accumulate within the same finite context budget as instructions, history, evidence and reserved output space.",
+          "point": "The false claim remains in the stored history and is sent back into the context on every later call; fixing the tool stops new bad results but does not remove what is already stored.",
           "marks": 1
         },
         {
-          "point": "Trimming unnecessary fields preserves room for needed context and output, reducing the risk of overflow or truncation removing important information.",
+          "point": "Explains why the replayed claim can still override or compete with the correct policy: e.g. nothing in the replayed text flags it as unverified or false, so the model can treat it like trusted context, and/or each replay repeats the claim (including the agent's own earlier statement of it), reinforcing it on later turns. Any one valid mechanism earns the mark.",
           "marks": 1
         }
       ],
-      "model": "Tool results accumulate in the shared context budget. Trimming unused fields preserves room for necessary instructions, evidence and output before overflow forces truncation.",
+      "model": "The turn-3 claim is part of the stored history, and that history is replayed into the context on every later turn. Fixing the tool only stops new bad results; it does not remove the claim already stored. When the claim is replayed, nothing in the text marks it as unverified or false, so the model can treat it like any other trusted context and keep using it over the system prompt's 30-day policy. This is context poisoning.",
       "source": {
         "path": "Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
-        "heading": "The Context Budget"
+        "heading": "Context Poisoning"
       },
       "objective": "context-budget",
       "goal": "explain"
@@ -35,31 +35,77 @@
     {
       "id": "c2",
       "type": "mcq",
-      "prompt": "A retrieved document contains useful evidence alongside text telling an agent to ignore application rules. During history compaction, both are copied into a “decisions and rules” summary without source or trust labels. Why does this create a risk on later turns?",
+      "prompt": "An agent appends its reasoning and the full raw tool output to its history on every iteration and never compacts it. Its runtime handles a full context window by deleting the oldest messages until the request fits. The task instruction was given as the first message of the run. After many iterations, the agent stops following that task instruction. Which explanation best accounts for this?",
       "marks": 1,
       "options": [
-        "Compaction makes the document's factual claims impossible to verify, even if the original remains available.",
-        "Moving document text into a shorter summary gives that text greater formal authority than application rules.",
-        "The summary can make an untrusted directive appear to be an established instruction when replayed.",
-        "The shorter summary consumes more context than the original because it combines evidence and instructions."
+        "The uncompacted history filled the window, so the runtime deleted the oldest messages to make room, and the original instruction was among the first removed.",
+        "The model's attention resets after a fixed number of turns, so it rereads only the newest messages and ignores older instructions.",
+        "Tool outputs automatically take priority over task instructions, so each new tool result overrides the earlier task instruction.",
+        "The `max_tokens` output budget is separate from the input, so a growing history only uses up output space and leaves the instruction untouched."
       ],
-      "answer": 2,
+      "answer": 0,
       "rubric": [
         {
-          "point": "Identifies that losing source and trust distinctions can cause an untrusted directive to be replayed as an established instruction.",
+          "point": "Chooses the option saying the uncompacted history filled the window and the runtime's oldest-first deletion removed the original instruction.",
           "marks": 1
         }
       ],
-      "model": "The summary can make an untrusted directive appear to be an established instruction when replayed.",
+      "model": "**The uncompacted history filled the window, so the runtime deleted the oldest messages to make room, and the original instruction was among the first removed.** Every iteration added uncompacted tokens to one shared budget. Once the limit was reached, the runtime's oldest-first deletion removed the earliest content, which included the instruction.",
       "source": {
         "path": "Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
-        "heading": "Context Poisoning"
+        "heading": "Unbounded History Growth"
       },
       "objective": "context-budget",
       "goal": "explain"
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "text": "the tools reponse stays in the conversation and later responses use it because it in history updated. To avoid it i would recommend start new chat, or replace history entry of the tool call with new fixed call",
+      "confidence": "sure"
+    },
+    "c2": {
+      "choice": 0,
+      "confidence": "sure"
+    }
+  },
+  "marks": {
+    "c2": {
+      "score": 1,
+      "awarded": [
+        true
+      ],
+      "annotations": [],
+      "mistake": "none",
+      "feedback": "Correct."
+    },
+    "c1": {
+      "awarded": [
+        true,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "the tools reponse stays in the conversation and later responses use it because it in history updated",
+          "kind": "correct",
+          "note": "You identified that the bad tool response stays in the stored history and is reused on later turns, which is why fixing the tool doesn't clear it."
+        },
+        {
+          "quote": "the tools reponse stays in the conversation and later responses use it because it in history updated",
+          "kind": "missing",
+          "note": "You didn't explain why the replayed claim can override the 30-day system prompt. The missing point is that nothing marks it as unverified, so the model treats it as trusted context, or that each replay reinforces it."
+        },
+        {
+          "quote": "start new chat, or replace history entry of the tool call with new fixed call",
+          "kind": "insight",
+          "note": "Resetting the conversation or replacing the poisoned history entry are sensible remedies, but the question asked why the claim persists, not how to fix it."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You correctly said the false claim persists in replayed history, but you didn't explain why it outweighs the correct policy, such as being unmarked and treated as trusted.",
+      "score": 1
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1795444755677
 }

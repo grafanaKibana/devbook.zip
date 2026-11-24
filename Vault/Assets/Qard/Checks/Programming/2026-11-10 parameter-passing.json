@@ -1,65 +1,111 @@
 {
   "version": 1,
-  "createdAt": 1794301247203,
+  "createdAt": 1795396369805,
   "mastery": "Assets/Qard/Courses/Programming Mastery.md",
   "course": "Programming",
   "objective": "parameter-passing",
-  "title": "Predict how by-value parameters and ref, out, or in affect caller storage",
+  "title": "Predict how by-value parameters, ref, out, in and ref returns affect caller storage, and which method a call runs under virtual dispatch, member hiding, extension lookup and overload resolution",
   "goal": "explain",
   "questionPolicy": 1,
-  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
   "questions": [
     {
       "id": "c1",
-      "type": "short",
-      "goal": "explain",
+      "type": "mcq",
       "objective": "parameter-passing",
-      "prompt": "Consider this C# program. `total` is a static `int` field, and `Report` takes an `in int` parameter.\n\n```csharp\nstatic int total = 5;\n\nstatic void Report(in int value)\n{\n    total = 20;\n    Console.WriteLine(value);\n}\n\nReport(in total);\n```\n\n`Report` never assigns `value`; it assigns only the field `total`. Predict what the program prints, and explain why `in` gives that result.",
-      "marks": 2,
+      "goal": "explain",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+        "heading": "Pitfalls"
+      },
+      "prompt": "`Meter` is a mutable C# struct with a public `int Reading` field and an ordinary (not `readonly`) method `public void Tick() { Reading += 5; }`.\n\n```csharp\nstatic void ViaRef(ref Meter m) { m.Tick(); }\nstatic void ViaIn(in Meter m)   { m.Tick(); }\n\nvar a = new Meter { Reading = 1 };\nvar b = new Meter { Reading = 1 };\nViaRef(ref a);\nViaIn(in b);\n```\n\nBoth methods compile. Afterwards `a.Reading` is `6` but `b.Reading` is still `1`, even though both parameters refer to the caller's variable. Which statement best explains the difference?",
+      "options": [
+        "Because `Tick` is not marked `readonly` and could write to storage that `in` makes readonly, the compiler calls it on a hidden copy of `b`; with `ref`, `Tick` runs directly on `a`.",
+        "Because an `in` struct argument is copied into the parameter exactly like an ordinary by-value argument, `Tick` changes the method's own copy; `ref` passes the caller's variable itself.",
+        "Because the runtime rolls back any field writes made through an `in` parameter when the method returns, the change to `b` is lost; `ref` keeps writes made during the call.",
+        "Because struct method calls always run on a copy of `this`, `Tick` never touches either variable directly; `ref` additionally copies the result back into `a` after the call."
+      ],
+      "answer": 0,
+      "marks": 1,
       "rubric": [
         {
-          "point": "Predicts that the program prints 20.",
-          "marks": 1
-        },
-        {
-          "point": "Explains that `in` makes `value` a readonly alias of `total`'s storage rather than a copy of 5. Readonly only blocks writes through `value`, so the write to `total` is visible when `value` is read.",
+          "point": "Selects the option explaining that the compiler makes a defensive copy for a non-readonly method called on an `in` parameter, while `ref` runs the method on the caller's variable.",
           "marks": 1
         }
       ],
-      "model": "It prints **20**. The `in` parameter is a by-reference alias of the variable `total`, not a copy of its value at the time of the call. Readonly means only that `Report` cannot assign through `value`. Other code can still change the underlying storage, so after `total = 20` the alias reads 20.\n\n*(Optional: without `in`, `value` would be a copy and the program would print 5.)*",
-      "source": {
-        "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
-        "heading": "In"
-      }
+      "model": "The first option. `in` passes a readonly alias to `b`, not a by-value copy. `Tick` is not `readonly`, so it might write to that readonly storage; the compiler therefore runs it on a defensive copy, and the increment lands on the copy. Through `ref`, `Tick` runs on `a` itself, so `a.Reading` becomes 6."
     },
     {
       "id": "c2",
-      "type": "mcq",
-      "goal": "explain",
+      "type": "short",
       "objective": "parameter-passing",
-      "prompt": "`Account` is a class with a public writable `int Balance` field. Both parameters are ordinary by-value parameters, and the caller passes the same variable to both.\n\n```csharp\nstatic void Sync(Account source, Account target)\n{\n    target.Balance = 40;\n    target = new Account { Balance = 90 };\n    source.Balance += 5;\n}\n\nvar acct = new Account { Balance = 20 };\nSync(acct, acct);\nConsole.WriteLine(acct.Balance);\n```\n\nWhich option gives the printed value with the correct explanation?",
-      "marks": 1,
-      "options": [
-        "20, because each class parameter receives its own copy of the object, so neither write in the method reaches the object that acct refers to",
-        "45, because both parameters hold copies of one reference: the write through target changes the shared object, and rebinding target leaves source on it",
-        "95, because both parameters alias the same caller variable, so rebinding target also moves source to the new object before the final write",
-        "90, because assigning a new object to a class parameter replaces the caller's reference in acct, so acct now refers to the new object"
-      ],
-      "answer": 1,
+      "goal": "explain",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
+        "heading": "Questions"
+      },
+      "prompt": "In C#, class `Base` has no `Describe` method. Class `Derived : Base` declares an ordinary instance method `public string Describe() => \"instance\";`. A static class in scope declares the extension method `public static string Describe(this Base b) => \"extension\";`.\n\n```csharp\nBase value = new Derived();\nConsole.WriteLine(value.Describe());\n```\n\nState which `Describe` runs, and explain why that one is chosen.",
+      "marks": 2,
       "rubric": [
         {
-          "point": "Chooses 45: the write through target mutates the object shared with source and acct, and reassigning target rebinds only that local reference, so source still adds 5 to the original object.",
+          "point": "States that the extension method runs (prints \"extension\").",
+          "marks": 1
+        },
+        {
+          "point": "Explains that the call is bound at compile time using the variable's compile-time type `Base`: lookup finds no instance `Describe` on `Base`, so the applicable extension is selected, and the runtime type `Derived` is not consulted (no virtual dispatch is involved).",
           "marks": 1
         }
       ],
-      "model": "**45.** Each by-value parameter is a separate copy of the same reference. `target.Balance = 40` changes the object that `source` and `acct` also refer to. Assigning `new Account` rebinds only `target`, so `source.Balance += 5` still updates the original object: 40 + 5 = 45.",
-      "source": {
-        "path": "Home/Programming/NET/CSharp/Fundamentals/Methods.md",
-        "heading": "Ref"
-      }
+      "model": "The extension method runs and prints `extension`. Lookup uses the compile-time type `Base`, which has no instance `Describe`, so the compiler binds the call to the applicable extension for `Base`. The object's runtime type, `Derived`, is not consulted, because this is a compile-time choice and not virtual dispatch."
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "choice": 1,
+      "confidence": "unsure"
+    },
+    "c2": {
+      "text": "the variable is type of base which is doesnt have Describe, so extension method is chosen",
+      "confidence": "unsure"
+    }
+  },
+  "marks": {
+    "c1": {
+      "score": 0,
+      "awarded": [
+        false
+      ],
+      "annotations": [],
+      "mistake": "misconception",
+      "feedback": "The answer is “Because `Tick` is not marked `readonly` and could write to storage that `in` makes readonly, the compiler calls it on a hidden copy of `b`; with `ref`, `Tick` runs directly on `a`.”."
+    },
+    "c2": {
+      "awarded": [
+        true,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "the variable is type of base which is doesnt have Describe",
+          "kind": "correct",
+          "note": "You correctly used the variable's compile-time type `Base` and noted it has no `Describe` instance method."
+        },
+        {
+          "quote": "so extension method is chosen",
+          "kind": "correct",
+          "note": "You correctly named the extension method as the one that runs."
+        },
+        {
+          "quote": "so extension method is chosen",
+          "kind": "missing",
+          "note": "You still needed to say the binding is done at compile time, so the runtime type `Derived` is never consulted and its instance `Describe` is ignored (no virtual dispatch)."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "Correct result and the key reason that `Base` lacks `Describe`, but you didn't say it's a compile-time binding that ignores the runtime type `Derived`.",
+      "score": 1
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1795396573875
 }

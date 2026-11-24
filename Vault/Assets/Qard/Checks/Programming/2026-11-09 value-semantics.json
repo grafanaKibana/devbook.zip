@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "createdAt": 1794384551977,
+  "createdAt": 1795449762370,
   "mastery": "Assets/Qard/Courses/Programming Mastery.md",
   "course": "Programming",
   "objective": "value-semantics",
-  "title": "Explain what value-type and reference-type assignment copy, including shared reference fields",
+  "title": "Explain what value-type and reference-type assignment copy, including shared reference fields, struct copies returned by properties and foreach, and where boxing occurs",
   "goal": "apply",
   "questionPolicy": 1,
   "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
@@ -12,36 +12,106 @@
     {
       "id": "c1",
       "type": "cloze",
-      "prompt": "`Playlist` is a C# **class** with one public field: `string[] Tracks`. Arrays are reference types.\n\n```csharp\nvar p = new Playlist { Tracks = new[] { \"intro\", \"theme\" } };\nvar q = p;\nvar saved = p.Tracks;\nq.Tracks = new[] { \"remix\" };\nq.Tracks[0] = \"live\";\n```\n\nAfter all five lines run, `p.Tracks[0]` is {{pTrack}} and `saved[0]` is {{savedTrack}}.",
+      "prompt": "`Tally` is a **struct** that implements an interface `ICounter`:\n\n```csharp\npublic interface ICounter { void Add(); }\n\npublic struct Tally : ICounter\n{\n    public int Count;\n    public void Add() => Count++;\n}\n```\n\nThis code runs:\n\n```csharp\nvar t = new Tally();      // Count = 0\nICounter boxed = t;\nboxed.Add();\nt.Add();\nt.Add();\nICounter alias = boxed;\nalias.Add();\n\nConsole.WriteLine(t.Count);\nConsole.WriteLine(((Tally)boxed).Count);\n```\n\nThe first line printed is {{local}}.\n\nThe second line printed is {{boxed}}.",
       "marks": 2,
       "blanks": [
         {
-          "id": "pTrack"
+          "id": "local"
         },
         {
-          "id": "savedTrack"
+          "id": "boxed"
         }
       ],
       "rubric": [
         {
-          "point": "`p.Tracks[0]` is \"live\": `p` and `q` refer to the same `Playlist` object, so replacing its `Tracks` field through `q` is seen through `p`, and the element change then applies to that new array.",
+          "point": "First output is 2: assigning `t` to `ICounter` boxed a separate copy, so only the two direct `t.Add()` calls change the local struct.",
           "marks": 1
         },
         {
-          "point": "`saved[0]` is \"intro\": `saved` holds a reference to the original array, which was never modified; replacing the field only repointed the object's field.",
+          "point": "Second output is 2: `alias = boxed` copies the reference to the same box, so `boxed.Add()` and `alias.Add()` both mutate that one boxed copy.",
           "marks": 1
         }
       ],
-      "model": "`p.Tracks[0]` is **\"live\"**, `saved[0]` is **\"intro\"**.\n\nOptional explanation: `var q = p` copies the object reference, so there is one `Playlist`. Assigning `q.Tracks` replaces that shared object's field, so `p.Tracks` now points to the new array too. `saved` copied the reference to the first array, which nothing changed.",
+      "model": "The first line printed is **2**.\n\nThe second line printed is **2**.\n\n*Why (optional):* `ICounter boxed = t` copies `t` into a new box on the heap. The local `t` is changed only by its own two `Add()` calls. The box is a reference-type object, so `alias = boxed` shares it, and both interface calls increment the same boxed `Count`.",
       "source": {
         "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
         "heading": "Copy and Storage Boundaries"
       },
       "objective": "value-semantics",
       "goal": "apply"
+    },
+    {
+      "id": "c2",
+      "type": "mcq",
+      "prompt": "`Line` is a **struct** with a mutating method, and `Order` is a class that exposes a `Line` through an auto-property. This program runs:\n\n```csharp\nvar order = new Order\n{\n    Line = new Line { Qty = 1, Tags = new List<string>() }\n};\n\norder.Line.Bump();\nConsole.WriteLine($\"{order.Line.Qty} {order.Line.Tags.Count}\");\n\npublic struct Line\n{\n    public int Qty;\n    public List<string> Tags;\n    public void Bump()\n    {\n        Qty++;\n        Tags.Add(\"bumped\");\n    }\n}\n\npublic sealed class Order\n{\n    public Line Line { get; set; }\n}\n```\n\nWhat does the `Console.WriteLine` call print?",
+      "marks": 1,
+      "options": [
+        "`1 0`",
+        "`1 1`",
+        "`2 1`",
+        "`2 0`"
+      ],
+      "answer": 1,
+      "rubric": [
+        {
+          "point": "Selects `1 1`: the property getter returns a copy of the struct, so the `Qty` increment is lost, but the copy's `Tags` field references the same list, so the added tag persists.",
+          "marks": 1
+        }
+      ],
+      "model": "**`1 1`**\n\n*Why (optional):* `order.Line` returns a copy of the stored struct. `Bump()` increments `Qty` on that temporary copy, which is then discarded, so the stored `Qty` stays 1. The copy's `Tags` field holds the same list reference as the stored struct, so `Tags.Add` changes the shared list and its count becomes 1.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Types.md",
+        "heading": "Pitfalls"
+      },
+      "objective": "value-semantics",
+      "goal": "apply"
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "blanks": {
+        "local": "2",
+        "boxed": "2"
+      },
+      "confidence": "unsure"
+    },
+    "c2": {
+      "choice": 2,
+      "confidence": "sure"
+    }
+  },
+  "marks": {
+    "c2": {
+      "score": 0,
+      "awarded": [
+        false
+      ],
+      "annotations": [],
+      "mistake": "misconception",
+      "feedback": "The answer is “`1 1`”."
+    },
+    "c1": {
+      "awarded": [
+        true,
+        true
+      ],
+      "annotations": [
+        {
+          "quote": "The first line printed is 2.",
+          "kind": "correct",
+          "note": "Correct. The local `t` is only changed by its own two `Add()` calls, because boxing copied it into a separate box."
+        },
+        {
+          "quote": "The second line printed is 2.",
+          "kind": "correct",
+          "note": "Correct. `alias` shares the same box as `boxed`, so both interface calls increment one boxed `Count`."
+        }
+      ],
+      "mistake": "none",
+      "feedback": "Both outputs are correct: the box is a separate copy of `t`, and `alias` shares that box by reference.",
+      "score": 2
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1795450003596
 }

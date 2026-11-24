@@ -1,39 +1,112 @@
 {
   "version": 1,
-  "createdAt": 1794301727499,
+  "createdAt": 1795452159591,
   "mastery": "Assets/Qard/Courses/Programming Mastery.md",
   "course": "Programming",
   "objective": "delegate-contracts",
-  "title": "Trace delegate invocation and captured state, including lifetime and multicast failure behavior",
+  "title": "Trace delegate invocation and captured variables, including the bound target and multicast order, return value and failure behavior",
   "goal": "explain",
   "questionPolicy": 1,
-  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
   "questions": [
     {
       "id": "c1",
       "type": "short",
-      "objective": "delegate-contracts",
-      "goal": "explain",
-      "prompt": "Consider this C# code:\n\n```csharp\nstatic (Action inc, Func<int> read) Make()\n{\n    int n = 0;\n    return (() => n++, () => n);\n}\n\nvar (inc, read) = Make();\ninc();\ninc();\nConsole.WriteLine(read()); // prints 2\n```\n\n`Make` has already returned before `inc` and `read` are called, and `inc` and `read` are two separate delegates. Explain why `read()` still returns `2`.",
+      "prompt": "Consider this C# code:\n\n```csharp\nint total = 0;\nAction add = () => total += 5;\nFunc<int> read = () => total;\n\nadd();\nadd();\nConsole.WriteLine(read());\n```\n\nIt prints `10`. The `read` delegate was created while `total` was `0`, and `read` never changes `total`. Explain why `read()` still returns `10`.",
       "marks": 2,
       "rubric": [
         {
-          "point": "Explains lifetime: the captured local `n` does not end when `Make` returns. It is kept in closure state that lives as long as a delegate still references it.",
+          "point": "Both lambdas capture the same variable `total`, meaning shared storage, rather than each getting its own copy or a snapshot of its value at creation.",
           "marks": 1
         },
         {
-          "point": "Explains sharing: both lambdas capture the same variable `n`, not separate copies or a snapshot of its value. The increments made through `inc` change the storage that `read` reads.",
+          "point": "`read` gets the variable's current value when it is invoked. By then, the two `add()` calls have written 10 to that same storage.",
           "marks": 1
         }
       ],
-      "model": "`n` is a captured variable, so it is stored in closure state rather than only in `Make`'s stack frame. That state stays alive after `Make` returns because the delegates still reference it. Both lambdas capture that one variable, not copies of its value. Each `inc()` updates the shared storage, so `read()` sees both increments and returns `2`.",
+      "model": "Both lambdas close over the same variable `total`, so they share its storage. Neither stores a copy of its value. Each `add()` call updates that storage, so `total` becomes 10. `read()` reads the current value when it is called, which is 10.",
       "source": {
         "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
         "heading": "Closures"
-      }
+      },
+      "objective": "delegate-contracts",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "mcq",
+      "prompt": "In this C# code, `Counter.Report()` prints the counter's name:\n\n```csharp\nvar a = new Counter(\"A\");\nAction viaGroup = a.Report;            // method-group conversion\nAction viaLambda = () => a.Report();   // lambda\n\na = new Counter(\"B\");\n\nviaGroup();\nviaLambda();\n```\n\nWhat do the two calls print, and why?",
+      "marks": 1,
+      "options": [
+        "`A` then `B`: the method-group delegate stored object A as its target when it was created, while the lambda captured the variable `a` and reads it at call time.",
+        "`A` then `A`: both delegates stored a snapshot of `a` when they were created, so reassigning the local afterwards cannot affect either of them.",
+        "`B` then `B`: both delegates read the variable `a` when invoked, because a delegate stores only the method and never the object to call it on.",
+        "`B` then `A`: the method-group delegate reads `a` at call time, while the lambda copied the value of `a` into itself when it was created."
+      ],
+      "answer": 0,
+      "rubric": [
+        {
+          "point": "Chooses `A` then `B`, because the closed instance delegate binds its target object at creation and the lambda captures the variable, which it reads when invoked.",
+          "marks": 1
+        }
+      ],
+      "model": "`A` then `B`. `a.Report` creates a closed instance delegate whose target is the object `a` referred to at that moment: Counter A. Reassigning `a` later does not change the delegate's stored target. The lambda captures the variable `a` itself, so when it runs it reads the current value, Counter B.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Delegates.md",
+        "heading": "Closures"
+      },
+      "objective": "delegate-contracts",
+      "goal": "explain"
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "text": "because delegate stores instructions, not state, it stored instruction to return total, on a moment of invokation, which it did",
+      "confidence": "sure"
+    },
+    "c2": {
+      "unknown": false,
+      "choice": 2,
+      "confidence": "unsure"
+    }
+  },
+  "marks": {
+    "c2": {
+      "score": 0,
+      "awarded": [
+        false
+      ],
+      "annotations": [],
+      "mistake": "misconception",
+      "feedback": "The answer is “`A` then `B`: the method-group delegate stored object A as its target when it was created, while the lambda captured the variable `a` and reads it at call time.”."
+    },
+    "c1": {
+      "awarded": [
+        false,
+        true
+      ],
+      "annotations": [
+        {
+          "quote": "it stored instruction to return total, on a moment of invokation",
+          "kind": "correct",
+          "note": "You correctly say `read` evaluates `total` when it is invoked, not when it was created."
+        },
+        {
+          "quote": "which it did",
+          "kind": "vague",
+          "note": "This doesn't explain why the invocation returns 10. You needed to say that the `add()` calls wrote to the same storage that `read` then reads."
+        },
+        {
+          "quote": "delegate stores instructions, not state",
+          "kind": "missing",
+          "note": "You didn't say that both lambdas capture the same variable `total`, so they share storage. A lambda that closes over a variable holds a reference to that variable, so 'not state' is misleading."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You explained that `read` evaluates `total` at invocation, but you didn't say that both lambdas share the same captured variable.",
+      "score": 1
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1795452467177
 }

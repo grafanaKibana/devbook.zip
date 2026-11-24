@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "createdAt": 1795441439167,
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "failure-contracts",
+  "title": "Choose where to throw, catch, wrap or rethrow so the original cause survives, and predict when finally runs and what it can mask",
+  "goal": "apply",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "objective": "failure-contracts",
+      "goal": "apply",
+      "prompt": "A report exporter runs the method below. `ReportExportException` is a custom exception whose constructor stores its second argument as `InnerException`. During one call, `QueryRows` throws a `TimeoutException`. The `catch` block runs, and then `connection.Close()` in `finally` throws an `IOException`. No other code in the method catches exceptions.\n\n```csharp\npublic void Export(DbConnection connection)\n{\n    try\n    {\n        QueryRows(connection);\n    }\n    catch (TimeoutException ex)\n    {\n        throw new ReportExportException(\"Export failed.\", ex);\n    }\n    finally\n    {\n        connection.Close();\n    }\n}\n```\n\nWhich exception reaches the caller of `Export`, and why does wrapping the timeout in the `catch` block not change that outcome?",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "States that the caller receives the `IOException` from `Close()` (not the `ReportExportException` or the `TimeoutException`).",
+          "marks": 1
+        },
+        {
+          "point": "Explains that `finally` runs after the `catch` block throws, while the `ReportExportException` is leaving the method, and the exception escaping `finally` replaces it, so the wrapper and its inner `TimeoutException` are lost.",
+          "marks": 1
+        }
+      ],
+      "model": "The caller receives the `IOException`.\n\nThe `catch` block throws `ReportExportException`, but control still has to pass through `finally` before leaving the method. `Close()` throws there, and that exception replaces the propagating `ReportExportException`, so the wrapper and the `TimeoutException` inside it never reach the caller.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+        "heading": "Pitfalls"
+      }
+    },
+    {
+      "id": "c2",
+      "type": "mcq",
+      "objective": "failure-contracts",
+      "goal": "apply",
+      "prompt": "A checkout service calls a payment gateway client. The client already translates vendor failures into `PaymentGatewayUnavailableException`, with the original HTTP failure stored as its `InnerException`. The checkout service must log this failure and then let it propagate. Code above the checkout service catches `PaymentGatewayUnavailableException`, and incident investigators need the stack trace showing where the client threw it, as well as the original HTTP cause.\n\nWhich `catch` block in the checkout service meets these requirements?",
+      "marks": 1,
+      "options": [
+        "`catch (PaymentGatewayUnavailableException ex) { Log(ex); throw; }`",
+        "`catch (PaymentGatewayUnavailableException ex) { Log(ex); throw ex; }`",
+        "`catch (PaymentGatewayUnavailableException ex) { Log(ex); throw new PaymentGatewayUnavailableException(ex.Message); }`",
+        "`catch (PaymentGatewayUnavailableException ex) { Log(ex); throw new InvalidOperationException(\"Checkout failed.\", ex); }`"
+      ],
+      "answer": 0,
+      "rubric": [
+        {
+          "point": "Chooses the block that logs and rethrows with `throw;`.",
+          "marks": 1
+        }
+      ],
+      "model": "The first option. The exception already has the stable type callers handle and already carries the HTTP cause, so the checkout service adds no meaning by wrapping it. `throw;` rethrows it unchanged with its original stack trace.\n\nWhy the others fail: `throw ex;` restarts the stack trace at the checkout service. Creating a new exception from `ex.Message` drops the stack trace and the inner HTTP cause. Wrapping in `InvalidOperationException` changes the type, so callers catching `PaymentGatewayUnavailableException` no longer match.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Exception Handling.md",
+        "heading": "Questions"
+      }
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

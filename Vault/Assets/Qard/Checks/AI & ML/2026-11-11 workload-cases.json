@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "createdAt": 1794384476642,
+  "createdAt": 1795445209539,
   "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
   "course": "AI & ML",
   "objective": "workload-cases",
-  "title": "Build representative, versioned evaluation cases with references, rubrics, and failure segments while preventing leakage and misleading synthetic coverage",
+  "title": "Build representative, versioned evaluation cases with references and rubrics, size the set for the effect it must detect, and avoid misleading synthetic coverage",
   "goal": "apply",
   "questionPolicy": 1,
   "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
@@ -12,28 +12,100 @@
     {
       "id": "c1",
       "type": "short",
-      "goal": "apply",
+      "prompt": "A team wants its release gate to detect a **2-percentage-point** improvement in answer accuracy. It runs the current system (baseline) and a candidate on the same **40** evaluation cases. The baseline gets 32/40 correct (80%). The candidate gets 33/40 correct (82.5%). The team says the candidate is better and ships it.\n\nIs the evidence enough to support that conclusion? Give your verdict and the reason.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Verdict: no, the evidence is not enough to conclude the candidate is better.",
+          "marks": 1
+        },
+        {
+          "point": "Reason: the gap is one case out of 40, which is well within sampling noise. A set this small cannot reliably detect a 2-point effect. It should be sized for that minimum detectable effect, or the result should be reported with an interval that shows the difference could be zero. Any equivalent statistical-power argument earns credit.",
+          "marks": 1
+        }
+      ],
+      "model": "No. The gap is a single case out of 40, which is easily explained by sampling noise. A 40-case set doesn't have the statistical power to detect a 2-point change. The set should be sized for that minimum detectable effect, and the difference should be reported with an interval.\n\n*Optional:* running both systems on the same cases (paired) often reduces variance, because each case acts as its own control when the two systems' outcomes are correlated across cases. Even so, 40 cases is very unlikely to be enough for a 2-point effect.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+        "heading": "Size and Statistical Power"
+      },
       "objective": "workload-cases",
+      "goal": "apply"
+    },
+    {
+      "id": "c2",
+      "type": "mcq",
+      "prompt": "A team built its evaluation set by having an LLM read product documentation and write questions that each document answers. Each case keeps the ID of the document it came from. The assistant scores 97% on this set. After launch, many real user questions fail. Those questions are vague, combine several issues or contain typos.\n\nWhich explanation and next step fit this situation best?",
+      "marks": 1,
+      "options": [
+        "The set is too small to show these failures. Generating several thousand more cases with the same prompt would expose them.",
+        "The pass threshold is too lenient. Raising the required score from 97% to 99% would make the gate catch these failures.",
+        "Generated questions share the generator's clean phrasing and difficulty, so messy real inputs are under-represented. Add sampled production questions to the set.",
+        "The scorer is at fault. Replacing reference-based grading with reference-free faithfulness grading would reveal these failures."
+      ],
+      "answer": 2,
+      "rubric": [
+        {
+          "point": "Chooses the option that explains the failures as inadequate coverage: synthetic cases share the generator's phrasing and difficulty, so messy real inputs are under-represented and production cases need to be added.",
+          "marks": 1
+        }
+      ],
+      "model": "**Option 3.** The generator wrote clean questions in its own style, so vague, multi-issue and typo-filled inputs are under-represented in the set, too rare for the score to reflect how the assistant handles them. More cases from the same prompt keep the same blind spot. A stricter threshold or a different scorer only changes how the same unrepresentative cases are graded. The fix is to add real production examples.",
       "source": {
         "path": "Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
         "heading": "Synthetic Generation"
       },
-      "prompt": "An internal IT helpdesk assistant answers employee questions from a knowledge base. Before launch, the team built a 1,500-case evaluation set by asking an LLM to read each knowledge-base article and write questions the article fully answers. Each case stores the article it came from. The assistant scored 94% on this set.\n\nOne month after launch, production logs show many failures on vague or multi-part requests, such as \"VPN broke again after the update, also can't print\". These requests rarely use the wording of any article.\n\nNow that production logs are available, what one change should the team make to the evaluation set, and why does it close the gap that let the 94% overstate quality?",
-      "marks": 2,
-      "rubric": [
-        {
-          "point": "Proposes a change that brings the underrepresented input shapes into the set, such as adding real or human-reviewed production cases (including vague, multi-part or messy requests) or replacing synthetic cases with them.",
-          "marks": 1
-        },
-        {
-          "point": "Explains that the generated cases, written from single articles in the generator's phrasing, underrepresented the vague or multi-part request types common in production, so the 94% reflected a different input mix from real traffic and overstated how well it predicted production quality.",
-          "marks": 1
-        }
-      ],
-      "model": "Add real cases sampled from production logs, including vague and multi-part requests, with reviewed labels, and let them replace synthetic cases over time.\n\nThe synthetic questions were each written from one article in the generator's phrasing, so vague or multi-part requests like those in production were underrepresented. The 94% measured a different mix of requests from real traffic, so it overstated production quality; adding real cases makes the set's mix match the workload."
+      "objective": "workload-cases",
+      "goal": "apply"
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "text": "i dont think so, since 1 case difference can be just and error difference between runs. The better evidence would be if there would be more cases or more run samples that confirm that improvement is consistent and not per case error",
+      "confidence": "sure"
+    },
+    "c2": {
+      "choice": 2,
+      "confidence": "unsure"
+    }
+  },
+  "marks": {
+    "c2": {
+      "score": 1,
+      "awarded": [
+        true
+      ],
+      "annotations": [],
+      "mistake": "none",
+      "feedback": "Correct."
+    },
+    "c1": {
+      "awarded": [
+        true,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "i dont think so",
+          "kind": "correct",
+          "note": "You give the right verdict: the evidence does not support concluding the candidate is better."
+        },
+        {
+          "quote": "1 case difference can be just and error difference between runs",
+          "kind": "correct",
+          "note": "You see that a one-case gap can be noise, which is part of the reason."
+        },
+        {
+          "quote": "The better evidence would be if there would be more cases or more run samples",
+          "kind": "vague",
+          "note": "You suggest more cases, but you don't tie this to sizing the set for the 2-point effect or to statistical power. You also don't mention reporting an interval that could include zero."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "Your verdict is right and you identify noise, but you don't state that 40 cases lack the power to detect a 2-point effect or that the set should be sized for it.",
+      "score": 1
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1795446057344
 }

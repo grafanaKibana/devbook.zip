@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "revision": 16,
+  "revision": 17,
   "general": {
     "answer-first": "Make the first paragraph a complete answer to the question, phrased as a direct reply in the question's own terms (for a why question: \"X is needed because A cannot ..., while X does ..., which solves ...\"). Keep everything after it concise and supporting: explanation, conditions and any example that back the answer without restating it or dropping needed information.",
     "plain-language": "Use straightforward, concrete language that is clear on a tired first read, without stacked clauses or dense phrasing, and keep technical precision. Write paragraphs that flow: join related ideas with because, so, which, then, while, instead of lining up short standalone declaratives. A run of clipped subject-verb sentences reads as a list of facts and is the most repeated complaint; read the paragraph aloud and rewrite it if it sounds like a list.",
@@ -14,7 +14,8 @@
     "familiar-examples": "Illustrate with common, everyday examples most developers have used. Replace niche APIs or rare scenarios with a simple general rule, or leave them out.",
     "explicit-subjects": "Name the subject explicitly instead of using a pronoun such as \"it\" whenever more than one thing in the sentence or paragraph could be meant.",
     "named-term-cards": "When interviewers commonly ask about a concept by its name, keep a card whose question uses that exact name and explains the concept, even if it overlaps another card that covers the same idea from a different angle.",
-    "diagram-over-words": "Match the device to the content: a numbered list for a sequence of steps, a small left-to-right mermaid diagram for a structure or graph that is easier seen than read. Whichever is used, cut the words it replaces and do not follow it with prose that repeats what it already shows. Do not add a code example that only repeats the prose."
+    "diagram-over-words": "Match the device to the content: a numbered list for a sequence of steps, a small left-to-right mermaid diagram for a structure or graph that is easier seen than read. Whichever is used, cut the words it replaces and do not follow it with prose that repeats what it already shows. Do not add a code example that only repeats the prose.",
+    "no-semicolons": "Do not use a semicolon to join clauses inside a sentence in authored prose or responses. Join the clauses with a conjunction such as because, so or while, or split them into two sentences."
   },
   "topics": {
     "ai-and-ml": {},

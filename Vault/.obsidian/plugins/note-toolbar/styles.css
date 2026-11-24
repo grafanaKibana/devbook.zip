@@ -2142,11 +2142,13 @@ body.is-floating-nav :is(body.is-phone .cg-note-toolbar-container[data-tbar-posi
 }
 body .callout[data-callout=note-toolbar][data-callout-metadata*=glass]:not([data-callout-metadata*=card]),
 body.is-mobile .callout[data-callout=note-toolbar][data-callout-metadata*=mgls]:not([data-callout-metadata*=card]) {
-  background: unset;
   mix-blend-mode: normal;
+}
+:is(body .callout[data-callout=note-toolbar][data-callout-metadata*=glass]:not([data-callout-metadata*=card]), body.is-mobile .callout[data-callout=note-toolbar][data-callout-metadata*=mgls]:not([data-callout-metadata*=card])):not([data-tbar-position*=text]) {
+  background: unset;
   overflow: visible;
 }
-:is(body .callout[data-callout=note-toolbar][data-callout-metadata*=glass]:not([data-callout-metadata*=card]), body.is-mobile .callout[data-callout=note-toolbar][data-callout-metadata*=mgls]:not([data-callout-metadata*=card])) .callout-content {
+:is(body .callout[data-callout=note-toolbar][data-callout-metadata*=glass]:not([data-callout-metadata*=card]), body.is-mobile .callout[data-callout=note-toolbar][data-callout-metadata*=mgls]:not([data-callout-metadata*=card])):not([data-tbar-position*=text]) .callout-content {
   overflow: visible;
 }
 :is(body .callout[data-callout=note-toolbar][data-callout-metadata*=glass]:not([data-callout-metadata*=card]), body.is-mobile .callout[data-callout=note-toolbar][data-callout-metadata*=mgls]:not([data-callout-metadata*=card])) ul {
@@ -4838,6 +4840,9 @@ input[type=text].note-toolbar-setting-error,
   height: 100%;
   width: var(--cg-nt-ui-modal-width);
 }
+.is-phone .note-toolbar-ui[data-ntb-ui-type=modal] {
+  top: calc(var(--safe-area-inset-top) + var(--header-height) + var(--size-4-4));
+}
 .note-toolbar-ui[data-ntb-ui-type=modal] .view-header-left,
 .note-toolbar-ui[data-ntb-ui-type=modal] .view-actions {
   display: none;
@@ -5013,6 +5018,8 @@ body[data-ntb-csstheme=Baseline] {
   --cg-nt-tbar-top-sticky-pos-mobile: calc(1rem * -1 + 1px);
 }
 body[data-ntb-csstheme=Baseline] .cg-note-toolbar-container[data-tbar-position=bottom],
+body[data-ntb-csstheme=Baseline] .cg-note-toolbar-container[data-tbar-position=float],
+body[data-ntb-csstheme=Baseline] .cg-note-toolbar-container[data-tbar-position=text],
 body[data-ntb-csstheme=Baseline] .cg-note-toolbar-container[data-tbar-position=top] {
   --cg-nt-tbar-bg-color: var(--background-primary);
 }

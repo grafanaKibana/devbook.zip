@@ -1,42 +1,116 @@
 {
   "version": 1,
-  "createdAt": 1794300573055,
+  "createdAt": 1795450676518,
   "mastery": "Assets/Qard/Courses/Programming Mastery.md",
   "course": "Programming",
   "objective": "type-shapes",
-  "title": "Choose class, struct or record semantics from identity, equality, copying and inheritance requirements",
+  "title": "Choose a record class, record struct or conventional class from equality, copying and inheritance requirements, and predict what generated equality and `with` copies do with reference members",
   "goal": "apply",
   "questionPolicy": 1,
-  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
   "questions": [
     {
       "id": "c1",
       "type": "mcq",
-      "marks": 1,
       "objective": "type-shapes",
       "goal": "apply",
-      "prompt": "A C# warehouse app models a `Shipment`. A scheduler, a tracking service and a billing service all hold the same shipment object. When the tracking service changes its `Status`, the other two must see that change immediately. Two shipments created separately must stay distinct even when every field has the same value, such as two identical pallets sent on the same day. Nothing inherits from `Shipment`.\n\nWhich type declaration fits these requirements best?",
+      "marks": 1,
+      "prompt": "Consider this C# program:\n\n```csharp\nvar a = new Order(\"1\", new[] { \"x\" });\nvar b = a with { Tags = new[] { \"x\" } };\n\nConsole.WriteLine(a == b);\n\npublic record Order(string Id, string[] Tags);\n```\n\nC# arrays use reference equality. What does the program print, and why?",
       "options": [
-        "`public record class Shipment`, because generated value equality lets every service compare shipments by their contents",
-        "`public readonly record struct Shipment`, because it is immutable, so a status change cannot be lost between services",
-        "`public sealed class Shipment`, because services share one instance and equality stays based on references",
-        "`public struct Shipment`, because copying the value gives each service its own up-to-date shipment state"
+        "`True`, because `with` starts from a copy of `a` and the new array holds the same element",
+        "`False`, because `b` is a separate record object, so it does not share its identity with `a`",
+        "`False`, because `a.Tags` and `b.Tags` are different array instances that compare by reference",
+        "`True`, because `Order` is a record, so generated equality compares its data instead of identity"
       ],
       "answer": 2,
       "rubric": [
         {
-          "point": "Chooses `sealed class`: a reference type gives shared identity, so all services see one object's mutations, and the default reference equality keeps separately created shipments with equal fields distinct.",
+          "point": "Chooses `False` because the two records hold different array instances, and generated record equality compares the `Tags` member with the array's reference equality.",
           "marks": 1
         }
       ],
-      "model": "**`public sealed class Shipment`.** Assignment and passing copy a reference, so all three services point at the same object and see the status change. Class equality compares references by default, so two separately created shipments with identical fields still compare unequal. `sealed` fits because nothing inherits from it.\n\n*Why the others fail:* a `record class` makes the two identical pallets compare equal. A struct or record struct copies the value, so each service would hold its own copy and would not see the change. A `readonly` type cannot change its status in place at all.",
+      "model": "`False`, because `a.Tags` and `b.Tags` are different array instances that compare by reference. The `with` expression replaced the copied array reference with a new array. Generated record equality compares each member with that member type's own equality, so the arrays are unequal even though they hold the same element.",
       "source": {
-        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Classes.md",
-        "heading": "Tradeoffs"
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+        "heading": "Pitfalls"
+      }
+    },
+    {
+      "id": "c2",
+      "type": "short",
+      "objective": "type-shapes",
+      "goal": "apply",
+      "prompt": "A C# geometry library needs a type for a 2D grid cell holding two `int` coordinates. Cells are created in very large numbers inside tight loops and used as `Dictionary` keys. Two cells with the same coordinates must compare equal, a cell must never change after creation, no other type will inherit from it, and a missing cell is never represented as `null`.\n\nWhich of `record class`, `record struct`, `readonly record struct` or a conventional `class` fits best? Give the choice and the reason it beats the closest alternative.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Chooses `readonly record struct`.",
+          "marks": 1
+        },
+        {
+          "point": "Gives a valid reason over the closest alternative: e.g. versus `record class`, no inheritance or null is needed so a small value type avoids a heap object per cell; or versus plain `record struct`, `readonly` makes the positional properties init-only so the cell cannot be mutated (which also keeps it safe as a dictionary key).",
+          "marks": 1
+        }
+      ],
+      "model": "`readonly record struct`. It gives generated value equality like a record class, but nothing here needs inheritance or `null`, so a small value type avoids allocating a heap object per cell; and unlike a plain `record struct`, its positional properties are init-only, so a cell cannot be mutated after creation.",
+      "source": {
+        "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Records.md",
+        "heading": "Readonly Record Struct"
       }
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "choice": 1,
+      "confidence": "sure"
+    },
+    "c2": {
+      "text": "readonly record struct since inheritence not needed so struct fit, the objects with the same properties are equal from struct, and it will never change because readonly, no null because of struct as well which will always contain default value",
+      "confidence": "sure"
+    }
+  },
+  "marks": {
+    "c1": {
+      "score": 0,
+      "awarded": [
+        false
+      ],
+      "annotations": [],
+      "mistake": "misconception",
+      "feedback": "The answer is “`False`, because `a.Tags` and `b.Tags` are different array instances that compare by reference”."
+    },
+    "c2": {
+      "awarded": [
+        true,
+        true
+      ],
+      "annotations": [
+        {
+          "quote": "readonly record struct",
+          "kind": "correct",
+          "note": "This is the right choice for a small, immutable, equality-based key type."
+        },
+        {
+          "quote": "inheritence not needed so struct fit",
+          "kind": "correct",
+          "note": "You tied the lack of inheritance to choosing a struct, which is a valid reason over `record class`."
+        },
+        {
+          "quote": "it will never change because readonly",
+          "kind": "correct",
+          "note": "You said `readonly` prevents mutation, which is the reason it beats a plain `record struct`. This also makes the cell safe as a dictionary key."
+        },
+        {
+          "quote": "no null because of struct as well which will always contain default value",
+          "kind": "insight",
+          "note": "Correct extra point: a struct is never `null` and defaults to zeroed fields, which matches the requirement that a missing cell is never `null`."
+        }
+      ],
+      "mistake": "none",
+      "feedback": "You chose `readonly record struct` and justified it against both `record class` (no inheritance or null needed) and plain `record struct` (`readonly` prevents mutation).",
+      "score": 2
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1795451489528
 }

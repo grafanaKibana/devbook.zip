@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "createdAt": 1795399153198,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "prompt-interface",
+  "title": "Specify instructions, inputs, constraints, and expected output as a versioned task interface, and set sampling and token-limit settings to fit the task",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "prompt": "A team uses an LLM to write structured JSON summaries of support conversations. On their evaluation set, complete valid responses range from 150 to 900 generated tokens and average 300. To cut cost, an engineer sets the output-token cap (max tokens) to 320. They expect the model to adapt by writing more concisely.\n\nExplain why this plan fails, and state what the cap should be sized from instead.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Explains that the cap is a hard stop, not an instruction the model adapts to: generation ends at 320 tokens whether or not the answer is complete, so valid responses longer than 320 tokens get truncated (e.g. incomplete or unparseable JSON).",
+          "marks": 1
+        },
+        {
+          "point": "States that the cap should be sized from the measured generated-token lengths of valid responses on the evaluation set (covering the longest, about 900) plus headroom, so it acts as a ceiling against runaway output. Mentioning prompt-based shortening alone does not earn this point.",
+          "marks": 1
+        }
+      ],
+      "model": "The cap does not make the model write shorter. It only stops generation at 320 tokens, so valid responses longer than that (up to about 900 tokens) get truncated, which can leave incomplete or unparseable JSON. The cap should be sized from the measured generated-token lengths of valid responses on the evaluation set: above the longest (about 900), plus headroom, so it works as a ceiling against runaway output.\n\n*Optional:* to actually reduce normal length and cost, shorten through the prompt, for example by stating a length limit or a tighter answer shape.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+        "heading": "Questions"
+      },
+      "objective": "prompt-interface",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

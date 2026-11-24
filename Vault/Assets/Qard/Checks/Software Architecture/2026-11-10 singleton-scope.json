@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "createdAt": 1794682393039,
+  "createdAt": 1795452830706,
   "mastery": "Assets/Qard/Courses/Software Architecture Mastery.md",
   "course": "Software Architecture",
   "objective": "singleton-scope",
@@ -11,55 +11,84 @@
   "questions": [
     {
       "id": "c1",
-      "type": "mcq",
-      "prompt": "An ASP.NET Core app registers `services.AddSingleton<IClock, Clock>()`. While registration is still running, a helper method calls `services.BuildServiceProvider()` and resolves `IClock` from it to configure another option. Later, the app resolves `IClock` from its normal application provider. Logging shows that two different `Clock` instances were created.\n\nWhich explanation is correct?",
-      "marks": 1,
-      "options": [
-        "`AddSingleton` keeps one instance per thread, so the startup thread running the helper received its own `Clock`.",
-        "Singleton instances are created per scope, and the helper resolved outside any scope, so the first request scope created a new `Clock`.",
-        "Each `BuildServiceProvider` call creates a separate root provider with its own singleton cache, and singleton lifetime only applies within one root provider.",
-        "The container disposes and recreates all singletons when registration finishes, so the startup `Clock` was replaced by a new one."
-      ],
-      "answer": 2,
-      "rubric": [
-        {
-          "point": "Chooses the option saying each `BuildServiceProvider` call creates a separate root provider with its own singleton set.",
-          "marks": 1
-        }
-      ],
-      "model": "**Option 3.** `AddSingleton` means one instance per root provider and registration, not one per process. Calling `BuildServiceProvider` during registration creates a second container, which has its own singleton cache, so it creates a second `Clock`.",
-      "source": {
-        "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md",
-        "heading": "Pitfalls"
-      },
-      "objective": "singleton-scope",
-      "goal": "explain"
-    },
-    {
-      "id": "c2",
       "type": "short",
-      "prompt": "A web API registers `RequestCounter` with `services.AddSingleton<RequestCounter>()`. The class has a plain `Dictionary<string, int>` field. Every incoming request calls a method that increments the count for the caller's API key, with no locking. A developer says: \"This is safe because the .NET DI container is thread-safe.\"\n\nExplain why this reasoning is wrong.",
+      "objective": "singleton-scope",
+      "goal": "explain",
+      "prompt": "In an ASP.NET Core app, `Cache` is registered with `services.AddSingleton<ICache, Cache>()`. During registration, a startup helper calls `services.BuildServiceProvider()` and resolves `ICache` from it to read some settings. The app then builds its normal service provider and serves requests that also resolve `ICache`. Logs show that the `Cache` constructor ran twice.\n\nExplain why the singleton registration did not prevent a second instance.",
       "marks": 2,
       "rubric": [
         {
-          "point": "Explains that the container's thread safety covers creating and resolving the service, not the instance's own fields or dependencies.",
+          "point": "States that singleton lifetime means one instance per root service provider (container) and registration, not one instance per process.",
           "marks": 1
         },
         {
-          "point": "Explains that one shared instance serves concurrent requests, so unsynchronized updates to the dictionary can race and corrupt the counts or the dictionary.",
+          "point": "Explains that calling `BuildServiceProvider` created a second root provider with its own singleton cache, so each provider created its own `Cache` instance.",
           "marks": 1
         }
       ],
-      "model": "The container only guarantees that creating and resolving the service is thread-safe. It does nothing to protect the object's state. Because the service is a singleton, every concurrent request uses the same `RequestCounter`, so unlocked increments on the shared `Dictionary` can race, losing updates or corrupting the dictionary.\n\n*Optional:* the whole read–modify–write increment must be atomic. Either take a lock around the entire increment, or use `ConcurrentDictionary.AddOrUpdate(key, 1, (_, n) => n + 1)`. Swapping in `ConcurrentDictionary` but keeping `counts[key]++` still loses updates, because the read and the write are separate operations.",
+      "model": "`AddSingleton` is a container lifetime rule: one instance per root provider and registration, not a process-wide guarantee. Calling `BuildServiceProvider` during registration made a second root container with its own singleton set, so it created one `Cache` and the app's real provider created another.",
       "source": {
         "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md",
         "heading": "Pitfalls"
-      },
+      }
+    },
+    {
+      "id": "c2",
+      "type": "mcq",
       "objective": "singleton-scope",
-      "goal": "explain"
+      "goal": "explain",
+      "prompt": "A classical Singleton `RequestStats` replaced its hand-written double-checked locking with `private static readonly Lazy<RequestStats> _instance = new(() => new RequestStats());` (default `Lazy<T>` settings). The instance holds a plain `Dictionary<string, int>` that request threads increment concurrently through `RequestStats.Instance`.\n\nWhich statement correctly explains the concurrency risk that remains?",
+      "options": [
+        "`Lazy<T>` gives each thread its own instance, so every thread keeps a separate dictionary and the totals diverge.",
+        "`Lazy<T>` serializes every member call on the instance, so the only remaining cost is lock contention under heavy load.",
+        "`Lazy<T>` makes creation thread-safe so only one instance exists, but unsynchronized writes to its shared dictionary still race.",
+        "`Lazy<T>` only delays creation, so two threads arriving together can still each construct an instance and overwrite the field."
+      ],
+      "answer": 2,
+      "marks": 1,
+      "rubric": [
+        {
+          "point": "Selects the option stating that `Lazy<T>` makes initialization thread-safe (one instance) but does not make the instance's shared mutable state thread-safe.",
+          "marks": 1
+        }
+      ],
+      "model": "**C.** Default `Lazy<T>` guarantees one thread-safe construction, removing the double-checked-locking problem. It does nothing for the instance's members: concurrent unsynchronized writes to the shared `Dictionary` still race, so the state needs its own synchronization.\n\n*Optional detail:* swapping `Dictionary` for `ConcurrentDictionary` alone does not make `stats[key]++` atomic, because the read and the write are separate operations. Valid fixes are a `lock` around the whole increment or `ConcurrentDictionary.AddOrUpdate(key, 1, (_, n) => n + 1)`.",
+      "source": {
+        "path": "Home/Software Architecture/Patterns/Design Patterns/Creational/Singleton.md",
+        "heading": "Singleton Lifetime in .NET"
+      }
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "unknown": true
+    },
+    "c2": {
+      "choice": 3,
+      "confidence": "unsure"
+    }
+  },
+  "marks": {
+    "c1": {
+      "score": 0,
+      "awarded": [
+        false,
+        false
+      ],
+      "annotations": [],
+      "mistake": "unknown",
+      "feedback": "You said you didn't know. The model answer shows what was needed."
+    },
+    "c2": {
+      "score": 0,
+      "awarded": [
+        false
+      ],
+      "annotations": [],
+      "mistake": "misconception",
+      "feedback": "The answer is “`Lazy<T>` makes creation thread-safe so only one instance exists, but unsynchronized writes to its shared dictionary still race.”."
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1795453248187
 }

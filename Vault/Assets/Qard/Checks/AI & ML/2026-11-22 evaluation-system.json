@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "createdAt": 1795363228493,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "evaluation-system",
+  "title": "Combine exact checks and rubric scoring over a versioned case set, keeping cases separate from scorers and gating a release against a pinned baseline",
+  "goal": "apply",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "goal": "apply",
+      "objective": "evaluation-system",
+      "source": {
+        "path": "Home/AI & ML/LLM/Evaluation/Evaluation.md",
+        "heading": "Evaluation System"
+      },
+      "prompt": "A team's release gate compares a candidate LLM app with a pinned baseline on the same frozen holdout set. An LLM judge scores each answer's correctness against a rubric. The baseline scores were recorded last month. Since then, the team has switched the judge to a newer model and reworded the judge prompt. The candidate was scored with the new judge. Its average is 0.4 points below the stored baseline, so the gate fails.\n\nShould the team treat this result as evidence that the candidate regressed? Give your verdict, explain why, and say what the team should do to get a valid gate decision.",
+      "marks": 3,
+      "rubric": [
+        {
+          "point": "Verdict: no, the result is not valid evidence that the candidate regressed.",
+          "marks": 1
+        },
+        {
+          "point": "Reason: the baseline and candidate were scored by different judge versions (model and prompt), so the scores are not comparable. The 0.4 drop may come from the judge change rather than from the candidate.",
+          "marks": 1
+        },
+        {
+          "point": "Fix: score both systems with one versioned judge (same model, prompt, rubric and sampling settings), for example by rescoring the baseline outputs with the new judge or the candidate with the old one, and then compare.",
+          "marks": 1
+        }
+      ],
+      "model": "No. The judge model and prompt changed between the two runs, so the two score files don't measure the same thing. The 0.4 drop could come from the new judge scoring differently rather than from the candidate getting worse. To get a valid decision, rescore the baseline outputs with the new pinned judge (same model, prompt, rubric and sampling settings), or rescore the candidate with the old judge, and then apply the gate.\n\n*Optional:* before relying on the new judge, check it against a blinded human sample."
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

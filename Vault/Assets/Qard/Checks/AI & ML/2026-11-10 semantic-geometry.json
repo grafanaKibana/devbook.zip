@@ -1,39 +1,115 @@
 {
   "version": 1,
-  "createdAt": 1794303332360,
+  "createdAt": 1795447444439,
   "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
   "course": "AI & ML",
   "objective": "semantic-geometry",
-  "title": "Choose an embedding model and similarity measure for domain retrieval and plan re-embedding when representation compatibility changes",
+  "title": "Choose an embedding model, dimensionality, and similarity measure for domain retrieval and plan re-embedding when the model changes",
   "goal": "explain",
   "questionPolicy": 1,
-  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
   "questions": [
     {
       "id": "c1",
       "type": "short",
-      "objective": "semantic-geometry",
-      "goal": "explain",
-      "prompt": "A retrieval system's embedding model returns **unnormalized** vectors: their length (magnitude) varies from text to text. The vector index scores matches by **dot product**, but a colleague's tests used **cosine similarity**. On the same query and corpus, the two methods return different top-k chunks.\n\nExplain why dot product can rank the chunks differently from cosine similarity here, and state a condition on the vectors under which the two would produce identical rankings for a given query.",
+      "prompt": "A retrieval index stores chunk vectors from an embedding model whose documentation says its vectors are **not** length-normalized: different chunks get vectors of different lengths (magnitudes). The same query is run twice over this index, once ranking by cosine similarity and once by dot product.\n\nExplain why the two runs can return a different top result.",
       "marks": 2,
       "rubric": [
         {
-          "point": "Dot product equals cosine similarity multiplied by the vectors' magnitudes, so a stored vector with a larger magnitude can score higher even when its direction (angle) is less similar to the query; cosine ignores magnitude.",
+          "point": "States that dot product depends on vector magnitude (equals cosine similarity scaled by the vectors' lengths), whereas cosine compares direction only and ignores magnitude.",
           "marks": 1
         },
         {
-          "point": "States a valid condition for identical rankings: all stored vectors have the same (positive) magnitude, for example all L2-normalized to unit length, so dot product is a constant positive multiple of (or equal to) cosine similarity. Normalizing the query is not required, since the query's magnitude scales every score equally.",
+          "point": "Explains the ranking consequence: because stored vectors differ in length, a chunk with a larger magnitude can outrank a chunk whose direction is closer to the query under dot product, so the order can differ from the cosine order. The answer may add that the two rankings are guaranteed to match when all vectors are length-normalized.",
           "marks": 1
         }
       ],
-      "model": "Dot product is cosine similarity scaled by both vectors' magnitudes. With unnormalized vectors, a chunk whose vector is long can outscore a chunk whose direction is closer to the query, while cosine compares only the angle. The rankings become identical when every stored vector has the same length, for example when all are L2-normalized: dot product is then cosine similarity times a constant positive factor, so the order does not change.\n\n*Optional:* the query's own length multiplies every score by the same amount, so it never changes the ranking. The model's documentation determines whether magnitude is part of the signal and which metric to use.",
+      "model": "Dot product equals cosine similarity multiplied by the two vectors' lengths, while cosine looks only at the angle between them. Because these vectors are not normalized, their lengths differ, so under dot product a long vector pointing less closely toward the query can outscore a shorter one that points more closely toward it. Cosine would rank the better-aligned chunk first, so the top result can change.\n\n*Optional:* with length-normalized vectors every length is 1, so dot product equals cosine and the rankings are guaranteed to match.",
       "source": {
         "path": "Home/AI & ML/LLM/Embeddings.md",
         "heading": "Similarity Metrics"
-      }
+      },
+      "objective": "semantic-geometry",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "mcq",
+      "prompt": "A team uses a Matryoshka-trained embedding model that produces 3072-dimensional vectors. Instead of indexing the full vectors, they build a two-stage design. The ANN index holds only the normalized first 256 dimensions of each vector. The full 3072-dimensional vectors are kept in a separate store and used to re-score the small set of candidates that the ANN search returns.\n\nCompared with indexing the full 3072-dimensional vectors, which statement best explains the effect of this design?",
+      "marks": 1,
+      "options": [
+        "Total vector storage drops about twelvefold, because only the 256-dimensional prefixes are stored after indexing.",
+        "Re-scoring with full vectors makes recall identical to full-dimensional search, because every chunk is scored at full precision.",
+        "ANN memory and search work drop, but total vector storage does not, because the full vectors are still kept outside the index.",
+        "ANN memory stays the same, because the full vectors must be loaded into the index to compare prefixes."
+      ],
+      "answer": 2,
+      "rubric": [
+        {
+          "point": "Chooses the option stating that ANN memory and search work drop but total vector storage does not, because the full vectors are still stored outside the index.",
+          "marks": 1
+        }
+      ],
+      "model": "**ANN memory and search work drop, but total vector storage does not, because the full vectors are still kept outside the index.**\n\nThe index holds only the short prefixes, so it is smaller and faster to search. The full vectors still have to be stored somewhere for re-scoring. Re-scoring can only reorder candidates that the prefix search found, so it does not guarantee full-dimensional recall.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Embeddings.md",
+        "heading": "Dimensionality"
+      },
+      "objective": "semantic-geometry",
+      "goal": "explain"
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "text": "different magnitudes will produce different vectors, which can lead missing information during comparison of the vectors on retrieval",
+      "confidence": "guess"
+    },
+    "c2": {
+      "unknown": true
+    }
+  },
+  "marks": {
+    "c2": {
+      "score": 0,
+      "awarded": [
+        false
+      ],
+      "annotations": [],
+      "mistake": "unknown",
+      "feedback": "You said you didn't know. The model answer shows what was needed."
+    },
+    "c1": {
+      "awarded": [
+        false,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "different magnitudes will produce different vectors",
+          "kind": "wrong",
+          "note": "Magnitude is a property of each stored vector, not something that makes vectors differ between the two runs. The question is about how the same vectors are scored under two metrics."
+        },
+        {
+          "quote": "which can lead missing information during comparison of the vectors on retrieval",
+          "kind": "vague",
+          "note": "This doesn't say how information would be lost or why the top result changes. It never contrasts a metric that uses magnitude with one that ignores it."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to say that dot product depends on vector length (cosine similarity scaled by the lengths), while cosine compares direction only."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You also needed the ranking consequence: a longer vector pointing less closely at the query can outscore a better-aligned shorter one under dot product, so the order differs from cosine."
+        }
+      ],
+      "mistake": "misconception",
+      "feedback": "You noticed that magnitude matters, but you didn't say how dot product and cosine treat it differently or how that changes the ranking.",
+      "score": 0
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1795448293820
 }

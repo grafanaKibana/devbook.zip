@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "createdAt": 1795444841781,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "context-budget",
+  "title": "Allocate a finite context budget across instructions, history, retrieved evidence, and tool traffic while isolating untrusted material and guarding against context poisoning",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "goal": "explain",
+      "objective": "context-budget",
+      "prompt": "A research agent keeps a memory store. After each session it saves short facts from its own answers to memory. On later sessions, saved facts are inserted into the prompt as plain text in the same section as its operating rules. Nothing records where a fact came from or whether anyone checked it.\n\nIn one session, the agent mistakenly states \"Library X dropped support for Python 3.11\", and this claim is saved. In later sessions, the agent keeps repeating the claim, even when a page of the library's documentation saying 3.11 is supported is retrieved into the same prompt.\n\nExplain how this memory design lets the false claim persist instead of being corrected by the retrieved documentation.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Explains that the saved claim is replayed without provenance or a trust label, mixed in with trusted operating rules, which blurs the boundary between trusted and untrusted material so the claim can be treated like trusted context.",
+          "marks": 1
+        },
+        {
+          "point": "Explains that because the memory appears trusted (and a false natural-language claim carries no built-in sign that it is wrong), the model can give it more weight than the contradicting retrieved documentation, so the documentation is discounted rather than used to correct the claim.",
+          "marks": 1
+        }
+      ],
+      "model": "The memory is replayed as unlabelled text next to the operating rules, with no record of its source. That blurs the line between instructions and unchecked data, so the claim can be treated as trusted context. A false sentence carries no sign that it is wrong, so once it looks trusted, the model may weigh it above the retrieved documentation and discount the page that contradicts it instead of using it to reject the claim.\n\n*Optional:* fixes include validating claims before storage, keeping memory and retrieved data in labelled sections apart from instructions, and enforcing important controls in code.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Context Engineering/Context Engineering.md",
+        "heading": "Context Poisoning"
+      }
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

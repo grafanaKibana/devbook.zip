@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "createdAt": 1795449327305,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "retrieval-units",
+  "title": "Choose a chunking strategy and size that keep conditions with their rules, preserve source metadata, and balance matching precision against missing context",
+  "goal": "apply",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "mcq",
+      "objective": "retrieval-units",
+      "goal": "apply",
+      "source": {
+        "path": "Home/AI & ML/LLM/Context Engineering/RAG/Chunking.md",
+        "heading": "Recursive Chunking"
+      },
+      "prompt": "A RAG system indexes Markdown API reference pages. Each page has an endpoint description followed by a parameter table of about 1,200 tokens. Each row has a parameter name, type, default and constraint. Ingestion uses a generic recursive splitter with a 400-token target and 10% overlap. Its separators are paragraph breaks, newlines, spaces, then characters.\n\nEvaluation shows that retrieval finds the correct page, but the returned chunks contain table rows without the header row or the endpoint they belong to. The model then guesses which column a value belongs to. Prose answers are fine.\n\nWhich change most directly fixes this failure?",
+      "options": [
+        "Raise the overlap to 30%, so every chunk that starts partway through a table also repeats enough earlier text to include the header row.",
+        "Switch these pages to semantic chunking, so boundaries fall where embedding similarity between neighbouring rows drops below a tuned threshold.",
+        "Parse tables as their own units: keep each table whole with its endpoint if it fits the embedding limit, else repeat column headers and endpoint in every fragment.",
+        "Lower the target size to 150 tokens, so each chunk holds only a few rows and matches parameter-specific queries more precisely."
+      ],
+      "answer": 2,
+      "marks": 1,
+      "rubric": [
+        {
+          "point": "Chooses the structure-aware option: the table is kept whole with its endpoint context when it fits the embedding limit, and otherwise every fragment carries the column headers and endpoint context.",
+          "marks": 1
+        }
+      ],
+      "model": "**Parse tables as their own units: keep each table whole with its endpoint if it fits the embedding limit, otherwise repeat the column headers and endpoint in every fragment.**\n\nWhy the others fail: the table has no paragraph breaks, so the generic splitter cuts between rows at newlines. A 30% overlap covers only about 120 tokens, far less than the 1,200-token table, so later chunks still lack the header. Semantic breakpoints between similar-looking rows do not bring back the header or the endpoint. Smaller chunks separate even more rows from their header."
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

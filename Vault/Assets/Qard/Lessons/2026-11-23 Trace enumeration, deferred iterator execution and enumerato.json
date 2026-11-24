@@ -1,0 +1,466 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/Programming/NET/CSharp/Fundamentals/Foreach.md",
+      "text": "---\ntopic: [Programming]\nsubtopic: [NET]\nlevel: [\"4\"]\npriority: High\nstatus: In Progress\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Foreach\"\nflashcard_uid: \"2e8ba405\"\ncreated: \"2026-02-15T16:27:13.000Z\"\nmodified: \"2026-11-16T16:48:56.427Z\"\npublished: \"2026-07-08T13:14:17.324Z\"\n---\n\n`foreach` asks a source for one item at a time. Most sources implement `IEnumerable<T>`, but the compiler also accepts types that expose the required enumerator pattern without implementing the interface. This is why arrays, collections, spans, and custom stack-only enumerators can all use the same loop syntax.\n\nThe source must provide either an enumerable interface or a suitable `GetEnumerator()` method. The returned enumerator exposes `Current` and a parameterless `MoveNext()` returning `bool`.\n\nFor a normal enumerable, the lowering is roughly:\n\n```csharp\nvar enumerator = collection.GetEnumerator();\ntry\n{\n    while (enumerator.MoveNext())\n    {\n        var item = enumerator.Current;\n        // Use item\n    }\n}\nfinally\n{\n    // Conceptually: if this enumerator requires disposal, dispose it here.\n    // The exact pattern depends on its static type and may avoid boxing a struct.\n}\n```\n\nThe exact lowering depends on the source type. Arrays receive specialized index-based handling. Other enumerators are disposed when required, including after `break` or an exception. A hand-written `while (MoveNext())` loop must preserve that cleanup itself.\n\nConcrete collections can expose struct enumerators, avoiding a heap allocation for the enumerator. Upcasting such a collection to `IEnumerable<T>` may box that enumerator. This matters only on measured hot paths. The interface is often the better boundary elsewhere.\n\n# Iterators and Yield\n\n`yield return` lets a method describe a sequence without building the whole result first. The compiler turns the method into a state machine that resumes at the next statement each time the consumer asks for another element. `yield break` ends the sequence.\n\nAn iterator returning `IEnumerable<T>` normally starts work during enumeration, not when the method is called:\n\n- Calling the method obtains the enumerable state machine.\n- `MoveNext()` runs the body until it reaches a `yield return` or finishes.\n- Disposing the enumerator runs pending `finally` blocks.\n\nAsync iterators apply the same idea through `IAsyncEnumerable<T>` and `await foreach`.\n\nExample:\n\n```csharp\npublic static IEnumerable<int> CountNumbers(int start, int end)\n{\n    for (int i = start; i <= end; i++)\n    {\n        yield return i;\n    }\n}\n\nforeach (var number in CountNumbers(1, 5))\n{\n    Console.WriteLine(number);\n}\n```\n\nTwo boundaries are easy to miss:\n\n- **Deferred execution moves failures.** Validation inside the iterator body throws when enumeration begins. A non-iterator wrapper can validate immediately and return a private iterator.\n- **`yield return` has placement restrictions.** It cannot appear in a `catch` or `finally`, or in a `try` that has a `catch`. A `try` with only `finally` is allowed so the state machine can preserve cleanup.\n\n# Pitfalls\n\n**Changing the source during enumeration.** Many mutable collections, including `List<T>` and `Dictionary<TKey,TValue>`, invalidate active enumerators after structural changes and throw `InvalidOperationException`. Applying changes after the loop or iterating an intentional snapshot avoids the exception.\n\n**Deferred work captures more than the item.** Since C# 5, each `foreach` iteration has its own iteration variable, so lambdas do not all observe the final item. Captured mutable state outside the loop is still shared, and closures can outlive resources used during enumeration.\n\n**Source binding differs from deferred work.** LINQ operators receive their source object when called. Later reassignment of the caller's source variable does not replace that object inside the query. Changes to the object itself, and separately captured predicate variables, can still change a later enumeration.\n\n**Multiple enumeration.** An `IEnumerable<T>` may repeat I/O, database work, or side effects every time it is enumerated. Materialization is worthwhile only when a stable snapshot or repeated traversal is actually needed.\n\n# Tradeoffs\n\n- `foreach` expresses sequential traversal without exposing indexes. `for` fits when the index itself is part of the algorithm or the collection must be updated by position.\n- LINQ expresses a transformation pipeline. A loop is easier to step through and can avoid iterator or delegate overhead, but performance depends on the source and operators.\n- `Span<T>` provides a stack-only view over contiguous memory. It helps APIs avoid copies and allocations. It is not an automatic reason to replace every collection loop.\n\n# Questions\n\n<!-- qard-id: 23508898-cc73-4289-ba2c-ab026d0258b2 -->\n> [!qard]- What must a type provide to work with `foreach`?\n> A type works with `foreach` in either of two ways. It implements `IEnumerable<T>` or `IEnumerable`, or it matches the enumerator pattern that the compiler looks for. The interface is the usual reusable contract, but it is not required.\n>\n> The pattern has two parts:\n>\n> - **The source** has a public parameterless `GetEnumerator()` method. That method can also be an extension method.\n> - **The returned enumerator** has a public `Current` property and a public parameterless `MoveNext()` method that returns `bool`.\n>\n> The compiler binds to these members rather than to an interface, so a type can be iterated without implementing either interface. Arrays also receive specialized compiler handling.\n>\n> [Microsoft: iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements)\n\n<!-- qard-id: cdfb0d9a-b75e-43e1-b6ed-ac7ea0da25c7 -->\n> [!qard]- How does `foreach` work under the hood?\n> The compiler rewrites `foreach` into lower-level code, and the result depends on the source type. For the general enumerator pattern, the rewrite is roughly:\n>\n> ```csharp\n> var enumerator = source.GetEnumerator();\n> try\n> {\n>     while (enumerator.MoveNext())\n>     {\n>         var item = enumerator.Current;\n>         // loop body\n>     }\n> }\n> finally\n> {\n>     // Disposes the enumerator when it requires disposal.\n> }\n> ```\n>\n> 1. `GetEnumerator()` is called once, before the first element.\n> 2. Each `MoveNext()` call advances to the next element and returns `false` when the sequence is exhausted.\n> 3. `Current` supplies that element, which is assigned to the iteration variable before the body runs.\n> 4. When the enumerator requires disposal, the `finally` block disposes it, including after `break` or an exception. A handwritten `while (MoveNext())` loop has to provide that cleanup itself, or the enumerator's cleanup does not run.\n>\n> No single generated shape fits every source. Arrays, for example, can be lowered to index-based code without an enumerator.\n>\n> [Microsoft: iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements)\n\n<!-- qard-id: 0cfeffdf-d33d-4c50-a677-d2f470332fd4 -->\n> [!qard]- When is `yield return` useful compared with a materialized collection?\n> `yield return` produces values on demand, so a consumer can stop early without first building the whole result. The iterator body runs during enumeration; enumerating again runs it again and may observe changed state. A materialized collection is preferable when a stable snapshot or repeated traversal is needed. [Microsoft: yield statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/yield)\n\n> [!qard]- Does a deferred LINQ query follow later reassignment of its source variable?\n> No. An operator receives the source object when the pipeline is constructed. Reassigning the caller's variable cannot replace the source already passed to it:\n>\n> ```csharp\n> int[] source = [1, 2, 3];\n> var query = source.Where(n => n > 1);\n> source = [10, 20];\n> // Prints 2, 3 from the original source.\n> Console.WriteLine(string.Join(\", \", query));\n> ```\n>\n> Deferred execution postpones enumeration, not evaluation of the source argument. Mutation of the same source object can affect a later enumeration, and variables separately captured by a predicate remain live. Materializing the results creates a snapshot of those results. [Microsoft: Enumerable.Where](https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.where?view=net-10.0)\n\n# References\n\n- [C# iteration statements](https://learn.microsoft.com/dotnet/csharp/language-reference/statements/iteration-statements#the-foreach-statement)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1795441273417,
+  "topic": "Trace enumeration, deferred iterator execution and enumerator disposal on normal exit or failure",
+  "notes": [
+    "Home/Programming/NET/CSharp/Fundamentals/Foreach.md"
+  ],
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "iteration-contracts",
+  "steps": [
+    {
+      "title": "What foreach lowers to",
+      "explain": "A `foreach` loop hides its machinery. You write one line, and the compiler turns it into calls on an object you never see. If you cannot see those calls, you cannot say when cleanup runs or what happens when the loop stops early.\n\nIn plain words, the loop asks the source for a helper object. It then asks that helper for the next item, one at a time, until the helper says there are no more. That helper is called the **enumerator**. The whole walk sits inside a `try`, and the cleanup sits in its `finally`.\n\nFor a `List<string>`, the compiler writes roughly this:\n\n```csharp\nvar e = list.GetEnumerator();\ntry\n{\n    while (e.MoveNext())\n    {\n        var item = e.Current;\n        Console.WriteLine(item);\n    }\n}\nfinally\n{\n    e.Dispose();\n}\n```\n\nThe `List<string>` enumerator needs disposal, so the `finally` calls `Dispose()`.\n\nHere is the trace for `foreach (var item in list) Console.WriteLine(item);` with `List<string> list = new() { \"a\", \"b\" };`:\n\n| Move | Call | Result |\n|---|---|---|\n| 1 | `GetEnumerator()` | enumerator `e` created, once |\n| 2 | `MoveNext()` | `true`; `Current` is `\"a\"`; body prints `a` |\n| 3 | `MoveNext()` | `true`; `Current` is `\"b\"`; body prints `b` |\n| 4 | `MoveNext()` | `false`; the `while` ends |\n| 5 | `finally` | `e.Dispose()` runs |\n\n`MoveNext()` runs one more time than there are items. That last call returns `false` and ends the loop. `Current` is read only after a `true`.\n\nThe rule, for an ordinary enumerable such as `List<T>`: `foreach` calls `GetEnumerator()` once, loops on `while (MoveNext())`, and reads `Current` for each item. If the enumerator needs disposal, it is disposed in the `finally`. You already know `finally` runs however control leaves the `try`, so that disposal does not depend on how the loop ends. Arrays are the exception: the compiler gives them index-based handling instead. See [[Home/Programming/NET/CSharp/Fundamentals/Foreach|the foreach lowering]].",
+      "connect": "You already trust `finally` to run when an exception leaves a `try`. Here you see that `foreach` over a list is built on a `try`/`finally`, so the next steps can predict when the enumerator is disposed and when an iterator's body runs.",
+      "checkFirst": false,
+      "check": {
+        "id": "k1",
+        "type": "short",
+        "prompt": "`list` is an empty `List<string>`. This loop runs:\n\n```csharp\nforeach (var item in list)\n{\n    Console.WriteLine(item);\n}\n```\n\nHow many times are `MoveNext()` and `Dispose()` each called?",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "`MoveNext()` is called once.",
+            "marks": 1
+          },
+          {
+            "point": "`Dispose()` is called once.",
+            "marks": 1
+          }
+        ],
+        "model": "`MoveNext()` is called once (it returns `false`), and `Dispose()` is called once.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Foreach.md"
+        },
+        "objective": "iteration-contracts",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Says `MoveNext()` is called 0 times, or that the loop checks the list's `Count` first and skips everything.",
+          "reteach": "For a `List<string>`, the lowering never reads `Count`. It learns the list is empty only by asking: `while (e.MoveNext())`. For the empty list, that first call returns `false`, so `MoveNext()` runs exactly once and the loop ends."
+        },
+        {
+          "signs": "Says `MoveNext()` is called 3 times, copying the two-item trace.",
+          "reteach": "`MoveNext()` runs one more time than there are items. The traced list had two items, so it ran three times. This list has zero items, so it runs once, and that one call returns `false`."
+        },
+        {
+          "signs": "Says `Dispose()` is called 0 times because no items were visited or the body never ran.",
+          "reteach": "Disposal is not part of the loop body. It sits in the `finally` that wraps the whole `while`. On the empty list, control enters the `try`, the first `MoveNext()` returns `false`, and control leaves the `try`. Leaving the `try` runs the `finally`, so the `List<string>` enumerator's `Dispose()` runs once."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Disposal on normal exit, break and failure",
+      "explain": "An enumerator can hold something that must be released, such as an open file. If the loop ends and nobody calls `Dispose()`, the file stays open. A loop can end in three ways: it runs out of items, it hits `break`, or the body throws.\n\n`foreach` covers all three exits in one place. The lowered loop sits inside a `try`. When the enumerator requires disposal, the `Dispose()` call sits in that `try`'s `finally`. Some enumerators need no disposal, so nothing is called for them. You already know `finally` runs however control leaves the `try`. So every exit passes through the cleanup.\n\nSuppose `ReadLines()` returns an enumerable, and the enumerator it hands out keeps a file open until that enumerator is disposed. Here is the same loop written two ways:\n\n```csharp\n// A: foreach\nforeach (var line in ReadLines()) { Process(line); }\n\n// B: hand-written\nvar e = ReadLines().GetEnumerator();\nwhile (e.MoveNext()) { Process(e.Current); }\ne.Dispose();\n```\n\nTrace both when `Process` throws on the second line:\n\n| Move | A: `foreach` | B: hand-written |\n|---|---|---|\n| 1. `MoveNext()` → `true`, line 1 processed | same | same |\n| 2. `MoveNext()` → `true`, `Process` throws | exception leaves the `try` | exception leaves the `while` |\n| 3. Cleanup | `finally` runs → `Dispose()` called | `e.Dispose();` skipped: control never reaches it |\n| 4. Result | file closed, exception continues upward | file still open, exception continues upward |\n\nThe rule: when the enumerator requires disposal, `foreach` disposes it on a normal end, on `break` and on an exception, because the disposal is in a `finally`. A hand-written `while (MoveNext())` loop disposes only when control actually reaches its `Dispose()` call. To match `foreach`, it needs its own `try`/`finally` ([[Home/Programming/NET/CSharp/Fundamentals/Foreach|Foreach]]).",
+      "connect": "Step 1 showed the `try`/`finally` that `foreach` lowers to; here you saw what that `finally` buys on each way out of the loop. Later in the lesson, the same `Dispose()` call is what runs an iterator's pending cleanup when a loop stops early.",
+      "checkFirst": false,
+      "check": {
+        "id": "k2",
+        "type": "short",
+        "goal": "apply",
+        "objective": "iteration-contracts",
+        "prompt": "`ReadLines()` returns an enumerable. The enumerator it hands out keeps a file open until that enumerator is disposed. Nothing throws in this code:\n\n```csharp\nvar e = ReadLines().GetEnumerator();\nwhile (e.MoveNext())\n{\n    if (e.Current == \"END\") break;\n    Process(e.Current);\n}\ne.Dispose();\n```\n\nThe second line is `\"END\"`. Is `e.Dispose()` called, and why?",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "Yes, `e.Dispose()` is called.",
+            "marks": 1
+          },
+          {
+            "point": "Because `break` moves control to the statement after the loop, so execution reaches `e.Dispose();`.",
+            "marks": 1
+          }
+        ],
+        "model": "Yes. `break` jumps to the statement right after the loop, so control reaches `e.Dispose();` and the file is closed.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Foreach.md"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Answers \"No, a hand-written loop has no `finally`, so it never disposes.\"",
+          "reteach": "A missing `finally` means `Dispose()` runs only if control reaches that line, not that it never runs. In the check, `break` exits the `while` and continues at the next statement, which is `e.Dispose();`, so the file is closed. The hand-written loop loses disposal only on exits that skip that line, such as an exception."
+        },
+        {
+          "signs": "Answers \"No, `break` skips the cleanup just like an exception does.\"",
+          "reteach": "`break` and an exception leave the loop differently. An exception escaping this hand-written loop jumps past the trailing `e.Dispose();` line, because nothing guarantees that line runs during unwinding; only a `finally` would. `break` only ends the `while` and carries on at the very next statement. Here that statement is `e.Dispose();`, so it runs."
+        },
+        {
+          "signs": "Answers \"Yes, because the compiler wraps the loop in `try`/`finally`.\"",
+          "reteach": "The verdict is right, but the reason belongs to `foreach`, not to this code. The compiler adds the `try`/`finally` only when it lowers a `foreach`; this hand-written loop gets nothing added. `Dispose()` runs here only because `break` lands on the line after the loop, which is the `e.Dispose();` call."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "When an iterator body runs",
+      "explain": "A method with `yield return` looks like an ordinary method, so you expect its body to run when you call it. It does not. If you assume it does, your trace puts output, side effects and failures at the wrong point.\n\nIn plain words: calling a `yield` method only gives you an object that *can* produce the values. The body runs bit by bit, and only when someone asks for the next value by calling `MoveNext()`. Each call runs the body until the next `yield return`, or until the body ends. The compiler builds that object for you. It is a **state machine**: it remembers where the body stopped and resumes there. See [[Home/Programming/NET/CSharp/Fundamentals/Foreach#Iterators and Yield|Iterators and Yield]].\n\n```csharp\nstatic IEnumerable<int> Numbers()\n{\n    Console.WriteLine(\"start\");\n    yield return 1;\n    yield return 2;\n}\n\nvar seq = Numbers();\nConsole.WriteLine(\"called\");\nforeach (var n in seq) Console.WriteLine(n);\nforeach (var n in seq) Console.WriteLine(n);\n```\n\n| Move | What runs | Output during this move |\n|---|---|---|\n| 1. `Numbers()` | Nothing in the body. You get the state machine. | — |\n| 2. `\"called\"` line | Plain statement | `called` |\n| 3. First loop, `MoveNext()` #1 | Body from the top to `yield return 1`; returns `true` | `start` |\n| 4. Loop body | Reads `Current` (1) and prints it | `1` |\n| 5. `MoveNext()` #2 | Resumes after `yield return 1`, stops at `yield return 2`; returns `true` | — |\n| 6. Loop body | Reads `Current` (2) and prints it | `2` |\n| 7. `MoveNext()` #3 | Resumes and reaches the end; returns `false` | — |\n| 8. Second loop | A fresh enumerator, so moves 3–7 repeat from the top of the body | `start`, `1`, `2` |\n\nSo `called` prints before `start`, and `start` prints twice.\n\nThe rule: calling an iterator method runs none of its body. Advancing it, from one `yield return` to the next, happens only inside `MoveNext()`. Each new enumeration gets a new enumerator and runs the body again from the start. One exception remains: disposing an unfinished iterator can run a pending `finally` from its body. That is cleanup, not advancing.",
+      "connect": "The `foreach` lowering gave you the `MoveNext()` loop, and an iterator advances only inside those calls. The next step uses this to place an iterator's failures and to show when disposal runs its pending `finally`.",
+      "checkFirst": false,
+      "check": {
+        "id": "k3",
+        "type": "short",
+        "goal": "apply",
+        "objective": "iteration-contracts",
+        "prompt": "```csharp\nstatic IEnumerable<int> Numbers()\n{\n    Console.WriteLine(\"start\");\n    yield return 1;\n    yield return 2;\n}\n\nvar items = Numbers().ToList();\nforeach (var n in items) { }\nforeach (var n in items) { }\n```\n\n`ToList()` enumerates its source to the end once and stores the values in a new `List<int>`. How many times is `start` printed, and why?",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "`start` is printed once (during `ToList()`).",
+            "marks": 1
+          },
+          {
+            "point": "Reason: the iterator is enumerated only once, by `ToList()`; the two loops walk the list, which does not re-run the iterator body.",
+            "marks": 1
+          }
+        ],
+        "model": "Once, during `ToList()`. That is the only enumeration of the iterator, and the body runs only when it is enumerated. The two loops walk the stored list, so the body does not run again.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Foreach.md",
+          "heading": "Iterators and Yield"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Says `start` prints twice, or three times, because there are two loops and each enumeration re-runs the body.",
+          "reteach": "The body re-runs for each enumeration *of the iterator*. Here only `ToList()` enumerates `Numbers()`. It calls `MoveNext()` until the end, so `start` prints once, and it stores `1, 2` in a list. The two loops then enumerate that list, a different object with no iterator body. So `start` prints once."
+        },
+        {
+          "signs": "Says `start` prints once, but because `Numbers()` was called once and calling the method runs its body.",
+          "reteach": "The count is right but the reason is wrong. Calling `Numbers()` runs none of the body; it only returns the state machine. `start` prints when `ToList()` makes the first `MoveNext()` call. Write `var seq = Numbers();` with no `ToList()`, and nothing prints at all."
+        },
+        {
+          "signs": "Says `start` never prints because no `foreach` runs over `Numbers()` directly.",
+          "reteach": "`foreach` is not the only way to enumerate. Anything that calls `MoveNext()` advances the body. `ToList()` calls `MoveNext()` until it returns `false` so that it can fill the list. That first call runs `Console.WriteLine(\"start\")`, so `start` prints once."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Where failures and cleanup land",
+      "explain": "A `yield` method can check its data and throw. It can also hold cleanup in a `finally`. Neither runs where it appears to run. If you guess wrong, you expect an error at the call but get it inside the loop. You may also think cleanup was skipped when it already ran.\n\nIn plain words, an iterator's code runs only while something pulls from it. Each `MoveNext()` runs the body up to the next `yield return`. So a throw happens in the `MoveNext()` that reaches it, not in the call that created the sequence. A `finally` runs at the first exit that leaves its `try`.\n\n```csharp\nIEnumerable<int> Read(int[] values)\n{\n    Console.WriteLine(\"start\");\n    try\n    {\n        foreach (var v in values)\n        {\n            if (v < 0) throw new InvalidDataException(\"negative\");\n            yield return v;\n        }\n    }\n    finally { Console.WriteLine(\"cleanup\"); }\n}\n\nvar seq = Read(new[] { 1, -2 });\nConsole.WriteLine(\"created\");\nforeach (var x in seq) Console.WriteLine(x);\n```\n\n| Move | What runs | Output |\n|---|---|---|\n| 1. `Read(...)` | Nothing in the body runs. You get back an enumerable. | |\n| 2. `WriteLine` | The caller's line runs. | `created` |\n| 3. `GetEnumerator()` | `foreach` gets the enumerator. No body code runs yet. | |\n| 4. First `MoveNext()` | The body starts, enters the `try` and pauses at `yield return 1`. `MoveNext()` returns `true`. | `start` |\n| 5. Loop body | The loop prints `Current`. | `1` |\n| 6. Second `MoveNext()` | The body resumes. `-2` fails the check and throws inside the `try`. The exception leaves the `try`, so the `finally` runs now, inside this `MoveNext()`. | `cleanup` |\n| 7. Loop's `finally` | `foreach` calls `Dispose()`. No `finally` is still pending, so nothing prints. The exception continues out of the loop. | |\n\nThe rule: **iterator code, including validation, runs inside `MoveNext()`. A pending `finally` runs at whichever comes first. If enumeration resumes, a later `MoveNext()` can finish or throw out of the `try` and run it there. If the enumerator is disposed while the body is paused at a `yield return` inside the `try`, `Dispose()` runs it.** To make a bad argument fail at the call, check it in an ordinary method that then returns a private iterator. See [[Home/Programming/NET/CSharp/Fundamentals/Foreach#Iterators and Yield|Iterators and Yield]].",
+      "connect": "You saw that `foreach` over this iterator disposes its enumerator on every exit, and that an iterator body waits for `MoveNext()`. Together they tell you where a throw and a `finally` land, which the whole-loop trace next depends on.",
+      "checkFirst": false,
+      "check": {
+        "id": "k4",
+        "type": "mcq",
+        "goal": "apply",
+        "objective": "iteration-contracts",
+        "prompt": "`Read` is this iterator:\n\n```csharp\nIEnumerable<int> Read(int[] values)\n{\n    Console.WriteLine(\"start\");\n    try\n    {\n        foreach (var v in values)\n        {\n            if (v < 0) throw new InvalidDataException(\"negative\");\n            yield return v;\n        }\n    }\n    finally { Console.WriteLine(\"cleanup\"); }\n}\n```\n\nThe program runs:\n\n```csharp\nvar seq = Read(new[] { 1, -2 });\nConsole.WriteLine(\"created\");\nforeach (var x in seq)\n{\n    Console.WriteLine(x);\n    break;\n}\n```\n\nWhat does it print, and is an exception thrown?",
+        "options": [
+          "`created`, `start`, `1`, `cleanup`, and no exception is thrown.",
+          "`created`, `start`, `1`, `cleanup`, then the exception for `-2` is thrown.",
+          "`created`, `start`, `1`, and no exception; `cleanup` is never printed.",
+          "`created`, `start`, `1`, then the exception for `-2`; no `cleanup`."
+        ],
+        "answer": 0,
+        "marks": 1,
+        "rubric": [
+          {
+            "point": "Chooses `created`, `start`, `1`, `cleanup` with no exception: `break` stops before any `MoveNext()` reaches `-2`, and `Dispose()` runs the pending `finally`.",
+            "marks": 1
+          }
+        ],
+        "model": "`created`, `start`, `1`, `cleanup`, and no exception is thrown. After `break`, no `MoveNext()` reaches `-2`, so the check never fails. The body is paused inside the `try`, so the loop's `Dispose()` runs the pending `finally`."
+      },
+      "misconceptions": [
+        {
+          "signs": "Picks the option where `cleanup` is printed and then the exception for `-2` is thrown. The student copies the explanation's outcome, or thinks the iterator checks all its values anyway.",
+          "reteach": "The check for `-2` runs only inside a `MoveNext()` that reaches it. Here `break` leaves the loop after `1`, so no more `MoveNext()` calls happen. `-2` is never checked, so nothing throws. `cleanup` comes from `Dispose()`, not from an exception."
+        },
+        {
+          "signs": "Picks \"no exception; `cleanup` is never printed\". The student thinks an iterator's `finally` runs only when the body finishes or throws, so `break` skips it.",
+          "reteach": "After `1`, the body is paused at `yield return` inside the `try`. `break` leaves the loop, and the loop's hidden `finally` calls `Dispose()`. Disposing a paused iterator runs its pending `finally`, so `cleanup` prints."
+        },
+        {
+          "signs": "Picks \"the exception for `-2`; no `cleanup`\". The student thinks the exception happens despite `break` and that it skips the `finally`.",
+          "reteach": "Two corrections apply. First, `break` stops further `MoveNext()` calls, so `-2` is never reached and nothing throws. Second, a throw inside the `try` would still run the `finally` as the exception leaves the `try`. In this code, `cleanup` prints because `Dispose()` runs the pending `finally`."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Trace a whole loop",
+      "explain": "When a `foreach` runs over an iterator, two pieces of code take turns: your loop body and the iterator body. If you read the code top to bottom, you get the output order wrong. You also miss when the iterator's cleanup runs.\n\nThe idea: the iterator body only moves forward when `foreach` calls `MoveNext()`. However the loop ends, the `foreach` `finally` disposes the enumerator, and that runs the iterator's pending `finally`. You already know a `finally` runs on every exit from its `try`.\n\n```csharp\nIEnumerable<int> Numbers()\n{\n    Console.WriteLine(\"start\");\n    try\n    {\n        yield return 1;\n        yield return 2;\n        yield return 3;\n    }\n    finally { Console.WriteLine(\"cleanup\"); }\n}\n\nvar seq = Numbers();\nConsole.WriteLine(\"called\");\nforeach (var x in seq)\n{\n    Console.WriteLine(x);\n    if (x == 2) break;\n}\nConsole.WriteLine(\"after\");\n```\n\n| Move | What runs | Output |\n|---|---|---|\n| 1 | `Numbers()` returns the state machine; no body runs | — |\n| 2 | `Console.WriteLine(\"called\")` | `called` |\n| 3 | First `MoveNext()`: body runs to `yield return 1` | `start` |\n| 4 | Loop body prints `x` | `1` |\n| 5 | `MoveNext()`: body resumes to `yield return 2`; loop prints it, then `break` | `2` |\n| 6 | `break` leaves the `foreach` `try`; its `finally` disposes the enumerator, which runs the iterator's pending `finally` | `cleanup` |\n| 7 | Code after the loop | `after` |\n\nOutput: `called`, `start`, `1`, `2`, `cleanup`, `after`. `yield return 3` never runs.\n\nThe rule: the iterator runs one stretch per `MoveNext()`, starting at the first one. When the loop exits early, by `break` or by an exception, disposal runs the iterator's pending `finally` before control leaves the loop. See [[Home/Programming/NET/CSharp/Fundamentals/Foreach#Iterators and Yield|Iterators and Yield]].",
+      "connect": "Earlier you saw where an iterator's work and its pending `finally` happen. Now you put the lowered `foreach` and the lazy iterator together on one loop, which is the trace this lesson set out to teach.",
+      "checkFirst": false,
+      "check": {
+        "id": "k5",
+        "type": "short",
+        "goal": "apply",
+        "objective": "iteration-contracts",
+        "prompt": "`Numbers()` is the same iterator as before: it prints `start`, then yields 1, 2, 3 inside a `try` whose `finally` prints `cleanup`. This time the loop body throws instead of breaking, and a `catch` outside the loop handles it:\n\n```csharp\ntry\n{\n    foreach (var x in Numbers())\n    {\n        Console.WriteLine(x);\n        if (x == 1) throw new Exception();\n    }\n}\ncatch { Console.WriteLine(\"caught\"); }\n```\n\nWhat are the last two lines this code prints, in order?",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "The second-to-last line is `cleanup`",
+            "marks": 1
+          },
+          {
+            "point": "The last line is `caught`",
+            "marks": 1
+          }
+        ],
+        "model": "`cleanup`, then `caught`.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Foreach.md",
+          "heading": "Iterators and Yield"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Answers `caught`, then `cleanup`, as if the outer `catch` runs before the enumerator is disposed.",
+          "reteach": "The exception first leaves the `try` that `foreach` lowers to. That `finally` disposes the enumerator, and disposal runs the iterator's pending `finally`, so `cleanup` prints. Only after that does the exception reach the outer `catch`. The last two lines are `cleanup`, then `caught`."
+        },
+        {
+          "signs": "Answers `1`, then `caught`, leaving `cleanup` out because the loop ended with an exception.",
+          "reteach": "The `foreach` `finally` runs on every exit from its `try`, including an exception. So the enumerator is still disposed, and its pending `finally` prints `cleanup`. That line comes between `1` and `caught`."
+        },
+        {
+          "signs": "Copies the earlier trace: answers `cleanup`, then `after`, or `2`, then `cleanup`.",
+          "reteach": "Here the loop body throws when `x == 1`, so `MoveNext()` is never called again and `2` is never printed. There is also no `after` line in this code; the `catch` prints `caught`. The last two lines are `cleanup`, then `caught`."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "text": "both one time",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "both one time",
+            "kind": "correct",
+            "note": "You gave one call each for `MoveNext()` and `Dispose()`. On an empty list the first `MoveNext()` returns `false`, and the `finally` still runs `Dispose()` once."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "Both counts are correct: one `MoveNext()` call and one `Dispose()` call.",
+        "score": 2
+      },
+      "reply": "Right. The first `MoveNext()` returns `false`, so the body never runs. The `finally` still runs, so `Dispose()` is called once. Disposal doesn't depend on whether any items were visited."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "yes its called because while is finished, and dispose it right after the while",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          false
+        ],
+        "annotations": [
+          {
+            "quote": "yes its called",
+            "kind": "correct",
+            "note": "Right: `e.Dispose()` is called in this code."
+          },
+          {
+            "quote": "because while is finished, and dispose it right after the while",
+            "kind": "vague",
+            "note": "You say `Dispose()` follows the loop, but not why `break` still gets there. Say that `break` jumps to the statement after the loop."
+          }
+        ],
+        "mistake": "incomplete",
+        "feedback": "Correct verdict, but the reason skips how `break` leads control to `e.Dispose()`.",
+        "score": 1
+      },
+      "reply": "Yes, `Dispose()` is called. But \"while is finished\" is not quite the reason here. The loop did not run out of items; it exited early. What does `break` do with control, and where does it land? Name that and you have the full reason."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "it is printed once on tolist, in a place where enumerator materialized to the list. later foreachs just iteration over the list collection, without on demand logic",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "it is printed once on tolist",
+            "kind": "correct",
+            "note": "Right count and right place: the only enumeration of the iterator is inside `ToList()`, so the body runs once there."
+          },
+          {
+            "quote": "later foreachs just iteration over the list collection, without on demand logic",
+            "kind": "correct",
+            "note": "You explain why the loops don't re-print: they walk the stored `List<int>`, not the iterator, so the body never re-runs."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "Correct count with the right reason: one enumeration inside `ToList()`, and the loops only read the stored list.",
+        "score": 2
+      },
+      "reply": "Correct. `start` prints once. `ToList()` is the single enumeration of the iterator, so the body runs there. The two loops walk the stored `List<int>`, which has no iterator body to re-run. Deferred execution only applies while you enumerate the iterator itself."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "choice": 0,
+        "confidence": "sure"
+      },
+      "mark": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      },
+      "reply": "Right."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "cleanup and caught",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "cleanup and caught",
+            "kind": "correct",
+            "note": "You put `cleanup` before `caught`. The `foreach` `finally` disposes the enumerator and runs the iterator's pending `finally` while the exception unwinds, before the outer `catch` runs."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "Correct order: disposal runs the iterator's `finally` first, then the outer `catch` handles the exception.",
+        "score": 2
+      },
+      "reply": "Correct. The exception leaves the `foreach`, so its `finally` disposes the enumerator first. That prints `cleanup`. The exception then reaches the outer `catch`, which prints `caught`. Disposal always happens before control leaves the loop, whether it exits by `break` or by an exception."
+    }
+  ],
+  "current": 4,
+  "probe": {
+    "questions": [
+      {
+        "id": "p1",
+        "type": "mcq",
+        "marks": 1,
+        "prompt": "In C#, a method runs this code:\n\n```csharp\ntry\n{\n    Console.WriteLine(\"work\");\n    throw new InvalidOperationException();\n}\nfinally\n{\n    Console.WriteLine(\"cleanup\");\n}\n```\n\nNo `catch` in this method catches the exception, but a caller further up the stack does. Does `\"cleanup\"` print?",
+        "options": [
+          "Yes. The `finally` block runs as the exception leaves the `try`, before the caller's `catch` handles it.",
+          "No. A `finally` block runs only when the `try` block completes without an exception.",
+          "No. Without a `catch` in the same method, the exception skips the `finally` and goes straight to the caller.",
+          "Only if the caller rethrows the exception, because `finally` runs after the outermost handler finishes."
+        ],
+        "answer": 0,
+        "rubric": [
+          {
+            "point": "Chooses the option saying `finally` runs as the exception leaves the `try`, before the caller handles it.",
+            "marks": 1
+          }
+        ],
+        "model": "Yes. The `finally` block runs as the exception leaves the `try`, before the caller's `catch` handles it.",
+        "objective": "failure-contracts",
+        "goal": "apply"
+      }
+    ],
+    "answers": {
+      "p1": {
+        "choice": 0,
+        "confidence": "sure"
+      }
+    },
+    "note": "Checks the gap prerequisite failure-contracts: whether the student knows `finally` runs when an exception leaves the `try`. `foreach` relies on that to dispose its enumerator, and iterators rely on it to run pending `finally` blocks.",
+    "submitted": true,
+    "marks": {
+      "p1": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      }
+    },
+    "findings": "You know `finally` runs when an exception leaves a `try`, and you were sure of it. Earlier iteration checks were weak (0/3)."
+  },
+  "map": {
+    "title": "Enumeration, deferred iterators, and disposal",
+    "objective": "iteration-contracts",
+    "plan": "You already know `finally` runs on exit by exception, so we start by applying it to `foreach`. First you trace the `foreach` lowering and when the enumerator is disposed. Then you trace when an iterator body actually runs and why failures move. Last, you combine both on one loop with `break` and an exception.",
+    "mermaid": "graph TD\nA[\"finally runs when an exception leaves try\"] --> B[\"foreach lowers to GetEnumerator, MoveNext loop, try/finally\"]\nB --> C[\"Dispose runs on normal end, break or exception\"]\nA --> D[\"yield method returns a state machine, body waits for MoveNext\"]\nD --> E[\"Failures and side effects happen at enumeration, not at the call\"]\nC --> F[\"Trace a loop with an iterator: order of work, failure and disposal\"]\nE --> F",
+    "steps": [
+      {
+        "title": "What foreach lowers to",
+        "why": "You should write out GetEnumerator, the MoveNext/Current loop and the try/finally, using your known `finally` rule; this step introduces nothing about iterators yet."
+      },
+      {
+        "title": "Disposal on normal exit, break and failure",
+        "why": "You should predict when the enumerator is disposed on each exit and what a hand-written `while (MoveNext())` loop loses; this needs the lowering from step 1."
+      },
+      {
+        "title": "When an iterator body runs",
+        "why": "You should say that calling a `yield` method runs none of its body until `MoveNext()`, and that enumerating again re-runs it; this needs the MoveNext loop from step 1."
+      },
+      {
+        "title": "Where failures and cleanup land",
+        "why": "You should predict where a validation throw happens and when an iterator's pending `finally` runs; this needs steps 2 and 3."
+      },
+      {
+        "title": "Trace a whole loop",
+        "why": "You should trace one `foreach` over an iterator with `break` or a throw, giving order of output, failure point and disposal; this is the lesson goal."
+      }
+    ]
+  },
+  "stepsFor": "[\"Enumeration, deferred iterators, and disposal\",\"You already know `finally` runs on exit by exception, so we start by applying it to `foreach`. First you trace the `foreach` lowering and when the enumerator is disposed. Then you trace when an iterator body actually runs and why failures move. Last, you combine both on one loop with `break` and an exception.\",[[\"What foreach lowers to\",\"You should write out GetEnumerator, the MoveNext/Current loop and the try/finally, using your known `finally` rule; this step introduces nothing about iterators yet.\"],[\"Disposal on normal exit, break and failure\",\"You should predict when the enumerator is disposed on each exit and what a hand-written `while (MoveNext())` loop loses; this needs the lowering from step 1.\"],[\"When an iterator body runs\",\"You should say that calling a `yield` method runs none of its body until `MoveNext()`, and that enumerating again re-runs it; this needs the MoveNext loop from step 1.\"],[\"Where failures and cleanup land\",\"You should predict where a validation throw happens and when an iterator's pending `finally` runs; this needs steps 2 and 3.\"],[\"Trace a whole loop\",\"You should trace one `foreach` over an iterator with `break` or a throw, giving order of output, failure point and disposal; this is the lesson goal.\"]]]",
+  "accepted": true,
+  "finishedAt": 1795443487914,
+  "close": {
+    "summary": "Lesson built on the student's solid grasp of `finally` and applied it to `foreach` and iterators.\n\n- **foreach lowering (2/2):** traced `GetEnumerator()` → `try { while (MoveNext()) … Current … } finally { Dispose }` correctly.\n- **Disposal on exit (1/2):** gave right verdicts for normal completion, `break` and exceptions, but one answer skipped the mechanism: `break` leaves the `try` block, so the `finally` runs and calls `e.Dispose()`.\n- **Iterator timing (2/2):** understood that calling an iterator method only creates the state machine. The body runs inside `MoveNext()`, up to the next `yield return`.\n- **Failure placement (1/1):** saw that an exception in an iterator surfaces at the `MoveNext()` call during enumeration, not at the method call, and that disposal runs the iterator's pending `finally` blocks.\n- **Whole-loop trace (2/2):** combined both ideas on a loop with `break` and an exception.\n\nConfidence was \"sure\" throughout and matched the results, except for the one incomplete explanation. This is a clear improvement on the earlier iteration checks (0/3). The remaining gap is explaining *how* `break` reaches disposal, not knowing *that* it does.",
+    "cards": [
+      {
+        "front": "In the `foreach` lowering, why does `break` still dispose the enumerator?",
+        "back": "The `while (MoveNext())` loop sits inside `try { … } finally { e.Dispose(); }`. `break` exits the loop and so leaves the `try` block. Leaving a `try` by any route (normal end, `break`, `return` or an exception) runs the `finally`, which calls `Dispose()`."
+      },
+      {
+        "front": "When does the body of an iterator method (`yield return`) actually run?",
+        "back": "Not when the method is called. The call only returns the state machine. Each `MoveNext()` runs the body from where it last stopped to the next `yield return`, or to the end."
+      },
+      {
+        "front": "An iterator throws before its first `yield return`. Where does the exception surface?",
+        "back": "At the first `MoveNext()`, meaning when the `foreach` begins enumerating, not at the line that called the iterator method. Deferred execution moves the failure to the point of enumeration."
+      },
+      {
+        "front": "A `foreach` over an iterator exits early with `break` while the iterator is inside `try { yield return … } finally { … }`. What happens to that `finally`?",
+        "back": "It runs. The `foreach` `finally` calls `Dispose()` on the enumerator, and disposing an iterator runs its pending `finally` blocks. A hand-written `while (MoveNext())` loop without `Dispose()` would skip them."
+      }
+    ],
+    "cardState": {
+      "0": "skipped",
+      "1": "added"
+    },
+    "note": "Assets/Qard/Lessons/2026-11-23 Trace enumeration, deferred iterator execution and enumerato.md",
+    "nextCheck": "2026-11-26"
+  }
+}

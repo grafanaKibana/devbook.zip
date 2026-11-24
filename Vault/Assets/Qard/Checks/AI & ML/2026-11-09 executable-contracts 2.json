@@ -1,65 +1,72 @@
 {
   "version": 1,
-  "createdAt": 1794246786203,
+  "createdAt": 1795446161602,
   "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
   "course": "AI & ML",
   "objective": "executable-contracts",
   "title": "Enforce schema, required fields, tool permissions, and input contracts before semantic scoring while identifying requirements that structure alone cannot prove",
   "goal": "explain",
   "questionPolicy": 1,
-  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
   "questions": [
     {
       "id": "c1",
       "type": "short",
-      "prompt": "An agent can call a tool that immediately emails an attached document. The tool requires a recipient address and a document ID, and the agent may send only documents it has permission to share. A developer proposes checking these requirements only after the tool finishes, when validating the agent's final response. Explain why these checks must run before tool execution.",
-      "marks": 2,
+      "goal": "explain",
+      "objective": "executable-contracts",
+      "prompt": "A support agent can call two tools: `close_ticket(ticket_id, resolution)` and `escalate(ticket_id, reason)`. Before any tool runs, two deterministic checks execute:\n\n1. a **permission check** that rejects any tool not on the agent's allowlist (the list of tools it may call; both tools above are on it), and\n2. a **schema check** that rejects arguments that do not match that tool's JSON schema.\n\nNo other deterministic checks run.\n\nIn one test case, a customer reports a suspected account breach. Company policy says breach reports must be escalated. The agent calls `close_ticket` with a valid ticket ID and a non-empty resolution string. Both checks pass.\n\nExplain why both deterministic checks passed even though the agent did the wrong thing.",
+      "marks": 3,
       "rubric": [
         {
-          "point": "Required arguments and sharing permission determine whether the tool call is allowed to execute; they must be checked at the tool boundary.",
+          "point": "The permission check only confirms that `close_ticket` is a tool the agent is allowed to call, which it is.",
           "marks": 1
         },
         {
-          "point": "Checking the final response cannot prevent or undo an email already sent, even if that response passes validation.",
+          "point": "The schema check only confirms that the arguments have the required fields, types or shape, which they do.",
           "marks": 1
-        }
-      ],
-      "model": "Argument and sharing-permission checks must gate the tool call. Once the email is sent, a valid final response cannot undo an unauthorized disclosure.",
-      "source": {
-        "path": "Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
-        "heading": "Forgetting to Check Tool Inputs, Not Just Outputs"
-      },
-      "objective": "executable-contracts",
-      "goal": "explain"
-    },
-    {
-      "id": "c2",
-      "type": "mcq",
-      "prompt": "A support agent returns JSON containing a permitted action, `close_ticket`, and a nonempty reason. All required fields, argument contracts and permission checks pass. No executable rule specifies when closing a ticket resolves the customer's request. Why is semantic evaluation still needed?",
-      "marks": 1,
-      "options": [
-        "The checks establish contract compliance; judging whether closing addresses the request needs assessment beyond those rules.",
-        "The checks establish contract compliance; semantic evaluation must authorize the action before the tool can execute.",
-        "The checks establish that closing is appropriate; semantic evaluation only needs to improve the reason's wording.",
-        "The checks establish that closing is appropriate; semantic evaluation must confirm that the JSON is parseable."
-      ],
-      "answer": 0,
-      "rubric": [
+        },
         {
-          "point": "Identifies that contract compliance does not establish whether the permitted action addresses the customer's request.",
+          "point": "Neither check encodes which permitted action this case required, so a structurally valid call to the wrong allowed tool passes; choosing `escalate` over `close_ticket` is a correctness decision that structure alone cannot prove.",
           "marks": 1
         }
       ],
-      "model": "Contract compliance does not prove that closing the ticket addresses the customer's request; that decision is not encoded in the checks.",
+      "model": "The permission check only asks whether `close_ticket` is on the allowlist, and it is. The schema check only asks whether the arguments are well formed, and they are. Neither check encodes which allowed action this case requires, so a structurally valid call to the wrong permitted tool passes both.",
       "source": {
         "path": "Home/AI & ML/LLM/Evaluation/Deterministic Checks.md",
         "heading": "Over-Relying on Schema Validation Alone"
-      },
-      "objective": "executable-contracts",
-      "goal": "explain"
+      }
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "text": "it is agent decision failure, not deterministic check. agent correctly called a tool, with valid params, so deterministic checks are passed. ",
+      "confidence": "sure"
+    }
+  },
+  "marks": {
+    "c1": {
+      "awarded": [
+        false,
+        false,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "agent correctly called a tool, with valid params, so deterministic checks are passed.",
+          "kind": "vague",
+          "note": "You note the call was valid, but you don't say what each check verifies. The permission check confirms the tool is allowlisted, and the schema check confirms the arguments are well formed."
+        },
+        {
+          "quote": "it is agent decision failure, not deterministic check.",
+          "kind": "missing",
+          "note": "You identified a decision failure, which is the right direction. You needed to explain that neither check encodes which permitted tool this case required, so picking `close_ticket` over `escalate` is a correctness question that structure can't prove."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You correctly call it an agent decision failure, but you never explain what each check tests or why neither can tell that `escalate` was required.",
+      "score": 0
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1795447346110
 }

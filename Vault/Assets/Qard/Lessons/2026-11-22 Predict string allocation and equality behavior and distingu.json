@@ -1,0 +1,454 @@
+{
+  "sourceSnapshots": [
+    {
+      "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+      "text": "---\ntopic: [Programming]\nsubtopic: [NET]\nlevel: [\"4\"]\npriority: Medium\nstatus: In Progress\npublish: true\nqard-deck: \"Programming\"\nqard-topic: \"NET/CSharp/Fundamentals/Types/Strings\"\nflashcard_uid: \"d65a72cc\"\ncreated: \"2026-02-10T16:03:55.000Z\"\nmodified: \"2026-11-16T16:48:56.427Z\"\npublished: \"2026-07-08T13:14:17.328Z\"\n---\n\n`string` is the C# alias for the sealed reference type `System.String`. Its contents are immutable. Assignment copies a reference, while an operation that changes text produces a different string. That boundary explains most string behavior, including when concatenation is clear and when incremental construction starts wasting allocations.\n\n# Core Properties\n\n- `string` is a sealed reference type.\n- Strings are immutable in safe managed code.\n- `==` and `Equals` compare string content, not object identity.\n\n```csharp\nvar a = \"hello\";\nvar b = a;\nb = b + \"!\";\n\nConsole.WriteLine(a); // hello\nConsole.WriteLine(b); // hello!\n```\n\n`b = b + \"!\"` creates a new string object. `a` remains unchanged.\n\n# String Interning\n\nString literals can share an interned instance, and identical literals typically do. Object identity is not contractual. Compilation can request `NoStringInterning`, and runtime behavior may still vary:\n\n```csharp\nvar s1 = \"dotnet\";\nvar s2 = \"dotnet\";\n\nConsole.WriteLine(object.ReferenceEquals(s1, s2)); // Typically True; identity is not contractual\n```\n\nRuntime interning is available through `string.Intern(s)`, and `string.IsInterned(s)` checks whether an equivalent value is already present. Interned entries are generally retained until the runtime terminates. Feeding the pool high-cardinality dynamic text trades ordinary garbage collection for long-lived retention, usually a bad deal. Compile-time constant concatenations (`\"a\" + \"b\"`) are folded by the compiler. Runtime-built strings are not automatically interned.\n\n# StringBuilder\n\n`StringBuilder` fits text assembled through repeated appends, especially in a loop or another hot path.\n\n```csharp\nvar sb = new StringBuilder(capacity: 256);\nfor (var i = 0; i < 5; i++)\n{\n    sb.Append(\"item-\").Append(i).AppendLine();\n}\n\nvar result = sb.ToString();\n```\n\nThe usual decision is small:\n\n- Interpolation or concatenation fits small, one-off composition.\n- `StringBuilder` fits repeated incremental construction after the allocation cost matters.\n\n# Encoding and Unicode\n\nA .NET `string` stores UTF-16 code units. A `char` is one 16-bit code unit, not necessarily a complete Unicode scalar value. Characters outside the Basic Multilingual Plane use a surrogate pair, so `\"👍\".Length == 2` and `s[0]` returns only half of that pair.\n\n`Rune` and `EnumerateRunes()` operate on Unicode scalar values. User-perceived characters are a different boundary again: one grapheme may contain a base character plus combining marks, so text-element APIs such as `StringInfo` are needed. `string.Normalize()` can put canonically equivalent sequences into the same normalization form before comparison.\n\n# Low-Allocation String Handling\n\nHot paths sometimes need construction without intermediate strings:\n\n- **`ReadOnlySpan<char>`** slices and parses existing text without allocating another string. Many BCL parse APIs accept spans directly.\n- **`string.Create(length, state, callback)`** fills a new string of known length directly, avoiding a separate builder buffer.\n- **Interpolated string handlers (C# 10)** let an API consume interpolation pieces without first creating the final string. The benefit applies only when the receiving overload accepts a handler, as `StringBuilder.Append` does.\n- **`ArrayPool<char>`** rents scratch buffers for transformations. Pooling is worthwhile only when buffer allocations show up in measurement. Every rental adds ownership and clearing rules.\n\n# Pitfalls\n\n- Repeated `+=` in a loop creates intermediate strings. In a measured hot path, `StringBuilder` or a pre-sized buffer cuts that churn.\n- `ReferenceEquals` checks identity, and interning makes identity depend on how the string was created. Semantic comparison should use APIs that accept `StringComparison`, including `string.Equals`, `StartsWith`, `EndsWith`, and `IndexOf`.\n- Culture-implicit comparison can change with the current culture. Identifiers and protocol values normally need `Ordinal` or `OrdinalIgnoreCase`. Natural-language UI text may need a culture-aware comparison instead.\n\n# Tradeoffs\n\n- **Interpolation or concatenation vs `StringBuilder`:** interpolation is clearer for one-off formatting. A builder pays off when text grows through repeated appends.\n- **Ordinal vs culture-aware comparison:** ordinal rules are stable for technical keys. Culture-aware comparison belongs to natural-language text where locale behavior is intentional.\n- **Interning vs ordinary allocation:** literals can share interned instances, but code must not depend on their identity. Forcing dynamic values into the pool can save duplicates at the price of process-long retention, so it needs a bounded value set and evidence.\n\n# Questions\n\n<!-- qard-id: e73d1e16-6636-4fa5-966c-6c12bab1222c -->\n> [!qard]- When is `StringBuilder` a better choice than string concatenation?\n> `StringBuilder` is the better choice when text is built through many appends, especially in a loop or another frequently executed path where allocations matter. For a small, fixed expression, interpolation or concatenation is clearer.\n>\n> The difference comes from string immutability:\n>\n> - **Repeated concatenation:** a `string` cannot change, so each `result += part` allocates a new string holding the accumulated text plus the new part. Each loop step leaves behind an intermediate string, and the growing text is copied again every time.\n> - **`StringBuilder`:** each append writes into a mutable buffer, and `ToString()` creates the final string once. The buffer reallocates only when it runs out of capacity, so an initial capacity close to the expected final size avoids that growth.\n>\n> No fixed number of appends marks the switch point. The signal for a builder is repeated construction in code where measured allocation cost matters.\n>\n> Sources: [Microsoft Learn: Using the StringBuilder class](https://learn.microsoft.com/en-us/dotnet/standard/base-types/stringbuilder)\n\n<!-- qard-id: cbfb80da-9ddd-4625-8352-7a13aa6b2474 -->\n> [!qard]- Why can `ReferenceEquals(a, b)` be false when `a == b` is true for strings?\n> They test different things. For strings, `==` compares contents: it returns true when both strings hold the same characters in the same order, using an ordinal, case-sensitive comparison. `ReferenceEquals` returns true only when both references point to the same object.\n>\n> Equal text can therefore live in two separate objects. Strings built at run time are not interned automatically, so two strings built from the same pieces are normally distinct instances: `==` returns true while `ReferenceEquals` returns false.\n>\n> Interning can make identity coincide through two different mechanisms:\n>\n> - **Explicit `String.Intern`:** it returns the intern pool's reference for a string with that value, adding the argument to the pool if no equal string is there yet. Equal strings passed through `String.Intern` therefore always come back as the same reference.\n> - **Automatic literal interning:** identical string literals typically share one pooled instance, so `ReferenceEquals` often returns true for them. A compilation can request `NoStringInterning`, and runtime behavior may vary, so literal identity is not a dependable contract.\n>\n> Because identity depends on how each string was produced, `ReferenceEquals` is not a test of content. Content comparisons belong to `==` or `string.Equals`, with an explicit `StringComparison` stating the rule the data needs: ordinal comparison (`Ordinal` or `OrdinalIgnoreCase`) for protocol keys and identifiers, and culture-aware comparison for natural-language text shown to users.\n>\n> Sources: [Microsoft Learn: Object.ReferenceEquals](https://learn.microsoft.com/en-us/dotnet/api/system.object.referenceequals?view=net-10.0) · [Microsoft Learn: String equality operator](https://learn.microsoft.com/en-us/dotnet/api/system.string.op_equality?view=net-10.0) · [Microsoft Learn: String.Intern](https://learn.microsoft.com/en-us/dotnet/api/system.string.intern?view=net-10.0) · [Microsoft Learn: Best practices for comparing strings](https://learn.microsoft.com/en-us/dotnet/standard/base-types/best-practices-strings)\n\n# References\n\n- [Best practices for strings in .NET](https://learn.microsoft.com/en-us/dotnet/standard/base-types/best-practices-strings)"
+    }
+  ],
+  "version": 1,
+  "createdAt": 1795364623905,
+  "topic": "Predict string allocation and equality behavior and distinguish UTF-16 code units from user-perceived characters",
+  "notes": [
+    "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md"
+  ],
+  "mastery": "Assets/Qard/Courses/Programming Mastery.md",
+  "course": "Programming",
+  "objective": "text-semantics",
+  "steps": [
+    {
+      "title": "Identity versus content equality",
+      "explain": "A `string` variable holds a **reference**, which points to a string object on the heap. Assigning one string variable to another copies the reference, not the text. That raises two separate questions:\n\n- **Content equality:** do both objects hold the same characters in the same order? For strings, `==` and `Equals` answer this. By default they compare ordinally (character by character) and are case-sensitive.\n- **Identity:** do both references point to the *same object*? `object.ReferenceEquals` answers this, and only this.\n\nThe same text can sit in two separate objects, so the two answers can differ. See [[Home/Programming/NET/CSharp/Fundamentals/Types/Strings#Core Properties|Core Properties]].\n\n```csharp\nstring a = new string('h', 2);   // \"hh\"; a nonempty new string(...) allocates a fresh object\nstring b = a;                    // copies the reference: b points to a's object\nstring c = new string('h', 2);   // a second, separate object with the same text\n\nConsole.WriteLine(a == b);                       // True  – same text\nConsole.WriteLine(object.ReferenceEquals(a, b)); // True  – same object\nConsole.WriteLine(a == c);                       // True  – same text\nConsole.WriteLine(object.ReferenceEquals(a, c)); // False – two objects\n```\n\n**Immutability** makes this sharing safe. No operation can change the characters inside an existing string object. An operation that seems to modify text returns a reference to a different object instead:\n\n```csharp\na = a + \"!\";   // joining two nonempty strings at run time allocates a new \"hh!\" object; a now points to it\n// b still points to the original \"hh\" object, unchanged\n```\n\nAfter that line, `a` and `b` no longer share an object, and their contents differ too. Code that holds `b` never sees an edit made through `a`, because nothing is edited. `a` is simply pointed at a different object.\n\nSo `ReferenceEquals` tells you how an object was produced and passed around, not what text it holds. To compare text, use `==` or `string.Equals`. See [[Home/Programming/NET/CSharp/Fundamentals/Types/Strings#Pitfalls|Pitfalls]].\n\nThese allocation claims cover the cases shown: `new string(...)` with a nonzero length, and run-time concatenation of two nonempty strings. Edge cases can reuse an existing object. Concatenating with `\"\"` can return the other operand unchanged, and a zero-length `new string(...)` can return `string.Empty`. Literals such as `\"!\"` are another case, because the runtime can share one object for equal literals. That rule is the next step's topic.",
+      "connect": "This step opens the lesson. Separating \"same text\" from \"same object\" is what you need to predict when strings share an instance (next step) and, later, what `Length` and indexing report.",
+      "checkFirst": false,
+      "check": {
+        "id": "k1",
+        "type": "mcq",
+        "prompt": "Consider this C# code. A `new string(...)` call with a nonzero length allocates a fresh object, and run-time concatenation (`+`) of two nonempty strings allocates a new result object. No `string.Intern` call is made.\n\n```csharp\nstring a = new string('x', 3);  // \"xxx\"\nstring b = a;\na = a + \"y\";\nb = b + \"y\";\n```\n\nAfter the last line, what does `object.ReferenceEquals(a, b)` return, and why?",
+        "marks": 1,
+        "options": [
+          "True, because `b` was assigned from `a`, so the two variables stay linked to one shared object",
+          "False, because each concatenation allocated its own new \"xxxy\" object, so equal text sits in two objects",
+          "False, because the first concatenation changed the shared object in place, so `b` ends up holding different text",
+          "True, because both variables hold the text \"xxxy\", and strings with equal text are always one object"
+        ],
+        "answer": 1,
+        "rubric": [
+          {
+            "point": "Chooses False, explained by each concatenation allocating a separate new object even though both hold \"xxxy\"",
+            "marks": 1
+          }
+        ],
+        "model": "**False.** `b = a` copied the reference once. Then each `+ \"y\"` joined two nonempty strings and allocated its own new \"xxxy\" object. `a` and `b` hold equal text in two different objects. The original \"xxx\" object was never modified.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+          "heading": "Core Properties"
+        },
+        "objective": "text-semantics",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "Picks the first option (True): assumes `b = a` links the variables permanently, so later operations keep them on one object.",
+          "reteach": "`b = a` copies the reference once. It does not tie the variables together. `a = a + \"y\"` joins two nonempty strings, so it allocates a new object and points only `a` at it. `b = b + \"y\"` then allocates a *second* new object for `b`. They end up as two objects with equal text, so `ReferenceEquals` is false while `==` is true."
+        },
+        {
+          "signs": "Picks the third option: reaches False through in-place mutation, believing `a + \"y\"` changed the shared \"xxx\" so `b` became \"xxxyy\".",
+          "reteach": "Strings are immutable. Concatenation never changes an existing object. It returns a reference to a different one, which here is a new object because both operands are nonempty. After `a = a + \"y\"`, `b` still points to the untouched \"xxx\", so `b + \"y\"` also gives \"xxxy\". The texts match. The result is False only because there are two separate objects."
+        },
+        {
+          "signs": "Picks the fourth option (True): assumes equal text means one object, mixing up content equality with identity.",
+          "reteach": "`==` compares **content**, and `ReferenceEquals` compares **identity**. They are independent. Equal text does not merge objects. Each nonempty `new string(...)` and each run-time join of two nonempty strings produces its own object. Two equal results are still two objects unless something makes them share one, such as interning (the next step's topic)."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "When strings are interned or allocated",
+      "explain": "Previous step: `==` compares text and `ReferenceEquals` compares objects. Equal text can live in one shared object or in two separate ones. Which case applies depends on **how each string was produced**.\n\n**Interning** means keeping one shared instance per distinct text value in a runtime-wide table called the *intern pool*. Interning and allocation are separate questions. A string that is not interned is not automatically a new object.\n\n| How the string is produced | Interned? | Same object as an equal literal? |\n|---|---|---|\n| String literal, e.g. `\"ab\"` | Typically yes | Typically yes. Identical literals usually share one pooled instance. |\n| Concatenation of constants, e.g. `\"a\" + \"b\"` | Typically yes | Typically yes. The compiler folds it into the literal `\"ab\"` before the program runs. |\n| Built at run time (`+` with a non-constant operand, `string.Concat`, `StringBuilder`, file or network input) | Never automatically | Usually no. Building new text allocates a new object. Some operations hand back an existing instance, though: `s.ToString()` returns `s` itself, and `s + \"\"` can return `s`. |\n| Passed through `string.Intern(s)` | Yes | Only if that literal was pooled. Intern returns the pool's instance for the text and adds `s` first if the text is absent. |\n\nThe dependable guarantee belongs to `string.Intern`. Equal values passed through it always come back as **the same reference**, wherever each value came from.\n\nExample: one value produced four ways.\n\n```csharp\nstring lit    = \"ab\";\nstring folded = \"a\" + \"b\";                     // compiler emits the literal \"ab\"\nstring built  = new StringBuilder(\"a\").Append(\"b\").ToString();\nstring pooled = string.Intern(built);\n\nConsole.WriteLine(object.ReferenceEquals(lit, folded)); // typically True: same pooled literal\nConsole.WriteLine(object.ReferenceEquals(lit, built));  // False: StringBuilder made new text at run time\nConsole.WriteLine(object.ReferenceEquals(lit, pooled)); // typically True: Intern returns the pooled \"ab\" if the literal was pooled\nConsole.WriteLine(lit == built);                        // True: same contents\n```\n\nThe rule turns on **when the text is known**. When the compiler can compute the text, the result becomes a literal and is normally pooled. When the text only exists at run time, it stays out of the pool unless the code calls `string.Intern`. Run-time code creating new text usually allocates a new object.\n\nTwo boundaries:\n\n- **Identity is not contractual.** Literal sharing is typical, not guaranteed. A compilation can request `NoStringInterning`, and runtime behavior can vary. Code must never decide equality with `ReferenceEquals`. See [[Home/Programming/NET/CSharp/Fundamentals/Types/Strings#String Interning|String Interning]].\n- **The pool keeps what it holds.** Interned entries are generally retained until the runtime terminates. Interning a small, bounded set of repeated values, such as status codes, can remove duplicates. Interning high-cardinality text, such as user IDs or request paths from traffic, turns short-lived garbage into memory that lasts for the life of the process. It needs a bounded value set and measured evidence first. See [[Home/Programming/NET/CSharp/Fundamentals/Types/Strings#Tradeoffs|Tradeoffs]].",
+      "connect": "Step 1 showed that equal strings can be different objects. This step predicts when they share an object and which of those cases are guaranteed, which supplies the allocation half of the final mixed prediction.",
+      "checkFirst": false,
+      "check": {
+        "id": "k2",
+        "type": "mcq",
+        "goal": "apply",
+        "objective": "text-semantics",
+        "prompt": "A C# service reads two values at run time, `region` and `id`, from a request. Neither value is a compile-time constant. The service builds the same text twice, in two separate calls, and then interns both results:\n\n```csharp\nstring x = string.Concat(region, \"/\", id);\nstring y = string.Concat(region, \"/\", id);\n\nstring px = string.Intern(x);\nstring py = string.Intern(y);\n```\n\nThe program contains no string literal with the same text as `x`. What does `object.ReferenceEquals(px, py)` return?",
+        "marks": 1,
+        "options": [
+          "True, because string.Intern returns one pooled instance for every equal value it receives",
+          "False, because x and y were allocated separately and Intern hands each one back its own reference",
+          "True, but only when a string literal with the same text also appears somewhere in the program",
+          "False, because strings built at run time cannot be added to the intern pool at all"
+        ],
+        "answer": 0,
+        "rubric": [
+          {
+            "point": "Chooses True because string.Intern guarantees that equal values return the same pooled reference: both calls return whichever instance the pool holds for that text, whether it was already pooled earlier or is added by the first call.",
+            "marks": 1
+          }
+        ],
+        "model": "**True, because string.Intern returns one pooled instance for every equal value it receives.**\n\n`x` and `y` are separate run-time allocations, so `ReferenceEquals(x, y)` would be False. If earlier code already interned this text, both Intern calls return that existing pooled instance. If not, the first call adds `x` and returns it, and the second call returns `x` too. Either way `px` and `py` are the same object. No literal is needed.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+          "heading": "String Interning"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Picks False because x and y were allocated separately: assumes Intern returns or marks its argument rather than returning the pool's instance.",
+          "reteach": "`string.Intern(s)` does not tag `s` and return it. It looks up the *text* in the pool. If an equal entry exists (for example, earlier code interned the same text), it returns that **existing** instance. If not, it adds `s` and returns `s`. So `string.Intern(x)` returns the pooled instance for the text, and `string.Intern(y)` finds that same entry. `y` stays a separate object, but `py` is not `y`: `px` and `py` are one object."
+        },
+        {
+          "signs": "Picks True only when a matching literal exists: thinks the pool contains only literals, so Intern can only point to a literal.",
+          "reteach": "Literals are one way into the pool. `string.Intern` is another. When no equal entry exists, Intern adds its argument, and that string becomes the pooled instance for later calls. The guarantee that equal values come back as one reference does not depend on any literal."
+        },
+        {
+          "signs": "Picks False because run-time strings cannot be pooled: confuses 'not interned automatically' with 'cannot be interned'.",
+          "reteach": "Run-time strings are not interned **automatically**. The program has to opt in. `string.Intern` is that opt-in, and it accepts any string, however it was built. That is also why it carries the retention cost: each new text value passed in stays in the pool for the life of the process."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "UTF-16 code units versus characters",
+      "explain": "Known foundation: `s[i]` indexes a string and `s.Length` counts its elements. The open question is what one element is.\n\nA `char` is a 16-bit UTF-16 **code unit**, and `Length` counts code units, not characters. Unicode defines far more than the 65,536 values a 16-bit slot can hold, so .NET splits the range:\n\n- Code points up to U+FFFF (the Basic Multilingual Plane: Latin, Cyrillic, CJK, most punctuation and symbols) fit in **one** `char`.\n- Code points above U+FFFF (almost every emoji, plus some historic scripts and mathematical symbols) are stored as a **surrogate pair**: two code units, a *high surrogate* in U+D800–U+DBFF followed by a *low surrogate* in U+DC00–U+DFFF. Neither half is a character on its own.\n\nExample: 👍 is the single code point U+1F44D. It lies above U+FFFF, so the string holds two code units, `\\uD83D` then `\\uDC4D`:\n\n```csharp\nvar s = \"👍\";\nConsole.WriteLine(s.Length);                   // 2\nConsole.WriteLine((int)s[0] == 0xD83D);        // True: the high surrogate, half of the pair\nConsole.WriteLine(char.IsHighSurrogate(s[0])); // True\nConsole.WriteLine(char.IsLowSurrogate(s[1]));  // True\n```\n\nPrediction rule: `Length` = (count of code points ≤ U+FFFF) + 2 × (count of code points > U+FFFF). Indexing walks those slots, so whatever follows a pair sits two positions after the pair's start.\n\nTwo different things can happen at a pair. Indexing or a `foreach (char c in s)` loop only *exposes* the individual code units: `s[i]` on a pair slot hands back half a character as a value, and `char.IsSurrogate(s[i])` flags such a slot, but the original string is untouched and still well-formed. Slicing or rebuilding text across the boundary is what produces broken text: `\"👍\".Substring(0, 1)`, or copying `char`s into a new string and stopping between the halves, yields a string holding a lone surrogate, which is ill-formed UTF-16. Reassembling the halves into one scalar (`Rune`) is the next step.\n\nSource: [[Home/Programming/NET/CSharp/Fundamentals/Types/Strings#Encoding and Unicode|Strings: Encoding and Unicode]].",
+      "connect": "The previous step predicted which strings share an instance; this step turns from identity to the contents, where `Length` and indexing count 16-bit code units rather than characters. The next step adds scalars and graphemes on top of this unit count, and the final step combines allocation and Unicode boundaries in one prediction.",
+      "checkFirst": false,
+      "check": {
+        "id": "k3",
+        "type": "short",
+        "prompt": "In C#, `var s = \"x🎵y\";` where 🎵 is the single Unicode code point U+1F3B5 (above U+FFFF) and `x`, `y` are plain ASCII letters.\n\nWhat kind of `char` does `s[2]` return? State whether it is a letter, the whole emoji, or part of the emoji, and if it is part of the emoji, which half. An exact hex value is not required.",
+        "marks": 2,
+        "rubric": [
+          {
+            "point": "s[2] is one half of 🎵's surrogate pair (a surrogate code unit); it is neither the letter 'y' nor the whole emoji.",
+            "marks": 1
+          },
+          {
+            "point": "It is specifically the low (second, trailing) surrogate of the pair.",
+            "marks": 1
+          }
+        ],
+        "model": "`s[2]` is a surrogate code unit, half of 🎵's pair: the **low (second) surrogate** (`\\uDFB5`). It is not `y`, which sits at `s[3]`, and an indexer can never return the whole emoji.\n\nOptional: slots are x = `s[0]`, high surrogate `\\uD83C` = `s[1]`, low surrogate `\\uDFB5` = `s[2]`, y = `s[3]`.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+          "heading": "Encoding and Unicode"
+        },
+        "objective": "text-semantics",
+        "goal": "apply"
+      },
+      "misconceptions": [
+        {
+          "signs": "s[2] = 'y'.",
+          "reteach": "That counts characters, not code units. `Length` and indexing use 16-bit `char` slots. U+1F3B5 is above U+FFFF, so it cannot fit in one slot and takes a surrogate pair: `x` (slot 0) + 🎵 (slots 1 and 2) + `y` (slot 3). `y` lands at index 3, and index 2 is the second half of the emoji."
+        },
+        {
+          "signs": "s[2] = the whole 🎵.",
+          "reteach": "An indexer returns exactly one `char`, a single 16-bit code unit. The emoji needs two, so no single index can hold it. `s[2]` returns one half of the pair; reassembling both halves into one scalar is what `Rune` does, not what the indexer does."
+        },
+        {
+          "signs": "s[2] = the high (first) surrogate.",
+          "reteach": "Off by one. The pair starts right after `x`, so the high surrogate occupies `s[1]` and the low surrogate `s[2]`. The high half always comes first in the string; `char.IsHighSurrogate(s[1])` and `char.IsLowSurrogate(s[2])` both return true."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Scalars, graphemes and normalization",
+      "explain": "The previous step established that `char` is one UTF-16 code unit, so `\"👍\".Length` is 2. Grouping code units correctly still leaves two higher boundaries.\n\n**Three ways to count the same text:**\n\n| Unit | What it is | .NET API |\n|---|---|---|\n| Code unit | one 16-bit `char` | `Length`, `s[i]` |\n| Scalar value | one Unicode code point, with a surrogate pair rejoined | `Rune`, `EnumerateRunes()` |\n| Grapheme (text element) | what a reader sees as one character | `StringInfo` |\n\nA `Rune` fixes the surrogate-pair problem: 👍 is 2 code units but 1 rune. It does not fix **combining marks**. A combining mark is a scalar value that is normally displayed with the base character before it. For example, U+0301 is the combining acute accent. When it follows `e`, it joins the grapheme of that `e`. One grapheme can hold a base plus several marks, so one visible character can be several runes ([[Home/Programming/NET/CSharp/Fundamentals/Types/Strings#Encoding and Unicode|Encoding and Unicode]]).\n\n**Example.** Unicode can represent \"é\" in two ways. U+00E9 is one precomposed scalar. The pair `e` followed by U+0301 is the decomposed form. Both display the same:\n\n```csharp\nstring a = \"é\";   // precomposed é\nstring b = \"é\";  // e + combining acute\n\na.Length                                 // 1\nb.Length                                 // 2  (both scalars are in the BMP: one char each)\nb.EnumerateRunes().Count()               // 2  (two scalars)\nnew StringInfo(b).LengthInTextElements   // 1  (one visible character)\n\na == b                                   // False\na.Normalize() == b.Normalize()           // True\n```\n\n`==` on strings compares ordinally, code unit by code unit. `a` holds `00E9` and `b` holds `0065 0301`, so they differ. Unicode defines the two sequences as **canonically equivalent**: they represent the same text. `Normalize()` uses Form C (NFC) by default. NFC composes a base plus mark into a single precomposed scalar where one exists, so `b.Normalize()` becomes `00E9`. After both sides are in the same form, ordinal comparison treats them as equal.\n\nThis is a normalization question, not an encoding question. UTF-8 versus UTF-16 is how scalars are stored as bytes. Composed versus decomposed is which scalars are used. Normalization only merges canonically equivalent sequences. It does not make every pair of similar-looking strings equal, such as Latin `a` and Cyrillic `а`.\n\n**When each tool is needed:**\n- Counting or slicing *visible characters* (length limits, truncating, reversing, cursor movement): use `StringInfo`. Using `Length` or runes can split a base from its accent.\n- Comparing or looking up text where canonically equivalent sequences should count as equal, such as user input or file names from different systems: normalize both sides to the same form before comparing.\n- Processing whole code points (encoding, classifying a scalar): use `Rune`. It is enough when the code needs whole scalars, not whole graphemes.",
+      "connect": "Step 3 showed that `Length` counts code units rather than characters. This step adds two more boundaries, scalar values and graphemes, and shows that canonically equivalent sequences compare unequal until they are normalized. Step 5 uses all three counts to predict `Length` and equality for new strings.",
+      "checkFirst": false,
+      "check": {
+        "id": "k4",
+        "type": "cloze",
+        "goal": "apply",
+        "objective": "text-semantics",
+        "prompt": "A .NET string `s` contains three Unicode scalar values in this order:\n\n- U+0065 (`e`), in the Basic Multilingual Plane (BMP)\n- U+0301 (combining acute accent), in the BMP\n- U+1F44D (👍), outside the BMP\n\nOn screen, `s` reads as \"é👍\". The code then runs `string t = s.Normalize();`, which uses Normalization Form C. Unicode has a precomposed scalar for `e` + U+0301: U+00E9 (é), in the BMP. Normalization does not change 👍.\n\nGive each value for `t` as a whole number.\n\n- `t.Length` = {{length}}\n- `t.EnumerateRunes().Count()` = {{runes}}\n- `new StringInfo(t).LengthInTextElements` = {{graphemes}}",
+        "marks": 3,
+        "blanks": [
+          {
+            "id": "length"
+          },
+          {
+            "id": "runes"
+          },
+          {
+            "id": "graphemes"
+          }
+        ],
+        "rubric": [
+          {
+            "point": "Gives `t.Length` as 3; the number alone earns the mark",
+            "marks": 1
+          },
+          {
+            "point": "Gives `t.EnumerateRunes().Count()` as 2; the number alone earns the mark",
+            "marks": 1
+          },
+          {
+            "point": "Gives `new StringInfo(t).LengthInTextElements` as 2; the number alone earns the mark",
+            "marks": 1
+          }
+        ],
+        "model": "- `t.Length` = **3**\n- `t.EnumerateRunes().Count()` = **2**\n- `new StringInfo(t).LengthInTextElements` = **2**\n\n*Optional feedback, not required:* NFC turns `e` + U+0301 into the single scalar U+00E9, which is 1 code unit. 👍 still takes 2 code units, so the total is 3. That leaves 2 scalars, and the reader still sees 2 characters.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+          "heading": "Encoding and Unicode"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Gives `t.Length` as 4, as if normalization left `e` and U+0301 separate, or as 2, counting visible characters.",
+          "reteach": "Form C composes a base plus mark into one precomposed scalar when Unicode defines one. Here, `e` + U+0301 becomes U+00E9, which is one BMP code unit. 👍 is outside the BMP, so it is still a surrogate pair of two code units. That makes 1 + 2 = 3. `Length` counts `char`s, not visible characters."
+        },
+        {
+          "signs": "Gives the rune count as 3, applying the decomposed count to `t`, or as 4, counting each surrogate as a rune.",
+          "reteach": "A `Rune` is one Unicode scalar value. After NFC, `t` contains only U+00E9 and U+1F44D. `EnumerateRunes()` rejoins the surrogate pair of 👍 into one rune, so the count is 2."
+        },
+        {
+          "signs": "Gives the text-element count as 1 or 3, assuming normalization changes the number of visible characters.",
+          "reteach": "Normalization swaps one canonically equivalent sequence for another. The text still represents the same characters. Before normalization, `e` + U+0301 formed one grapheme because the mark follows `e`. After normalization, U+00E9 is one grapheme. 👍 is the second grapheme in both versions, so `StringInfo` reports 2."
+        }
+      ],
+      "figure": ""
+    },
+    {
+      "title": "Mixed prediction case",
+      "explain": "Any pair of strings raises three separate questions, and each has its own API:\n\n1. **Content:** do they hold the same UTF-16 code units? `==` and `string.Equals` compare ordinally and case-sensitively by default.\n2. **Identity:** are they the same object? `ReferenceEquals` answers this, and the answer depends on how each string was produced.\n3. **Size:** how many `char` code units does each one have? `Length` answers this. It counts code units, not user-perceived characters.\n\nSome answers imply others, but only in one direction:\n\n- **Same reference → equal content and equal `Length`.** There is only one object, so there is only one sequence of code units.\n- **Ordinally equal content → equal `Length`.** It does **not** imply the same object, because a runtime copy has equal content but is a separate object.\n- **Different code units → different objects.** One object cannot hold two different sequences.\n\nSo first work out the code units, which settle content and Length. Then work out identity from where each object came from.\n\n**Example 1: a runtime copy of an emoji literal**\n\n```csharp\nstring thumbs = \"\\U0001F44D\";                     // 👍, one surrogate pair\nstring built  = new string(thumbs.ToCharArray()); // allocated at run time\n\nthumbs == built                    // True: same code units\nReferenceEquals(thumbs, built)     // False: built is a new object\nbuilt.Length                       // 2: high + low surrogate\nbuilt[0]                           // '\\uD83D': only the high surrogate\nReferenceEquals(string.Intern(built), string.Intern(thumbs)) // True\n```\n\nThe last line passes **both** values through `string.Intern`. `Intern` looks a string up by its content. It returns the pool's single reference for that content, and adds the string to the pool first if it is missing. So two strings with equal content always come back from `Intern` as the same object.\n\n**Example 2: two spellings of é**\n\n```csharp\nstring decomposed = \"é\"; // 'e' + combining acute accent\nstring composed   = \"é\";  // precomposed 'é'\n\ndecomposed.Length                   // 2\ncomposed.Length                     // 1\ndecomposed == composed              // False: different code units\ndecomposed.Normalize() == composed  // True: Form C turns e + ◌́ into é\n```\n\nBoth strings display as one grapheme, so `StringInfo` counts one text element in each. Even so, `decomposed` has two code units. When `Normalize()` has to change the text, it returns a **newly allocated** string. Like any other runtime-built string, that result is not interned automatically.\n\nSources: [[Home/Programming/NET/CSharp/Fundamentals/Types/Strings#Core Properties|Core properties]] · [[Home/Programming/NET/CSharp/Fundamentals/Types/Strings#String Interning|String interning]] · [[Home/Programming/NET/CSharp/Fundamentals/Types/Strings#Encoding and Unicode|Encoding and Unicode]]",
+      "connect": "Step 4 showed that text which looks the same can differ in code units until it is normalized. This step combines that with the interning rules from steps 1–2, so you can predict identity for strings whose content may or may not match.",
+      "checkFirst": false,
+      "check": {
+        "id": "k5",
+        "type": "mcq",
+        "goal": "apply",
+        "objective": "text-semantics",
+        "prompt": "In this C# code, `\"Å\"` is the letter `A` followed by U+030A, a combining ring above. It displays as `Å`. `Normalize()` uses its default form (Form C), which turns `A` + combining ring into the single precomposed character U+00C5 `Å`.\n\n```csharp\nstring x = \"Å\";\nstring y = x.Normalize();\n\nConsole.WriteLine(object.ReferenceEquals(string.Intern(x), string.Intern(y)));\n```\n\nWhat is printed, and why?",
+        "marks": 1,
+        "options": [
+          "`True`: both strings display as `Å`, so `Intern` maps them to one pooled entry.",
+          "`False`: `x` and `y` hold different code units, so `Intern` returns a different pooled string for each.",
+          "`True`: `y` is derived from `x`, so `Normalize` and `Intern` keep the original object.",
+          "`False`: `y` was allocated at run time, and `Intern` never pools runtime-built strings."
+        ],
+        "answer": 1,
+        "rubric": [
+          {
+            "point": "Chooses `False` with the reason that `Intern` looks strings up by ordinal content, and `x` (`A` + U+030A) and `y` (U+00C5) have different code units, so they map to two different pooled references.",
+            "marks": 1
+          }
+        ],
+        "model": "`False`: `x` and `y` hold different code units, so `Intern` returns a different pooled string for each.\n\n`x` is two code units and `y` is one. `Intern` matches strings by their code units, not by how they look, so it treats them as two separate contents.",
+        "source": {
+          "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+          "heading": "String Interning"
+        }
+      },
+      "misconceptions": [
+        {
+          "signs": "Chooses `True` because both strings display as `Å`.",
+          "reteach": "`Intern` looks a string up by its UTF-16 code units, the same comparison `==` makes. It does not look at how the text renders. `x` is `A` + U+030A, which is two code units, and `y` is U+00C5, which is one. That is different content, so there are two different pool entries. Only after you normalize both sides do they share one entry."
+        },
+        {
+          "signs": "Chooses `True` on the grounds that `y` came from `x`, so the object is preserved.",
+          "reteach": "`Normalize()` had to change the text here, so it returned a new string with different code units. A string object cannot change its contents, so once the content differs it has to be a different object. Pooling cannot make objects with different contents into one reference."
+        },
+        {
+          "signs": "Chooses `False` on the grounds that `Intern` ignores runtime-built strings.",
+          "reteach": "The verdict is right but the reason is wrong. `Intern` does accept runtime-built strings. If the content is missing from the pool, it adds the string and returns it. So `string.Intern(x.Normalize())` and `string.Intern(\"Å\")` *would* be the same reference. The result here is `False` only because `x` and `y` have different content."
+        }
+      ],
+      "figure": ""
+    }
+  ],
+  "state": [
+    {
+      "asks": [],
+      "answer": {
+        "choice": 1,
+        "confidence": "sure"
+      },
+      "mark": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      },
+      "reply": "Right."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "choice": 0,
+        "confidence": "sure"
+      },
+      "mark": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      },
+      "reply": "Right."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "text": "it will return low surrogate of the emoji",
+        "confidence": "sure"
+      },
+      "mark": {
+        "awarded": [
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "low surrogate of the emoji",
+            "kind": "correct",
+            "note": "You identified `s[2]` as a surrogate code unit that belongs to the emoji, so it is neither 'y' nor the whole emoji."
+          },
+          {
+            "quote": "it will return low surrogate",
+            "kind": "correct",
+            "note": "Right: it is the low (second) half of the pair. The high half sits at `s[1]`."
+          }
+        ],
+        "mistake": "none",
+        "feedback": "Correct: `s[2]` is the low surrogate of the emoji's pair.",
+        "score": 2
+      },
+      "reply": "Correct. `x` is `s[0]`, the high surrogate is `s[1]`, the low surrogate is `s[2]` and `y` is `s[3]`. Indexing returns a code unit, never the whole emoji."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "blanks": {
+          "length": "4",
+          "runes": "2",
+          "graphemes": "2"
+        },
+        "confidence": "unsure"
+      },
+      "mark": {
+        "awarded": [
+          false,
+          true,
+          true
+        ],
+        "annotations": [
+          {
+            "quote": "`t.Length` = 4",
+            "kind": "wrong",
+            "note": "After NFC, `e` + U+0301 becomes one char (U+00E9), so that part is 1 code unit, not 2. 👍 adds 2, giving 3."
+          },
+          {
+            "quote": "`t.EnumerateRunes().Count()` = 2",
+            "kind": "correct",
+            "note": "Right: U+00E9 and 👍 are 2 scalars, with the surrogate pair rejoined into one rune."
+          },
+          {
+            "quote": "`new StringInfo(t).LengthInTextElements` = 2",
+            "kind": "correct",
+            "note": "Right: normalization does not change what the reader sees, so there are still 2 graphemes."
+          }
+        ],
+        "mistake": "misconception",
+        "feedback": "Runes and graphemes are right, but `t.Length` should be 3 because NFC composes `e` + U+0301 into a single code unit.",
+        "score": 2
+      },
+      "reply": "Runes (2) and graphemes (2) are right. The slip is `t.Length`. NFC merges `e` + U+0301 into U+00E9, which is **1** code unit, not 2. You seem to have counted the pre-normalization form. 👍 is a surrogate pair, so it adds 2. Recount: 1 + 2 = ?",
+      "reteach": "Form C composes a base plus mark into one precomposed scalar when Unicode defines one. Here, `e` + U+0301 becomes U+00E9, which is one BMP code unit. 👍 is outside the BMP, so it is still a surrogate pair of two code units. That makes 1 + 2 = 3. `Length` counts `char`s, not visible characters."
+    },
+    {
+      "asks": [],
+      "answer": {
+        "choice": 1,
+        "confidence": "sure"
+      },
+      "mark": {
+        "score": 1,
+        "awarded": [
+          true
+        ],
+        "annotations": [],
+        "mistake": "none",
+        "feedback": "Correct."
+      },
+      "reply": "Right."
+    }
+  ],
+  "current": 4,
+  "probe": {
+    "questions": [],
+    "answers": {},
+    "note": "No probe needed: the only mastery prerequisite (value-semantics) is already right once, and the misconception state with a confident-but-wrong 1/3 check shows the lesson should start by directly confronting the string identity-vs-content and char-vs-character confusions rather than searching for the edge.",
+    "submitted": true,
+    "marks": {},
+    "findings": "Your record shows a misconception on this objective: lesson checks were 3/5, and only 1 of 3 explanations was marked sure. The likely gap is where string identity, equality and UTF-16 length diverge from what a reader perceives as one character."
+  },
+  "map": {
+    "title": "Strings: identity, equality and UTF-16 units",
+    "plan": "Start with reference identity versus content equality, since your evidence suggests it is shaky. Then cover when strings are interned or newly allocated. Finish with UTF-16 code units, surrogate pairs and graphemes, and use them to predict Length and indexing for a new string.",
+    "objective": "text-semantics",
+    "mermaid": "graph TD\nA[\"Strings are immutable reference types\"] --> B[\"== compares content, ReferenceEquals compares identity\"]\nB --> C[\"Allocation: literals interned, runtime strings new\"]\nC --> D[\"string stores UTF-16 code units\"]\nD --> E[\"Surrogate pairs and graphemes differ from Length\"]\nE --> F[\"Predict equality, allocation and Length for a new case\"]",
+    "steps": [
+      {
+        "title": "Identity versus content equality",
+        "why": "Explain why == can be true while ReferenceEquals is false for two strings; this relies on immutability and reference assignment, and leaves interning rules to the next step."
+      },
+      {
+        "title": "When strings are interned or allocated",
+        "why": "Predict which cases share an instance: literals, compile-time constant concatenation, runtime-built strings and string.Intern; identity is not contractual, and the high-cardinality retention cost belongs here."
+      },
+      {
+        "title": "UTF-16 code units versus characters",
+        "why": "Explain that char is a 16-bit code unit, so a surrogate pair gives Length 2 and s[0] returns half of it; this builds on indexing and leaves graphemes for the next step."
+      },
+      {
+        "title": "Scalars, graphemes and normalization",
+        "why": "Distinguish Rune from user-perceived characters (combining marks) and say when StringInfo or Normalize is needed before comparison; this extends the code-unit idea."
+      },
+      {
+        "title": "Mixed prediction case",
+        "why": "Predict equality, identity and Length for a new set of strings, combining allocation behavior with Unicode boundaries as the final check of the objective."
+      }
+    ]
+  },
+  "stepsFor": "[\"Strings: identity, equality and UTF-16 units\",\"Start with reference identity versus content equality, since your evidence suggests it is shaky. Then cover when strings are interned or newly allocated. Finish with UTF-16 code units, surrogate pairs and graphemes, and use them to predict Length and indexing for a new string.\",[[\"Identity versus content equality\",\"Explain why == can be true while ReferenceEquals is false for two strings; this relies on immutability and reference assignment, and leaves interning rules to the next step.\"],[\"When strings are interned or allocated\",\"Predict which cases share an instance: literals, compile-time constant concatenation, runtime-built strings and string.Intern; identity is not contractual, and the high-cardinality retention cost belongs here.\"],[\"UTF-16 code units versus characters\",\"Explain that char is a 16-bit code unit, so a surrogate pair gives Length 2 and s[0] returns half of it; this builds on indexing and leaves graphemes for the next step.\"],[\"Scalars, graphemes and normalization\",\"Distinguish Rune from user-perceived characters (combining marks) and say when StringInfo or Normalize is needed before comparison; this extends the code-unit idea.\"],[\"Mixed prediction case\",\"Predict equality, identity and Length for a new set of strings, combining allocation behavior with Unicode boundaries as the final check of the objective.\"]]]",
+  "accepted": true,
+  "finishedAt": 1795396182859,
+  "close": {
+    "summary": "The lesson covered three things about .NET strings: reference identity versus content equality, when strings are interned or newly allocated, and how UTF-16 code units, surrogate pairs, Unicode scalars (`Rune`) and graphemes relate to `Length` and indexing.\n\nYou got every check right and were sure on identity versus equality, interning and allocation, UTF-16 code units versus characters, and the final mixed prediction. So the earlier misconception about identity and equality looks resolved.\n\nOne gap remains, in normalization. You handled runes and graphemes correctly but mispredicted `Length` after `Normalize()`, and you were unsure there. NFC composes `e` + U+0301 (combining acute) into the single precomposed code unit U+00E9, so `Length` drops by one. Normalization changes the code-unit sequence, and that can change `Length` and what each index returns. It does not change the grapheme count. Not every combining sequence has a precomposed form, so NFC can't always shorten a string.",
+    "cards": [
+      {
+        "front": "In .NET, what does `\"é\".Normalize(NormalizationForm.FormC).Length` return, and why?",
+        "back": "1. NFC composes `e` + combining acute (U+0301) into the precomposed `é` (U+00E9), one UTF-16 code unit. Before normalization the length is 2."
+      },
+      {
+        "front": "Which of these can `string.Normalize()` change: code-unit `Length`, rune count or grapheme count?",
+        "back": "Code-unit `Length` and rune count can change, because NFC composes and NFD decomposes. The grapheme count stays the same, because the user-perceived characters are unchanged."
+      },
+      {
+        "front": "Why is `\"👍\".Length` 2 in .NET, and what does `s[0]` return?",
+        "back": "👍 is outside the BMP, so UTF-16 stores it as a surrogate pair. `Length` counts code units, so it is 2. `s[0]` returns only the high surrogate, which is not a valid character on its own."
+      },
+      {
+        "front": "Which .NET API counts user-perceived characters, as opposed to `char`s or `Rune`s?",
+        "back": "`StringInfo`, through `LengthInTextElements` or `GetTextElementEnumerator`. It walks grapheme clusters, so a base character plus its combining marks counts as one."
+      }
+    ],
+    "noteEdit": {
+      "path": "Home/Programming/NET/CSharp/Fundamentals/Types/Strings.md",
+      "heading": "Encoding and Unicode",
+      "text": "Normalization rewrites the code-unit sequence, so `Length` and indexing can change while the grapheme count stays the same. NFC composes `\"é\"` (two code units) into the precomposed `\"é\"` (one code unit), and NFD reverses this. Only sequences that have a precomposed form get shorter. Other base-plus-combining-mark sequences stay multi-unit under NFC."
+    },
+    "cardState": {},
+    "note": "Assets/Qard/Lessons/2026-11-22 Predict string allocation and equality behavior and distingu.md",
+    "nextCheck": "2026-11-26"
+  }
+}

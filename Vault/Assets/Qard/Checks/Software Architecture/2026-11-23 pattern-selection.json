@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "createdAt": 1795452832356,
+  "mastery": "Assets/Qard/Courses/Software Architecture Mastery.md",
+  "course": "Software Architecture",
+  "objective": "pattern-selection",
+  "title": "Justify a design pattern from a recurring problem, constraints and variation point and distinguish its intent and cost from a similar implementation shape",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "prompt": "A team owns both `InvoiceService` and the only class that calls it, `BillingController`. Both are in the same codebase. `InvoiceService` exposes `CreateInvoice(customerId, lines)`, but `BillingController` was written to call `Issue(InvoiceRequest request)`. The two signatures differ only because the classes were written separately. Nothing requires them to be different contracts. A developer proposes adding an `InvoiceServiceAdapter` that implements `Issue` and translates each call into `CreateInvoice`.\n\nIs Adapter justified here? Give your verdict and explain why, based on what makes Adapter worth its cost.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Verdict: Adapter is not justified here, and aligning the two contracts directly is the better choice.",
+          "marks": 1
+        },
+        {
+          "point": "Reason: the team controls both sides and the mismatch protects no deliberate boundary, so the contracts can be aligned directly without losing anything. The adapter would add an abstraction to test and maintain while isolating no real translation boundary. Accept any equivalent reasoning, such as saying Adapter pays off when a contract cannot change or when two contracts are intentionally kept separate, and that neither applies here.",
+          "marks": 1
+        }
+      ],
+      "model": "Not justified. Adapter pays off when it keeps translation at one boundary between contracts that should stay different, for example a third-party SDK or a deliberately separate domain contract. Here the same team owns both classes, and the mismatch is accidental. The signatures can be aligned directly without losing a needed boundary, so an adapter would only add a type to test and maintain.",
+      "source": {
+        "path": "Home/Software Architecture/Patterns/Design Patterns/Design Patterns.md",
+        "heading": "Choose a Pattern by Intent and Cost"
+      },
+      "objective": "pattern-selection",
+      "goal": "explain"
+    },
+    {
+      "id": "c2",
+      "type": "mcq",
+      "prompt": "Two classes both forward work to an object behind an interface:\n\n- `Ticket` forwards `Advance()` to an object for its current stage (Open, In Review or Closed). After each call, that object sets the ticket's next stage object.\n- `ReportExporter` forwards `Export()` to a format object (CSV or PDF) that the calling code passes in.\n\nThe first class is State and the second is Strategy. Which statement best explains the difference?",
+      "marks": 1,
+      "options": [
+        "In State, the delegate stands for the object's current state and changes as that state changes. In Strategy, the delegate is an interchangeable algorithm used as a policy.",
+        "In State, the context object must always choose the delegate itself. In Strategy, only an outside client is ever allowed to choose the delegate.",
+        "In State, each delegate is a subclass of the context object. In Strategy, the delegate is composed into the context at runtime instead.",
+        "In State, each delegate keeps mutable fields of its own. In Strategy, the delegate must be stateless and hold no fields at all."
+      ],
+      "answer": 0,
+      "rubric": [
+        {
+          "point": "Chooses the option that distinguishes them by intent: State models the current state and its transitions, while Strategy is an interchangeable algorithm used as a policy.",
+          "marks": 1
+        }
+      ],
+      "model": "**Option 1.** The two patterns differ in intent. With State, behavior follows the object's current state, and either the context or the state objects can define the transitions. With Strategy, an interchangeable algorithm is supplied as a policy, usually by the client. Who chooses the delegate does not decide which pattern it is.",
+      "source": {
+        "path": "Home/Software Architecture/Patterns/Design Patterns/Design Patterns.md",
+        "heading": "Choose a Pattern by Intent and Cost"
+      },
+      "objective": "pattern-selection",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

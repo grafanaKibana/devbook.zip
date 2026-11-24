@@ -9,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Foreach"
 flashcard_uid: "2e8ba405"
 created: "2026-02-15T16:27:13.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-23T14:21:10.152Z"
 published: "2026-07-08T13:14:17.324Z"
 ---
 
@@ -150,6 +150,10 @@ Two boundaries are easy to miss:
 > ```
 >
 > Deferred execution postpones enumeration, not evaluation of the source argument. Mutation of the same source object can affect a later enumeration, and variables separately captured by a predicate remain live. Materializing the results creates a snapshot of those results. [Microsoft: Enumerable.Where](https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.where?view=net-10.0)
+
+<!-- qard-id: e303e94f-1825-4dab-8f52-50354e8a26f4 -->
+> [!qard]- When does the body of an iterator method (`yield return`) actually run?
+> Not when the method is called. The call only returns the state machine. Each `MoveNext()` runs the body from where it last stopped to the next `yield return`, or to the end.
 
 # References
 

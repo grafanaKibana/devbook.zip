@@ -9,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Concurrency and Parallelism/Tasks"
 flashcard_uid: "9dbbd8f8"
 created: "2026-02-18T20:04:43.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-24T12:42:46.039Z"
 published: "2026-07-08T13:14:17.323Z"
 ---
 
@@ -21,7 +21,7 @@ A CPU-bound task may run on a ThreadPool worker. A task representing asynchronou
 
 `Task` is the read side of a future/promise pair. `TaskCompletionSource<T>` exposes the write side for adapting callbacks or events to a task-based contract. A task eventually reaches `RanToCompletion`, `Faulted`, or `Canceled`. Its earlier status depends on how it was created and scheduled.
 
-`await` first asks whether the awaiter has completed. If so, execution may continue synchronously. Otherwise, the async state machine registers its continuation and returns control to the caller. The continuation later runs through the captured scheduling context when one applies, or through the default task infrastructure.
+`await` first asks whether the awaiter has completed. If so, execution may continue synchronously. Otherwise, the async state machine registers its continuation and returns control to the caller. The continuation later runs through the captured scheduling context when one applies. Without one, it runs on a ThreadPool thread or inline on the thread that completed the operation.
 
 **Core forms:**
 - `Task` — represents an operation with no return value.
@@ -31,7 +31,7 @@ A CPU-bound task may run on a ThreadPool worker. A task representing asynchronou
 **Creation and scheduling.** Tasks returned by `async` methods and most framework APIs already represent work in progress. A task created with the `Task` constructor remains in `Created` until scheduled with `Start`, which is rarely useful in application code. `Task.Factory.StartNew` is lower-level and easy to misuse with asynchronous delegates:
 
 - An `async` lambda can produce a nested task that requires `Unwrap`.
-- The default scheduler is `TaskScheduler.Current`, so behavior can depend on the caller's context.
+- `StartNew` schedules on `TaskScheduler.Current` unless a scheduler is passed, not on `TaskScheduler.Default`, so behavior can depend on the caller's context.
 
 `Task.Run` is the normal way to queue CPU-bound work to the default scheduler. `TaskCreationOptions.LongRunning` is a scheduler hint for work that would otherwise monopolize a worker. The default scheduler typically responds with a non-pool thread, but custom schedulers may behave differently.
 

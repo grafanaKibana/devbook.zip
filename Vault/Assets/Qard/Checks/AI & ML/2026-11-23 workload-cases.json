@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "createdAt": 1795446200468,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "workload-cases",
+  "title": "Build representative, versioned evaluation cases with references and rubrics, size the set for the effect it must detect, and avoid misleading synthetic coverage",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "goal": "explain",
+      "objective": "workload-cases",
+      "prompt": "A team has a 50-case evaluation set for a question-answering assistant. Each case is scored correct or incorrect in a single run. Last month the set flagged a broken prompt change because accuracy fell sharply. The team now wants to use the same 50 cases to choose between two retrieval configurations. Both configurations will answer the same 50 cases. The team expects them to differ by about 1–2 percentage points in accuracy.\n\nExplain why this set cannot be trusted to choose between the two retrieval configurations, even though it caught the broken prompt. Then state what quantity the size of an evaluation set should be chosen against.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Explains that the set lacks the statistical power to detect a 1–2 point difference. On 50 cases, one case is worth 2 points, so the expected difference is about one net case or less. Because both configurations answer the same cases, the uncertainty in the difference comes from the cases whose correctness changes between configurations. A few such cases changing by chance or from run-to-run noise can create, hide or reverse a difference this small, so it cannot be separated from noise. Equivalent reasoning is accepted, such as saying an interval around the paired difference would be wide enough to include zero. Saying only that 50 cases is too few, without linking the 1–2 point effect to noise in the difference, does not earn this point.",
+          "marks": 1
+        },
+        {
+          "point": "States that the set should be sized against the smallest effect it must detect (the minimum detectable effect), here about 1–2 points. No remedy needs to be named.",
+          "marks": 1
+        }
+      ],
+      "model": "Each case is worth 2 points on 50 cases, so a 1–2 point difference is about one net case or less. Both configurations answer the same cases, so their difference depends on the cases that change correctness between them. A few cases changing by chance, or from noise between single runs, can create, hide or reverse a difference that small. The set therefore lacks the power to tell which configuration is better. A large failure is a different situation: it changes many cases in one direction. A small set can expose that kind of change, but it cannot separate two close configurations.\n\nThe set's size should be chosen against the minimum detectable effect: the smallest difference the comparison must detect, here about 1–2 points.\n\n*Optional detail:* the result should report an interval around the paired difference instead of only the two accuracy scores.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Evaluation/Building an Evaluation Set.md",
+        "heading": "Size and Statistical Power"
+      }
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

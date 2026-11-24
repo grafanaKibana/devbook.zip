@@ -1,39 +1,77 @@
 {
   "version": 1,
-  "createdAt": 1794246219283,
+  "createdAt": 1795397388733,
   "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
   "course": "AI & ML",
   "objective": "prompt-interface",
-  "title": "Specify instructions, inputs, constraints, and expected output as a versioned task interface whose quality is measured on representative cases",
+  "title": "Specify instructions, inputs, constraints, and expected output as a versioned task interface, and set sampling and token-limit settings to fit the task",
   "goal": "apply",
   "questionPolicy": 1,
-  "promptFingerprint": "3463a35886e8f97d2f3be6778821fc7c67834115e8d27d2781aba6a80c89867d",
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
   "questions": [
     {
       "id": "c1",
       "type": "short",
-      "prompt": "An LLM extracts delivery dates from customer messages. Each message contains at most one explicitly stated delivery date. The receiving program requires a JSON object with exactly one key, `delivery_date`: its value must be the date copied exactly as written, or `null` when no delivery date is stated. No surrounding text is accepted.\n\nRewrite this draft prompt to specify the required behavior and output contract. Keep `{{message}}` as the input placeholder.\n\n```text\nExtract the delivery date from this customer message:\n{{message}}\n```",
+      "prompt": "A team uses an LLM to extract fields from supplier invoices. The prompt asks for a JSON object with fields `supplier`, `date`, `total` and `line_items`, where `line_items` is a list with one entry per invoice line. The output-token cap (max tokens) is set to 60. Short invoices parse correctly. About 15% of responses for invoices with many lines fail JSON parsing because they end partway through the object. The prompt wording is clear, and the model follows the schema.\n\nWhat change to the token-limit setting should the team make, and why does the current setting cause these failures?",
       "marks": 2,
       "rubric": [
         {
-          "point": "Requires copying an explicitly stated delivery date exactly as written and returning null when none is stated, without inferring a date.",
+          "point": "States that the output-token cap should be raised so that long multi-line invoice outputs can finish. Any valid way of choosing the new value is acceptable but not required.",
           "marks": 1
         },
         {
-          "point": "Requires only a JSON object containing exactly the delivery_date key, with a string or null value and no surrounding text.",
+          "point": "Explains that the cap is a hard stop: generation ends when the cap is reached even if the answer is unfinished, so invoices with many lines, which need more tokens, produce cut-off JSON that cannot be parsed.",
           "marks": 1
         }
       ],
-      "model": "Extract the explicitly stated delivery date from the customer message below. Copy it exactly as written; if none is stated, use null. Do not infer a date. Return only a JSON object with exactly one key, `delivery_date`, whose value is that string or null.\n\nCustomer message:\n{{message}}",
+      "model": "Raise the output-token cap. The current cap of 60 is a hard ceiling: generation stops when it is reached, even mid-answer. Invoices with many lines need more tokens, so their JSON is cut off and does not parse.\n\n*Optional:* Size the new cap from the generated-token counts of valid outputs on representative invoices, plus headroom, and use the API's stop or incomplete reason to flag truncated responses.",
       "source": {
         "path": "Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
-        "heading": "Instruction Prompting"
+        "heading": "LLM Settings"
       },
       "objective": "prompt-interface",
       "goal": "apply"
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "text": "output cap is the problem. list items can have many invoces, and if there is many, they might not fit into the cap.",
+      "confidence": "sure"
+    }
+  },
+  "marks": {
+    "c1": {
+      "awarded": [
+        false,
+        true
+      ],
+      "annotations": [
+        {
+          "quote": "output cap is the problem.",
+          "kind": "correct",
+          "note": "You correctly identified the output-token cap as the cause of the failures."
+        },
+        {
+          "quote": "if there is many, they might not fit into the cap.",
+          "kind": "correct",
+          "note": "You explained that invoices with many lines need more tokens than the cap allows, so the JSON is cut off. This is the core reason for the failures."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "The question asks what change to make. You needed to say that the cap should be raised so long outputs can finish."
+        },
+        {
+          "quote": "they might not fit into the cap",
+          "kind": "vague",
+          "note": "The cap is a hard stop that ends generation mid-answer, which is why the JSON is truncated and fails to parse. 'Might not fit' does not say this directly, but it is close enough to the idea."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You diagnosed the truncation correctly but never stated the fix, which is to raise the output-token cap.",
+      "score": 1
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1795399063366
 }

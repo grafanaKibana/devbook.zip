@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "createdAt": 1795364185641,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "prompt-search",
+  "title": "Optimize candidate prompts or demonstrations against an explicit evaluator while separating validation data from the final held-out comparison",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "goal": "explain",
+      "objective": "prompt-search",
+      "marks": 2,
+      "prompt": "A team searches for a prompt that tags support emails with one of four categories. A model proposes 40 candidate instructions with different wordings. None of the candidates was written using the 25 labelled emails below (emails whose correct category is known). Every candidate tags the same 25 labelled emails, code counts the correct tags, and the candidate with the highest count is kept. The team reports that winning count as the quality to expect on new emails.\n\nExplain why this reported count tends to overstate the kept candidate's quality on new emails, even though all 40 candidates were scored on the same 25 emails. Then explain why comparing more candidates on those same 25 emails can make that overstatement larger.",
+      "rubric": [
+        {
+          "point": "Explains the selection effect: each candidate's count mixes real quality with chance variation on these particular emails, and keeping the highest count favours candidates whose chance variation was favourable, so the winner's count is biased upward relative to what it will score on new emails (equivalent phrasings such as selection bias, winner's curse, or overfitting to the validation set are accepted).",
+          "marks": 1
+        },
+        {
+          "point": "Explains why more candidates can enlarge the overstatement: each additional candidate is another opportunity for a high count to arise from favourable chance on these emails, so the maximum of more noisy counts tends to sit further above the real quality of whichever candidate wins (a caveat that near-duplicate or highly correlated candidates add little to this effect is acceptable but not required).",
+          "marks": 1
+        }
+      ],
+      "model": "Each candidate's count on the 25 emails is its real quality plus chance variation from which emails happen to be in the set. Keeping the highest count favours candidates whose chance variation was favourable, so the kept count is more likely to include favourable chance than an unselected count and, on average, sits above what that candidate will score on new emails. A shared set makes the counts comparable, but it does not make the winner's count unbiased.\n\nComparing more candidates can make the overstatement larger because each extra candidate is another chance for a high count to come from favourable chance on these 25 emails, so the maximum of more noisy counts drifts further above the real quality of whichever candidate wins.\n\nOptional: the effect is weakest when the added candidates are near-duplicates or make highly correlated errors, because they add little independent chance.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+        "heading": "A small example set rewards luck"
+      }
+    },
+    {
+      "id": "c2",
+      "type": "mcq",
+      "goal": "explain",
+      "objective": "prompt-search",
+      "marks": 1,
+      "prompt": "A prompt search tunes a few-shot prompt that extracts the payment due date from supplier emails. Each candidate is the same instruction plus three worked examples, where a worked example is a labelled email copied into the prompt together with its correct due date. The team has 150 labelled emails for the search and a separate 50 labelled emails held out for the final comparison against the current prompt.\n\nEach candidate's three worked examples are drawn at random from the 150 emails. Every candidate then extracts the date from all 150 emails, code counts exact matches, and the highest count wins the search.\n\nWhich statement correctly describes how this use of the 150 emails affects the search?",
+      "options": [
+        "Every candidate has exactly three of its own examples among the 150, so any advantage from seeing those dates is the same for all of them and cancels out when the counts are compared.",
+        "Any candidate favoured by its own examples is caught at the final comparison, because the 50 held-out emails were never used, so the search still ends up releasing the best candidate.",
+        "Each candidate is scored partly on emails whose correct dates sit in its own prompt, and three such emails each does not guarantee an equal benefit, so the ranking can reflect exposure to answers rather than performance on unseen emails.",
+        "The counts are unreliable only because 150 emails is a small set for a three-example prompt, so the same procedure would be sound with a few hundred more labelled emails."
+      ],
+      "answer": 2,
+      "rubric": [
+        {
+          "point": "Chooses the explanation that candidates are scored on emails whose answers appear in their own prompts, and that equal overlap counts do not guarantee equal benefit, so the ranking can reflect exposure to answers rather than performance on unseen emails.",
+          "marks": 1
+        }
+      ],
+      "model": "Each candidate is scored partly on emails whose correct dates sit in its own prompt, and three such emails each does not guarantee an equal benefit, so the ranking can reflect exposure to answers rather than performance on unseen emails.\n\nOptional: equal overlap counts do not mean equal benefit, so nothing reliably cancels. The held-out set can only reject the chosen winner afterwards; it cannot recover a better candidate the search passed over. A larger set would leave the overlap in place. The fix is a demonstration pool separate from the validation set.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+        "heading": "Automatic Prompt Engineer (APE)"
+      }
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}
