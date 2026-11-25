@@ -152,8 +152,8 @@ plugins:
         focusOnHover: true
       globalGraph:
         showTags: false
-        enableRadial: false
-        linkDistance: 20
+        enableRadial: true
+        linkDistance: 30
     layout:
       position: right
       priority: 10
@@ -180,8 +180,7 @@ plugins:
     enabled: true
     # Registered for SiteHeader; quartz.ts removes its manifest placement.
   - source: github:quartz-community/darkmode
-    enabled: true
-    # Registered for SiteHeader; quartz.ts removes its manifest placement.
+    enabled: false # SiteHeader owns Auto, Light and Dark.
   - source: github:quartz-community/reader-mode
     enabled: true
     # Registered for SiteHeader; quartz.ts removes its manifest placement.
@@ -200,6 +199,7 @@ plugins:
     options:
       links:
         About: /about
+        Changelog: /changelog
         Email: mailto:reshetnik.nikita@gmail.com
         LinkedIn: https://www.linkedin.com/in/nikitareshetnik/
         GitHub: https://github.com/grafanaKibana

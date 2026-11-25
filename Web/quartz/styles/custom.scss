@@ -193,30 +193,14 @@ pre > code:focus-visible {
   border-radius: var(--surface-radius);
 }
 
-// ============================================================================
-// Graph panel — accent frame + faint top-down glow keyed to --secondary
-// (overrides the plugin's flat --lightgray border).
-// ============================================================================
-// The accent ramp paints the border itself: a transparent border reveals the
-// last layer, which is clipped to the border box, while the fill layers stop at
-// the padding box. border-image would do it in one line but squares off the
-// corners, and this panel is rounded.
-.graph > .graph-outer {
-  border: 1px solid transparent;
-  // Opaque --light base (as the scope dropdown's .ns-menu panel uses) so the page
-  // dot-grid doesn't show through, with a faint top-down accent glow layered over.
-  // --light has to be spelled as a gradient: a plain colour can only ever be the
-  // background-color, which no per-layer clip applies to.
-  background:
-    radial-gradient(
-        120% 120% at 50% 0%,
-        color-mix(in srgb, var(--secondary) 3.5%, transparent),
-        transparent 60%
-      )
-      padding-box,
-    linear-gradient(var(--light), var(--light)) padding-box,
-    var(--accent-gradient) border-box;
-  //box-shadow: inset 0 0 40px color-mix(in srgb, var(--secondary) 4%, transparent);
+.graph > .graph-outer,
+.graph > .global-graph-outer > .global-graph-container {
+  background: var(--light);
+}
+
+pre:not(:has(> code.mermaid)),
+figure[data-rehype-pretty-code-figure] > [data-rehype-pretty-code-title] {
+  background-color: var(--light);
 }
 
 // ============================================================================
@@ -224,10 +208,10 @@ pre > code:focus-visible {
 // ============================================================================
 .callout[data-callout] {
   --border: color-mix(in srgb, var(--color) 24%, var(--lightgray));
-  --bg: color-mix(in srgb, var(--color) 3.5%, var(--light));
+  --bg: var(--light);
   // Quartz's callout hues are one set for both themes, so most titles fall
   // under 4.5:1 on the light fill and the purple ones on the dark fill. Pull
-  // the title ink toward the text colour; the border and fill keep the hue.
+  // the title ink toward the text colour. The border retains the callout hue.
   --callout-ink: color-mix(in srgb, var(--color) 60%, var(--dark));
 }
 :root[saved-theme="dark"] .callout[data-callout] {
@@ -425,19 +409,17 @@ body {
   }
 }
 
-// The home Topics dashboard cards are transparent by design (authored in the
-// note's datacorejsx so they blend with the page fill) — over the dot grid that
-// lets the texture show through them. On the published site, back each card with
-// the opaque page fill so it reads as a clean surface and the grid stays in the
-// gutters. This is Quartz-only (Obsidian has no grid), so it lives here, not in
-// the shared note. The `.dc-topic-grid` anchor lifts specificity above the note's
-// inline `<style>` (which loads after this in the body) without `!important`.
-.dc-topic-grid .dc-topic-card {
+// Exported dashboard and folder cards share their chrome with Obsidian.
+// On the site the page grid stays in the gutters and topic color stays in the icons.
+:is(.dc-topic-dashboard, .folder-structure-map) .db-card {
   background-color: var(--light);
+
+  &::before {
+    content: none;
+  }
 }
-// Preserve the topic-tinted hover, but composite it over the opaque fill (the
-// note's rule uses a 10%-alpha tint that would otherwise let the grid through).
-.dc-topic-grid .dc-topic-card:hover {
+
+.dc-topic-grid .dc-topic-card:is(:hover, :focus-within) {
   background-color: color-mix(in srgb, rgb(var(--topic-rgb)) 10%, var(--light));
 }
 
@@ -492,35 +474,56 @@ body {
   gap: 1rem;
 }
 
-// Header toggle + search icons pick up the title accent (--secondary, the
-// default link colour the page title uses) on hover.
-.site-header-actions .darkmode,
-.site-header-actions .readermode,
-.site-header-search .search > .search-button {
-  & svg {
-    transition:
-      fill var(--dur-2) var(--ease-out),
-      stroke var(--dur-2) var(--ease-out),
-      color var(--dur-2) var(--ease-out),
-      opacity var(--dur-1) var(--ease-out);
+// The system picker uses native select interaction with a compact theme glyph.
+.site-theme-picker {
+  display: grid;
+  place-items: center;
+  position: relative;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  color: var(--darkgray);
+  border-radius: 4px;
+
+  svg {
+    display: none;
+    width: 20px;
+    height: 20px;
+  }
+  select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+  &:has(select:focus-visible:not([data-pointer-focus])) {
+    outline: 2px solid var(--secondary);
+    outline-offset: -2px;
+  }
+}
+:root[data-theme-mode="auto"] .theme-icon-auto,
+:root[data-theme-mode="dark"] .theme-icon-dark,
+:root[data-theme-mode="light"] .theme-icon-light {
+  display: block;
+}
+
+// Clickable controls share a muted border that strengthens on hover.
+@mixin nav-control-border {
+  border: 1px solid var(--lightgray);
+
+  @media (hover: hover) {
+    &:hover {
+      border-color: var(--gray);
+    }
   }
 }
 
-// Recolour each icon using ONLY the paint channel it uses at rest — adding the
-// other channel made them look bolder on hover: a stroke thickened the filled
-// sun/moon, and a fill flooded the outline search glass solid.
-//   • darkmode  — filled (fill:--darkgray, no stroke): recolour the fill.
-//   • readermode — filled + hair-line stroke: recolour both (weight unchanged).
-//   • search    — outline (.search-path stroke, fill:none): recolour the stroke.
-.site-header-actions .darkmode:hover svg {
-  fill: var(--secondary);
-}
-.site-header-actions .readermode:hover svg {
-  fill: var(--secondary);
-  stroke: var(--secondary);
-}
-.site-header-search .search > .search-button:hover svg .search-path {
-  stroke: var(--secondary);
+.ns-scope .ns-trigger,
+.graph > .graph-outer,
+pre > button.clipboard-button,
+.site-header-search .search > .search-container > .search-space > input {
+  @include nav-control-border;
 }
 
 .site-header-search {
@@ -586,15 +589,10 @@ body {
     max-width: 32rem;
 
     & > .search-button {
+      @include nav-control-border;
       width: 100%;
       background-color: var(--lightgray);
-      border: 1px solid transparent;
       border-radius: 6px;
-
-      &:hover,
-      &:focus-visible {
-        border-color: var(--gray);
-      }
     }
   }
   .site-header-actions {
@@ -669,13 +667,11 @@ body {
   // The icon buttons keep their 20px glyphs but get full 44px hit areas; the
   // actions' flex gap closes up so the glyphs keep their visual spacing.
   .site-header-search .search > .search-button,
-  .site-header-actions .darkmode,
   .site-header-actions .readermode {
     min-width: 2.75rem;
     height: 2.75rem;
     justify-content: center;
   }
-  .site-header-actions .darkmode svg,
   .site-header-actions .readermode svg {
     left: calc(50% - 10px);
   }
@@ -782,127 +778,215 @@ body {
 // ============================================================================
 
 :root {
-  // Folders stay heavier than files, but well short of the plugin's near-bold 600.
-  --explorer-folder-weight: 500;
-  // base.scss styles every `a` at $semiBoldWeight (600), which is also what the
-  // plugin gives folders — so folder and file rows currently weigh the same.
-  // Pull file links back to normal to restore the hierarchy.
-  --explorer-file-weight: #{$normalWeight};
+  --nav-line-height: 1.3125rem;
   // Inset for the slide-in panel (mobile) and drawer (tablet), where the tree
   // would otherwise sit flush against the screen edge. Matches the header bar's
   // 1.5rem so the tree lines up under the title.
   --explorer-panel-inset: 1.5rem;
-  // Nav rows read as pills (design: .db-ex-row): a small pad + radius so the
-  // hover and active washes hug each label instead of spanning edge-to-edge.
+  // Keep the tree compact and round the keyboard focus indicator.
   --explorer-row-pad: 0.18rem 0.35rem;
   --explorer-row-radius: 5px;
-  // The row hover wash — a faint tint of the ink over the page fill.
-  --explorer-row-hover-bg: color-mix(in srgb, var(--dark) 5%, transparent);
 }
-// Touch rows reach the 44px target; the pill look is unchanged.
+// Touch rows reach the 44px target.
 @media (pointer: coarse) {
   :root {
-    --explorer-row-pad: 0.5625rem 0.35rem;
+    --explorer-row-pad: max(0.35rem, calc((2.75rem - var(--nav-line-height)) / 2)) 0.35rem;
   }
 }
 
 // ---------------------------------------------------------------------------
-// Row chrome. Both the file link and the folder header are the interactive
-// "rows"; give each the same pad, radius and hover wash so the tree reads as a
-// stack of pills (design: .db-ex-row / .db-ex-row:hover). `.explorer` prefixes
-// lift these over the plugin's own (unlayered) rules.
+// File and folder rows share their padding and focus shape.
 // ---------------------------------------------------------------------------
 .explorer .explorer-content ul li > a.nav-file-title,
 .explorer .explorer-content .folder-container {
   box-sizing: border-box;
   padding: var(--explorer-row-pad);
   border-radius: var(--explorer-row-radius);
-  transition:
-    color var(--dur-2) var(--ease-out),
-    background-color var(--dur-2) var(--ease-out);
+  line-height: var(--nav-line-height);
 }
 
-// The file link is inline by default, so its wash would only cover the text.
-// Make it a full-width flex line so the hover/active pill spans the whole row
-// and the icon + label sit centred.
-.explorer .explorer-content ul li > a.nav-file-title {
+// Align the file glyph with the first line even when the label wraps.
+.explorer .explorer-content ul li > a.nav-file-title,
+.backlinks > ul > li > a.internal {
   display: flex;
-  align-items: center;
-  width: 100%;
+  align-items: flex-start;
 }
 
-.explorer .explorer-content ul li > a.nav-file-title:hover,
-.explorer .explorer-content .folder-container:hover {
-  background-color: var(--explorer-row-hover-bg);
+// Center the glyph in the first line box; subsequent lines align with the label.
+.explorer .explorer-content .ec-ico,
+.backlinks > ul > li > a.internal .ec-ico {
+  align-self: flex-start;
+  height: var(--nav-line-height);
 }
 
-// ---------------------------------------------------------------------------
-// Folder rows. The accent lives on the book/topic glyph (decorated by
-// explorer-icons.tsx); the LABEL is plain ink and the collapse chevron is a
-// muted gray — the plugin paints both green, so pull them back to the design's
-// --dark / --gray (design: .db-ex-folder + .db-ex-chev-node).
-// ---------------------------------------------------------------------------
+// Navigation feedback has one clock across both rails and header search.
+:root {
+  --nav-label-ink: #444c37;
+  --nav-hover-ink: var(--dark);
+  --nav-list-rest: #626362;
+  --nav-list-active: #141516;
+  --nav-icon-rest-tint: white;
+  --nav-icon-active-tint: black;
+}
+
+:root[saved-theme="dark"] {
+  --nav-label-ink: var(--darkgray);
+  --nav-list-rest: #bdbeb3;
+  --nav-list-active: #f3f5e9;
+  --nav-icon-rest-tint: black;
+  --nav-icon-active-tint: white;
+}
+
+@mixin nav-feedback($properties...) {
+  transition-property: $properties;
+  transition-duration: var(--nav-feedback-duration, var(--dur-1));
+  transition-timing-function: var(--ease-out);
+}
+
+.explorer .explorer-content :is(.nav-file-title, .folder-container, .folder-button),
+.ns-scope :is(.ns-opt, .ns-trigger),
+.graph > .graph-outer,
+.toc ul.toc-content > li > a,
+.backlinks li > a.internal,
+.site-header .page-title a,
+.site-header-search .search > .search-button,
+.site-header-search .search > .search-container > .search-space > input,
+.site-header-search .search .search-container .search-space .search-layout .results-container a.result-card,
+.site-header-search .search .search-container .search-space .tag-suggestions .tag-suggestion-item {
+  @include nav-feedback(color, background-color, border-color);
+
+  @media (hover: hover) {
+    &:hover {
+      --nav-feedback-duration: 0s;
+    }
+  }
+}
+
+// The clipboard plugin also sets a transition when the enclosing block is hovered.
+pre > button.clipboard-button,
+pre:hover > button.clipboard-button {
+  @include nav-feedback(opacity, border-color);
+
+  @media (hover: hover) {
+    &:hover {
+      --nav-feedback-duration: 0s;
+    }
+  }
+}
+
+.site-header-search a.result-card > .card-title,
+.site-header-search .tag-suggestion-item:not(.active) {
+  color: var(--nav-label-ink);
+}
+
+.explorer .folder-container .folder-title,
+.explorer .explorer-content .ec-ico,
+.backlinks li > a.internal .ec-ico,
+.site-header-search a.result-card > .card-title {
+  @include nav-feedback(color);
+}
+
+@media (hover: hover) {
+  .site-header-search .tag-suggestion-item:hover,
+  .site-header-search a.result-card:hover > .card-title {
+    color: var(--nav-hover-ink);
+  }
+
+  .site-header-search a.result-card:hover:not(:focus-visible),
+  .site-header-search .tag-suggestion-item:hover {
+    background-color: transparent;
+  }
+}
+
 .explorer .explorer-content .folder-container div > a,
-.explorer .explorer-content .folder-container div > button span {
-  font-weight: var(--explorer-folder-weight);
-  color: var(--dark);
-}
-// Hover is carried by the row wash, not a label colour shift; hold the label
-// (and the button-form folder link) steady on --dark.
-.explorer .explorer-content .folder-container:hover div > a,
-.explorer .explorer-content .folder-container:hover div > button span {
-  color: var(--dark);
-}
-// The collapse chevron (.folder-icon) — kept small and thin like the design's
-// Lucide chevron, but inked in --darkgray (the breadcrumb-crumb tone) rather than
-// --gray so it stays clearly visible; holds that tone on hover (the plugin turns
-// it --tertiary).
-.explorer .explorer-content .folder-container > svg.folder-icon,
-.explorer .explorer-content .folder-container > svg.folder-icon:hover {
-  color: var(--darkgray);
-  width: 11px;
-  height: 11px;
-  stroke-width: 1.5;
+.explorer .explorer-content .folder-container .folder-title {
+  line-height: var(--nav-line-height);
 }
 
-// ---------------------------------------------------------------------------
-// File rows. Normal weight, solid --darkgray ink (the plugin dims idle files to
-// 0.75 opacity and --dark); the current page gets the green wash pill
-// (design: .db-ex-file / .db-ex-file.is-active).
-// ---------------------------------------------------------------------------
-.explorer .explorer-content ul li > a.nav-file-title {
-  font-weight: var(--explorer-file-weight);
-  color: var(--darkgray);
+// Sizing and ink follow the scope trigger; each disclosure owns its open-state rotation.
+.ns-scope .ns-chev-svg,
+.explorer button.desktop-explorer .fold,
+.explorer .explorer-content .folder-container > svg.folder-icon,
+.toc button.toc-header .fold {
+  width: 15px;
+  height: 15px;
+  color: var(--gray);
+  stroke-width: 2;
   opacity: 1;
 }
-.explorer .explorer-content ul li > a.nav-file-title:hover {
-  color: var(--dark);
+
+.explorer .explorer-content .folder-container > svg.folder-icon {
+  align-self: flex-start;
+  margin-block-start: calc((var(--nav-line-height) - 15px) / 2);
 }
-// A full-width row meets the edge of its clipping list, which would cut the
-// outset ring's end edge; draw it inside the pill.
+
+// The row owns the state. Labels, topic glyphs and ToC markers consume it.
+.explorer .explorer-content :is(.nav-file-title, .folder-container),
+.toc ul.toc-content > li > a,
+.backlinks > ul > li > a.internal {
+  --nav-row-ink: var(--nav-list-rest);
+  --nav-row-weight: 400;
+  --nav-row-stroke: 0px;
+  --nav-topic-share: 84%;
+  --nav-icon-tint: var(--nav-icon-rest-tint);
+  --nav-icon-scale: 1;
+
+  &:focus-visible,
+  &:has(:focus-visible) {
+    --nav-row-ink: var(--nav-list-active);
+    --nav-topic-share: 100%;
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      --nav-row-ink: var(--nav-list-active);
+      --nav-topic-share: 100%;
+    }
+  }
+}
+
+.explorer .explorer-content a.nav-file-title:is(.active, .is-active),
+.explorer .explorer-content .folder-container:has(.folder-button[aria-current="page"]),
+:root[data-page-scrolled] .toc ul.toc-content > li > a.in-view,
+.backlinks > ul > li > a.internal[aria-current="page"] {
+  --nav-row-ink: var(--nav-list-active);
+  --nav-row-weight: 500;
+  --nav-row-stroke: 0.52px;
+  --nav-icon-tint: var(--nav-icon-active-tint);
+  --nav-topic-share: 90%;
+  --nav-icon-scale: 1.15;
+}
+
+.explorer .explorer-content ul li > a.nav-file-title,
+.explorer .explorer-content .folder-container .folder-title,
+.toc ul.toc-content > li > a,
+.backlinks > ul > li > a.internal {
+  color: var(--nav-row-ink);
+  font-weight: var(--nav-row-weight);
+  -webkit-text-stroke: var(--nav-row-stroke) currentColor;
+  opacity: 1;
+}
+
+.explorer .explorer-content .ec-ico,
+.backlinks > ul > li > a.internal .ec-ico,
+.toc ul.toc-content > li > a::before {
+  color: color-mix(in oklab, var(--ec-topic, var(--secondary)) var(--nav-topic-share), var(--nav-icon-tint));
+  -webkit-text-stroke: 0;
+}
+
+:is(.explorer, .backlinks) .ec-ico .ec-svg {
+  scale: var(--nav-icon-scale);
+  stroke-width: calc(2px / var(--nav-icon-scale));
+}
+
 .explorer .explorer-content ul li > a.nav-file-title:focus-visible {
   outline-offset: -2px;
 }
-.explorer .explorer-content ul li > a.nav-file-title.active {
-  color: var(--secondary);
-  font-weight: #{$semiBoldWeight};
-  opacity: 1;
-  // Wash drawn from the ramp's light end, on the same diagonal as the other
-  // accents, fading out before the row's right edge.
-  background-image: linear-gradient(
-    115deg,
-    color-mix(in srgb, var(--accent-to) 22%, transparent),
-    transparent 80%
-  );
-}
-// File glyph carries its topic's hue (set inline as --ec-topic by
-// explorer-icons.tsx) while the label stays --darkgray — the same icon-accent /
-// regular-label split the folder rows use, and the same subtree tint. Root pages
-// have no topic folder above them, so --ec-topic is unset and the icon falls back
-// to the accent. The icon has its own colour, so the label's hover shift to
-// --dark leaves it fixed.
-.explorer .explorer-content ul li > a.nav-file-title .ec-ico {
-  color: var(--ec-topic, var(--secondary));
+
+.ns-trigger[aria-current="page"] .ns-name {
+  color: var(--nav-list-active);
+  font-weight: 500;
+  -webkit-text-stroke: 0.15px currentColor;
 }
 
 // ---------------------------------------------------------------------------
@@ -915,14 +999,6 @@ body {
   letter-spacing: -0.01em;
   color: var(--dark);
 }
-.explorer button.desktop-explorer .fold {
-  color: var(--darkgray);
-  opacity: 1;
-  width: 13px;
-  height: 13px;
-  stroke-width: 1.5;
-}
-
 // ---------------------------------------------------------------------------
 // A hidden tree leaves the tab order and the accessibility tree. The plugin
 // marks every open folder `visibility: visible`, which overrides a hidden
@@ -1216,16 +1292,37 @@ body {
 }
 
 // ============================================================================
-// Table of contents. The plugin fades entries outside the viewport to 35% ink
-// (2.2:1); carry the in-view emphasis as an ink step instead, so the resting
-// entries stay readable: --gray at rest, --darkgray in view.
+// ToC and Backlinks use regular-weight links. In-view ToC entries gain ink and weight.
 // ============================================================================
-.toc ul.toc-content > li > a {
-  color: var(--gray);
-  opacity: 1;
+// The list item has its own line box, even when its link wraps.
+.toc ul.toc-content > li,
+.backlinks > ul > li,
+.backlinks > ul > li > a.internal {
+  line-height: var(--nav-line-height);
+}
 
-  &.in-view {
-    color: var(--darkgray);
+.backlinks > ul > li > a.internal {
+  padding: 0;
+  background: transparent;
+}
+
+.toc ul.toc-content > li > a {
+  display: block;
+  position: relative;
+  padding-inline-start: 0.75rem;
+  line-height: inherit;
+
+  // Align the same short dash with the first line at every heading depth.
+  &::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: calc((var(--nav-line-height) - 1px) / 2);
+    width: 6px;
+    height: 1px;
+    background-color: currentColor;
+    scale: var(--nav-icon-scale) 1;
+    transform-origin: left center;
   }
 }
 
@@ -1355,9 +1452,6 @@ body[data-slug="index"] {
     --db-card-pad: var(--home-card-pad);
     position: relative;
     overflow: hidden;
-  }
-  .dc-topic-card::before {
-    opacity: 1;
   }
 }
 
@@ -1746,8 +1840,8 @@ blockquote.transclude:has(.excalidraw-page) {
 }
 
 // Site footer: drop the "Created with Quartz © …" credit line, left-align the
-// link row, and prefix each link with a masked icon — Lucide for About (info) and
-// Email (mail), brand marks for LinkedIn and GitHub (lucide-static ships no brand
+// link row, and prefix each link with a masked icon — Lucide for About, Changelog
+// and Email, brand marks for LinkedIn and GitHub (lucide-static ships no brand
 // icons). These match the share links' compact interaction styling, but use the
 // normal text colour for both icon and label.
 footer > p {
@@ -1800,9 +1894,21 @@ footer.site-footer:not(:has(> .site-footer-share)) {
   }
 }
 
-// Only the four known links carry an icon; a link without a `--footer-icon`
+// Keep all five labels together on narrow footers without share controls.
+@media (max-width: 27rem) {
+  footer.site-footer:not(:has(> .site-footer-share)) > ul {
+    gap: 0.25rem;
+
+    a::before {
+      display: none;
+    }
+  }
+}
+
+// Only known links carry an icon; a link without a `--footer-icon`
 // gets no ::before (guards against an unmasked solid square).
 footer > ul a[href$="about"]::before,
+footer > ul a[href$="changelog"]::before,
 footer > ul a[href^="mailto:"]::before,
 footer > ul a[href*="linkedin.com"]::before,
 footer > ul a[href*="github.com"]::before {
@@ -1817,6 +1923,9 @@ footer > ul a[href*="github.com"]::before {
 
 footer > ul a[href$="about"] {
   --footer-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4'/%3E%3Cpath d='M12 8h.01'/%3E%3C/svg%3E");
+}
+footer > ul a[href$="changelog"] {
+  --footer-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 11a9 9 0 1 1 2.64 7.36M3 4v7h7m2-4v5l3 2'/%3E%3C/svg%3E");
 }
 footer > ul a[href^="mailto:"] {
   --footer-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7'/%3E%3Crect x='2' y='4' width='20' height='16' rx='2'/%3E%3C/svg%3E");
@@ -1862,6 +1971,7 @@ blockquote {
 }
 
 .datacore-card {
+  background-color: var(--light);
   transition:
     background-color var(--dur-4) var(--ease-in-out),
     border-color var(--dur-4) var(--ease-in-out);

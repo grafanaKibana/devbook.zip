@@ -17,7 +17,7 @@ import { lucideMap } from "../lib/lucide-icons"
 // The component renders a `slug -> {icon,color,order,name}` map (from each
 // note's frontmatter, which Quartz Syncer publishes into content/). The browser
 // script builds the dropdown from the *actual* top-level nodes of the rendered
-// tree (`.explorer-ul > li`) — so it always mirrors what the Explorer shows —
+// tree (`.explorer-ul > li`),
 // joining each node to the map by slug (the same key variants ExplorerOrder uses).
 // Scoping is CSS-driven: the script toggles state classes on the top-level nodes
 // and CSS (below) does the hiding, reusing the plugin's own `.folder-outer.open`
@@ -26,8 +26,8 @@ import { lucideMap } from "../lib/lucide-icons"
 //
 // The design (issue #64, chosen mock "Option B"): a boxed selector whose icon
 // chip carries the topic's own colour (tinted background + coloured Lucide icon),
-// the clean topic name, and a chevron; the menu lists every top-level entry with
-// a matching coloured chip, plus an "All topics" entry to clear the scope.
+// the clean topic name, and a chevron. Home and Interview Questions precede
+// the ordered topics; informational pages are omitted from this navigation.
 
 // localStorage key for the persisted scope (a slug, or the ALL sentinel).
 const STORE_KEY = "devbook:explorer-scope"
@@ -84,8 +84,32 @@ const script = `
   var STORE_KEY = ${JSON.stringify(STORE_KEY)};
   var ALL = ${JSON.stringify(ALL)};
 
+  // With no saved tree position, Explorer calls scrollIntoView on the active
+  // row before the scope is applied. That can scroll the article as well.
+  var revealInitialRow = false;
+  try {
+    if (sessionStorage.getItem("explorerScrollTop") === null) {
+      sessionStorage.setItem("explorerScrollTop", "0");
+      revealInitialRow = true;
+    }
+  } catch (_) { /* Storage can be disabled. */ }
+
   function releaseFirstPaint(explorer, scope) {
     if (!scope || explorer.querySelector(".hide-until-loaded")) return;
+    if (revealInitialRow) {
+      revealInitialRow = false;
+      sessionStorage.removeItem("explorerScrollTop");
+      requestAnimationFrame(function () {
+        var list = explorer.querySelector(".explorer-ul");
+        var row = list && list.querySelector(".active, .folder-button[aria-current='page']");
+        if (!row || !row.getClientRects().length) return;
+        var bounds = list.getBoundingClientRect();
+        var active = row.getBoundingClientRect();
+        if (active.top < bounds.top || active.bottom > bounds.bottom) {
+          list.scrollTop += active.top - bounds.top - (bounds.height - active.height) / 2;
+        }
+      });
+    }
     var gate = window.__devbookExplorerFirstPaint;
     if (gate) gate.release();
   }
@@ -109,6 +133,18 @@ const script = `
       ' width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"' +
       ' stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
       inner + '</svg>';
+  }
+
+  // Keep the original SVG elements: Explorer attaches its toggle listener to them.
+  function syncDisclosureChevrons() {
+    var glyph = ICONS["chevron-down"];
+    if (!glyph) return;
+    document.querySelectorAll(".explorer .desktop-explorer .fold:not(.nav-chevron), .explorer .folder-icon:not(.nav-chevron), .toc-header .fold:not(.nav-chevron)").forEach(function (icon) {
+      icon.setAttribute("viewBox", "0 0 24 24");
+      icon.setAttribute("aria-hidden", "true");
+      icon.innerHTML = glyph;
+      icon.classList.add("nav-chevron");
+    });
   }
 
   function readMap() {
@@ -168,6 +204,7 @@ const script = `
       return {
         slug: slug,
         kind: "folder",
+        menuGroup: "topics",
         li: li,
         href: flink ? flink.getAttribute("href") || flink.href : "/" + slug.replace(/\\/index$/, ""),
         name: stripPrefix(meta.name || labelText(fc)),
@@ -182,9 +219,13 @@ const script = `
       var fmeta = lookup(map, fslug) || {};
       var seg = lastSeg(fslug);
       var segBase = seg.replace(/\\.[a-z0-9]+$/i, ""); // drop a trailing extension (e.g. roadmap.canvas)
+      var menuGroup = "files";
+      if (segBase === "questions") menuGroup = "primary";
+      if (segBase === "about" || segBase === "changelog") menuGroup = "hidden";
       return {
         slug: fslug,
         kind: "file",
+        menuGroup: menuGroup,
         li: li,
         href: a.getAttribute("href") || a.href, // navigate here on select (files open, not scope)
         name: stripPrefix(fmeta.name || labelText(a)),
@@ -192,7 +233,7 @@ const script = `
           fmeta.icon && ICONS[fmeta.icon]
             ? fmeta.icon
             : FILE_ICON_BY_NAME[seg] || FILE_ICON_BY_NAME[segBase] || "file",
-        color: fmeta.color || null,
+        color: menuGroup === "primary" ? "var(--gray)" : fmeta.color || null,
         order: typeof fmeta.order === "number" ? fmeta.order : Infinity,
       };
     }
@@ -233,33 +274,27 @@ const script = `
   }
 
   function buildMenu(entries, current) {
-    var html =
-      optHtml({ slug: ALL, topic: "var(--gray)", icon: "house", label: "Home", href: "/", active: current === ALL }) +
-      '<div class="ns-sep" role="presentation"></div>';
-    html += entries
-      .map(function (e, i) {
-        // A divider between the topic folders and the loose root pages (files),
-        // mirroring the Home/topics one — inserted before the first file.
-        var prev = entries[i - 1];
-        var sep =
-          prev && prev.kind === "folder" && e.kind === "file"
-            ? '<div class="ns-sep" role="presentation"></div>'
-            : "";
-        return (
-          sep +
-          optHtml({
-            slug: e.slug,
-            topic: e.color || "var(--secondary)",
-            icon: e.icon,
-            label: e.name,
-            kind: e.kind,
-            href: e.href,
-            active: current === e.slug,
-          })
-        );
-      })
-      .join("");
-    return html;
+    var groups = {
+      primary: [optHtml({ slug: ALL, topic: "var(--gray)", icon: "house", label: "Home", href: "/", active: current === ALL })],
+      topics: [],
+      files: [],
+    };
+    entries.forEach(function (e) {
+      if (e.menuGroup === "hidden") return;
+      groups[e.menuGroup].push(optHtml({
+        slug: e.slug,
+        topic: e.color || "var(--secondary)",
+        icon: e.icon,
+        label: e.name,
+        kind: e.kind,
+        href: e.href,
+        active: current === e.slug,
+      }));
+    });
+    return [groups.primary, groups.topics, groups.files]
+      .filter(function (group) { return group.length; })
+      .map(function (group) { return group.join(""); })
+      .join('<div class="ns-sep" role="presentation"></div>');
   }
 
   // SPA-navigate when Quartz's router is available, else a full load. Used for
@@ -290,16 +325,19 @@ const script = `
     return null;
   }
 
-  // The top-level folder entry the *current page* lives under, or null on the home
-  // root / a loose file. Matched by folder href prefix (base-path safe: both the
+  // The current selectable file, its enclosing top-level folder, or null for Home.
+  // Matched by folder href prefix (base-path safe: both the
   // href and location.pathname carry any configured base), longest match wins so a
   // topic whose slug is a prefix of another can't shadow the deeper one.
-  function currentTopicEntry(entries) {
+  function currentPageEntry(entries) {
     var here = normalizeSlug(location.pathname);
     var best = null, bestLen = -1;
     for (var i = 0; i < entries.length; i++) {
       var e = entries[i];
-      if (e.kind !== "folder") continue;
+      if (e.kind === "file") {
+        if (e.menuGroup !== "hidden" && here === e.slug) return e;
+        continue;
+      }
       var base = normalizeSlug(e.href || e.slug.replace(/\\/index$/, ""));
       if (!base) continue;
       if (here === base || here.indexOf(base + "/") === 0) {
@@ -361,15 +399,25 @@ const script = `
     return scope;
   }
 
+  function updateScrollEdges(list) {
+    var maxScroll = list.scrollHeight - list.clientHeight;
+    list.classList.toggle("ns-fade-top", maxScroll > 0 && list.scrollTop > 0);
+    // scrollTop can be fractional while scrollHeight/clientHeight are integers.
+    list.classList.toggle("ns-fade-bottom", maxScroll - Math.max(0, list.scrollTop) > 1);
+  }
+
   function wireSelector(explorer, scope) {
     var trigger = scope.querySelector(".ns-trigger");
     var menu = scope.querySelector(".ns-menu");
+    var list = menu.querySelector(".ns-menu-list");
+    list.addEventListener("scroll", function () { updateScrollEdges(list); }, { passive: true });
 
     function open() {
       scope.classList.add("open");
       trigger.setAttribute("aria-expanded", "true");
       var first = menu.querySelector(".ns-opt.is-active") || menu.querySelector(".ns-opt");
       if (first) first.focus();
+      updateScrollEdges(list);
     }
     function close(focusTrigger) {
       scope.classList.remove("open");
@@ -436,6 +484,9 @@ const script = `
   function bindBreakpoint() {
     if (mqlBound || typeof window === "undefined" || !window.matchMedia) return;
     mqlBound = true;
+    window.addEventListener("resize", function () {
+      document.querySelectorAll(".ns-scope.open .ns-menu-list").forEach(updateScrollEdges);
+    });
     var mql = window.matchMedia(PANEL_MEDIA);
     var onChange = function () { apply(); };
     if (mql.addEventListener) mql.addEventListener("change", onChange);
@@ -449,7 +500,8 @@ const script = `
       li.style.setProperty("--ns-reveal-order", String(index + 2));
       var selected = current === e.slug;
       var scoping = current !== ALL;
-      li.classList.toggle("ns-hidden", scoping && !selected);
+      // Primary destinations already have a row in the picker above the tree.
+      li.classList.toggle("ns-hidden", e.menuGroup === "primary" || e.menuGroup === "hidden" || (scoping && !selected));
       if (e.kind === "folder") {
         var fc = li.querySelector(":scope > .folder-container");
         var outer = li.querySelector(":scope > .folder-outer");
@@ -488,6 +540,18 @@ const script = `
     apply(); // re-render all explorers so a change here reflects everywhere
   }
 
+  function markCurrentFolder(explorer, scope) {
+    var page = CSS.escape(normalizeSlug(document.body.dataset.slug).replace(/\\/index$/, ""));
+    var row = explorer.querySelector('.folder-container[data-folderpath="' + page + '/index"], .folder-container[data-folderpath="' + page + '"]');
+    var trigger = scope && scope.querySelector(".ns-trigger");
+    // In a scoped topic the trigger represents the hidden top-level row.
+    var current = row && (row.classList.contains("ns-head-hidden") ? trigger : row.querySelector("a.folder-button"));
+    var previous = explorer.querySelector('a.folder-button[aria-current="page"]');
+    if (previous && previous !== current) previous.removeAttribute("aria-current");
+    if (trigger && trigger !== current) trigger.removeAttribute("aria-current");
+    if (current) current.setAttribute("aria-current", "page");
+  }
+
   function renderSelector(explorer, entries, current) {
     var scope = ensureSelector(explorer);
     if (!scope) return null;
@@ -507,7 +571,16 @@ const script = `
     if (name) name.textContent = label;
     var trigger = scope.querySelector(".ns-trigger");
     if (trigger) trigger.setAttribute("aria-label", "Section: " + label);
-    if (list) list.innerHTML = buildMenu(entries, isAll ? ALL : current);
+    if (list) {
+      var html = buildMenu(entries, isAll ? ALL : current);
+      // Quartz can render again while the picker is open. Keep keyboard focus
+      // and the scroll position when the list of options has not changed.
+      if (list.nsMenuHtml !== html) {
+        list.innerHTML = html;
+        list.nsMenuHtml = html;
+      }
+      if (scope.classList.contains("open")) updateScrollEdges(list);
+    }
     return scope;
   }
 
@@ -524,6 +597,7 @@ const script = `
     busy = true;
     try {
       ICONS = readIcons();
+      syncDisclosureChevrons();
       var explorers = document.querySelectorAll("div.explorer");
       if (!explorers.length) return;
       var map = readMap();
@@ -531,8 +605,8 @@ const script = `
         // The tree is built asynchronously; do this the first apply() that sees it.
         var refEntries = topLevelEntries(explorers[0], map);
         if (refEntries.length) {
-          var topic = currentTopicEntry(refEntries);
-          setStored(topic ? topic.slug : ALL);
+          var page = currentPageEntry(refEntries);
+          setStored(page ? page.slug : ALL);
           pendingSync = false;
         }
       }
@@ -550,6 +624,7 @@ const script = `
         var scopeSlug = curEntry && curEntry.kind === "folder" ? current : ALL;
         var scope = renderSelector(explorer, entries, current);
         applyScope(entries, scopeSlug);
+        markCurrentFolder(explorer, scope);
         releaseFirstPaint(explorer, scope);
       });
     } finally {
@@ -675,14 +750,8 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
   color: var(--dark);
   font-family: inherit;
   background: var(--light);
-  border: 1px solid var(--lightgray);
   border-radius: var(--radius-m, 8px);
   padding: 0.45rem 0.5rem;
-  transition: border-color var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out);
-}
-.ns-trigger:hover {
-  border-color: var(--gray);
-  background: color-mix(in srgb, var(--gray) 6%, var(--light));
 }
 .ns-trigger:focus-visible {
   outline: 2px solid var(--secondary);
@@ -721,10 +790,6 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
   color: var(--gray);
   transition: transform var(--dur-2) var(--ease-out);
 }
-.ns-chev-svg {
-  width: 15px;
-  height: 15px;
-}
 .ns-scope.open .ns-chev {
   transform: rotate(180deg);
 }
@@ -755,9 +820,14 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
   padding: 0.35rem;
   max-height: min(60vh, 340px);
   overflow-y: auto;
+  --ns-fade-length: min(2.5rem, 15%);
+  scroll-padding-block: var(--ns-fade-length);
+  mask-image: linear-gradient(to bottom, transparent, black var(--ns-fade-top, 0px), black calc(100% - var(--ns-fade-bottom, 0px)), transparent);
   /* Keep the bounce, just don't chain the scroll to the sidebar/page behind. */
   overscroll-behavior: contain;
 }
+.ns-menu-list.ns-fade-top { --ns-fade-top: var(--ns-fade-length); }
+.ns-menu-list.ns-fade-bottom { --ns-fade-bottom: var(--ns-fade-length); }
 .ns-sep {
   height: 1px;
   background: var(--lightgray);
@@ -771,7 +841,7 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
   width: 100%;
   cursor: pointer;
   text-align: left;
-  color: var(--darkgray);
+  color: var(--nav-label-ink);
   font-family: inherit;
   font-size: 0.9rem;
   background: transparent;
@@ -780,8 +850,7 @@ export const NavScopeDropdown: QuartzComponentConstructor = () => {
   padding: 0.42rem 0.5rem;
 }
 .ns-opt:hover {
-  background: color-mix(in srgb, var(--gray) 14%, transparent);
-  color: var(--dark);
+  color: var(--nav-hover-ink);
 }
 .ns-opt:focus-visible {
   outline: 2px solid var(--secondary);

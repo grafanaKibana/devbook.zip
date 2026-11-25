@@ -1,0 +1,47 @@
+// The canvas handles pointer input. The native graph button remains the keyboard
+// entry point, with its focus ring around the panel it opens.
+.graph > .graph-outer > button.global-graph-icon {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 1;
+  pointer-events: none;
+  background: transparent;
+
+  svg {
+    display: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--secondary);
+    outline-offset: -3px;
+  }
+
+  &[data-pointer-focus]:focus {
+    outline: none;
+  }
+}
+
+dialog.graph-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+
+  &::backdrop {
+    background: transparent;
+    backdrop-filter: blur(4px);
+  }
+
+  > .global-graph-outer {
+    backdrop-filter: none;
+  }
+}
