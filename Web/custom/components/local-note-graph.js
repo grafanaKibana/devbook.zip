@@ -1,0 +1,212 @@
+import { resolveBasePath, simplifySlug } from "@quartz-community/utils"
+import { graphNodeHitRadius } from "./graph-node-hit-radius.js"
+
+let nextGraphId = 0
+
+function neighborhood(content, current, depth) {
+  const notes = new Map(Object.entries(content).map(([slug, note]) => [simplifySlug(slug), note]))
+  const neighbors = new Map([...notes.keys()].map((id) => [id, new Set()]))
+  const edges = []
+  for (const [source, note] of notes) {
+    for (const link of note.links ?? []) {
+      const target = simplifySlug(link)
+      if (!notes.has(target)) continue
+      edges.push({ source, target })
+      neighbors.get(source).add(target)
+      neighbors.get(target).add(source)
+    }
+  }
+  const seen = new Set([current])
+  let frontier = [current]
+  for (let hop = 0; hop < depth && frontier.length; hop++) {
+    const next = []
+    for (const id of frontier) {
+      for (const neighbor of neighbors.get(id) ?? []) {
+        if (seen.has(neighbor)) continue
+        seen.add(neighbor)
+        next.push(neighbor)
+      }
+    }
+    frontier = next
+  }
+  const nodes = [...seen].map((id) => ({
+    id,
+    title: notes.get(id)?.title ?? document.title,
+    folder: notes.get(id)?.tags?.includes("foldernote"),
+    degree: 0,
+  }))
+  const byId = new Map(nodes.map((node) => [node.id, node]))
+  const links = edges.filter(({ source, target }) => seen.has(source) && seen.has(target))
+  for (const edge of links) {
+    edge.source = byId.get(edge.source)
+    edge.target = byId.get(edge.target)
+    edge.source.degree++
+    if (edge.source !== edge.target) edge.target.degree++
+    edge.direct = edge.source.id === current || edge.target.id === current
+  }
+  return { nodes, links }
+}
+
+function draw(container, content, cfg) {
+  const d3 = window.d3
+  const current = simplifySlug(document.body.dataset.slug)
+  const { nodes, links } = neighborhood(content, current, cfg.depth)
+  const center = nodes[0]
+  center.fx = center.fy = 0
+  for (const n of nodes) n.r = 2 + Math.sqrt(n.degree)
+  d3.forceSimulation(nodes)
+    .force("charge", d3.forceManyBody().strength(-100 * cfg.repelForce))
+    .force("link", d3.forceLink(links).distance(cfg.linkDistance))
+    .force("collide", d3.forceCollide((n) => n.r).iterations(3))
+    .stop()
+    .tick(300)
+
+  const extentX = d3.max(nodes, (n) => Math.abs(n.x) + n.r)
+  const extentY = d3.max(nodes, (n) => Math.abs(n.y) + n.r)
+  const colors = JSON.parse(document.querySelector(".ec-color-map")?.textContent || "{}")
+  const svg = d3
+    .select(container)
+    .append("svg")
+    .attr("aria-label", `Connections to ${center.title}`)
+  const drawing = svg.append("g")
+  const lines = drawing
+    .append("g")
+    .selectAll("line")
+    .data(links.sort((a, b) => a.direct - b.direct))
+    .join("line")
+    .attr("class", (l) => (l.direct ? "direct" : null))
+    .attr("x1", (l) => l.source.x)
+    .attr("y1", (l) => l.source.y)
+    .attr("x2", (l) => l.target.x)
+    .attr("y2", (l) => l.target.y)
+  const anchors = drawing
+    .selectAll("a")
+    .data(nodes)
+    .join("a")
+    .attr("href", (n) => resolveBasePath(n.id))
+    .attr("aria-label", (n) => n.title)
+    .attr("aria-current", (n) => (n === center ? "page" : null))
+    .style("--node-color", (n) => colors[n.id.split("/")[0] + "/index"] ?? "var(--gray)")
+  anchors
+    .append("circle")
+    .attr("class", (n) => (n.folder ? "dot folder" : "dot"))
+    .attr("cx", (n) => n.x)
+    .attr("cy", (n) => n.y)
+    .attr("r", (n) => n.r)
+  drawing
+    .append("circle")
+    .attr("class", "current")
+    .attr("r", center.r + 2.5)
+
+  // Clip enlarged click targets to the nearest node's cell where targets overlap.
+  const triangulation = d3.Delaunay.from(
+    nodes,
+    (n) => n.x,
+    (n) => n.y,
+  )
+  const clipPrefix = `local-graph-${nextGraphId++}-cell-`
+  const clipPaths = svg
+    .append("defs")
+    .selectAll("clipPath")
+    .data(nodes)
+    .join("clipPath")
+    .attr("id", (_, i) => clipPrefix + i)
+    .attr("clipPathUnits", "userSpaceOnUse")
+    .append("path")
+  const hit = anchors
+    .append("circle")
+    .attr("class", "hit")
+    .attr("clip-path", (_, i) => `url(#${clipPrefix}${i})`)
+    .attr("cx", (n) => n.x)
+    .attr("cy", (n) => n.y)
+  const tip = d3.select(container).append("span").attr("class", "local-graph-label")
+  let hovered, focused
+  function highlight() {
+    const selected = hovered ?? focused
+    tip.text(selected?.title ?? "")
+    lines.classed("muted", (l) => !!selected && l.source !== selected && l.target !== selected)
+    lines.classed("highlight", (l) => l.source === selected || l.target === selected)
+  }
+  anchors
+    .on("pointerenter", (_, n) => {
+      hovered = n
+      highlight()
+    })
+    .on("pointerleave", () => {
+      hovered = null
+      highlight()
+    })
+    .on("focus", (_, n) => {
+      focused = n
+      highlight()
+    })
+    .on("blur", () => {
+      focused = null
+      highlight()
+    })
+  svg.on("click", (event) => {
+    if (event.target.closest("a")) return
+    event.stopPropagation()
+    const opener = container.parentElement.querySelector(".global-graph-icon")
+    opener.setAttribute("data-pointer-focus", "")
+    opener.click()
+  })
+  function fit() {
+    const w = container.clientWidth,
+      h = container.clientHeight
+    if (!w || !h) return
+    const scale = Math.max(0.01, Math.min(1, (w / 2 - 12) / extentX, (h / 2 - 12) / extentY))
+    drawing.attr("transform", `translate(${w / 2},${h / 2}) scale(${scale})`)
+    const halfWidth = w / (2 * scale)
+    const halfHeight = h / (2 * scale)
+    const cells = triangulation.voronoi([-halfWidth, -halfHeight, halfWidth, halfHeight])
+    hit.attr("r", (n) => graphNodeHitRadius(n.r, scale))
+    clipPaths.attr("d", (_, i) => cells.renderCell(i))
+  }
+  fit()
+  const resize = new ResizeObserver(fit)
+  resize.observe(container)
+  window.addCleanup?.(() => resize.disconnect())
+}
+
+// Claim the small panel before Quartz starts its Pixi renderer. The same plugin
+// supplies D3 and continues to own the expanded graph and its keyboard shortcut.
+function setup() {
+  for (const el of document.querySelectorAll(".graph-container")) {
+    el.classList.replace("graph-container", "local-note-graph")
+  }
+  if (!window.d3) return
+  for (const el of document.querySelectorAll(".local-note-graph:not([data-initialized])")) {
+    el.dataset.initialized = ""
+    fetchData
+      .then((content) => {
+        if (el.isConnected) draw(el, content, JSON.parse(el.dataset.cfg))
+      })
+      .catch(() => {
+        el.textContent = "Graph could not load."
+      })
+  }
+}
+document.addEventListener("nav", setup)
+document.addEventListener("render", setup)
+document.addEventListener("DOMContentLoaded", setup)
+document.addEventListener(
+  "load",
+  function onLoad(event) {
+    if (event.target.tagName === "SCRIPT" && window.d3) {
+      document.removeEventListener("load", onLoad, true)
+      setup()
+    }
+  },
+  true,
+)
+document.addEventListener(
+  "error",
+  (event) => {
+    if (event.target.tagName === "SCRIPT" && event.target.src.includes("/d3@")) {
+      for (const el of document.querySelectorAll(".local-note-graph"))
+        el.textContent = "Graph could not load."
+    }
+  },
+  true,
+)

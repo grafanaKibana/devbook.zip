@@ -194,7 +194,9 @@ pre > code:focus-visible {
 }
 
 .graph > .graph-outer,
-.graph > .global-graph-outer > .global-graph-container {
+.graph > .global-graph-outer > .global-graph-container,
+.ns-scope .ns-trigger,
+.site-header-search .search > .search-button {
   background: var(--light);
 }
 
@@ -520,6 +522,7 @@ body {
 }
 
 .ns-scope .ns-trigger,
+.site-header-search .search > .search-button,
 .graph > .graph-outer,
 pre > button.clipboard-button,
 .site-header-search .search > .search-container > .search-space > input {
@@ -589,9 +592,7 @@ pre > button.clipboard-button,
     max-width: 32rem;
 
     & > .search-button {
-      @include nav-control-border;
       width: 100%;
-      background-color: var(--lightgray);
       border-radius: 6px;
     }
   }
