@@ -22940,17 +22940,17 @@
   "focused_workload": {
     "version": 1,
     "id": "7103f3bdc4654662b2f56279ab3b357d",
-    "status": "active",
-    "phase": "source_reserved",
+    "status": "sealed",
+    "phase": "sealed",
     "started_at": "2026-11-25T21:52:34.749189Z",
-    "elapsed_seconds": 34.2490859,
+    "elapsed_seconds": 39.228290799999996,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-25T21:53:08.997860Z",
+    "checkpoint_at": "2026-11-25T21:53:13.977072Z",
     "topic": "Data Persistence",
     "topic_id": "data-persistence-4ea34db4",
     "current_batch": {
@@ -22975,7 +22975,10 @@
       "pr": null
     },
     "base_sha": "926d953b52eebde46f37618d826242cbefef11e1",
-    "reservation_deadline": "2026-11-25T22:22:34.748774Z"
+    "reservation_deadline": "2026-11-25T22:22:34.748774Z",
+    "error": "Source retrieval failed.",
+    "stop_reason": "provider_error",
+    "sealed_at": "2026-11-25T21:53:13.977091Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
