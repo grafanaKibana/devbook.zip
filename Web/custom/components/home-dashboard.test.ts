@@ -169,20 +169,67 @@ test("established notes fill development progress and unknown stages stay visibl
   assert.match(unknown, /1 Established, 0 In Progress, 0 New, 1 Other/)
 })
 
-test("HTML progress square preserves empty, mixed, and full lifecycle fills", async () => {
-  for (const { statuses, percentage, endpoints } of [
+test("cards and both hero meters share stepped fills and preserve the weighted percentage", async () => {
+  for (const { statuses, percentage, endpoints, tipTone } of [
     { statuses: [], percentage: 0, endpoints: [] },
     { statuses: ["New"], percentage: 0, endpoints: [] },
-    { statuses: ["Established", "In Progress"], percentage: 75, endpoints: [75, 50] },
+    {
+      statuses: ["Established", "In Progress"],
+      percentage: 75,
+      endpoints: [75, 50],
+      tipTone: "in-progress",
+    },
+    { statuses: ["Established", "New"], percentage: 50, endpoints: [50], tipTone: "established" },
     { statuses: ["Established"], percentage: 100, endpoints: [100] },
+    {
+      statuses: ["Established", ...Array(99).fill("New")],
+      percentage: 1,
+      endpoints: [5],
+      tipTone: "established",
+    },
+    {
+      statuses: [...Array(99).fill("Established"), "New"],
+      percentage: 99,
+      endpoints: [95],
+      tipTone: "established",
+    },
+    {
+      statuses: ["Established", ...Array(96).fill("In Progress"), ...Array(3).fill("New")],
+      percentage: 49,
+      endpoints: [50, 5],
+      tipTone: "in-progress",
+    },
+    {
+      statuses: [...Array(98).fill("Established"), "In Progress", "unexpected"],
+      percentage: 99,
+      endpoints: [95, 90],
+      tipTone: "in-progress",
+    },
   ]) {
     const html = await renderDashboard(1, "Summary", statuses)
     const visual = /<div class="dc-progress-visual"[\s\S]*?<\/section>/.exec(html)?.[0] ?? ""
     assert.match(visual, new RegExp(`${percentage}% overall note development`))
-    assert.match(visual, /class="dc-progress-square"/)
+    assert.match(visual, /class="dc-progress-ring"/)
     assert.doesNotMatch(visual, /<svg|<path|<canvas|data:image/)
+    assert.match(html, new RegExp(`aria-label="${percentage}% note development:`))
+    assert.match(html, new RegExp(`<strong>${percentage}%</strong>`))
+    const tracks = [...html.matchAll(/<div class="dc-topic-bar-track">([\s\S]*?)<\/div>/g)]
+    assert.equal(tracks.length, 2)
+    for (const [, track] of tracks) {
+      const widths = [...track.matchAll(/width:([\d.]+)%;/g)].map(([, value]) => Number(value))
+      assert.deepEqual(widths, [...endpoints].reverse())
+    }
+    const caps = [
+      ...visual.matchAll(
+        /<span[^>]*--dc-progress-color:var\(--dc-progress-([a-z-]+)\)[^>]*><span class="dc-progress-ring-tip"/g,
+      ),
+    ]
     assert.deepEqual(
-      [...visual.matchAll(/--dc-progress-fill:([\d.]+)%/g)].map(([, value]) => Number(value)),
+      caps.map((match) => match[1]),
+      tipTone ? [tipTone] : [],
+    )
+    assert.deepEqual(
+      [...visual.matchAll(/--dc-progress-fill:([\d.]+);/g)].map(([, value]) => Number(value)),
       endpoints,
     )
   }
