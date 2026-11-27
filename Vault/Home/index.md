@@ -4,7 +4,7 @@ tags: [FolderNote, MetricsIgnore]
 publish: true
 icon: home
 created: "2026-07-05T15:34:15.000Z"
-modified: "2026-11-16T17:10:31.241Z"
+modified: "2026-11-25T15:57:50.505Z"
 published: "2026-07-06T07:55:35.732Z"
 ---
 
@@ -19,8 +19,8 @@ return function TopicDashboard() {
   // belongs to Qard. Solid accent tints keep segments crisp in both readers.
   // New notes add no fill. Unknown statuses count as Other with weight 0.
   const LIFECYCLE = [
-    { key: "established", tone: "established", label: "Established", weight: 100, mix: 100 },
-    { key: "in progress", tone: "in-progress", label: "In Progress", weight: 50, mix: 50 },
+    { key: "established", tone: "established", label: "Established", weight: 100 },
+    { key: "in progress", tone: "in-progress", label: "In Progress", weight: 50 },
     { key: "new", label: "New", weight: 0 },
   ];
   const OTHER = { key: "other", label: "Other", weight: 0 };
@@ -28,14 +28,10 @@ return function TopicDashboard() {
   const STATUS_RAMP = LIFECYCLE.filter((seg) => seg.tone);
   const stagesFor = (byStatus) => (byStatus.other ? [...LIFECYCLE, OTHER] : LIFECYCLE);
   const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
-  const tint = (mix) =>
-    mix >= 100
-      ? "rgb(var(--topic-rgb))"
-      : `color-mix(in srgb, rgb(var(--topic-rgb)) ${mix}%, var(--background-primary, var(--light, #ffffff)))`;
-  const heroTint = (seg) => `var(--dc-progress-${seg.tone})`;
+  const statusColor = (seg) => `var(--dc-progress-${seg.tone})`;
   const swatch = (seg) =>
     seg.tone
-      ? { background: heroTint(seg) }
+      ? { background: statusColor(seg) }
       : { background: "var(--background-primary, var(--light, #ffffff))", boxShadow: "inset 0 0 0 1px rgba(var(--topic-rgb), 0.5)" };
   const lifecycleText = (byStatus) => stagesFor(byStatus).map((seg) => `${byStatus[seg.key] ?? 0} ${seg.label}`).join(", ");
   const progressLabel = (pct, byStatus) => `${pct}% note development: ${lifecycleText(byStatus)}`;
@@ -123,33 +119,33 @@ return function TopicDashboard() {
     for (const k of Object.keys(c.byStatus)) oByStatus[k] = (oByStatus[k] ?? 0) + c.byStatus[k];
   }
   const oPct = oTotal > 0 ? Math.round(oPoints / oTotal) : 0;
-  let oCumulative = 0;
-  const oEndpoints = {};
-  for (const seg of STATUS_RAMP) {
-    oCumulative += ((oByStatus[seg.key] ?? 0) * seg.weight) / Math.max(oTotal, 1);
-    oEndpoints[seg.key] = oCumulative;
-  }
-
-  // Filled tiers as cumulative overlapping layers: each spans from the left edge
-  // to its running total and stacks above the next (darkest on top), so a darker
-  // tier's rounded right cap nests over the lighter one behind it. Every tier
-  // ends in a rounded cap, but they read as one continuous bar, not separate pills.
-  const segments = (byStatus, total, colorFor = (seg) => tint(seg.mix)) => {
-    if (total <= 0) return null;
-    let cum = 0;
-    return STATUS_RAMP.map((seg, i) => {
-      const cnt = byStatus[seg.key] ?? 0;
-      cum += (cnt * seg.weight) / total;
-      if (cnt <= 0) return null;
-      return (
-        <span style={{
-          position: "absolute", left: 0, top: 0, height: "100%",
-          width: `${cum}%`, background: colorFor(seg),
-          borderRadius: "0 999px 999px 0", zIndex: STATUS_RAMP.length - i,
-        }} />
-      );
+  // Quantize only the drawing. Reserve a step for every nonempty fill and
+  // leave a step of track exposed until the underlying score is complete.
+  const steppedFills = (byStatus, total, points) => {
+    if (!total) return [];
+    const steps = 20;
+    const present = STATUS_RAMP.filter((seg) => byStatus[seg.key] > 0);
+    const maxSteps = points === total * 100 ? steps : steps - 1;
+    const filled = Math.min(maxSteps, Math.max(present.length, Math.round(points * steps / (total * 100))));
+    let cumulativePoints = 0;
+    let end = 0;
+    return present.map((seg, index) => {
+      cumulativePoints += byStatus[seg.key] * seg.weight;
+      const remaining = present.length - index - 1;
+      const nearest = Math.round(cumulativePoints * steps / (total * 100));
+      end = Math.min(filled - remaining, Math.max(end + 1, nearest));
+      return { seg, percent: end * 100 / steps };
     });
   };
+  const overallFills = steppedFills(oByStatus, oTotal, oPoints);
+
+  const segments = (fills) => fills.map(({ seg, percent }, i) => (
+    <span style={{
+      position: "absolute", left: 0, top: 0, height: "100%",
+      width: `${percent}%`, background: statusColor(seg),
+      borderRadius: i === fills.length - 1 ? "0 999px 999px 0" : "0", zIndex: fills.length - i,
+    }} />
+  ));
 
   // Emit literal grid coordinates for Safari and Syncer's static HTML.
   const tileRules = (minSpan) => bentoFor(minSpan).map((tile, index) =>
@@ -163,10 +159,7 @@ return function TopicDashboard() {
   // pieces, which are home-only and NOT shared with the FolderNote hubs:
   //   • .dc-topic-chip  — a tinted rounded tile holding the topic icon, in place of
   //     the bare inline glyph, beside the title.
-  //   • .dc-topic-bar   — a framed capsule progress track (accent-bordered pill with
-  //     the cumulative status fill nested inside .dc-topic-bar-track), not a flat rail.
-  // Each card sets --card-accent for the base chrome and --topic-rgb for the chip,
-  // capsule, and Quartz's opaque backing in custom.scss (both = c.rgb).
+  //   • .dc-topic-bar — the fine inline track between the count and percentage.
   const CSS = `
 .dc-topic-dashboard { container: dc-home / inline-size; }
 .dc-topic-grid { display: grid; grid-template-columns: 1fr; grid-auto-rows: minmax(min-content, auto); gap: 1rem; width: 100%; }
@@ -186,13 +179,20 @@ return function TopicDashboard() {
 .dc-topic-chip svg { display: block; width: 1.3rem; height: 1.3rem; }
 .dc-topic-dashboard p.dc-topic-summary { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.875rem; line-height: 1.45; overflow-wrap: anywhere; }
 .dc-topic-spacer { flex: 1 0 auto; min-height: 0.55em; }
-.dc-topic-foot { display: flex; flex-direction: column; gap: 4px; }
-.dc-topic-cap { font-size: 0.8125rem; line-height: 1.3; font-variant-numeric: tabular-nums; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0.5rem; color: var(--text-muted, var(--darkgray, #5f6b7a)); }
-.dc-topic-cap strong { color: var(--text-normal, var(--dark, #1f2937)); font-weight: 600; }
-.dc-topic-bar { box-sizing: border-box; position: relative; width: 100%; height: 11px; margin-top: 0.15rem; padding: 2px; border-radius: 999px; border: 1px solid rgba(var(--topic-rgb), 0.5); background: var(--background-primary, var(--light, #ffffff)); overflow: hidden; }
-.dc-topic-bar-track { box-sizing: border-box; position: relative; height: 100%; border-radius: 999px; overflow: hidden; }
-.dc-progress-hero { --topic-rgb: 76, 128, 0; --card-accent: 76, 128, 0; --dc-progress-established: #4c8000; --dc-progress-in-progress: #9cbd66; --dc-radial-size: clamp(6.75rem, 24cqi, 8rem); overflow: hidden; container-type: inline-size; margin: 0 0 clamp(1rem, 2vw, 1.4rem); animation: db-card-in var(--dur-3, 220ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
-.theme-dark .dc-progress-hero, :root[saved-theme="dark"] .dc-progress-hero { --topic-rgb: 132, 204, 22; --card-accent: 132, 204, 22; --dc-progress-established: #84cc16; --dc-progress-in-progress: #c1e88a; }
+.dc-topic-foot { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 9px; font-size: 0.8125rem; line-height: 1.3; font-variant-numeric: tabular-nums; color: var(--text-muted, var(--darkgray, #5f6b7a)); }
+.dc-topic-foot strong { color: var(--text-normal, var(--dark, #1f2937)); font-weight: 600; }
+.dc-topic-bar { width: 100%; height: 4px; }
+.dc-topic-bar-track { position: relative; height: 100%; border-radius: 999px; overflow: hidden; background: color-mix(in srgb, var(--background-modifier-border, var(--lightgray, #d8dee9)) 76%, var(--background-primary, var(--light, #fff))); }
+.dc-topic-card, .dc-progress-hero {
+  --dc-progress-established: color-mix(in srgb, rgb(var(--topic-rgb)) 75%, var(--dc-established-mix, var(--text-normal, var(--dark, #1f2937))));
+  --dc-progress-in-progress: color-mix(in srgb, rgb(var(--topic-rgb)) 70%, var(--dc-in-progress-mix, var(--background-primary, var(--light, #ffffff))));
+}
+.theme-light .dc-progress-hero, :root[saved-theme="light"] .dc-progress-hero {
+  --dc-established-mix: var(--background-primary, var(--light, #ffffff));
+  --dc-in-progress-mix: var(--text-normal, var(--dark, #1f2937));
+}
+.dc-progress-hero { --topic-rgb: 76, 128, 0; --card-accent: 76, 128, 0; --dc-radial-size: clamp(6.75rem, 24cqi, 8rem); overflow: hidden; container-type: inline-size; margin: 0 0 clamp(1rem, 2vw, 1.4rem); animation: db-card-in var(--dur-3, 220ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
+.theme-dark .dc-progress-hero, :root[saved-theme="dark"] .dc-progress-hero { --topic-rgb: 132, 204, 22; --card-accent: 132, 204, 22; }
 .dc-progress-hero:hover, .dc-progress-hero:focus-within { border-color: var(--background-modifier-border, var(--lightgray, #d8dee9)); background-color: var(--background-primary, var(--light, #ffffff)); box-shadow: none; transform: none; }
 .dc-progress-hero:hover::before, .dc-progress-hero:focus-within::before { opacity: 0.78; }
 .dc-progress-hero .db-card-body { display: grid; gap: clamp(1rem, 3cqi, 2rem); align-items: center; padding: clamp(1rem, 3cqi, 2rem); }
@@ -212,24 +212,25 @@ ul.dc-progress-statuses { display: flex; flex-wrap: wrap; gap: 0.55rem 1.1rem; m
 .dc-progress-statuses i { width: 0.55rem; height: 0.55rem; border-radius: 2px; flex: 0 0 auto; }
 p.dc-progress-note { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-size: 0.8125rem; line-height: 1.45; }
 .dc-progress-visual { display: grid; width: 100%; place-self: stretch; }
-.dc-progress-square { display: none; }
+.dc-progress-ring { display: none; }
 /* CSS escapes keep the type's angle brackets intact through Syncer's XML serializer. */
-@property --dc-progress-fill { syntax: "\\3c percentage\\3e "; inherits: false; initial-value: 0%; }
-.dc-progress-square-fill { position: absolute; inset: 0; background: conic-gradient(var(--dc-progress-color) var(--dc-progress-fill), transparent 0); animation: dc-progress-square-draw 480ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
+@property --dc-progress-fill { syntax: "\\3c number\\3e "; inherits: true; initial-value: 0; }
+.dc-progress-ring-fill { position: absolute; inset: 0; background: conic-gradient(var(--dc-progress-color) calc(var(--dc-progress-fill) * 1%), transparent 0); animation: dc-progress-ring-draw 480ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
+.dc-progress-ring-tip { position: absolute; inset: 0; transform: rotate(calc(var(--dc-progress-fill) * 3.6deg)); }
+.dc-progress-ring-tip::before { content: ""; position: absolute; top: 0; left: 50%; width: var(--dc-ring-stroke); height: var(--dc-ring-stroke); transform: translateX(-50%); border-radius: 50%; background: var(--dc-progress-color); }
 .dc-progress-value { display: none; }
 .dc-progress-value strong { font-family: var(--codeFont, var(--font-monospace, monospace)); font-size: 0.75rem; font-weight: 700; line-height: 1; }
 .dc-progress-value span { display: none; color: var(--text-muted, var(--darkgray, #5f6b7a)); font-family: var(--codeFont, var(--font-monospace, monospace)); font-size: 0.62rem; line-height: 1.15; letter-spacing: 0.04em; text-transform: uppercase; }
 .dc-progress-bar { height: 12px; margin-top: 0; }
-@keyframes dc-progress-square-draw { from { --dc-progress-fill: 0%; } }
+@keyframes dc-progress-ring-draw { from { --dc-progress-fill: 0; } }
 @container (min-width: 40rem) {
   .dc-progress-hero .db-card-body { grid-template-columns: minmax(0, 1fr) auto; }
   .dc-progress-summary { display: block; }
   .dc-progress-title { font-size: clamp(1.75rem, 4cqi, 2.25rem); }
   .dc-progress-mobile-value { display: none; }
   .dc-progress-visual { position: relative; width: var(--dc-radial-size); aspect-ratio: 1; gap: 0; padding-top: 0; place-self: center; place-items: center; }
-  /* Two CSS masks cut out the center without painting over the card surface.
-     Inset, radius and padding preserve the square's existing size and bold line. */
-  .dc-progress-square { position: absolute; inset: 4.1667%; display: block; box-sizing: border-box; border-radius: 19.0909%; padding: calc(var(--dc-radial-size) / 12); background: var(--background-modifier-border, var(--lightgray, #d8dee9)); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; }
+  /* Two CSS masks cut out the center without painting over the card surface. */
+  .dc-progress-ring { --dc-ring-stroke: min(6px, calc(var(--dc-radial-size) / 21)); position: absolute; inset: 4.1667%; display: block; box-sizing: border-box; border-radius: 50%; padding: var(--dc-ring-stroke); background: var(--background-modifier-border, var(--lightgray, #d8dee9)); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; }
   /* Label and line scale together when the indicator shrinks in a narrow pane. */
   .dc-progress-value { position: relative; display: grid; place-items: center; padding: 0 calc(var(--dc-radial-size) * 0.14); text-align: center; }
   .dc-progress-value strong { font-family: var(--headerFont, var(--font-interface, sans-serif)); font-size: calc(var(--dc-radial-size) * 0.26); letter-spacing: -0.05em; }
@@ -249,7 +250,7 @@ p.dc-progress-note { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray
 .dc-topic-bar-track span { transform-origin: left center; animation: dc-topic-bar-fill var(--dur-3, 220ms) var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) backwards; }
 /* Needed on its own: this file's CSS is inlined per-page and custom.scss is not
    loaded at all inside Obsidian, so the --dur-* collapse cannot reach here. */
-@media (prefers-reduced-motion: reduce) { .dc-topic-bar-track span, .dc-progress-square-fill, .dc-progress-hero { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .dc-topic-bar-track span, .dc-progress-ring-fill, .dc-progress-hero { animation: none; } }
 @container dc-home (min-width: 28rem) {
   .dc-topic-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
   ${tileRules(6)}
@@ -281,13 +282,15 @@ p.dc-progress-note { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray
             </ul>
           </div>
           <div class="dc-progress-visual" role="img" aria-label={`${oPct}% overall note development`}>
-            <div class="dc-progress-square" aria-hidden="true">
-              {STATUS_RAMP.slice().reverse().filter((seg) => oByStatus[seg.key] > 0).map((seg) => (
-                <span class="dc-progress-square-fill" style={{ "--dc-progress-color": heroTint(seg), "--dc-progress-fill": `${oEndpoints[seg.key]}%` }} />
+            <div class="dc-progress-ring" aria-hidden="true">
+              {overallFills.slice().reverse().map(({ seg, percent }, i) => (
+                <span class="dc-progress-ring-fill" style={{ "--dc-progress-color": statusColor(seg), "--dc-progress-fill": String(percent) }}>
+                  {i === 0 && percent < 100 ? <span class="dc-progress-ring-tip" /> : null}
+                </span>
               ))}
             </div>
             <span class="dc-progress-value"><strong>{oPct}%</strong><span>Progress</span></span>
-            <div class="dc-topic-bar dc-progress-bar" aria-hidden="true"><div class="dc-topic-bar-track">{segments(oByStatus, oTotal, heroTint)}</div></div>
+            <div class="dc-topic-bar dc-progress-bar" aria-hidden="true"><div class="dc-topic-bar-track">{segments(overallFills)}</div></div>
           </div>
         </div>
       </section>
@@ -302,8 +305,9 @@ p.dc-progress-note { margin: 0.6rem 0 0; color: var(--text-muted, var(--darkgray
               {c.summary ? <p class="dc-topic-summary">{c.summary}</p> : null}
               <div class="dc-topic-spacer" />
               <div class="dc-topic-foot">
-                <div class="dc-topic-cap"><span>{plural(c.total, "note")}</span>{" "}<strong>{c.pct}%</strong></div>
-                <div class="dc-topic-bar" role="img" aria-label={progressLabel(c.pct, c.byStatus)}><div class="dc-topic-bar-track">{segments(c.byStatus, c.total)}</div></div>
+                <span>{plural(c.total, "note")}</span>
+                <div class="dc-topic-bar" role="img" aria-label={progressLabel(c.pct, c.byStatus)}><div class="dc-topic-bar-track">{segments(steppedFills(c.byStatus, c.total, c.points))}</div></div>
+                <strong>{c.pct}%</strong>
               </div>
             </div>
             <span class="db-card-hit"><dc.Link link={c.fn.$link} /></span>
