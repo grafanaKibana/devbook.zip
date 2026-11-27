@@ -211,6 +211,11 @@ const script = `
       const explorers = document.querySelectorAll("div.explorer");
       const map = readMap();
       const colorMap = readColorMap();
+      const color = topicColor(document.body.dataset.slug || "", colorMap);
+      document.querySelectorAll(".toc").forEach(function (toc) {
+        if (color) toc.style.setProperty("--ec-topic", color);
+        else toc.style.removeProperty("--ec-topic");
+      });
       decorateBacklinks(map, colorMap);
       explorers.forEach(function (ex) {
         decorateFolders(ex, map, colorMap);
@@ -322,9 +327,6 @@ export const ExplorerIcons: QuartzComponentConstructor = () => {
 /* Folder — book (collapsed) -> book-open (expanded). Reuses the plugin's own
    open-state hook (.folder-outer.open) via :has(), matching how it rotates the
    collapse chevron. An assigned icon (.ec-assigned) is the same in both states. */
-.explorer .ec-folder-ico, .backlinks .ec-ico {
-  color: var(--ec-topic, var(--secondary));
-}
 .explorer .ec-folder-open {
   display: none;
 }

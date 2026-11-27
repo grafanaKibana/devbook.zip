@@ -194,7 +194,9 @@ pre > code:focus-visible {
 }
 
 .graph > .graph-outer,
-.graph > .global-graph-outer > .global-graph-container {
+.graph > .global-graph-outer > .global-graph-container,
+.ns-scope .ns-trigger,
+.site-header-search .search > .search-button {
   background: var(--light);
 }
 
@@ -520,6 +522,7 @@ body {
 }
 
 .ns-scope .ns-trigger,
+.site-header-search .search > .search-button,
 .graph > .graph-outer,
 pre > button.clipboard-button,
 .site-header-search .search > .search-container > .search-space > input {
@@ -589,9 +592,7 @@ pre > button.clipboard-button,
     max-width: 32rem;
 
     & > .search-button {
-      @include nav-control-border;
       width: 100%;
-      background-color: var(--lightgray);
       border-radius: 6px;
     }
   }
@@ -778,12 +779,6 @@ pre > button.clipboard-button,
 // ============================================================================
 
 :root {
-  // Folders stay heavier than files, but well short of the plugin's near-bold 600.
-  --explorer-folder-weight: 500;
-  // base.scss styles every `a` at $semiBoldWeight (600), which is also what the
-  // plugin gives folders — so folder and file rows currently weigh the same.
-  // Pull file links back to normal to restore the hierarchy.
-  --explorer-file-weight: #{$normalWeight};
   --nav-line-height: 1.3125rem;
   // Inset for the slide-in panel (mobile) and drawer (tablet), where the tree
   // would otherwise sit flush against the screen edge. Matches the header bar's
@@ -827,15 +822,20 @@ pre > button.clipboard-button,
 
 // Navigation feedback has one clock across both rails and header search.
 :root {
-  // 2:1 between the ordinary light-theme label and the hovered ink (#14180f).
   --nav-label-ink: #444c37;
   --nav-hover-ink: var(--dark);
-  --toc-label-ink: var(--nav-label-ink);
+  --nav-list-rest: #626362;
+  --nav-list-active: #141516;
+  --nav-icon-rest-tint: white;
+  --nav-icon-active-tint: black;
 }
 
 :root[saved-theme="dark"] {
   --nav-label-ink: var(--darkgray);
-  --toc-label-ink: var(--gray);
+  --nav-list-rest: #bdbeb3;
+  --nav-list-active: #f3f5e9;
+  --nav-icon-rest-tint: black;
+  --nav-icon-active-tint: white;
 }
 
 @mixin nav-feedback($properties...) {
@@ -888,16 +888,6 @@ pre:hover > button.clipboard-button {
 }
 
 @media (hover: hover) {
-  .explorer .explorer-content ul li > a.nav-file-title:not(.active, .is-active):hover .ec-ico,
-  .explorer .folder-container:not(:has(.folder-button[aria-current="page"])):hover .ec-folder-ico,
-  .backlinks li > a.internal:not([aria-current="page"]):hover .ec-ico {
-    color: color-mix(in srgb, var(--ec-topic, var(--secondary)) 65%, var(--dark));
-  }
-
-  .explorer .explorer-content ul li > a.nav-file-title:hover,
-  .explorer .explorer-content .folder-container:hover .folder-title,
-  .toc ul.toc-content > li > a:hover,
-  .backlinks > ul > li > a.internal:hover,
   .site-header-search .tag-suggestion-item:hover,
   .site-header-search a.result-card:hover > .card-title {
     color: var(--nav-hover-ink);
@@ -909,18 +899,11 @@ pre:hover > button.clipboard-button {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Folder rows. The accent lives on the book/topic glyph (decorated by
-// explorer-icons.tsx); the LABEL is plain ink and the collapse chevron is a
-// muted gray — the plugin paints both green, so pull them back to the design's
-// --dark / --gray (design: .db-ex-folder + .db-ex-chev-node).
-// ---------------------------------------------------------------------------
 .explorer .explorer-content .folder-container div > a,
 .explorer .explorer-content .folder-container .folder-title {
   line-height: var(--nav-line-height);
-  font-weight: var(--explorer-folder-weight);
-  color: var(--nav-label-ink);
 }
+
 // Sizing and ink follow the scope trigger; each disclosure owns its open-state rotation.
 .ns-scope .ns-chev-svg,
 .explorer button.desktop-explorer .fold,
@@ -938,55 +921,73 @@ pre:hover > button.clipboard-button {
   margin-block-start: calc((var(--nav-line-height) - 15px) / 2);
 }
 
-// ---------------------------------------------------------------------------
-// File rows use regular ink for siblings and bold ink for the current page.
-// ---------------------------------------------------------------------------
-.explorer .explorer-content ul li > a.nav-file-title,
+// The row owns the state. Labels, topic glyphs and ToC markers consume it.
+.explorer .explorer-content :is(.nav-file-title, .folder-container),
+.toc ul.toc-content > li > a,
 .backlinks > ul > li > a.internal {
-  font-weight: var(--explorer-file-weight);
-  color: var(--nav-label-ink);
+  --nav-row-ink: var(--nav-list-rest);
+  --nav-row-weight: 400;
+  --nav-row-stroke: 0px;
+  --nav-topic-share: 84%;
+  --nav-icon-tint: var(--nav-icon-rest-tint);
+  --nav-icon-scale: 1;
+
+  &:focus-visible,
+  &:has(:focus-visible) {
+    --nav-row-ink: var(--nav-list-active);
+    --nav-topic-share: 100%;
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      --nav-row-ink: var(--nav-list-active);
+      --nav-topic-share: 100%;
+    }
+  }
+}
+
+.explorer .explorer-content a.nav-file-title:is(.active, .is-active),
+.explorer .explorer-content .folder-container:has(.folder-button[aria-current="page"]),
+:root[data-page-scrolled] .toc ul.toc-content > li > a.in-view,
+.backlinks > ul > li > a.internal[aria-current="page"] {
+  --nav-row-ink: var(--nav-list-active);
+  --nav-row-weight: 500;
+  --nav-row-stroke: 0.52px;
+  --nav-icon-tint: var(--nav-icon-active-tint);
+  --nav-topic-share: 90%;
+  --nav-icon-scale: 1.15;
+}
+
+.explorer .explorer-content ul li > a.nav-file-title,
+.explorer .explorer-content .folder-container .folder-title,
+.toc ul.toc-content > li > a,
+.backlinks > ul > li > a.internal {
+  color: var(--nav-row-ink);
+  font-weight: var(--nav-row-weight);
+  -webkit-text-stroke: var(--nav-row-stroke) currentColor;
   opacity: 1;
 }
-// A full-width row meets the edge of its clipping list, which would cut the
-// outset ring's end edge; draw it inside the pill.
+
+.explorer .explorer-content .ec-ico,
+.backlinks > ul > li > a.internal .ec-ico,
+.toc ul.toc-content > li > a::before {
+  color: color-mix(in oklab, var(--ec-topic, var(--secondary)) var(--nav-topic-share), var(--nav-icon-tint));
+  -webkit-text-stroke: 0;
+}
+
+:is(.explorer, .backlinks) .ec-ico .ec-svg {
+  scale: var(--nav-icon-scale);
+  stroke-width: calc(2px / var(--nav-icon-scale));
+}
+
 .explorer .explorer-content ul li > a.nav-file-title:focus-visible {
   outline-offset: -2px;
 }
-@mixin current-nav-weight {
-  font-weight: 500;
-  // Source Sans Pro ships regular and semibold faces. Give medium labels
-  // a little extra ink when the browser resolves 500 to the regular face.
-  -webkit-text-stroke: 0.15px currentColor;
-}
 
-.explorer .explorer-content ul li > a.nav-file-title:is(.active, .is-active),
-.backlinks > ul > li > a.internal[aria-current="page"],
-.explorer .explorer-content .folder-button[aria-current="page"] .folder-title,
 .ns-trigger[aria-current="page"] .ns-name {
-  color: var(--nav-label-ink);
-  @include current-nav-weight;
-}
-
-.explorer .explorer-content ul li > a.nav-file-title:is(.active, .is-active) .ec-ico,
-.backlinks > ul > li > a.internal[aria-current="page"] .ec-ico {
-  color: color-mix(in srgb, var(--ec-topic, var(--secondary)) 50%, var(--dark));
-}
-
-.explorer .folder-container:has(.folder-button[aria-current="page"]) .ec-folder-ico {
-  color: color-mix(in srgb, var(--ec-topic, var(--secondary)) 50%, var(--dark));
-}
-
-.explorer .nav-file-title:is(.active, .is-active) .ec-svg,
-.explorer .folder-container:has(.folder-button[aria-current="page"]) .ec-svg {
-  --selected-icon-scale: 1.15;
-  scale: var(--selected-icon-scale);
-  // Keep the standard two-unit stroke visually constant as the glyph grows.
-  stroke-width: calc(2px / var(--selected-icon-scale));
-}
-
-// Root pages use the site accent when no topic color is available.
-.explorer .explorer-content ul li > a.nav-file-title .ec-ico {
-  color: var(--ec-topic, var(--secondary));
+  color: var(--nav-list-active);
+  font-weight: 500;
+  -webkit-text-stroke: 0.15px currentColor;
 }
 
 // ---------------------------------------------------------------------------
@@ -1307,14 +1308,10 @@ pre:hover > button.clipboard-button {
 }
 
 .toc ul.toc-content > li > a {
-  --toc-ink: var(--toc-label-ink);
   display: block;
   position: relative;
   padding-inline-start: 0.75rem;
-  font-weight: #{$normalWeight};
   line-height: inherit;
-  color: var(--toc-ink);
-  opacity: 1;
 
   // Align the same short dash with the first line at every heading depth.
   &::before {
@@ -1324,13 +1321,9 @@ pre:hover > button.clipboard-button {
     inset-block-start: calc((var(--nav-line-height) - 1px) / 2);
     width: 6px;
     height: 1px;
-    background-color: var(--toc-ink);
-  }
-
-  // Quartz marks visible headings even while the reader is still at the page top.
-  :root[data-page-scrolled] &.in-view {
-    --toc-ink: var(--nav-label-ink);
-    @include current-nav-weight;
+    background-color: currentColor;
+    scale: var(--nav-icon-scale) 1;
+    transform-origin: left center;
   }
 }
 
@@ -1450,10 +1443,6 @@ body[data-slug="index"] {
   // footer box from layout while letting the fixed controls render.
   .center > .page-footer {
     display: contents;
-  }
-
-  .dc-progress-square {
-    border-radius: var(--surface-radius);
   }
 
   .dc-topic-card {

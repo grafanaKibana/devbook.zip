@@ -152,8 +152,8 @@ plugins:
         focusOnHover: true
       globalGraph:
         showTags: false
-        enableRadial: false
-        linkDistance: 20
+        enableRadial: true
+        linkDistance: 30
     layout:
       position: right
       priority: 10
