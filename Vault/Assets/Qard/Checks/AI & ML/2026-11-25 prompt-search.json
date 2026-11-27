@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "createdAt": 1795614471817,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "prompt-search",
+  "title": "Optimize candidate prompts or demonstrations against an explicit evaluator while separating validation data from the final held-out comparison",
+  "goal": "apply",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "goal": "apply",
+      "objective": "prompt-search",
+      "prompt": "A team is automatically searching for a prompt that extracts the total, date and supplier from invoices. Code scores each output against known correct values.\n\n1. A model proposes 50 candidate instructions. Each one runs on a **search set** of 60 labelled invoices.\n2. The 5 candidates with the highest scores then run on a **test set** of 300 different labelled invoices.\n3. The team releases the candidate with the best test-set score (88%) and reports **88%** as the accuracy to expect in production.\n\nIs 88% a trustworthy estimate of production accuracy? Give your verdict and explain why.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Verdict: No. The 88% is likely too optimistic, or it overstates expected production accuracy.",
+          "marks": 1
+        },
+        {
+          "point": "Reason: the test set was used to choose between the 5 finalists, so it acted as selection data. The winner was partly picked because it happened to do well on those 300 invoices, so its score there is no longer an unbiased measure of how it does on unseen invoices. The answer can also say that a final comparison needs data that was not used to choose the candidate.",
+          "marks": 1
+        }
+      ],
+      "model": "No, it is probably too high. The 300 invoices were used to choose the winner from the 5 finalists, so the test set became part of the selection. Picking the best of 5 scores on that set rewards a candidate that partly fits those particular invoices. A trustworthy figure needs the final candidate to be chosen without the test set, using only the search set or a separate validation set, and then scored once on invoices that played no part in the choice.\n\n*Optional detail:* the fix is to use the search set to pick the winner and run only that one candidate on the untouched test set.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
+        "heading": "A small example set rewards luck"
+      }
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

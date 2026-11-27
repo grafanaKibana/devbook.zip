@@ -9,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Classes"
 flashcard_uid: "0928b940"
 created: "2026-02-18T19:18:52.000Z"
-modified: "2026-11-17T09:54:57.676Z"
+modified: "2026-11-27T16:47:13.667Z"
 published: "2026-07-08T13:14:17.327Z"
 ---
 
@@ -324,12 +324,6 @@ With neither type initialized previously, a first `new Derived()` from unrelated
 > Optional partial methods suit hooks in generated code. A generator can declare `partial void OnNameChanged();` and call it, and the handwritten part may implement it. When no part implements it, the calls are removed at compile time, including evaluation of their argument expressions, so behavior expected from the hook never runs.
 >
 > [Microsoft: partial members](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/partial-member) · [C# specification: classes (partial methods)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/classes)
-
-<!-- qard-id: f4c9ae99-2c35-4108-8f4f-199349060aeb -->
-> [!qard]- When a class does not overload `==`, why do separately created instances with equal fields compare unequal?
-> For a class, `==` without an overload compares references: it is `true` only when both operands refer to the same object. Two separately created instances are two objects, so they compare unequal even when every field matches. `Equals(object)` compares references in the same way only when neither the class nor any of its base classes overrides it, so the implementation inherited from `Object` applies; the absence of an `==` overload alone does not guarantee this.
->
-> [Microsoft: define value equality](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type) · [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
 
 > [!qard]- How can a conventional class implement value equality?
 > Value equality is added by deciding which fields make two instances equal and applying that rule consistently:

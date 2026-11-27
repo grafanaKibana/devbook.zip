@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "createdAt": 1795364185641,
+  "createdAt": 1795614072750,
   "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
   "course": "AI & ML",
   "objective": "prompt-search",
@@ -12,54 +12,71 @@
     {
       "id": "c1",
       "type": "short",
-      "goal": "explain",
       "objective": "prompt-search",
-      "marks": 2,
-      "prompt": "A team searches for a prompt that tags support emails with one of four categories. A model proposes 40 candidate instructions with different wordings. None of the candidates was written using the 25 labelled emails below (emails whose correct category is known). Every candidate tags the same 25 labelled emails, code counts the correct tags, and the candidate with the highest count is kept. The team reports that winning count as the quality to expect on new emails.\n\nExplain why this reported count tends to overstate the kept candidate's quality on new emails, even though all 40 candidates were scored on the same 25 emails. Then explain why comparing more candidates on those same 25 emails can make that overstatement larger.",
-      "rubric": [
-        {
-          "point": "Explains the selection effect: each candidate's count mixes real quality with chance variation on these particular emails, and keeping the highest count favours candidates whose chance variation was favourable, so the winner's count is biased upward relative to what it will score on new emails (equivalent phrasings such as selection bias, winner's curse, or overfitting to the validation set are accepted).",
-          "marks": 1
-        },
-        {
-          "point": "Explains why more candidates can enlarge the overstatement: each additional candidate is another opportunity for a high count to arise from favourable chance on these emails, so the maximum of more noisy counts tends to sit further above the real quality of whichever candidate wins (a caveat that near-duplicate or highly correlated candidates add little to this effect is acceptable but not required).",
-          "marks": 1
-        }
-      ],
-      "model": "Each candidate's count on the 25 emails is its real quality plus chance variation from which emails happen to be in the set. Keeping the highest count favours candidates whose chance variation was favourable, so the kept count is more likely to include favourable chance than an unselected count and, on average, sits above what that candidate will score on new emails. A shared set makes the counts comparable, but it does not make the winner's count unbiased.\n\nComparing more candidates can make the overstatement larger because each extra candidate is another chance for a high count to come from favourable chance on these 25 emails, so the maximum of more noisy counts drifts further above the real quality of whichever candidate wins.\n\nOptional: the effect is weakest when the added candidates are near-duplicates or make highly correlated errors, because they add little independent chance.",
+      "goal": "explain",
       "source": {
         "path": "Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
         "heading": "A small example set rewards luck"
-      }
-    },
-    {
-      "id": "c2",
-      "type": "mcq",
-      "goal": "explain",
-      "objective": "prompt-search",
-      "marks": 1,
-      "prompt": "A prompt search tunes a few-shot prompt that extracts the payment due date from supplier emails. Each candidate is the same instruction plus three worked examples, where a worked example is a labelled email copied into the prompt together with its correct due date. The team has 150 labelled emails for the search and a separate 50 labelled emails held out for the final comparison against the current prompt.\n\nEach candidate's three worked examples are drawn at random from the 150 emails. Every candidate then extracts the date from all 150 emails, code counts exact matches, and the highest count wins the search.\n\nWhich statement correctly describes how this use of the 150 emails affects the search?",
-      "options": [
-        "Every candidate has exactly three of its own examples among the 150, so any advantage from seeing those dates is the same for all of them and cancels out when the counts are compared.",
-        "Any candidate favoured by its own examples is caught at the final comparison, because the 50 held-out emails were never used, so the search still ends up releasing the best candidate.",
-        "Each candidate is scored partly on emails whose correct dates sit in its own prompt, and three such emails each does not guarantee an equal benefit, so the ranking can reflect exposure to answers rather than performance on unseen emails.",
-        "The counts are unreliable only because 150 emails is a small set for a three-example prompt, so the same procedure would be sound with a few hundred more labelled emails."
-      ],
-      "answer": 2,
+      },
+      "prompt": "A team wants a prompt that turns support tickets into SQL queries. A model proposes 30 candidate instructions. Each candidate runs on the same 40 tickets with known correct queries, and code counts the correct outputs. The best candidate scores 38 of 40. The team plans to report \"about 95% accuracy\" as the expected accuracy on the tickets the product will receive in production.\n\nExplain why 38 of 40 is likely to overstate this winner's accuracy on new tickets, and describe the data that would give a trustworthy estimate of its production accuracy.",
+      "marks": 3,
       "rubric": [
         {
-          "point": "Chooses the explanation that candidates are scored on emails whose answers appear in their own prompts, and that equal overlap counts do not guarantee equal benefit, so the ranking can reflect exposure to answers rather than performance on unseen emails.",
+          "point": "Explains that the winner was chosen because it scored highest on those same 40 tickets, so its score includes fit to, or luck on, those particular examples (selection makes the score optimistic).",
+          "marks": 1
+        },
+        {
+          "point": "States that the estimate needs a separate held-out set of tickets that the search never used, and whose results do not guide choosing or revising the prompt. Repeated runs on that set are acceptable.",
+          "marks": 1
+        },
+        {
+          "point": "States that the held-out tickets must be representative of the intended production workload (for example drawn from or shaped like real production tickets), since an unrelated or systematically easier set would not support a production-accuracy estimate.",
           "marks": 1
         }
       ],
-      "model": "Each candidate is scored partly on emails whose correct dates sit in its own prompt, and three such emails each does not guarantee an equal benefit, so the ranking can reflect exposure to answers rather than performance on unseen emails.\n\nOptional: equal overlap counts do not mean equal benefit, so nothing reliably cancels. The held-out set can only reject the chosen winner afterwards; it cannot recover a better candidate the search passed over. A larger set would leave the overlap in place. The fix is a demonstration pool separate from the validation set.",
-      "source": {
-        "path": "Home/AI & ML/LLM/Prompt Engineering/Automated Prompt Optimization.md",
-        "heading": "Automatic Prompt Engineer (APE)"
-      }
+      "model": "The 38 of 40 is the score that made this candidate win out of 30. Picking the highest score favours whichever candidate happened to suit those 40 tickets, partly through luck on a few of them, so the score is biased upwards as a prediction for other tickets. A trustworthy estimate comes from scoring the chosen prompt on a separate held-out set of tickets that played no part in the search and is not used to pick or revise the prompt. Those tickets must be representative of the production workload, such as a sample of real production tickets, because a set that is unrelated or easier than production would not show production accuracy."
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "text": "the prompt is overfitted to the cases, and shows not 95% accuracy in general, but 95% accuracy over this fixed set. The percentage will bu trustworthly if it will include random production tickets, that wasnt included into ticket sets, if the result will be the same on other random tickets, then it is trustworthy",
+      "confidence": "sure"
+    }
+  },
+  "marks": {
+    "c1": {
+      "awarded": [
+        true,
+        true,
+        true
+      ],
+      "annotations": [
+        {
+          "quote": "the prompt is overfitted to the cases",
+          "kind": "correct",
+          "note": "You identify that the winning prompt is fitted to those particular tickets, which is the core reason the score is optimistic."
+        },
+        {
+          "quote": "shows not 95% accuracy in general, but 95% accuracy over this fixed set",
+          "kind": "correct",
+          "note": "You correctly separate accuracy on the fixed set from accuracy on new tickets."
+        },
+        {
+          "quote": "that wasnt included into ticket sets",
+          "kind": "correct",
+          "note": "You require tickets the search never used, which is the held-out requirement."
+        },
+        {
+          "quote": "include random production tickets",
+          "kind": "correct",
+          "note": "Sampling real production tickets makes the held-out set representative of the intended workload."
+        }
+      ],
+      "mistake": "none",
+      "feedback": "You covered the overfitting to the fixed set, the need for unseen held-out tickets, and the need for them to come from production.",
+      "score": 3
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1795614441413
 }

@@ -10,7 +10,7 @@ qard-deck: "Programming"
 qard-topic: "NET/ASP NET Web API/Middlewares"
 flashcard_uid: "7fb97c90"
 created: "2026-02-10T01:40:47.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-27T16:47:13.667Z"
 published: "2026-07-08T13:14:17.319Z"
 ---
 
@@ -163,46 +163,52 @@ Middleware fits a concern that belongs outside a particular endpoint model or mu
 
 <!-- qard-id: 044cb1c8-912a-42fc-82d3-f9e2167680f6 -->
 > [!qard]- How does middleware differ from a controller action filter in ASP.NET Core?
-> Both can run shared code before and after request-handling work, and both can stop that work early. Both have access to the HTTP request and response through `HttpContext`.
+> The difference is how close each one sits to the controller's action method. Middleware sits in the HTTP pipeline, outside the controllers, so it runs for every request that reaches it but knows only the raw request and response, which is why request logging and CORS live there. An action filter sits inside the controller part of the framework, directly around a Web API controller's action method, and runs after model binding has filled the action's parameters. The filter therefore runs only for controller actions but knows the action's arguments and `ModelState`, and can read or replace the action result before it is written to the response.
 >
-> **Middleware wraps the next part of the HTTP pipeline.** It can surround the whole controller execution, including preparing the action’s inputs and writing its response. It can also cover requests handled elsewhere in the application. Its position determines which requests reach it.
->
-> **An action filter wraps the controller’s action method.** It runs after MVC has prepared the values passed to that method. Alongside `HttpContext`, it receives those values and can inspect or change the result the method returns, before MVC writes that result as the HTTP response.
->
-> Middleware fits behavior that should work independently of controller actions. An action filter fits behavior that needs direct access to an action’s inputs or returned result.
+> So the two are not interchangeable. A filter never runs for a request that no controller handles, and middleware is given only `HttpContext`, so it never sees the action's arguments, `ModelState` or the action result.
 >
 > [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0) · [Microsoft: ASP.NET Core middleware](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-10.0)
 
 <!-- qard-id: 8d463f18-1072-4f4b-b785-c13f213e9fc9 -->
-> [!qard]- How can an ASP.NET Core application handle unhandled exceptions consistently?
-> A single exception-handling middleware, such as `UseExceptionHandler`, is registered near the start of the pipeline so that it wraps every later component. It turns any unhandled exception from those components into one safe, consistent error response. In ASP.NET Core 8 and later, a registered `IExceptionHandler` implementation can keep the mapping from exception to response in one place.
+> [!qard]- How can exceptions be handled globally in ASP.NET Core?
+> Unhandled exceptions can be caught in one place for the whole application, by a middleware registered first in the pipeline. An exception from any later component or the endpoint travels back to that middleware, which logs the exception and returns one consistent error response, so endpoints do not handle errors themselves.
 >
-> 1. A later component or the endpoint throws. The exception propagates back out through each `next` call until it reaches the handler.
-> 2. A safe server-side diagnostic records the failure. This diagnostic is arranged deliberately, not assumed. In ASP.NET Core 10, when an `IExceptionHandler` reports an exception as handled, the middleware's own diagnostics are suppressed by default. The handler therefore records what an investigation needs.
-> 3. The handler writes the application's error contract: an error status code and a body. With `AddProblemDetails()` registered, that body can be a standard Problem Details response.
-> 4. Production responses omit stack traces and other sensitive details.
-> 
-> Limits:
+> The ways to do it:
 >
-> - **Coverage:** components registered before the handler are outside it, so their exceptions are not caught.
-> - **Started responses:** once the response has started, the status code and headers may already be sent. The handler then cannot reliably replace them with an error response.
-> - **Swallowing:** logging the exception but returning a success status hides the failure from clients. The boundary either writes a real error response or lets the exception continue.
-> 
+> - **`UseExceptionHandler`:** the built-in middleware, usually with `AddProblemDetails()` for a standard error body.
+> - **`IExceptionHandler`:** a class that the built-in middleware calls to map specific exceptions to responses.
+> - **Custom middleware:** a hand-written `try`/`catch` around `await next(context)`, which gives full control over the response.
+> - **Exception filters:** they catch exceptions only from controller actions, so they are not truly global.
+>
 > [Microsoft: Handle errors in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling?view=aspnetcore-10.0)
 
 <!-- qard-id: b38ff0ad-a54f-4c82-ba97-6f472c68d084 -->
 > [!qard]- How does a request move through the ASP.NET Core middleware pipeline?
-> A request passes inward through middleware in registration order until something produces a response, normally the endpoint. The response then passes back outward through the same components in reverse order.
+> A request goes through the middleware components one by one, in the order they were registered, until it reaches the endpoint, which produces the response. The response then goes back through the same components in the opposite order, so the component registered first sees the request first and the response last.
 >
-> 1. Each component receives `HttpContext` and a `next` delegate. Code before `await next(context)` runs on the way in.
-> 2. A component either calls `next` to pass control inward, or returns without calling it to short-circuit. After a short-circuit, later components and the endpoint do not run.
-> 3. In a typical API pipeline, routing selects the endpoint. Authentication then tries to establish `HttpContext.User` and normally continues even without a valid credential. Authorization evaluates the endpoint's policy. If the caller fails it, authorization triggers the scheme's challenge for an unauthenticated caller, or forbid for an authenticated one. The scheme decides the response, for example `401` or `403` for bearer tokens, or a redirect for cookies.
-> 4. The endpoint runs and produces the response.
-> 5. Control returns through earlier components in reverse order, so code after `next` runs on the way out.
-> 
-> Code after `next` can change the status code or headers only while the response has not started. Once `Response.HasStarted` is true, they may already be on the wire. Branches such as `Map` and `UseWhen` change which components a request passes through, so order within a branch matters as well.
+> Each component gets a `next` delegate and the same `HttpContext` object, which holds both the request and the response for that one request. Calling `next` runs everything registered after the component, so code written before the call runs while the request is going in, and code written after the call runs while the response is coming back.
 >
-> [Microsoft: Middleware in Minimal API apps](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/middleware?view=aspnetcore-10.0) · [Microsoft: ASP.NET Core authentication overview](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/?view=aspnetcore-10.0) · [Microsoft: Handle errors in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling?view=aspnetcore-10.0)
+> ```csharp
+> app.Use(async (context, next) =>
+> {
+>     // 1. first on the way in
+>     await next(context);
+>     // 5. last on the way out
+> });
+>
+> app.Use(async (context, next) =>
+> {
+>     // 2. second on the way in
+>     await next(context);
+>     // 4. first on the way out
+> });
+>
+> app.MapGet("/", () => "Hello"); // 3. the endpoint produces the response
+> ```
+>
+> A component can also stop the request by writing the response itself and not calling `next`, for example by setting status 401 when the API key is missing. The components after it and the endpoint then never run, and the response goes back through only the components registered before it. This is called short-circuiting the pipeline.
+>
+> [Microsoft: ASP.NET Core middleware](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-10.0)
 
 # References
 

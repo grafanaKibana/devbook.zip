@@ -8,7 +8,7 @@ publish: true
 qard-deck: "AI & ML"
 qard-topic: "LLM/Prompt Engineering/Automated Prompt Optimization"
 created: "2026-02-28T13:40:02.000Z"
-modified: "2026-11-19T19:50:06.148Z"
+modified: "2026-11-27T16:47:13.667Z"
 published: "2026-07-08T13:14:17.480Z"
 ---
 
@@ -231,22 +231,16 @@ Hand tuning stays cheaper for a few stable prompts, while automation pays off wh
 
 <!-- qard-id: 637042dc-8641-4fbe-9f1a-25620b16a717 -->
 > [!qard]- What is meta prompting?
-> Meta prompting is using a model to write or improve a prompt. It fits when a prompt keeps failing in the same way and the failed outputs are at hand, or when a first prompt has to be drafted from a task description, while one obvious wording fix is quicker by hand. The work happens during prompt development, so it adds no calls per request.
+> Meta prompting is using a model to write or improve a prompt. The model is given the current prompt, the outputs that went wrong and what those outputs should have contained, and it writes a new prompt that deals with those failures. The new prompt is only a candidate, because the model saw just those failures, so it is tried on other inputs before it replaces the old prompt.
 >
-> The model receives the current prompt, the outputs that went wrong and the requirement, and returns a rewrite whose new rules answer those failures, which replaces guessing at wording by hand. The rewrite is only a candidate, because the model saw only the failures, so the rewrite is scored on inputs it was not written from before a person lets it replace the current prompt.
+> ```text
+> Current prompt:   Summarize this incident report.
+> Failed output:    a summary with no times and no cause
+> Should contain:   the timeline, the root cause and the actions taken
 >
-> For example, the prompt of a support bot, "Answer customer questions about orders", is rewritten and tried again until the bot's replies on the trial conversations are acceptable. Along the way a rewrite that forbade refund promises made the bot refuse to explain the refund policy, so that reply went back to the model and the rule was narrowed to explain the policy without promising a refund.
->
-> ```mermaid
-> flowchart LR
->   A["Bot promises refunds it cannot grant"] -->|"prompt and failed replies"| B["Model rewrites the prompt"]
->   B --> C["Try on other conversations"]
->   C --> D{"All replies acceptable?"}
->   D -->|"no: new failed replies go back"| B
->   D -->|"yes"| E["New prompt replaces the old one"]
+> Model's rewrite:  Summarize the incident report as JSON with the keys
+>                   timeline, root_cause and actions.
 > ```
->
-> Sources: [OpenAI model optimization](https://developers.openai.com/api/docs/guides/model-optimization) · [OpenAI evals](https://developers.openai.com/api/docs/guides/evals)
 
 # References
 

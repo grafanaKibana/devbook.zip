@@ -9,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Methods"
 flashcard_uid: "a3e803d0"
 created: "2026-02-15T16:27:13.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-27T16:47:13.667Z"
 published: "2026-07-08T13:14:17.325Z"
 ---
 
@@ -288,16 +288,36 @@ By-value parameters and ordinary virtual dispatch are the default. By-reference 
 > [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier) · [Microsoft: base keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/base) · [Microsoft: sealed modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/sealed)
 
 <!-- qard-id: 13e7573c-4ba4-4f2b-a316-4f2dcb52ccd6 -->
-> [!qard]- How do virtual overriding, member hiding, and composition differ in dispatch through a base-class reference?
-> Only virtual dispatch makes a call through a base-class reference run derived code. Making the base member `virtual` and overriding it is therefore the only option that works through such a reference. Hiding with `new` affects only derived-typed references, and composition moves the variation out of inheritance.
+> [!qard]- What is the difference between `override` and `new` on a method in C#?
+> `override` and `new` are both used when a derived class declares a method that its base class already has, and the question is which of the two gets called. With `override`, the type of the created object decides, while with `new`, the variable type decides. An overriding method takes the place of the base method, so there is just one method, and it gets called whatever type the variable has. A method declared with `new` does not take the base method's place and stays alongside it, so a base-type variable gets the base method and a derived-type variable gets the new one. Because nothing gets replaced, `new` works on any base method, while `override` needs the base method to be `virtual`.
 >
-> | Option | Call through a base reference | Fits when |
-> |---|---|---|
-> | Base member made `virtual`, derived member marked `override` | Runs the derived implementation, chosen by the object's runtime type | The base type can be changed and derived objects are meant to substitute for base objects |
-> | Derived member declared with `new` (hiding) | Still runs the base implementation. Only references typed as the derived class reach the new member | Hiding itself is the intended behavior, such as a deliberate compatibility split, not polymorphism |
-> | Composition | No inheritance dispatch is involved. The class delegates the varying step to an object it holds | The base cannot be changed, or the variation is not a natural subtype relationship |
+> ```csharp
+> class Animal
+> {
+>     public virtual string Speak() => "...";
+> }
+> class Dog : Animal
+> {
+>     public override string Speak() => "Woof";  // replaces Animal.Speak
+> }
+> class Cat : Animal
+> {
+>     public new string Speak() => "Meow";       // a second method next to Animal.Speak
+> }
 >
-> Hiding is the common trap. The same object behaves differently depending on whether it is referenced as the derived type or as the base type.
+> var dog = new Dog();
+> var cat = new Cat();
+> Animal dogAsAnimal = dog;   // the same objects, used as Animal
+> Animal catAsAnimal = cat;
+>
+> // 1. override: the object decides
+> dog.Speak();          // "Woof"
+> dogAsAnimal.Speak();  // "Woof"
+>
+> // 2. new: the variable decides (same when Animal.Speak is not virtual)
+> cat.Speak();          // "Meow"
+> catAsAnimal.Speak();  // "..."
+> ```
 >
 > [Microsoft: virtual keyword](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/virtual) · [Microsoft: new modifier](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/new-modifier)
 

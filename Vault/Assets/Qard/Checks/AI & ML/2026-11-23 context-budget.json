@@ -33,7 +33,45 @@
       }
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "text": "The memory should have retention period, and updated over time. In this case even if false claim is saved, it will updated after some time with new information. Additionaly we can have some dreaming/garbage collection fuctionality that is checks memory claims once in X time and leave only confirmed ones",
+      "confidence": "unsure"
+    }
+  },
+  "marks": {
+    "c1": {
+      "awarded": [
+        false,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "The memory should have retention period, and updated over time.",
+          "kind": "wrong",
+          "note": "This proposes a fix and doesn't explain why the claim persists. Expiry wouldn't stop the claim from being replayed and trusted in the meantime."
+        },
+        {
+          "quote": "we can have some dreaming/garbage collection fuctionality that is checks memory claims once in X time and leave only confirmed ones",
+          "kind": "insight",
+          "note": "Periodic validation of stored claims is a sound mitigation, since it checks claims before they are trusted. It still doesn't answer how the current design lets the false claim persist."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to explain that the claim is replayed with no provenance or trust label in the same section as the operating rules, so it is treated as trusted context."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to explain that because the memory looks trusted, the model weighs it above the retrieved documentation and discounts the page that contradicts it."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You gave fixes (expiry, periodic validation) but never explained the mechanism: unlabelled memory mixed with trusted rules is treated as trusted and outweighs the contradicting documentation.",
+      "score": 0
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1795614663734
 }

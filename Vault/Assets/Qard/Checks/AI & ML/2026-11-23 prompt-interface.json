@@ -33,7 +33,40 @@
       "goal": "explain"
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "text": "the model doesnt know the limit, it just generates tokens until it hits the limit, so unswear will be cutted",
+      "confidence": "guess"
+    }
+  },
+  "marks": {
+    "c1": {
+      "awarded": [
+        true,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "it just generates tokens until it hits the limit, so unswear will be cutted",
+          "kind": "correct",
+          "note": "You show that the cap is a hard stop, so answers longer than the limit are cut off. That covers the failure mechanism."
+        },
+        {
+          "quote": "the model doesnt know the limit",
+          "kind": "correct",
+          "note": "Right, the model doesn't adapt its length to the cap, which is why the engineer's expectation fails."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You didn't say what the cap should be sized from: the measured token lengths of valid responses on the evaluation set (the longest is about 900) plus headroom."
+        }
+      ],
+      "mistake": "incomplete",
+      "feedback": "You explained why the cap truncates answers but didn't say it should be sized from the measured lengths of valid responses, plus headroom.",
+      "score": 1
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1795613931491
 }

@@ -9,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Strings"
 flashcard_uid: "d65a72cc"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-27T16:47:13.667Z"
 published: "2026-07-08T13:14:17.328Z"
 ---
 
@@ -108,18 +108,20 @@ Hot paths sometimes need construction without intermediate strings:
 
 <!-- qard-id: cbfb80da-9ddd-4625-8352-7a13aa6b2474 -->
 > [!qard]- Why can `ReferenceEquals(a, b)` be false when `a == b` is true for strings?
-> They test different things. For strings, `==` compares contents: it returns true when both strings hold the same characters in the same order, using an ordinal, case-sensitive comparison. `ReferenceEquals` returns true only when both references point to the same object.
+> `string` is a reference type, and for most reference types `==` compares references. `string` overloads the equality operators, so its `==` compares the characters, while `ReferenceEquals` still compares references. So when two separate objects hold the same text, `==` is true and `ReferenceEquals` is false. This is what happens with strings created at run time, but when identical literals are in the code at compile time, each distinct literal is interned, so both variables usually point to the same object and `ReferenceEquals(a, b)` also returns true.
 >
-> Equal text can therefore live in two separate objects. Strings built at run time are not interned automatically, so two strings built from the same pieces are normally distinct instances: `==` returns true while `ReferenceEquals` returns false.
+> ```csharp
+> string a = "dotnet";
+> string b = "dotnet";                               // identical literal, stored once
+> string c = new string(a.ToCharArray());            // same text, built at run time
 >
-> Interning can make identity coincide through two different mechanisms:
+> Console.WriteLine(a == b);                         // True
+> Console.WriteLine(object.ReferenceEquals(a, b));   // True, usually: one shared object
+> Console.WriteLine(a == c);                         // True
+> Console.WriteLine(object.ReferenceEquals(a, c));   // False: two objects
+> ```
 >
-> - **Explicit `String.Intern`:** it returns the intern pool's reference for a string with that value, adding the argument to the pool if no equal string is there yet. Equal strings passed through `String.Intern` therefore always come back as the same reference.
-> - **Automatic literal interning:** identical string literals typically share one pooled instance, so `ReferenceEquals` often returns true for them. A compilation can request `NoStringInterning`, and runtime behavior may vary, so literal identity is not a dependable contract.
-> 
-> Because identity depends on how each string was produced, `ReferenceEquals` is not a test of content. Content comparisons belong to `==` or `string.Equals`, with an explicit `StringComparison` stating the rule the data needs: ordinal comparison (`Ordinal` or `OrdinalIgnoreCase`) for protocol keys and identifiers, and culture-aware comparison for natural-language text shown to users.
->
-> Sources: [Microsoft Learn: Object.ReferenceEquals](https://learn.microsoft.com/en-us/dotnet/api/system.object.referenceequals?view=net-10.0) · [Microsoft Learn: String equality operator](https://learn.microsoft.com/en-us/dotnet/api/system.string.op_equality?view=net-10.0) · [Microsoft Learn: String.Intern](https://learn.microsoft.com/en-us/dotnet/api/system.string.intern?view=net-10.0) · [Microsoft Learn: Best practices for comparing strings](https://learn.microsoft.com/en-us/dotnet/standard/base-types/best-practices-strings)
+> Sources: [Microsoft Learn: Object.ReferenceEquals](https://learn.microsoft.com/en-us/dotnet/api/system.object.referenceequals?view=net-10.0) · [Microsoft Learn: String equality operator](https://learn.microsoft.com/en-us/dotnet/api/system.string.op_equality?view=net-10.0) · [Microsoft Learn: String.Intern](https://learn.microsoft.com/en-us/dotnet/api/system.string.intern?view=net-10.0)
 
 # References
 

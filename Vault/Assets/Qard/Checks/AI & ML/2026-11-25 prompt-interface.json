@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "createdAt": 1795613959281,
+  "mastery": "Assets/Qard/Courses/AI & ML Mastery.md",
+  "course": "AI & ML",
+  "objective": "prompt-interface",
+  "title": "Specify instructions, inputs, constraints, and expected output as a versioned task interface, and set sampling and token-limit settings to fit the task",
+  "goal": "explain",
+  "questionPolicy": 1,
+  "promptFingerprint": "ec5039a2e6d3005579fe487449eea1ea93688b749854c36ece707c4dc0ecfeca",
+  "questions": [
+    {
+      "id": "c1",
+      "type": "short",
+      "prompt": "A team uses a reasoning model to label customer reviews as `positive`, `negative` or `mixed`. The visible answer is only a label and a one-line reason, about 30 tokens. On this endpoint, the model's hidden reasoning tokens count toward the output-token cap. To keep costs down, the team sets the cap to 60 tokens. Many responses then come back incomplete, and some have no visible output.\n\nExplain why the 60-token cap causes this, and say what the team should base the cap on instead.",
+      "marks": 2,
+      "rubric": [
+        {
+          "point": "Explains that hidden reasoning tokens count toward the same cap, so reasoning can use up the 60 tokens before the visible label is finished or even started, and generation stops at the cap.",
+          "marks": 1
+        },
+        {
+          "point": "States that the cap should be sized from the measured total generated tokens of valid responses (reasoning plus visible output) on a representative evaluation set, with headroom added. Any wording that bases the cap on observed full output lengths plus a margin earns this mark.",
+          "marks": 1
+        }
+      ],
+      "model": "The cap counts all generated tokens, including hidden reasoning. The model spends most or all of the 60 tokens on reasoning, so it hits the cap before it finishes the label, or before it writes anything visible. The cap should be set from the measured total generated tokens, reasoning plus visible answer, of valid responses on an evaluation set, plus headroom. Prompt changes, not a tight cap, should be used to cut normal length.",
+      "source": {
+        "path": "Home/AI & ML/LLM/Prompt Engineering/Prompt Engineering.md",
+        "heading": "Questions"
+      },
+      "objective": "prompt-interface",
+      "goal": "explain"
+    }
+  ],
+  "answers": {},
+  "marks": {},
+  "status": "ready"
+}

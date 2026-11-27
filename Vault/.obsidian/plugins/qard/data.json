@@ -26,7 +26,7 @@
     "scheduler": "fsrs",
     "desiredRetention": 0.9,
     "newCardsPerDay": 5,
-    "reviewBatchSize": 20,
+    "reviewBatchSize": 10,
     "typedAnswers": false,
     "deckNaming": "note",
     "deckOptions": {
@@ -276,8 +276,8 @@
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1795466399157,
-      "needsFixing": true
+      "flagsAt": 1795536729851,
+      "repairSince": 1795536729850
     },
     "a219c123-c1e0-4eae-96fc-228367900e40": {
       "cardId": "a219c123-c1e0-4eae-96fc-228367900e40",
@@ -358,9 +358,8 @@
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1795466267006,
-      "needsFixing": true,
-      "repairSince": 1794424598362
+      "flagsAt": 1795535689718,
+      "repairSince": 1795535689717
     },
     "ec8874e5-0ca6-4d53-a3dd-6594e0a512e3": {
       "cardId": "ec8874e5-0ca6-4d53-a3dd-6594e0a512e3",
@@ -385,8 +384,9 @@
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1793950621008,
-      "repairSince": 1793950620063
+      "flagsAt": 1795557753459,
+      "repairSince": 1795557753457,
+      "paused": true
     },
     "b115f4c1-4ffb-413c-917b-d5fcdb62cb05": {
       "cardId": "b115f4c1-4ffb-413c-917b-d5fcdb62cb05",
@@ -469,29 +469,29 @@
     },
     "d5bda60c-1799-4e4a-ab36-7624ae085e3a": {
       "cardId": "d5bda60c-1799-4e4a-ab36-7624ae085e3a",
-      "lastReviewed": 1795464180296,
-      "due": 1795464540296,
+      "lastReviewed": 1795534410516,
+      "due": 1795534770516,
       "interval": 0.004166666666666667,
       "ease": 2.5,
-      "reviewCount": 4,
-      "lapses": 2,
+      "reviewCount": 6,
+      "lapses": 3,
       "lastRating": 2,
       "fsrs": {
-        "due": 1795464540296,
-        "stability": 2.13674512,
-        "difficulty": 9.45265637,
-        "elapsed_days": 11,
+        "due": 1795534770516,
+        "stability": 0.49737479,
+        "difficulty": 9.85599088,
+        "elapsed_days": 0,
         "scheduled_days": 0,
-        "reps": 4,
+        "reps": 6,
         "lapses": 0,
         "learning_steps": 0,
         "state": 1,
-        "last_review": 1795464180296,
+        "last_review": 1795534410516,
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1794487531929,
-      "repairSince": 1794487531924
+      "flagsAt": 1795612440111,
+      "repairSince": 1795612440109
     },
     "a16bf465-c1ae-4bca-909c-6f7462f37ca6": {
       "cardId": "a16bf465-c1ae-4bca-909c-6f7462f37ca6",
@@ -619,9 +619,8 @@
         "version": 1,
         "source": "reviews"
       },
-      "needsFixing": true,
-      "flagsAt": 1795465418951,
-      "paused": true
+      "flagsAt": 1795544417294,
+      "repairSince": 1795543561102
     },
     "88201824-3803-4d3e-892a-427b12e49301": {
       "cardId": "88201824-3803-4d3e-892a-427b12e49301",
@@ -673,8 +672,8 @@
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1795466362024,
-      "needsFixing": true
+      "flagsAt": 1795533389079,
+      "repairSince": 1795533389077
     },
     "1cd27d60-d7eb-47c8-9be5-3d6e78be5028": {
       "cardId": "1cd27d60-d7eb-47c8-9be5-3d6e78be5028",
@@ -723,8 +722,9 @@
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1794866748852,
-      "repairSince": 1794866748851
+      "flagsAt": 1795613533544,
+      "repairSince": 1795613533543,
+      "paused": true
     },
     "52ff6f00-16ec-4741-9be4-2551798fc8ee": {
       "cardId": "52ff6f00-16ec-4741-9be4-2551798fc8ee",
@@ -748,7 +748,10 @@
         "last_review": 1794346750107,
         "version": 1,
         "source": "reviews"
-      }
+      },
+      "flagsAt": 1795615822569,
+      "paused": true,
+      "repairSince": 1795615822568
     },
     "36a34049-8f3f-493f-b608-a516bf6a28a4": {
       "cardId": "36a34049-8f3f-493f-b608-a516bf6a28a4",
@@ -829,27 +832,29 @@
     },
     "cbfb80da-9ddd-4625-8352-7a13aa6b2474": {
       "cardId": "cbfb80da-9ddd-4625-8352-7a13aa6b2474",
-      "lastReviewed": 1795466676143,
-      "due": 1795467276143,
-      "interval": 0.006944444444444444,
+      "lastReviewed": 1795534302100,
+      "due": 1796139102100,
+      "interval": 7,
       "ease": 2.5,
-      "reviewCount": 2,
+      "reviewCount": 3,
       "lapses": 1,
-      "lastRating": 1,
+      "lastRating": 4,
       "fsrs": {
-        "due": 1795467276143,
-        "stability": 1.54234988,
-        "difficulty": 7.02698957,
-        "elapsed_days": 18,
-        "scheduled_days": 0,
-        "reps": 2,
+        "due": 1796139102100,
+        "stability": 5.70004509,
+        "difficulty": 6.01877639,
+        "elapsed_days": 1,
+        "scheduled_days": 7,
+        "reps": 3,
         "lapses": 1,
         "learning_steps": 0,
-        "state": 3,
-        "last_review": 1795466676143,
+        "state": 2,
+        "last_review": 1795534302100,
         "version": 1,
         "source": "reviews"
-      }
+      },
+      "flagsAt": 1795622147516,
+      "repairSince": 1795622147513
     },
     "23508898-cc73-4289-ba2c-ab026d0258b2": {
       "cardId": "23508898-cc73-4289-ba2c-ab026d0258b2",
@@ -1054,8 +1059,9 @@
         "version": 1,
         "source": "reviews"
       },
-      "flagsAt": 1794500444123,
-      "repairSince": 1794500444107
+      "flagsAt": 1795616184284,
+      "repairSince": 1795616184284,
+      "paused": true
     },
     "ddd8a30b-97ea-4f04-8025-704d1c3481ab": {
       "cardId": "ddd8a30b-97ea-4f04-8025-704d1c3481ab",
@@ -1287,8 +1293,8 @@
         "version": 1,
         "source": "reviews"
       },
-      "needsFixing": true,
-      "flagsAt": 1795467158217
+      "flagsAt": 1795544563340,
+      "repairSince": 1795544563339
     },
     "47c1a77e-18c3-47f2-beec-be36bdb47219": {
       "cardId": "47c1a77e-18c3-47f2-beec-be36bdb47219",
@@ -2785,6 +2791,36 @@
       "scheduler": "fsrs",
       "desiredRetention": 0.9,
       "deck": "AI & ML"
+    },
+    {
+      "introduced": false,
+      "cardId": "d5bda60c-1799-4e4a-ab36-7624ae085e3a",
+      "at": 1795534241440,
+      "rating": 1,
+      "scheduled": true,
+      "scheduler": "fsrs",
+      "desiredRetention": 0.9,
+      "deck": "Programming"
+    },
+    {
+      "introduced": false,
+      "cardId": "cbfb80da-9ddd-4625-8352-7a13aa6b2474",
+      "at": 1795534302100,
+      "rating": 4,
+      "scheduled": true,
+      "scheduler": "fsrs",
+      "desiredRetention": 0.9,
+      "deck": "Programming"
+    },
+    {
+      "introduced": false,
+      "cardId": "d5bda60c-1799-4e4a-ab36-7624ae085e3a",
+      "at": 1795534410516,
+      "rating": 2,
+      "scheduled": true,
+      "scheduler": "fsrs",
+      "desiredRetention": 0.9,
+      "deck": "Programming"
     }
   ],
   "links": {
@@ -2961,26 +2997,26 @@
       45183
     ],
     "check-write|claude-code|opus": [
-      44554,
-      65446,
-      77186,
       92952,
       79809,
       40648,
       42055,
       58867,
-      72884
+      72884,
+      27687,
+      59249,
+      30367
     ],
     "check-mark|claude-code|sonnet": [
-      19604,
-      12915,
-      12188,
-      16656,
       14621,
       13567,
       13844,
       10865,
-      10768
+      10768,
+      11308,
+      13925,
+      10680,
+      11266
     ],
     "probe|claude-code|sonnet": [
       140485,
@@ -4253,6 +4289,35 @@
         "costUsd": 0.287511,
         "costCalls": 1
       }
+    },
+    "2026-11-25": {
+      "Marking|tutor|claude-code|claude-sonnet-5-5": {
+        "calls": 4,
+        "input": 24,
+        "output": 3409,
+        "cacheRead": 273383,
+        "cacheWrite": 137206,
+        "costUsd": 0.6376385999999999,
+        "costCalls": 4
+      },
+      "Writing checks|writer|claude-code|claude-opus-5-5": {
+        "calls": 4,
+        "input": 8,
+        "output": 4753,
+        "cacheRead": 32205,
+        "cacheWrite": 186283,
+        "costUsd": 1.5917970000000001,
+        "costCalls": 4
+      },
+      "Other|marker|codex|gpt-6.1-sol": {
+        "calls": 4,
+        "input": 142013,
+        "output": 1125,
+        "cacheRead": 29312,
+        "cacheWrite": 0,
+        "costUsd": 0,
+        "costCalls": 0
+      }
     }
   },
   "study": {
@@ -4523,6 +4588,25 @@
       "cards|Programming": 840.4,
       "cards|": 15.4,
       "cards|AI & ML": 242.5
+    },
+    "2026-11-24": {
+      "browsing|": 155,
+      "planning|": 114.6,
+      "tests|": 2.8,
+      "planning|AI & ML": 7.2,
+      "cards|Programming": 531.9,
+      "cards|": 2.3,
+      "browsing|Programming": 61.6
+    },
+    "2026-11-25": {
+      "browsing|": 30.6,
+      "planning|": 15.2,
+      "checks|AI & ML": 1135.8,
+      "checks|Software Architecture": 15.6
+    },
+    "2026-11-27": {
+      "browsing|": 10.8,
+      "browsing|Programming": 21.8
     }
   },
   "statistics": {
@@ -4628,6 +4712,12 @@
         4,
         2,
         7
+      ],
+      "2026-11-24": [
+        1,
+        1,
+        0,
+        1
       ]
     },
     "cards": {
@@ -4776,8 +4866,8 @@
         1
       ],
       "d5bda60c-1799-4e4a-ab36-7624ae085e3a": [
-        2,
-        2,
+        3,
+        3,
         0,
         0
       ],
@@ -4863,7 +4953,7 @@
         1,
         0,
         0,
-        1
+        2
       ],
       "23508898-cc73-4289-ba2c-ab026d0258b2": [
         0,
@@ -4968,8 +5058,8 @@
   "exams": [
     {
       "id": "027e0d94-42e5-4fc5-8e71-9de4c580643e",
-      "name": "Programming — first pass",
-      "date": "2026-11-19",
+      "name": "Programming",
+      "date": "2027-01-08",
       "selection": {
         "decks": [
           "Programming"
@@ -4991,8 +5081,8 @@
     },
     {
       "id": "9506c4b9-2a5c-4bd4-aa40-1deb7cc19516",
-      "name": "Computer Science — first pass",
-      "date": "2026-11-26",
+      "name": "Computer Science",
+      "date": "2027-01-15",
       "selection": {
         "decks": [
           "Computer Science"
@@ -5014,8 +5104,8 @@
     },
     {
       "id": "8919c8b5-046f-4335-a096-bae3c084277d",
-      "name": "Software Design — first pass",
-      "date": "2026-12-03",
+      "name": "Software Design",
+      "date": "2027-01-22",
       "selection": {
         "decks": [
           "Software Design"
@@ -5037,8 +5127,8 @@
     },
     {
       "id": "414b777e-4a7e-42e0-a258-30896d420b12",
-      "name": "Networks — first pass",
-      "date": "2026-12-10",
+      "name": "Networks",
+      "date": "2027-01-29",
       "selection": {
         "decks": [
           "Networks"
@@ -5060,8 +5150,8 @@
     },
     {
       "id": "44090d79-db6d-4b34-a45d-091f3f2bb625",
-      "name": "Data Persistence — first pass",
-      "date": "2026-12-17",
+      "name": "Data Persistence",
+      "date": "2027-02-12",
       "selection": {
         "decks": [
           "Data Persistence"
@@ -5083,8 +5173,8 @@
     },
     {
       "id": "bd89f527-62dc-42a2-9e45-31a1f59b918c",
-      "name": "Security — first pass",
-      "date": "2026-12-24",
+      "name": "Security",
+      "date": "2027-02-26",
       "selection": {
         "decks": [
           "Security"
@@ -5106,8 +5196,8 @@
     },
     {
       "id": "e6f1cdb7-6980-46c7-a6b4-32f46cc79ec2",
-      "name": "Software Architecture — first pass",
-      "date": "2027-01-14",
+      "name": "Software Architecture",
+      "date": "2027-03-26",
       "selection": {
         "decks": [
           "Software Architecture"
@@ -5129,8 +5219,8 @@
     },
     {
       "id": "bb88b860-00a0-41a8-8db8-9dbadb576d57",
-      "name": "DevOps — first pass",
-      "date": "2027-01-21",
+      "name": "DevOps",
+      "date": "2027-04-09",
       "selection": {
         "decks": [
           "DevOps"
@@ -5152,8 +5242,8 @@
     },
     {
       "id": "c062e5a7-aba2-4875-ae6e-4eb7a440844c",
-      "name": "AI & ML — first pass",
-      "date": "2027-02-10",
+      "name": "AI & ML",
+      "date": "2027-05-07",
       "selection": {
         "decks": [
           "AI & ML"
@@ -5257,9 +5347,10 @@
     "session:a857d6ad-364e-4311-b31a-568bcea41342",
     "session:32ab7044-9178-4875-ab5e-dd66122bc59a",
     "session:7f8e8d08-4b63-4fae-95d9-1ec941746ad3",
-    "session:9ea57ff1-396d-4add-9dd8-0d69863e29f0"
+    "session:9ea57ff1-396d-4add-9dd8-0d69863e29f0",
+    "session:7ce95f1d-389c-41ec-bcc5-b394e82d9f00"
   ],
-  "settingsAt": 1795365177449,
+  "settingsAt": 1795560952335,
   "totals": {
     "legacy": {
       "study": {
@@ -5609,6 +5700,25 @@
           "cards|Programming": 840.4,
           "cards|": 15.4,
           "cards|AI & ML": 242.5
+        },
+        "2026-11-24": {
+          "browsing|": 155,
+          "planning|": 114.6,
+          "tests|": 2.8,
+          "planning|AI & ML": 7.2,
+          "cards|Programming": 531.9,
+          "cards|": 2.3,
+          "browsing|Programming": 61.6
+        },
+        "2026-11-25": {
+          "browsing|": 30.6,
+          "planning|": 15.2,
+          "checks|AI & ML": 1135.8,
+          "checks|Software Architecture": 15.6
+        },
+        "2026-11-27": {
+          "browsing|": 10.8,
+          "browsing|Programming": 21.8
         }
       },
       "usage": {
@@ -6829,6 +6939,35 @@
             "cacheWrite": 64157,
             "costUsd": 0.287511,
             "costCalls": 1
+          }
+        },
+        "2026-11-25": {
+          "Marking|tutor|claude-code|claude-sonnet-5-5": {
+            "calls": 4,
+            "input": 24,
+            "output": 3409,
+            "cacheRead": 273383,
+            "cacheWrite": 137206,
+            "costUsd": 0.637638,
+            "costCalls": 4
+          },
+          "Writing checks|writer|claude-code|claude-opus-5-5": {
+            "calls": 4,
+            "input": 8,
+            "output": 4753,
+            "cacheRead": 32205,
+            "cacheWrite": 186283,
+            "costUsd": 1.591797,
+            "costCalls": 4
+          },
+          "Other|marker|codex|gpt-6.1-sol": {
+            "calls": 4,
+            "input": 142013,
+            "output": 1125,
+            "cacheRead": 29312,
+            "cacheWrite": 0,
+            "costUsd": 0,
+            "costCalls": 0
           }
         }
       }

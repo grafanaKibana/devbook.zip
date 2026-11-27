@@ -4,14 +4,14 @@ topic: [Programming]
 subtopic: [NET]
 tags: [FolderNote]
 publish: true
-status: New
+status: Established
 priority: Medium
 level: ["4"]
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Types"
 flashcard_uid: "a5c39ae2"
 created: "2026-02-10T16:03:55.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-27T16:47:13.667Z"
 published: "2026-07-08T13:14:17.329Z"
 ---
 
@@ -98,7 +98,7 @@ The direct `h.Counter.Inc()` call compiles, but it mutates the temporary value r
 >
 > There is no `counters[i] = copy` to save the change. This illustrates the copying behavior, rather than exact compiler output.
 >
-> This concerns the struct’s own fields; objects referenced by those fields can still be shared and changed.
+> This concerns the struct’s own fields. Objects referenced by those fields can still be shared and changed.
 >
 > Sources: [Microsoft Learn: Iteration statements](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements) · [Microsoft Learn: Value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types)
 
@@ -135,21 +135,48 @@ The direct `h.Counter.Inc()` call compiles, but it mutates the temporary value r
 > Sources: [Microsoft Learn: Boxing and unboxing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing) · [Microsoft Learn: Nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types#boxing-and-unboxing) · [Microsoft Learn: Generic classes and methods](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/generics) · [Microsoft Learn: OpCodes.Constrained](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.constrained?view=net-10.0)
 
 <!-- qard-id: d5bda60c-1799-4e4a-ab36-7624ae085e3a -->
-> [!qard]- How should a C# data type be chosen among classes, records and struct variants?
-> Choose how assignment should behave first, then add the equality and mutation rules needed.
+> [!qard]- What is the difference between a class and a struct in C#?
+> A class is a reference type, so a variable holds a reference to an object, while a struct is a value type, so a variable holds the value itself, and most of the differences follow from that.
 >
-> 1. **`class` or `struct`: sharing or copying?** A class fits objects that need shared identity or inheritance: assigning it copies a reference to the same object. A struct fits a value that should be copied on assignment. Choosing a struct does not guarantee that no heap allocation occurs.
+> - **Assignment:** assigning a reference type copies the reference, so two variables share one object and a change through one shows through the other. Assigning a value type copies every field, so the copy is independent.
+> - **Storage:** a reference-type object lives on the managed heap. A value lives wherever its variable lives, which is typically the stack for a local, inside the heap object for a class field or array element, and a heap box after conversion to `object` or an interface. A local captured by a lambda, or kept across `await` or `yield`, can end up on the heap too.
+> - **Cost:** a reference type costs a heap allocation per object, but its reference is cheap to copy at any size. A value type needs no separate allocation, but every assignment or argument copies all fields unless the argument is passed with `ref`, `in` or `out`, so large structs are expensive to pass.
+> - **Equality:** by default a reference type compares references, so two objects with the same data are unequal, although `string` and records override that. A value type compares its data, so two values with the same data are equal.
+> - **Null:** a reference-type variable can be `null`, while a value-type variable always holds a value unless it is declared as `Nullable<T>`, such as `int?`.
+> - **Inheritance:** a class can derive from another class, while a struct can only implement interfaces, so a type hierarchy needs classes.
 >
-> 2. **Add `record` when generated value equality fits.** A `record class` still shares references, while a `record struct` still copies values. Generated equality compares stored fields using each field type’s equality rules; it does not automatically compare the contents of referenced collections. Ordinary structs already have default value equality; records provide generated equality members and other conveniences. Records can be mutable.
+> Sources: [Microsoft Learn: Structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft Learn: Value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types) · [Microsoft Learn: Boxing and unboxing](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing) · [Microsoft Learn: Nullable value types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/nullable-value-types)
+
+> [!qard]- What is a `record`, and what does it add to a class and to a struct in C#?
+> A record is a class or struct declared with `record`, for which the compiler generates equality that compares the data instead of the object's identity, plus other data conveniences that otherwise are written by hand. The generated comparison is not deep, because each member is compared with its own type's equality, so a `List<T>` member is compared by reference.
 >
-> 3. **Add `readonly` when the struct’s own state should stay fixed after initialization.** Use `readonly struct`, or `readonly record struct` when generated record behavior is also wanted. This prevents changes to the struct’s own fields; it does not freeze objects those fields reference.
+> - **Class:** the result of a comparison changes, because a plain class compares references while a record class compares the data, so two objects with the same data become equal.
+> - **Struct:** the result of a comparison stays the same, because a plain struct already compares field values. The gain is a typed `Equals` that avoids the boxing and reflection of the inherited one, the `==` and `!=` that a plain struct lacks, and a hash over all fields, where the inherited `GetHashCode` may use only some of them and so collide more often.
+> - **Mutability:** a record is not automatically immutable. Positional properties of a record class are init-only, so they cannot be reassigned once the object is created, while those of a record struct are settable unless the type is a `readonly record struct`. A record can still declare an ordinary settable property, such as `public int Age { get; set; }`. An init-only property only prevents assigning a new value to the property, so with `record Order(List<string> Items)` the call `order.Items.Add("x")` still changes the list.
+> - **Use:** records suit data carriers such as DTOs, messages and value objects, where equal data means equal objects. Entities with identity, such as Entity Framework entities, usually stay conventional classes.
+> - **Generated:** for both kinds the compiler writes `Equals`, `GetHashCode`, `==`, `!=`, a `ToString` that prints the member values, and for positional syntax such as `record Person(string Name, int Age)` the constructor, a property per parameter and `Deconstruct`.
 >
-> 4. **Use `ref struct` when the value must hold data such as `Span<T>` or a `ref` field.** The compiler prevents that value from escaping onto the managed heap. `readonly ref struct` combines this restriction with readonly state.
+> ```csharp
+> // With record: the compiler writes the equality members.
+> public record struct Point(int X, int Y);
 >
-> Sources: [Microsoft Learn: Structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft Learn: Records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft Learn: Record equality specification](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/structs#16533-equality-members) · [Microsoft Learn: ref structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/ref-struct)
+> // Without record: the same members by hand.
+> public struct PlainPoint : IEquatable<PlainPoint>
+> {
+>     public int X, Y;
+>
+>     public bool Equals(PlainPoint p) => X == p.X && Y == p.Y;
+>     public override bool Equals(object? o) => o is PlainPoint p && Equals(p);
+>     public override int GetHashCode() => HashCode.Combine(X, Y);
+>     public static bool operator ==(PlainPoint a, PlainPoint b) => a.Equals(b);
+>     public static bool operator !=(PlainPoint a, PlainPoint b) => !a.Equals(b);
+> }
+> ```
+>
+> Sources: [Microsoft Learn: Records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record) · [Microsoft Learn: ValueType.Equals](https://learn.microsoft.com/en-us/dotnet/api/system.valuetype.equals) · [Microsoft Learn: ValueType.GetHashCode](https://learn.microsoft.com/en-us/dotnet/api/system.valuetype.gethashcode)
 
 > [!qard]- Why can two anonymous objects compare unequal with `==` but match in `Intersect`?
-> Anonymous types synthesize value-based `Equals` and `GetHashCode`, but do not overload `==`; that operator compares reference identity. Two separately created anonymous objects with the same property names, types, order, and values in the same assembly therefore compare unequal with `==` but equal with `Equals`. `Intersect` uses the default equality comparer, which uses their generated equality and hash rather than the `==` operator. Each property is compared with its own type's equality, not recursively by arbitrary object contents. [Microsoft: anonymous types](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/anonymous-types)
+> Anonymous types synthesize value-based `Equals` and `GetHashCode`, but do not overload `==`, so that operator compares reference identity. Two separately created anonymous objects with the same property names, types, order, and values in the same assembly therefore compare unequal with `==` but equal with `Equals`. `Intersect` uses the default equality comparer, which uses their generated equality and hash rather than the `==` operator. Each property is compared with its own type's equality, not recursively by arbitrary object contents. [Microsoft: anonymous types](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/anonymous-types)
 
 # References
 

@@ -8,7 +8,7 @@ publish: true
 qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Structs"
 created: "2026-02-18T19:18:52.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-27T16:47:13.667Z"
 published: "2026-07-08T13:14:17.328Z"
 ---
 
@@ -237,19 +237,34 @@ Readonly values remove most accidental mutation paths. APIs that need in-place u
 >
 > [Microsoft: structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct) · [Microsoft: method parameters](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/method-parameters)
 
+> [!qard]- What is a `ref struct`, and why is it needed?
+> A `ref struct` is a stack-only struct, which means the compiler guarantees that a value of the type never ends up on the managed heap. The guarantee is needed because a type such as `Span<T>` holds a reference straight into memory that something else owns, such as the middle of an array or a `stackalloc` buffer. A copy of that span stored in a heap object could outlive the memory and then read or write whatever replaced it.
+>
+> `Span<T>` and `ReadOnlySpan<T>` are themselves `ref struct` types, so a custom type that keeps a span in a field has to be a `ref struct` as well, which is the usual reason to write one. The price is that such a value cannot be a class field or stay alive across an `await`, which is where `Memory<T>` is used instead.
+>
+> ```csharp
+> // Compiles: a ref struct stays on the stack, so the span field is safe.
+> ref struct LineReader
+> {
+>     private ReadOnlySpan<char> text;
+> }
+>
+> // Same field without `ref`: an ordinary struct can be boxed or stored
+> // in a class, so the span could reach the heap and outlive its memory.
+> struct LineBuffer
+> {
+>     private ReadOnlySpan<char> text; // error CS8345
+> }
+> ```
+>
+> [Microsoft: ref structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/ref-struct)
+
 > [!qard]- What restrictions apply to a `ref struct`, and why do they exist?
 > A `ref struct` can never be stored on the managed heap. It cannot be boxed or converted to `object`, `ValueType`, or an interface type. It cannot be a field of a class or ordinary struct, a static field, or an array element. A lambda or local function cannot capture it, a variable of the type cannot stay live across an `await` or `yield return`, and the type cannot be declared as a record.
 >
 > The type can hold a reference into stack memory or into the middle of another object, as `Span<T>` over `stackalloc` memory does. A heap copy could outlive that stack frame or referenced data and leave a dangling reference. Keeping every copy where the compiler's ref-safety analysis tracks its lifetime makes such references safe without runtime checks.
 >
 > [Microsoft: ref structure types](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/ref-struct)
-
-> [!qard]- Why should a struct that is compared or hashed often implement `IEquatable<T>` instead of relying on inherited `ValueType` equality?
-> Inherited `ValueType.Equals(object)` takes `object`, so comparing two structs boxes both values. It compares raw bytes only for some layouts, when no field is a reference type and the struct has no padding; otherwise it compares fields through reflection, which is much slower. Inherited `ValueType.GetHashCode` uses one or more fields, not necessarily all of them, so distinct values can share a hash and slow down lookups. By default, `Dictionary<TKey,TValue>` and `HashSet<T>` use `EqualityComparer<T>.Default`, which calls a typed `IEquatable<T>.Equals(T)` without boxing when the struct implements it.
->
-> A complete implementation pairs `IEquatable<T>.Equals(T)` with `Equals(object)` and `GetHashCode` overrides over the same fields. A struct has no `==` or `!=` by default, so those operators need explicit declarations. A `record struct` synthesizes all of these members.
->
-> [Microsoft: ValueType.Equals](https://learn.microsoft.com/en-us/dotnet/api/system.valuetype.equals) · [Microsoft: ValueType.GetHashCode](https://learn.microsoft.com/en-us/dotnet/api/system.valuetype.gethashcode) · [Microsoft: define value equality](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type)
 
 # References
 

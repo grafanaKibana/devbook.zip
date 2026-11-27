@@ -9,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/ASP NET Web API/Filters"
 flashcard_uid: "ef27222b"
 created: "2026-02-19T23:08:30.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-27T16:47:13.667Z"
 published: "2026-07-08T13:14:17.319Z"
 ---
 
@@ -135,10 +135,8 @@ Attributes cannot receive runtime services through their own constructors, so at
 > [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)
 
 <!-- qard-id: ec8874e5-0ca6-4d53-a3dd-6594e0a512e3 -->
-> [!qard]- Which part of the controller pipeline do ASP.NET Core exception filters cover?
-> Only the core that runs the action: controller creation, model binding, action filters and the action method. Exception filters run only when that core throws an unhandled exception.
->
-> Everything else is outside them: authorization filters run earlier, resource filters wrap the core on both sides, result filters and result execution run later, and middleware, routing and Minimal API handlers sit outside the controller-filter pipeline. A uniform API error contract therefore belongs in exception-handling middleware.
+> [!qard]- What exceptions does an exception filter catch in ASP.NET Core?
+> An exception filter catches unhandled exceptions from running the action: the action method and the steps right around it, which are creating the controller, model binding and the action filters. It does not see anything that goes wrong before those steps or after them. An exception thrown while the result is written to the response, such as a serialization error, gets past it, and so does one thrown in middleware. That is why an exception filter suits error handling for controllers only, while one error response for the whole API belongs in exception-handling middleware.
 >
 > [Microsoft: Filters in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-10.0)
 

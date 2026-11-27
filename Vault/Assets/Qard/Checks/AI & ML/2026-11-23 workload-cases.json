@@ -33,7 +33,45 @@
       }
     }
   ],
-  "answers": {},
-  "marks": {},
-  "status": "ready"
+  "answers": {
+    "c1": {
+      "text": "one cases are relevant only for one retrieval configuration, other config can have different models, intexes, providers, search algorithms and other things which can lead to other results which are correct, but not expected for the first set. Typically there should one set per configuration",
+      "confidence": "unsure"
+    }
+  },
+  "marks": {
+    "c1": {
+      "awarded": [
+        false,
+        false
+      ],
+      "annotations": [
+        {
+          "quote": "one cases are relevant only for one retrieval configuration",
+          "kind": "wrong",
+          "note": "Both configurations answer the same 50 cases, so the cases are shared. The problem is that a 1–2 point gap is about one net case, which noise can create or hide."
+        },
+        {
+          "quote": "Typically there should one set per configuration",
+          "kind": "wrong",
+          "note": "A separate set per configuration would remove the paired comparison. The fix is a set big enough to detect the effect, not one set per configuration."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to say that a 1–2 point difference on 50 cases is about one case, so it cannot be separated from noise."
+        },
+        {
+          "quote": "",
+          "kind": "missing",
+          "note": "You needed to say that set size should be chosen against the smallest effect the set must detect (the minimum detectable effect), here about 1–2 points."
+        }
+      ],
+      "mistake": "misconception",
+      "feedback": "You treated the problem as configuration-specific cases rather than a lack of statistical power to detect a 1–2 point difference, and you did not name the minimum detectable effect.",
+      "score": 0
+    }
+  },
+  "status": "marked",
+  "finishedAt": 1795615014011
 }

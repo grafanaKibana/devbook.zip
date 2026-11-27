@@ -9,7 +9,7 @@ qard-deck: "Programming"
 qard-topic: "NET/CSharp/Fundamentals/Types/Records"
 flashcard_uid: "c03985b0"
 created: "2026-02-18T19:18:52.000Z"
-modified: "2026-11-16T16:48:56.427Z"
+modified: "2026-11-27T16:47:13.667Z"
 published: "2026-07-08T13:14:17.328Z"
 ---
 
@@ -242,41 +242,23 @@ public record Wrapper(List<int> Items);
 
 # Questions
 
-> [!qard]- What is a C# record?
-> A record is a class or struct declared with record whose generated equality compares data rather than object identity. `record` alone means record class, a reference type that can inherit from another record class; record struct is a value type. Records fit data carriers such as DTOs, messages, and value objects. Identity-rich entities, such as typical Entity Framework entities, usually fit conventional classes.
->
-> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
-
-> [!qard]- Which members does the compiler synthesize for a positional record?
-> - **Value equality and hashing:** `Equals` and `==` compare the runtime type and field values, using each field type's equality; `!=` negates equality. `GetHashCode` computes a compatible hash, so equal records have equal hashes. Separately created `record class` instances with equal data can therefore compare equal.
-> - **Nondestructive mutation:** `p with { Age = 31 }` copies the record and changes the listed members. The copy is shallow, so referenced objects are shared.
-> - **Readable `ToString`:** prints the type name and public members, such as `Person { Name = Alice, Age = 30 }`.
-> - **Positional members:** `record Person(string Name, int Age)` also generates a primary constructor, a public property for each parameter and `Deconstruct`. These properties are init-only for `record class` and `readonly record struct`, but settable for a plain `record struct`.
->
->
-> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
-
 <!-- qard-id: 40d90777-69d9-4746-901b-68d334cae949 -->
-> [!qard]- In `record Wrapper(List<int> Items)`, if `var b = a with { };` and an item is added to `b.Items`, does `a` observe the change, and why?
-> Yes. A `with` expression makes a shallow copy: it copies each field of `a` into the new record, and for a reference-type field that copies the reference, not the object it points to. `a.Items` and `b.Items` therefore refer to the same `List<int>`, so an item added through `b.Items` is visible through `a.Items`.
+> [!qard]- Does a `with` expression make a deep or a shallow copy of a record?
+> A `with` expression makes a shallow copy. It copies each field into the new record, and for a reference-type field that means copying the reference, not the object behind it. The original and the copy then share that object, so a change made to it through one record is visible through the other.
 >
 > ```csharp
 > var a = new Wrapper(new List<int> { 1, 2 });
-> var b = a with { };
+> var b = a with { };                    // copies the reference to the same list
 > b.Items.Add(3);
-> Console.WriteLine(a.Items.Count); // 3
+> Console.WriteLine(a.Items.Count);      // 3
+>
+> var c = a with { Items = new List<int>(a.Items) };   // independent copy: its own list
+>
+> record Wrapper(List<int> Items);
 > ```
 >
-> An independent copy needs its own list, for example `a with { Items = new List<int>(a.Items) }`.
->
 > [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
-<!-- qard-id: 003b8f0c-ee5e-4a60-ac02-067b2fcef925 -->
-> [!qard]- Given `record Wrapper(List<int> Items)` and `var b = a with { };`, are `a` and `b` equal before and after an item is added to `b.Items`? Why?
-> They are equal both before and after the item is added. Generated record equality compares the runtime type and each field using that field's own equality, and `List<int>` compares by reference. Because `with` copied the reference, `a.Items` and `b.Items` refer to the same list. Adding an item changes that list in place without replacing it. The comparison therefore sees the same reference both times and never looks at the list's contents.
->
-> The converse follows from the same rule: two `Wrapper` instances holding separate lists with identical items compare unequal.
->
-> [Microsoft: records](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/record)
+
 <!-- qard-id: 13eb1fca-847d-4f86-8bf6-c4720c859178 -->
 > [!qard]- How can a record compare a collection member by its elements instead of by reference?
 > There are two ways: override the record's equality so it compares the collection's elements, or store the elements in a type whose own `Equals` compares elements. Generated record equality compares each field with that field type's equality, and `List<T>` compares references, so the default never looks at the elements.
