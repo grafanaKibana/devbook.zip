@@ -78,6 +78,7 @@ const script = `
     var state = "mid";
     if (scrollY <= 4) state = "top";
     else if (scrollY >= maxScroll - 4) state = "bottom";
+    docEl.toggleAttribute("data-page-scrolled", state !== "top");
 
     // The reveal gate only shows the cluster once scrollY passes the threshold,
     // so the "top" extreme is effectively unreachable while visible; the top

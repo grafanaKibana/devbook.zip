@@ -5,6 +5,7 @@ import { ExplorerIcons } from "./custom/components/explorer-icons"
 import { ContentMetaRow } from "./custom/components/content-meta-row"
 import { Complexity } from "./custom/components/complexity"
 import { ExplorerOrder } from "./custom/components/explorer-order"
+import { GraphInteraction } from "./custom/components/graph-interaction"
 import { FloatingButtons } from "./custom/components/floating-buttons"
 import { NavScopeDropdown } from "./custom/components/nav-scope-dropdown"
 import { PageContribute } from "./custom/components/page-contribute"
@@ -143,6 +144,7 @@ const complexity = Complexity()
 const excalidrawEnhance = ExcalidrawEnhance()
 const excalidrawExport = ExcalidrawExport()
 const pageReveal = PageReveal()
+const graphInteraction = GraphInteraction()
 layout.defaults.afterBody = [
   ...(layout.defaults.afterBody ?? []),
   steptrace,
@@ -150,6 +152,7 @@ layout.defaults.afterBody = [
   excalidrawEnhance,
   excalidrawExport,
   pageReveal,
+  graphInteraction,
 ]
 for (const pageLayout of Object.values(layout.byPageType)) {
   pageLayout.afterBody = [
@@ -159,6 +162,7 @@ for (const pageLayout of Object.values(layout.byPageType)) {
     excalidrawEnhance,
     excalidrawExport,
     pageReveal,
+    graphInteraction,
   ]
 }
 
@@ -184,11 +188,7 @@ const content = { ...(layout.byPageType.content ?? {}) }
 content.afterBody = [QuestionsIndex(), ...(content.afterBody ?? [])]
 layout.byPageType.content = content
 
-// Site header (title · search · theme/reader toggles). These four community
-// components are no longer positioned in the left sidebar (their `layout` was
-// removed from quartz.config.yaml); instead we render them here, in the page's
-// semantic `header` slot, wrapped by our SiteHeader. They're still registered,
-// so the resource collector ships their CSS/JS — we only need their instances.
+// The header embeds registered components and supplies its own theme picker.
 const instantiateRegistered = (name: string): QuartzComponent => {
   const registered = componentRegistry.get(name)
   if (!registered) {
@@ -205,7 +205,7 @@ const instantiateRegistered = (name: string): QuartzComponent => {
 // Quartz 5.1 uses manifest positions when YAML omits layout. These components
 // are rendered inside DevBook wrappers, so remove their automatic placements.
 const embeddedComponents = new Set(
-  ["page-title", "search", "darkmode", "reader-mode", "content-meta"].map(instantiateRegistered),
+  ["page-title", "search", "reader-mode", "content-meta"].map(instantiateRegistered),
 )
 for (const pageLayout of [layout.defaults, ...Object.values(layout.byPageType)]) {
   for (const slot of ["header", "beforeBody", "left", "right", "afterBody"] as const) {
@@ -217,7 +217,6 @@ for (const pageLayout of [layout.defaults, ...Object.values(layout.byPageType)])
 const siteHeader = SiteHeader({
   title: instantiateRegistered("page-title"),
   search: instantiateRegistered("search"),
-  darkmode: instantiateRegistered("darkmode"),
   readerMode: instantiateRegistered("reader-mode"),
 })
 layout.defaults.header = [siteHeader, ...(layout.defaults.header ?? [])]

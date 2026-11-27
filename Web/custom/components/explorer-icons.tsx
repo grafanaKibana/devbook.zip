@@ -117,36 +117,29 @@ const script = `
     }
   }
 
-  // The top-level <li> a node lives under (a direct child of .explorer-ul).
-  function topLevelLi(el) {
-    let li = el.closest("li");
-    while (li) {
-      const parent = li.parentElement;
-      if (parent && parent.classList.contains("explorer-ul")) return li;
-      li = parent ? parent.closest("li") : null;
-    }
-    return null;
+  // Both rails use the destination's root folder for its topic colour.
+  function topicColor(slug, colorMap) {
+    const topic = slug.split("/", 1)[0];
+    return colorMap[topic + "/index"] || (slug.includes("/") && colorMap[topic]) || null;
   }
 
-  // The topic tint for a node: the colour of its top-level topic folder, so a
-  // whole subtree shares that topic's hue (matching the design, where each topic
-  // folder's glyph carries its colour). Returns null to fall back to the accent.
-  function topicColor(el, colorMap) {
-    const top = topLevelLi(el);
-    if (!top) return null;
-    const fc = top.querySelector(":scope > .folder-container");
-    if (!fc || fc.dataset.folderpath == null) return null;
-    const slug = normalizeSlug(fc.dataset.folderpath);
-    return (
-      colorMap[slug] || colorMap[slug + "/index"] || colorMap[slug.replace(/\\/index$/, "")] || null
-    );
+  // The browser resolves relative backlink hrefs against the current page.
+  // Keep a folder's index suffix so its default glyph agrees with the tree.
+  function linkSlug(link) {
+    const base = document.body.dataset.basepath || "";
+    const path = link.pathname;
+    const local = base && (path === base || path.startsWith(base + "/")) ? path.slice(base.length) : path;
+    const slug = normalizeSlug(local);
+    if (!slug) return "index";
+    return local.endsWith("/") ? slug + "/index" : slug;
   }
 
   function decorateFolders(explorer, map, colorMap) {
     explorer.querySelectorAll(".folder-container").forEach(function (c) {
       if (c.dataset.ec) return;
       c.dataset.ec = "1";
-      const name = pickAssigned(map, normalizeSlug(c.dataset.folderpath));
+      const slug = normalizeSlug(c.dataset.folderpath);
+      const name = pickAssigned(map, slug);
       // An assigned icon is used for both states; otherwise book -> book-open.
       const closed = name || DEFAULTS.folderClosed;
       const open = name || DEFAULTS.folderOpen;
@@ -155,7 +148,7 @@ const script = `
       span.innerHTML = svg(closed, "ec-folder-closed") + svg(open, "ec-folder-open");
       // Tint the glyph to its topic's colour (the design puts the accent on the
       // folder icon); nested folders inherit their top-level topic's hue.
-      const color = topicColor(c, colorMap);
+      const color = topicColor(slug, colorMap);
       if (color) span.style.setProperty("--ec-topic", color);
       const chevron = c.querySelector(".folder-icon");
       if (chevron && chevron.nextSibling) c.insertBefore(span, chevron.nextSibling);
@@ -168,7 +161,8 @@ const script = `
     explorer.querySelectorAll("a.nav-file-title").forEach(function (a) {
       if (a.dataset.ec) return;
       a.dataset.ec = "1";
-      const name = pickAssigned(map, normalizeSlug(a.getAttribute("href") || a.href));
+      const slug = linkSlug(a);
+      const name = pickAssigned(map, slug);
       const idle = name || DEFAULTS.fileIdle;
       const active = name || DEFAULTS.fileActive;
       const span = document.createElement("span");
@@ -178,9 +172,33 @@ const script = `
       // that topic's hue; root pages (Credits, Questions, Roadmap) have no topic
       // folder above them, so topicColor returns null and the icon falls back to
       // the accent.
-      const color = topicColor(a, colorMap);
+      const color = topicColor(slug, colorMap);
       if (color) span.style.setProperty("--ec-topic", color);
       a.insertBefore(span, a.firstChild);
+    });
+  }
+
+  function decorateBacklinks(map, colorMap) {
+    const currentPage = (document.body.dataset.slug || "").replace(/\\/index$/, "");
+    document.querySelectorAll(".backlinks li > a.internal").forEach(function (link) {
+      const slug = linkSlug(link);
+      const current = slug.replace(/\\/index$/, "") === currentPage;
+      const unchanged = current === (link.getAttribute("aria-current") === "page");
+      if (unchanged && link.firstElementChild?.dataset.ecTarget === slug) return;
+      if (current) link.setAttribute("aria-current", "page");
+      else link.removeAttribute("aria-current");
+      const topic = slug.split("/", 1)[0];
+      const primary = slug === "index" || slug === "questions";
+      const name = slug === "index" ? "house" : slug === "questions" ? "circle-help"
+        : pickAssigned(map, topic) || (slug.includes("/") ? DEFAULTS.folderClosed : DEFAULTS.fileIdle);
+      const icon = document.createElement("span");
+      icon.className = "ec-ico";
+      icon.dataset.ecTarget = slug;
+      icon.innerHTML = svg(name, "");
+      const color = primary ? "var(--gray)" : topicColor(slug, colorMap);
+      if (color) icon.style.setProperty("--ec-topic", color);
+      if (link.firstElementChild?.hasAttribute("data-ec-target")) link.firstElementChild.replaceWith(icon);
+      else link.prepend(icon);
     });
   }
 
@@ -191,9 +209,9 @@ const script = `
     try {
       ICONS = readIcons();
       const explorers = document.querySelectorAll("div.explorer");
-      if (!explorers.length) return;
       const map = readMap();
       const colorMap = readColorMap();
+      decorateBacklinks(map, colorMap);
       explorers.forEach(function (ex) {
         decorateFolders(ex, map, colorMap);
         decorateFiles(ex, map, colorMap);
@@ -234,7 +252,7 @@ export const ExplorerIcons: QuartzComponentConstructor = () => {
     // Also inline a slug -> topic-colour map from the topic folder-notes' `color:`
     // frontmatter, so the browser script can tint each folder glyph to its topic's
     // hue (the same colour the scope selector uses).
-    const iconNames = new Set<string>(Object.values(DEFAULTS))
+    const iconNames = new Set<string>([...Object.values(DEFAULTS), "house", "circle-help"])
     const map: Record<string, string> = {}
     const colorMap: Record<string, string> = {}
     for (const file of allFiles ?? []) {
@@ -288,7 +306,7 @@ export const ExplorerIcons: QuartzComponentConstructor = () => {
   Component.afterDOMLoaded = script
 
   Component.css = `
-.explorer .ec-ico {
+.explorer .ec-ico, .backlinks .ec-ico {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -296,7 +314,7 @@ export const ExplorerIcons: QuartzComponentConstructor = () => {
   margin-right: 0.4em;
   vertical-align: -0.18em;
 }
-.explorer .ec-svg {
+.explorer .ec-svg, .backlinks .ec-svg {
   width: 15px;
   height: 15px;
 }
@@ -304,7 +322,7 @@ export const ExplorerIcons: QuartzComponentConstructor = () => {
 /* Folder — book (collapsed) -> book-open (expanded). Reuses the plugin's own
    open-state hook (.folder-outer.open) via :has(), matching how it rotates the
    collapse chevron. An assigned icon (.ec-assigned) is the same in both states. */
-.explorer .ec-folder-ico {
+.explorer .ec-folder-ico, .backlinks .ec-ico {
   color: var(--ec-topic, var(--secondary));
 }
 .explorer .ec-folder-open {
