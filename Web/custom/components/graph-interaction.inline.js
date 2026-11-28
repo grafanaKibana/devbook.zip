@@ -170,14 +170,30 @@ function cssColor(container, className) {
   }
 }
 
-// The zoom transform that frames the whole layout. It never zooms in past 1×:
-// above that the plugin builds every label at once, which stalls the opening.
-function fitTransform(app, simulation, zoom) {
+// The zoom transform that frames the whole layout, and never zooms in past 1×.
+// `reach` is how far from the centre the settled layout is expected to spread:
+// framing at least that much keeps the view from zooming in on the opening
+// cluster and back out as it unfolds.
+function fitTransform(app, simulation, zoom, reach) {
   const d3 = window.d3
   const { width, height } = app.screen
   const models = simulation.nodes()
-  const [x0, x1] = d3.extent(models, (n) => n.x)
-  const [y0, y1] = d3.extent(models, (n) => n.y)
+  const x0 = Math.min(
+    -reach,
+    d3.min(models, (n) => n.x),
+  )
+  const x1 = Math.max(
+    reach,
+    d3.max(models, (n) => n.x),
+  )
+  const y0 = Math.min(
+    -reach,
+    d3.min(models, (n) => n.y),
+  )
+  const y1 = Math.max(
+    reach,
+    d3.max(models, (n) => n.y),
+  )
   const [minScale] = zoom.scaleExtent()
   const pad = 24
   const fit = Math.min((width - 2 * pad) / (x1 - x0 || 1), (height - 2 * pad) / (y1 - y0 || 1))
@@ -238,22 +254,58 @@ function enhancePicking(app, container, content, simulation, zoom) {
     neighbors.get(source.id).add(target.id)
     neighbors.get(target.id).add(source.id)
   }
-  // Rank notes by connections. The best-connected 5% are labelled in the opening
-  // view; the rest fade in as the view zooms to 3.5× its opening scale.
-  const degrees = Array.from(neighbors.values(), (set) => set.size).sort((a, b) => a - b)
-  const rank = (node) =>
-    window.d3.bisectLeft(degrees, neighbors.get(node.label).size) / Math.max(1, degrees.length - 1)
-  const revealAt = (node) => 0.75 + (2.5 * Math.max(0, 0.95 - rank(node))) / 0.95
+  // Notes are labelled one at a time, best-connected first: the top 5% in the
+  // opening view and every note by 4× that zoom. Each note has its own place
+  // in the order, because notes that share a connection count would otherwise
+  // all appear at the same zoom. The share labelled grows as a power of the
+  // zoom, a little faster than the view narrows, so the number of labels on
+  // screen creeps up instead of doubling on the first step.
+  const hubShare = 0.05
+  // A label's opacity depends on the zoom alone, with no timed fade. It spans
+  // this much zoom, about three wheel notches, so one notch is a small step.
+  const labelFade = 1.6
+  const labelPower = Math.log(1 / hubShare) / Math.log(4 / labelFade)
+  const degree = (entry) => neighbors.get(entry.node.label).size
+  const order = [...nodes].sort(
+    (a, b) => degree(b) - degree(a) || a.node.label.localeCompare(b.node.label),
+  )
+  order.forEach((entry, i) => {
+    const share = (i + 1) / order.length
+    const at = (share / hubShare) ** (1 / labelPower)
+    // The opening view shows its hubs in full, so their fade ends there.
+    entry.logAt = Math.log(share <= hubShare ? at / labelFade : at)
+    entry.alpha = 0
+  })
 
-  // The view keeps the settling layout framed until the reader zooms, pans or drags.
+  // The view keeps the settling layout framed until the reader zooms, pans or
+  // drags. It eases toward that framing instead of snapping to it, so a note
+  // thrown wide while the layout unfolds does not shake the whole view.
+  const cfg = JSON.parse(container.dataset.cfg || "{}")
+  // The plugin's radial force gathers the notes on a ring of this radius.
+  const reach = cfg.enableRadial ? Math.min(app.screen.width, app.screen.height) * 0.4 : 0
+  const cameraLag = 250
   let openingScale = graph.scale.x
   let following = !!zoom
+  let view, viewAt
   function follow() {
     if (!following) return
-    const transform = fitTransform(app, simulation, zoom)
-    openingScale = transform.k
+    const target = fitTransform(app, simulation, zoom, reach)
+    const now = performance.now()
+    const blend = view ? 1 - Math.exp(-(now - viewAt) / cameraLag) : 1
+    view = {
+      k: (view?.k ?? 0) + (target.k - (view?.k ?? 0)) * blend,
+      x: (view?.x ?? 0) + (target.x - (view?.x ?? 0)) * blend,
+      y: (view?.y ?? 0) + (target.y - (view?.y ?? 0)) * blend,
+    }
+    viewAt = now
+    openingScale = view.k
+    const transform = window.d3.zoomIdentity.translate(view.x, view.y).scale(view.k)
     window.d3.select(app.canvas).call(zoom.transform, transform)
   }
+  // The layout bursts out of one point over its first ticks, faster than the eye
+  // can follow. Those run before the first frame, so the graph opens already
+  // spread out and eases into place.
+  simulation.tick(20)
   if (zoom) {
     zoom.on("start.fit", (event) => {
       if (event.sourceEvent) following = false
@@ -264,56 +316,66 @@ function enhancePicking(app, container, content, simulation, zoom) {
     follow()
   }
 
-  // The plugin creates labels only above 1× zoom, all at once. At or below 1×,
-  // hub labels are HTML over the canvas, which stays crisp without building
-  // textures. Above 1× the plugin's own labels take over.
-  const cfg = JSON.parse(container.dataset.cfg || "{}")
+  // Labels are HTML over the canvas at every zoom. The plugin's own are textures
+  // it builds all at once above 1×, which stalls the view and makes them appear
+  // in one step, so its label layer stays hidden.
+  if (labels) labels.visible = false
   const textColor = cssColor(container, "graph-view color-text")
   const overlay = document.createElement("div")
   overlay.className = "graph-hub-labels"
   overlay.style.color = textColor.color
   overlay.style.opacity = String(textColor.alpha)
-  overlay.style.fontSize = `${(cfg.fontSize || 0.6) * 15}px`
   container.append(overlay)
-  const hubs = new Map(
-    nodes
-      .filter(({ node }) => rank(node) >= 0.95)
-      .map(({ node }) => {
-        const label = document.createElement("span")
-        label.textContent = content[contentSlug(node.label)]?.title ?? node.label
-        overlay.append(label)
-        return [node, label]
-      }),
-  )
-  const point = new window.PIXI.Point()
-  function updateHubLabels() {
-    const shown = graph.scale.x <= 1
-    for (const [node, label] of hubs) {
-      const visible = shown && node !== highlighted
-      label.hidden = !visible
-      if (!visible) continue
-      graph.toGlobal(node.position, point)
-      label.style.transform = `translate(${point.x}px, ${point.y}px) translate(-50%, -120%)`
-    }
-  }
-
-  const labelNodes = new Map()
-  function labelNode(label) {
-    if (!labelNodes.has(label)) {
-      const entry = nodes.find(({ node }) => node.x === label.x && node.y === label.y)
-      if (entry) labelNodes.set(label, entry.node)
-    }
-    return labelNodes.get(label)
-  }
+  // Zooming and panning move one sheet in step with the canvas, and the text
+  // scales with it. A label is touched only when its own opacity or its note's
+  // place changes, and only while its note is in view, so a zoom frame costs
+  // about the same however many notes are labelled.
+  const sheet = document.createElement("div")
+  overlay.append(sheet)
+  const fontSize = (cfg.fontSize || 0.6) * 15
+  const logFade = Math.log(labelFade)
+  let sized
   function updateLabels() {
-    for (const label of labels?.children ?? []) {
-      if (!label.visible) continue
-      const node = labelNode(label)
-      if (!node || node === highlighted) continue
-      const zoomed = graph.scale.x / openingScale
-      label.alpha = Math.max(0, Math.min(1, (zoomed - revealAt(node)) / 0.25))
+    const k = graph.scale.x
+    sheet.style.transform = `translate(${graph.x}px, ${graph.y}px) scale(${k})`
+    // The text is its set size in the opening view, whatever scale that view
+    // settles at. This changes only while the opening is still being framed.
+    const size = `${fontSize / openingScale}px`
+    if (size !== sized) sheet.style.fontSize = sized = size
+    const zoomed = k / openingScale
+    const logZoom = Math.log(zoomed)
+    // A label is centred above its note and grows with the zoom, so the margin
+    // that keeps a part-visible label alive grows with it.
+    const reachX = 100 * Math.max(1, zoomed)
+    const reachY = 20 * Math.max(1, zoomed)
+    const { width, height } = app.screen
+    for (const entry of nodes) {
+      const { node } = entry
+      const lit = node === highlighted
+      const x = node.x * k + graph.x
+      const y = node.y * k + graph.y
+      const inView = x > -reachX && x < width + reachX && y > 0 && y < height + reachY
+      const faded = Math.max(0, Math.min(1, (logZoom - entry.logAt) / logFade))
+      const alpha = !inView ? 0 : lit ? 1 : Math.round(faded * 100) / 100
+      if (alpha !== entry.alpha) {
+        if (!entry.span) {
+          entry.span = document.createElement("span")
+          entry.span.textContent = content[contentSlug(node.label)]?.title ?? node.label
+          sheet.append(entry.span)
+        }
+        entry.span.hidden = alpha === 0
+        entry.span.style.opacity = String(alpha)
+        entry.alpha = alpha
+      }
+      if (alpha === 0) continue
+      if (node.x !== entry.x || node.y !== entry.y || lit !== entry.lit) {
+        entry.x = node.x
+        entry.y = node.y
+        entry.lit = lit
+        const lift = lit ? " scale(1.1)" : ""
+        entry.span.style.transform = `translate(${node.x}px, ${node.y}px) translate(-50%, -120%)${lift}`
+      }
     }
-    updateHubLabels()
   }
   // At rest only links to the current note keep full strength. Hover dims the rest itself.
   function drawIdleLinks() {
