@@ -194,7 +194,7 @@
   inline-size: clamp(7.5rem, 34cqi, 10.5rem);
   flex-direction: column;
   overflow: hidden;
-  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border: var(--_stroke-hair) solid var(--_chrome-border);
   border-radius: var(--_radius-container);
 }
 

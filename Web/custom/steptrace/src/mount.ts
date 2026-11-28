@@ -904,11 +904,9 @@ export function createMount(
       if (!endpointSection || !startMenu || !targetMenu || !startHead || !targetHead) return
       const options =
         settings?.options || graph?.nodes?.map((node) => ({ value: node.id, label: node.id }))
-      if (!options?.length) {
-        endpointSection.hidden = true
-        return
-      }
-      endpointSection.hidden = false
+      endpointSection.hidden = !options?.length
+      menuWrap.hidden = endpointSection.hidden
+      if (endpointSection.hidden) return
       startHead.textContent = settings?.startLabel || "Start node"
       startMenu.setAttribute("aria-label", startHead.textContent)
       targetHead.hidden = !settings
