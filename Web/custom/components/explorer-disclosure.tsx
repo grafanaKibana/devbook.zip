@@ -85,8 +85,20 @@ const script = `
     });
   }
 
-  if (panel.addEventListener) panel.addEventListener("change", sync);
-  else if (panel.addListener) panel.addListener(sync);
+  // The plugin sets the drawer's closed state only when a page loads narrow.
+  // Crossing the breakpoint gives each layout its resting state: a closed
+  // drawer below it, an expanded tree above it.
+  function onBreakpoint() {
+    document.querySelectorAll("div.explorer").forEach(function (explorer) {
+      explorer.classList.toggle("collapsed", panel.matches);
+      delete explorer.dataset.drawerOpen;
+    });
+    document.documentElement.classList.remove("mobile-no-scroll");
+    sync();
+  }
+
+  if (panel.addEventListener) panel.addEventListener("change", onBreakpoint);
+  else if (panel.addListener) panel.addListener(onBreakpoint);
   document.addEventListener("nav", bind);
 })();
 `
