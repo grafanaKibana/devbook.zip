@@ -49,6 +49,12 @@ export interface BuildCtx {
    * `.base` / `.canvas` pages).
    */
   virtualPages: ProcessedContent[]
+  /**
+   * Pages the filters removed (and their aliases) → the filter, set after filtering when the
+   * Links transformer marks broken links. PageTypeDispatcher marks links to them, and to folder
+   * and tag pages no page type generated, once the virtual pages exist (markUnpublishedLinks).
+   */
+  removedPages?: ReadonlyMap<string, string>
   /** Content-hashed asset filenames, populated by ComponentResources emitter */
   hashedResourceNames?: HashedResourceNames
   /** Maps CSS content strings to their emitted hashed filenames. Populated by ComponentResources. */
@@ -86,3 +92,26 @@ export function trieFromAllFiles(allFiles: QuartzPluginData[]): FileTrieNode<Bui
 }
 
 export type WorkerSerializableBuildCtx = Omit<BuildCtx, "cfg" | "trie">
+
+/** The plain-data fields of {@link BuildCtx} that worker threads need, each one required. */
+type WorkerCtxFields = {
+  [K in "buildId" | "argv" | "allSlugs" | "allFiles" | "permalinks" | "incremental"]-?: BuildCtx[K]
+}
+
+/**
+ * The build context passed to worker threads (structured-cloned): every plain-data field the
+ * parse needs. Listing each field as required means a new one can't be forgotten here: worker
+ * threads run for sites of 192 or more files, so a missing field (permalinks, #2644) only broke
+ * large sites.
+ */
+export function workerCtx(ctx: BuildCtx): WorkerSerializableBuildCtx {
+  const fields: WorkerCtxFields = {
+    buildId: ctx.buildId,
+    argv: ctx.argv,
+    allSlugs: ctx.allSlugs,
+    allFiles: ctx.allFiles,
+    permalinks: ctx.permalinks ?? {},
+    incremental: ctx.incremental,
+  }
+  return { ...fields, virtualPages: [] }
+}

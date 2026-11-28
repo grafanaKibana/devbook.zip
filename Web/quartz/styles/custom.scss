@@ -1667,7 +1667,7 @@ body:is([data-slug="questions"], [data-slug="about"]) .page[data-frame="default"
 // ---------------------------------------------------------------------------
 // Mermaid xy charts (xychart-beta)
 // ---------------------------------------------------------------------------
-.center pre > code.mermaid > svg[aria-roledescription="xychart"] {
+.center .mermaid svg[aria-roledescription="xychart"] {
   width: auto !important;
   height: auto !important;
   max-width: 100% !important;
@@ -1838,17 +1838,14 @@ body:is([data-slug="questions"], [data-slug="about"]) .page[data-frame="default"
 }
 
 // Raw transclusions retain their controls but shed the quote/card chrome.
-blockquote.transclude:has(.excalidraw-page) {
+.transclude:has(.excalidraw-page) {
   padding: 0;
   border: 0;
   border-radius: 0;
   overflow: visible;
   background: transparent;
 
-  > h1:first-child {
-    display: none;
-  }
-
+  > .markdown-embed-title,
   > a.transclude-src {
     display: none;
   }

@@ -113,8 +113,6 @@ plugins:
     options:
       renderEngine: katex
     order: 80
-  - source: github:quartz-community/fonts
-    enabled: false
   - source: github:quartz-community/explicit-publish
     enabled: true
   - source: github:quartz-community/alias-redirects

@@ -39,6 +39,7 @@ import {
   readPluginsJson,
   writePluginsJson,
   updateGlobalConfig,
+  extendedConfigFiles,
   LOCKFILE_PATH,
 } from "./plugin-data.js"
 import {
@@ -334,6 +335,17 @@ export async function handleBuild(argv) {
     argv.watch = true
   }
 
+  // Let `--config <path>` override the default ./quartz.config.yaml. Passed down
+  // via env so it reaches the esbuild-bundled build code and worker threads.
+  if (argv.config) {
+    const resolved = path.resolve(argv.config)
+    if (!fs.existsSync(resolved)) {
+      console.error(`Config file not found: ${resolved}`)
+      process.exit(1)
+    }
+    process.env.QUARTZ_CONFIG_PATH = resolved
+  }
+
   // " Quartz v5.1.0 " for a release checkout, plus `git describe` (e.g. v5.1.0-3-g1a2b3c4-dirty) otherwise
   const checkout = describeQuartzCheckout()
   const describe = checkout.describe && checkout.describe !== `v${version}` ? checkout.describe : ""
@@ -607,11 +619,18 @@ export async function handleBuild(argv) {
       "quartz.config.yaml",
       "quartz.config.default.yaml",
     ])
-    chokidar
-      .watch(paths, { ignoreInitial: true })
-      .on("add", () => build(clientRefresh))
-      .on("change", () => build(clientRefresh))
-      .on("unlink", () => build(clientRefresh))
+    const extraWatch = process.env.QUARTZ_CONFIG_PATH ? [process.env.QUARTZ_CONFIG_PATH] : []
+    // local files the config extends (and the files they extend); looked up again after each
+    // change, so a newly added base is watched too
+    const watcher = chokidar.watch([...paths, ...extraWatch, ...(await extendedConfigFiles())], {
+      ignoreInitial: true,
+    })
+    const rebuild = async () => {
+      await build(clientRefresh)
+      const bases = await extendedConfigFiles()
+      if (bases.length > 0) watcher.add(bases)
+    }
+    watcher.on("add", rebuild).on("change", rebuild).on("unlink", rebuild)
 
     console.log(styleText("gray", "hint: exit with ctrl+c"))
   }

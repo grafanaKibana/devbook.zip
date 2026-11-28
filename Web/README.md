@@ -43,7 +43,7 @@ Export the current working Vault and start Quartz with one command:
 (cd .scripts && dotnet run --project DevBook.Tooling -- site preview --repo-root ..)
 ```
 
-The preview command snapshots current working source, including untracked notes/media, into an ignored disposable checkout and uses a separate Obsidian profile. It preserves the real Git index, personal plugin settings and Qard study state. `--app-bundle /path/to/Obsidian.app` selects a compatible app; CI pins checksum-verified **Obsidian 1.14.5**. `--port 8085` changes the server port and `--no-serve` prepares a build without starting a server. Native rendering currently requires macOS; Node 22 remains required for Quartz.
+The preview command snapshots current working source, including untracked notes/media, into an ignored disposable checkout and uses a separate Obsidian profile. It preserves the real Git index, personal plugin settings and Qard study state. `--app-bundle /path/to/Obsidian.app` selects a compatible app; CI pins checksum-verified **Obsidian 1.14.5**. `--port 8085` changes the server port and `--no-serve` prepares a build without starting a server. Native rendering currently requires macOS; Node 22.22 or later remains required for Quartz.
 
 Preview serves a fixed snapshot. After editing Vault notes, stop it and rerun `site preview` to export those changes. It does not watch the live Vault.
 
