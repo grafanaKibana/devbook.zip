@@ -48,7 +48,7 @@ function runGreedyBestFirst(config: GraphStateConfig, ops: GraphStateOperations)
   ]
   let order = 1
 
-  ops.init(pathCost, visibleQueue(queue), `Seed OPEN with ${config.start}; rank it by h alone.`)
+  ops.init(pathCost, visibleQueue(queue), `Seed OPEN with ${config.start}. Rank it by h alone.`)
 
   while (queue.length) {
     queue.sort(
@@ -62,7 +62,7 @@ function runGreedyBestFirst(config: GraphStateConfig, ops: GraphStateOperations)
       pathCost,
       visibleQueue(queue),
       closed,
-      `Move ${current.id} to CLOSED: h ${current.h} is smallest; path cost ${current.g} is ignored.`,
+      `Move ${current.id} to CLOSED: h ${current.h} is smallest. Path cost ${current.g} is ignored.`,
     )
 
     if (current.id === config.target) {
@@ -80,7 +80,7 @@ function runGreedyBestFirst(config: GraphStateConfig, ops: GraphStateOperations)
         pathCost,
         greedyCost,
         optimalCost,
-        `Greedy stops at cost ${greedyCost}; A* reaches the same goal with optimal cost ${optimalCost}.`,
+        `Greedy stops at cost ${greedyCost}. A* reaches the same goal with optimal cost ${optimalCost}.`,
       )
       return
     }
@@ -92,7 +92,7 @@ function runGreedyBestFirst(config: GraphStateConfig, ops: GraphStateOperations)
         pathCost,
         visibleQueue(queue),
         closed,
-        `Inspect ${current.id} → ${edge.to}; only h(${edge.to}) will rank it.`,
+        `Inspect ${current.id} → ${edge.to}. Only h(${edge.to}) will rank it.`,
       )
       if (visited.has(edge.to)) continue
       visited.add(edge.to)
@@ -106,7 +106,7 @@ function runGreedyBestFirst(config: GraphStateConfig, ops: GraphStateOperations)
         pathCost,
         visibleQueue(queue),
         closed,
-        `Add ${edge.to} to OPEN with h ${h}; accumulated cost ${pathCost[edge.to]} does not affect priority.`,
+        `Add ${edge.to} to OPEN with h ${h}. Accumulated cost ${pathCost[edge.to]} does not affect priority.`,
       )
     }
   }

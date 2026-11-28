@@ -98,7 +98,7 @@ export const ahoCorasick = {
         ops.goto(`${state}->${next}`, next, index, `Consume ${character}: goto "${next}".`)
         state = next
       } else {
-        ops.fallback(null, "root", index, `No ${character} edge from root; stay at root.`)
+        ops.fallback(null, "root", index, `No ${character} edge from root. Stay at root.`)
         state = "root"
       }
       const outputs: string[] = []

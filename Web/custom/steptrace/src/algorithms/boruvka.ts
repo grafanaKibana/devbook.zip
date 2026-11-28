@@ -115,16 +115,16 @@ export const boruvka = {
     choices.push(cd)
     recorder.add("Component D chooses C—D (3).", components, choices, accepted, cd)
     recorder.add(
-      "Deduplicate A—B; three distinct safe candidates remain.",
+      "Deduplicate A—B. Three distinct safe candidates remain.",
       components,
       choices,
       accepted,
     )
     accepted.push(ab)
-    recorder.add("Accept A—B; A and B merge.", [["A", "B"], ["C"], ["D"]], choices, accepted, ab)
+    recorder.add("Accept A—B. A and B merge.", [["A", "B"], ["C"], ["D"]], choices, accepted, ab)
     accepted.push(bc)
     recorder.add(
-      "Accept B—C; C joins the component.",
+      "Accept B—C. C joins the component.",
       [["A", "B", "C"], ["D"]],
       choices,
       accepted,
@@ -132,7 +132,7 @@ export const boruvka = {
     )
     accepted.push(cd)
     recorder.add(
-      "Accept C—D; all vertices are connected.",
+      "Accept C—D. All vertices are connected.",
       [["A", "B", "C", "D"]],
       choices,
       accepted,

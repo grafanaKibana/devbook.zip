@@ -34,8 +34,8 @@ export const zAlgorithm = {
         k,
         sourceCase,
         inside
-          ? `i = ${i} lies inside [${l}, ${r}]; mirror k = ${k}.`
-          : `i = ${i} lies outside [${l}, ${r}]; compare from the prefix start.`,
+          ? `i = ${i} lies inside [${l}, ${r}]. Mirror k = ${k}.`
+          : `i = ${i} lies outside [${l}, ${r}]. Compare from the prefix start.`,
       )
 
       if (inside) {
@@ -46,7 +46,7 @@ export const zAlgorithm = {
           z[i],
           sourceCase,
           sourceCase === "copy"
-            ? `Copy Z[${k}] = ${z[k]} to Z[${i}]; it ends before r, so no character comparison is needed.`
+            ? `Copy Z[${k}] = ${z[k]} to Z[${i}]. It ends before r, so no character comparison is needed.`
             : `Reuse the verified box remainder ${remainder} from Z[${k}], then test beyond r.`,
         )
         if (sourceCase === "copy") {
@@ -56,7 +56,7 @@ export const zAlgorithm = {
             l,
             r,
             sourceCase,
-            `Commit Z[${i}] = ${z[i]}; the active box stays [${l}, ${r}].`,
+            `Commit Z[${i}] = ${z[i]}. The active box stays [${l}, ${r}].`,
           )
           continue
         }
@@ -88,7 +88,7 @@ export const zAlgorithm = {
         l,
         r,
         sourceCase,
-        `Commit Z[${i}] = ${z[i]}; the active box is [${l}, ${r}].`,
+        `Commit Z[${i}] = ${z[i]}. The active box is [${l}, ${r}].`,
       )
     }
     ops.done(`Z = [${z.join(", ")}].`)

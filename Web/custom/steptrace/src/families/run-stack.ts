@@ -1,4 +1,4 @@
-import { barHeightStyle, el, makeBars, statusEl } from "../render"
+import { barHeightStyle, el, makeBars, setRailLabel, statusEl } from "../render"
 import type { StepTraceView, VisualFamily } from "../types"
 
 export interface RunSpan {
@@ -193,7 +193,7 @@ export class RunStackRecorder implements RunStackOperations {
 }
 
 function runLabel(run: RunSpan) {
-  return `[${run.start}…${run.start + run.length - 1}] · ${run.length}`
+  return `[${run.start}…${run.start + run.length - 1}], ${run.length}`
 }
 
 function stackRunFor(frame: RunStackFrame, index: number) {
@@ -221,7 +221,7 @@ export function runStackWatch(frame: RunStackFrame) {
     },
     {
       k: "stack",
-      v: frame.stack.map((run) => run.length).join(" · ") || "empty",
+      v: frame.stack.map((run) => run.length).join(", ") || "empty",
       sw: "var(--_amber)",
       hint: "Saved contiguous run lengths, from stack bottom to top.",
     },
@@ -245,7 +245,7 @@ export function makeRunStackView(frames: readonly RunStackFrame[]): StepTraceVie
   const arrayBars = el("div", "steptrace__stage steptrace__run-bars")
   const bars = makeBars(arrayBars, length)
   const stackLabel = el("div", "steptrace__rail-label steptrace__run-stack-label")
-  stackLabel.textContent = "Run stack · top"
+  setRailLabel(stackLabel, "Run stack", "top")
   const stackSection = el("div", "steptrace__run-stack-section")
   const stack = el("div", "steptrace__run-stack-cards")
   const stackCards = Array.from({ length }, () => {
@@ -328,10 +328,10 @@ export function makeRunStackView(frames: readonly RunStackFrame[]): StepTraceVie
     }
     const check = frame.invariant
     invariant.textContent = check
-      ? `X=${check.x ?? "—"}, Y=${check.y ?? "—"}, Z=${check.z ?? "—"}${check.holds == null ? "" : check.holds ? " · holds" : " · merge"}`
+      ? `X=${check.x ?? "—"}, Y=${check.y ?? "—"}, Z=${check.z ?? "—"}${check.holds == null ? "" : check.holds ? ", holds" : ", merge"}`
       : frame.type === "force-merge"
         ? "Final collapse: merge adjacent runs until one remains."
-        : `minrun ${frame.minrun} · ${frame.merges} merge${frame.merges === 1 ? "" : "s"}`
+        : `minrun ${frame.minrun}, ${frame.merges} merge${frame.merges === 1 ? "" : "s"}`
     invariant.dataset.state = check?.holds === false ? "merge" : check?.holds ? "holds" : ""
     status.textContent = frame.message
     previousStack = frame.stack

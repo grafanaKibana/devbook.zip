@@ -24,7 +24,7 @@ export const rabinKarp = {
     }
     const ph = hash(pattern)
     ops.init(
-      `Rabin-Karp for "${pattern}" — slide rolling hashes; verify text only on hash collision (${ph}).`,
+      `Rabin-Karp for "${pattern}" — slide rolling hashes. Verify text only on hash collision (${ph}).`,
     )
     let highPow = 1
     for (let k = 0; k < m - 1; k++) highPow = (highPow * B) % MOD

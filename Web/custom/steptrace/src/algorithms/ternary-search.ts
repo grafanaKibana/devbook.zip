@@ -42,7 +42,7 @@ export const ternarySearch = {
     ops.beginPhase(
       0,
       values.length - 1,
-      "Probe both third-points together; the larger value shows which side still contains the peak.",
+      "Probe both third-points together. The larger value shows which side still contains the peak.",
       "ternary",
     )
 
@@ -64,10 +64,10 @@ export const ternarySearch = {
 
       if (values[mid1] < values[mid2]) {
         left = mid1 + 1
-        ops.narrow(left, right, `The sequence is higher at ${mid2}; keep [${left}, ${right}].`)
+        ops.narrow(left, right, `The sequence is higher at ${mid2}. Keep [${left}, ${right}].`)
       } else if (values[mid1] > values[mid2]) {
         right = mid2 - 1
-        ops.narrow(left, right, `The sequence is higher at ${mid1}; keep [${left}, ${right}].`)
+        ops.narrow(left, right, `The sequence is higher at ${mid1}. Keep [${left}, ${right}].`)
       } else {
         left = mid1 + 1
         right = mid2 - 1
@@ -82,7 +82,7 @@ export const ternarySearch = {
     ops.beginPhase(
       left,
       right,
-      `Only [${left}, ${right}] remains; scan these final values.`,
+      `Only [${left}, ${right}] remains. Scan these final values.`,
       "scan",
     )
     let best = left

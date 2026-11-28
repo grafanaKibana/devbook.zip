@@ -174,7 +174,7 @@ export function mountGraphRepresentation(root: HTMLElement): MountHandle {
   matrix.setAttribute("aria-label", "Rows are from vertices and columns are to vertices")
   const caption = document.createElement("caption")
   caption.className = "steptrace__dp-caption"
-  caption.textContent = "Directed adjacency matrix; rows are from and columns are to vertices"
+  caption.textContent = "Directed adjacency matrix. Rows are from and columns are to vertices"
   matrix.append(caption)
   const matrixHead = document.createElement("thead")
   const matrixHeader = document.createElement("tr")

@@ -44,7 +44,7 @@ export function mountUnionFind(root: HTMLElement, config: UnionFindConfig): Moun
     class: "steptrace__union-find-svg",
     viewBox: `0 0 ${WIDTH} ${HEIGHT}`,
     role: "img",
-    "aria-label": "Each arrow points from an element to its parent; roots point to themselves",
+    "aria-label": "Each arrow points from an element to its parent. Roots point to themselves",
   })
   const markerId = `steptrace-union-find-arrow-${++markerSerial}`
   const marker = svgElement("marker", {
@@ -249,7 +249,7 @@ export function mountUnionFind(root: HTMLElement, config: UnionFindConfig): Moun
     paint(
       result.path.length > 1
         ? `Find(${a}) followed ${result.path.join(" → ")} and compressed the path to root ${result.root}.`
-        : `Find(${a}) = ${result.root}; it is already a root.`,
+        : `Find(${a}) = ${result.root}. It is already a root.`,
     )
   }
 
@@ -275,7 +275,7 @@ export function mountUnionFind(root: HTMLElement, config: UnionFindConfig): Moun
     activeRoot = null
     first.value = "0"
     second.value = "1"
-    paint("Reset to singleton sets; every element is its own root.")
+    paint("Reset to singleton sets. Every element is its own root.")
   }
 
   shell.listen(union, "click", onUnion)

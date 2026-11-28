@@ -50,7 +50,7 @@ export const exponentialSearch = {
 
     const lo = Math.floor(bound / 2)
     const hi = Math.min(bound, values.length - 1)
-    ops.beginPhase(lo, hi, `The target is bracketed in [${lo}, ${hi}]; switch to binary search.`)
+    ops.beginPhase(lo, hi, `The target is bracketed in [${lo}, ${hi}]. Switch to binary search.`)
 
     let left = lo
     let right = hi

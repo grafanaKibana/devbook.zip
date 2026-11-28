@@ -59,7 +59,7 @@ export const boyerMoore = {
     while (alignment <= n - m) {
       ops.alignBoyerMoore(
         alignment,
-        `Align the pattern at ${alignment}; compare from j = ${m - 1} right-to-left.`,
+        `Align the pattern at ${alignment}. Compare from j = ${m - 1} right-to-left.`,
       )
       let j = m - 1
       let matchedFrom = m
@@ -83,7 +83,7 @@ export const boyerMoore = {
         ops.matchBoyerMoore(
           alignment,
           fullMatchShift,
-          `Whole pattern matched at ${alignment}; the full-match good-suffix shift is ${fullMatchShift}.`,
+          `Whole pattern matched at ${alignment}. The full-match good-suffix shift is ${fullMatchShift}.`,
         )
         const nextAlignment = alignment + fullMatchShift
         if (nextAlignment <= n - m) {
@@ -92,7 +92,7 @@ export const boyerMoore = {
         } else {
           ops.shiftBoyerMoore(
             alignment,
-            `A full-match shift of ${fullMatchShift} would leave the searchable range; keep the match visible.`,
+            `A full-match shift of ${fullMatchShift} would leave the searchable range. Keep the match visible.`,
           )
           alignment = nextAlignment
         }
@@ -109,7 +109,7 @@ export const boyerMoore = {
         good,
         selected,
         winner,
-        `Bad-character proposes ${bad}; good-suffix proposes ${good}; take max = ${selected} (${winner}).`,
+        `Bad-character proposes ${bad}. Good-suffix proposes ${good}. Take max = ${selected} (${winner}).`,
       )
       alignment += selected
       ops.shiftBoyerMoore(alignment, `Shift the pattern to alignment ${alignment}.`)

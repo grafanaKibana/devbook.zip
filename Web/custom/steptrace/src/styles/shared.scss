@@ -19,13 +19,21 @@
   --_text: var(--st-text, #{tokens.$text});
   --_muted: var(--st-muted, #{tokens.$muted});
   --_border: var(--st-border, #{tokens.$border});
-  --_divider: var(--st-divider, color-mix(in srgb, var(--_text) 13%, transparent));
-  --_divider-faint: var(--st-divider-faint, color-mix(in srgb, var(--_text) 10%, transparent));
+  /* Player and control chrome follows the host's own control borders. */
+  --_chrome-border: var(--st-chrome-border, var(--_border));
+  --_chrome-border-hover: var(--st-chrome-border-hover, var(--_muted));
+  --_chrome-radius: var(--st-chrome-radius, var(--_radius-md));
+  --_divider: var(--st-divider, var(--_chrome-border));
+  --_divider-faint: var(--st-divider-faint, var(--_chrome-border));
   --_accent: var(--st-accent, #{tokens.$green-light});
   --_on-accent: var(--st-on-accent, #{tokens.$on-accent});
   --_panel-shadow: var(--st-panel-shadow, #{tokens.$panel-shadow-light});
   --_held-bg: var(--st-held-bg, #{tokens.$held-bg-light});
   --_held-fg: var(--st-held-fg, #{tokens.$on-accent});
+  /* Red-black "black" is a data colour, not text ink, so it stays black in
+     both themes. */
+  --_rb-black: var(--st-rb-black, #{tokens.$rb-black});
+  --_rb-black-ink: #{tokens.$on-accent};
   /* Font tokens — hosts bind these to their body and code families (Quartz:
      --bodyFont/--codeFont; Obsidian: --font-text/--font-monospace).
      Fallbacks name the design's own faces for standalone use. */
@@ -179,6 +187,9 @@
    State styles only set --steptrace-array-outline, so highlights cannot square
    off or be clipped when the first or last cell is active. */
 .steptrace .steptrace__pcells,
+.steptrace .steptrace__cells,
+.steptrace .steptrace__bcells:not(.steptrace__bcells--idx),
+.steptrace .steptrace__hash-buckets,
 .steptrace .steptrace__contiguous-array {
   --steptrace-array-radius: var(--_array-radius);
   border-radius: var(--steptrace-array-radius);
@@ -186,6 +197,9 @@
 }
 
 .steptrace .steptrace__pcells > .steptrace__pcell,
+.steptrace .steptrace__cells > .steptrace__cell,
+.steptrace .steptrace__bcells > .steptrace__bcell,
+.steptrace .steptrace__hash-buckets > .steptrace__hash-cell,
 .steptrace .steptrace__contiguous-array > .steptrace__contiguous-cell {
   border-radius: 0;
   outline: var(--_stroke-emphasis) solid var(--steptrace-array-outline, transparent);
@@ -193,20 +207,98 @@
 }
 
 .steptrace .steptrace__pcells > .steptrace__pcell:first-child,
+.steptrace .steptrace__cells > .steptrace__cell:first-child,
+.steptrace .steptrace__bcells > .steptrace__bcell:first-child,
+.steptrace .steptrace__hash-buckets > .steptrace__hash-cell:first-child,
 .steptrace .steptrace__contiguous-array > .steptrace__contiguous-cell:first-child {
   border-radius: calc(var(--steptrace-array-radius) - var(--_stroke-hair)) 0 0
     calc(var(--steptrace-array-radius) - var(--_stroke-hair));
 }
 
 .steptrace .steptrace__pcells > .steptrace__pcell:last-child,
+.steptrace .steptrace__cells > .steptrace__cell:last-child,
+.steptrace .steptrace__bcells > .steptrace__bcell:last-child,
+.steptrace .steptrace__hash-buckets > .steptrace__hash-cell:last-child,
 .steptrace .steptrace__contiguous-array > .steptrace__contiguous-cell:last-child {
   border-radius: 0 calc(var(--steptrace-array-radius) - var(--_stroke-hair))
     calc(var(--steptrace-array-radius) - var(--_stroke-hair)) 0;
 }
 
 .steptrace .steptrace__pcells > .steptrace__pcell:only-child,
+.steptrace .steptrace__cells > .steptrace__cell:only-child,
+.steptrace .steptrace__bcells > .steptrace__bcell:only-child,
+.steptrace .steptrace__hash-buckets > .steptrace__hash-cell:only-child,
 .steptrace .steptrace__contiguous-array > .steptrace__contiguous-cell:only-child {
   border-radius: calc(var(--steptrace-array-radius) - var(--_stroke-hair));
+}
+
+/* Bordered shells are opaque, so the page dot grid never shows through. */
+.steptrace
+  :where(
+    .steptrace__pcells,
+    .steptrace__cells,
+    .steptrace__bcells,
+    .steptrace__hash-buckets,
+    .steptrace__contiguous-array,
+    .steptrace__btboard,
+    .steptrace__btpath,
+    .steptrace__stack-board,
+    .steptrace__prefix-text-cell,
+    .steptrace__coin-tray
+  ) {
+  background-color: var(--st-page, var(--_surface));
+}
+
+/* A tinted cell keeps a page-coloured gutter inside its gridlines, so the
+   hairline between cells reads at the same contrast as on the page. */
+.steptrace
+  :where(
+    .steptrace__pcell,
+    .steptrace__cell,
+    .steptrace__bcell,
+    .steptrace__contiguous-cell,
+    .steptrace__hash-cell,
+    .steptrace__btcell,
+    .steptrace__dp th[data-role],
+    .steptrace__dp td,
+    .steptrace__warehouse-matrix td
+  ) {
+  box-shadow: inset 0 0 0 var(--_stroke-emphasis) var(--st-page, var(--_surface));
+}
+
+/* Matrix corner cells follow the frame's curve, so a corner highlight or
+   inset ring stays concentric with it. */
+.steptrace .steptrace__btcell[data-edge~="top"][data-edge~="left"],
+.steptrace
+  :is(.steptrace__dp, .steptrace__warehouse-matrix)
+  > :nth-child(1 of thead, tbody, tfoot)
+  > tr:first-child
+  > :first-child {
+  border-top-left-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
+}
+.steptrace .steptrace__btcell[data-edge~="top"][data-edge~="right"],
+.steptrace
+  :is(.steptrace__dp, .steptrace__warehouse-matrix)
+  > :nth-child(1 of thead, tbody, tfoot)
+  > tr:first-child
+  > :last-child {
+  border-top-right-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
+}
+.steptrace .steptrace__btcell[data-edge~="bottom"][data-edge~="left"],
+.steptrace
+  :is(.steptrace__dp, .steptrace__warehouse-matrix)
+  > :nth-last-child(1 of thead, tbody, tfoot)
+  > tr:last-child
+  > :first-child {
+  border-bottom-left-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
+}
+.steptrace .steptrace__btcell[data-edge~="bottom"][data-edge~="right"],
+.steptrace
+  :is(.steptrace__dp, .steptrace__warehouse-matrix)
+  > :nth-last-child(1 of thead, tbody, tfoot)
+  > tr:last-child
+  > :last-child {
+  border-bottom-right-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
 }
 
 /* Reduce, do not remove: positional movement is what causes vestibular trouble,
@@ -269,10 +361,27 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.steptrace__phase-name:not(:empty)::after,
+.steptrace__rail-label-detail::before,
+.steptrace__status .steptrace__counts::before,
+span.steptrace__sep {
+  display: inline-block;
+  inline-size: var(--_stroke-hair);
+  block-size: 0.9em;
+  margin-inline: var(--_space-3);
+  vertical-align: -0.1em;
+  background: var(--_chrome-border-hover);
+  content: "";
+}
 .steptrace__phase-name:not(:empty)::after {
-  margin-left: var(--_space-4);
-  color: var(--_muted);
-  content: "·";
+  margin-inline-end: 0;
+}
+span.steptrace__sep {
+  overflow: hidden;
+  color: transparent;
+}
+tspan.steptrace__sep {
+  fill: var(--_chrome-border-hover);
 }
 .steptrace__counter {
   justify-self: end;
@@ -544,6 +653,12 @@
   color: var(--_muted);
   margin-bottom: var(--_space-3);
 }
+.steptrace__rail-label-detail {
+  color: var(--_context-text);
+  font-weight: var(--_weight-regular);
+  letter-spacing: normal;
+  text-transform: none;
+}
 .steptrace__trace {
   display: flex;
   flex-direction: column;
@@ -805,8 +920,8 @@
   gap: var(--_space-3) var(--_space-4);
   margin-top: var(--_space-5);
   padding: var(--_space-4);
-  border: var(--_stroke-hair) solid var(--_border);
-  border-radius: var(--_radius-container);
+  border: var(--_stroke-hair) solid var(--_chrome-border);
+  border-radius: var(--_chrome-radius);
   background: var(--st-page, #{tokens.$on-accent});
 }
 .steptrace__timeline {
@@ -975,15 +1090,15 @@
   height: var(--_btn-size);
   flex: 0 0 var(--_btn-size);
   margin: var(--_space-2);
-  border: 0;
-  border-radius: var(--_radius-pill);
+  border: var(--_stroke-hair) solid var(--_chrome-border);
+  border-radius: var(--_chrome-radius);
   background: transparent;
   color: var(--_muted);
   cursor: pointer;
   padding: 0;
   box-shadow: none;
   transition:
-    background-color var(--_dur-quick) var(--_ease-decelerate),
+    border-color var(--_dur-quick) var(--_ease-decelerate),
     color var(--_dur-quick) var(--_ease-decelerate);
 }
 /* The margin keeps the 44px footprint; this restores it as the hit area. */
@@ -993,7 +1108,7 @@
   content: "";
 }
 .steptrace__btn:hover {
-  background: var(--_hover);
+  border-color: var(--_chrome-border-hover);
   color: var(--_text);
 }
 .steptrace__btn--speed {
@@ -1020,7 +1135,7 @@
   height: var(--_target-size);
   flex-basis: var(--_target-size);
   margin: 0;
-  border-radius: var(--_radius-pill);
+  border-color: var(--_accent);
 }
 .steptrace__btn--play::before {
   display: none;
@@ -1028,6 +1143,7 @@
 /* The generic :hover above would swap the fill for a faint text wash while the
    glyph keeps --_on-accent, leaving it invisible against either theme's page. */
 .steptrace__btn--play:hover {
+  border-color: var(--_accent);
   background-color: var(--_accent);
   color: var(--_on-accent);
   filter: brightness(1.12);
@@ -1051,7 +1167,8 @@
   height: var(--_btn-size);
   margin: var(--_space-2);
   padding: 0;
-  border-radius: var(--_radius-pill);
+  border: var(--_stroke-hair) solid var(--_chrome-border);
+  border-radius: var(--_chrome-radius);
   color: var(--_muted);
 }
 .steptrace button.steptrace__btn--speed {
@@ -1062,12 +1179,14 @@
   height: auto;
   margin: 0;
 }
-.steptrace button.steptrace__btn:hover:not(:disabled),
 .steptrace button.steptrace__menu-item:hover {
   background-color: var(--_hover);
   box-shadow: none;
 }
 .steptrace button.steptrace__btn:hover:not(:disabled) {
+  border-color: var(--_chrome-border-hover);
+  background-color: transparent;
+  box-shadow: none;
   color: var(--_text);
 }
 .steptrace button.steptrace__btn--play {
@@ -1076,6 +1195,7 @@
 }
 .steptrace button.steptrace__btn--play,
 .steptrace button.steptrace__btn--play:hover:not(:disabled) {
+  border-color: var(--_accent);
   background-color: var(--_accent);
   color: var(--_on-accent);
 }
@@ -1169,8 +1289,8 @@
   margin: 0;
   /* steptrace-exception: select-chevron-space | category=geometry | rationale=reserves fitted space for the background chevron | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
   padding: var(--_space-3) 1.8rem var(--_space-3) var(--_space-4);
-  border: var(--_stroke-hair) solid var(--_border);
-  border-radius: var(--_radius-sm);
+  border: var(--_stroke-hair) solid var(--_chrome-border);
+  border-radius: var(--_chrome-radius);
   font: var(--_weight-strong) var(--_type-base) var(--_font-body);
   color: var(--_text);
   background-color: transparent;
@@ -1179,6 +1299,9 @@
   background-position: right 8px center;
   background-size: 10px;
   cursor: pointer;
+}
+.steptrace__select:hover {
+  border-color: var(--_chrome-border-hover);
 }
 .steptrace__select:focus-visible {
   outline: var(--_focus-ring);
@@ -1237,8 +1360,8 @@
   min-block-size: var(--_target-size);
   margin: 0;
   padding: var(--_space-3) var(--_space-4);
-  border: var(--_stroke-hair) solid var(--_border);
-  border-radius: var(--_radius-xs);
+  border: var(--_stroke-hair) solid var(--_chrome-border);
+  border-radius: var(--_chrome-radius);
   background-color: var(--st-page, var(--_surface));
   color: var(--_text);
   font: var(--_weight-strong) var(--_type-base) / var(--_leading-readable) var(--_font-body);
@@ -1250,8 +1373,7 @@
     color var(--_dur-quick) var(--_ease-decelerate);
 }
 .steptrace--narrow .steptrace__detail-button:hover {
-  border-color: var(--_muted);
-  background-color: var(--_surface);
+  border-color: var(--_chrome-border-hover);
 }
 .steptrace--narrow .steptrace__detail-button[aria-pressed="true"] {
   border-color: var(--_accent);

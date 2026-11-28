@@ -35,10 +35,12 @@ const VIEW_WIDTH = 620
 const VIEW_HEIGHT = 280
 const MAX_KEYS = 3
 const MAX_VALUES = 10
-const CELL_WIDTH = 33
+const CELL_WIDTH = 36
 const NODE_HEIGHT = 34
-const NODE_GAP = 8
-const VIEW_PADDING = 10
+const NODE_GAP = 30
+const NODE_RADIUS = 6
+const CELL_INSET = 2
+const VIEW_PADDING = 28
 
 export function parseMultiwayTreeConfig(
   config: StepTraceConfig,
@@ -185,9 +187,9 @@ export function createMultiwayTreeModel(kind: TreeKind, values: readonly number[
         detail:
           state.special != null
             ? kind === "b-plus-tree"
-              ? `Inserted ${key}; copied separator ${state.special} into the parent and kept it in the right leaf.`
-              : `Inserted ${key}; promoted median ${state.special} into the parent.`
-            : `Inserted ${key}; every node remains within the order-4 limit.`,
+              ? `Inserted ${key}. Copied separator ${state.special} into the parent and kept it in the right leaf.`
+              : `Inserted ${key}. Promoted median ${state.special} into the parent.`
+            : `Inserted ${key}. Every node remains within the order-4 limit.`,
       }
     },
     search(key: number, state: MultiwayTreeOperationState) {
@@ -207,7 +209,7 @@ export function createMultiwayTreeModel(kind: TreeKind, values: readonly number[
             found,
             detail: found
               ? `Search reached leaf ${current.id} and found ${key}.`
-              : `Search reached leaf ${current.id}; ${key} is absent.`,
+              : `Search reached leaf ${current.id}. ${key} is absent.`,
           }
         }
         current = current.children[index]
@@ -354,7 +356,7 @@ export function mountMultiwayTree(
     svg.setAttribute("viewBox", `0 0 ${viewWidth} ${VIEW_HEIGHT}`)
     const positions = new Map<string, { x: number; y: number; width: number }>()
     levels.forEach((nodes, depth) => {
-      const y = 30 + depth * (kind === "b-plus-tree" ? 80 : 92)
+      const y = 42 + depth * (kind === "b-plus-tree" ? 80 : 92)
       const widths = nodes.map((node) => Math.max(node.keys.length, 1) * CELL_WIDTH)
       const levelWidth =
         widths.reduce((sum, width) => sum + width, 0) + Math.max(nodes.length - 1, 0) * NODE_GAP
@@ -401,16 +403,20 @@ export function mountMultiwayTree(
       for (const nodes of levels) {
         for (const parent of nodes) {
           const from = positions.get(parent.id)!
-          for (const child of parent.children) {
+          const left = from.x - from.width / 2
+          const lastBoundary = Math.max(parent.children.length - 1, 1)
+          parent.children.forEach((child, index) => {
             const to = positions.get(child.id)!
+            const boundary = left + (index * from.width) / lastBoundary
+            const inset = index === 0 ? NODE_RADIUS : index === lastBoundary ? -NODE_RADIUS : 0
             const line = svgEl("line", "steptrace__edge steptrace__multiway-tree-edge")
-            line.setAttribute("x1", String(from.x))
+            line.setAttribute("x1", String(boundary + inset))
             line.setAttribute("y1", String(from.y + NODE_HEIGHT / 2))
             line.setAttribute("x2", String(to.x))
             line.setAttribute("y2", String(to.y - NODE_HEIGHT / 2))
             svg.append(line)
             renderedEdges.push({ line, parentId: parent.id, childId: child.id })
-          }
+          })
         }
       }
 
@@ -423,7 +429,7 @@ export function mountMultiwayTree(
           const path = svgEl("path", "steptrace__multiway-tree-link")
           path.setAttribute(
             "d",
-            `M ${from.x + from.width / 2} ${from.y + NODE_HEIGHT / 2} V 248 H ${to.x - to.width / 2} V ${to.y + NODE_HEIGHT / 2 + 5}`,
+            `M ${from.x + from.width / 2 + 3} ${from.y} H ${to.x - to.width / 2 - 3}`,
           )
           path.setAttribute("marker-end", `url(#${kind}-next-arrow)`)
           path.dataset.from = leaf.id
@@ -448,13 +454,26 @@ export function mountMultiwayTree(
             `${node.children.length ? "Internal node" : "Leaf"} ${node.id}, keys ${node.keys.join(", ") || "empty"}`,
           )
           renderedNodes.push({ group, nodeId: node.id })
+          const frame = svgEl("rect", "steptrace__multiway-tree-frame")
+          frame.setAttribute("width", String(position.width))
+          frame.setAttribute("height", String(NODE_HEIGHT))
+          frame.setAttribute("rx", String(NODE_RADIUS))
+          group.append(frame)
           const keys = node.keys.length ? node.keys : [null]
           keys.forEach((key, index) => {
+            if (index > 0) {
+              const divider = svgEl("line", "steptrace__multiway-tree-divider")
+              divider.setAttribute("x1", String(index * CELL_WIDTH))
+              divider.setAttribute("x2", String(index * CELL_WIDTH))
+              divider.setAttribute("y2", String(NODE_HEIGHT))
+              group.append(divider)
+            }
             const cell = svgEl("rect", "steptrace__multiway-tree-cell")
-            cell.setAttribute("x", String(index * CELL_WIDTH))
-            cell.setAttribute("width", String(CELL_WIDTH))
-            cell.setAttribute("height", String(NODE_HEIGHT))
-            cell.setAttribute("rx", "4")
+            cell.setAttribute("x", String(index * CELL_WIDTH + CELL_INSET))
+            cell.setAttribute("y", String(CELL_INSET))
+            cell.setAttribute("width", String(CELL_WIDTH - CELL_INSET * 2))
+            cell.setAttribute("height", String(NODE_HEIGHT - CELL_INSET * 2))
+            cell.setAttribute("rx", String(NODE_RADIUS - CELL_INSET))
             cell.dataset.key = key == null ? "" : String(key)
             const text = svgEl("text", "steptrace__multiway-tree-key")
             text.setAttribute("x", String(index * CELL_WIDTH + CELL_WIDTH / 2))
@@ -463,17 +482,17 @@ export function mountMultiwayTree(
             text.setAttribute("dominant-baseline", "central")
             text.textContent = key == null ? "·" : String(key)
             const marker = successMarker("steptrace__multiway-tree-success")
-            marker.setAttribute("x", String(index * CELL_WIDTH + CELL_WIDTH - 12))
-            marker.setAttribute("y", "1")
+            marker.setAttribute("x", String(index * CELL_WIDTH + CELL_WIDTH - CELL_INSET - 12))
+            marker.setAttribute("y", String(CELL_INSET + 1))
             marker.setAttribute("width", "11")
             marker.setAttribute("height", "11")
             group.append(cell, text, marker)
             renderedKeys.push({ cell, marker, nodeId: node.id, key })
           })
           const id = svgEl("text", "steptrace__multiway-tree-id")
-          id.setAttribute("x", String(position.width / 2))
+          id.setAttribute("x", "-4")
           id.setAttribute("y", "-6")
-          id.setAttribute("text-anchor", "middle")
+          id.setAttribute("text-anchor", "end")
           id.textContent = node.id
           group.append(id)
           svg.append(group)

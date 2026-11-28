@@ -144,7 +144,7 @@ function traverse(
         else
           ops.completeSearch(
             ops.hasTerminal(current),
-            `Character matched; IsEnd("${key}") is ${ops.hasTerminal(current)}.`,
+            `Character matched. IsEnd("${key}") is ${ops.hasTerminal(current)}.`,
           )
         return
       }
@@ -152,8 +152,8 @@ function traverse(
       if (!node.eq) break
       const id = edgeId(current, "eq", node.eq)
       if (ops.hasVisibleEdge(id))
-        ops.reuseEdge(id, node.eq, index, `eq consumes the character; continue with ${key[index]}.`)
-      else ops.createNode(id, node.eq, index, `eq consumes the character; create ${key[index]}.`)
+        ops.reuseEdge(id, node.eq, index, `eq consumes the character. Continue with ${key[index]}.`)
+      else ops.createNode(id, node.eq, index, `eq consumes the character. Create ${key[index]}.`)
       current = node.eq
     } else {
       const role: Role = character < node.character ? "lo" : "hi"
@@ -179,7 +179,7 @@ export const ternarySearchTree = {
   run(input, ops) {
     for (const [operation, key] of input.operations)
       traverse(input, ops, operation as "insert" | "search", key)
-    ops.done("Ternary search tree complete: lo/hi compared without consuming; eq consumed.")
+    ops.done("Ternary search tree complete: lo/hi compared without consuming, and eq consumed.")
   },
 } satisfies FamilyAlgorithmDefinition<
   "string",

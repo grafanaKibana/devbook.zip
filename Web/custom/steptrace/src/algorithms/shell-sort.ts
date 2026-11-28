@@ -47,12 +47,12 @@ export const shellSort = {
           ops.holdKeyAt(
             key,
             index,
-            `Lift ${key} from index ${index}; index ${index} becomes the insertion hole.`,
+            `Lift ${key} from index ${index}. Index ${index} becomes the insertion hole.`,
           )
           let cursor = index - gap
           ops.compareHeldAt(
             cursor,
-            `Hold ${key} from index ${index}; compare it with ${ops.value[cursor]} at index ${cursor}.`,
+            `Hold ${key} from index ${index}. Compare it with ${ops.value[cursor]} at index ${cursor}.`,
           )
           while (cursor >= start && ops.value[cursor] > key) {
             ops.shiftHeld(

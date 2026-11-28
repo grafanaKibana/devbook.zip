@@ -100,7 +100,7 @@ export const hamiltonianCycle = {
   meta: { label: "Hamiltonian Cycle" },
   parse: () => ({ nodes, edges }),
   run(_config, recorder) {
-    recorder.add("Start at A; try unused neighbours in the order C, B, D.", ["A"], ["C", "B", "D"])
+    recorder.add("Start at A. Try unused neighbours in the order C, B, D.", ["A"], ["C", "B", "D"])
     recorder.add("Choose C first.", ["A", "C"], ["B", "D"])
     recorder.add("Choose B from C.", ["A", "C", "B"], [])
     recorder.add(
@@ -120,7 +120,7 @@ export const hamiltonianCycle = {
       ["D", "B"],
     )
     recorder.add("Backtrack from D to C.", ["A", "C"], [], ["D"])
-    recorder.add("Both C branches failed; backtrack to A.", ["A"], ["B", "D"], ["C"])
+    recorder.add("Both C branches failed. Backtrack to A.", ["A"], ["B", "D"], ["C"])
     recorder.add("Choose B from A.", ["A", "B"], ["C"])
     recorder.add("Choose C from B.", ["A", "B", "C"], ["D"])
     recorder.add("Choose D from C.", ["A", "B", "C", "D"], [])

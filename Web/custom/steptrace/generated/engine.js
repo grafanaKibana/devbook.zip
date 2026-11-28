@@ -586,7 +586,7 @@
       setStatus(
         status,
         frame.message,
-        `· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}`
+        `${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"}, step ${i + 1}/${total}`
       );
     }
     function watch(frame) {
@@ -740,7 +740,7 @@
       setStatus(
         status,
         frame.message,
-        `· ${frame.probes} check${frame.probes === 1 ? "" : "s"} · step ${index + 1}/${totalFrames}`
+        `${frame.probes} check${frame.probes === 1 ? "" : "s"}, step ${index + 1}/${totalFrames}`
       );
     }
     return {
@@ -804,7 +804,7 @@
         tcells[frame.cmpT].dataset.state = frame.cmpResult || "probe";
       if (frame.cmpP != null && pcells[frame.cmpP])
         pcells[frame.cmpP].dataset.state = frame.cmpResult || "probe";
-      setStatus(status, frame.message, `· step ${i + 1}/${total}`);
+      setStatus(status, frame.message, `step ${i + 1}/${total}`);
     }
     function watch(frame) {
       const rows = [
@@ -887,7 +887,7 @@
       if (frame.type === "match" || frame.shiftDecision?.winner === "full-match" && frame.found.includes(frame.shift))
         for (const cell of patternCells) cell.dataset.state = "found";
       applyGeom();
-      setStatus(status, frame.message, `· step ${index + 1}/${total}`);
+      setStatus(status, frame.message, `step ${index + 1}/${total}`);
     }
     function watch(frame) {
       const suffix = frame.matchedFrom == null || frame.matchedFrom >= pattern.length ? "—" : pattern.slice(frame.matchedFrom);
@@ -901,7 +901,7 @@
         { k: "good shift", v: choice?.good ?? "—", sw: "var(--_violet)" },
         {
           k: "selected shift",
-          v: choice ? `${choice.selected} · ${winner}` : "—",
+          v: choice ? `${choice.selected}, ${winner}` : "—",
           sw: "var(--_amber)"
         }
       ];
@@ -1067,7 +1067,7 @@
         stringCells[frame.compare.candidate].dataset.state = state;
       }
       syncLayout();
-      setStatus(status, frame.message, `· step ${index + 1}/${total}`);
+      setStatus(status, frame.message, `step ${index + 1}/${total}`);
     }
     function watch(frame) {
       const box = frame.box || [0, 0];
@@ -1261,7 +1261,7 @@
       const text = el("span", "steptrace__matrix-footer-summary-text");
       text.textContent = model.summary.text;
       summary.append(text);
-      row.setAttribute("aria-label", `${model.context}; ${model.summary.text}`);
+      row.setAttribute("aria-label", `${model.context}. ${model.summary.text}`);
     }
     return { paint };
   }
@@ -1377,7 +1377,7 @@
         const key4 = el("span", "steptrace__coin-memo-key");
         const value = el("span", "steptrace__coin-memo-value");
         key4.textContent = entry.key;
-        value.textContent = entry.state === "hit" ? `${entry.value} · reused` : entry.value;
+        value.textContent = entry.state === "hit" ? `${entry.value}, reused` : entry.value;
         row.append(key4, value);
         memo.append(row);
       }
@@ -1410,7 +1410,7 @@
         paintAttempts(frame);
         paintMemo(frame);
         paintAmounts(frame);
-        setStatus(status, frame.message, `· step ${index + 1}/${total}`);
+        setStatus(status, frame.message, `step ${index + 1}/${total}`);
       },
       watch(frame) {
         const plan = frame.selected.length ? frame.selected.map((coin) => `${coin}¢`).join(" + ") : "—";
@@ -1603,8 +1603,8 @@
         }
         footerStart.textContent = frame.approach === "greedy" ? "Greedy route" : frame.approach === "naive" ? "Recursive routes" : frame.approach === "memoization" ? "Memoized route" : "Fill from the goal";
         footerEnd.textContent = frame.approach === "memoization" ? `${storedCount} answers saved` : frame.approach === "tabulation" ? `${storedCount}/${cells.length * cells[0].length} tiles written` : frame.bestCost == null ? `route cost ${frame.routeCost}` : `best route ${frame.bestCost}`;
-        footerRow.setAttribute("aria-label", `${footerStart.textContent}; ${footerEnd.textContent}`);
-        setStatus(status, frame.message, `· step ${index + 1}/${total}`);
+        footerRow.setAttribute("aria-label", `${footerStart.textContent}. ${footerEnd.textContent}`);
+        setStatus(status, frame.message, `step ${index + 1}/${total}`);
       },
       watch(frame) {
         const current = frame.current ? `R${frame.current[0] + 1}C${frame.current[1] + 1}` : "—";
@@ -1802,7 +1802,7 @@
           td.setAttribute("aria-label", semantics.cellLabel(frame, r, c));
         }
       }
-      setStatus(status, frame.message, `· step ${i + 1}/${total}`);
+      setStatus(status, frame.message, `step ${i + 1}/${total}`);
     }
     function watch(frame) {
       return semantics.watchRows(frame);
@@ -1885,7 +1885,7 @@
         arc.dataset.active = active ? "true" : "false";
         arcLayer.append(arc);
       }
-      setStatus(status, frame.message, `· step ${i + 1}/${total}`);
+      setStatus(status, frame.message, `step ${i + 1}/${total}`);
     }
     function watch(frame) {
       const sets = new Set(frame.roots).size;
@@ -1969,7 +1969,7 @@
           c.dataset.state = data.state[bi] || "";
         }
       }
-      setStatus(status, frame.message, `· step ${i + 1}/${stepTotal}`);
+      setStatus(status, frame.message, `step ${i + 1}/${stepTotal}`);
     }
     function watch(frame) {
       return [
@@ -2002,6 +2002,12 @@
       for (let c = 0; c < n; c++) {
         const cell = el("div", "steptrace__btcell");
         cell.dataset.parity = String((r + c) % 2);
+        cell.dataset.edge = [
+          r === 0 ? "top" : "",
+          r === n - 1 ? "bottom" : "",
+          c === 0 ? "left" : "",
+          c === n - 1 ? "right" : ""
+        ].filter(Boolean).join(" ");
         cell.setAttribute("role", "gridcell");
         const glyph = el("div", "steptrace__btqueen");
         glyph.innerHTML = ICON.chessQueen;
@@ -2381,12 +2387,12 @@
       if (frame.type === "place" && cur) {
         activeNode2 = decisionId(columns);
         event = "branch";
-        caption = `Branch R${cur.row} C${cur.col} · descend to R${cur.row + 1}`;
+        caption = `Branch R${cur.row} C${cur.col}, descend to R${cur.row + 1}`;
       } else if (frame.type === "reject" && cur) {
         activeNode2 = `p:${decisionId(columns)}`;
         activePath.add(activeNode2);
         event = "prune";
-        caption = frame.conflict ? `Prune R${cur.row} C${cur.col} · blocked by R${frame.conflict.row} C${frame.conflict.col}` : `Prune R${cur.row} C${cur.col}`;
+        caption = frame.conflict ? `Prune R${cur.row} C${cur.col}, blocked by R${frame.conflict.row} C${frame.conflict.col}` : `Prune R${cur.row} C${cur.col}`;
       } else if (frame.type === "backtrack" && cur) {
         const returningColumns = [...columns, cur.col];
         returnSource = decisionId(returningColumns);
@@ -2640,7 +2646,7 @@
       for (const element of [label, detail, result]) element.setAttribute("text-anchor", "middle");
       const [primaryLine, secondaryLine] = descriptor.nodeLines(node2);
       label.textContent = primaryLine;
-      detail.textContent = secondaryLine;
+      setTextParts(detail, secondaryLine);
       if (descriptor.shape === "circle") {
         label.setAttribute("y", "0");
         label.setAttribute("dominant-baseline", "central");
@@ -2791,7 +2797,7 @@
       const activeNode2 = nodes5.find((node2) => node2.id === model.active);
       if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(model.visible);
       title.textContent = `${descriptor.ariaLabel}: ${model.phase}`;
-      description.textContent = `${model.phase}. Active subproblem ${activeNode2 ? descriptor.nodeLines(activeNode2).join("; ") : "none"}. ${model.action}. ${stripTags(frame.message)}`;
+      description.textContent = `${model.phase}. Active subproblem ${activeNode2 ? descriptor.nodeLines(activeNode2).join(". ") : "none"}. ${model.action}. ${stripTags(frame.message)}`;
       for (const node2 of nodes5) {
         const elements = nodeElements[node2.id];
         const state = model.states[node2.id] || "";
@@ -2809,7 +2815,10 @@
             for (let index2 = 0; index2 < elements.valueCells.length; index2++)
               elements.valueCells[index2].textContent = String(values[index2] ?? "");
           } else {
-            elements.detail.textContent = descriptor.preserveDetail ? elements.secondaryLine : resultText || elements.secondaryLine;
+            setTextParts(
+              elements.detail,
+              descriptor.preserveDetail ? elements.secondaryLine : resultText || elements.secondaryLine
+            );
           }
           elements.result.textContent = "";
           elements.badge.textContent = descriptor.showStateBadge ? descriptor.stateLabels[state] || "" : "";
@@ -2824,7 +2833,7 @@
         edge.element.dataset.path = path.has(edge.from) && path.has(edge.to) ? "true" : "false";
         edge.element.dataset.related = model.active === edge.from && related.has(edge.to) ? "true" : "false";
       }
-      setStatus(status, frame.message, `· step ${index + 1}/${total}`);
+      setStatus(status, frame.message, `step ${index + 1}/${total}`);
     }
     function watch(frame) {
       const model = descriptor.frameModel(frame);
@@ -3027,7 +3036,7 @@
         e.el.dataset.selected = sel ? "true" : "false";
         e.el.dataset.dim = selected.length && !sel ? "true" : "false";
       }
-      setStatus(status, frame.message, `· ${frame.visited.length} visited · step ${i + 1}/${total}`);
+      setStatus(status, frame.message, `${frame.visited.length} visited, step ${i + 1}/${total}`);
     }
     function watch(frame) {
       return [
@@ -3057,6 +3066,35 @@
     const count = el("span", "steptrace__counts");
     count.textContent = counts;
     status.append(" ", count);
+  }
+  function setTextParts(node2, text) {
+    const parts = String(text).split(" ");
+    if (parts.length === 1) {
+      node2.textContent = parts[0];
+      return;
+    }
+    const svg = node2 instanceof SVGElement;
+    const make = (cls, content) => {
+      const part = svg ? document.createElementNS("http://www.w3.org/2000/svg", "tspan") : document.createElement("span");
+      if (cls) part.setAttribute("class", cls);
+      part.textContent = content;
+      return part;
+    };
+    const children = [];
+    parts.forEach((part, index) => {
+      if (index > 0) {
+        const sep = make("steptrace__sep", svg ? " | " : " ");
+        if (svg) sep.setAttribute("aria-hidden", "true");
+        children.push(sep);
+      }
+      children.push(make("", part));
+    });
+    node2.replaceChildren(...children);
+  }
+  function setRailLabel(node2, title, detail) {
+    const aside = el("span", "steptrace__rail-label-detail");
+    aside.textContent = detail;
+    node2.replaceChildren(document.createTextNode(title), aside);
   }
   function makeLegend(items, ariaLabel, extraClass = "") {
     const legend = el("div", `steptrace__legend${extraClass ? ` ${extraClass}` : ""}`);
@@ -3335,56 +3373,56 @@
   function summaryFor(algorithm, kind, frame, graph) {
     if (kind === "sort") {
       if (algorithm === "counting-sort")
-        return `Output [${frame.output.join(", ")}] · ${frame.tallied} tallies · ${frame.placed} stable placements.`;
+        return `Output [${frame.output.join(", ")}], ${frame.tallied} tallies, ${frame.placed} stable placements.`;
       if (algorithm === "radix-sort" || algorithm === "bucket-sort") {
         const output = frame.source.map((token) => token.value);
         const work = algorithm === "radix-sort" ? `${frame.passCount} stable digit passes` : `${frame.comparisons} local comparisons`;
-        return `Output [${output.join(", ")}] · ${work} · ${frame.gathered} gathered.`;
+        return `Output [${output.join(", ")}], ${work}, ${frame.gathered} gathered.`;
       }
       if (algorithm === "merge-sort")
-        return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`;
+        return `Output [${frame.array.join(", ")}], ${frame.swaps} writes.`;
       if (algorithm === "tim-sort")
-        return `Output [${frame.array.join(", ")}] · ${frame.merges} run-stack merge${frame.merges === 1 ? "" : "s"}.`;
+        return `Output [${frame.array.join(", ")}], ${frame.merges} run-stack merge${frame.merges === 1 ? "" : "s"}.`;
       const unit = frame.movementUnit || (["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm) ? "swaps" : "moves");
-      const comparisons = frame.showComparisons === false ? "" : `${frame.comparisons} comparisons · `;
-      return `Output [${frame.array.join(", ")}] · ${comparisons}${frame.swaps} ${unit}.`;
+      const comparisons = frame.showComparisons === false ? "" : `${frame.comparisons} comparisons, `;
+      return `Output [${frame.array.join(", ")}], ${comparisons}${frame.swaps} ${unit}.`;
     }
     if (kind === "graph") {
       if (algorithm === "a-star") {
         const cost = frame.selectedPath?.length ? frame.g?.[frame.target] : null;
-        return cost == null ? `${frame.target} is unreachable.` : `Path ${frame.selectedPath.join(" → ")} · cost ${cost} · A* ${frame.astarExpanded} vs Dijkstra ${frame.dijkstraExpanded} expansions.`;
+        return cost == null ? `${frame.target} is unreachable.` : `Path ${frame.selectedPath.join(" → ")}, cost ${cost}, A* ${frame.astarExpanded} vs Dijkstra ${frame.dijkstraExpanded} expansions.`;
       }
       if (algorithm === "dijkstra" && frame.target != null) {
         const edges5 = frame.selected || [];
         const path = edges5.length ? [edges5[0][0], ...edges5.map((e) => e[1])].join(" → ") : String(frame.target);
         const cost = frame.dist[frame.target];
-        return cost == null ? `${frame.target} is unreachable.` : `Path ${path} · cost ${cost} · ${frame.visited.length} nodes settled.`;
+        return cost == null ? `${frame.target} is unreachable.` : `Path ${path}, cost ${cost}, ${frame.visited.length} nodes settled.`;
       }
       if (algorithm === "dijkstra") {
         const distances = Object.keys(frame.dist).sort().map((id) => `${id}:${frame.dist[id]}`).join(", ");
-        return `Shortest-path tree: ${frame.selected.length} edges · distances ${distances}.`;
+        return `Shortest-path tree: ${frame.selected.length} edges, distances ${distances}.`;
       }
       if (algorithm === "prim") {
         const weight = (frame.selected || []).reduce(
           (sum, e) => sum + graphEdgeWeight(graph, e[0], e[1]),
           0
         );
-        return `${frame.selected.length} edges selected · total weight ${weight} · ${frame.visited.length} nodes joined.`;
+        return `${frame.selected.length} edges selected, total weight ${weight}, ${frame.visited.length} nodes joined.`;
       }
       if (algorithm === "topological-sort") {
         const unresolved = graph ? graph.nodes.length - frame.visited.length : 0;
-        return unresolved > 0 ? `No topological order · cycle leaves ${unresolved} node${unresolved === 1 ? "" : "s"} unresolved.` : `Order ${frame.visited.join(" → ")} · ${frame.visited.length} nodes emitted.`;
+        return unresolved > 0 ? `No topological order, cycle leaves ${unresolved} node${unresolved === 1 ? "" : "s"} unresolved.` : `Order ${frame.visited.join(" → ")}, ${frame.visited.length} nodes emitted.`;
       }
       if (frame.target != null) {
         const d = frame.dist[frame.target];
         return d == null ? `${frame.target} is unreachable.` : `${frame.target} reached at depth ${d} after ${frame.visited.length} visits.`;
       }
-      return `${frame.visited.length} nodes visited · frontier empty.`;
+      return `${frame.visited.length} nodes visited, frontier empty.`;
     }
     if (kind === "search") {
       if (algorithm === "binary-search-on-answer")
-        return `Minimum feasible capacity ${frame.answer} · ${frame.probes} probe${frame.probes === 1 ? "" : "s"}.`;
-      return frame.found == null ? `${frame.target} not found · ${frame.comparisons} comparisons.` : `${frame.target} found at index ${frame.found} · ${frame.comparisons} comparisons.`;
+        return `Minimum feasible capacity ${frame.answer}, ${frame.probes} probe${frame.probes === 1 ? "" : "s"}.`;
+      return frame.found == null ? `${frame.target} not found, ${frame.comparisons} comparisons.` : `${frame.target} found at index ${frame.found}, ${frame.comparisons} comparisons.`;
     }
     if (kind === "string" && frame.profile === "z-array") return `Z = [${frame.z.join(", ")}].`;
     if (kind === "string" && frame.profile === "aho-corasick") {
@@ -3392,10 +3430,10 @@
       return matches ? `Matches ${matches}.` : "No patterns matched.";
     }
     if (kind === "string" && frame.profile === "ternary-search-tree")
-      return `${frame.terminalNodes.length} terminal keys · ${frame.visibleNodes.length - 1} character nodes.`;
+      return `${frame.terminalNodes.length} terminal keys, ${frame.visibleNodes.length - 1} character nodes.`;
     if (kind === "string" && Array.isArray(frame.terminalNodes)) {
       const keys = frame.terminalNodes.filter((node2) => node2 !== "root");
-      return keys.length ? `Stored keys ${keys.join(", ")} · ${frame.visibleNodes.length} trie nodes.` : `No keys stored · ${frame.visibleNodes.length} trie node.`;
+      return keys.length ? `Stored keys ${keys.join(", ")}, ${frame.visibleNodes.length} trie nodes.` : `No keys stored, ${frame.visibleNodes.length} trie node.`;
     }
     if (kind === "string") {
       const found = Array.isArray(frame.found) ? frame.found : [];
@@ -3403,7 +3441,7 @@
     }
     if (kind === "pointers") {
       const values = (frame.marked || []).map((i) => frame.array[i]);
-      return values.length ? `Answer indices [${frame.marked.join(", ")}] · values [${values.join(", ")}].` : algorithm === "two-pointers" || algorithm === "sliding-window" ? `No qualifying range was found.` : `No committed result was recorded.`;
+      return values.length ? `Answer indices [${frame.marked.join(", ")}], values [${values.join(", ")}].` : algorithm === "two-pointers" || algorithm === "sliding-window" ? `No qualifying range was found.` : `No committed result was recorded.`;
     }
     if (kind === "dp") {
       if ([
@@ -3412,54 +3450,54 @@
         "coin-change-memoization",
         "coin-change-tabulation"
       ].includes(algorithm))
-        return `${frame.best || "Exact change pending"} · target ${frame.target}¢.`;
+        return `${frame.best || "Exact change pending"}, target ${frame.target}¢.`;
       if ([
         "grid-path-greedy",
         "grid-path-naive",
         "grid-path-memoization",
         "grid-path-tabulation"
       ].includes(algorithm))
-        return frame.bestCost == null ? `Warehouse route pending · current cost ${frame.routeCost}.` : `Minimum warehouse route cost ${frame.bestCost}.`;
+        return frame.bestCost == null ? `Warehouse route pending, current cost ${frame.routeCost}.` : `Minimum warehouse route cost ${frame.bestCost}.`;
       if (algorithm === "coin-change-bottom-up")
-        return `Fewest coins for 30¢: ${frame.grid[0]?.at(-1)} · exact change 10¢ + 10¢ + 10¢.`;
+        return `Fewest coins for 30¢: ${frame.grid[0]?.at(-1)}, exact change 10¢ + 10¢ + 10¢.`;
       if (algorithm === "grid-path-bottom-up")
-        return `Minimum warehouse route cost ${frame.grid[0]?.[0]} · ${frame.path.length} path tiles.`;
+        return `Minimum warehouse route cost ${frame.grid[0]?.[0]}, ${frame.path.length} path tiles.`;
       if (algorithm === "floyd-warshall") {
         if (frame.negativeCycle?.length)
-          return `Negative cycle through ${frame.negativeCycle.join(", ")}; shortest paths are undefined.`;
+          return `Negative cycle through ${frame.negativeCycle.join(", ")}. Shortest paths are undefined.`;
         const distances = frame.grid.map(
           (row2, index) => `${frame.rowLabels[index]}: [${row2.map((value2) => value2 ?? "∞").join(", ")}]`
-        ).join(" · ");
+        ).join(", ");
         return `All-pairs distances ${distances}.`;
       }
       if (algorithm === "dynamic-programming") {
         const stored = frame.grid.flat().filter((value2) => value2 != null).length;
         const target = frame.grid[0]?.[frame.grid[0].length - 1];
         if (frame.variant === "concrete")
-          return `Best non-adjacent total ${target} · ${stored} prefixes solved once.`;
-        return `Target ${target} · ${stored} states solved once in dependency order.`;
+          return `Best non-adjacent total ${target}, ${stored} prefixes solved once.`;
+        return `Target ${target}, ${stored} states solved once in dependency order.`;
       }
       const row = frame.grid[frame.grid.length - 1] || [];
       const value = row[row.length - 1];
       const sequence2 = (frame.path || []).map((p) => frame.rowLabels[p[0]]).join("");
-      return algorithm === "lcs" ? `Optimal value ${value}${sequence2 ? ` · sequence "${sequence2}"` : ""}.` : `Final table value ${value}${frame.path.length ? ` · ${frame.path.length} traced cells` : ""}.`;
+      return algorithm === "lcs" ? `Optimal value ${value}${sequence2 ? `, sequence "${sequence2}"` : ""}.` : `Final table value ${value}${frame.path.length ? `, ${frame.path.length} traced cells` : ""}.`;
     }
     if (kind === "unionfind")
-      return `${new Set(frame.roots).size} disjoint set${new Set(frame.roots).size === 1 ? "" : "s"} · parents [${frame.parent.join(", ")}].`;
+      return `${new Set(frame.roots).size} disjoint set${new Set(frame.roots).size === 1 ? "" : "s"}, parents [${frame.parent.join(", ")}].`;
     if (kind === "bits")
-      return algorithm === "kernighan-popcount" ? `Population count ${frame.total} · ${frame.pop} lowest set bits cleared.` : `${frame.pop} of ${frame.total} tally steps committed.`;
+      return algorithm === "kernighan-popcount" ? `Population count ${frame.total}, ${frame.pop} lowest set bits cleared.` : `${frame.pop} of ${frame.total} tally steps committed.`;
     if (kind === "backtrack")
-      return frame.solved ? `Solved at depth ${frame.depth} · ${frame.placed} placements · ${frame.pruned} branches pruned.` : `No arrangement found · ${frame.pruned} branches pruned.`;
+      return frame.solved ? `Solved at depth ${frame.depth}, ${frame.placed} placements, ${frame.pruned} branches pruned.` : `No arrangement found, ${frame.pruned} branches pruned.`;
     if (kind === "rectree") {
       if (algorithm === "branch-and-bound")
-        return `Best value ${frame.incumbent} · take A + C · weight 7/7 · ${frame.pruned} branches pruned.`;
+        return `Best value ${frame.incumbent}, take A + C, weight 7/7, ${frame.pruned} branches pruned.`;
       if (algorithm === "coin-change-top-down")
-        return `Fewest coins for 30¢: ${frame.results?.c30 || "—"} · ${frame.pruned} recursive calls skipped.`;
+        return `Fewest coins for 30¢: ${frame.results?.c30 || "—"}, ${frame.pruned} recursive calls skipped.`;
       if (algorithm === "grid-path-top-down")
-        return `Minimum warehouse route cost ${frame.results?.r1c1 || "—"} · ${frame.pruned} recursive calls skipped.`;
+        return `Minimum warehouse route cost ${frame.results?.r1c1 || "—"}, ${frame.pruned} recursive calls skipped.`;
       if (algorithm === "memoization") {
         const memoResult = String(frame.results?.a || "ready").replace(/^result\s+/i, "");
-        return `Result ${memoResult} · ${frame.calls} calls · ${frame.pruned} recursive calls skipped.`;
+        return `Result ${memoResult}, ${frame.calls} calls, ${frame.pruned} recursive calls skipped.`;
       }
       const result = frame.results?.root;
       if (Array.isArray(result)) return `Sorted result [${result.join(", ")}].`;
@@ -3622,11 +3660,11 @@
     return interval ? `[${interval[0]}, ${interval[1]}]` : "—";
   }
   function formatRelation(relation) {
-    if (relation === "contained") return "contained · keep end";
-    if (relation === "overlap") return "overlap · extend";
-    if (relation === "gap") return "gap · emit";
-    if (relation === "compatible") return "compatible · accept";
-    if (relation === "conflict") return "overlap · reject";
+    if (relation === "contained") return "contained, keep end";
+    if (relation === "overlap") return "overlap, extend";
+    if (relation === "gap") return "gap, emit";
+    if (relation === "compatible") return "compatible, accept";
+    if (relation === "conflict") return "overlap, reject";
     return "—";
   }
   function intervalBand(className, start, end, minimum) {
@@ -3798,7 +3836,7 @@
       watch,
       summary(frame) {
         const output = frame.output.map((interval) => formatInterval(interval)).join(", ");
-        return scheduling ? `Accepted ${output} · ${frame.output.length} of ${frame.intervals.length} meetings.` : `Merged ${output} · ${frame.intervals.length} intervals → ${frame.output.length} blocks.`;
+        return scheduling ? `Accepted ${output}, ${frame.output.length} of ${frame.intervals.length} meetings.` : `Merged ${output}, ${frame.intervals.length} intervals → ${frame.output.length} blocks.`;
       }
     };
   }
@@ -3846,7 +3884,7 @@
         0,
         accepted.id,
         pair(accepted),
-        `Accept [${accepted.start}, ${accepted.end}]; it finishes first.`
+        `Accept [${accepted.start}, ${accepted.end}]. It finishes first.`
       );
       for (let index = 1; index < sorted.length; index++) {
         const next = sorted[index];
@@ -3861,7 +3899,7 @@
           ops.reject(
             index,
             next.id,
-            `Reject [${next.start}, ${next.end}]; accepting it would overlap [${accepted.start}, ${accepted.end}].`
+            `Reject [${next.start}, ${next.end}]. Accepting it would overlap [${accepted.start}, ${accepted.end}].`
           );
           continue;
         }
@@ -3873,7 +3911,7 @@
           `Accept [${next.start}, ${next.end}] and move the compatibility boundary to ${next.end}.`
         );
       }
-      ops.finish("Every meeting was considered; the accepted schedule is maximum-size.");
+      ops.finish("Every meeting was considered. The accepted schedule is maximum-size.");
     }
   };
 
@@ -4179,7 +4217,7 @@
           model.root = node(key4);
           state.changed.add(key4);
           state.success = key4;
-          return { changed: true, detail: `Inserted ${key4} as the root; height is 1.` };
+          return { changed: true, detail: `Inserted ${key4} as the root. Height is 1.` };
         }
         let current = model.root;
         while (true) {
@@ -4187,7 +4225,7 @@
           if (key4 === current.key)
             return {
               changed: false,
-              detail: `Compared ${state.path.join(" → ")}; ${key4} already exists, so the tree did not change.`
+              detail: `Compared ${state.path.join(" → ")}. ${key4} already exists, so the tree did not change.`
             };
           const side = key4 < current.key ? "left" : "right";
           const child = current[side];
@@ -4202,7 +4240,7 @@
           const after = treeHeight(model.root);
           return {
             changed: true,
-            detail: `Inserted ${key4} via ${state.path.join(" → ")}; height ${before} → ${after}. Sorted inserts keep extending one side instead of restoring balance.`
+            detail: `Inserted ${key4} via ${state.path.join(" → ")}. Height ${before} → ${after}. Sorted inserts keep extending one side instead of restoring balance.`
           };
         }
       },
@@ -4218,7 +4256,7 @@
         }
         return {
           found: false,
-          detail: `Search path ${state.path.join(" → ")} reached an empty child; ${key4} is absent.`
+          detail: `Search path ${state.path.join(" → ")} reached an empty child. ${key4} is absent.`
         };
       },
       remove(key4, state) {
@@ -4232,7 +4270,7 @@
         if (!current)
           return {
             changed: false,
-            detail: `Compared ${state.path.join(" → ")}; ${key4} is absent, so the tree did not change.`
+            detail: `Compared ${state.path.join(" → ")}. ${key4} is absent, so the tree did not change.`
           };
         state.path.push(current.key);
         state.changed.add(current.key);
@@ -4259,11 +4297,11 @@
         }
         return {
           changed: true,
-          detail: `Removed ${key4} via ${state.path.join(" → ")}; BST order is preserved at height ${treeHeight(model.root)}.`
+          detail: `Removed ${key4} via ${state.path.join(" → ")}. BST order is preserved at height ${treeHeight(model.root)}.`
         };
       },
       meta: () => "",
-      invariant: () => `BST order valid · height ${treeHeight(model.root)}`
+      invariant: () => `BST order valid, height ${treeHeight(model.root)}`
     };
     return model;
   }
@@ -4374,7 +4412,7 @@
         if (inserted) state.success = key4;
         return {
           changed: inserted,
-          detail: inserted ? `Inserted ${key4} via ${state.path.join(" → ") || "the root"}; ${repairs.length ? `${repairs.join(", ")} restored |balance| ≤ 1.` : "no rotation was needed."}` : `Compared ${state.path.join(" → ")}; ${key4} already exists, so the tree did not change.`
+          detail: inserted ? `Inserted ${key4} via ${state.path.join(" → ") || "the root"}, and ${repairs.length ? `${repairs.join(", ")} restored |balance| ≤ 1.` : "no rotation was needed."}` : `Compared ${state.path.join(" → ")}. ${key4} already exists, so the tree did not change.`
         };
       },
       search(key4, state) {
@@ -4389,7 +4427,7 @@
         }
         return {
           found: false,
-          detail: `Search path ${state.path.join(" → ")} reached an empty child; ${key4} is absent.`
+          detail: `Search path ${state.path.join(" → ")} reached an empty child. ${key4} is absent.`
         };
       },
       remove(key4, state) {
@@ -4399,11 +4437,11 @@
         if (model.root) model.root.parent = null;
         return {
           changed: removed,
-          detail: removed ? `Removed ${key4} via ${state.path.join(" → ")}; ${repairs.length ? `${repairs.join(", ")} rebalanced the shortened path.` : "all ancestors stayed within |balance| ≤ 1."}` : `Compared ${state.path.join(" → ")}; ${key4} is absent, so the tree did not change.`
+          detail: removed ? `Removed ${key4} via ${state.path.join(" → ")}, and ${repairs.length ? `${repairs.join(", ")} rebalanced the shortened path.` : "all ancestors stayed within |balance| ≤ 1."}` : `Compared ${state.path.join(" → ")}. ${key4} is absent, so the tree did not change.`
         };
       },
       meta: (current) => `h${current.height} bf${balanceFactor(current)}`,
-      invariant: () => "AVL balance valid · |balance| ≤ 1"
+      invariant: () => "AVL balance valid, |balance| ≤ 1"
     };
     for (const value of values) model.insert(value, operationState());
     return model;
@@ -4529,7 +4567,7 @@
         if (inserted) state.success = key4;
         return {
           changed: inserted,
-          detail: inserted ? `Inserted ${key4}; ${events.join(", ") || "no fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.` : `Compared ${state.path.join(" → ")}; ${key4} already exists, so the tree did not change.`
+          detail: inserted ? `Inserted ${key4}. ${events.length ? `Fixup: ${events.join(", ")}` : "No fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.` : `Compared ${state.path.join(" → ")}. ${key4} already exists, so the tree did not change.`
         };
       },
       search(key4, state) {
@@ -4544,7 +4582,7 @@
         }
         return {
           found: false,
-          detail: `Search path ${state.path.join(" → ")} reached an empty child; ${key4} is absent.`
+          detail: `Search path ${state.path.join(" → ")} reached an empty child. ${key4} is absent.`
         };
       },
       remove(key4, state) {
@@ -4562,11 +4600,11 @@
         if (model.root) model.root.color = "black";
         return {
           changed: true,
-          detail: `Removed ${key4}; ${events.join(", ") || "no fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.`
+          detail: `Removed ${key4}. ${events.length ? `Fixup: ${events.join(", ")}` : "No fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.`
         };
       },
-      meta: (current) => current.color === "red" ? "R" : "B",
-      invariant: () => `RB invariants valid · black-height ${blackHeight(model.root)}`
+      meta: () => "",
+      invariant: () => `RB invariants valid, black-height ${blackHeight(model.root)}`
     };
     for (const value of values) model.insert(value, operationState());
     return model;
@@ -4578,7 +4616,7 @@
       search: () => ({ found: false, detail: "" }),
       remove: () => ({ changed: false, detail: "" }),
       meta: () => "",
-      invariant: () => "BST order valid · accessed node becomes root"
+      invariant: () => "BST order valid, accessed node becomes root"
     };
     for (const value of values) model.root = plainInsert(model.root, value);
     const rotateLeft = (current, state) => {
@@ -4658,7 +4696,7 @@
       if (result.found)
         return {
           changed: false,
-          detail: `${key4} already exists; the tree did not change.`
+          detail: `${key4} already exists. The tree did not change.`
         };
       const parent = result.last;
       const added = node(key4);
@@ -4680,7 +4718,7 @@
       if (result.found) state.success = key4;
       return {
         found: !!result.found,
-        detail: result.found ? `Search path ${state.path.join(" → ")} found ${key4}; ${cases.join(" → ") || "already root"} moved it to the root.` : `Search path ${state.path.join(" → ")} missed ${key4}; canonical splay moves last accessed ${accessed?.key ?? "node"} to the root via ${cases.join(" → ") || "no rotation"}.`
+        detail: result.found ? `Search path ${state.path.join(" → ")} found ${key4}. ${cases.length ? `Splay steps ${cases.join(" → ")} moved it to the root` : "It was already the root"}.` : `Search path ${state.path.join(" → ")} missed ${key4}. Canonical splay moves last accessed ${accessed?.key ?? "node"} to the root via ${cases.join(" → ") || "no rotation"}.`
       };
     };
     model.remove = (key4, state) => {
@@ -4690,7 +4728,7 @@
         const cases = accessed ? splay(accessed, state) : [];
         return {
           changed: false,
-          detail: `${key4} is absent; last accessed ${accessed?.key ?? "node"} was splayed via ${cases.join(" → ") || "no rotation"}.`
+          detail: `${key4} is absent. Last accessed ${accessed?.key ?? "node"} was splayed via ${cases.join(" → ") || "no rotation"}.`
         };
       }
       splay(result.found, state);
@@ -4710,7 +4748,7 @@
       }
       return {
         changed: true,
-        detail: `Removed ${key4}; splayed the left maximum and joined both ordered halves.`
+        detail: `Removed ${key4}. Splayed the left maximum and joined both ordered halves.`
       };
     };
     return model;
@@ -4881,7 +4919,7 @@
         const metadata = model.meta(entry.node);
         group.setAttribute(
           "aria-label",
-          kind === "avl-tree" ? `Key ${entry.node.key}, height ${entry.node.height}, balance factor ${balanceFactor(entry.node)}` : `Key ${entry.node.key}${metadata ? `, ${metadata}` : ""}`
+          kind === "avl-tree" ? `Key ${entry.node.key}, height ${entry.node.height}, balance factor ${balanceFactor(entry.node)}` : kind === "red-black-tree" ? `Key ${entry.node.key}, ${entry.node.color}` : `Key ${entry.node.key}${metadata ? `, ${metadata}` : ""}`
         );
         value.textContent = String(entry.node.key);
         meta.textContent = metadata;
@@ -5633,10 +5671,10 @@
           ...frame.selectedEdges.filter((_, index) => index % 2 === 0).map((edge) => edge.split("|")[1])
         ] : [];
         const { comparison: result } = frame.detail;
-        const comparison = result.primaryValue != null && result.baselineValue != null ? result.metric === "cost" ? ` · ${result.primaryLabel} cost ${result.primaryValue} vs ${result.baselineLabel} cost ${result.baselineValue}` : ` · ${result.primaryLabel} ${result.primaryValue} vs ${result.baselineLabel} ${result.baselineValue} expansions` : "";
+        const comparison = result.primaryValue != null && result.baselineValue != null ? result.metric === "cost" ? `, ${result.primaryLabel} cost ${result.primaryValue} vs ${result.baselineLabel} cost ${result.baselineValue}` : `, ${result.primaryLabel} ${result.primaryValue} vs ${result.baselineLabel} ${result.baselineValue} expansions` : "";
         if (path.length && result.metric === "cost" && result.primaryLabel === "Greedy" && result.primaryValue != null && result.baselineValue != null)
           return `Greedy ${path.join("→​")}: cost ${result.primaryValue} vs A* cost ${result.baselineValue} (optimal).`;
-        return frame.target && cost == null ? `${frame.target} is unreachable.` : `Path ${path.length ? path.join(" → ") : "pending"}${cost == null ? "" : ` · cost ${cost}`}${comparison}.`;
+        return frame.target && cost == null ? `${frame.target} is unreachable.` : `Path ${path.length ? path.join(" → ") : "pending"}${cost == null ? "" : `, cost ${cost}`}${comparison}.`;
       }
       case "dual-search":
         return frame.detail.meeting ? `Frontiers meet at ${frame.detail.meeting}.` : "No meeting point was found.";
@@ -5646,13 +5684,13 @@
       case "component-flood":
         return `${frame.detail.groups?.length ?? frame.detail.component} connected components.`;
       case "low-link-cuts":
-        return `${frame.detail.articulationPoints.length} articulation points · ${frame.detail.bridges.length} bridges.`;
+        return `${frame.detail.articulationPoints.length} articulation points, ${frame.detail.bridges.length} bridges.`;
       case "low-link-components":
         return `${frame.detail.components.length} strongly connected components.`;
       case "mst-scan":
-        return `${frame.detail.accepted.length} tree edges · total weight ${frame.detail.totalWeight}.`;
+        return `${frame.detail.accepted.length} tree edges, total weight ${frame.detail.totalWeight}.`;
       case "mst-round":
-        return `${frame.detail.components.length} component${frame.detail.components.length === 1 ? "" : "s"} · total weight ${frame.detail.totalWeight}.`;
+        return `${frame.detail.components.length} component${frame.detail.components.length === 1 ? "" : "s"}, total weight ${frame.detail.totalWeight}.`;
       case "path-backtrack": {
         const [first] = frame.detail.path;
         const last = frame.detail.path.at(-1);
@@ -5672,12 +5710,12 @@
     const shown = [];
     for (const entry of entries.slice(0, FRONTIER_WATCH_LIMIT)) {
       const rest = entries.length - shown.length - 1;
-      const line = [...shown, entry, ...rest ? [`+${rest} more`] : []].join(" · ");
+      const line = [...shown, entry, ...rest ? [`+${rest} more`] : []].join(", ");
       if (shown.length && line.length > WATCH_LIST_CHARS) break;
       shown.push(entry);
     }
     if (entries.length > shown.length) shown.push(`+${entries.length - shown.length} more`);
-    return shown.join(" · ");
+    return shown.join(", ");
   }
   function edgeRelaxationWatch(frame) {
     const { detail } = frame;
@@ -5687,7 +5725,7 @@
     const edge = { k: "edge", v: detail.edge?.join(" → ") || "—", sw: "var(--_blue)" };
     const ids = frame.nodes.map(({ id }) => id);
     if (detail.policy === "bellman-ford") {
-      const distanceWatch = ids.map(entry).join(" · ");
+      const distanceWatch = ids.map(entry).join(", ");
       return [
         { k: "distances", v: distanceWatch, sw: "var(--_blue)", hint: distanceWatch },
         { k: "pass", v: String(detail.pass), sw: "var(--_violet)" },
@@ -5715,13 +5753,13 @@
         k: "frontier",
         v: watchSlice(frontier.map(entry)) || "—",
         sw: "var(--_amber)",
-        hint: "Reached, unsettled nodes by tentative distance; the first one settles next."
+        hint: "Reached, unsettled nodes by tentative distance. The first one settles next."
       },
       {
         k: "distances",
         v: `${settled} of ${ids.length} settled`,
         sw: "var(--_green)",
-        hint: `All distances: ${ids.slice().sort(byDistance).map(entry).join(" · ")}.`
+        hint: `All distances: ${ids.slice().sort(byDistance).map(entry).join(", ")}.`
       }
     ];
   }
@@ -5967,7 +6005,7 @@
         if (frame.detail.kind === "heuristic-search") {
           const g = frame.detail.costs[id];
           const h = frame.detail.heuristic[id];
-          group.children[0].textContent = frame.detail.policy === "greedy" ? `${node2.label}: h ${h}; path cost ${g ?? "∞"} is ignored for priority` : `${node2.label}: g ${g ?? "∞"}, h ${h}, f ${g == null ? "∞" : g + h}`;
+          group.children[0].textContent = frame.detail.policy === "greedy" ? `${node2.label}: h ${h}. Path cost ${g ?? "∞"} is ignored for priority` : `${node2.label}: g ${g ?? "∞"}, h ${h}, f ${g == null ? "∞" : g + h}`;
         } else {
           group.children[0].textContent = node2.label;
         }
@@ -6006,14 +6044,14 @@
         rows.push(
           {
             k: "score",
-            v: current && g != null && h != null ? frame.detail.policy === "greedy" ? `h ${h}` : `g ${g} · h ${h} · f ${g + h}` : "—",
+            v: current && g != null && h != null ? frame.detail.policy === "greedy" ? `h ${h}` : `g ${g}, h ${h}, f ${g + h}` : "—",
             sw: "var(--_amber)"
           },
           {
             k: "open",
             v: watchSlice(frame.detail.open.map((entry) => entry.id)) || "—",
             sw: "var(--_amber)",
-            hint: `OPEN by priority: ${frame.detail.open.map(({ id, h: h2, f }) => `${id} ${greedy ? `h ${h2}` : `f ${f}`}`).join(" · ") || "empty"}.`
+            hint: `OPEN by priority: ${frame.detail.open.map(({ id, h: h2, f }) => `${id} ${greedy ? `h ${h2}` : `f ${f}`}`).join(", ") || "empty"}.`
           },
           frame.selectedEdges.length ? {
             k: "path",
@@ -6024,7 +6062,7 @@
             k: "closed",
             v: `${frame.detail.closed.length} of ${frame.nodes.length}`,
             sw: "var(--_green)",
-            hint: `CLOSED in expansion order: ${frame.detail.closed.join(" · ") || "none yet"}.`
+            hint: `CLOSED in expansion order: ${frame.detail.closed.join(", ") || "none yet"}.`
           }
         );
       }
@@ -6032,7 +6070,7 @@
         const comparison = frame.detail.comparison;
         rows.push({
           k: comparison.metric === "expansions" ? "expanded" : "comparison",
-          v: `${comparison.primaryLabel} ${comparison.primaryValue} · ${comparison.baselineLabel} ${comparison.baselineValue}`,
+          v: `${comparison.primaryLabel} ${comparison.primaryValue}, ${comparison.baselineLabel} ${comparison.baselineValue}`,
           sw: "var(--_green)"
         });
       }
@@ -6041,7 +6079,7 @@
           rows.push(
             {
               k: "frontiers",
-              v: `F ${frame.detail.forward.length} · B ${frame.detail.backward.length}`,
+              v: `F ${frame.detail.forward.length}, B ${frame.detail.backward.length}`,
               sw: "var(--_amber)"
             },
             { k: "meeting", v: frame.detail.meeting || "—", sw: "var(--_violet)" }
@@ -6067,12 +6105,12 @@
             },
             {
               k: "cut vertices",
-              v: frame.detail.articulationPoints.join(" · ") || "—",
+              v: frame.detail.articulationPoints.join(", ") || "—",
               sw: "var(--_violet)"
             },
             {
               k: "bridges",
-              v: frame.detail.bridges.map(([from, to]) => `${from}—${to}`).join(" · ") || "—",
+              v: frame.detail.bridges.map(([from, to]) => `${from}—${to}`).join(", ") || "—",
               sw: "var(--_violet)"
             }
           );
@@ -6086,7 +6124,7 @@
               v: id ? `${frame.detail.discovery[id] ?? "—"} / ${frame.detail.low[id] ?? "—"}` : "—",
               sw: "var(--_amber)"
             },
-            { k: "stack", v: frame.detail.stack.join(" · ") || "—", sw: "var(--_violet)" },
+            { k: "stack", v: frame.detail.stack.join(", ") || "—", sw: "var(--_violet)" },
             { k: "components", v: String(frame.detail.components.length), sw: "var(--_green)" }
           );
           break;
@@ -6112,8 +6150,8 @@
         case "path-backtrack":
           rows.push(
             { k: "path", v: frame.detail.path.join(" → ") || "—", sw: "var(--_green)" },
-            { k: "candidates", v: frame.detail.candidates.join(" · ") || "—", sw: "var(--_amber)" },
-            { k: "rejected", v: frame.detail.rejected.join(" · ") || "—", sw: "var(--_red)" }
+            { k: "candidates", v: frame.detail.candidates.join(", ") || "—", sw: "var(--_amber)" },
+            { k: "rejected", v: frame.detail.rejected.join(", ") || "—", sw: "var(--_red)" }
           );
           break;
         case "residual-flow":
@@ -6217,7 +6255,7 @@
       }
     ];
     let order = 1;
-    ops.init(g, visibleQueue(queue2, closed), `Seed OPEN with ${config.start}; rank it by f = g + h.`);
+    ops.init(g, visibleQueue(queue2, closed), `Seed OPEN with ${config.start}. Rank it by f = g + h.`);
     while (queue2.length) {
       queue2.sort(
         (left, right) => left.f - right.f || left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)
@@ -6243,7 +6281,7 @@
           g,
           closed.size,
           dijkstraExpanded,
-          `Path cost ${g[config.target]}. A* expanded ${closed.size}; Dijkstra expanded ${dijkstraExpanded}.`
+          `Path cost ${g[config.target]}. A* expanded ${closed.size}. Dijkstra expanded ${dijkstraExpanded}.`
         );
         return;
       }
@@ -6683,7 +6721,7 @@
           elements.role.dataset.state = state;
         }
       }
-      setStatus(status, frame.message, `· step ${index + 1}/${total}`);
+      setStatus(status, frame.message, `step ${index + 1}/${total}`);
     }
     function watch(frame) {
       const character = frame.text && frame.textCursor != null ? frame.text[frame.textCursor] || "—" : frame.profile === "ternary-search-tree" && frame.cursor != null ? frame.key[frame.cursor] || "—" : frame.cursor && frame.cursor > 0 ? frame.key[frame.cursor - 1] || "—" : frame.key[0] || "—";
@@ -6805,7 +6843,7 @@
           ops.goto(`${state}->${next}`, next, index, `Consume ${character}: goto "${next}".`);
           state = next;
         } else {
-          ops.fallback(null, "root", index, `No ${character} edge from root; stay at root.`);
+          ops.fallback(null, "root", index, `No ${character} edge from root. Stay at root.`);
           state = "root";
         }
         const outputs = [];
@@ -6957,7 +6995,7 @@
       low,
       cuts,
       bridges,
-      "Propagate low[2] = 0 to vertex 1; the triangle remains connected."
+      "Propagate low[2] = 0 to vertex 1. The triangle remains connected."
     );
     low["0"] = Math.min(low["0"], low["1"]);
     recorder.record(
@@ -7245,7 +7283,7 @@
   }
   function run2(config, recorder) {
     const distances = { "0": 0, "1": Infinity, "2": Infinity, "3": Infinity };
-    recorder.record(0, null, distances, false, "Set dist[0] = 0; all other distances start at ∞.");
+    recorder.record(0, null, distances, false, "Set dist[0] = 0. All other distances start at ∞.");
     for (let pass = 1; pass <= 3; pass++) {
       for (const [index, edge] of config.edges.entries()) {
         const before = distances[edge.to];
@@ -7280,7 +7318,7 @@
       null,
       distances,
       changed,
-      "The confirming sweep changes nothing; no reachable negative cycle exists."
+      "The confirming sweep changes nothing. No reachable negative cycle exists."
     );
   }
   var bellmanFord = {
@@ -8822,7 +8860,7 @@
     parse: parseBinarySearchOnAnswerConfig,
     run(input, ops) {
       ops.begin(
-        `Search capacities ${input.lower} through ${input.upper}; the first feasible value is the answer.`
+        `Search capacities ${input.lower} through ${input.upper}. The first feasible value is the answer.`
       );
       let lo = input.lower;
       let hi = input.upper;
@@ -8841,7 +8879,7 @@
         ops.narrow(
           lo,
           hi,
-          evaluation2.feasible ? `Keep ${lo} through ${hi}; a smaller feasible capacity may exist.` : `Keep ${lo} through ${hi}; every smaller capacity is infeasible.`
+          evaluation2.feasible ? `Keep ${lo} through ${hi}. A smaller feasible capacity may exist.` : `Keep ${lo} through ${hi}. Every smaller capacity is infeasible.`
         );
       }
       const evaluation = evaluateShipping(input.weights, lo, input.days);
@@ -8880,10 +8918,10 @@
         }
         if (a[mid] < target) {
           lo = mid + 1;
-          ops.narrow(lo, hi, `${a[mid]} < ${target}: discard the left half; search [${lo}, ${hi}].`);
+          ops.narrow(lo, hi, `${a[mid]} < ${target}: discard the left half. Search [${lo}, ${hi}].`);
         } else {
           hi = mid - 1;
-          ops.narrow(lo, hi, `${a[mid]} > ${target}: discard the right half; search [${lo}, ${hi}].`);
+          ops.narrow(lo, hi, `${a[mid]} > ${target}: discard the right half. Search [${lo}, ${hi}].`);
         }
       }
       ops.done(`${target} is not in the array — the range is empty after ${ops.comparisons} probes.`);
@@ -8906,10 +8944,12 @@
   var VIEW_HEIGHT2 = 280;
   var MAX_KEYS = 3;
   var MAX_VALUES2 = 10;
-  var CELL_WIDTH = 33;
+  var CELL_WIDTH = 36;
   var NODE_HEIGHT = 34;
-  var NODE_GAP = 8;
-  var VIEW_PADDING = 10;
+  var NODE_GAP = 30;
+  var NODE_RADIUS = 6;
+  var CELL_INSET = 2;
+  var VIEW_PADDING = 28;
   function parseMultiwayTreeConfig(config, algorithm, defaults, defaultValue, defaultRange) {
     if (config.order != null && config.order !== 4)
       throw new Error(`steptrace: ${algorithm} supports fixed order 4.`);
@@ -9022,7 +9062,7 @@
         }
         return {
           changed: true,
-          detail: state.special != null ? kind === "b-plus-tree" ? `Inserted ${key4}; copied separator ${state.special} into the parent and kept it in the right leaf.` : `Inserted ${key4}; promoted median ${state.special} into the parent.` : `Inserted ${key4}; every node remains within the order-4 limit.`
+          detail: state.special != null ? kind === "b-plus-tree" ? `Inserted ${key4}. Copied separator ${state.special} into the parent and kept it in the right leaf.` : `Inserted ${key4}. Promoted median ${state.special} into the parent.` : `Inserted ${key4}. Every node remains within the order-4 limit.`
         };
       },
       search(key4, state) {
@@ -9039,7 +9079,7 @@
             if (found) state.found.add(`${current.id}:${key4}`);
             return {
               found,
-              detail: found ? `Search reached leaf ${current.id} and found ${key4}.` : `Search reached leaf ${current.id}; ${key4} is absent.`
+              detail: found ? `Search reached leaf ${current.id} and found ${key4}.` : `Search reached leaf ${current.id}. ${key4} is absent.`
             };
           }
           current = current.children[index];
@@ -9169,7 +9209,7 @@
       svg.setAttribute("viewBox", `0 0 ${viewWidth} ${VIEW_HEIGHT2}`);
       const positions = /* @__PURE__ */ new Map();
       levels.forEach((nodes5, depth) => {
-        const y = 30 + depth * (kind === "b-plus-tree" ? 80 : 92);
+        const y = 42 + depth * (kind === "b-plus-tree" ? 80 : 92);
         const widths = nodes5.map((node2) => Math.max(node2.keys.length, 1) * CELL_WIDTH);
         const levelWidth = widths.reduce((sum, width) => sum + width, 0) + Math.max(nodes5.length - 1, 0) * NODE_GAP;
         let cursor = (viewWidth - levelWidth) / 2;
@@ -9214,16 +9254,20 @@
         for (const nodes5 of levels) {
           for (const parent of nodes5) {
             const from = positions.get(parent.id);
-            for (const child of parent.children) {
+            const left = from.x - from.width / 2;
+            const lastBoundary = Math.max(parent.children.length - 1, 1);
+            parent.children.forEach((child, index) => {
               const to = positions.get(child.id);
+              const boundary = left + index * from.width / lastBoundary;
+              const inset = index === 0 ? NODE_RADIUS : index === lastBoundary ? -NODE_RADIUS : 0;
               const line = svgEl2("line", "steptrace__edge steptrace__multiway-tree-edge");
-              line.setAttribute("x1", String(from.x));
+              line.setAttribute("x1", String(boundary + inset));
               line.setAttribute("y1", String(from.y + NODE_HEIGHT / 2));
               line.setAttribute("x2", String(to.x));
               line.setAttribute("y2", String(to.y - NODE_HEIGHT / 2));
               svg.append(line);
               renderedEdges.push({ line, parentId: parent.id, childId: child.id });
-            }
+            });
           }
         }
         const leaves = levels.at(-1) ?? [];
@@ -9235,7 +9279,7 @@
             const path = svgEl2("path", "steptrace__multiway-tree-link");
             path.setAttribute(
               "d",
-              `M ${from.x + from.width / 2} ${from.y + NODE_HEIGHT / 2} V 248 H ${to.x - to.width / 2} V ${to.y + NODE_HEIGHT / 2 + 5}`
+              `M ${from.x + from.width / 2 + 3} ${from.y} H ${to.x - to.width / 2 - 3}`
             );
             path.setAttribute("marker-end", `url(#${kind}-next-arrow)`);
             path.dataset.from = leaf.id;
@@ -9259,13 +9303,26 @@
               `${node2.children.length ? "Internal node" : "Leaf"} ${node2.id}, keys ${node2.keys.join(", ") || "empty"}`
             );
             renderedNodes.push({ group, nodeId: node2.id });
+            const frame = svgEl2("rect", "steptrace__multiway-tree-frame");
+            frame.setAttribute("width", String(position.width));
+            frame.setAttribute("height", String(NODE_HEIGHT));
+            frame.setAttribute("rx", String(NODE_RADIUS));
+            group.append(frame);
             const keys = node2.keys.length ? node2.keys : [null];
             keys.forEach((key4, index) => {
+              if (index > 0) {
+                const divider = svgEl2("line", "steptrace__multiway-tree-divider");
+                divider.setAttribute("x1", String(index * CELL_WIDTH));
+                divider.setAttribute("x2", String(index * CELL_WIDTH));
+                divider.setAttribute("y2", String(NODE_HEIGHT));
+                group.append(divider);
+              }
               const cell = svgEl2("rect", "steptrace__multiway-tree-cell");
-              cell.setAttribute("x", String(index * CELL_WIDTH));
-              cell.setAttribute("width", String(CELL_WIDTH));
-              cell.setAttribute("height", String(NODE_HEIGHT));
-              cell.setAttribute("rx", "4");
+              cell.setAttribute("x", String(index * CELL_WIDTH + CELL_INSET));
+              cell.setAttribute("y", String(CELL_INSET));
+              cell.setAttribute("width", String(CELL_WIDTH - CELL_INSET * 2));
+              cell.setAttribute("height", String(NODE_HEIGHT - CELL_INSET * 2));
+              cell.setAttribute("rx", String(NODE_RADIUS - CELL_INSET));
               cell.dataset.key = key4 == null ? "" : String(key4);
               const text = svgEl2("text", "steptrace__multiway-tree-key");
               text.setAttribute("x", String(index * CELL_WIDTH + CELL_WIDTH / 2));
@@ -9274,17 +9331,17 @@
               text.setAttribute("dominant-baseline", "central");
               text.textContent = key4 == null ? "·" : String(key4);
               const marker2 = successMarker("steptrace__multiway-tree-success");
-              marker2.setAttribute("x", String(index * CELL_WIDTH + CELL_WIDTH - 12));
-              marker2.setAttribute("y", "1");
+              marker2.setAttribute("x", String(index * CELL_WIDTH + CELL_WIDTH - CELL_INSET - 12));
+              marker2.setAttribute("y", String(CELL_INSET + 1));
               marker2.setAttribute("width", "11");
               marker2.setAttribute("height", "11");
               group.append(cell, text, marker2);
               renderedKeys.push({ cell, marker: marker2, nodeId: node2.id, key: key4 });
             });
             const id = svgEl2("text", "steptrace__multiway-tree-id");
-            id.setAttribute("x", String(position.width / 2));
+            id.setAttribute("x", "-4");
             id.setAttribute("y", "-6");
-            id.setAttribute("text-anchor", "middle");
+            id.setAttribute("text-anchor", "end");
             id.textContent = node2.id;
             group.append(id);
             svg.append(group);
@@ -10046,7 +10103,7 @@
           chainBucket: lookup.home,
           chainTarget: { bucket: lookup.home, index: CHAIN_CAPACITY - 1 },
           chainPath: Array.from({ length: CHAIN_CAPACITY }, (_, index2) => index2),
-          message: `Bucket ${lookup.home} chain is full (${CHAIN_CAPACITY}); key ${key4} was not added.`
+          message: `Bucket ${lookup.home} chain is full (${CHAIN_CAPACITY}). Key ${key4} was not added.`
         };
       }
       const index = chain.length;
@@ -10060,7 +10117,7 @@
         chainBucket: lookup.home,
         chainTarget: { bucket: lookup.home, index },
         chainPath: Array.from({ length: index + 1 }, (_, position) => position),
-        message: index === 0 ? `Put ${key4}:${value} in bucket ${lookup.home}'s first chain node.` : `Collision at bucket ${lookup.home}; appended chain node ${index}.`,
+        message: index === 0 ? `Put ${key4}:${value} in bucket ${lookup.home}'s first chain node.` : `Collision at bucket ${lookup.home}. Appended chain node ${index}.`,
         commit: () => {
           chain.push({ key: key4, value, home: lookup.home, next: null });
         }
@@ -10125,7 +10182,7 @@
           calculation: calculationFor(key4),
           path: probe.path,
           target: probe.found,
-          message: `Add ${key4} rejected; the key already exists in cell ${probe.found}.`
+          message: `Add ${key4} rejected. The key already exists in cell ${probe.found}.`
         };
       }
       const target = probe.insert;
@@ -10137,7 +10194,7 @@
         calculation: calculationFor(key4),
         path,
         target: target ?? path.at(-1) ?? probe.home,
-        message: target == null ? "Open-addressing table is full." : probe.found != null ? `Updated key ${key4} in cell ${target}.` : tombstones[target] ? content === "set" ? `Added key ${key4} in reused tombstone cell ${target}.` : `Put ${key4}:${value} in reused tombstone cell ${target}.` : target === probe.home ? content === "set" ? `Added key ${key4} in home cell ${target}.` : `Put ${key4}:${value} in home cell ${target}.` : content === "set" ? `Collision at ${probe.home}; linear probe added key ${key4} in cell ${target}.` : `Collision at ${probe.home}; linear probe placed ${key4}:${value} in cell ${target}.`,
+        message: target == null ? "Open-addressing table is full." : probe.found != null ? `Updated key ${key4} in cell ${target}.` : tombstones[target] ? content === "set" ? `Added key ${key4} in reused tombstone cell ${target}.` : `Put ${key4}:${value} in reused tombstone cell ${target}.` : target === probe.home ? content === "set" ? `Added key ${key4} in home cell ${target}.` : `Put ${key4}:${value} in home cell ${target}.` : content === "set" ? `Collision at ${probe.home}. Linear probe added key ${key4} in cell ${target}.` : `Collision at ${probe.home}. Linear probe placed ${key4}:${value} in cell ${target}.`,
         commit: target == null ? void 0 : () => {
           slots[target] = { key: key4, value, home: probe.home, next: null };
           tombstones[target] = false;
@@ -10155,7 +10212,7 @@
         calculation: calculationFor(key4),
         path: probe.path,
         target,
-        message: entry ? removeEntry ? `Removed key ${key4}; cell ${probe.found} is now a tombstone.` : content === "set" ? `Contains ${key4}: true; found in cell ${probe.found}.` : `Search ${key4} found ${entry.value} in cell ${probe.found}.` : `${removeEntry ? "Remove" : content === "set" ? "Contains" : "Search"} ${key4}${content === "set" && !removeEntry ? ": false;" : ""} missed after ${probe.path.length} probe${probe.path.length === 1 ? "" : "s"}.`,
+        message: entry ? removeEntry ? `Removed key ${key4}. Cell ${probe.found} is now a tombstone.` : content === "set" ? `Contains ${key4}: true. Found in cell ${probe.found}.` : `Search ${key4} found ${entry.value} in cell ${probe.found}.` : `${removeEntry ? "Remove" : content === "set" ? "Contains" : "Search"} ${key4}${content === "set" && !removeEntry ? ": false. Missed" : " missed"} after ${probe.path.length} probe${probe.path.length === 1 ? "" : "s"}.`,
         commit: entry && removeEntry ? () => {
           slots[probe.found] = null;
           tombstones[probe.found] = true;
@@ -10183,7 +10240,7 @@
         calculation: calculationFor(key4),
         path: target == null ? traversal.path : traversal.path.slice(0, traversal.path.indexOf(target) + 1),
         target: target ?? traversal.path.at(-1),
-        message: target == null ? "All four buckets are full." : found != null ? `Updated key ${key4} in bucket ${targetBucket}, cell ${target}.` : targetBucket === traversal.bucket ? `Put ${key4}:${value} in bucket ${targetBucket}, cell ${target}.` : `Bucket ${traversal.bucket} was full; overflow placed ${key4}:${value} in bucket ${targetBucket}, cell ${target}.`,
+        message: target == null ? "All four buckets are full." : found != null ? `Updated key ${key4} in bucket ${targetBucket}, cell ${target}.` : targetBucket === traversal.bucket ? `Put ${key4}:${value} in bucket ${targetBucket}, cell ${target}.` : `Bucket ${traversal.bucket} was full. Overflow placed ${key4}:${value} in bucket ${targetBucket}, cell ${target}.`,
         commit: target == null ? void 0 : () => {
           slots[target] = { key: key4, value, home: traversal.bucket, next: null };
         }
@@ -10215,10 +10272,10 @@
       const [first, second] = MAP_SEED;
       const count = `Seeded ${MAP_SEED.length} entries`;
       if (config.strategy === "closed-addressing")
-        return `${count}; keys ${first.key} and ${second.key} collide in bucket ${indexFor(first.key, SIZE)}'s chain.`;
+        return `${count}. Keys ${first.key} and ${second.key} collide in bucket ${indexFor(first.key, SIZE)}'s chain.`;
       if (config.strategy === "open-addressing")
-        return `${count}; ${second.key} collided with ${first.key} at cell ${indexFor(second.key, SIZE)} and probed to cell ${slots.findIndex((entry) => entry?.key === second.key)}.`;
-      return `${count}; keys ${first.key} and ${second.key} share bucket ${indexFor(first.key, SIZE / BUCKET_SIZE)}.`;
+        return `${count}. ${second.key} collided with ${first.key} at cell ${indexFor(second.key, SIZE)} and probed to cell ${slots.findIndex((entry) => entry?.key === second.key)}.`;
+      return `${count}. Keys ${first.key} and ${second.key} share bucket ${indexFor(first.key, SIZE / BUCKET_SIZE)}.`;
     }
     function onPut() {
       const key4 = suppliedPutKey();
@@ -10372,14 +10429,14 @@
         const completeStep = () => {
           if (destroyed) return;
           if (kind === "query" && !bits[index]) {
-            finish("definitely-absent", `Query ${value}: definitely absent; bit ${index} is 0.`);
+            finish("definitely-absent", `Query ${value}: definitely absent. Bit ${index} is 0.`);
             return;
           }
           step++;
           if (step < positions.length) advance();
           else if (kind === "add")
-            finish("added", `Added ${value}; bits ${positions.join(", ")} are 1.`);
-          else finish("possibly-present", `Query ${value}: possibly present; all three bits are 1.`);
+            finish("added", `Added ${value}. Bits ${positions.join(", ")} are 1.`);
+          else finish("possibly-present", `Query ${value}: possibly present. All three bits are 1.`);
         };
         if (shell.reducedMotion()) completeStep();
         else timer = setTimeout(completeStep, HOP_MS);
@@ -10572,7 +10629,7 @@
     done(message) {
       this.cursor = null;
       this.compared = null;
-      this.decision = "top k retained · heap order";
+      this.decision = "top k retained, heap order";
       this.record("done", message);
     }
     record(type, message) {
@@ -10680,12 +10737,12 @@
     const heaps = el("div", "steptrace__two-heaps-grid");
     const lowerWrap = el("div", "steptrace__two-heaps-side");
     const lowerLabel = el("div", "steptrace__rail-label");
-    lowerLabel.textContent = "Lower · max-heap";
+    setRailLabel(lowerLabel, "Lower", "max-heap");
     const lower = createTwoHeapTree(capacity, "Lower max-heap", "max");
     lowerWrap.append(lowerLabel, lower.wrap);
     const upperWrap = el("div", "steptrace__two-heaps-side");
     const upperLabel = el("div", "steptrace__rail-label");
-    upperLabel.textContent = "Upper · min-heap";
+    setRailLabel(upperLabel, "Upper", "min-heap");
     const upper = createTwoHeapTree(capacity, "Upper min-heap", "min");
     upperWrap.append(upperLabel, upper.wrap);
     heaps.append(lowerWrap, upperWrap);
@@ -10716,7 +10773,7 @@
         ];
       },
       summary(frame) {
-        return `Median ${frame.median} · lower ${frame.lower.length} · upper ${frame.upper.length}.`;
+        return `Median ${frame.median}, lower ${frame.lower.length}, upper ${frame.upper.length}.`;
       }
     };
   }
@@ -10736,12 +10793,12 @@
       cell.setAttribute("aria-label", `Stream value ${first.array[index]}`);
     });
     const heapLabel = el("div", "steptrace__rail-label steptrace__heap-tree-label");
-    heapLabel.textContent = `Min-heap · capacity k = ${first.k}`;
+    setRailLabel(heapLabel, `Min-heap`, `capacity k = ${first.k}`);
     const heapWrap = el("div", "steptrace__heap-tree");
     const svg = svgEl3("svg", "steptrace__heap-svg");
     svg.setAttribute("viewBox", `0 0 300 ${first.k > 3 ? 192 : 124}`);
     svg.setAttribute("role", "img");
-    svg.setAttribute("aria-label", "Fixed-size min-heap; root is the weakest current winner");
+    svg.setAttribute("aria-label", "Fixed-size min-heap. Root is the weakest current winner");
     const positions = Array.from({ length: first.k }, (_, index) => heapPosition(index));
     const edges5 = [];
     for (let index = 1; index < first.k; index++) {
@@ -10851,7 +10908,7 @@
         k: "weakest root",
         v: frame.heap[0]?.value ?? "empty",
         sw: "var(--_amber)",
-        hint: "Smallest retained value; this is the only winner a newcomer must beat."
+        hint: "Smallest retained value. This is the only winner a newcomer must beat."
       },
       {
         k: "heap",
@@ -10868,7 +10925,7 @@
       paint,
       watch,
       summary(frame) {
-        return `Top ${frame.k}: heap [${frame.heap.map((entry) => entry.value).join(", ")}] · root ${frame.heap[0]?.value} is the weakest winner · not globally sorted.`;
+        return `Top ${frame.k}: heap [${frame.heap.map((entry) => entry.value).join(", ")}], root ${frame.heap[0]?.value} is the weakest winner, not globally sorted.`;
       },
       destroy: geometry.destroy
     };
@@ -11028,7 +11085,7 @@
       settled = child;
       input.value = "";
       paint(
-        `Inserted ${value}; sift-up path ${path.join(" → ")}${swaps ? ` with ${swaps} swap${swaps === 1 ? "" : "s"}` : " already satisfied heap order"}.`
+        `Inserted ${value}. Sift-up path ${path.join(" → ")}${swaps ? ` with ${swaps} swap${swaps === 1 ? "" : "s"}` : " already satisfied heap order"}.`
       );
     }
     function onExtract() {
@@ -11056,7 +11113,7 @@
         settled = parent;
       }
       paint(
-        `Extracted minimum ${minimum}${path.length ? `; sift-down path ${path.join(" → ")} with ${swaps} swap${swaps === 1 ? "" : "s"}` : "; heap is now empty"}.`
+        `Extracted minimum ${minimum}${path.length ? `. Sift-down path ${path.join(" → ")} with ${swaps} swap${swaps === 1 ? "" : "s"}` : ". Heap is now empty"}.`
       );
     }
     function onReset() {
@@ -11161,7 +11218,7 @@
         const meta = svgEl4("text", "steptrace__heap-root-label");
         meta.setAttribute("text-anchor", "middle");
         meta.setAttribute("y", "-20");
-        meta.textContent = rootLabel;
+        setTextParts(meta, rootLabel);
         group.append(meta);
       }
       if (node2.marked) {
@@ -11196,10 +11253,10 @@
       "steptrace__heap-structure steptrace__heap-variant"
     );
     const treeLabel = el("div", "steptrace__rail-label");
-    treeLabel.textContent = "Two forests · 3 + 1 values";
+    setRailLabel(treeLabel, "Two forests", "3 + 1 values");
     const tree = el("div", "steptrace__heap-structure-tree");
     const slotLabel = el("div", "steptrace__rail-label steptrace__heap-array-label");
-    slotLabel.textContent = "Forest slots · binary carry";
+    setRailLabel(slotLabel, "Forest slots", "binary carry");
     const slotWrap = el("div", "steptrace__heap-array");
     const slots = createIndexedBoard(slotWrap, 3, "Binomial forest slots by order");
     shell.stage.append(treeLabel, tree, slotLabel, slotWrap);
@@ -11232,13 +11289,13 @@
         children: [{ id: "carry0", key: 7, children: [] }]
       };
       if (phase === 0) {
-        rootMeta.set(first.id, "A · B₁");
-        rootMeta.set(loose.id, "A · B₀");
-        rootMeta.set(second.id, "B · B₀");
+        rootMeta.set(first.id, "A B₁");
+        rootMeta.set(loose.id, "A B₀");
+        rootMeta.set(second.id, "B B₀");
       } else if (phase === 1) {
-        rootMeta.set(first.id, "A · B₁");
-        rootMeta.set(carry.id, "carry · B₁");
-      } else rootMeta.set(result.id, "result · B₂");
+        rootMeta.set(first.id, "A B₁");
+        rootMeta.set(carry.id, "carry B₁");
+      } else rootMeta.set(result.id, "result B₂");
       geometry = paintForest(
         tree,
         phase === 0 ? [first, loose, second] : phase === 1 ? [first, carry] : [result],
@@ -11280,14 +11337,14 @@
         ]
       );
       shell.setCounter(phase === 2 ? "1" : phase === 1 ? "2" : "3", phase === 2 ? " tree" : " roots");
-      shell.status.textContent = message || "Meld the 3-value forest with the singleton; equal orders link and carry right.";
+      shell.status.textContent = message || "Meld the 3-value forest with the singleton. Equal orders link and carry right.";
       meld.textContent = phase === 0 ? "Meld" : phase === 1 ? "Continue carry" : "Melded";
       meld.disabled = phase === 2;
     }
     shell.listen(meld, "click", () => {
       phase++;
       paint(
-        phase === 1 ? "B₀ + B₀ links into a B₁ carry; the next B₁ slot is already occupied." : "B₁ + B₁ links again, carrying one B₂ tree into the empty order-2 slot."
+        phase === 1 ? "B₀ + B₀ links into a B₁ carry. The next B₁ slot is already occupied." : "B₁ + B₁ links again, carrying one B₂ tree into the empty order-2 slot."
       );
     });
     shell.listen(reset, "click", () => {
@@ -11426,7 +11483,7 @@
       );
       const count = allNodes().length;
       shell.setCounter(String(count), count === 1 ? " value" : " values");
-      shell.status.textContent = message || "This forest was built by public inserts; extract-min consolidates, decrease-key cuts.";
+      shell.status.textContent = message || "This forest was built by public inserts. Extract-min consolidates, decrease-key cuts.";
       extract.disabled = roots.length === 0;
       decrease.disabled = count === 0;
     }
@@ -11439,7 +11496,7 @@
       }
       insertValue(value);
       insertInput.value = "";
-      paint(`Inserted ${value} as a new degree-0 root; no consolidation work is done yet.`);
+      paint(`Inserted ${value} as a new degree-0 root. No consolidation work is done yet.`);
     }
     function onExtract() {
       if (!roots.length) return;
@@ -11458,7 +11515,7 @@
         settled.add(minimum().id);
       }
       paint(
-        `Extracted minimum ${min.key}; promoted its children and consolidated equal degrees.${allNodes().some((node2) => node2.key === 41) && allNodes().some((node2) => node2.key === 52) ? " Next: decrease 41 to 5, then 52 to 4 to see a mark and cascading cut." : ""}`
+        `Extracted minimum ${min.key}. Promoted its children and consolidated equal degrees.${allNodes().some((node2) => node2.key === 41) && allNodes().some((node2) => node2.key === 52) ? " Next: decrease 41 to 5, then 52 to 4 to see a mark and cascading cut." : ""}`
       );
     }
     function onDecrease() {
@@ -11484,7 +11541,7 @@
       currentInput.value = "";
       newInput.value = "";
       paint(
-        `Decreased ${current} to ${next}${operationCuts > 1 ? `; the cut removed a second child, so marked parent ${parent?.key} cascaded to the root list` : cutOccurred && parent?.marked ? `; the node was cut and parent ${parent.key} is now marked after its first child loss. Decrease 52 to 4 next to cascade` : cutOccurred ? "; heap order broke, so the node was cut to the root list" : ""}.`
+        `Decreased ${current} to ${next}${operationCuts > 1 ? `. The cut removed a second child, so marked parent ${parent?.key} cascaded to the root list` : cutOccurred && parent?.marked ? `. The node was cut and parent ${parent.key} is now marked after its first child loss. Decrease 52 to 4 next to cascade` : cutOccurred ? ". Heap order broke, so the node was cut to the root list" : ""}.`
       );
     }
     function onReset() {
@@ -11578,10 +11635,10 @@
       "steptrace__heap-structure steptrace__heap-variant steptrace__merge-heap"
     );
     const treeLabel = el("div", "steptrace__rail-label");
-    treeLabel.textContent = "Two heaps · [2, 7, 10] + [3, 5, 8]";
+    setRailLabel(treeLabel, "Two heaps", "[2, 7, 10] + [3, 5, 8]");
     const tree = el("div", "steptrace__heap-structure-tree");
     const ruleLabel = el("div", "steptrace__heap-rule");
-    ruleLabel.textContent = mode === "leftist" ? "Conditional swap · keep npl(left) ≥ npl(right)" : "Unconditional swap · every touched node";
+    ruleLabel.textContent = mode === "leftist" ? "Conditional swap, keep npl(left) ≥ npl(right)" : "Unconditional swap, every touched node";
     shell.stage.append(treeLabel, tree, ruleLabel);
     const merge2 = shell.button("Merge", true);
     const reset = shell.button("Reset");
@@ -11615,7 +11672,7 @@
       swapped = /* @__PURE__ */ new Set();
       result = mergeBinaryHeaps(cloneBinary(first), cloneBinary(second), mode, active, swapped);
       paint(
-        mode === "leftist" ? `Merged along the right spines; ${swapped.size} conditional child swap${swapped.size === 1 ? "" : "s"} restored the npl invariant.` : `Merged along the right spines; all ${swapped.size} touched node${swapped.size === 1 ? "" : "s"} swapped children unconditionally.`
+        mode === "leftist" ? `Merged along the right spines. ${swapped.size} conditional child swap${swapped.size === 1 ? "" : "s"} restored the npl invariant.` : `Merged along the right spines. All ${swapped.size} touched node${swapped.size === 1 ? "" : "s"} swapped children unconditionally.`
       );
     });
     shell.listen(reset, "click", () => {
@@ -11872,7 +11929,7 @@
       while (alignment <= n - m) {
         ops.alignBoyerMoore(
           alignment,
-          `Align the pattern at ${alignment}; compare from j = ${m - 1} right-to-left.`
+          `Align the pattern at ${alignment}. Compare from j = ${m - 1} right-to-left.`
         );
         let j = m - 1;
         let matchedFrom = m;
@@ -11895,7 +11952,7 @@
           ops.matchBoyerMoore(
             alignment,
             fullMatchShift,
-            `Whole pattern matched at ${alignment}; the full-match good-suffix shift is ${fullMatchShift}.`
+            `Whole pattern matched at ${alignment}. The full-match good-suffix shift is ${fullMatchShift}.`
           );
           const nextAlignment = alignment + fullMatchShift;
           if (nextAlignment <= n - m) {
@@ -11904,7 +11961,7 @@
           } else {
             ops.shiftBoyerMoore(
               alignment,
-              `A full-match shift of ${fullMatchShift} would leave the searchable range; keep the match visible.`
+              `A full-match shift of ${fullMatchShift} would leave the searchable range. Keep the match visible.`
             );
             alignment = nextAlignment;
           }
@@ -11920,7 +11977,7 @@
           good,
           selected,
           winner,
-          `Bad-character proposes ${bad}; good-suffix proposes ${good}; take max = ${selected} (${winner}).`
+          `Bad-character proposes ${bad}. Good-suffix proposes ${good}. Take max = ${selected} (${winner}).`
         );
         alignment += selected;
         ops.shiftBoyerMoore(alignment, `Shift the pattern to alignment ${alignment}.`);
@@ -12025,16 +12082,16 @@
       choices.push(cd);
       recorder.add("Component D chooses C—D (3).", components, choices, accepted, cd);
       recorder.add(
-        "Deduplicate A—B; three distinct safe candidates remain.",
+        "Deduplicate A—B. Three distinct safe candidates remain.",
         components,
         choices,
         accepted
       );
       accepted.push(ab);
-      recorder.add("Accept A—B; A and B merge.", [["A", "B"], ["C"], ["D"]], choices, accepted, ab);
+      recorder.add("Accept A—B. A and B merge.", [["A", "B"], ["C"], ["D"]], choices, accepted, ab);
       accepted.push(bc);
       recorder.add(
-        "Accept B—C; C joins the component.",
+        "Accept B—C. C joins the component.",
         [["A", "B", "C"], ["D"]],
         choices,
         accepted,
@@ -12042,7 +12099,7 @@
       );
       accepted.push(cd);
       recorder.add(
-        "Accept C—D; all vertices are connected.",
+        "Accept C—D. All vertices are connected.",
         [["A", "B", "C", "D"]],
         choices,
         accepted,
@@ -12063,7 +12120,7 @@
   }
   function parseExecutionTreeConfig(config) {
     if (config.array !== void 0)
-      invalidConfig2('does not take an "array"; it animates the paradigm itself.');
+      invalidConfig2('does not take an "array". It animates the paradigm itself.');
     return { profile: "divide-and-conquer" };
   }
   function parseMemoizationConfig(config) {
@@ -12144,7 +12201,7 @@
         { k: "phase", v: frame.phase, sw: "var(--_violet)" },
         {
           k: subproblemLabel,
-          v: node2 ? `${node2.label} · ${node2.detail || `[${node2.values.join(", ")}]`}` : "—",
+          v: node2 ? `${node2.label}, ${node2.detail || `[${node2.values.join(", ")}]`}` : "—",
           sw: "var(--_blue)"
         },
         { k: pathLabelName, v: pathLabel(frame), sw: "var(--_neutral)" },
@@ -12176,7 +12233,7 @@
       { state: "split", label: "Expand New State" },
       { state: "base", label: "Base Result" },
       { state: "store", label: "Store First Result" },
-      { state: "cache", label: "Cache Hit; Skip Branch" }
+      { state: "cache", label: "Cache Hit, Skip Branch" }
     ],
     frameModel,
     nodeLines(node2) {
@@ -12184,7 +12241,7 @@
     },
     watchRows(frame) {
       const node2 = activeNode(frame);
-      const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(" · ");
+      const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(", ");
       return [
         {
           k: "phase",
@@ -12194,7 +12251,7 @@
         },
         {
           k: "state",
-          v: node2 ? `${node2.label} · ${node2.detail || "no cache key"}` : "—",
+          v: node2 ? `${node2.label}, ${node2.detail || "no cache key"}` : "—",
           sw: "var(--_blue)",
           hint: "The active recursive state and the key used to recognize repeats."
         },
@@ -12206,7 +12263,7 @@
         },
         {
           k: "work",
-          v: `${frame.calls} calls · ${frame.pruned} skipped`,
+          v: `${frame.calls} calls, ${frame.pruned} skipped`,
           sw: "var(--_neutral)",
           hint: "Calls entered so far and recursive calls avoided by cache hits."
         }
@@ -12229,7 +12286,7 @@
     },
     watchRows(frame) {
       const node2 = activeNode(frame);
-      const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(" · ");
+      const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(", ");
       return [
         {
           k: "phase",
@@ -12251,7 +12308,7 @@
         },
         {
           k: "work",
-          v: `${frame.calls} calls · ${frame.pruned} skipped`,
+          v: `${frame.calls} calls, ${frame.pruned} skipped`,
           sw: "var(--_neutral)",
           hint: "Recursive calls entered and child calls avoided by cache hits."
         }
@@ -12286,7 +12343,7 @@
         },
         {
           k: "load",
-          v: node2 ? `${node2.weight}/7 · value ${node2.value}` : "—",
+          v: node2 ? `${node2.weight}/7, value ${node2.value}` : "—",
           sw: "var(--_neutral)",
           hint: "Current knapsack weight against capacity 7 and its feasible value."
         },
@@ -12329,7 +12386,7 @@
         {
           id: "root",
           label: "start",
-          detail: "0/7 · 0 · ≤116",
+          detail: "0/7 0 ≤116",
           values: [],
           x: 636,
           y: 28,
@@ -12341,7 +12398,7 @@
         {
           id: "a+",
           label: "take A",
-          detail: "2/7 · 40 · ≤116",
+          detail: "2/7 40 ≤116",
           values: [],
           x: 352,
           y: 100,
@@ -12353,7 +12410,7 @@
         {
           id: "a-",
           label: "skip A",
-          detail: "0/7 · 0 · ≤102",
+          detail: "0/7 0 ≤102",
           values: [],
           x: 920,
           y: 100,
@@ -12365,7 +12422,7 @@
         {
           id: "ab+",
           label: "take B",
-          detail: "5/7 · 90 · ≤116",
+          detail: "5/7 90 ≤116",
           values: [],
           x: 139,
           y: 172,
@@ -12377,7 +12434,7 @@
         {
           id: "ab-",
           label: "skip B",
-          detail: "2/7 · 40 · ≤105",
+          detail: "2/7 40 ≤105",
           values: [],
           x: 565,
           y: 172,
@@ -12389,7 +12446,7 @@
         {
           id: "abc+",
           label: "take C",
-          detail: "10/7 · 155",
+          detail: "10/7 155",
           values: [],
           x: 68,
           y: 244,
@@ -12401,7 +12458,7 @@
         {
           id: "abc-",
           label: "skip C",
-          detail: "5/7 · 90 · ≤107.5",
+          detail: "5/7 90 ≤107.5",
           values: [],
           x: 210,
           y: 244,
@@ -12413,7 +12470,7 @@
         {
           id: "ac+",
           label: "take C",
-          detail: "7/7 · 105 · ≤105",
+          detail: "7/7 105 ≤105",
           values: [],
           x: 423,
           y: 244,
@@ -12425,7 +12482,7 @@
         {
           id: "ac-",
           label: "skip C",
-          detail: "2/7 · 40 · ≤75",
+          detail: "2/7 40 ≤75",
           values: [],
           x: 707,
           y: 244,
@@ -12437,7 +12494,7 @@
         {
           id: "abcd+",
           label: "take D",
-          detail: "9/7 · 125",
+          detail: "9/7 125",
           values: [],
           x: 68,
           y: 316,
@@ -12449,7 +12506,7 @@
         {
           id: "abcd-",
           label: "skip D",
-          detail: "5/7 · 90 · ≤90",
+          detail: "5/7 90 ≤90",
           values: [],
           x: 210,
           y: 316,
@@ -12461,7 +12518,7 @@
         {
           id: "acd+",
           label: "take D",
-          detail: "11/7 · 140",
+          detail: "11/7 140",
           values: [],
           x: 352,
           y: 316,
@@ -12473,7 +12530,7 @@
         {
           id: "acd-",
           label: "skip D",
-          detail: "7/7 · 105 · ≤105",
+          detail: "7/7 105 ≤105",
           values: [],
           x: 494,
           y: 316,
@@ -12485,7 +12542,7 @@
         {
           id: "ac-d+",
           label: "take D",
-          detail: "6/7 · 75 · ≤75",
+          detail: "6/7 75 ≤75",
           values: [],
           x: 636,
           y: 316,
@@ -12497,7 +12554,7 @@
         {
           id: "ac-d-",
           label: "skip D",
-          detail: "2/7 · 40 · ≤40",
+          detail: "2/7 40 ≤40",
           values: [],
           x: 778,
           y: 316,
@@ -12509,7 +12566,7 @@
         {
           id: "a-b+",
           label: "take B",
-          detail: "3/7 · 50 · ≤102",
+          detail: "3/7 50 ≤102",
           values: [],
           x: 849,
           y: 172,
@@ -12521,7 +12578,7 @@
         {
           id: "a-b-",
           label: "skip B",
-          detail: "0/7 · 0 · ≤82.5",
+          detail: "0/7 0 ≤82.5",
           values: [],
           x: 991,
           y: 172,
@@ -12559,7 +12616,7 @@
         "root",
         ["root"],
         ["a+", "a-"],
-        "Branch on A; depth-first search explores take A first."
+        "Branch on A. Depth-first search explores take A first."
       );
       ops.incumbent(
         "a+",
@@ -12573,14 +12630,14 @@
         "ab+",
         ["root", "a+", "ab+"],
         ["abc+", "abc-"],
-        "Branch on C; the take branch is visited first."
+        "Branch on C. The take branch is visited first."
       );
       ops.reject("abc+", ["root", "a+", "ab+", "abc+"], "Take C exceeds capacity: weight 10 > 7.");
       ops.split(
         "abc-",
         ["root", "a+", "ab+", "abc-"],
         ["abcd+", "abcd-"],
-        "Skip C and branch on D; the optimistic bound is 107.5."
+        "Skip C and branch on D. The optimistic bound is 107.5."
       );
       ops.reject(
         "abcd+",
@@ -12621,13 +12678,13 @@
         "ac-",
         ["root", "a+", "ab-", "ac-"],
         [],
-        "Skip C loses on its bound: 75 ≤ incumbent 105; do not expand D."
+        "Skip C loses on its bound: 75 ≤ incumbent 105. Do not expand D."
       );
       ops.prune(
         "a-",
         ["root", "a-"],
         [],
-        "Skip A loses at the root: bound 102 ≤ incumbent 105; prune its whole subtree."
+        "Skip A loses at the root: bound 102 ≤ incumbent 105. Prune its whole subtree."
       );
       ops.done("root", "best value 105", "Best feasible set is A + C with weight 7 and value 105.");
     }
@@ -12641,7 +12698,7 @@
     run: (input, ops) => {
       const n = ops.value.length;
       ops.init(
-        `Bubble sort — compare neighbours and swap inversions; each pass moves the maximum right.`
+        `Bubble sort — compare neighbours and swap inversions. Each pass moves the maximum right.`
       );
       for (let i = 0; i < n - 1; i++) {
         let swapped = false;
@@ -13159,7 +13216,7 @@
     );
     const output = makeDistributionArrayBand(
       "Sorted Array",
-      "The input is read right-to-left; each placement preserves duplicate order.",
+      "The input is read right-to-left. Each placement preserves duplicate order.",
       first.input.length,
       "steptrace__distribution-bars--output"
     );
@@ -13204,7 +13261,7 @@
           placed == null ? `output index ${slotIndex}, empty` : `output index ${slotIndex}, value ${placed}, token ${labels[origin ?? 0]}`
         );
       });
-      setStatus(status, frame.message, `· ${phaseLabel(frame.type)} · step ${index + 1}/${total}`);
+      setStatus(status, frame.message, `${phaseLabel(frame.type)}, step ${index + 1}/${total}`);
     }
     return {
       nodes: [stage, status],
@@ -13472,7 +13529,7 @@
     );
     const output = makeDistributionArrayBand(
       first.profile === "radix" ? "Gathered Pass" : "Sorted Array",
-      "Buckets are read left to right; order inside each bucket is retained.",
+      "Buckets are read left to right. Order inside each bucket is retained.",
       first.source.length,
       "steptrace__distribution-bars--output"
     );
@@ -13532,7 +13589,7 @@
           token == null ? `output index ${outputIndex}, empty` : `output index ${outputIndex}, value ${token.value}`
         );
       });
-      setStatus(status, frame.message, `· ${phaseLabel2(frame)} · step ${index + 1}/${total}`);
+      setStatus(status, frame.message, `${phaseLabel2(frame)}, step ${index + 1}/${total}`);
     }
     return {
       nodes: [stage, legend, status],
@@ -13593,7 +13650,7 @@
     run(input, ops) {
       const buckets = Array.from({ length: input.bucketCount }, () => []);
       ops.intro(
-        `${input.bucketCount} equal-width ranges split [0, 1); scatter by value, sort locally, then gather left to right.`
+        `${input.bucketCount} equal-width ranges split [0, 1). Scatter by value, sort locally, then gather left to right.`
       );
       ops.beginPass(
         0,
@@ -13607,14 +13664,14 @@
         ops.scatter(
           sourceIndex,
           bucketIndex,
-          `${value.toFixed(2)} lies in ${input.bucketLabels[bucketIndex]}; append it to that bucket.`
+          `${value.toFixed(2)} lies in ${input.bucketLabels[bucketIndex]}. Append it to that bucket.`
         );
       });
       buckets.forEach((bucket, bucketIndex) => {
         if (bucket.length < 2) return;
         ops.beginLocalSort(
           bucketIndex,
-          `Sort ${input.bucketLabels[bucketIndex]} internally; other ranges do not need comparison.`
+          `Sort ${input.bucketLabels[bucketIndex]} internally. Other ranges do not need comparison.`
         );
         for (let right = 1; right < bucket.length; right++) {
           for (let cursor = right; cursor > 0; cursor--) {
@@ -13859,7 +13916,7 @@
       else count++;
       input.value = "";
       render(
-        full ? `Wrote ${value} at slot ${index}; overwrote oldest value ${overwritten} and advanced oldest.` : `Wrote ${value} at slot ${index}.`
+        full ? `Wrote ${value} at slot ${index}. Overwrote oldest value ${overwritten} and advanced oldest.` : `Wrote ${value} at slot ${index}.`
       );
     }
     function onRead() {
@@ -14051,7 +14108,7 @@
     function onRemove() {
       if (!values.length) return;
       const removed = values.pop();
-      render(`Removed last value ${removed}; capacity remains ${capacity}.`);
+      render(`Removed last value ${removed}. Capacity remains ${capacity}.`);
     }
     function onReset() {
       values.splice(0, values.length, ...initial);
@@ -14100,7 +14157,7 @@
         })
       );
       shell.setCounter(`[${start}..${start + length})`, " view");
-      shell.status.textContent = message || "The highlighted span aliases the same backing cells; writes are visible in both.";
+      shell.status.textContent = message || "The highlighted span aliases the same backing cells. Writes are visible in both.";
     }
     function onSlice() {
       const nextStart = numericIndex(startInput, values.length);
@@ -14111,7 +14168,7 @@
       }
       start = nextStart;
       length = nextLength;
-      render(`Created span view backing[${start}..${start + length}); no values were copied.`);
+      render(`Created span view backing[${start}..${start + length}). No values were copied.`);
     }
     function onWrite() {
       const offset = numericIndex(offsetInput, length);
@@ -14220,7 +14277,7 @@
         }
         ops.endGap(
           swapped,
-          gap === 1 && !swapped ? "Gap 1 made no swap; no adjacent inversion remains." : `Gap ${gap} pass complete${swapped ? " with swaps" : " without a swap"}.`
+          gap === 1 && !swapped ? "Gap 1 made no swap. No adjacent inversion remains." : `Gap ${gap} pass complete${swapped ? " with swaps" : " without a swap"}.`
         );
       }
       ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
@@ -14389,23 +14446,23 @@
     parse: parseCountingSortConfig,
     run(input, ops) {
       ops.intro(
-        `Keys span ${input.min}…${input.max}. Count by value first; no pair of keys is compared.`
+        `Keys span ${input.min}…${input.max}. Count by value first. No pair of keys is compared.`
       );
       for (let index = 0; index < input.array.length; index++) {
         const key4 = input.array[index];
-        ops.tally(index, `Read input[${index}] = ${key4}; add one to frequency[${key4}].`);
+        ops.tally(index, `Read input[${index}] = ${key4}. Add one to frequency[${key4}].`);
       }
       for (let key4 = input.min; key4 <= input.max; key4++) {
         ops.prefix(
           key4,
-          key4 === input.min ? `Position[${key4}] starts at ${key4}'s frequency: keys ≤ ${key4} end before this index.` : `Add position[${key4 - 1}] into position[${key4}]; it now counts keys ≤ ${key4}.`
+          key4 === input.min ? `Position[${key4}] starts at ${key4}'s frequency: keys ≤ ${key4} end before this index.` : `Add position[${key4 - 1}] into position[${key4}]. It now counts keys ≤ ${key4}.`
         );
       }
       for (let index = input.array.length - 1; index >= 0; index--) {
         const key4 = input.array[index];
         ops.place(
           index,
-          `Read input[${index}] = ${key4} from the tail; decrement its end position, then write output there.`
+          `Read input[${index}] = ${key4} from the tail. Decrement its end position, then write output there.`
         );
       }
       ops.done(
@@ -14436,7 +14493,7 @@
     parse: parseCyclicSortConfig,
     run(_input, ops) {
       ops.init(
-        "Cyclic sort — value v belongs at index v − 1; keep the cursor still until its value is home."
+        "Cyclic sort — value v belongs at index v − 1. Keep the cursor still until its value is home."
       );
       let cursor = 0;
       while (cursor < ops.value.length) {
@@ -14452,12 +14509,12 @@
           ops.swapHome(
             cursor,
             home,
-            `Send ${value} home to index ${home}; ${displaced} returns to index ${cursor}.`
+            `Send ${value} home to index ${home}. ${displaced} returns to index ${cursor}.`
           );
           ops.settleHome(home, `Value ${value} is now fixed at its home index ${home}.`);
           continue;
         }
-        ops.settleHome(cursor, `Value ${value} is already home at index ${cursor}; advance.`);
+        ops.settleHome(cursor, `Value ${value} is already home at index ${cursor}. Advance.`);
         cursor++;
       }
       ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
@@ -14706,7 +14763,7 @@
       settled,
       [],
       false,
-      `Set dist[${config.start}] = 0; all other distances start at ∞.`
+      `Set dist[${config.start}] = 0. All other distances start at ∞.`
     );
     while (settled.size < config.nodes.length) {
       const current = config.nodes.map(({ id }) => id).filter((id) => !settled.has(id) && Number.isFinite(distances[id])).sort((left, right) => distances[left] - distances[right] || left.localeCompare(right))[0];
@@ -14720,7 +14777,7 @@
         settled,
         [],
         false,
-        `Settle ${current} at distance ${distances[current]}; its shortest distance is final.`
+        `Settle ${current} at distance ${distances[current]}. Its shortest distance is final.`
       );
       for (const edge of neighbours.get(current)) {
         if (settled.has(edge.to)) continue;
@@ -14739,7 +14796,7 @@
           settled,
           [],
           changed,
-          changed ? `Relax ${current} → ${edge.to}: ${candidate} improves ${Number.isFinite(before) ? before : "∞"}.` : `Keep dist[${edge.to}] = ${before}; ${candidate} is not shorter.`,
+          changed ? `Relax ${current} → ${edge.to}: ${candidate} improves ${Number.isFinite(before) ? before : "∞"}.` : `Keep dist[${edge.to}] = ${before}. ${candidate} is not shorter.`,
           before
         );
       }
@@ -14768,7 +14825,7 @@
       settled,
       selectedEdges,
       false,
-      `Path ${path.join(" → ")} · cost ${distances[config.target]}.`
+      `Path ${path.join(" → ")}, cost ${distances[config.target]}.`
     );
   }
   var dijkstra = {
@@ -15348,11 +15405,11 @@
       ops.chooseCoin(1, 1, [25, 1, 1, 1, 1], "Another 1¢ coin leaves 1¢.");
       ops.chooseCoin(1, 0, [25, 1, 1, 1, 1, 1], "The fifth 1¢ coin completes the change.");
       ops.coinAttempt(
-        { label: "greedy counter", value: "25¢ + 1¢ × 5 · 6 coins", state: "active" },
+        { label: "greedy counter", value: "25¢ + 1¢ × 5, 6 coins", state: "active" },
         "The greedy plan is exact, but it uses six coins."
       );
       ops.coinAttempt(
-        { label: "better counter", value: "10¢ + 10¢ + 10¢ · 3 coins", state: "best" },
+        { label: "better counter", value: "10¢ + 10¢ + 10¢, 3 coins", state: "best" },
         "Three 10¢ coins prove that the largest-first plan is not optimal."
       );
       ops.coinResult(
@@ -15360,7 +15417,7 @@
         [25, 1, 1, 1, 1, 1],
         "Greedy returns exact change, but uses twice as many coins as the optimum."
       );
-      ops.done("Largest usable coin first gives 6 coins; the optimum uses 3.");
+      ops.done("Largest usable coin first gives 6 coins. The optimum uses 3.");
     }
   );
   var coinChangeNaive = storyAlgorithm(
@@ -15390,7 +15447,7 @@
       ops.chooseCoin(1, 1, [25, 1, 1, 1, 1], "Take the fourth 1¢ coin.");
       ops.chooseCoin(1, 0, [25, 1, 1, 1, 1, 1], "The fifth 1¢ coin completes this branch.");
       ops.coinAttempt(
-        { label: "25¢ branch", value: "25¢ + 1¢ × 5 · 6 coins", state: "dead" },
+        { label: "25¢ branch", value: "25¢ + 1¢ × 5, 6 coins", state: "dead" },
         "The first complete branch returns six coins."
       );
       ops.backtrackCoins(30, [], "Backtrack once more and try the 10¢ branch.");
@@ -15398,7 +15455,7 @@
       ops.chooseCoin(10, 10, [10, 10], "The second 10¢ coin leaves 10¢.");
       ops.chooseCoin(10, 0, [10, 10, 10], "The third 10¢ coin completes the payment.");
       ops.coinAttempt(
-        { label: "10¢ branch", value: "10¢ + 10¢ + 10¢ · 3 coins", state: "best" },
+        { label: "10¢ branch", value: "10¢ + 10¢ + 10¢, 3 coins", state: "best" },
         "Comparing completed branches finds the three-coin optimum."
       );
       ops.coinResult(
@@ -15697,7 +15754,7 @@
         "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
         "A route costing 10 proves the greedy route costing 21 is not optimal."
       );
-      ops.done("Greedy pays 21; the best route pays 10.");
+      ops.done("Greedy pays 21. The best route pays 10.");
     }
   );
   var gridPathNaive = storyAlgorithm(
@@ -15765,7 +15822,7 @@
         ],
         11,
         [[1, 1]],
-        "R2C2 is reached again; its entire remaining-route search repeats."
+        "R2C2 is reached again. Its entire remaining-route search repeats."
       );
       ops.visitTile(
         [2, 0],
@@ -15954,7 +16011,7 @@
         "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
         "The saved map reconstructs the cost-10 route."
       );
-      ops.done("R2C2 is evaluated once; its saved answer stops the repeated branch.");
+      ops.done("R2C2 is evaluated once. Its saved answer stops the repeated branch.");
     }
   );
   var gridPathTabulation = storyAlgorithm(
@@ -16331,7 +16388,7 @@
       }
       const lo = Math.floor(bound / 2);
       const hi = Math.min(bound, values.length - 1);
-      ops.beginPhase(lo, hi, `The target is bracketed in [${lo}, ${hi}]; switch to binary search.`);
+      ops.beginPhase(lo, hi, `The target is bracketed in [${lo}, ${hi}]. Switch to binary search.`);
       let left = lo;
       let right = hi;
       while (left <= right) {
@@ -16579,7 +16636,7 @@
       const result = formatDistance2(frame.result);
       return {
         context: `Stage k = ${frame.k}`,
-        summary: frame.decision === "improve" ? { role: "write", text: `Write ${result} · ${previous} → ${result}` } : { role: "keep", text: `Keep ${previous} · via ${frame.k} is not shorter` }
+        summary: frame.decision === "improve" ? { role: "write", text: `Write ${result}, ${previous} → ${result}` } : { role: "keep", text: `Keep ${previous}, via ${frame.k} is not shorter` }
       };
     }
     return {
@@ -16599,8 +16656,8 @@
       const base = distanceLabel(frame, [row, column]);
       const roles = matrixGridRolesForCell(frame, row, column);
       if (!roles.includes("target"))
-        return roles.length ? `${base}; roles: ${roles.join(", ")}` : base;
-      return `${base}; roles: ${roles.join(", ")}; previous ${formatDistance2(frame.previous)}; candidate ${formatDistance2(frame.candidate)}; decision ${frame.decision}; result ${formatDistance2(frame.result)}`;
+        return roles.length ? `${base}. Roles: ${roles.join(", ")}` : base;
+      return `${base}. Roles: ${roles.join(", ")}. Previous ${formatDistance2(frame.previous)}. Candidate ${formatDistance2(frame.candidate)}. Decision ${frame.decision}. Result ${formatDistance2(frame.result)}`;
     },
     stateForCell(frame, row, column) {
       if (frame.cur?.[0] === row && frame.cur?.[1] === column) return "cur";
@@ -16673,7 +16730,7 @@
         const column = indexForNode.get(to);
         dist[row][column] = Math.min(dist[row][column], weight);
       }
-      ops.board(displayMatrix(dist), "Initialize direct-edge distances; missing edges are ∞.");
+      ops.board(displayMatrix(dist), "Initialize direct-edge distances. Missing edges are ∞.");
       for (let k = 0; k < input.nodes.length; k++) {
         const kNode = input.nodes[k];
         ops.stage(kNode, `Stage k = ${kNode}: allow node ${kNode} as an intermediate.`);
@@ -16699,7 +16756,7 @@
               Number.isFinite(candidate) ? candidate : null,
               improve ? "improve" : "keep",
               Number.isFinite(dist[i][j]) ? dist[i][j] : null,
-              improve ? `dist[${from}][${to}] improves through ${kNode}: ${currentLabel} → ${candidateLabel}.` : `Keep dist[${from}][${to}] = ${currentLabel}; the route through ${kNode} costs ${candidateLabel}.`
+              improve ? `dist[${from}][${to}] improves through ${kNode}: ${currentLabel} → ${candidateLabel}.` : `Keep dist[${from}][${to}] = ${currentLabel}. The route through ${kNode} costs ${candidateLabel}.`
             );
           }
         }
@@ -16708,7 +16765,7 @@
       if (negativeCycle.length) {
         ops.reportNegativeCycle(
           negativeCycle,
-          `Negative cycle detected through ${negativeCycle.join(", ")}; shortest distances are undefined.`
+          `Negative cycle detected through ${negativeCycle.join(", ")}. Shortest distances are undefined.`
         );
         ops.done("Stopped after reporting the negative cycle.");
         return;
@@ -16835,7 +16892,7 @@
       appended = values.length - 1;
       input.value = "";
       paint(
-        config.variant === "doubly" ? `Appended ${value} at ${nextAddress}; ${previousAddress}.next now stores ${nextAddress}, and ${nextAddress}.prev stores ${previousAddress}.` : `Appended ${value} at ${nextAddress}; ${previousAddress}.next now stores ${nextAddress}.`
+        config.variant === "doubly" ? `Appended ${value} at ${nextAddress}. ${previousAddress}.next now stores ${nextAddress}, and ${nextAddress}.prev stores ${previousAddress}.` : `Appended ${value} at ${nextAddress}. ${previousAddress}.next now stores ${nextAddress}.`
       );
       input.focus?.();
     }
@@ -16844,7 +16901,7 @@
       const removed = values.pop();
       relinked = values.length - 1;
       appended = null;
-      paint(`Removed tail ${removed}; ${linkedAddress(values.length - 1)}.next is null.`);
+      paint(`Removed tail ${removed}. ${linkedAddress(values.length - 1)}.next is null.`);
     }
     function onReset() {
       values.splice(0, values.length, ...initial);
@@ -16885,7 +16942,7 @@
     }
     function onReverse() {
       nodes5 = nodes5.slice().reverse();
-      paint(`Reversed next pointers; former head ${nodes5.at(-1).address}.next is null.`);
+      paint(`Reversed next pointers. Former head ${nodes5.at(-1).address}.next is null.`);
     }
     function onReset() {
       nodes5 = initial.slice();
@@ -16918,11 +16975,11 @@
       "steptrace__lru-cache"
     );
     const mapLabel = el("div", "steptrace__rail-label");
-    mapLabel.textContent = "Map · key → node address";
+    setRailLabel(mapLabel, "Map", "key → node address");
     const mapWrap = el("div", "steptrace__lru-map");
     const map = createIndexedBoard(mapWrap, capacity, "LRU key to node address index");
     const chainLabel = el("div", "steptrace__rail-label");
-    chainLabel.textContent = "Recency · MRU → LRU";
+    setRailLabel(chainLabel, "Recency", "MRU → LRU");
     const chainWrap = el("div", "steptrace__lru-chain");
     const chain = createAddressChain(chainWrap, "doubly");
     shell.stage.append(mapLabel, mapWrap, chainLabel, chainWrap);
@@ -16957,7 +17014,7 @@
         { moved }
       );
       shell.setCounter(String(entries.length), ` / ${capacity}`);
-      shell.status.textContent = message || "Put or get a key. The left node is MRU; the right node is LRU.";
+      shell.status.textContent = message || "Put or get a key. The left node is MRU. The right node is LRU.";
     }
     function promote(index) {
       const [entry] = entries.splice(index, 1);
@@ -16978,13 +17035,13 @@
       }
       const entry = promote(index);
       accessedKey = target;
-      paint(`Get ${target}: hit ${entry.value}; promoted ${entry.address} to MRU.`);
+      paint(`Get ${target}: hit ${entry.value}. Promoted ${entry.address} to MRU.`);
     }
     function onPut() {
       const target = key4();
       const rawValue = valueInput.value.trim() || randomValue4();
       if (!/^[A-Z0-9]{1,4}$/.test(target) || !Number.isInteger(Number(rawValue))) {
-        shell.status.textContent = "Key must be 1–4 letters or digits; value must be an integer.";
+        shell.status.textContent = "Key must be 1–4 letters or digits. Value must be an integer.";
         return;
       }
       const index = entries.findIndex((entry) => entry.key === target);
@@ -17008,7 +17065,7 @@
         moved = entry.address;
         accessedKey = void 0;
         changedMapSlot = slot;
-        message = evicted ? `Put ${target}:${rawValue}: evicted LRU ${evicted.key} at ${evicted.address}; inserted ${entry.address} at MRU.` : `Put ${target}:${rawValue}: inserted ${entry.address} at MRU.`;
+        message = evicted ? `Put ${target}:${rawValue}: evicted LRU ${evicted.key} at ${evicted.address}. Inserted ${entry.address} at MRU.` : `Put ${target}:${rawValue}: inserted ${entry.address} at MRU.`;
       }
       keyInput.value = "";
       valueInput.value = "";
@@ -17241,7 +17298,7 @@
       {
         k: frame.phase === "detect" ? "fast" : "head",
         v: frame.fast,
-        hint: frame.phase === "detect" ? "The pointer advancing two nodes per loop iteration." : "The pointer reset to the list head; both pointers now advance one node.",
+        hint: frame.phase === "detect" ? "The pointer advancing two nodes per loop iteration." : "The pointer reset to the list head. Both pointers now advance one node.",
         sw: "var(--_violet)"
       },
       {
@@ -17258,7 +17315,7 @@
       paint,
       watch,
       summary(frame) {
-        return `Cycle detected at ${frame.meeting}; entry located at ${frame.entry}.`;
+        return `Cycle detected at ${frame.meeting}. Entry located at ${frame.entry}.`;
       },
       destroy: geometry.destroy
     };
@@ -17323,16 +17380,16 @@
       ops.move("fast", "E", "Fast completes the advance: D → E.");
       ops.move("slow", "G", "Slow advances one node: F → G.");
       ops.move("fast", "F", "Fast begins its next advance: E → F.");
-      ops.meet("fast", "G", "Fast completes the advance at G; both pointers meet, proving a cycle.");
+      ops.meet("fast", "G", "Fast completes the advance at G. Both pointers meet, proving a cycle.");
       ops.reset(
         "fast",
         "A",
-        "Reset fast to A. Keep slow at G; both pointers now move one node at a time."
+        "Reset fast to A. Keep slow at G. Both pointers now move one node at a time."
       );
       ops.move("fast", "B", "Head pointer advances one node: A → B.");
       ops.move("slow", "H", "Cycle pointer advances one node: G → H.");
       ops.move("fast", "C", "Head pointer advances one node: B → C.");
-      ops.enter("slow", "C", "Cycle pointer advances H → C; both meet at cycle entry C.");
+      ops.enter("slow", "C", "Cycle pointer advances H → C. Both meet at cycle entry C.");
     }
   };
 
@@ -17478,7 +17535,7 @@
       roles = new Map(path.map((slot) => [slot, "update"]));
       delta.value = "";
       paint(
-        `Added ${parsed} at value[${index}]; updated ${path.map((slot) => `BIT[${slot}]`).join(" → ")}.`
+        `Added ${parsed} at value[${index}]. Updated ${path.map((slot) => `BIT[${slot}]`).join(" → ")}.`
       );
     }
     function onQuery() {
@@ -17651,7 +17708,7 @@
       activeIndex = index;
       activeRange = null;
       updateValue.value = "";
-      paint(`Set value[${index}] from ${before} to ${parsed}; recomputed its path to the root.`);
+      paint(`Set value[${index}] from ${before} to ${parsed}. Recomputed its path to the root.`);
     }
     function onQuery() {
       let left = Number(rangeStart.value);
@@ -17757,7 +17814,7 @@
       }
     ];
     let order = 1;
-    ops.init(pathCost, visibleQueue2(queue2), `Seed OPEN with ${config.start}; rank it by h alone.`);
+    ops.init(pathCost, visibleQueue2(queue2), `Seed OPEN with ${config.start}. Rank it by h alone.`);
     while (queue2.length) {
       queue2.sort(
         (left, right) => left.h - right.h || left.order - right.order || left.id.localeCompare(right.id)
@@ -17769,7 +17826,7 @@
         pathCost,
         visibleQueue2(queue2),
         closed,
-        `Move ${current.id} to CLOSED: h ${current.h} is smallest; path cost ${current.g} is ignored.`
+        `Move ${current.id} to CLOSED: h ${current.h} is smallest. Path cost ${current.g} is ignored.`
       );
       if (current.id === config.target) {
         const path = [current.id];
@@ -17786,7 +17843,7 @@
           pathCost,
           greedyCost,
           optimalCost,
-          `Greedy stops at cost ${greedyCost}; A* reaches the same goal with optimal cost ${optimalCost}.`
+          `Greedy stops at cost ${greedyCost}. A* reaches the same goal with optimal cost ${optimalCost}.`
         );
         return;
       }
@@ -17797,7 +17854,7 @@
           pathCost,
           visibleQueue2(queue2),
           closed,
-          `Inspect ${current.id} → ${edge.to}; only h(${edge.to}) will rank it.`
+          `Inspect ${current.id} → ${edge.to}. Only h(${edge.to}) will rank it.`
         );
         if (visited.has(edge.to)) continue;
         visited.add(edge.to);
@@ -17811,7 +17868,7 @@
           pathCost,
           visibleQueue2(queue2),
           closed,
-          `Add ${edge.to} to OPEN with h ${h}; accumulated cost ${pathCost[edge.to]} does not affect priority.`
+          `Add ${edge.to} to OPEN with h ${h}. Accumulated cost ${pathCost[edge.to]} does not affect priority.`
         );
       }
     }
@@ -17983,7 +18040,7 @@
     matrix.setAttribute("aria-label", "Rows are from vertices and columns are to vertices");
     const caption = document.createElement("caption");
     caption.className = "steptrace__dp-caption";
-    caption.textContent = "Directed adjacency matrix; rows are from and columns are to vertices";
+    caption.textContent = "Directed adjacency matrix. Rows are from and columns are to vertices";
     matrix.append(caption);
     const matrixHead = document.createElement("thead");
     const matrixHeader = document.createElement("tr");
@@ -18229,7 +18286,7 @@
     run: (input, ops) => {
       const n = ops.value.length;
       ops.init(
-        `Heap sort — build a max-heap (parents ≥ children); move the root right and sift down.`
+        `Heap sort — build a max-heap (parents ≥ children). Move the root right and sift down.`
       );
       function siftDown(lo, hi) {
         let root = lo;
@@ -18345,7 +18402,7 @@
     meta: { label: "Hamiltonian Cycle" },
     parse: () => ({ nodes: nodes2, edges: edges2 }),
     run(_config, recorder) {
-      recorder.add("Start at A; try unused neighbours in the order C, B, D.", ["A"], ["C", "B", "D"]);
+      recorder.add("Start at A. Try unused neighbours in the order C, B, D.", ["A"], ["C", "B", "D"]);
       recorder.add("Choose C first.", ["A", "C"], ["B", "D"]);
       recorder.add("Choose B from C.", ["A", "C", "B"], []);
       recorder.add(
@@ -18365,7 +18422,7 @@
         ["D", "B"]
       );
       recorder.add("Backtrack from D to C.", ["A", "C"], [], ["D"]);
-      recorder.add("Both C branches failed; backtrack to A.", ["A"], ["B", "D"], ["C"]);
+      recorder.add("Both C branches failed. Backtrack to A.", ["A"], ["B", "D"], ["C"]);
       recorder.add("Choose B from A.", ["A", "B"], ["C"]);
       recorder.add("Choose C from B.", ["A", "B", "C"], ["D"]);
       recorder.add("Choose D from C.", ["A", "B", "C", "D"], []);
@@ -18542,7 +18599,7 @@
             "deferred",
             depthUsed,
             "defer",
-            `Defer [${lo}, ${hi}] (${size} values) to the final insertion pass; cutoff is ${input.smallPartitionThreshold}.`
+            `Defer [${lo}, ${hi}] (${size} values) to the final insertion pass. Cutoff is ${input.smallPartitionThreshold}.`
           );
           return;
         }
@@ -18551,7 +18608,7 @@
             "heap sort",
             depthUsed,
             "fallback",
-            `Depth limit ${input.depthLimit} reached on [${lo}, ${hi}]; heap-sort this range.`
+            `Depth limit ${input.depthLimit} reached on [${lo}, ${hi}]. Heap-sort this range.`
           );
           heapSortRange(lo, hi);
           return;
@@ -18630,7 +18687,7 @@
       }
       if (values[bound] < target) {
         ops.done(
-          `${target} is larger than the array maximum; not found after ${ops.comparisons} probes.`
+          `${target} is larger than the array maximum. Not found after ${ops.comparisons} probes.`
         );
         return;
       }
@@ -18639,13 +18696,13 @@
       ops.beginPhase(
         lo,
         hi,
-        `The target can only be in block [${lo}, ${hi}]; scan that block from the start.`,
+        `The target can only be in block [${lo}, ${hi}]. Scan that block from the start.`,
         "scan"
       );
       for (let i = lo; i <= hi && i < values.length; i++) {
         ops.probe(lo, hi, i, `Linear scan in jump block [${lo}, ${hi}]: check index ${i}.`);
         if (values[i] === target) {
-          ops.hit(i, `${values[i]} equals ${target}; found it at index ${i}.`);
+          ops.hit(i, `${values[i]} equals ${target}. Found it at index ${i}.`);
           ops.done(`Found ${target} at index ${i} after ${ops.comparisons} probes.`);
           return;
         }
@@ -18889,7 +18946,7 @@
       );
       accepted.push(edges3[3]);
       recorder.add(
-        "Accept C—D; V − 1 edges complete the MST with total weight 7.",
+        "Accept C—D. V − 1 edges complete the MST with total weight 7.",
         [["A", "B", "C", "D"]],
         [],
         accepted,
@@ -18953,20 +19010,20 @@
           path.unshift([r, c]);
           ops.markPath(
             path,
-            `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' → dp[${r - 1}][${c - 1}] + 1; add '${A[r - 1]}' and move diagonally.`
+            `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' → dp[${r - 1}][${c - 1}] + 1. Add '${A[r - 1]}' and move diagonally.`
           );
           r--;
           c--;
         } else if (dp[r - 1][c] >= dp[r][c - 1]) {
           ops.markPath(
             path,
-            `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' → inherit top dp[${r - 1}][${c}]; move up, add no letter.`
+            `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' → inherit top dp[${r - 1}][${c}]. Move up, add no letter.`
           );
           r--;
         } else {
           ops.markPath(
             path,
-            `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' → inherit left dp[${r}][${c - 1}]; move left, add no letter.`
+            `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' → inherit left dp[${r}][${c - 1}]. Move left, add no letter.`
           );
           c--;
         }
@@ -19057,7 +19114,7 @@
     meta: { label: "Merge sort" },
     run: (input, ops) => {
       const n = ops.value.length;
-      ops.init("Merge sort — merge adjacent sorted runs; their length doubles each pass from 1.");
+      ops.init("Merge sort — merge adjacent sorted runs. Their length doubles each pass from 1.");
       for (let width = 1; width < n; width *= 2) {
         for (let lo = 0; lo < n; lo += 2 * width) {
           const mid = Math.min(lo + width, n);
@@ -19306,7 +19363,7 @@
             index,
             next.id,
             relation,
-            relation === "contained" ? `[${next.start}, ${next.end}] is contained in [${current.join(", ")}]; keep the current end.` : `${next.start} ≤ ${current[1]}, so [${next.start}, ${next.end}] overlaps the current block.`
+            relation === "contained" ? `[${next.start}, ${next.end}] is contained in [${current.join(", ")}]. Keep the current end.` : `${next.start} ≤ ${current[1]}, so [${next.start}, ${next.end}] overlaps the current block.`
           );
           if (relation === "contained") continue;
           current = [current[0], Math.max(current[1], next.end)];
@@ -19321,7 +19378,7 @@
         );
         ops.emit(
           current,
-          `Emit [${current.join(", ")}]; no later interval can reach back across the gap.`
+          `Emit [${current.join(", ")}]. No later interval can reach back across the gap.`
         );
         current = pair2(next);
         ops.restart(index, next.id, current, `Start a new current block at [${current.join(", ")}].`);
@@ -19416,9 +19473,9 @@
       );
       recorder.add("DFS chooses s → a.", ["s", "a"], flow, 0);
       recorder.add("Continue through a → b.", ["s", "a", "b"], flow, 0);
-      recorder.add("Reach t through b → t; the bottleneck is 1.", ["s", "a", "b", "t"], flow, 0, 1);
+      recorder.add("Reach t through b → t. The bottleneck is 1.", ["s", "a", "b", "t"], flow, 0, 1);
       flow = { ...flow, "s|a": 1, "a|b": 1, "b|t": 1 };
-      recorder.add("Augment s → a → b → t by 1; total flow is 1.", ["s", "a", "b", "t"], flow, 1, 1);
+      recorder.add("Augment s → a → b → t by 1. Total flow is 1.", ["s", "a", "b", "t"], flow, 1, 1);
       recorder.add("The next search starts with the remaining edge s → b.", ["s", "b"], flow, 1);
       recorder.add(
         "Use residual edge b → a to retract the earlier a → b unit.",
@@ -19427,7 +19484,7 @@
         1
       );
       recorder.add(
-        "Continue through the free edge a → t; bottleneck is 1.",
+        "Continue through the free edge a → t. Bottleneck is 1.",
         ["s", "b", "a", "t"],
         flow,
         1,
@@ -19441,7 +19498,7 @@
         2,
         1
       );
-      recorder.add("No residual s → t path remains; the maximum flow is 2.", [], flow, 2);
+      recorder.add("No residual s → t path remains. The maximum flow is 2.", [], flow, 2);
     }
   };
 
@@ -19572,7 +19629,7 @@
         const item = values[index];
         const isTop = index === values.length - 1;
         value.textContent = item ?? "·";
-        label.textContent = isTop ? `TOP · ${index}` : String(index);
+        setTextParts(label, isTop ? `TOP ${index}` : String(index));
         popGhost.textContent = index === changedIndex && operation === "pop" ? operationValue : "";
         cell.dataset.empty = item == null ? "1" : "0";
         cell.dataset.top = isTop ? "1" : "0";
@@ -19784,7 +19841,7 @@
       stackCells.forEach((cell, slot) => {
         const index = frame.stack[slot];
         const visible = index != null;
-        cell.textContent = visible ? `${frame.array[index]} · i${index}` : "";
+        setTextParts(cell, visible ? `${frame.array[index]} i${index}` : "");
         cell.dataset.visible = visible ? "1" : "0";
         cell.dataset.top = visible && slot === frame.stack.length - 1 ? "1" : "0";
         cell.setAttribute("aria-hidden", visible ? "false" : "true");
@@ -19801,13 +19858,13 @@
     const watch = (frame) => [
       {
         k: "scan",
-        v: frame.cursor == null ? "complete" : `i${frame.cursor} · ${frame.array[frame.cursor]}`,
+        v: frame.cursor == null ? "complete" : `i${frame.cursor}, ${frame.array[frame.cursor]}`,
         sw: "var(--_blue)",
         hint: "Value currently compared with the stack top."
       },
       {
         k: "stack",
-        v: frame.stack.map((index) => frame.array[index]).join(" · ") || "empty",
+        v: frame.stack.map((index) => frame.array[index]).join(", ") || "empty",
         sw: "var(--_amber)",
         hint: "Unanswered values, decreasing from bottom to top."
       },
@@ -19818,7 +19875,7 @@
       },
       {
         k: "charges",
-        v: `${frame.pushes} push · ${frame.pops} pop`,
+        v: `${frame.pushes} push, ${frame.pops} pop`,
         sw: "var(--_neutral)",
         hint: "Every index is pushed once and popped at most once."
       }
@@ -19831,7 +19888,7 @@
       watch,
       summary(frame) {
         const answers = frame.answers.map((answer) => answer == null ? "none" : String(frame.array[answer])).join(", ");
-        return `Next greater values: [${answers}] · ${frame.pushes} pushes, ${frame.pops} pops.`;
+        return `Next greater values: [${answers}], ${frame.pushes} pushes, ${frame.pops} pops.`;
       }
     };
   }
@@ -19864,21 +19921,21 @@
       const stack2 = [];
       for (let index = 0; index < input.array.length; index++) {
         const value = input.array[index];
-        ops.scan(index, `Scan i${index} = ${value}; compare it with the stack top.`);
+        ops.scan(index, `Scan i${index} = ${value}. Compare it with the stack top.`);
         while (stack2.length && input.array[stack2.at(-1)] < value) {
           const popped = stack2.pop();
           ops.pop(
             index,
-            `${value} > ${input.array[popped]}, so pop i${popped}; ${value} is its next greater value.`
+            `${value} > ${input.array[popped]}, so pop i${popped}. ${value} is its next greater value.`
           );
         }
         stack2.push(index);
         ops.push(
           index,
-          `Push i${index}; retained values are ${stack2.map((item) => input.array[item]).join(" > ")}.`
+          `Push i${index}. Retained values are ${stack2.map((item) => input.array[item]).join(" > ")}.`
         );
       }
-      ops.done("The scan is complete; retained indices have no greater value to their right.");
+      ops.done("The scan is complete. Retained indices have no greater value to their right.");
     }
   };
 
@@ -19892,7 +19949,7 @@
       const n = Math.min(Math.max(input.n || 4, 4), 6);
       ops.board(
         n,
-        `${n}-Queens on ${n}×${n}: place one per row; backtrack when no safe square remains.`
+        `${n}-Queens on ${n}×${n}: place one per row. Backtrack when no safe square remains.`
       );
       const conflict = (row, col) => {
         const q = ops.queens;
@@ -19958,7 +20015,7 @@
         }
       }
       ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index));
-      ops.done(`A full odd/even pair made no swap; the array is sorted.`);
+      ops.done(`A full odd/even pair made no swap. The array is sorted.`);
     }
   };
 
@@ -20240,7 +20297,7 @@
       input.array.forEach((value, index) => {
         ops.add(
           index,
-          `Read a[${index}] = ${value}; running total becomes ${input.array.slice(0, index + 1).reduce((sum, item) => sum + item, 0)}.`
+          `Read a[${index}] = ${value}. Running total becomes ${input.array.slice(0, index + 1).reduce((sum, item) => sum + item, 0)}.`
         );
         ops.write(index, `Write that total to prefix[${index + 1}].`);
       });
@@ -20412,7 +20469,7 @@
           ops.scatter(
             sourceIndex,
             digit,
-            `${value}'s ${passLabel} digit is ${digit}; append it to bucket ${digit}.`
+            `${value}'s ${passLabel} digit is ${digit}. Append it to bucket ${digit}.`
           );
         });
         ops.beginGather(
@@ -20425,7 +20482,7 @@
             ops.gather(
               bucketIndex,
               itemIndex,
-              `Take ${value} from bucket ${bucketIndex}; write it at output index ${next.length - 1}.`
+              `Take ${value} from bucket ${bucketIndex}. Write it at output index ${next.length - 1}.`
             );
           });
         });
@@ -20462,7 +20519,7 @@
       }
       const ph = hash(pattern);
       ops.init(
-        `Rabin-Karp for "${pattern}" — slide rolling hashes; verify text only on hash collision (${ph}).`
+        `Rabin-Karp for "${pattern}" — slide rolling hashes. Verify text only on hash collision (${ph}).`
       );
       let highPow = 1;
       for (let k = 0; k < m - 1; k++) highPow = highPow * B % MOD;
@@ -20601,12 +20658,12 @@
             ops.holdKeyAt(
               key4,
               index,
-              `Lift ${key4} from index ${index}; index ${index} becomes the insertion hole.`
+              `Lift ${key4} from index ${index}. Index ${index} becomes the insertion hole.`
             );
             let cursor = index - gap;
             ops.compareHeldAt(
               cursor,
-              `Hold ${key4} from index ${index}; compare it with ${ops.value[cursor]} at index ${cursor}.`
+              `Hold ${key4} from index ${index}. Compare it with ${ops.value[cursor]} at index ${cursor}.`
             );
             while (cursor >= start && ops.value[cursor] > key4) {
               ops.shiftHeld(
@@ -20649,7 +20706,7 @@
         if (duplicate != null && duplicate >= lo) {
           ops.step(
             { pointers: { lo, hi }, window: [lo, hi], bestRange, duplicateIndex: hi },
-            `Duplicate "${character}" enters at index ${hi}; move left past its previous index ${duplicate}.`
+            `Duplicate "${character}" enters at index ${hi}. Move left past its previous index ${duplicate}.`
           );
           lo = duplicate + 1;
         }
@@ -20832,7 +20889,7 @@
         ;
         [heap2[left], heap2[right]] = [heap2[right], heap2[left]];
       };
-      ops.init(`Keep a min-heap of ${input.k}; its root is the weakest current winner.`);
+      ops.init(`Keep a min-heap of ${input.k}. Its root is the weakest current winner.`);
       input.array.forEach((value, index) => {
         ops.read(index, `Read ${value} from the stream.`);
         if (heap2.length < input.k) {
@@ -20853,7 +20910,7 @@
             ops.swapUp(
               child,
               parent2,
-              `${childValue} is smaller than ${parentValue}, so swap upward; the smaller value moves toward the root.`
+              `${childValue} is smaller than ${parentValue}, so swap upward. The smaller value moves toward the root.`
             );
             child = parent2;
           }
@@ -20866,7 +20923,7 @@
         if (value <= heap2[0].value) {
           ops.reject(
             index,
-            `${value} ≤ ${heap2[0].value}; reject ${value} because it cannot enter the top ${input.k}.`
+            `${value} ≤ ${heap2[0].value}. Reject ${value} because it cannot enter the top ${input.k}.`
           );
           return;
         }
@@ -20874,7 +20931,7 @@
         heap2[0] = { value, source: index };
         ops.replaceRoot(
           index,
-          `${value} > ${evicted}; evict the weakest winner ${evicted} and place ${value} at the root.`
+          `${value} > ${evicted}. Evict the weakest winner ${evicted} and place ${value} at the root.`
         );
         let parent = 0;
         while (true) {
@@ -20886,7 +20943,7 @@
             ops.compareChildren(
               left,
               right,
-              `Compare children ${heap2[left].value} and ${heap2[right].value}; ${Math.min(heap2[left].value, heap2[right].value)} is weaker.`
+              `Compare children ${heap2[left].value} and ${heap2[right].value}. ${Math.min(heap2[left].value, heap2[right].value)} is weaker.`
             );
             if (heap2[right].value < heap2[left].value) weaker = right;
           }
@@ -20902,13 +20959,13 @@
           ops.swapDown(
             parent,
             weaker,
-            `${parentValue} > ${childValue}, so swap them; ${childValue} becomes the weaker root candidate.`
+            `${parentValue} > ${childValue}, so swap them. ${childValue} becomes the weaker root candidate.`
           );
           parent = weaker;
         }
       });
       ops.done(
-        `The heap contains the ${input.k} largest values. Its root is the weakest winner; the heap itself is not globally sorted.`
+        `The heap contains the ${input.k} largest values. Its root is the weakest winner. The heap itself is not globally sorted.`
       );
     }
   };
@@ -21011,7 +21068,7 @@
       low,
       stack2,
       components,
-      "C→A reaches an active ancestor; low[C] becomes 0."
+      "C→A reaches an active ancestor, so low[C] becomes 0."
     );
     visit("D", 3, "C");
     visit("E", 4, "D");
@@ -21024,7 +21081,7 @@
       low,
       stack2,
       components,
-      "E→D reaches an active ancestor; low[E] becomes 3."
+      "E→D reaches an active ancestor, so low[E] becomes 3."
     );
     low["D"] = Math.min(low["D"], low["E"]);
     recorder.record(
@@ -21046,7 +21103,7 @@
       low,
       stack2,
       components,
-      "low[D] = disc[D]; pop E and D as one SCC."
+      "low[D] = disc[D]. Pop E and D as one SCC."
     );
     low["B"] = low["C"];
     recorder.record(
@@ -21069,7 +21126,7 @@
       low,
       stack2,
       components,
-      "low[A] = disc[A]; pop C, B, A as one SCC."
+      "low[A] = disc[A]. Pop C, B, A as one SCC."
     );
     recorder.record("done", null, null, disc, low, stack2, components, "SCCs: {D,E} and {A,B,C}.");
   }
@@ -21109,7 +21166,7 @@
           prefix = next;
         }
         if (operation === "insert") {
-          ops.markTerminal(key4, `Mark "${key4}" terminal; descendants do not change that marker.`);
+          ops.markTerminal(key4, `Mark "${key4}" terminal. Descendants do not change that marker.`);
         } else if (operation === "prefix") {
           ops.completePrefix(pathExists, `Prefix "${key4}" tests path existence: ${pathExists}.`);
         } else {
@@ -21117,7 +21174,7 @@
           ops.completeSearch(found, `Search "${key4}" tests IsEnd after the path: ${found}.`);
         }
       }
-      ops.done("All trie operations complete; shared prefixes remain one persistent path.");
+      ops.done("All trie operations complete. Shared prefixes remain one persistent path.");
     }
   };
 
@@ -21130,7 +21187,7 @@
       const a = ops.value;
       const target = input.target;
       ops.init(
-        `Two pointers on sorted data seek ${target}: left → raises the sum; right ← lowers it.`
+        `Two pointers on sorted data seek ${target}: left → raises the sum, and right ← lowers it.`
       );
       let l = 0;
       let r = a.length - 1;
@@ -21177,7 +21234,7 @@
         (value, index) => ops.insert(index, `Insert ${value}, then rebalance so heap sizes differ by at most one.`)
       );
       ops.done(
-        "Every lower value is at most every upper value; the root or root average is the median."
+        "Every lower value is at most every upper value. The root or root average is the median."
       );
     }
   };
@@ -21188,7 +21245,7 @@
   var HEIGHT = 220;
   var TOP = 34;
   var LEVEL_GAP = 66;
-  var NODE_RADIUS = 18;
+  var NODE_RADIUS2 = 18;
   var markerSerial = 0;
   function svgElement3(kind, attributes = {}) {
     const node2 = document.createElementNS(SVG_NS7, kind);
@@ -21215,7 +21272,7 @@
       class: "steptrace__union-find-svg",
       viewBox: `0 0 ${WIDTH} ${HEIGHT}`,
       role: "img",
-      "aria-label": "Each arrow points from an element to its parent; roots point to themselves"
+      "aria-label": "Each arrow points from an element to its parent. Roots point to themselves"
     });
     const markerId = `steptrace-union-find-arrow-${++markerSerial}`;
     const marker2 = svgElement3("marker", {
@@ -21244,7 +21301,7 @@
     });
     const nodeNodes = Array.from({ length: config.size }, (_, index) => {
       const group = svgElement3("g", { class: "steptrace__union-find-node" });
-      const circle = svgElement3("circle", { r: NODE_RADIUS });
+      const circle = svgElement3("circle", { r: NODE_RADIUS2 });
       const value = svgElement3("text", { "text-anchor": "middle", "dominant-baseline": "central" });
       const rootLabel = svgElement3("text", {
         class: "steptrace__union-find-root-label",
@@ -21348,10 +21405,10 @@
         const dx = target.x - position.x;
         const dy = target.y - position.y;
         const distance2 = Math.hypot(dx, dy);
-        const startX = position.x + dx * NODE_RADIUS / distance2;
-        const startY = position.y + dy * NODE_RADIUS / distance2;
-        const endX = target.x - dx * (NODE_RADIUS + 5) / distance2;
-        const endY = target.y - dy * (NODE_RADIUS + 5) / distance2;
+        const startX = position.x + dx * NODE_RADIUS2 / distance2;
+        const startY = position.y + dy * NODE_RADIUS2 / distance2;
+        const endX = target.x - dx * (NODE_RADIUS2 + 5) / distance2;
+        const endY = target.y - dy * (NODE_RADIUS2 + 5) / distance2;
         edge.toggleAttribute("hidden", false);
         edge.dataset.active = String(highlighted.has(index));
         edge.setAttribute(
@@ -21404,7 +21461,7 @@
       highlighted = new Set(result.path);
       activeRoot = result.root;
       paint(
-        result.path.length > 1 ? `Find(${a}) followed ${result.path.join(" → ")} and compressed the path to root ${result.root}.` : `Find(${a}) = ${result.root}; it is already a root.`
+        result.path.length > 1 ? `Find(${a}) followed ${result.path.join(" → ")} and compressed the path to root ${result.root}.` : `Find(${a}) = ${result.root}. It is already a root.`
       );
     }
     function onConnected() {
@@ -21426,7 +21483,7 @@
       activeRoot = null;
       first.value = "0";
       second.value = "1";
-      paint("Reset to singleton sets; every element is its own root.");
+      paint("Reset to singleton sets. Every element is its own root.");
     }
     shell.listen(union, "click", onUnion);
     shell.listen(find, "click", onFind);
@@ -21500,7 +21557,7 @@
       ops.beginPhase(
         0,
         values.length - 1,
-        "Probe both third-points together; the larger value shows which side still contains the peak.",
+        "Probe both third-points together. The larger value shows which side still contains the peak.",
         "ternary"
       );
       let left = 0;
@@ -21518,10 +21575,10 @@
         );
         if (values[mid1] < values[mid2]) {
           left = mid1 + 1;
-          ops.narrow(left, right, `The sequence is higher at ${mid2}; keep [${left}, ${right}].`);
+          ops.narrow(left, right, `The sequence is higher at ${mid2}. Keep [${left}, ${right}].`);
         } else if (values[mid1] > values[mid2]) {
           right = mid2 - 1;
-          ops.narrow(left, right, `The sequence is higher at ${mid1}; keep [${left}, ${right}].`);
+          ops.narrow(left, right, `The sequence is higher at ${mid1}. Keep [${left}, ${right}].`);
         } else {
           left = mid1 + 1;
           right = mid2 - 1;
@@ -21535,7 +21592,7 @@
       ops.beginPhase(
         left,
         right,
-        `Only [${left}, ${right}] remains; scan these final values.`,
+        `Only [${left}, ${right}] remains. Scan these final values.`,
         "scan"
       );
       let best = left;
@@ -21651,7 +21708,7 @@
           else
             ops.completeSearch(
               ops.hasTerminal(current),
-              `Character matched; IsEnd("${key4}") is ${ops.hasTerminal(current)}.`
+              `Character matched. IsEnd("${key4}") is ${ops.hasTerminal(current)}.`
             );
           return;
         }
@@ -21659,8 +21716,8 @@
         if (!node2.eq) break;
         const id = edgeId(current, "eq", node2.eq);
         if (ops.hasVisibleEdge(id))
-          ops.reuseEdge(id, node2.eq, index, `eq consumes the character; continue with ${key4[index]}.`);
-        else ops.createNode(id, node2.eq, index, `eq consumes the character; create ${key4[index]}.`);
+          ops.reuseEdge(id, node2.eq, index, `eq consumes the character. Continue with ${key4[index]}.`);
+        else ops.createNode(id, node2.eq, index, `eq consumes the character. Create ${key4[index]}.`);
         current = node2.eq;
       } else {
         const role = character < node2.character ? "lo" : "hi";
@@ -21685,7 +21742,7 @@
     run(input, ops) {
       for (const [operation, key4] of input.operations)
         traverse(input, ops, operation, key4);
-      ops.done("Ternary search tree complete: lo/hi compared without consuming; eq consumed.");
+      ops.done("Ternary search tree complete: lo/hi compared without consuming, and eq consumed.");
     }
   };
 
@@ -21819,7 +21876,7 @@
     }
   };
   function runLabel(run7) {
-    return `[${run7.start}…${run7.start + run7.length - 1}] · ${run7.length}`;
+    return `[${run7.start}…${run7.start + run7.length - 1}], ${run7.length}`;
   }
   function stackRunFor(frame, index) {
     return frame.stack[index] || null;
@@ -21844,7 +21901,7 @@
       },
       {
         k: "stack",
-        v: frame.stack.map((run7) => run7.length).join(" · ") || "empty",
+        v: frame.stack.map((run7) => run7.length).join(", ") || "empty",
         sw: "var(--_amber)",
         hint: "Saved contiguous run lengths, from stack bottom to top."
       },
@@ -21867,7 +21924,7 @@
     const arrayBars = el("div", "steptrace__stage steptrace__run-bars");
     const bars = makeBars(arrayBars, length);
     const stackLabel = el("div", "steptrace__rail-label steptrace__run-stack-label");
-    stackLabel.textContent = "Run stack · top";
+    setRailLabel(stackLabel, "Run stack", "top");
     const stackSection = el("div", "steptrace__run-stack-section");
     const stack2 = el("div", "steptrace__run-stack-cards");
     const stackCards = Array.from({ length }, () => {
@@ -21925,7 +21982,7 @@
         card.card.dataset.motion = frame.type === "push" && stackIndex === frame.stack.length - 1 ? "push" : frame.type === "check" ? "check" : frame.type === "merge" || frame.type === "force-merge" ? "merge" : previous?.start !== run7.start || previous?.length !== run7.length ? "reflow" : "";
       }
       const check = frame.invariant;
-      invariant.textContent = check ? `X=${check.x ?? "—"}, Y=${check.y ?? "—"}, Z=${check.z ?? "—"}${check.holds == null ? "" : check.holds ? " · holds" : " · merge"}` : frame.type === "force-merge" ? "Final collapse: merge adjacent runs until one remains." : `minrun ${frame.minrun} · ${frame.merges} merge${frame.merges === 1 ? "" : "s"}`;
+      invariant.textContent = check ? `X=${check.x ?? "—"}, Y=${check.y ?? "—"}, Z=${check.z ?? "—"}${check.holds == null ? "" : check.holds ? ", holds" : ", merge"}` : frame.type === "force-merge" ? "Final collapse: merge adjacent runs until one remains." : `minrun ${frame.minrun}, ${frame.merges} merge${frame.merges === 1 ? "" : "s"}`;
       invariant.dataset.state = check?.holds === false ? "merge" : check?.holds ? "holds" : "";
       status.textContent = frame.message;
       previousStack = frame.stack;
@@ -22026,7 +22083,7 @@
         if (descending)
           ops.reverse(
             { start, length },
-            `Reverse the strictly descending run ${runLabel2(start, length)}; equal keys never entered it.`
+            `Reverse the strictly descending run ${runLabel2(start, length)}. Equal keys never entered it.`
           );
         const forcedLength = Math.min(input.minrun, n - start);
         if (length < forcedLength) {
@@ -22048,7 +22105,7 @@
               source,
               lo,
               source,
-              `Binary-insert ${value} at index ${lo}; equals stay after earlier equals for stability.`
+              `Binary-insert ${value} at index ${lo}. Equals stay after earlier equals for stability.`
             );
           }
           length = forcedLength;
@@ -22104,7 +22161,7 @@
           r,
           k,
           sourceCase,
-          inside ? `i = ${i} lies inside [${l}, ${r}]; mirror k = ${k}.` : `i = ${i} lies outside [${l}, ${r}]; compare from the prefix start.`
+          inside ? `i = ${i} lies inside [${l}, ${r}]. Mirror k = ${k}.` : `i = ${i} lies outside [${l}, ${r}]. Compare from the prefix start.`
         );
         if (inside) {
           z[i] = Math.min(remainder, z[k]);
@@ -22113,7 +22170,7 @@
             k,
             z[i],
             sourceCase,
-            sourceCase === "copy" ? `Copy Z[${k}] = ${z[k]} to Z[${i}]; it ends before r, so no character comparison is needed.` : `Reuse the verified box remainder ${remainder} from Z[${k}], then test beyond r.`
+            sourceCase === "copy" ? `Copy Z[${k}] = ${z[k]} to Z[${i}]. It ends before r, so no character comparison is needed.` : `Reuse the verified box remainder ${remainder} from Z[${k}], then test beyond r.`
           );
           if (sourceCase === "copy") {
             ops.commitZ(
@@ -22122,7 +22179,7 @@
               l,
               r,
               sourceCase,
-              `Commit Z[${i}] = ${z[i]}; the active box stays [${l}, ${r}].`
+              `Commit Z[${i}] = ${z[i]}. The active box stays [${l}, ${r}].`
             );
             continue;
           }
@@ -22152,7 +22209,7 @@
           l,
           r,
           sourceCase,
-          `Commit Z[${i}] = ${z[i]}; the active box is [${l}, ${r}].`
+          `Commit Z[${i}] = ${z[i]}. The active box is [${l}, ${r}].`
         );
       }
       ops.done(`Z = [${z.join(", ")}].`);
@@ -22469,8 +22526,25 @@
   var SPEEDS = [0.5, 1, 1.5, 2];
   var COMPACT_INLINE_SIZE = 704;
   var fadeFor = (age) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1));
-  var WATCH_ENTRY_SEPARATOR = " · ";
+  var WATCH_ENTRY_SEPARATOR = ", ";
   var mountSerial = 0;
+  function splitWatchEntries(text) {
+    const entries = [];
+    let depth = 0;
+    let start = 0;
+    for (let index = 0; index < text.length; index++) {
+      const char = text[index];
+      if (char === "[" || char === "(" || char === "{") depth++;
+      else if (char === "]" || char === ")" || char === "}") depth = Math.max(0, depth - 1);
+      else if (depth === 0 && text.startsWith(WATCH_ENTRY_SEPARATOR, index)) {
+        entries.push(text.slice(start, index));
+        start = index + WATCH_ENTRY_SEPARATOR.length;
+        index = start - 1;
+      }
+    }
+    entries.push(text.slice(start));
+    return entries;
+  }
   function watchRowParts(row) {
     const parts = [];
     if (row.sw) {
@@ -22481,7 +22555,7 @@
     const key4 = el("span", "steptrace__watch-k");
     key4.textContent = row.k;
     const value = el("span", "steptrace__watch-v");
-    const entries = (row.v == null ? "" : String(row.v)).split(WATCH_ENTRY_SEPARATOR);
+    const entries = splitWatchEntries(row.v == null ? "" : String(row.v));
     if (entries.length === 1) value.textContent = entries[0];
     else
       entries.forEach((entry, index) => {
@@ -23021,7 +23095,7 @@
           tick.style.setProperty("--start", `${start}%`);
           tick.style.setProperty("--end", `${end}%`);
           tick.dataset.step = String(mark.i);
-          tick.title = `${mark.label} · step ${mark.i + 1}`;
+          tick.title = `${mark.label}, step ${mark.i + 1}`;
           tick.setAttribute("aria-hidden", "true");
           const label = el("b", "steptrace__milestone-label");
           label.textContent = mark.label;
@@ -23203,11 +23277,9 @@
       function syncEndpointOptions(settings, graph) {
         if (!endpointSection || !startMenu || !targetMenu || !startHead || !targetHead) return;
         const options = settings?.options || graph?.nodes?.map((node2) => ({ value: node2.id, label: node2.id }));
-        if (!options?.length) {
-          endpointSection.hidden = true;
-          return;
-        }
-        endpointSection.hidden = false;
+        endpointSection.hidden = !options?.length;
+        menuWrap.hidden = endpointSection.hidden;
+        if (endpointSection.hidden) return;
         startHead.textContent = settings?.startLabel || "Start node";
         startMenu.setAttribute("aria-label", startHead.textContent);
         targetHead.hidden = !settings;

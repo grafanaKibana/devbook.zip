@@ -1,5 +1,5 @@
 import { GRAPH_NODE_RADIUS_PX, observeFixedSvgNodes, trimGraphEdge } from "../graph-node"
-import { el } from "../render"
+import { el, setRailLabel, setTextParts } from "../render"
 import type { MountHandle } from "../types"
 import { heapPosition } from "./heap-selection"
 import { createIndexedBoard, createStructureShell, onEnter } from "./interactive-structure"
@@ -162,7 +162,7 @@ export function mountHeap(root: HTMLElement, config: HeapConfig): MountHandle {
     settled = child
     input.value = ""
     paint(
-      `Inserted ${value}; sift-up path ${path.join(" → ")}${
+      `Inserted ${value}. Sift-up path ${path.join(" → ")}${
         swaps ? ` with ${swaps} swap${swaps === 1 ? "" : "s"}` : " already satisfied heap order"
       }.`,
     )
@@ -195,8 +195,8 @@ export function mountHeap(root: HTMLElement, config: HeapConfig): MountHandle {
     paint(
       `Extracted minimum ${minimum}${
         path.length
-          ? `; sift-down path ${path.join(" → ")} with ${swaps} swap${swaps === 1 ? "" : "s"}`
-          : "; heap is now empty"
+          ? `. Sift-down path ${path.join(" → ")} with ${swaps} swap${swaps === 1 ? "" : "s"}`
+          : ". Heap is now empty"
       }.`,
     )
   }
@@ -331,7 +331,7 @@ function paintForest(
       const meta = svgEl("text", "steptrace__heap-root-label")
       meta.setAttribute("text-anchor", "middle")
       meta.setAttribute("y", "-20")
-      meta.textContent = rootLabel
+      setTextParts(meta, rootLabel)
       group.append(meta)
     }
     if (node.marked) {
@@ -367,10 +367,10 @@ export function mountBinomialQueue(root: HTMLElement, _config: HeapVariantConfig
     "steptrace__heap-structure steptrace__heap-variant",
   )
   const treeLabel = el("div", "steptrace__rail-label")
-  treeLabel.textContent = "Two forests · 3 + 1 values"
+  setRailLabel(treeLabel, "Two forests", "3 + 1 values")
   const tree = el("div", "steptrace__heap-structure-tree")
   const slotLabel = el("div", "steptrace__rail-label steptrace__heap-array-label")
-  slotLabel.textContent = "Forest slots · binary carry"
+  setRailLabel(slotLabel, "Forest slots", "binary carry")
   const slotWrap = el("div", "steptrace__heap-array")
   const slots = createIndexedBoard(slotWrap, 3, "Binomial forest slots by order")
   shell.stage.append(treeLabel, tree, slotLabel, slotWrap)
@@ -405,13 +405,13 @@ export function mountBinomialQueue(root: HTMLElement, _config: HeapVariantConfig
       children: [{ id: "carry0", key: 7, children: [] }],
     }
     if (phase === 0) {
-      rootMeta.set(first.id, "A · B₁")
-      rootMeta.set(loose.id, "A · B₀")
-      rootMeta.set(second.id, "B · B₀")
+      rootMeta.set(first.id, "A B₁")
+      rootMeta.set(loose.id, "A B₀")
+      rootMeta.set(second.id, "B B₀")
     } else if (phase === 1) {
-      rootMeta.set(first.id, "A · B₁")
-      rootMeta.set(carry.id, "carry · B₁")
-    } else rootMeta.set(result.id, "result · B₂")
+      rootMeta.set(first.id, "A B₁")
+      rootMeta.set(carry.id, "carry B₁")
+    } else rootMeta.set(result.id, "result B₂")
     geometry = paintForest(
       tree,
       phase === 0 ? [first, loose, second] : phase === 1 ? [first, carry] : [result],
@@ -468,7 +468,7 @@ export function mountBinomialQueue(root: HTMLElement, _config: HeapVariantConfig
     )
     shell.setCounter(phase === 2 ? "1" : phase === 1 ? "2" : "3", phase === 2 ? " tree" : " roots")
     shell.status.textContent =
-      message || "Meld the 3-value forest with the singleton; equal orders link and carry right."
+      message || "Meld the 3-value forest with the singleton. Equal orders link and carry right."
     meld.textContent = phase === 0 ? "Meld" : phase === 1 ? "Continue carry" : "Melded"
     meld.disabled = phase === 2
   }
@@ -477,7 +477,7 @@ export function mountBinomialQueue(root: HTMLElement, _config: HeapVariantConfig
     phase++
     paint(
       phase === 1
-        ? "B₀ + B₀ links into a B₁ carry; the next B₁ slot is already occupied."
+        ? "B₀ + B₀ links into a B₁ carry. The next B₁ slot is already occupied."
         : "B₁ + B₁ links again, carrying one B₂ tree into the empty order-2 slot.",
     )
   })
@@ -636,7 +636,7 @@ export function mountFibonacciHeap(root: HTMLElement, config: FibonacciHeapConfi
     shell.setCounter(String(count), count === 1 ? " value" : " values")
     shell.status.textContent =
       message ||
-      "This forest was built by public inserts; extract-min consolidates, decrease-key cuts."
+      "This forest was built by public inserts. Extract-min consolidates, decrease-key cuts."
     extract.disabled = roots.length === 0
     decrease.disabled = count === 0
   }
@@ -650,7 +650,7 @@ export function mountFibonacciHeap(root: HTMLElement, config: FibonacciHeapConfi
     }
     insertValue(value)
     insertInput.value = ""
-    paint(`Inserted ${value} as a new degree-0 root; no consolidation work is done yet.`)
+    paint(`Inserted ${value} as a new degree-0 root. No consolidation work is done yet.`)
   }
 
   function onExtract() {
@@ -670,7 +670,7 @@ export function mountFibonacciHeap(root: HTMLElement, config: FibonacciHeapConfi
       settled.add(minimum().id)
     }
     paint(
-      `Extracted minimum ${min.key}; promoted its children and consolidated equal degrees.${
+      `Extracted minimum ${min.key}. Promoted its children and consolidated equal degrees.${
         allNodes().some((node) => node.key === 41) && allNodes().some((node) => node.key === 52)
           ? " Next: decrease 41 to 5, then 52 to 4 to see a mark and cascading cut."
           : ""
@@ -704,11 +704,11 @@ export function mountFibonacciHeap(root: HTMLElement, config: FibonacciHeapConfi
     paint(
       `Decreased ${current} to ${next}${
         operationCuts > 1
-          ? `; the cut removed a second child, so marked parent ${parent?.key} cascaded to the root list`
+          ? `. The cut removed a second child, so marked parent ${parent?.key} cascaded to the root list`
           : cutOccurred && parent?.marked
-            ? `; the node was cut and parent ${parent.key} is now marked after its first child loss. Decrease 52 to 4 next to cascade`
+            ? `. The node was cut and parent ${parent.key} is now marked after its first child loss. Decrease 52 to 4 next to cascade`
             : cutOccurred
-              ? "; heap order broke, so the node was cut to the root list"
+              ? ". Heap order broke, so the node was cut to the root list"
               : ""
       }.`,
     )
@@ -821,13 +821,13 @@ function mountMergeHeap(root: HTMLElement, mode: "leftist" | "skew"): MountHandl
     "steptrace__heap-structure steptrace__heap-variant steptrace__merge-heap",
   )
   const treeLabel = el("div", "steptrace__rail-label")
-  treeLabel.textContent = "Two heaps · [2, 7, 10] + [3, 5, 8]"
+  setRailLabel(treeLabel, "Two heaps", "[2, 7, 10] + [3, 5, 8]")
   const tree = el("div", "steptrace__heap-structure-tree")
   const ruleLabel = el("div", "steptrace__heap-rule")
   ruleLabel.textContent =
     mode === "leftist"
-      ? "Conditional swap · keep npl(left) ≥ npl(right)"
-      : "Unconditional swap · every touched node"
+      ? "Conditional swap, keep npl(left) ≥ npl(right)"
+      : "Unconditional swap, every touched node"
   shell.stage.append(treeLabel, tree, ruleLabel)
   const merge = shell.button("Merge", true)
   const reset = shell.button("Reset")
@@ -869,10 +869,10 @@ function mountMergeHeap(root: HTMLElement, mode: "leftist" | "skew"): MountHandl
     result = mergeBinaryHeaps(cloneBinary(first), cloneBinary(second), mode, active, swapped)
     paint(
       mode === "leftist"
-        ? `Merged along the right spines; ${swapped.size} conditional child swap${
+        ? `Merged along the right spines. ${swapped.size} conditional child swap${
             swapped.size === 1 ? "" : "s"
           } restored the npl invariant.`
-        : `Merged along the right spines; all ${swapped.size} touched node${
+        : `Merged along the right spines. All ${swapped.size} touched node${
             swapped.size === 1 ? "" : "s"
           } swapped children unconditionally.`,
     )

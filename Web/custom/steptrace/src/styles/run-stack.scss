@@ -80,7 +80,7 @@
   min-block-size: 1.6rem;
   padding: var(--_space-1) var(--_space-2);
   border-inline-start: 3px solid var(--_neutral);
-  background: color-mix(in srgb, var(--_run-cell) 88%, var(--_surface));
+  background: var(--_run-cell);
   font-family: var(--_font-mono);
   font-variant-numeric: tabular-nums;
   transition:
@@ -188,7 +188,7 @@
   min-block-size: 1.8rem;
   padding: var(--_space-2) var(--_space-2);
   border-inline-start: 2px solid var(--_neutral);
-  background: color-mix(in srgb, var(--_run-cell) 86%, var(--_surface));
+  background: var(--_run-cell);
   color: var(--_muted);
   font: var(--_weight-strong) var(--_type-xs)/var(--_leading-readable) var(--_font-mono);
   font-variant-numeric: tabular-nums;

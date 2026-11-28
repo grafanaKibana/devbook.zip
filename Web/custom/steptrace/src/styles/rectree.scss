@@ -144,8 +144,8 @@
 
 .steptrace .steptrace__rtnode .steptrace__rtcirc {
   fill: var(--st-page, var(--_surface));
-  stroke: var(--_neutral);
-  stroke-width: 1.25;
+  stroke: var(--_chrome-border);
+  stroke-width: var(--_stroke-hair);
   transition:
     fill var(--_tween) ease,
     stroke var(--_tween) ease;

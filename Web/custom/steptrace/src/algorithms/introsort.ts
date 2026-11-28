@@ -110,7 +110,7 @@ export const introsort = {
           "deferred",
           depthUsed,
           "defer",
-          `Defer [${lo}, ${hi}] (${size} values) to the final insertion pass; cutoff is ${input.smallPartitionThreshold}.`,
+          `Defer [${lo}, ${hi}] (${size} values) to the final insertion pass. Cutoff is ${input.smallPartitionThreshold}.`,
         )
         return
       }
@@ -119,7 +119,7 @@ export const introsort = {
           "heap sort",
           depthUsed,
           "fallback",
-          `Depth limit ${input.depthLimit} reached on [${lo}, ${hi}]; heap-sort this range.`,
+          `Depth limit ${input.depthLimit} reached on [${lo}, ${hi}]. Heap-sort this range.`,
         )
         heapSortRange(lo, hi)
         return

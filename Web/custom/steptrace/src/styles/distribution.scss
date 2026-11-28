@@ -168,7 +168,7 @@
 }
 
 .steptrace__distribution-entry--key {
-  border-block-end: var(--_stroke-hair) solid var(--_hair);
+  border-block-end: var(--_stroke-hair) solid var(--_distribution-border);
   background: var(--_distribution-header);
 }
 
@@ -293,9 +293,9 @@
   min-width: 0;
   min-height: 0;
   padding: var(--_space-0) var(--_space-1);
-  border: var(--_stroke-hair) solid var(--_hair);
+  border: var(--_stroke-hair) solid var(--_chrome-border);
   border-radius: var(--_radius-xs);
-  background: var(--_surface);
+  background: var(--st-page, var(--_surface));
   color: var(--_text);
   /* steptrace-exception: distribution-token-fit | category=responsive | rationale=fits tokens across distribution lane widths | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
   font: var(--_weight-strong) clamp(var(--_type-xs), 1.45vw, var(--_type-sm)) /

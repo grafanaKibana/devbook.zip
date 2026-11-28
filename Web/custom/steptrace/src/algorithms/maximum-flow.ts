@@ -107,9 +107,9 @@ export const maximumFlow = {
     )
     recorder.add("DFS chooses s → a.", ["s", "a"], flow, 0)
     recorder.add("Continue through a → b.", ["s", "a", "b"], flow, 0)
-    recorder.add("Reach t through b → t; the bottleneck is 1.", ["s", "a", "b", "t"], flow, 0, 1)
+    recorder.add("Reach t through b → t. The bottleneck is 1.", ["s", "a", "b", "t"], flow, 0, 1)
     flow = { ...flow, "s|a": 1, "a|b": 1, "b|t": 1 }
-    recorder.add("Augment s → a → b → t by 1; total flow is 1.", ["s", "a", "b", "t"], flow, 1, 1)
+    recorder.add("Augment s → a → b → t by 1. Total flow is 1.", ["s", "a", "b", "t"], flow, 1, 1)
     recorder.add("The next search starts with the remaining edge s → b.", ["s", "b"], flow, 1)
     recorder.add(
       "Use residual edge b → a to retract the earlier a → b unit.",
@@ -118,7 +118,7 @@ export const maximumFlow = {
       1,
     )
     recorder.add(
-      "Continue through the free edge a → t; bottleneck is 1.",
+      "Continue through the free edge a → t. Bottleneck is 1.",
       ["s", "b", "a", "t"],
       flow,
       1,
@@ -132,6 +132,6 @@ export const maximumFlow = {
       2,
       1,
     )
-    recorder.add("No residual s → t path remains; the maximum flow is 2.", [], flow, 2)
+    recorder.add("No residual s → t path remains. The maximum flow is 2.", [], flow, 2)
   },
 } satisfies FamilyAlgorithmDefinition<"graph", Config, Recorder, GraphStateFrame>

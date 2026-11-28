@@ -27,8 +27,8 @@
   font-size: var(--_type-base);
   color: var(--_text);
   background: var(--st-page, var(--_surface));
-  border: var(--_stroke-hair) solid var(--_border);
-  border-radius: var(--_radius-md);
+  border: var(--_stroke-hair) solid var(--_chrome-border);
+  border-radius: var(--_chrome-radius);
   padding: var(--_space-2) var(--_space-4);
   cursor: pointer;
   min-height: var(--_target-size);
@@ -36,7 +36,7 @@
 }
 .steptrace__toolbar button:hover,
 .steptrace__toolbar select:hover {
-  border-color: var(--_accent);
+  border-color: var(--_chrome-border-hover);
 }
 .steptrace__toolbar button.steptrace__play {
   background: var(--_accent);

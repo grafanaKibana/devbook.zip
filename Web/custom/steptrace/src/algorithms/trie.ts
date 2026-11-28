@@ -34,7 +34,7 @@ export const trie = {
         prefix = next
       }
       if (operation === "insert") {
-        ops.markTerminal(key, `Mark "${key}" terminal; descendants do not change that marker.`)
+        ops.markTerminal(key, `Mark "${key}" terminal. Descendants do not change that marker.`)
       } else if (operation === "prefix") {
         ops.completePrefix(pathExists, `Prefix "${key}" tests path existence: ${pathExists}.`)
       } else {
@@ -42,7 +42,7 @@ export const trie = {
         ops.completeSearch(found, `Search "${key}" tests IsEnd after the path: ${found}.`)
       }
     }
-    ops.done("All trie operations complete; shared prefixes remain one persistent path.")
+    ops.done("All trie operations complete. Shared prefixes remain one persistent path.")
   },
 } satisfies FamilyAlgorithmDefinition<
   "string",

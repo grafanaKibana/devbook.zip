@@ -28,7 +28,7 @@ export const floydWarshall = {
       dist[row][column] = Math.min(dist[row][column], weight)
     }
 
-    ops.board(displayMatrix(dist), "Initialize direct-edge distances; missing edges are ∞.")
+    ops.board(displayMatrix(dist), "Initialize direct-edge distances. Missing edges are ∞.")
 
     for (let k = 0; k < input.nodes.length; k++) {
       const kNode = input.nodes[k]
@@ -58,7 +58,7 @@ export const floydWarshall = {
             Number.isFinite(dist[i][j]) ? dist[i][j] : null,
             improve
               ? `dist[${from}][${to}] improves through ${kNode}: ${currentLabel} → ${candidateLabel}.`
-              : `Keep dist[${from}][${to}] = ${currentLabel}; the route through ${kNode} costs ${candidateLabel}.`,
+              : `Keep dist[${from}][${to}] = ${currentLabel}. The route through ${kNode} costs ${candidateLabel}.`,
           )
         }
       }
@@ -68,7 +68,7 @@ export const floydWarshall = {
     if (negativeCycle.length) {
       ops.reportNegativeCycle(
         negativeCycle,
-        `Negative cycle detected through ${negativeCycle.join(", ")}; shortest distances are undefined.`,
+        `Negative cycle detected through ${negativeCycle.join(", ")}. Shortest distances are undefined.`,
       )
       ops.done("Stopped after reporting the negative cycle.")
       return

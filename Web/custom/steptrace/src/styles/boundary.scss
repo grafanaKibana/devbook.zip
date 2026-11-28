@@ -145,7 +145,7 @@
   padding: var(--_space-3);
   border: var(--_stroke-hair) solid var(--_boundary-border);
   border-radius: var(--_boundary-radius);
-  background: color-mix(in srgb, var(--_boundary-cell) 94%, var(--_text));
+  background: var(--_boundary-cell);
 }
 
 .steptrace .steptrace__boundary-lane[data-state="empty"] {
@@ -168,7 +168,7 @@
 
 .steptrace .steptrace__boundary-overflow-row {
   min-height: 1.9rem;
-  border-top: var(--_stroke-hair) solid color-mix(in srgb, var(--_boundary-border) 70%, transparent);
+  border-top: var(--_stroke-hair) solid var(--_boundary-border);
   padding-top: var(--_space-2);
 }
 

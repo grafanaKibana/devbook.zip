@@ -77,7 +77,7 @@
   inset-inline-start: calc(var(--_interval-start) / var(--_interval-columns) * 100%);
   inline-size: calc(var(--_interval-span) / var(--_interval-columns) * 100%);
   block-size: 1.2rem;
-  border: var(--_stroke-hair) solid var(--_border);
+  border: var(--_stroke-hair) solid var(--_chrome-border);
   border-radius: var(--_radius-sm);
   padding-inline: var(--_space-2);
   display: flex;
@@ -85,7 +85,7 @@
   justify-content: center;
   overflow: hidden;
   color: var(--_text);
-  background: color-mix(in srgb, var(--_neutral) 12%, var(--_surface));
+  background: var(--st-page, var(--_surface));
   font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
   white-space: nowrap;
   transform: translateY(-50%);

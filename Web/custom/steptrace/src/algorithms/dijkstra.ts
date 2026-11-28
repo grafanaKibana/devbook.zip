@@ -208,7 +208,7 @@ function run(config: Config, recorder: Recorder) {
     settled,
     [],
     false,
-    `Set dist[${config.start}] = 0; all other distances start at ∞.`,
+    `Set dist[${config.start}] = 0. All other distances start at ∞.`,
   )
 
   while (settled.size < config.nodes.length) {
@@ -226,7 +226,7 @@ function run(config: Config, recorder: Recorder) {
       settled,
       [],
       false,
-      `Settle ${current} at distance ${distances[current]}; its shortest distance is final.`,
+      `Settle ${current} at distance ${distances[current]}. Its shortest distance is final.`,
     )
     for (const edge of neighbours.get(current)!) {
       if (settled.has(edge.to)) continue
@@ -247,7 +247,7 @@ function run(config: Config, recorder: Recorder) {
         changed,
         changed
           ? `Relax ${current} → ${edge.to}: ${candidate} improves ${Number.isFinite(before) ? before : "∞"}.`
-          : `Keep dist[${edge.to}] = ${before}; ${candidate} is not shorter.`,
+          : `Keep dist[${edge.to}] = ${before}. ${candidate} is not shorter.`,
         before,
       )
     }
@@ -277,7 +277,7 @@ function run(config: Config, recorder: Recorder) {
     settled,
     selectedEdges,
     false,
-    `Path ${path.join(" → ")} · cost ${distances[config.target]}.`,
+    `Path ${path.join(" → ")}, cost ${distances[config.target]}.`,
   )
 }
 

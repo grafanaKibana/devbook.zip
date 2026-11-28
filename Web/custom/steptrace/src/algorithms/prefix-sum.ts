@@ -38,7 +38,7 @@ export const prefixSum = {
     input.array.forEach((value, index) => {
       ops.add(
         index,
-        `Read a[${index}] = ${value}; running total becomes ${input.array.slice(0, index + 1).reduce((sum, item) => sum + item, 0)}.`,
+        `Read a[${index}] = ${value}. Running total becomes ${input.array.slice(0, index + 1).reduce((sum, item) => sum + item, 0)}.`,
       )
       ops.write(index, `Write that total to prefix[${index + 1}].`)
     })

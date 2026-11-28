@@ -201,7 +201,7 @@ export function mountFenwickTree(root: HTMLElement, config: FenwickTreeConfig): 
     roles = new Map(path.map((slot) => [slot, "update"]))
     delta.value = ""
     paint(
-      `Added ${parsed} at value[${index}]; updated ${path
+      `Added ${parsed} at value[${index}]. Updated ${path
         .map((slot) => `BIT[${slot}]`)
         .join(" → ")}.`,
     )
@@ -412,7 +412,7 @@ export function mountSegmentTree(root: HTMLElement, config: SegmentTreeConfig): 
     activeIndex = index
     activeRange = null
     updateValue.value = ""
-    paint(`Set value[${index}] from ${before} to ${parsed}; recomputed its path to the root.`)
+    paint(`Set value[${index}] from ${before} to ${parsed}. Recomputed its path to the root.`)
   }
 
   function onQuery() {

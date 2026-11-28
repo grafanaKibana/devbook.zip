@@ -8,7 +8,7 @@ export const heapSort = {
   run: (input, ops) => {
     const n = ops.value.length
     ops.init(
-      `Heap sort — build a max-heap (parents ≥ children); move the root right and sift down.`,
+      `Heap sort — build a max-heap (parents ≥ children). Move the root right and sift down.`,
     )
     function siftDown(lo, hi) {
       let root = lo

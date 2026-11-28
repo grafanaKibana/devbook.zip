@@ -86,7 +86,7 @@ export function runAStar(config: GraphStateConfig, ops: GraphStateOperations) {
     },
   ]
   let order = 1
-  ops.init(g, visibleQueue(queue, closed), `Seed OPEN with ${config.start}; rank it by f = g + h.`)
+  ops.init(g, visibleQueue(queue, closed), `Seed OPEN with ${config.start}. Rank it by f = g + h.`)
 
   while (queue.length) {
     queue.sort(
@@ -117,7 +117,7 @@ export function runAStar(config: GraphStateConfig, ops: GraphStateOperations) {
         g,
         closed.size,
         dijkstraExpanded,
-        `Path cost ${g[config.target]}. A* expanded ${closed.size}; Dijkstra expanded ${dijkstraExpanded}.`,
+        `Path cost ${g[config.target]}. A* expanded ${closed.size}. Dijkstra expanded ${dijkstraExpanded}.`,
       )
       return
     }

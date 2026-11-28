@@ -47,7 +47,7 @@ export const bucketSort = {
   run(input, ops) {
     const buckets = Array.from({ length: input.bucketCount }, () => [] as number[])
     ops.intro(
-      `${input.bucketCount} equal-width ranges split [0, 1); scatter by value, sort locally, then gather left to right.`,
+      `${input.bucketCount} equal-width ranges split [0, 1). Scatter by value, sort locally, then gather left to right.`,
     )
     ops.beginPass(
       0,
@@ -61,7 +61,7 @@ export const bucketSort = {
       ops.scatter(
         sourceIndex,
         bucketIndex,
-        `${value.toFixed(2)} lies in ${input.bucketLabels[bucketIndex]}; append it to that bucket.`,
+        `${value.toFixed(2)} lies in ${input.bucketLabels[bucketIndex]}. Append it to that bucket.`,
       )
     })
 
@@ -69,7 +69,7 @@ export const bucketSort = {
       if (bucket.length < 2) return
       ops.beginLocalSort(
         bucketIndex,
-        `Sort ${input.bucketLabels[bucketIndex]} internally; other ranges do not need comparison.`,
+        `Sort ${input.bucketLabels[bucketIndex]} internally. Other ranges do not need comparison.`,
       )
       for (let right = 1; right < bucket.length; right++) {
         for (let cursor = right; cursor > 0; cursor--) {

@@ -97,11 +97,11 @@ export const coinChangeGreedy = storyAlgorithm(
     ops.chooseCoin(1, 1, [25, 1, 1, 1, 1], "Another 1¢ coin leaves 1¢.")
     ops.chooseCoin(1, 0, [25, 1, 1, 1, 1, 1], "The fifth 1¢ coin completes the change.")
     ops.coinAttempt(
-      { label: "greedy counter", value: "25¢ + 1¢ × 5 · 6 coins", state: "active" },
+      { label: "greedy counter", value: "25¢ + 1¢ × 5, 6 coins", state: "active" },
       "The greedy plan is exact, but it uses six coins.",
     )
     ops.coinAttempt(
-      { label: "better counter", value: "10¢ + 10¢ + 10¢ · 3 coins", state: "best" },
+      { label: "better counter", value: "10¢ + 10¢ + 10¢, 3 coins", state: "best" },
       "Three 10¢ coins prove that the largest-first plan is not optimal.",
     )
     ops.coinResult(
@@ -109,7 +109,7 @@ export const coinChangeGreedy = storyAlgorithm(
       [25, 1, 1, 1, 1, 1],
       "Greedy returns exact change, but uses twice as many coins as the optimum.",
     )
-    ops.done("Largest usable coin first gives 6 coins; the optimum uses 3.")
+    ops.done("Largest usable coin first gives 6 coins. The optimum uses 3.")
   },
 )
 
@@ -140,7 +140,7 @@ export const coinChangeNaive = storyAlgorithm(
     ops.chooseCoin(1, 1, [25, 1, 1, 1, 1], "Take the fourth 1¢ coin.")
     ops.chooseCoin(1, 0, [25, 1, 1, 1, 1, 1], "The fifth 1¢ coin completes this branch.")
     ops.coinAttempt(
-      { label: "25¢ branch", value: "25¢ + 1¢ × 5 · 6 coins", state: "dead" },
+      { label: "25¢ branch", value: "25¢ + 1¢ × 5, 6 coins", state: "dead" },
       "The first complete branch returns six coins.",
     )
     ops.backtrackCoins(30, [], "Backtrack once more and try the 10¢ branch.")
@@ -148,7 +148,7 @@ export const coinChangeNaive = storyAlgorithm(
     ops.chooseCoin(10, 10, [10, 10], "The second 10¢ coin leaves 10¢.")
     ops.chooseCoin(10, 0, [10, 10, 10], "The third 10¢ coin completes the payment.")
     ops.coinAttempt(
-      { label: "10¢ branch", value: "10¢ + 10¢ + 10¢ · 3 coins", state: "best" },
+      { label: "10¢ branch", value: "10¢ + 10¢ + 10¢, 3 coins", state: "best" },
       "Comparing completed branches finds the three-coin optimum.",
     )
     ops.coinResult(
@@ -462,7 +462,7 @@ export const gridPathGreedy = storyAlgorithm(
       "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
       "A route costing 10 proves the greedy route costing 21 is not optimal.",
     )
-    ops.done("Greedy pays 21; the best route pays 10.")
+    ops.done("Greedy pays 21. The best route pays 10.")
   },
 )
 
@@ -531,7 +531,7 @@ export const gridPathNaive = storyAlgorithm(
       ],
       11,
       [[1, 1]],
-      "R2C2 is reached again; its entire remaining-route search repeats.",
+      "R2C2 is reached again. Its entire remaining-route search repeats.",
     )
     ops.visitTile(
       [2, 0],
@@ -721,7 +721,7 @@ export const gridPathMemoization = storyAlgorithm(
       "R1C1 → R2C1 → R3C1 → R3C2 → R4C2 → R4C3 → R4C4",
       "The saved map reconstructs the cost-10 route.",
     )
-    ops.done("R2C2 is evaluated once; its saved answer stops the repeated branch.")
+    ops.done("R2C2 is evaluated once. Its saved answer stops the repeated branch.")
   },
 )
 
