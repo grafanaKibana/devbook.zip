@@ -24128,9 +24128,11 @@ function createMount(registry2, structures = []) {
     function syncEndpointOptions(settings, graph) {
       if (!endpointSection || !startMenu || !targetMenu || !startHead || !targetHead) return;
       const options = settings?.options || graph?.nodes?.map((node2) => ({ value: node2.id, label: node2.id }));
-      endpointSection.hidden = !options?.length;
-      menuWrap.hidden = endpointSection.hidden;
-      if (endpointSection.hidden) return;
+      if (!options?.length) {
+        endpointSection.hidden = true;
+        return;
+      }
+      endpointSection.hidden = false;
       startHead.textContent = settings?.startLabel || "Start node";
       startMenu.setAttribute("aria-label", startHead.textContent);
       targetHead.hidden = !settings;

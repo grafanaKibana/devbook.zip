@@ -9,7 +9,7 @@
 .steptrace__contiguous-array {
   display: grid;
   grid-template-columns: repeat(var(--steptrace-capacity, 6), minmax(0, 1fr));
-  border: var(--_stroke-hair) solid var(--_chrome-border);
+  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
 }
 
 .steptrace__contiguous-cell {
@@ -40,34 +40,10 @@
   --steptrace-array-outline: var(--_amber);
 }
 
-/* A view spans adjacent cells, so it frames the whole run once instead of
-   outlining each cell and doubling the stroke at every join. The run's end
-   reuses the cell divider as the first pixel of its stroke. */
 .steptrace__contiguous-cell[data-view="1"] {
-  --steptrace-view-start: var(--_stroke-emphasis);
-  --steptrace-view-end: var(--_stroke-hair);
+  --steptrace-array-outline: var(--_violet);
 
-  border-inline-end-color: var(--_violet);
   background: color-mix(in srgb, var(--_violet) 14%, transparent);
-  box-shadow:
-    inset 0 var(--_stroke-emphasis) var(--_violet),
-    inset 0 calc(-1 * var(--_stroke-emphasis)) var(--_violet),
-    inset var(--steptrace-view-start) 0 var(--_violet),
-    inset calc(-1 * var(--steptrace-view-end)) 0 var(--_violet);
-}
-
-.steptrace__contiguous-cell[data-view="1"]:last-child {
-  --steptrace-view-end: var(--_stroke-emphasis);
-}
-
-.steptrace__contiguous-cell[data-view="1"] + .steptrace__contiguous-cell[data-view="1"] {
-  --steptrace-view-start: 0px;
-}
-
-.steptrace__contiguous-cell[data-view="1"]:has(+ .steptrace__contiguous-cell[data-view="1"]) {
-  --steptrace-view-end: 0px;
-
-  border-inline-end-color: var(--_divider);
 }
 
 .steptrace__contiguous-value {

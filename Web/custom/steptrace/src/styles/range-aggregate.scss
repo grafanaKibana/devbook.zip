@@ -23,7 +23,7 @@
   align-items: center;
   min-width: 0;
   overflow: hidden;
-  border: var(--_stroke-hair) solid var(--_chrome-border);
+  border: var(--_stroke-hair) solid var(--_border);
   border-radius: var(--_radius-sm);
   background: color-mix(in srgb, var(--_surface) 88%, transparent);
   transition:
@@ -60,7 +60,7 @@
   display: grid;
   align-self: stretch;
   place-items: center;
-  border-block-start: var(--_stroke-hair) solid var(--_chrome-border);
+  border-block-start: var(--_stroke-hair) solid var(--_border);
   color: var(--_context-text);
   font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
 }

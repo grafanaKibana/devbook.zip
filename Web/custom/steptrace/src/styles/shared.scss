@@ -19,10 +19,6 @@
   --_text: var(--st-text, #{tokens.$text});
   --_muted: var(--st-muted, #{tokens.$muted});
   --_border: var(--st-border, #{tokens.$border});
-  /* Player and control chrome follows the host's own control borders. */
-  --_chrome-border: var(--st-chrome-border, var(--_border));
-  --_chrome-border-hover: var(--st-chrome-border-hover, var(--_muted));
-  --_chrome-radius: var(--st-chrome-radius, var(--_radius-md));
   --_divider: var(--st-divider, color-mix(in srgb, var(--_text) 13%, transparent));
   --_divider-faint: var(--st-divider-faint, color-mix(in srgb, var(--_text) 10%, transparent));
   --_accent: var(--st-accent, #{tokens.$green-light});
@@ -809,8 +805,8 @@
   gap: var(--_space-3) var(--_space-4);
   margin-top: var(--_space-5);
   padding: var(--_space-4);
-  border: var(--_stroke-hair) solid var(--_chrome-border);
-  border-radius: var(--_chrome-radius);
+  border: var(--_stroke-hair) solid var(--_border);
+  border-radius: var(--_radius-container);
   background: var(--st-page, #{tokens.$on-accent});
 }
 .steptrace__timeline {
@@ -979,15 +975,15 @@
   height: var(--_btn-size);
   flex: 0 0 var(--_btn-size);
   margin: var(--_space-2);
-  border: var(--_stroke-hair) solid var(--_chrome-border);
-  border-radius: var(--_chrome-radius);
+  border: 0;
+  border-radius: var(--_radius-pill);
   background: transparent;
   color: var(--_muted);
   cursor: pointer;
   padding: 0;
   box-shadow: none;
   transition:
-    border-color var(--_dur-quick) var(--_ease-decelerate),
+    background-color var(--_dur-quick) var(--_ease-decelerate),
     color var(--_dur-quick) var(--_ease-decelerate);
 }
 /* The margin keeps the 44px footprint; this restores it as the hit area. */
@@ -997,7 +993,7 @@
   content: "";
 }
 .steptrace__btn:hover {
-  border-color: var(--_chrome-border-hover);
+  background: var(--_hover);
   color: var(--_text);
 }
 .steptrace__btn--speed {
@@ -1024,7 +1020,7 @@
   height: var(--_target-size);
   flex-basis: var(--_target-size);
   margin: 0;
-  border-color: var(--_accent);
+  border-radius: var(--_radius-pill);
 }
 .steptrace__btn--play::before {
   display: none;
@@ -1032,7 +1028,6 @@
 /* The generic :hover above would swap the fill for a faint text wash while the
    glyph keeps --_on-accent, leaving it invisible against either theme's page. */
 .steptrace__btn--play:hover {
-  border-color: var(--_accent);
   background-color: var(--_accent);
   color: var(--_on-accent);
   filter: brightness(1.12);
@@ -1056,8 +1051,7 @@
   height: var(--_btn-size);
   margin: var(--_space-2);
   padding: 0;
-  border: var(--_stroke-hair) solid var(--_chrome-border);
-  border-radius: var(--_chrome-radius);
+  border-radius: var(--_radius-pill);
   color: var(--_muted);
 }
 .steptrace button.steptrace__btn--speed {
@@ -1068,13 +1062,12 @@
   height: auto;
   margin: 0;
 }
+.steptrace button.steptrace__btn:hover:not(:disabled),
 .steptrace button.steptrace__menu-item:hover {
   background-color: var(--_hover);
   box-shadow: none;
 }
 .steptrace button.steptrace__btn:hover:not(:disabled) {
-  border-color: var(--_chrome-border-hover);
-  box-shadow: none;
   color: var(--_text);
 }
 .steptrace button.steptrace__btn--play {
@@ -1083,7 +1076,6 @@
 }
 .steptrace button.steptrace__btn--play,
 .steptrace button.steptrace__btn--play:hover:not(:disabled) {
-  border-color: var(--_accent);
   background-color: var(--_accent);
   color: var(--_on-accent);
 }
@@ -1177,8 +1169,8 @@
   margin: 0;
   /* steptrace-exception: select-chevron-space | category=geometry | rationale=reserves fitted space for the background chevron | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
   padding: var(--_space-3) 1.8rem var(--_space-3) var(--_space-4);
-  border: var(--_stroke-hair) solid var(--_chrome-border);
-  border-radius: var(--_chrome-radius);
+  border: var(--_stroke-hair) solid var(--_border);
+  border-radius: var(--_radius-sm);
   font: var(--_weight-strong) var(--_type-base) var(--_font-body);
   color: var(--_text);
   background-color: transparent;
@@ -1187,9 +1179,6 @@
   background-position: right 8px center;
   background-size: 10px;
   cursor: pointer;
-}
-.steptrace__select:hover {
-  border-color: var(--_chrome-border-hover);
 }
 .steptrace__select:focus-visible {
   outline: var(--_focus-ring);
@@ -1248,8 +1237,8 @@
   min-block-size: var(--_target-size);
   margin: 0;
   padding: var(--_space-3) var(--_space-4);
-  border: var(--_stroke-hair) solid var(--_chrome-border);
-  border-radius: var(--_chrome-radius);
+  border: var(--_stroke-hair) solid var(--_border);
+  border-radius: var(--_radius-xs);
   background-color: var(--st-page, var(--_surface));
   color: var(--_text);
   font: var(--_weight-strong) var(--_type-base) / var(--_leading-readable) var(--_font-body);
@@ -1261,7 +1250,8 @@
     color var(--_dur-quick) var(--_ease-decelerate);
 }
 .steptrace--narrow .steptrace__detail-button:hover {
-  border-color: var(--_chrome-border-hover);
+  border-color: var(--_muted);
+  background-color: var(--_surface);
 }
 .steptrace--narrow .steptrace__detail-button[aria-pressed="true"] {
   border-color: var(--_accent);

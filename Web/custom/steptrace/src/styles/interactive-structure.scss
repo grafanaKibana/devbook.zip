@@ -10,7 +10,7 @@
 
 .steptrace__structure-controls {
   --steptrace-structure-control-size: var(--_target-size);
-  --steptrace-structure-control-radius: var(--_chrome-radius);
+  --steptrace-structure-control-radius: var(--_radius-sm);
   --steptrace-structure-control-gap: var(--_space-3);
   display: flex;
   flex-wrap: wrap;
@@ -24,7 +24,7 @@
 .steptrace .steptrace__structure-controls .steptrace__select {
   min-width: 0;
   min-height: var(--steptrace-structure-control-size);
-  border: var(--_stroke-hair) solid var(--_chrome-border);
+  border: var(--_stroke-hair) solid var(--_border);
   border-radius: var(--steptrace-structure-control-radius);
   box-shadow: none;
   font: var(--_weight-strong) var(--_type-base) / var(--_leading-solid) var(--_font-body);
@@ -51,19 +51,17 @@
   cursor: pointer;
 }
 
-.steptrace__structure-input:hover:not(:disabled),
 .steptrace__structure-action:hover:not(:disabled) {
-  border-color: var(--_chrome-border-hover);
+  background: var(--_hover);
 }
 
-.steptrace .steptrace__structure-controls .steptrace__structure-action--primary {
+.steptrace__structure-action--primary {
   border-color: var(--_accent);
   background: var(--_accent);
   color: var(--_on-accent);
 }
 
-.steptrace .steptrace__structure-controls .steptrace__structure-action--primary:hover:not(:disabled) {
-  border-color: var(--_accent);
+.steptrace__structure-action--primary:hover:not(:disabled) {
   background: var(--_accent);
   filter: brightness(1.12);
 }

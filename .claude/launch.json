@@ -4,13 +4,13 @@
     {
       "name": "Web: Instance 1",
       "runtimeExecutable": "sh",
-      "runtimeArgs": ["-c", "cd Web && npm run serve -- --port 8080 --wsPort 3001"],
+      "runtimeArgs": ["-c", "cd Web && npx quartz build --serve --port 8080"],
       "port": 8080
     },
     {
       "name": "Web: Instance 2",
       "runtimeExecutable": "sh",
-      "runtimeArgs": ["-c", "cd Web && npm run serve -- --port 8081 --wsPort 3002"],
+      "runtimeArgs": ["-c", "cd Web && npx quartz build --serve --port 8081 --wsPort 3002"],
       "port": 8081
     }
   ]

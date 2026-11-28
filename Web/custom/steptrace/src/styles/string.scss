@@ -11,7 +11,7 @@
   --_string-radius: var(--_radius-container);
   display: flex;
   width: 100%;
-  border: var(--_stroke-hair) solid var(--_chrome-border);
+  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
   border-radius: var(--_string-radius);
   overflow: hidden;
 }

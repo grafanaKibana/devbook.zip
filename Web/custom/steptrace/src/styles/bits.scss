@@ -85,7 +85,7 @@
   flex: 1 1 0;
   min-width: 0;
   height: 44px;
-  border: var(--_stroke-hair) solid var(--_chrome-border);
+  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
   border-radius: var(--_radius-container);
   overflow: hidden; /* clip cell tints flush to the rounded frame */
 }

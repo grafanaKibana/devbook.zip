@@ -14,7 +14,7 @@
   align-items: center;
   gap: var(--_space-4);
   padding: var(--_space-3) var(--_space-4);
-  border: var(--_stroke-hair) solid var(--_chrome-border);
+  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 14%, transparent);
   border-radius: var(--_radius-md);
   background: color-mix(in srgb, var(--_surface) 78%, transparent);
 }
@@ -204,7 +204,7 @@
   min-width: 0;
   align-self: end;
   overflow: hidden;
-  border: var(--_stroke-hair) solid var(--_chrome-border);
+  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
   border-radius: var(--_radius-container);
 }
 
