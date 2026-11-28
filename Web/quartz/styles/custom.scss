@@ -930,6 +930,15 @@ pre:hover > button.clipboard-button {
   margin-block-start: calc((var(--nav-line-height) - 15px) / 2);
 }
 
+.explorer .explorer-content .folder-container > .folder-icon > svg {
+  display: block;
+}
+
+// A folder's guide line runs through the centre of its chevron.
+.explorer .explorer-content .folder-outer > ul {
+  margin-left: calc(0.35rem + 7px);
+}
+
 // The row owns the state. Labels, topic glyphs and ToC markers consume it.
 .explorer .explorer-content :is(.nav-file-title, .folder-container),
 .toc ul.toc-content > li > a,

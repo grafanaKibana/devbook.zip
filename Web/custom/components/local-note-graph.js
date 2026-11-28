@@ -52,7 +52,10 @@ function draw(container, content, cfg) {
   const current = simplifySlug(document.body.dataset.slug)
   const { nodes, links } = neighborhood(content, current, cfg.depth)
   const center = nodes[0]
-  center.fx = center.fy = 0
+  // The note's folder note anchors the layout when it is in the neighborhood.
+  const folderId = current.replace(/[^/]*$/, "") || "/"
+  const anchor = nodes.find((n) => n.id === folderId) ?? center
+  anchor.fx = anchor.fy = 0
   for (const n of nodes) n.r = 2 + Math.sqrt(n.degree)
   d3.forceSimulation(nodes)
     .force("charge", d3.forceManyBody().strength(-100 * cfg.repelForce))
@@ -96,6 +99,8 @@ function draw(container, content, cfg) {
   drawing
     .append("circle")
     .attr("class", "current")
+    .attr("cx", center.x)
+    .attr("cy", center.y)
     .attr("r", center.r + 2.5)
 
   // Clip enlarged click targets to the nearest node's cell where targets overlap.
@@ -169,31 +174,49 @@ function draw(container, content, cfg) {
   window.addCleanup?.(() => resize.disconnect())
 }
 
-// The graph plugin loads D3 only when it draws its own graph, and this panel
-// replaces its local graph. Load the same pinned build so the plugin reuses it.
-const D3_SRC = "https://cdn.jsdelivr.net/npm/d3@7.9.2/dist/d3.min.js"
-const D3_INTEGRITY = "sha384-LxfWGZyh6PaLjBRPf7NWiEYs9Mn0UQ6ZmqbLLZhxlOBBNWF2a2K0Pfc5efkrNnhQ"
-let d3Loaded
+// The graph plugin loads D3 and PixiJS only when it draws its own graph. This
+// panel replaces its local graph, and a cold PixiJS slows the first opening of
+// the global graph, so both load here from the plugin's pinned builds.
+const D3_BUILD = {
+  global: "d3",
+  src: "https://cdn.jsdelivr.net/npm/d3@7.9.2/dist/d3.min.js",
+  integrity: "sha384-LxfWGZyh6PaLjBRPf7NWiEYs9Mn0UQ6ZmqbLLZhxlOBBNWF2a2K0Pfc5efkrNnhQ",
+}
+export const PIXI_BUILD = {
+  global: "PIXI",
+  src: "https://cdn.jsdelivr.net/npm/pixi.js@8.23.0/dist/pixi.min.js",
+  integrity: "sha384-IGfYrdVH+mWT/lAfomOiw9gRIY0pOGCN3enQE3TBB6FWluTVVh4hlXDzNotZYUcv",
+}
+const loading = new Map()
 
-function loadD3() {
-  if (window.d3) return Promise.resolve()
-  d3Loaded ??= new Promise((resolve, reject) => {
-    const existing = document.querySelector(`script[src="${D3_SRC}"]`)
-    const script = existing ?? document.createElement("script")
-    script.addEventListener("load", () => resolve())
-    // The plugin treats any matching tag as loaded, so a failed one must go.
-    script.addEventListener("error", () => {
-      script.remove()
-      d3Loaded = undefined
-      reject()
-    })
-    if (existing) return
-    script.src = D3_SRC
-    script.integrity = D3_INTEGRITY
-    script.crossOrigin = "anonymous"
-    document.head.append(script)
-  })
-  return d3Loaded
+// The plugin treats any tag with its URL as already loaded. A tag carries the
+// exact URL only once it has loaded, and a failed tag is removed.
+export function loadLibrary({ global, src, integrity }) {
+  if (window[global]) return Promise.resolve()
+  if (!loading.has(src)) {
+    loading.set(
+      src,
+      new Promise((resolve, reject) => {
+        const existing = document.querySelector(`script[src="${src}"]`)
+        const script = existing ?? document.createElement("script")
+        script.addEventListener("load", () => {
+          script.setAttribute("src", src)
+          resolve()
+        })
+        script.addEventListener("error", () => {
+          script.remove()
+          loading.delete(src)
+          reject()
+        })
+        if (existing) return
+        script.src = src + "#pending"
+        script.integrity = integrity
+        script.crossOrigin = "anonymous"
+        document.head.append(script)
+      }),
+    )
+  }
+  return loading.get(src)
 }
 
 // Claim the small panel before Quartz starts its Pixi renderer. The plugin
@@ -208,7 +231,7 @@ function setup() {
   claim()
   for (const el of document.querySelectorAll(".local-note-graph:not([data-initialized])")) {
     el.dataset.initialized = ""
-    Promise.all([loadD3(), fetchData])
+    Promise.all([loadLibrary(D3_BUILD), fetchData])
       .then(([, content]) => {
         if (el.isConnected) draw(el, content, JSON.parse(el.dataset.cfg))
       })

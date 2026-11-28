@@ -1,4 +1,4 @@
-import "./local-note-graph.js"
+import { PIXI_BUILD, loadLibrary } from "./local-note-graph.js"
 import { graphNodeHitRadius } from "./graph-node-hit-radius.js"
 import { resolveBasePath, simplifySlug } from "@quartz-community/utils"
 
@@ -68,26 +68,36 @@ document.addEventListener(
 
 // Pixi's application extension runs for each new graph, including theme changes.
 // The graph plugin populates the scene synchronously after creating its simulation.
+let extended
 function installGraphPicking() {
   const pixi = window.PIXI
-  if (!pixi) return
-  document.removeEventListener("load", installGraphPicking, true)
+  if (!pixi || pixi === extended) return
+  extended = pixi
   pixi.extensions.add({
     extension: pixi.ExtensionType.Application,
     init() {
       this.stage.once("childAdded", () => {
         const container = this.canvas.parentElement
         if (!container?.matches(".global-graph-container")) return
-        // Quartz constructs its D3 simulation synchronously after attaching this
-        // scene. Capture that instance so dragging moves the underlying layout.
+        // Quartz constructs its D3 simulation and then its zoom synchronously after
+        // attaching this scene. Capture both so dragging moves the underlying layout
+        // and the opening view can frame it.
         const d3 = window.d3
         const create = d3.forceSimulation
+        const createZoom = d3.zoom
+        let zoom
+        const captureZoom = (...args) => {
+          d3.zoom = createZoom
+          zoom = createZoom(...args)
+          return zoom
+        }
         const capture = (...args) => {
           d3.forceSimulation = create
+          d3.zoom = captureZoom
           const simulation = create(...args)
           fetchData.then((content) => {
             if (container.isConnected && this.stage && !this.stage.destroyed) {
-              enhancePicking(this, container, content, simulation)
+              enhancePicking(this, container, content, simulation, zoom)
             }
           })
           return simulation
@@ -95,6 +105,7 @@ function installGraphPicking() {
         d3.forceSimulation = capture
         queueMicrotask(() => {
           if (d3.forceSimulation === capture) d3.forceSimulation = create
+          if (d3.zoom === captureZoom) d3.zoom = createZoom
         })
       })
     },
@@ -104,6 +115,39 @@ function installGraphPicking() {
 
 document.addEventListener("load", installGraphPicking, true)
 installGraphPicking()
+
+// Warm PixiJS once while idle wherever the graph panel is displayed, so opening
+// the global graph does not wait for its download and parse.
+let warmed
+function warmPixi() {
+  if (warmed || !document.querySelector(".graph")?.getClientRects().length) return
+  warmed = true
+  const load = () =>
+    loadLibrary(PIXI_BUILD)
+      .then(warmRenderer)
+      .catch(() => {
+        warmed = false
+      })
+  if (window.requestIdleCallback) window.requestIdleCallback(load, { timeout: 3000 })
+  else setTimeout(load, 1000)
+}
+
+// One throwaway frame compiles the renderer's code and shaders ahead of the
+// first real graph, which otherwise opens twice as slowly as later ones.
+async function warmRenderer() {
+  const pixi = window.PIXI
+  const app = new pixi.Application()
+  await app.init({ width: 16, height: 16, antialias: true, backgroundAlpha: 0, autoStart: false })
+  // As the plugin does: no animation-frame loop while nothing is drawn.
+  pixi.Ticker.system.autoStart = false
+  pixi.Ticker.system.stop()
+  const node = new pixi.Graphics().circle(0, 0, 4).fill("#000").circle(0, 0, 3).stroke("#fff")
+  const link = new pixi.Graphics().moveTo(0, 0).lineTo(8, 8).stroke({ width: 1, color: "#fff" })
+  app.stage.addChild(link, node)
+  app.render()
+  app.destroy(true)
+}
+document.addEventListener("nav", warmPixi)
 
 // Pixi cannot parse every computed CSS colour. Painting one pixel yields sRGB.
 function cssColor(container, className) {
@@ -126,7 +170,30 @@ function cssColor(container, className) {
   }
 }
 
-function enhancePicking(app, container, content, simulation) {
+// The zoom transform that frames the whole layout. It never zooms in past 1×:
+// above that the plugin builds every label at once, which stalls the opening.
+function fitTransform(app, simulation, zoom) {
+  const d3 = window.d3
+  const { width, height } = app.screen
+  const models = simulation.nodes()
+  const [x0, x1] = d3.extent(models, (n) => n.x)
+  const [y0, y1] = d3.extent(models, (n) => n.y)
+  const [minScale] = zoom.scaleExtent()
+  const pad = 24
+  const fit = Math.min((width - 2 * pad) / (x1 - x0 || 1), (height - 2 * pad) / (y1 - y0 || 1))
+  const scale = Math.max(minScale, Math.min(1, fit))
+  // The plugin draws node positions offset by half the canvas.
+  const midX = (x0 + x1) / 2 + width / 2
+  const midY = (y0 + y1) / 2 + height / 2
+  return d3.zoomIdentity.translate(width / 2 - scale * midX, height / 2 - scale * midY).scale(scale)
+}
+
+// Quartz uses trailing slashes for folder indexes and "/" for Home.
+function contentSlug(id) {
+  return id.replace(/\/$/, "/index").replace(/^\//, "")
+}
+
+function enhancePicking(app, container, content, simulation, zoom) {
   const graph = app.stage.children[0]
   const links = simulation.force("link").links()
   const current = simplifySlug(document.body.dataset.slug)
@@ -171,9 +238,65 @@ function enhancePicking(app, container, content, simulation) {
     neighbors.get(source.id).add(target.id)
     neighbors.get(target.id).add(source.id)
   }
-  const maxDegree = Math.max(1, ...Array.from(neighbors.values(), (set) => set.size))
-  // First labels fade in above 1×; even isolated notes finish fading at 4×.
-  const revealAt = (node) => 3.25 - (2.25 * neighbors.get(node.label).size) / maxDegree
+  // Rank notes by connections. The best-connected 5% are labelled in the opening
+  // view; the rest fade in as the view zooms to 3.5× its opening scale.
+  const degrees = Array.from(neighbors.values(), (set) => set.size).sort((a, b) => a - b)
+  const rank = (node) =>
+    window.d3.bisectLeft(degrees, neighbors.get(node.label).size) / Math.max(1, degrees.length - 1)
+  const revealAt = (node) => 0.75 + (2.5 * Math.max(0, 0.95 - rank(node))) / 0.95
+
+  // The view keeps the settling layout framed until the reader zooms, pans or drags.
+  let openingScale = graph.scale.x
+  let following = !!zoom
+  function follow() {
+    if (!following) return
+    const transform = fitTransform(app, simulation, zoom)
+    openingScale = transform.k
+    window.d3.select(app.canvas).call(zoom.transform, transform)
+  }
+  if (zoom) {
+    zoom.on("start.fit", (event) => {
+      if (event.sourceEvent) following = false
+    })
+    simulation.on("tick.fit", follow).on("end.fit", () => {
+      following = false
+    })
+    follow()
+  }
+
+  // The plugin creates labels only above 1× zoom, all at once. At or below 1×,
+  // hub labels are HTML over the canvas, which stays crisp without building
+  // textures. Above 1× the plugin's own labels take over.
+  const cfg = JSON.parse(container.dataset.cfg || "{}")
+  const textColor = cssColor(container, "graph-view color-text")
+  const overlay = document.createElement("div")
+  overlay.className = "graph-hub-labels"
+  overlay.style.color = textColor.color
+  overlay.style.opacity = String(textColor.alpha)
+  overlay.style.fontSize = `${(cfg.fontSize || 0.6) * 15}px`
+  container.append(overlay)
+  const hubs = new Map(
+    nodes
+      .filter(({ node }) => rank(node) >= 0.95)
+      .map(({ node }) => {
+        const label = document.createElement("span")
+        label.textContent = content[contentSlug(node.label)]?.title ?? node.label
+        overlay.append(label)
+        return [node, label]
+      }),
+  )
+  const point = new window.PIXI.Point()
+  function updateHubLabels() {
+    const shown = graph.scale.x <= 1
+    for (const [node, label] of hubs) {
+      const visible = shown && node !== highlighted
+      label.hidden = !visible
+      if (!visible) continue
+      graph.toGlobal(node.position, point)
+      label.style.transform = `translate(${point.x}px, ${point.y}px) translate(-50%, -120%)`
+    }
+  }
+
   const labelNodes = new Map()
   function labelNode(label) {
     if (!labelNodes.has(label)) {
@@ -187,8 +310,10 @@ function enhancePicking(app, container, content, simulation) {
       if (!label.visible) continue
       const node = labelNode(label)
       if (!node || node === highlighted) continue
-      label.alpha = Math.max(0, Math.min(1, (graph.scale.x - revealAt(node)) / 0.75))
+      const zoomed = graph.scale.x / openingScale
+      label.alpha = Math.max(0, Math.min(1, (zoomed - revealAt(node)) / 0.25))
     }
+    updateHubLabels()
   }
   // At rest only links to the current note keep full strength. Hover dims the rest itself.
   function drawIdleLinks() {
@@ -224,17 +349,32 @@ function enhancePicking(app, container, content, simulation) {
     highlighted?.emit("graph-highlight")
   }
 
+  // Notes with the same size and colours share one drawing, so the first frame
+  // tessellates each look once instead of once per note.
+  const drawings = new Map()
+  function drawing(radius, color, fill) {
+    const key = `${radius}|${color}|${fill}`
+    if (!drawings.has(key)) {
+      const width = 1.5
+      drawings.set(
+        key,
+        new window.PIXI.GraphicsContext()
+          .circle(0, 0, radius)
+          .fill(fill)
+          .circle(0, 0, radius - width / 2)
+          .stroke({ color, width }),
+      )
+    }
+    return drawings.get(key)
+  }
+
   for (const { node, radius } of nodes) {
     if (!node.label.startsWith("tags/")) {
       const topic = node.label.split("/", 1)[0]
       const color = topicColors[topic + "/index"] ?? topicColors[topic] ?? neutral
-      // Quartz uses trailing slashes for folder indexes and "/" for Home.
-      const slug = node.label.replace(/\/$/, "/index").replace(/^\//, "")
-      const folder = content[slug]?.tags?.includes("foldernote")
+      const folder = content[contentSlug(node.label)]?.tags?.includes("foldernote")
       const fill = folder ? window.d3.interpolateRgb(background, color)(0.5) : background
-      const width = 1.5
-      node.clear().circle(0, 0, radius).fill(fill)
-      node.circle(0, 0, radius - width / 2).stroke({ color, width })
+      node.context = drawing(radius, color, fill)
     }
     node.hitArea = {
       contains(x, y) {
@@ -270,6 +410,7 @@ function enhancePicking(app, container, content, simulation) {
     (x, y, pointerType) => (pointerType === "mouse" && hovered) || pick(x, y),
     (node) => {
       grabbed = node
+      following = false
       updateHighlight()
     },
     (x, y, pointerType) => {

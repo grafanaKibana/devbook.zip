@@ -115,3 +115,19 @@ dialog.graph-dialog {
     display: none;
   }
 }
+
+.graph-hub-labels {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  font-family: var(--bodyFont);
+  line-height: 1;
+
+  span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+  }
+}
