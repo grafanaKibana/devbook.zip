@@ -810,7 +810,7 @@ function mountHashTable(
         chainBucket: lookup.home,
         chainTarget: { bucket: lookup.home, index: CHAIN_CAPACITY - 1 },
         chainPath: Array.from({ length: CHAIN_CAPACITY }, (_, index) => index),
-        message: `Bucket ${lookup.home} chain is full (${CHAIN_CAPACITY}); key ${key} was not added.`,
+        message: `Bucket ${lookup.home} chain is full (${CHAIN_CAPACITY}). Key ${key} was not added.`,
       }
     }
 
@@ -828,7 +828,7 @@ function mountHashTable(
       message:
         index === 0
           ? `Put ${key}:${value} in bucket ${lookup.home}'s first chain node.`
-          : `Collision at bucket ${lookup.home}; appended chain node ${index}.`,
+          : `Collision at bucket ${lookup.home}. Appended chain node ${index}.`,
       commit: () => {
         chain.push({ key, value, home: lookup.home, next: null })
       },
@@ -900,7 +900,7 @@ function mountHashTable(
         calculation: calculationFor(key),
         path: probe.path,
         target: probe.found,
-        message: `Add ${key} rejected; the key already exists in cell ${probe.found}.`,
+        message: `Add ${key} rejected. The key already exists in cell ${probe.found}.`,
       }
     }
     const target = probe.insert
@@ -929,8 +929,8 @@ function mountHashTable(
                   ? `Added key ${key} in home cell ${target}.`
                   : `Put ${key}:${value} in home cell ${target}.`
                 : content === "set"
-                  ? `Collision at ${probe.home}; linear probe added key ${key} in cell ${target}.`
-                  : `Collision at ${probe.home}; linear probe placed ${key}:${value} in cell ${target}.`,
+                  ? `Collision at ${probe.home}. Linear probe added key ${key} in cell ${target}.`
+                  : `Collision at ${probe.home}. Linear probe placed ${key}:${value} in cell ${target}.`,
       commit:
         target == null
           ? undefined
@@ -954,9 +954,9 @@ function mountHashTable(
       target,
       message: entry
         ? removeEntry
-          ? `Removed key ${key}; cell ${probe.found} is now a tombstone.`
+          ? `Removed key ${key}. Cell ${probe.found} is now a tombstone.`
           : content === "set"
-            ? `Contains ${key}: true; found in cell ${probe.found}.`
+            ? `Contains ${key}: true. Found in cell ${probe.found}.`
             : `Search ${key} found ${entry.value} in cell ${probe.found}.`
         : `${removeEntry ? "Remove" : content === "set" ? "Contains" : "Search"} ${key}${
             content === "set" && !removeEntry ? ": false;" : ""
@@ -1003,7 +1003,7 @@ function mountHashTable(
             ? `Updated key ${key} in bucket ${targetBucket}, cell ${target}.`
             : targetBucket === traversal.bucket
               ? `Put ${key}:${value} in bucket ${targetBucket}, cell ${target}.`
-              : `Bucket ${traversal.bucket} was full; overflow placed ${key}:${value} in bucket ${targetBucket}, cell ${target}.`,
+              : `Bucket ${traversal.bucket} was full. Overflow placed ${key}:${value} in bucket ${targetBucket}, cell ${target}.`,
       commit:
         target == null
           ? undefined
@@ -1053,10 +1053,10 @@ function mountHashTable(
     const [first, second] = MAP_SEED
     const count = `Seeded ${MAP_SEED.length} entries`
     if (config.strategy === "closed-addressing")
-      return `${count}; keys ${first.key} and ${second.key} collide in bucket ${indexFor(first.key, SIZE)}'s chain.`
+      return `${count}. Keys ${first.key} and ${second.key} collide in bucket ${indexFor(first.key, SIZE)}'s chain.`
     if (config.strategy === "open-addressing")
-      return `${count}; ${second.key} collided with ${first.key} at cell ${indexFor(second.key, SIZE)} and probed to cell ${slots.findIndex((entry) => entry?.key === second.key)}.`
-    return `${count}; keys ${first.key} and ${second.key} share bucket ${indexFor(first.key, SIZE / BUCKET_SIZE)}.`
+      return `${count}. ${second.key} collided with ${first.key} at cell ${indexFor(second.key, SIZE)} and probed to cell ${slots.findIndex((entry) => entry?.key === second.key)}.`
+    return `${count}. Keys ${first.key} and ${second.key} share bucket ${indexFor(first.key, SIZE / BUCKET_SIZE)}.`
   }
 
   function onPut() {
@@ -1242,14 +1242,14 @@ export function mountBloomFilter(root: HTMLElement, _config: BloomFilterConfig):
       const completeStep = () => {
         if (destroyed) return
         if (kind === "query" && !bits[index]) {
-          finish("definitely-absent", `Query ${value}: definitely absent; bit ${index} is 0.`)
+          finish("definitely-absent", `Query ${value}: definitely absent. Bit ${index} is 0.`)
           return
         }
         step++
         if (step < positions.length) advance()
         else if (kind === "add")
-          finish("added", `Added ${value}; bits ${positions.join(", ")} are 1.`)
-        else finish("possibly-present", `Query ${value}: possibly present; all three bits are 1.`)
+          finish("added", `Added ${value}. Bits ${positions.join(", ")} are 1.`)
+        else finish("possibly-present", `Query ${value}: possibly present. All three bits are 1.`)
       }
 
       if (shell.reducedMotion()) completeStep()

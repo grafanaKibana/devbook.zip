@@ -16,7 +16,7 @@
   padding: var(--_space-3) var(--_space-4);
   border: var(--_stroke-hair) solid var(--_chrome-border);
   border-radius: var(--_radius-md);
-  background: color-mix(in srgb, var(--_surface) 78%, transparent);
+  background: var(--st-page, var(--_surface));
 }
 
 .steptrace__hash-token,

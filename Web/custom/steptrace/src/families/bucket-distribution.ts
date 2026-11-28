@@ -359,7 +359,7 @@ export function makeBucketDistributionView(frames: readonly BucketDistributionFr
   )
   const output = makeDistributionArrayBand(
     first.profile === "radix" ? "Gathered Pass" : "Sorted Array",
-    "Buckets are read left to right; order inside each bucket is retained.",
+    "Buckets are read left to right. Order inside each bucket is retained.",
     first.source.length,
     "steptrace__distribution-bars--output",
   )
@@ -429,7 +429,7 @@ export function makeBucketDistributionView(frames: readonly BucketDistributionFr
           : `output index ${outputIndex}, value ${token.value}`,
       )
     })
-    setStatus(status, frame.message, `· ${phaseLabel(frame)} · step ${index + 1}/${total}`)
+    setStatus(status, frame.message, `${phaseLabel(frame)}, step ${index + 1}/${total}`)
   }
 
   return {

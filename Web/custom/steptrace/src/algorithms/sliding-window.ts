@@ -18,7 +18,7 @@ export const slidingWindow = {
       if (duplicate != null && duplicate >= lo) {
         ops.step(
           { pointers: { lo, hi }, window: [lo, hi], bestRange, duplicateIndex: hi },
-          `Duplicate "${character}" enters at index ${hi}; move left past its previous index ${duplicate}.`,
+          `Duplicate "${character}" enters at index ${hi}. Move left past its previous index ${duplicate}.`,
         )
         lo = duplicate + 1
       }

@@ -32,6 +32,6 @@ export const oddEvenSort = {
       }
     }
     ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index))
-    ops.done(`A full odd/even pair made no swap; the array is sorted.`)
+    ops.done(`A full odd/even pair made no swap. The array is sorted.`)
   },
 } satisfies FamilyAlgorithmDefinition<"sort", ArraySortConfig, ArraySortRecorder, ArraySortFrame>

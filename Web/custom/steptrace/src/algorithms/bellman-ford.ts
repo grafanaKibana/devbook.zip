@@ -90,7 +90,7 @@ function parse(): Config {
 
 function run(config: Config, recorder: Recorder) {
   const distances: Record<string, number> = { "0": 0, "1": Infinity, "2": Infinity, "3": Infinity }
-  recorder.record(0, null, distances, false, "Set dist[0] = 0; all other distances start at ∞.")
+  recorder.record(0, null, distances, false, "Set dist[0] = 0. All other distances start at ∞.")
   for (let pass = 1; pass <= 3; pass++) {
     for (const [index, edge] of config.edges.entries()) {
       const before = distances[edge.to]
@@ -129,7 +129,7 @@ function run(config: Config, recorder: Recorder) {
     null,
     distances,
     changed,
-    "The confirming sweep changes nothing; no reachable negative cycle exists.",
+    "The confirming sweep changes nothing. No reachable negative cycle exists.",
   )
 }
 

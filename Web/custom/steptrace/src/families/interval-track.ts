@@ -204,11 +204,11 @@ function formatInterval(interval: [number, number] | null) {
 }
 
 function formatRelation(relation: IntervalRelation) {
-  if (relation === "contained") return "contained · keep end"
-  if (relation === "overlap") return "overlap · extend"
-  if (relation === "gap") return "gap · emit"
-  if (relation === "compatible") return "compatible · accept"
-  if (relation === "conflict") return "overlap · reject"
+  if (relation === "contained") return "contained, keep end"
+  if (relation === "overlap") return "overlap, extend"
+  if (relation === "gap") return "gap, emit"
+  if (relation === "compatible") return "compatible, accept"
+  if (relation === "conflict") return "overlap, reject"
   return "—"
 }
 
@@ -444,8 +444,8 @@ export function makeIntervalTrackView(
     summary(frame) {
       const output = frame.output.map((interval) => formatInterval(interval)).join(", ")
       return scheduling
-        ? `Accepted ${output} · ${frame.output.length} of ${frame.intervals.length} meetings.`
-        : `Merged ${output} · ${frame.intervals.length} intervals → ${frame.output.length} blocks.`
+        ? `Accepted ${output}, ${frame.output.length} of ${frame.intervals.length} meetings.`
+        : `Merged ${output}, ${frame.intervals.length} intervals → ${frame.output.length} blocks.`
     },
   }
 }

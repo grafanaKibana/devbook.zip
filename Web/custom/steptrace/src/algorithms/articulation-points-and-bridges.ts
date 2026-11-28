@@ -169,7 +169,7 @@ function run(_: Config, recorder: Recorder) {
     low,
     cuts,
     bridges,
-    "Propagate low[2] = 0 to vertex 1; the triangle remains connected.",
+    "Propagate low[2] = 0 to vertex 1. The triangle remains connected.",
   )
   low["0"] = Math.min(low["0"], low["1"])
   recorder.record(

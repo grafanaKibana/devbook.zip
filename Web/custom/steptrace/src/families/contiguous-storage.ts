@@ -267,7 +267,7 @@ export function mountCircularBuffer(root: HTMLElement, config: CircularBufferCon
     input.value = ""
     render(
       full
-        ? `Wrote ${value} at slot ${index}; overwrote oldest value ${overwritten} and advanced oldest.`
+        ? `Wrote ${value} at slot ${index}. Overwrote oldest value ${overwritten} and advanced oldest.`
         : `Wrote ${value} at slot ${index}.`,
     )
   }
@@ -489,7 +489,7 @@ export function mountDynamicArray(root: HTMLElement, config: DynamicArrayConfig)
   function onRemove() {
     if (!values.length) return
     const removed = values.pop()
-    render(`Removed last value ${removed}; capacity remains ${capacity}.`)
+    render(`Removed last value ${removed}. Capacity remains ${capacity}.`)
   }
 
   function onReset() {
@@ -543,7 +543,7 @@ export function mountSpan(root: HTMLElement, config: SpanConfig): MountHandle {
     )
     shell.setCounter(`[${start}..${start + length})`, " view")
     shell.status.textContent =
-      message || "The highlighted span aliases the same backing cells; writes are visible in both."
+      message || "The highlighted span aliases the same backing cells. Writes are visible in both."
   }
 
   function onSlice() {
@@ -560,7 +560,7 @@ export function mountSpan(root: HTMLElement, config: SpanConfig): MountHandle {
     }
     start = nextStart
     length = nextLength
-    render(`Created span view backing[${start}..${start + length}); no values were copied.`)
+    render(`Created span view backing[${start}..${start + length}). No values were copied.`)
   }
 
   function onWrite() {

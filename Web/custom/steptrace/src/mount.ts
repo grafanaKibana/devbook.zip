@@ -36,10 +36,30 @@ const LOG_ROWS = 10
 const SPEEDS = [0.5, 1, 1.5, 2]
 const COMPACT_INLINE_SIZE = 704
 const fadeFor = (age: number) => Math.max(0.1, 0.5 * Math.pow(0.62, age - 1))
-const WATCH_ENTRY_SEPARATOR = " · "
+const WATCH_ENTRY_SEPARATOR = ", "
 let mountSerial = 0
 
-// Multi-entry values ("A:0 · B:4 · C:∞") may wrap only between entries, never
+// Entries split only at top level, so a bracketed list such as "[1, 2]" stays
+// one entry.
+function splitWatchEntries(text: string) {
+  const entries: string[] = []
+  let depth = 0
+  let start = 0
+  for (let index = 0; index < text.length; index++) {
+    const char = text[index]
+    if (char === "[" || char === "(" || char === "{") depth++
+    else if (char === "]" || char === ")" || char === "}") depth = Math.max(0, depth - 1)
+    else if (depth === 0 && text.startsWith(WATCH_ENTRY_SEPARATOR, index)) {
+      entries.push(text.slice(start, index))
+      start = index + WATCH_ENTRY_SEPARATOR.length
+      index = start - 1
+    }
+  }
+  entries.push(text.slice(start))
+  return entries
+}
+
+// Multi-entry values ("A:0, B:4, C:∞") may wrap only between entries, never
 // inside one such as "6-42:∞", whose hyphen is otherwise a break opportunity.
 function watchRowParts(row: WatchRow) {
   const parts: HTMLElement[] = []
@@ -51,7 +71,7 @@ function watchRowParts(row: WatchRow) {
   const key = el("span", "steptrace__watch-k")
   key.textContent = row.k
   const value = el("span", "steptrace__watch-v")
-  const entries = (row.v == null ? "" : String(row.v)).split(WATCH_ENTRY_SEPARATOR)
+  const entries = splitWatchEntries(row.v == null ? "" : String(row.v))
   if (entries.length === 1) value.textContent = entries[0]
   else
     entries.forEach((entry, index) => {
@@ -697,7 +717,7 @@ export function createMount(
         tick.style.setProperty("--start", `${start}%`)
         tick.style.setProperty("--end", `${end}%`)
         tick.dataset.step = String(mark.i)
-        tick.title = `${mark.label} · step ${mark.i + 1}`
+        tick.title = `${mark.label}, step ${mark.i + 1}`
         tick.setAttribute("aria-hidden", "true")
         const label = el("b", "steptrace__milestone-label")
         label.textContent = mark.label

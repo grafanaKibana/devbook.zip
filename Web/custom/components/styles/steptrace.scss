@@ -17,7 +17,7 @@
   --st-chrome-border-hover: var(--gray);
   --st-chrome-radius: var(--surface-radius);
   --st-table-cell: var(--light);
-  --st-table-header: var(--lightgray);
+  --st-table-header: color-mix(in srgb, var(--darkgray) 5%, var(--light));
   --st-table-border: var(--lightgray);
   --st-table-text: var(--darkgray);
   --st-accent: var(--secondary);

@@ -582,7 +582,7 @@ export function makeSearchView(
     setStatus(
       status,
       frame.message,
-      `· ${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"} · step ${i + 1}/${total}`,
+      `${frame.comparisons} probe${frame.comparisons === 1 ? "" : "s"}, step ${i + 1}/${total}`,
     )
   }
 
@@ -771,7 +771,7 @@ export function makeBoundarySearchView(frames, descriptor: BoundarySearchViewDes
     setStatus(
       status,
       frame.message,
-      `· ${frame.probes} check${frame.probes === 1 ? "" : "s"} · step ${index + 1}/${totalFrames}`,
+      `${frame.probes} check${frame.probes === 1 ? "" : "s"}, step ${index + 1}/${totalFrames}`,
     )
   }
 
@@ -850,7 +850,7 @@ export function makeMatchView(frames) {
       tcells[frame.cmpT].dataset.state = frame.cmpResult || "probe"
     if (frame.cmpP != null && pcells[frame.cmpP])
       pcells[frame.cmpP].dataset.state = frame.cmpResult || "probe"
-    setStatus(status, frame.message, `· step ${i + 1}/${total}`)
+    setStatus(status, frame.message, `step ${i + 1}/${total}`)
   }
 
   function watch(frame) {
@@ -944,7 +944,7 @@ function makeBoyerMooreView(frames) {
     )
       for (const cell of patternCells) cell.dataset.state = "found"
     applyGeom()
-    setStatus(status, frame.message, `· step ${index + 1}/${total}`)
+    setStatus(status, frame.message, `step ${index + 1}/${total}`)
   }
 
   function watch(frame) {
@@ -973,7 +973,7 @@ function makeBoyerMooreView(frames) {
       { k: "good shift", v: choice?.good ?? "—", sw: "var(--_violet)" },
       {
         k: "selected shift",
-        v: choice ? `${choice.selected} · ${winner}` : "—",
+        v: choice ? `${choice.selected}, ${winner}` : "—",
         sw: "var(--_amber)",
       },
     ]
@@ -1163,7 +1163,7 @@ function makeZArrayView(frames) {
       stringCells[frame.compare.candidate].dataset.state = state
     }
     syncLayout()
-    setStatus(status, frame.message, `· step ${index + 1}/${total}`)
+    setStatus(status, frame.message, `step ${index + 1}/${total}`)
   }
 
   function watch(frame) {
@@ -1425,7 +1425,7 @@ function makeMatrixFooter(
     const text = el("span", "steptrace__matrix-footer-summary-text")
     text.textContent = model.summary.text
     summary.append(text)
-    row.setAttribute("aria-label", `${model.context}; ${model.summary.text}`)
+    row.setAttribute("aria-label", `${model.context}. ${model.summary.text}`)
   }
 
   return { paint }
@@ -1558,7 +1558,7 @@ function makeCoinChangeStoryView(frames) {
       const key = el("span", "steptrace__coin-memo-key")
       const value = el("span", "steptrace__coin-memo-value")
       key.textContent = entry.key
-      value.textContent = entry.state === "hit" ? `${entry.value} · reused` : entry.value
+      value.textContent = entry.state === "hit" ? `${entry.value}, reused` : entry.value
       row.append(key, value)
       memo.append(row)
     }
@@ -1612,7 +1612,7 @@ function makeCoinChangeStoryView(frames) {
       paintAttempts(frame)
       paintMemo(frame)
       paintAmounts(frame)
-      setStatus(status, frame.message, `· step ${index + 1}/${total}`)
+      setStatus(status, frame.message, `step ${index + 1}/${total}`)
     },
     watch(frame) {
       const plan = frame.selected.length
@@ -1848,8 +1848,8 @@ function makeGridPathStoryView(frames) {
             : frame.bestCost == null
               ? `route cost ${frame.routeCost}`
               : `best route ${frame.bestCost}`
-      footerRow.setAttribute("aria-label", `${footerStart.textContent}; ${footerEnd.textContent}`)
-      setStatus(status, frame.message, `· step ${index + 1}/${total}`)
+      footerRow.setAttribute("aria-label", `${footerStart.textContent}. ${footerEnd.textContent}`)
+      setStatus(status, frame.message, `step ${index + 1}/${total}`)
     },
     watch(frame) {
       const current = frame.current ? `R${frame.current[0] + 1}C${frame.current[1] + 1}` : "—"
@@ -2059,7 +2059,7 @@ export function makeDPView(frames, semantics = lcsMatrixGridSemantics) {
         td.setAttribute("aria-label", semantics.cellLabel(frame, r, c))
       }
     }
-    setStatus(status, frame.message, `· step ${i + 1}/${total}`)
+    setStatus(status, frame.message, `step ${i + 1}/${total}`)
   }
 
   function watch(frame) {
@@ -2150,7 +2150,7 @@ export function makeUnionFindView(frames) {
       arc.dataset.active = active ? "true" : "false"
       arcLayer.append(arc)
     }
-    setStatus(status, frame.message, `· step ${i + 1}/${total}`)
+    setStatus(status, frame.message, `step ${i + 1}/${total}`)
   }
 
   function watch(frame) {
@@ -2251,7 +2251,7 @@ export function makeBitsView(frames) {
         c.dataset.state = data.state[bi] || ""
       }
     }
-    setStatus(status, frame.message, `· step ${i + 1}/${stepTotal}`)
+    setStatus(status, frame.message, `step ${i + 1}/${stepTotal}`)
   }
 
   // exactly 3 rows every frame ⇒ constant footer height (no jitter)
@@ -2710,13 +2710,13 @@ export function makeBacktrackView(frames) {
     if (frame.type === "place" && cur) {
       activeNode = decisionId(columns)
       event = "branch"
-      caption = `Branch R${cur.row} C${cur.col} · descend to R${cur.row + 1}`
+      caption = `Branch R${cur.row} C${cur.col}, descend to R${cur.row + 1}`
     } else if (frame.type === "reject" && cur) {
       activeNode = `p:${decisionId(columns)}`
       activePath.add(activeNode)
       event = "prune"
       caption = frame.conflict
-        ? `Prune R${cur.row} C${cur.col} · blocked by R${frame.conflict.row} C${frame.conflict.col}`
+        ? `Prune R${cur.row} C${cur.col}, blocked by R${frame.conflict.row} C${frame.conflict.col}`
         : `Prune R${cur.row} C${cur.col}`
     } else if (frame.type === "backtrack" && cur) {
       const returningColumns = [...columns, cur.col]
@@ -3039,7 +3039,7 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
     for (const element of [label, detail, result]) element.setAttribute("text-anchor", "middle")
     const [primaryLine, secondaryLine] = descriptor.nodeLines(node)
     label.textContent = primaryLine
-    detail.textContent = secondaryLine
+    setTextParts(detail, secondaryLine)
     if (descriptor.shape === "circle") {
       label.setAttribute("y", "0")
       label.setAttribute("dominant-baseline", "central")
@@ -3211,7 +3211,7 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
     const activeNode = nodes.find((node) => node.id === model.active)
     if (descriptor.centerVisible) treeLayer.style.transform = centerTransform(model.visible)
     title.textContent = `${descriptor.ariaLabel}: ${model.phase}`
-    description.textContent = `${model.phase}. Active subproblem ${activeNode ? descriptor.nodeLines(activeNode).join("; ") : "none"}. ${model.action}. ${stripTags(frame.message)}`
+    description.textContent = `${model.phase}. Active subproblem ${activeNode ? descriptor.nodeLines(activeNode).join(". ") : "none"}. ${model.action}. ${stripTags(frame.message)}`
     for (const node of nodes) {
       const elements = nodeElements[node.id]
       const state = model.states[node.id] || ""
@@ -3235,9 +3235,10 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
           for (let index = 0; index < elements.valueCells.length; index++)
             elements.valueCells[index].textContent = String(values[index] ?? "")
         } else {
-          elements.detail.textContent = descriptor.preserveDetail
-            ? elements.secondaryLine
-            : resultText || elements.secondaryLine
+          setTextParts(
+            elements.detail,
+            descriptor.preserveDetail ? elements.secondaryLine : resultText || elements.secondaryLine,
+          )
         }
         elements.result.textContent = ""
         elements.badge.textContent = descriptor.showStateBadge
@@ -3255,7 +3256,7 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
       edge.element.dataset.related =
         model.active === edge.from && related.has(edge.to) ? "true" : "false"
     }
-    setStatus(status, frame.message, `· step ${index + 1}/${total}`)
+    setStatus(status, frame.message, `step ${index + 1}/${total}`)
   }
 
   function watch(frame) {
@@ -3490,7 +3491,7 @@ export function makeGraphView(frames, graph, frontierLabel) {
       e.el.dataset.selected = sel ? "true" : "false"
       e.el.dataset.dim = selected.length && !sel ? "true" : "false"
     }
-    setStatus(status, frame.message, `· ${frame.visited.length} visited · step ${i + 1}/${total}`)
+    setStatus(status, frame.message, `${frame.visited.length} visited, step ${i + 1}/${total}`)
   }
 
   function watch(frame) {
@@ -3525,6 +3526,41 @@ export function setStatus(status, message, counts = null) {
   const count = el("span", "steptrace__counts")
   count.textContent = counts
   status.append(" ", count)
+}
+
+// Compact values join their parts with an en space. Each join renders as a
+// hairline separator: a styled span in HTML, a muted bar glyph in SVG text.
+export function setTextParts(node, text) {
+  const parts = String(text).split("\u2002")
+  if (parts.length === 1) {
+    node.textContent = parts[0]
+    return
+  }
+  const svg = node instanceof SVGElement
+  const make = (cls, content) => {
+    const part = svg
+      ? document.createElementNS("http://www.w3.org/2000/svg", "tspan")
+      : document.createElement("span")
+    if (cls) part.setAttribute("class", cls)
+    part.textContent = content
+    return part
+  }
+  const children = []
+  parts.forEach((part, index) => {
+    if (index > 0) {
+      const sep = make("steptrace__sep", svg ? "\u2002|\u2002" : "")
+      sep.setAttribute("aria-hidden", "true")
+      children.push(sep)
+    }
+    children.push(make("", part))
+  })
+  node.replaceChildren(...children)
+}
+
+export function setRailLabel(node, title, detail) {
+  const aside = el("span", "steptrace__rail-label-detail")
+  aside.textContent = detail
+  node.replaceChildren(document.createTextNode(title), aside)
 }
 
 export function makeLegend(items, ariaLabel, extraClass = "") {
@@ -3944,33 +3980,33 @@ function graphEdgeWeight(graph, a, b) {
 export function summaryFor(algorithm, kind, frame, graph) {
   if (kind === "sort") {
     if (algorithm === "counting-sort")
-      return `Output [${frame.output.join(", ")}] · ${frame.tallied} tallies · ${frame.placed} stable placements.`
+      return `Output [${frame.output.join(", ")}], ${frame.tallied} tallies, ${frame.placed} stable placements.`
     if (algorithm === "radix-sort" || algorithm === "bucket-sort") {
       const output = frame.source.map((token) => token.value)
       const work =
         algorithm === "radix-sort"
           ? `${frame.passCount} stable digit passes`
           : `${frame.comparisons} local comparisons`
-      return `Output [${output.join(", ")}] · ${work} · ${frame.gathered} gathered.`
+      return `Output [${output.join(", ")}], ${work}, ${frame.gathered} gathered.`
     }
     if (algorithm === "merge-sort")
-      return `Output [${frame.array.join(", ")}] · ${frame.swaps} writes.`
+      return `Output [${frame.array.join(", ")}], ${frame.swaps} writes.`
     if (algorithm === "tim-sort")
-      return `Output [${frame.array.join(", ")}] · ${frame.merges} run-stack merge${frame.merges === 1 ? "" : "s"}.`
+      return `Output [${frame.array.join(", ")}], ${frame.merges} run-stack merge${frame.merges === 1 ? "" : "s"}.`
     const unit =
       frame.movementUnit ||
       (["bubble-sort", "selection-sort", "quick-sort", "heap-sort"].includes(algorithm)
         ? "swaps"
         : "moves")
-    const comparisons = frame.showComparisons === false ? "" : `${frame.comparisons} comparisons · `
-    return `Output [${frame.array.join(", ")}] · ${comparisons}${frame.swaps} ${unit}.`
+    const comparisons = frame.showComparisons === false ? "" : `${frame.comparisons} comparisons, `
+    return `Output [${frame.array.join(", ")}], ${comparisons}${frame.swaps} ${unit}.`
   }
   if (kind === "graph") {
     if (algorithm === "a-star") {
       const cost = frame.selectedPath?.length ? frame.g?.[frame.target] : null
       return cost == null
         ? `${frame.target} is unreachable.`
-        : `Path ${frame.selectedPath.join(" → ")} · cost ${cost} · A* ${frame.astarExpanded} vs Dijkstra ${frame.dijkstraExpanded} expansions.`
+        : `Path ${frame.selectedPath.join(" → ")}, cost ${cost}, A* ${frame.astarExpanded} vs Dijkstra ${frame.dijkstraExpanded} expansions.`
     }
     if (algorithm === "dijkstra" && frame.target != null) {
       const edges = frame.selected || []
@@ -3980,27 +4016,27 @@ export function summaryFor(algorithm, kind, frame, graph) {
       const cost = frame.dist[frame.target]
       return cost == null
         ? `${frame.target} is unreachable.`
-        : `Path ${path} · cost ${cost} · ${frame.visited.length} nodes settled.`
+        : `Path ${path}, cost ${cost}, ${frame.visited.length} nodes settled.`
     }
     if (algorithm === "dijkstra") {
       const distances = Object.keys(frame.dist)
         .sort()
         .map((id) => `${id}:${frame.dist[id]}`)
         .join(", ")
-      return `Shortest-path tree: ${frame.selected.length} edges · distances ${distances}.`
+      return `Shortest-path tree: ${frame.selected.length} edges, distances ${distances}.`
     }
     if (algorithm === "prim") {
       const weight = (frame.selected || []).reduce(
         (sum, e) => sum + graphEdgeWeight(graph, e[0], e[1]),
         0,
       )
-      return `${frame.selected.length} edges selected · total weight ${weight} · ${frame.visited.length} nodes joined.`
+      return `${frame.selected.length} edges selected, total weight ${weight}, ${frame.visited.length} nodes joined.`
     }
     if (algorithm === "topological-sort") {
       const unresolved = graph ? graph.nodes.length - frame.visited.length : 0
       return unresolved > 0
-        ? `No topological order · cycle leaves ${unresolved} node${unresolved === 1 ? "" : "s"} unresolved.`
-        : `Order ${frame.visited.join(" → ")} · ${frame.visited.length} nodes emitted.`
+        ? `No topological order, cycle leaves ${unresolved} node${unresolved === 1 ? "" : "s"} unresolved.`
+        : `Order ${frame.visited.join(" → ")}, ${frame.visited.length} nodes emitted.`
     }
     if (frame.target != null) {
       const d = frame.dist[frame.target]
@@ -4008,14 +4044,14 @@ export function summaryFor(algorithm, kind, frame, graph) {
         ? `${frame.target} is unreachable.`
         : `${frame.target} reached at depth ${d} after ${frame.visited.length} visits.`
     }
-    return `${frame.visited.length} nodes visited · frontier empty.`
+    return `${frame.visited.length} nodes visited, frontier empty.`
   }
   if (kind === "search") {
     if (algorithm === "binary-search-on-answer")
-      return `Minimum feasible capacity ${frame.answer} · ${frame.probes} probe${frame.probes === 1 ? "" : "s"}.`
+      return `Minimum feasible capacity ${frame.answer}, ${frame.probes} probe${frame.probes === 1 ? "" : "s"}.`
     return frame.found == null
-      ? `${frame.target} not found · ${frame.comparisons} comparisons.`
-      : `${frame.target} found at index ${frame.found} · ${frame.comparisons} comparisons.`
+      ? `${frame.target} not found, ${frame.comparisons} comparisons.`
+      : `${frame.target} found at index ${frame.found}, ${frame.comparisons} comparisons.`
   }
   if (kind === "string" && frame.profile === "z-array") return `Z = [${frame.z.join(", ")}].`
   if (kind === "string" && frame.profile === "aho-corasick") {
@@ -4023,12 +4059,12 @@ export function summaryFor(algorithm, kind, frame, graph) {
     return matches ? `Matches ${matches}.` : "No patterns matched."
   }
   if (kind === "string" && frame.profile === "ternary-search-tree")
-    return `${frame.terminalNodes.length} terminal keys · ${frame.visibleNodes.length - 1} character nodes.`
+    return `${frame.terminalNodes.length} terminal keys, ${frame.visibleNodes.length - 1} character nodes.`
   if (kind === "string" && Array.isArray(frame.terminalNodes)) {
     const keys = frame.terminalNodes.filter((node) => node !== "root")
     return keys.length
-      ? `Stored keys ${keys.join(", ")} · ${frame.visibleNodes.length} trie nodes.`
-      : `No keys stored · ${frame.visibleNodes.length} trie node.`
+      ? `Stored keys ${keys.join(", ")}, ${frame.visibleNodes.length} trie nodes.`
+      : `No keys stored, ${frame.visibleNodes.length} trie node.`
   }
   if (kind === "string") {
     const found = Array.isArray(frame.found) ? frame.found : []
@@ -4039,7 +4075,7 @@ export function summaryFor(algorithm, kind, frame, graph) {
   if (kind === "pointers") {
     const values = (frame.marked || []).map((i) => frame.array[i])
     return values.length
-      ? `Answer indices [${frame.marked.join(", ")}] · values [${values.join(", ")}].`
+      ? `Answer indices [${frame.marked.join(", ")}], values [${values.join(", ")}].`
       : algorithm === "two-pointers" || algorithm === "sliding-window"
         ? `No qualifying range was found.`
         : `No committed result was recorded.`
@@ -4053,7 +4089,7 @@ export function summaryFor(algorithm, kind, frame, graph) {
         "coin-change-tabulation",
       ].includes(algorithm)
     )
-      return `${frame.best || "Exact change pending"} · target ${frame.target}¢.`
+      return `${frame.best || "Exact change pending"}, target ${frame.target}¢.`
     if (
       [
         "grid-path-greedy",
@@ -4063,57 +4099,57 @@ export function summaryFor(algorithm, kind, frame, graph) {
       ].includes(algorithm)
     )
       return frame.bestCost == null
-        ? `Warehouse route pending · current cost ${frame.routeCost}.`
+        ? `Warehouse route pending, current cost ${frame.routeCost}.`
         : `Minimum warehouse route cost ${frame.bestCost}.`
     if (algorithm === "coin-change-bottom-up")
-      return `Fewest coins for 30¢: ${frame.grid[0]?.at(-1)} · exact change 10¢ + 10¢ + 10¢.`
+      return `Fewest coins for 30¢: ${frame.grid[0]?.at(-1)}, exact change 10¢ + 10¢ + 10¢.`
     if (algorithm === "grid-path-bottom-up")
-      return `Minimum warehouse route cost ${frame.grid[0]?.[0]} · ${frame.path.length} path tiles.`
+      return `Minimum warehouse route cost ${frame.grid[0]?.[0]}, ${frame.path.length} path tiles.`
     if (algorithm === "floyd-warshall") {
       if (frame.negativeCycle?.length)
-        return `Negative cycle through ${frame.negativeCycle.join(", ")}; shortest paths are undefined.`
+        return `Negative cycle through ${frame.negativeCycle.join(", ")}. Shortest paths are undefined.`
       const distances = frame.grid
         .map(
           (row, index) =>
             `${frame.rowLabels[index]}: [${row.map((value) => value ?? "∞").join(", ")}]`,
         )
-        .join(" · ")
+        .join(", ")
       return `All-pairs distances ${distances}.`
     }
     if (algorithm === "dynamic-programming") {
       const stored = frame.grid.flat().filter((value) => value != null).length
       const target = frame.grid[0]?.[frame.grid[0].length - 1]
       if (frame.variant === "concrete")
-        return `Best non-adjacent total ${target} · ${stored} prefixes solved once.`
-      return `Target ${target} · ${stored} states solved once in dependency order.`
+        return `Best non-adjacent total ${target}, ${stored} prefixes solved once.`
+      return `Target ${target}, ${stored} states solved once in dependency order.`
     }
     const row = frame.grid[frame.grid.length - 1] || []
     const value = row[row.length - 1]
     const sequence = (frame.path || []).map((p) => frame.rowLabels[p[0]]).join("")
     return algorithm === "lcs"
-      ? `Optimal value ${value}${sequence ? ` · sequence "${sequence}"` : ""}.`
-      : `Final table value ${value}${frame.path.length ? ` · ${frame.path.length} traced cells` : ""}.`
+      ? `Optimal value ${value}${sequence ? `, sequence "${sequence}"` : ""}.`
+      : `Final table value ${value}${frame.path.length ? `, ${frame.path.length} traced cells` : ""}.`
   }
   if (kind === "unionfind")
-    return `${new Set(frame.roots).size} disjoint set${new Set(frame.roots).size === 1 ? "" : "s"} · parents [${frame.parent.join(", ")}].`
+    return `${new Set(frame.roots).size} disjoint set${new Set(frame.roots).size === 1 ? "" : "s"}, parents [${frame.parent.join(", ")}].`
   if (kind === "bits")
     return algorithm === "kernighan-popcount"
-      ? `Population count ${frame.total} · ${frame.pop} lowest set bits cleared.`
+      ? `Population count ${frame.total}, ${frame.pop} lowest set bits cleared.`
       : `${frame.pop} of ${frame.total} tally steps committed.`
   if (kind === "backtrack")
     return frame.solved
-      ? `Solved at depth ${frame.depth} · ${frame.placed} placements · ${frame.pruned} branches pruned.`
-      : `No arrangement found · ${frame.pruned} branches pruned.`
+      ? `Solved at depth ${frame.depth}, ${frame.placed} placements, ${frame.pruned} branches pruned.`
+      : `No arrangement found, ${frame.pruned} branches pruned.`
   if (kind === "rectree") {
     if (algorithm === "branch-and-bound")
-      return `Best value ${frame.incumbent} · take A + C · weight 7/7 · ${frame.pruned} branches pruned.`
+      return `Best value ${frame.incumbent}, take A + C, weight 7/7, ${frame.pruned} branches pruned.`
     if (algorithm === "coin-change-top-down")
-      return `Fewest coins for 30¢: ${frame.results?.c30 || "—"} · ${frame.pruned} recursive calls skipped.`
+      return `Fewest coins for 30¢: ${frame.results?.c30 || "—"}, ${frame.pruned} recursive calls skipped.`
     if (algorithm === "grid-path-top-down")
-      return `Minimum warehouse route cost ${frame.results?.r1c1 || "—"} · ${frame.pruned} recursive calls skipped.`
+      return `Minimum warehouse route cost ${frame.results?.r1c1 || "—"}, ${frame.pruned} recursive calls skipped.`
     if (algorithm === "memoization") {
       const memoResult = String(frame.results?.a || "ready").replace(/^result\s+/i, "")
-      return `Result ${memoResult} · ${frame.calls} calls · ${frame.pruned} recursive calls skipped.`
+      return `Result ${memoResult}, ${frame.calls} calls, ${frame.pruned} recursive calls skipped.`
     }
     const result = frame.results?.root
     if (Array.isArray(result)) return `Sorted result [${result.join(", ")}].`

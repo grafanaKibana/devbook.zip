@@ -15,25 +15,25 @@ export const countingSort = {
   parse: parseCountingSortConfig,
   run(input, ops) {
     ops.intro(
-      `Keys span ${input.min}…${input.max}. Count by value first; no pair of keys is compared.`,
+      `Keys span ${input.min}…${input.max}. Count by value first. No pair of keys is compared.`,
     )
     for (let index = 0; index < input.array.length; index++) {
       const key = input.array[index]
-      ops.tally(index, `Read input[${index}] = ${key}; add one to frequency[${key}].`)
+      ops.tally(index, `Read input[${index}] = ${key}. Add one to frequency[${key}].`)
     }
     for (let key = input.min; key <= input.max; key++) {
       ops.prefix(
         key,
         key === input.min
           ? `Position[${key}] starts at ${key}'s frequency: keys ≤ ${key} end before this index.`
-          : `Add position[${key - 1}] into position[${key}]; it now counts keys ≤ ${key}.`,
+          : `Add position[${key - 1}] into position[${key}]. It now counts keys ≤ ${key}.`,
       )
     }
     for (let index = input.array.length - 1; index >= 0; index--) {
       const key = input.array[index]
       ops.place(
         index,
-        `Read input[${index}] = ${key} from the tail; decrement its end position, then write output there.`,
+        `Read input[${index}] = ${key} from the tail. Decrement its end position, then write output there.`,
       )
     }
     ops.done(

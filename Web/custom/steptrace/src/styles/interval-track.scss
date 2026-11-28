@@ -85,7 +85,7 @@
   justify-content: center;
   overflow: hidden;
   color: var(--_text);
-  background: color-mix(in srgb, var(--_neutral) 12%, var(--_surface));
+  background: var(--st-page, var(--_surface));
   font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
   white-space: nowrap;
   transform: translateY(-50%);

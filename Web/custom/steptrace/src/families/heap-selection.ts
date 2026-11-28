@@ -1,4 +1,4 @@
-import { el, ICON, makeArrayStrip, makeLegend, statusEl } from "../render"
+import { el, ICON, makeArrayStrip, makeLegend, setRailLabel, statusEl } from "../render"
 import { GRAPH_NODE_RADIUS_PX, observeFixedSvgNodes, trimGraphEdge } from "../graph-node"
 import type { StepTraceView, VisualFamily, WatchRow } from "../types"
 
@@ -228,7 +228,7 @@ export class HeapSelectionRecorder implements HeapSelectionOperations {
   done(message: string) {
     this.cursor = null
     this.compared = null
-    this.decision = "top k retained · heap order"
+    this.decision = "top k retained, heap order"
     this.record("done", message)
   }
 
@@ -342,12 +342,12 @@ export function makeTwoHeapsView(frames: readonly TwoHeapsFrame[]): StepTraceVie
   const heaps = el("div", "steptrace__two-heaps-grid")
   const lowerWrap = el("div", "steptrace__two-heaps-side")
   const lowerLabel = el("div", "steptrace__rail-label")
-  lowerLabel.textContent = "Lower · max-heap"
+  setRailLabel(lowerLabel, "Lower", "max-heap")
   const lower = createTwoHeapTree(capacity, "Lower max-heap", "max")
   lowerWrap.append(lowerLabel, lower.wrap)
   const upperWrap = el("div", "steptrace__two-heaps-side")
   const upperLabel = el("div", "steptrace__rail-label")
-  upperLabel.textContent = "Upper · min-heap"
+  setRailLabel(upperLabel, "Upper", "min-heap")
   const upper = createTwoHeapTree(capacity, "Upper min-heap", "min")
   upperWrap.append(upperLabel, upper.wrap)
   heaps.append(lowerWrap, upperWrap)
@@ -380,7 +380,7 @@ export function makeTwoHeapsView(frames: readonly TwoHeapsFrame[]): StepTraceVie
       ]
     },
     summary(frame) {
-      return `Median ${frame.median} · lower ${frame.lower.length} · upper ${frame.upper.length}.`
+      return `Median ${frame.median}, lower ${frame.lower.length}, upper ${frame.upper.length}.`
     },
   }
 }
@@ -405,12 +405,12 @@ export function makeHeapSelectionView(
   })
 
   const heapLabel = el("div", "steptrace__rail-label steptrace__heap-tree-label")
-  heapLabel.textContent = `Min-heap · capacity k = ${first.k}`
+  setRailLabel(heapLabel, `Min-heap`, `capacity k = ${first.k}`)
   const heapWrap = el("div", "steptrace__heap-tree")
   const svg = svgEl("svg", "steptrace__heap-svg")
   svg.setAttribute("viewBox", `0 0 300 ${first.k > 3 ? 192 : 124}`)
   svg.setAttribute("role", "img")
-  svg.setAttribute("aria-label", "Fixed-size min-heap; root is the weakest current winner")
+  svg.setAttribute("aria-label", "Fixed-size min-heap. Root is the weakest current winner")
 
   const positions = Array.from({ length: first.k }, (_, index) => heapPosition(index))
   const edges: Array<{ line: SVGElement; parent: number; child: number }> = []
@@ -552,7 +552,7 @@ export function makeHeapSelectionView(
       k: "weakest root",
       v: frame.heap[0]?.value ?? "empty",
       sw: "var(--_amber)",
-      hint: "Smallest retained value; this is the only winner a newcomer must beat.",
+      hint: "Smallest retained value. This is the only winner a newcomer must beat.",
     },
     {
       k: "heap",
@@ -570,7 +570,7 @@ export function makeHeapSelectionView(
     paint,
     watch,
     summary(frame) {
-      return `Top ${frame.k}: heap [${frame.heap.map((entry) => entry.value).join(", ")}] · root ${frame.heap[0]?.value} is the weakest winner · not globally sorted.`
+      return `Top ${frame.k}: heap [${frame.heap.map((entry) => entry.value).join(", ")}], root ${frame.heap[0]?.value} is the weakest winner, not globally sorted.`
     },
     destroy: geometry.destroy,
   }

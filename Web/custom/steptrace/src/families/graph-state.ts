@@ -819,8 +819,8 @@ export function graphStateSummary(frame: GraphStateFrame) {
       const comparison =
         result.primaryValue != null && result.baselineValue != null
           ? result.metric === "cost"
-            ? ` · ${result.primaryLabel} cost ${result.primaryValue} vs ${result.baselineLabel} cost ${result.baselineValue}`
-            : ` · ${result.primaryLabel} ${result.primaryValue} vs ${result.baselineLabel} ${result.baselineValue} expansions`
+            ? `, ${result.primaryLabel} cost ${result.primaryValue} vs ${result.baselineLabel} cost ${result.baselineValue}`
+            : `, ${result.primaryLabel} ${result.primaryValue} vs ${result.baselineLabel} ${result.baselineValue} expansions`
           : ""
       if (
         path.length &&
@@ -832,7 +832,7 @@ export function graphStateSummary(frame: GraphStateFrame) {
         return `Greedy ${path.join("→\u200b")}: cost ${result.primaryValue} vs A* cost ${result.baselineValue} (optimal).`
       return frame.target && cost == null
         ? `${frame.target} is unreachable.`
-        : `Path ${path.length ? path.join(" → ") : "pending"}${cost == null ? "" : ` · cost ${cost}`}${comparison}.`
+        : `Path ${path.length ? path.join(" → ") : "pending"}${cost == null ? "" : `, cost ${cost}`}${comparison}.`
     }
     case "dual-search":
       return frame.detail.meeting
@@ -846,13 +846,13 @@ export function graphStateSummary(frame: GraphStateFrame) {
     case "component-flood":
       return `${frame.detail.groups?.length ?? frame.detail.component} connected components.`
     case "low-link-cuts":
-      return `${frame.detail.articulationPoints.length} articulation points · ${frame.detail.bridges.length} bridges.`
+      return `${frame.detail.articulationPoints.length} articulation points, ${frame.detail.bridges.length} bridges.`
     case "low-link-components":
       return `${frame.detail.components.length} strongly connected components.`
     case "mst-scan":
-      return `${frame.detail.accepted.length} tree edges · total weight ${frame.detail.totalWeight}.`
+      return `${frame.detail.accepted.length} tree edges, total weight ${frame.detail.totalWeight}.`
     case "mst-round":
-      return `${frame.detail.components.length} component${frame.detail.components.length === 1 ? "" : "s"} · total weight ${frame.detail.totalWeight}.`
+      return `${frame.detail.components.length} component${frame.detail.components.length === 1 ? "" : "s"}, total weight ${frame.detail.totalWeight}.`
     case "path-backtrack": {
       const [first] = frame.detail.path
       const last = frame.detail.path.at(-1)
@@ -882,12 +882,12 @@ function watchSlice(entries: readonly string[]) {
   const shown: string[] = []
   for (const entry of entries.slice(0, FRONTIER_WATCH_LIMIT)) {
     const rest = entries.length - shown.length - 1
-    const line = [...shown, entry, ...(rest ? [`+${rest} more`] : [])].join(" · ")
+    const line = [...shown, entry, ...(rest ? [`+${rest} more`] : [])].join(", ")
     if (shown.length && line.length > WATCH_LIST_CHARS) break
     shown.push(entry)
   }
   if (entries.length > shown.length) shown.push(`+${entries.length - shown.length} more`)
-  return shown.join(" · ")
+  return shown.join(", ")
 }
 
 export function edgeRelaxationWatch(frame: GraphStateFrame): WatchRow[] {
@@ -898,7 +898,7 @@ export function edgeRelaxationWatch(frame: GraphStateFrame): WatchRow[] {
   const edge = { k: "edge", v: detail.edge?.join(" → ") || "—", sw: "var(--_blue)" }
   const ids = frame.nodes.map(({ id }) => id)
   if (detail.policy === "bellman-ford") {
-    const distanceWatch = ids.map(entry).join(" · ")
+    const distanceWatch = ids.map(entry).join(", ")
     return [
       { k: "distances", v: distanceWatch, sw: "var(--_blue)", hint: distanceWatch },
       { k: "pass", v: String(detail.pass), sw: "var(--_violet)" },
@@ -934,13 +934,13 @@ export function edgeRelaxationWatch(frame: GraphStateFrame): WatchRow[] {
       k: "frontier",
       v: watchSlice(frontier.map(entry)) || "—",
       sw: "var(--_amber)",
-      hint: "Reached, unsettled nodes by tentative distance; the first one settles next.",
+      hint: "Reached, unsettled nodes by tentative distance. The first one settles next.",
     },
     {
       k: "distances",
       v: `${settled} of ${ids.length} settled`,
       sw: "var(--_green)",
-      hint: `All distances: ${ids.slice().sort(byDistance).map(entry).join(" · ")}.`,
+      hint: `All distances: ${ids.slice().sort(byDistance).map(entry).join(", ")}.`,
     },
   ]
 }
@@ -1219,7 +1219,7 @@ export function makeGraphStateView(
         const h = frame.detail.heuristic[id]
         group.children[0].textContent =
           frame.detail.policy === "greedy"
-            ? `${node.label}: h ${h}; path cost ${g ?? "∞"} is ignored for priority`
+            ? `${node.label}: h ${h}. Path cost ${g ?? "∞"} is ignored for priority`
             : `${node.label}: g ${g ?? "∞"}, h ${h}, f ${g == null ? "∞" : g + h}`
       } else {
         group.children[0].textContent = node.label
@@ -1267,7 +1267,7 @@ export function makeGraphStateView(
             current && g != null && h != null
               ? frame.detail.policy === "greedy"
                 ? `h ${h}`
-                : `g ${g} · h ${h} · f ${g + h}`
+                : `g ${g}, h ${h}, f ${g + h}`
               : "—",
           sw: "var(--_amber)",
         },
@@ -1278,7 +1278,7 @@ export function makeGraphStateView(
           hint: `OPEN by priority: ${
             frame.detail.open
               .map(({ id, h, f }) => `${id} ${greedy ? `h ${h}` : `f ${f}`}`)
-              .join(" · ") || "empty"
+              .join(", ") || "empty"
           }.`,
         },
         frame.selectedEdges.length
@@ -1292,7 +1292,7 @@ export function makeGraphStateView(
               k: "closed",
               v: `${frame.detail.closed.length} of ${frame.nodes.length}`,
               sw: "var(--_green)",
-              hint: `CLOSED in expansion order: ${frame.detail.closed.join(" · ") || "none yet"}.`,
+              hint: `CLOSED in expansion order: ${frame.detail.closed.join(", ") || "none yet"}.`,
             },
       )
     }
@@ -1304,7 +1304,7 @@ export function makeGraphStateView(
       const comparison = frame.detail.comparison
       rows.push({
         k: comparison.metric === "expansions" ? "expanded" : "comparison",
-        v: `${comparison.primaryLabel} ${comparison.primaryValue} · ${comparison.baselineLabel} ${comparison.baselineValue}`,
+        v: `${comparison.primaryLabel} ${comparison.primaryValue}, ${comparison.baselineLabel} ${comparison.baselineValue}`,
         sw: "var(--_green)",
       })
     }
@@ -1313,7 +1313,7 @@ export function makeGraphStateView(
         rows.push(
           {
             k: "frontiers",
-            v: `F ${frame.detail.forward.length} · B ${frame.detail.backward.length}`,
+            v: `F ${frame.detail.forward.length}, B ${frame.detail.backward.length}`,
             sw: "var(--_amber)",
           },
           { k: "meeting", v: frame.detail.meeting || "—", sw: "var(--_violet)" },
@@ -1339,12 +1339,12 @@ export function makeGraphStateView(
           },
           {
             k: "cut vertices",
-            v: frame.detail.articulationPoints.join(" · ") || "—",
+            v: frame.detail.articulationPoints.join(", ") || "—",
             sw: "var(--_violet)",
           },
           {
             k: "bridges",
-            v: frame.detail.bridges.map(([from, to]) => `${from}—${to}`).join(" · ") || "—",
+            v: frame.detail.bridges.map(([from, to]) => `${from}—${to}`).join(", ") || "—",
             sw: "var(--_violet)",
           },
         )
@@ -1358,7 +1358,7 @@ export function makeGraphStateView(
             v: id ? `${frame.detail.discovery[id] ?? "—"} / ${frame.detail.low[id] ?? "—"}` : "—",
             sw: "var(--_amber)",
           },
-          { k: "stack", v: frame.detail.stack.join(" · ") || "—", sw: "var(--_violet)" },
+          { k: "stack", v: frame.detail.stack.join(", ") || "—", sw: "var(--_violet)" },
           { k: "components", v: String(frame.detail.components.length), sw: "var(--_green)" },
         )
         break
@@ -1384,8 +1384,8 @@ export function makeGraphStateView(
       case "path-backtrack":
         rows.push(
           { k: "path", v: frame.detail.path.join(" → ") || "—", sw: "var(--_green)" },
-          { k: "candidates", v: frame.detail.candidates.join(" · ") || "—", sw: "var(--_amber)" },
-          { k: "rejected", v: frame.detail.rejected.join(" · ") || "—", sw: "var(--_red)" },
+          { k: "candidates", v: frame.detail.candidates.join(", ") || "—", sw: "var(--_amber)" },
+          { k: "rejected", v: frame.detail.rejected.join(", ") || "—", sw: "var(--_red)" },
         )
         break
       case "residual-flow":

@@ -113,7 +113,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--_space-1);
-  background: var(--_surface);
+  background: var(--st-page, var(--_surface));
   font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
   transition:
     inset-inline-start var(--_dur-move) var(--_spring-soft),
@@ -192,7 +192,7 @@
 .steptrace .steptrace__linked-list-node-card {
   position: relative;
   min-inline-size: 0;
-  max-inline-size: 5.25rem;
+  max-inline-size: 7rem;
   flex: 1 1 0;
 }
 
@@ -228,13 +228,13 @@
 
 .steptrace .steptrace__linked-list-board[data-variant="doubly"] .steptrace__linked-list-cell {
   grid-template-rows: minmax(0, 1fr) auto auto;
-  block-size: calc(44px + 2rem);
+  block-size: calc(44px + 1.35rem);
 }
 
 .steptrace .steptrace__linked-list-pointer {
   position: relative;
   min-width: 0;
-  padding: var(--_space-0);
+  padding: var(--_space-1) var(--_space-2);
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -248,13 +248,16 @@
   position: absolute;
   inset-block-start: 0;
   inset-inline: var(--_stroke-hair);
-  border-block-start: var(--_stroke-hair) solid var(--_border);
+  border-block-start: var(--_stroke-hair) solid var(--_chrome-border);
   content: "";
 }
 
 .steptrace .steptrace__linked-list-value-field {
-  grid-template-rows: auto auto;
-  gap: var(--_space-0);
+  grid-auto-flow: column;
+  align-items: baseline;
+  align-content: center;
+  justify-content: center;
+  column-gap: var(--_space-2);
 }
 
 .steptrace .steptrace__linked-list-value {
@@ -403,8 +406,114 @@
   background: color-mix(in srgb, var(--_blue) 16%, transparent);
 }
 
+/* LRU nodes read as | prev | value | next | and span the map's full width at
+   the map strip's height, so both halves of the cache line up. */
 .steptrace .steptrace__lru-chain .steptrace__linked-list-board {
-  margin-inline: auto;
+  inline-size: 100%;
+  min-block-size: 0;
+}
+
+.steptrace .steptrace__lru-chain .steptrace__linked-list-node-card {
+  max-inline-size: none;
+}
+
+.steptrace .steptrace__lru-chain .steptrace__linked-list-board .steptrace__linked-list-cell {
+  grid-template-areas: "prev value next";
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  block-size: calc(44px + 1.35rem + 2 * var(--_stroke-hair));
+}
+
+.steptrace .steptrace__lru-chain .steptrace__linked-list-value-field {
+  grid-area: value;
+  grid-auto-flow: row;
+  align-items: center;
+  justify-items: center;
+  row-gap: var(--_space-0);
+}
+
+.steptrace .steptrace__lru-chain .steptrace__linked-list-pointer {
+  grid-template-columns: min-content;
+  place-content: center;
+  padding: var(--_space-1) var(--_space-2);
+  white-space: normal;
+  text-align: center;
+}
+
+.steptrace .steptrace__lru-chain .steptrace__linked-list-pointer::before {
+  display: none;
+}
+
+.steptrace .steptrace__lru-chain .steptrace__linked-list-pointer[data-pointer="prev"] {
+  grid-area: prev;
+  border-inline-end: var(--_stroke-hair) solid var(--_chrome-border);
+}
+
+.steptrace .steptrace__lru-chain .steptrace__linked-list-pointer[data-pointer="next"] {
+  grid-area: next;
+  border-inline-start: var(--_stroke-hair) solid var(--_chrome-border);
+}
+
+/* Each pointer arcs from the centre of its own column to the centre of the
+   neighbour's value column: next above the row, prev below it. Nodes share
+   one width and 1 : 1.25 : 1 columns, so both ends are fixed fractions. */
+.steptrace .steptrace__lru-chain .steptrace__linked-list-board {
+  padding-block: var(--_space-5);
+}
+
+.steptrace .steptrace__lru-chain .steptrace__linked-list-board .steptrace__linked-list-link {
+  /* steptrace-exception: lru-arc-span | category=geometry | rationale=spans from a pointer column centre to the neighbour value column centre | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  inline-size: calc(65.38% + var(--steptrace-linked-gap));
+  block-size: var(--_space-4);
+  border: 1.5px solid currentColor;
+}
+
+.steptrace
+  .steptrace__lru-chain
+  .steptrace__linked-list-board
+  .steptrace__linked-list-link[data-pointer="next"] {
+  inset-block: auto 100%;
+  /* steptrace-exception: lru-next-origin | category=geometry | rationale=next leaves the centre of the right pointer column | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
+  inset-inline: 84.62% auto;
+  border-block-end: 0;
+  border-start-start-radius: var(--_radius-sm);
+  border-start-end-radius: var(--_radius-sm);
+}
+
+.steptrace
+  .steptrace__lru-chain
+  .steptrace__linked-list-board
+  .steptrace__linked-list-link[data-pointer="prev"] {
+  inset-block: 100% auto;
+  inset-inline: calc(-50% - var(--steptrace-linked-gap)) auto;
+  border-block-start: 0;
+  border-end-start-radius: var(--_radius-sm);
+  border-end-end-radius: var(--_radius-sm);
+}
+
+.steptrace .steptrace__lru-chain .steptrace__linked-list-board .steptrace__linked-list-link::after {
+  inset-block-start: auto;
+  border-block: 0;
+  /* steptrace-exception: lru-arc-head | category=geometry | rationale=triangle border width defines the accepted arrowhead silhouette | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json | properties=border-inline */
+  border-inline: 4px solid transparent;
+}
+
+.steptrace
+  .steptrace__lru-chain
+  .steptrace__linked-list-board
+  .steptrace__linked-list-link[data-pointer="next"]::after {
+  inset-block-end: 0;
+  inset-inline: auto -3.25px;
+  border-block-start: 6px solid currentColor;
+}
+
+.steptrace
+  .steptrace__lru-chain
+  .steptrace__linked-list-board
+  .steptrace__linked-list-link[data-pointer="prev"]::after {
+  inset-block-start: 0;
+  inset-inline: -3.25px auto;
+  border-block-end: 6px solid currentColor;
 }
 
 @media (prefers-reduced-motion: reduce) {

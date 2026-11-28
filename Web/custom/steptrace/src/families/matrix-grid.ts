@@ -133,8 +133,8 @@ export function matrixGridFooterModel(frame: MatrixGridFrame): MatrixGridFooterM
       context: `Stage k = ${frame.k}`,
       summary:
         frame.decision === "improve"
-          ? { role: "write", text: `Write ${result} · ${previous} → ${result}` }
-          : { role: "keep", text: `Keep ${previous} · via ${frame.k} is not shorter` },
+          ? { role: "write", text: `Write ${result}, ${previous} → ${result}` }
+          : { role: "keep", text: `Keep ${previous}, via ${frame.k} is not shorter` },
     }
   }
   return {
@@ -156,8 +156,8 @@ export const matrixGridViewSemantics: MatrixGridViewSemantics = {
     const base = distanceLabel(frame, [row, column])
     const roles = matrixGridRolesForCell(frame, row, column)
     if (!roles.includes("target"))
-      return roles.length ? `${base}; roles: ${roles.join(", ")}` : base
-    return `${base}; roles: ${roles.join(", ")}; previous ${formatDistance(frame.previous)}; candidate ${formatDistance(frame.candidate)}; decision ${frame.decision}; result ${formatDistance(frame.result)}`
+      return roles.length ? `${base}. Roles: ${roles.join(", ")}` : base
+    return `${base}. Roles: ${roles.join(", ")}. Previous ${formatDistance(frame.previous)}. Candidate ${formatDistance(frame.candidate)}. Decision ${frame.decision}. Result ${formatDistance(frame.result)}`
   },
   stateForCell(frame: MatrixGridFrame, row, column) {
     if (frame.cur?.[0] === row && frame.cur?.[1] === column) return "cur"

@@ -55,7 +55,7 @@ export const combSort = {
       ops.endGap(
         swapped,
         gap === 1 && !swapped
-          ? "Gap 1 made no swap; no adjacent inversion remains."
+          ? "Gap 1 made no swap. No adjacent inversion remains."
           : `Gap ${gap} pass complete${swapped ? " with swaps" : " without a swap"}.`,
       )
     }

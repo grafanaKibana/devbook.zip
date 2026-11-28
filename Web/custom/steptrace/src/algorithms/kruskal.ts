@@ -149,7 +149,7 @@ export const kruskal = {
     )
     accepted.push(edges[3])
     recorder.add(
-      "Accept C—D; V − 1 edges complete the MST with total weight 7.",
+      "Accept C—D. V − 1 edges complete the MST with total weight 7.",
       [["A", "B", "C", "D"]],
       [],
       accepted,

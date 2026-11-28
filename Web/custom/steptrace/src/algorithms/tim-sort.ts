@@ -88,7 +88,7 @@ export const timSort = {
       if (descending)
         ops.reverse(
           { start, length },
-          `Reverse the strictly descending run ${runLabel(start, length)}; equal keys never entered it.`,
+          `Reverse the strictly descending run ${runLabel(start, length)}. Equal keys never entered it.`,
         )
 
       const forcedLength = Math.min(input.minrun, n - start)
@@ -111,7 +111,7 @@ export const timSort = {
             source,
             lo,
             source,
-            `Binary-insert ${value} at index ${lo}; equals stay after earlier equals for stability.`,
+            `Binary-insert ${value} at index ${lo}. Equals stay after earlier equals for stability.`,
           )
         }
         length = forcedLength

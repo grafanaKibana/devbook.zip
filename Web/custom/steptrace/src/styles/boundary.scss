@@ -145,7 +145,7 @@
   padding: var(--_space-3);
   border: var(--_stroke-hair) solid var(--_boundary-border);
   border-radius: var(--_boundary-radius);
-  background: color-mix(in srgb, var(--_boundary-cell) 94%, var(--_text));
+  background: var(--_boundary-cell);
 }
 
 .steptrace .steptrace__boundary-lane[data-state="empty"] {

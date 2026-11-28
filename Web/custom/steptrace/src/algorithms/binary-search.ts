@@ -30,10 +30,10 @@ export const binarySearch = {
       }
       if (a[mid] < target) {
         lo = mid + 1
-        ops.narrow(lo, hi, `${a[mid]} < ${target}: discard the left half; search [${lo}, ${hi}].`)
+        ops.narrow(lo, hi, `${a[mid]} < ${target}: discard the left half. Search [${lo}, ${hi}].`)
       } else {
         hi = mid - 1
-        ops.narrow(lo, hi, `${a[mid]} > ${target}: discard the right half; search [${lo}, ${hi}].`)
+        ops.narrow(lo, hi, `${a[mid]} > ${target}: discard the right half. Search [${lo}, ${hi}].`)
       }
     }
     ops.done(`${target} is not in the array — the range is empty after ${ops.comparisons} probes.`)

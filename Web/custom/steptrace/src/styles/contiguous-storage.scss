@@ -28,10 +28,6 @@
   border-inline-end: 0;
 }
 
-.steptrace__contiguous-cell[data-empty="0"] {
-  background: color-mix(in srgb, var(--_accent) 10%, transparent);
-}
-
 .steptrace__contiguous-cell[data-active="1"] {
   background: color-mix(in srgb, var(--_blue) 12%, transparent);
 }

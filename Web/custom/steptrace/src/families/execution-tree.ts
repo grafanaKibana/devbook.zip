@@ -107,7 +107,7 @@ function invalidConfig(message: string): never {
 
 export function parseExecutionTreeConfig(config: StepTraceConfig): ExecutionTreeConfig {
   if (config.array !== undefined)
-    invalidConfig('does not take an "array"; it animates the paradigm itself.')
+    invalidConfig('does not take an "array". It animates the paradigm itself.')
   return { profile: "divide-and-conquer" }
 }
 
@@ -202,7 +202,7 @@ export const executionTreeViewDescriptor: ExecutionTreeViewDescriptor = {
       { k: "phase", v: frame.phase, sw: "var(--_violet)" },
       {
         k: subproblemLabel,
-        v: node ? `${node.label} · ${node.detail || `[${node.values.join(", ")}]`}` : "—",
+        v: node ? `${node.label}, ${node.detail || `[${node.values.join(", ")}]`}` : "—",
         sw: "var(--_blue)",
       },
       { k: pathLabelName, v: pathLabel(frame), sw: "var(--_neutral)" },
@@ -236,7 +236,7 @@ export const memoizationTreeViewDescriptor: ExecutionTreeViewDescriptor = {
     { state: "split", label: "Expand New State" },
     { state: "base", label: "Base Result" },
     { state: "store", label: "Store First Result" },
-    { state: "cache", label: "Cache Hit; Skip Branch" },
+    { state: "cache", label: "Cache Hit. Skip Branch" },
   ],
   frameModel,
   nodeLines(node: ExecutionTreeNode) {
@@ -244,7 +244,7 @@ export const memoizationTreeViewDescriptor: ExecutionTreeViewDescriptor = {
   },
   watchRows(frame: ExecutionTreeFrame) {
     const node = activeNode(frame)
-    const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(" · ")
+    const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(", ")
     return [
       {
         k: "phase",
@@ -254,7 +254,7 @@ export const memoizationTreeViewDescriptor: ExecutionTreeViewDescriptor = {
       },
       {
         k: "state",
-        v: node ? `${node.label} · ${node.detail || "no cache key"}` : "—",
+        v: node ? `${node.label}, ${node.detail || "no cache key"}` : "—",
         sw: "var(--_blue)",
         hint: "The active recursive state and the key used to recognize repeats.",
       },
@@ -266,7 +266,7 @@ export const memoizationTreeViewDescriptor: ExecutionTreeViewDescriptor = {
       },
       {
         k: "work",
-        v: `${frame.calls} calls · ${frame.pruned} skipped`,
+        v: `${frame.calls} calls, ${frame.pruned} skipped`,
         sw: "var(--_neutral)",
         hint: "Calls entered so far and recursive calls avoided by cache hits.",
       },
@@ -290,7 +290,7 @@ export const dynamicProgrammingTreeViewDescriptor: ExecutionTreeViewDescriptor =
   },
   watchRows(frame: ExecutionTreeFrame) {
     const node = activeNode(frame)
-    const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(" · ")
+    const cached = frame.cache.map((entry) => `${entry.key} → ${entry.result}`).join(", ")
     return [
       {
         k: "phase",
@@ -312,7 +312,7 @@ export const dynamicProgrammingTreeViewDescriptor: ExecutionTreeViewDescriptor =
       },
       {
         k: "work",
-        v: `${frame.calls} calls · ${frame.pruned} skipped`,
+        v: `${frame.calls} calls, ${frame.pruned} skipped`,
         sw: "var(--_neutral)",
         hint: "Recursive calls entered and child calls avoided by cache hits.",
       },
@@ -348,7 +348,7 @@ export const branchAndBoundTreeViewDescriptor: ExecutionTreeViewDescriptor = {
       },
       {
         k: "load",
-        v: node ? `${node.weight}/7 · value ${node.value}` : "—",
+        v: node ? `${node.weight}/7, value ${node.value}` : "—",
         sw: "var(--_neutral)",
         hint: "Current knapsack weight against capacity 7 and its feasible value.",
       },

@@ -89,7 +89,8 @@
 }
 
 .steptrace .steptrace__binary-tree-node[data-color="black"] .steptrace__ncirc {
-  fill: var(--_text);
+  fill: var(--_rb-black);
+  stroke: var(--_chrome-border-hover);
 }
 
 .steptrace .steptrace__binary-tree-node[data-color="red"] .steptrace__ncirc {
@@ -97,7 +98,7 @@
 }
 
 .steptrace .steptrace__binary-tree-node[data-color="black"] .steptrace__id {
-  fill: var(--_surface);
+  fill: var(--_rb-black-ink);
 }
 
 .steptrace .steptrace__binary-tree-node[data-color="red"] .steptrace__id {

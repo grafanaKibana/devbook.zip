@@ -58,7 +58,7 @@ export const mergeIntervals = {
           next.id,
           relation,
           relation === "contained"
-            ? `[${next.start}, ${next.end}] is contained in [${current.join(", ")}]; keep the current end.`
+            ? `[${next.start}, ${next.end}] is contained in [${current.join(", ")}]. Keep the current end.`
             : `${next.start} ≤ ${current[1]}, so [${next.start}, ${next.end}] overlaps the current block.`,
         )
         if (relation === "contained") continue
@@ -75,7 +75,7 @@ export const mergeIntervals = {
       )
       ops.emit(
         current,
-        `Emit [${current.join(", ")}]; no later interval can reach back across the gap.`,
+        `Emit [${current.join(", ")}]. No later interval can reach back across the gap.`,
       )
       current = pair(next)
       ops.restart(index, next.id, current, `Start a new current block at [${current.join(", ")}].`)

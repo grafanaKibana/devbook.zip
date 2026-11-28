@@ -4,7 +4,7 @@ import {
   observeFixedSvgNodes,
   trimGraphEdge,
 } from "../graph-node"
-import { el, makeLegend, statusEl, successMarker } from "../render"
+import { el, makeLegend, setRailLabel, statusEl, successMarker } from "../render"
 import type { MountHandle, StepTraceView, VisualFamily, WatchRow } from "../types"
 import { createIndexedBoard, createStructureShell, onEnter } from "./interactive-structure"
 
@@ -149,8 +149,8 @@ export function mountLinkedList(root: HTMLElement, config: LinkedListConfig): Mo
     input.value = ""
     paint(
       config.variant === "doubly"
-        ? `Appended ${value} at ${nextAddress}; ${previousAddress}.next now stores ${nextAddress}, and ${nextAddress}.prev stores ${previousAddress}.`
-        : `Appended ${value} at ${nextAddress}; ${previousAddress}.next now stores ${nextAddress}.`,
+        ? `Appended ${value} at ${nextAddress}. ${previousAddress}.next now stores ${nextAddress}, and ${nextAddress}.prev stores ${previousAddress}.`
+        : `Appended ${value} at ${nextAddress}. ${previousAddress}.next now stores ${nextAddress}.`,
     )
     input.focus?.()
   }
@@ -160,7 +160,7 @@ export function mountLinkedList(root: HTMLElement, config: LinkedListConfig): Mo
     const removed = values.pop()
     relinked = values.length - 1
     appended = null
-    paint(`Removed tail ${removed}; ${linkedAddress(values.length - 1)}.next is null.`)
+    paint(`Removed tail ${removed}. ${linkedAddress(values.length - 1)}.next is null.`)
   }
 
   function onReset() {
@@ -207,7 +207,7 @@ function mountLinkedListReverse(root: HTMLElement, config: LinkedListConfig): Mo
 
   function onReverse() {
     nodes = nodes.slice().reverse()
-    paint(`Reversed next pointers; former head ${nodes.at(-1)!.address}.next is null.`)
+    paint(`Reversed next pointers. Former head ${nodes.at(-1)!.address}.next is null.`)
   }
 
   function onReset() {
@@ -249,11 +249,11 @@ export function mountLruCache(root: HTMLElement): MountHandle {
     "steptrace__lru-cache",
   )
   const mapLabel = el("div", "steptrace__rail-label")
-  mapLabel.textContent = "Map · key → node address"
+  setRailLabel(mapLabel, "Map", "key → node address")
   const mapWrap = el("div", "steptrace__lru-map")
   const map = createIndexedBoard(mapWrap, capacity, "LRU key to node address index")
   const chainLabel = el("div", "steptrace__rail-label")
-  chainLabel.textContent = "Recency · MRU → LRU"
+  setRailLabel(chainLabel, "Recency", "MRU → LRU")
   const chainWrap = el("div", "steptrace__lru-chain")
   const chain = createAddressChain(chainWrap, "doubly")
   shell.stage.append(mapLabel, mapWrap, chainLabel, chainWrap)
@@ -293,7 +293,7 @@ export function mountLruCache(root: HTMLElement): MountHandle {
     )
     shell.setCounter(String(entries.length), ` / ${capacity}`)
     shell.status.textContent =
-      message || "Put or get a key. The left node is MRU; the right node is LRU."
+      message || "Put or get a key. The left node is MRU. The right node is LRU."
   }
 
   function promote(index: number) {
@@ -316,14 +316,14 @@ export function mountLruCache(root: HTMLElement): MountHandle {
     }
     const entry = promote(index)
     accessedKey = target
-    paint(`Get ${target}: hit ${entry.value}; promoted ${entry.address} to MRU.`)
+    paint(`Get ${target}: hit ${entry.value}. Promoted ${entry.address} to MRU.`)
   }
 
   function onPut() {
     const target = key()
     const rawValue = valueInput.value.trim() || randomValue()
     if (!/^[A-Z0-9]{1,4}$/.test(target) || !Number.isInteger(Number(rawValue))) {
-      shell.status.textContent = "Key must be 1–4 letters or digits; value must be an integer."
+      shell.status.textContent = "Key must be 1–4 letters or digits. Value must be an integer."
       return
     }
     const index = entries.findIndex((entry) => entry.key === target)
@@ -350,7 +350,7 @@ export function mountLruCache(root: HTMLElement): MountHandle {
       accessedKey = undefined
       changedMapSlot = slot
       message = evicted
-        ? `Put ${target}:${rawValue}: evicted LRU ${evicted.key} at ${evicted.address}; inserted ${entry.address} at MRU.`
+        ? `Put ${target}:${rawValue}: evicted LRU ${evicted.key} at ${evicted.address}. Inserted ${entry.address} at MRU.`
         : `Put ${target}:${rawValue}: inserted ${entry.address} at MRU.`
     }
     keyInput.value = ""
@@ -662,7 +662,7 @@ export function makeLinkedTopologyView(
       hint:
         frame.phase === "detect"
           ? "The pointer advancing two nodes per loop iteration."
-          : "The pointer reset to the list head; both pointers now advance one node.",
+          : "The pointer reset to the list head. Both pointers now advance one node.",
       sw: "var(--_violet)",
     },
     {
@@ -683,7 +683,7 @@ export function makeLinkedTopologyView(
     paint,
     watch,
     summary(frame) {
-      return `Cycle detected at ${frame.meeting}; entry located at ${frame.entry}.`
+      return `Cycle detected at ${frame.meeting}. Entry located at ${frame.entry}.`
     },
     destroy: geometry.destroy,
   }

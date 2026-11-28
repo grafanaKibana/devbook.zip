@@ -529,7 +529,7 @@ export function makePrefixCharacterView(
         elements.role.dataset.state = state
       }
     }
-    setStatus(status, frame.message, `· step ${index + 1}/${total}`)
+    setStatus(status, frame.message, `step ${index + 1}/${total}`)
   }
 
   function watch(frame: PrefixCharacterFrame) {

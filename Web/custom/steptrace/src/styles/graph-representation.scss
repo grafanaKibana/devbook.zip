@@ -66,7 +66,7 @@
 
 .steptrace .steptrace__graph-rep-lists {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--_space-4);
 }
 
@@ -106,8 +106,7 @@
 
 .steptrace .steptrace__graph-rep-list-row,
 .steptrace .steptrace__graph-rep-edge-row {
-  block-size: 2.4rem;
-  grid-template-rows: minmax(0, 1fr) 0.8rem;
+  block-size: calc(44px + 1.35rem);
 }
 
 .steptrace .steptrace__graph-rep-list-row[data-changed="1"],
@@ -118,13 +117,9 @@
 
 .steptrace .steptrace__graph-rep-list-row .steptrace__contiguous-value,
 .steptrace .steptrace__graph-rep-edge-row .steptrace__contiguous-value {
-  padding: var(--_space-1);
+  padding: var(--_space-2);
   font-size: var(--_type-sm);
   white-space: nowrap;
-}
-
-.steptrace .steptrace__graph-rep-edge-row .steptrace__contiguous-value {
-  padding-inline: var(--_space-0);
 }
 
 .steptrace .steptrace__graph-rep-list-row .steptrace__contiguous-index,
@@ -138,10 +133,6 @@
   }
 
   .steptrace .steptrace__graph-rep-storage {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .steptrace .steptrace__graph-rep-lists {
     grid-template-columns: minmax(0, 1fr);
   }
 }

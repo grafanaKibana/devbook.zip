@@ -130,7 +130,7 @@ function run(_: Config, recorder: Recorder) {
     low,
     stack,
     components,
-    "C→A reaches an active ancestor; low[C] becomes 0.",
+    "C→A reaches an active ancestor. Low[C] becomes 0.",
   )
   visit("D", 3, "C")
   visit("E", 4, "D")
@@ -143,7 +143,7 @@ function run(_: Config, recorder: Recorder) {
     low,
     stack,
     components,
-    "E→D reaches an active ancestor; low[E] becomes 3.",
+    "E→D reaches an active ancestor. Low[E] becomes 3.",
   )
   low["D"] = Math.min(low["D"], low["E"])
   recorder.record(
@@ -165,7 +165,7 @@ function run(_: Config, recorder: Recorder) {
     low,
     stack,
     components,
-    "low[D] = disc[D]; pop E and D as one SCC.",
+    "low[D] = disc[D]. Pop E and D as one SCC.",
   )
   low["B"] = low["C"]
   recorder.record(
@@ -188,7 +188,7 @@ function run(_: Config, recorder: Recorder) {
     low,
     stack,
     components,
-    "low[A] = disc[A]; pop C, B, A as one SCC.",
+    "low[A] = disc[A]. Pop C, B, A as one SCC.",
   )
   recorder.record("done", null, null, disc, low, stack, components, "SCCs: {D,E} and {A,B,C}.")
 }

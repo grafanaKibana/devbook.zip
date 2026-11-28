@@ -36,7 +36,7 @@ export const topKElements = {
       ;[heap[left], heap[right]] = [heap[right], heap[left]]
     }
 
-    ops.init(`Keep a min-heap of ${input.k}; its root is the weakest current winner.`)
+    ops.init(`Keep a min-heap of ${input.k}. Its root is the weakest current winner.`)
     input.array.forEach((value, index) => {
       ops.read(index, `Read ${value} from the stream.`)
       if (heap.length < input.k) {
@@ -57,7 +57,7 @@ export const topKElements = {
           ops.swapUp(
             child,
             parent,
-            `${childValue} is smaller than ${parentValue}, so swap upward; the smaller value moves toward the root.`,
+            `${childValue} is smaller than ${parentValue}, so swap upward. The smaller value moves toward the root.`,
           )
           child = parent
         }
@@ -71,7 +71,7 @@ export const topKElements = {
       if (value <= heap[0].value) {
         ops.reject(
           index,
-          `${value} ≤ ${heap[0].value}; reject ${value} because it cannot enter the top ${input.k}.`,
+          `${value} ≤ ${heap[0].value}. Reject ${value} because it cannot enter the top ${input.k}.`,
         )
         return
       }
@@ -80,7 +80,7 @@ export const topKElements = {
       heap[0] = { value, source: index }
       ops.replaceRoot(
         index,
-        `${value} > ${evicted}; evict the weakest winner ${evicted} and place ${value} at the root.`,
+        `${value} > ${evicted}. Evict the weakest winner ${evicted} and place ${value} at the root.`,
       )
       let parent = 0
       while (true) {
@@ -92,7 +92,7 @@ export const topKElements = {
           ops.compareChildren(
             left,
             right,
-            `Compare children ${heap[left].value} and ${heap[right].value}; ${Math.min(heap[left].value, heap[right].value)} is weaker.`,
+            `Compare children ${heap[left].value} and ${heap[right].value}. ${Math.min(heap[left].value, heap[right].value)} is weaker.`,
           )
           if (heap[right].value < heap[left].value) weaker = right
         }
@@ -108,13 +108,13 @@ export const topKElements = {
         ops.swapDown(
           parent,
           weaker,
-          `${parentValue} > ${childValue}, so swap them; ${childValue} becomes the weaker root candidate.`,
+          `${parentValue} > ${childValue}, so swap them. ${childValue} becomes the weaker root candidate.`,
         )
         parent = weaker
       }
     })
     ops.done(
-      `The heap contains the ${input.k} largest values. Its root is the weakest winner; the heap itself is not globally sorted.`,
+      `The heap contains the ${input.k} largest values. Its root is the weakest winner. The heap itself is not globally sorted.`,
     )
   },
 } satisfies FamilyAlgorithmDefinition<

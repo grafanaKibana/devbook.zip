@@ -144,7 +144,7 @@ function createBstModel(values: readonly number[]): TreeModel {
         model.root = node(key)
         state.changed.add(key)
         state.success = key
-        return { changed: true, detail: `Inserted ${key} as the root; height is 1.` }
+        return { changed: true, detail: `Inserted ${key} as the root. Height is 1.` }
       }
       let current = model.root
       while (true) {
@@ -152,7 +152,7 @@ function createBstModel(values: readonly number[]): TreeModel {
         if (key === current.key)
           return {
             changed: false,
-            detail: `Compared ${state.path.join(" → ")}; ${key} already exists, so the tree did not change.`,
+            detail: `Compared ${state.path.join(" → ")}. ${key} already exists, so the tree did not change.`,
           }
         const side = key < current.key ? "left" : "right"
         const child = current[side]
@@ -167,7 +167,7 @@ function createBstModel(values: readonly number[]): TreeModel {
         const after = treeHeight(model.root)
         return {
           changed: true,
-          detail: `Inserted ${key} via ${state.path.join(" → ")}; height ${before} → ${after}. Sorted inserts keep extending one side instead of restoring balance.`,
+          detail: `Inserted ${key} via ${state.path.join(" → ")}. Height ${before} → ${after}. Sorted inserts keep extending one side instead of restoring balance.`,
         }
       }
     },
@@ -183,7 +183,7 @@ function createBstModel(values: readonly number[]): TreeModel {
       }
       return {
         found: false,
-        detail: `Search path ${state.path.join(" → ")} reached an empty child; ${key} is absent.`,
+        detail: `Search path ${state.path.join(" → ")} reached an empty child. ${key} is absent.`,
       }
     },
     remove(key, state) {
@@ -197,7 +197,7 @@ function createBstModel(values: readonly number[]): TreeModel {
       if (!current)
         return {
           changed: false,
-          detail: `Compared ${state.path.join(" → ")}; ${key} is absent, so the tree did not change.`,
+          detail: `Compared ${state.path.join(" → ")}. ${key} is absent, so the tree did not change.`,
         }
       state.path.push(current.key)
       state.changed.add(current.key)
@@ -224,11 +224,11 @@ function createBstModel(values: readonly number[]): TreeModel {
       }
       return {
         changed: true,
-        detail: `Removed ${key} via ${state.path.join(" → ")}; BST order is preserved at height ${treeHeight(model.root)}.`,
+        detail: `Removed ${key} via ${state.path.join(" → ")}. BST order is preserved at height ${treeHeight(model.root)}.`,
       }
     },
     meta: () => "",
-    invariant: () => `BST order valid · height ${treeHeight(model.root)}`,
+    invariant: () => `BST order valid, height ${treeHeight(model.root)}`,
   }
   return model
 }
@@ -353,7 +353,7 @@ function createAvlModel(values: readonly number[]): TreeModel {
                 ? `${repairs.join(", ")} restored |balance| ≤ 1.`
                 : "no rotation was needed."
             }`
-          : `Compared ${state.path.join(" → ")}; ${key} already exists, so the tree did not change.`,
+          : `Compared ${state.path.join(" → ")}. ${key} already exists, so the tree did not change.`,
       }
     },
     search(key, state) {
@@ -368,7 +368,7 @@ function createAvlModel(values: readonly number[]): TreeModel {
       }
       return {
         found: false,
-        detail: `Search path ${state.path.join(" → ")} reached an empty child; ${key} is absent.`,
+        detail: `Search path ${state.path.join(" → ")} reached an empty child. ${key} is absent.`,
       }
     },
     remove(key, state) {
@@ -384,11 +384,11 @@ function createAvlModel(values: readonly number[]): TreeModel {
                 ? `${repairs.join(", ")} rebalanced the shortened path.`
                 : "all ancestors stayed within |balance| ≤ 1."
             }`
-          : `Compared ${state.path.join(" → ")}; ${key} is absent, so the tree did not change.`,
+          : `Compared ${state.path.join(" → ")}. ${key} is absent, so the tree did not change.`,
       }
     },
     meta: (current) => `h${current.height} bf${balanceFactor(current)}`,
-    invariant: () => "AVL balance valid · |balance| ≤ 1",
+    invariant: () => "AVL balance valid, |balance| ≤ 1",
   }
   for (const value of values) model.insert(value, operationState())
   return model
@@ -531,8 +531,8 @@ function createRedBlackModel(values: readonly number[]): TreeModel {
       return {
         changed: inserted,
         detail: inserted
-          ? `Inserted ${key}; ${events.join(", ") || "no fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.`
-          : `Compared ${state.path.join(" → ")}; ${key} already exists, so the tree did not change.`,
+          ? `Inserted ${key}. ${events.join(", ") || "no fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.`
+          : `Compared ${state.path.join(" → ")}. ${key} already exists, so the tree did not change.`,
       }
     },
     search(key, state) {
@@ -547,7 +547,7 @@ function createRedBlackModel(values: readonly number[]): TreeModel {
       }
       return {
         found: false,
-        detail: `Search path ${state.path.join(" → ")} reached an empty child; ${key} is absent.`,
+        detail: `Search path ${state.path.join(" → ")} reached an empty child. ${key} is absent.`,
       }
     },
     remove(key, state) {
@@ -565,11 +565,11 @@ function createRedBlackModel(values: readonly number[]): TreeModel {
       if (model.root) model.root.color = "black"
       return {
         changed: true,
-        detail: `Removed ${key}; ${events.join(", ") || "no fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.`,
+        detail: `Removed ${key}. ${events.join(", ") || "no fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.`,
       }
     },
-    meta: (current) => (current.color === "red" ? "R" : "B"),
-    invariant: () => `RB invariants valid · black-height ${blackHeight(model.root)}`,
+    meta: () => "",
+    invariant: () => `RB invariants valid, black-height ${blackHeight(model.root)}`,
   }
   for (const value of values) model.insert(value, operationState())
   return model
@@ -582,7 +582,7 @@ function createSplayModel(values: readonly number[]): TreeModel {
     search: () => ({ found: false, detail: "" }),
     remove: () => ({ changed: false, detail: "" }),
     meta: () => "",
-    invariant: () => "BST order valid · accessed node becomes root",
+    invariant: () => "BST order valid, accessed node becomes root",
   }
   for (const value of values) model.root = plainInsert(model.root, value)
 
@@ -667,7 +667,7 @@ function createSplayModel(values: readonly number[]): TreeModel {
     if (result.found)
       return {
         changed: false,
-        detail: `${key} already exists; the tree did not change.`,
+        detail: `${key} already exists. The tree did not change.`,
       }
     const parent = result.last!
     const added = node(key)
@@ -690,8 +690,8 @@ function createSplayModel(values: readonly number[]): TreeModel {
     return {
       found: !!result.found,
       detail: result.found
-        ? `Search path ${state.path.join(" → ")} found ${key}; ${cases.join(" → ") || "already root"} moved it to the root.`
-        : `Search path ${state.path.join(" → ")} missed ${key}; canonical splay moves last accessed ${accessed?.key ?? "node"} to the root via ${cases.join(" → ") || "no rotation"}.`,
+        ? `Search path ${state.path.join(" → ")} found ${key}. ${cases.join(" → ") || "already root"} moved it to the root.`
+        : `Search path ${state.path.join(" → ")} missed ${key}. Canonical splay moves last accessed ${accessed?.key ?? "node"} to the root via ${cases.join(" → ") || "no rotation"}.`,
     }
   }
   model.remove = (key, state) => {
@@ -701,7 +701,7 @@ function createSplayModel(values: readonly number[]): TreeModel {
       const cases = accessed ? splay(accessed, state) : []
       return {
         changed: false,
-        detail: `${key} is absent; last accessed ${accessed?.key ?? "node"} was splayed via ${cases.join(" → ") || "no rotation"}.`,
+        detail: `${key} is absent. Last accessed ${accessed?.key ?? "node"} was splayed via ${cases.join(" → ") || "no rotation"}.`,
       }
     }
     splay(result.found, state)
@@ -721,7 +721,7 @@ function createSplayModel(values: readonly number[]): TreeModel {
     }
     return {
       changed: true,
-      detail: `Removed ${key}; splayed the left maximum and joined both ordered halves.`,
+      detail: `Removed ${key}. Splayed the left maximum and joined both ordered halves.`,
     }
   }
   return model

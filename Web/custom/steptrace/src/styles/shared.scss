@@ -30,6 +30,10 @@
   --_panel-shadow: var(--st-panel-shadow, #{tokens.$panel-shadow-light});
   --_held-bg: var(--st-held-bg, #{tokens.$held-bg-light});
   --_held-fg: var(--st-held-fg, #{tokens.$on-accent});
+  /* Red-black "black" is a data colour, not text ink, so it stays black in
+     both themes. */
+  --_rb-black: var(--st-rb-black, #{tokens.$rb-black});
+  --_rb-black-ink: #{tokens.$on-accent};
   /* Font tokens — hosts bind these to their body and code families (Quartz:
      --bodyFont/--codeFont; Obsidian: --font-text/--font-monospace).
      Fallbacks name the design's own faces for standalone use. */
@@ -183,6 +187,9 @@
    State styles only set --steptrace-array-outline, so highlights cannot square
    off or be clipped when the first or last cell is active. */
 .steptrace .steptrace__pcells,
+.steptrace .steptrace__cells,
+.steptrace .steptrace__bcells,
+.steptrace .steptrace__hash-buckets,
 .steptrace .steptrace__contiguous-array {
   --steptrace-array-radius: var(--_array-radius);
   border-radius: var(--steptrace-array-radius);
@@ -190,6 +197,9 @@
 }
 
 .steptrace .steptrace__pcells > .steptrace__pcell,
+.steptrace .steptrace__cells > .steptrace__cell,
+.steptrace .steptrace__bcells > .steptrace__bcell,
+.steptrace .steptrace__hash-buckets > .steptrace__hash-cell,
 .steptrace .steptrace__contiguous-array > .steptrace__contiguous-cell {
   border-radius: 0;
   outline: var(--_stroke-emphasis) solid var(--steptrace-array-outline, transparent);
@@ -197,20 +207,98 @@
 }
 
 .steptrace .steptrace__pcells > .steptrace__pcell:first-child,
+.steptrace .steptrace__cells > .steptrace__cell:first-child,
+.steptrace .steptrace__bcells > .steptrace__bcell:first-child,
+.steptrace .steptrace__hash-buckets > .steptrace__hash-cell:first-child,
 .steptrace .steptrace__contiguous-array > .steptrace__contiguous-cell:first-child {
   border-radius: calc(var(--steptrace-array-radius) - var(--_stroke-hair)) 0 0
     calc(var(--steptrace-array-radius) - var(--_stroke-hair));
 }
 
 .steptrace .steptrace__pcells > .steptrace__pcell:last-child,
+.steptrace .steptrace__cells > .steptrace__cell:last-child,
+.steptrace .steptrace__bcells > .steptrace__bcell:last-child,
+.steptrace .steptrace__hash-buckets > .steptrace__hash-cell:last-child,
 .steptrace .steptrace__contiguous-array > .steptrace__contiguous-cell:last-child {
   border-radius: 0 calc(var(--steptrace-array-radius) - var(--_stroke-hair))
     calc(var(--steptrace-array-radius) - var(--_stroke-hair)) 0;
 }
 
 .steptrace .steptrace__pcells > .steptrace__pcell:only-child,
+.steptrace .steptrace__cells > .steptrace__cell:only-child,
+.steptrace .steptrace__bcells > .steptrace__bcell:only-child,
+.steptrace .steptrace__hash-buckets > .steptrace__hash-cell:only-child,
 .steptrace .steptrace__contiguous-array > .steptrace__contiguous-cell:only-child {
   border-radius: calc(var(--steptrace-array-radius) - var(--_stroke-hair));
+}
+
+/* Bordered shells are opaque, so the page dot grid never shows through. */
+.steptrace
+  :where(
+    .steptrace__pcells,
+    .steptrace__cells,
+    .steptrace__bcells,
+    .steptrace__hash-buckets,
+    .steptrace__contiguous-array,
+    .steptrace__btboard,
+    .steptrace__btpath,
+    .steptrace__stack-board,
+    .steptrace__prefix-text-cell,
+    .steptrace__coin-tray
+  ) {
+  background-color: var(--st-page, var(--_surface));
+}
+
+/* A tinted cell keeps a page-coloured gutter inside its gridlines, so the
+   hairline between cells reads at the same contrast as on the page. */
+.steptrace
+  :where(
+    .steptrace__pcell,
+    .steptrace__cell,
+    .steptrace__bcell,
+    .steptrace__contiguous-cell,
+    .steptrace__hash-cell,
+    .steptrace__btcell,
+    .steptrace__dp th[data-role],
+    .steptrace__dp td,
+    .steptrace__warehouse-matrix td
+  ) {
+  box-shadow: inset 0 0 0 var(--_stroke-emphasis) var(--st-page, var(--_surface));
+}
+
+/* Matrix corner cells follow the frame's curve, so a corner highlight or
+   inset ring stays concentric with it. */
+.steptrace .steptrace__btcell:first-child,
+.steptrace
+  :is(.steptrace__dp, .steptrace__warehouse-matrix)
+  > :nth-child(1 of thead, tbody, tfoot)
+  > tr:first-child
+  > :first-child {
+  border-top-left-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
+}
+.steptrace .steptrace__btcell:nth-child(4),
+.steptrace
+  :is(.steptrace__dp, .steptrace__warehouse-matrix)
+  > :nth-child(1 of thead, tbody, tfoot)
+  > tr:first-child
+  > :last-child {
+  border-top-right-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
+}
+.steptrace .steptrace__btcell:nth-last-child(4),
+.steptrace
+  :is(.steptrace__dp, .steptrace__warehouse-matrix)
+  > :nth-last-child(1 of thead, tbody, tfoot)
+  > tr:last-child
+  > :first-child {
+  border-bottom-left-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
+}
+.steptrace .steptrace__btcell:last-child,
+.steptrace
+  :is(.steptrace__dp, .steptrace__warehouse-matrix)
+  > :nth-last-child(1 of thead, tbody, tfoot)
+  > tr:last-child
+  > :last-child {
+  border-bottom-right-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
 }
 
 /* Reduce, do not remove: positional movement is what causes vestibular trouble,
@@ -273,10 +361,23 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.steptrace__phase-name:not(:empty)::after,
+.steptrace__rail-label-detail::before,
+.steptrace__status .steptrace__counts::before,
+span.steptrace__sep {
+  display: inline-block;
+  inline-size: var(--_stroke-hair);
+  block-size: 0.9em;
+  margin-inline: var(--_space-3);
+  vertical-align: -0.1em;
+  background: var(--_chrome-border-hover);
+  content: "";
+}
 .steptrace__phase-name:not(:empty)::after {
-  margin-left: var(--_space-4);
-  color: var(--_muted);
-  content: "·";
+  margin-inline-end: 0;
+}
+tspan.steptrace__sep {
+  fill: var(--_chrome-border-hover);
 }
 .steptrace__counter {
   justify-self: end;
@@ -547,6 +648,12 @@
   text-transform: uppercase;
   color: var(--_muted);
   margin-bottom: var(--_space-3);
+}
+.steptrace__rail-label-detail {
+  color: var(--_context-text);
+  font-weight: var(--_weight-regular);
+  letter-spacing: normal;
+  text-transform: none;
 }
 .steptrace__trace {
   display: flex;

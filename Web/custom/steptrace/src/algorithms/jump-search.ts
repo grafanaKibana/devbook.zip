@@ -48,7 +48,7 @@ export const jumpSearch = {
 
     if (values[bound] < target) {
       ops.done(
-        `${target} is larger than the array maximum; not found after ${ops.comparisons} probes.`,
+        `${target} is larger than the array maximum. Not found after ${ops.comparisons} probes.`,
       )
       return
     }
@@ -58,14 +58,14 @@ export const jumpSearch = {
     ops.beginPhase(
       lo,
       hi,
-      `The target can only be in block [${lo}, ${hi}]; scan that block from the start.`,
+      `The target can only be in block [${lo}, ${hi}]. Scan that block from the start.`,
       "scan",
     )
 
     for (let i = lo; i <= hi && i < values.length; i++) {
       ops.probe(lo, hi, i, `Linear scan in jump block [${lo}, ${hi}]: check index ${i}.`)
       if (values[i] === target) {
-        ops.hit(i, `${values[i]} equals ${target}; found it at index ${i}.`)
+        ops.hit(i, `${values[i]} equals ${target}. Found it at index ${i}.`)
         ops.done(`Found ${target} at index ${i} after ${ops.comparisons} probes.`)
         return
       }

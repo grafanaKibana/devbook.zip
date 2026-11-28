@@ -27,7 +27,7 @@ export const twoHeaps = {
       ops.insert(index, `Insert ${value}, then rebalance so heap sizes differ by at most one.`),
     )
     ops.done(
-      "Every lower value is at most every upper value; the root or root average is the median.",
+      "Every lower value is at most every upper value. The root or root average is the median.",
     )
   },
 } satisfies FamilyAlgorithmDefinition<"pointers", TwoHeapsConfig, TwoHeapsRecorder, TwoHeapsFrame>

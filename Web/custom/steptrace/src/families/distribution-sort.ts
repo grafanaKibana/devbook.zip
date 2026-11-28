@@ -272,7 +272,7 @@ export function makeDistributionSortView(frames: readonly DistributionSortFrame[
   )
   const output = makeDistributionArrayBand(
     "Sorted Array",
-    "The input is read right-to-left; each placement preserves duplicate order.",
+    "The input is read right-to-left. Each placement preserves duplicate order.",
     first.input.length,
     "steptrace__distribution-bars--output",
   )
@@ -322,7 +322,7 @@ export function makeDistributionSortView(frames: readonly DistributionSortFrame[
           : `output index ${slotIndex}, value ${placed}, token ${labels[origin ?? 0]}`,
       )
     })
-    setStatus(status, frame.message, `· ${phaseLabel(frame.type)} · step ${index + 1}/${total}`)
+    setStatus(status, frame.message, `${phaseLabel(frame.type)}, step ${index + 1}/${total}`)
   }
 
   return {

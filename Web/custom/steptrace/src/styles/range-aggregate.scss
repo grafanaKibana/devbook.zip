@@ -25,7 +25,7 @@
   overflow: hidden;
   border: var(--_stroke-hair) solid var(--_chrome-border);
   border-radius: var(--_radius-sm);
-  background: color-mix(in srgb, var(--_surface) 88%, transparent);
+  background: var(--st-page, var(--_surface));
   transition:
     background-color var(--_dur-quick) var(--_ease-decelerate),
     border-color var(--_dur-quick) var(--_ease-decelerate);

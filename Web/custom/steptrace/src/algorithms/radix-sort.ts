@@ -76,7 +76,7 @@ export const radixSort = {
         ops.scatter(
           sourceIndex,
           digit,
-          `${value}'s ${passLabel} digit is ${digit}; append it to bucket ${digit}.`,
+          `${value}'s ${passLabel} digit is ${digit}. Append it to bucket ${digit}.`,
         )
       })
       ops.beginGather(
@@ -89,7 +89,7 @@ export const radixSort = {
           ops.gather(
             bucketIndex,
             itemIndex,
-            `Take ${value} from bucket ${bucketIndex}; write it at output index ${next.length - 1}.`,
+            `Take ${value} from bucket ${bucketIndex}. Write it at output index ${next.length - 1}.`,
           )
         })
       })

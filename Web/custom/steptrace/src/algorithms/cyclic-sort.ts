@@ -28,7 +28,7 @@ export const cyclicSort = {
   parse: parseCyclicSortConfig,
   run(_input, ops) {
     ops.init(
-      "Cyclic sort — value v belongs at index v − 1; keep the cursor still until its value is home.",
+      "Cyclic sort — value v belongs at index v − 1. Keep the cursor still until its value is home.",
     )
     let cursor = 0
     while (cursor < ops.value.length) {
@@ -44,12 +44,12 @@ export const cyclicSort = {
         ops.swapHome(
           cursor,
           home,
-          `Send ${value} home to index ${home}; ${displaced} returns to index ${cursor}.`,
+          `Send ${value} home to index ${home}. ${displaced} returns to index ${cursor}.`,
         )
         ops.settleHome(home, `Value ${value} is now fixed at its home index ${home}.`)
         continue
       }
-      ops.settleHome(cursor, `Value ${value} is already home at index ${cursor}; advance.`)
+      ops.settleHome(cursor, `Value ${value} is already home at index ${cursor}. Advance.`)
       cursor++
     }
     ops.lockAll(Array.from({ length: ops.value.length }, (_, index) => index))

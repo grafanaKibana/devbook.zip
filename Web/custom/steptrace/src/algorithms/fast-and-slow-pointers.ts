@@ -64,17 +64,17 @@ export const fastAndSlowPointers = {
 
     ops.move("slow", "G", "Slow advances one node: F → G.")
     ops.move("fast", "F", "Fast begins its next advance: E → F.")
-    ops.meet("fast", "G", "Fast completes the advance at G; both pointers meet, proving a cycle.")
+    ops.meet("fast", "G", "Fast completes the advance at G. Both pointers meet, proving a cycle.")
 
     ops.reset(
       "fast",
       "A",
-      "Reset fast to A. Keep slow at G; both pointers now move one node at a time.",
+      "Reset fast to A. Keep slow at G. Both pointers now move one node at a time.",
     )
     ops.move("fast", "B", "Head pointer advances one node: A → B.")
     ops.move("slow", "H", "Cycle pointer advances one node: G → H.")
     ops.move("fast", "C", "Head pointer advances one node: B → C.")
-    ops.enter("slow", "C", "Cycle pointer advances H → C; both meet at cycle entry C.")
+    ops.enter("slow", "C", "Cycle pointer advances H → C. Both meet at cycle entry C.")
   },
 } satisfies FamilyAlgorithmDefinition<
   "pointers",

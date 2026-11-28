@@ -29,6 +29,8 @@
   --_panel-shadow: var(--st-panel-shadow, rgba(0, 0, 0, 0.12));
   --_held-bg: var(--st-held-bg, #92400e);
   --_held-fg: var(--st-held-fg, #fff);
+  --_rb-black: var(--st-rb-black, #1b1e17);
+  --_rb-black-ink: #fff;
   --_font-body: var( --st-font-body, "Source Sans 3", "Source Sans Pro", ui-sans-serif, system-ui, sans-serif );
   --_font-mono: var(--st-font-mono, "IBM Plex Mono", ui-monospace, monospace);
   --_space-hair: 0.0625rem;
@@ -101,28 +103,65 @@
   display: none !important;
 }
 .steptrace .steptrace__pcells,
+.steptrace .steptrace__cells,
+.steptrace .steptrace__bcells,
+.steptrace .steptrace__hash-buckets,
 .steptrace .steptrace__contiguous-array {
   --steptrace-array-radius: var(--_array-radius);
   border-radius: var(--steptrace-array-radius);
   overflow: hidden;
 }
 .steptrace .steptrace__pcells > .steptrace__pcell,
+.steptrace .steptrace__cells > .steptrace__cell,
+.steptrace .steptrace__bcells > .steptrace__bcell,
+.steptrace .steptrace__hash-buckets > .steptrace__hash-cell,
 .steptrace .steptrace__contiguous-array > .steptrace__contiguous-cell {
   border-radius: 0;
   outline: var(--_stroke-emphasis) solid var(--steptrace-array-outline, transparent);
   outline-offset: calc(-1 * var(--_stroke-emphasis));
 }
 .steptrace .steptrace__pcells > .steptrace__pcell:first-child,
+.steptrace .steptrace__cells > .steptrace__cell:first-child,
+.steptrace .steptrace__bcells > .steptrace__bcell:first-child,
+.steptrace .steptrace__hash-buckets > .steptrace__hash-cell:first-child,
 .steptrace .steptrace__contiguous-array > .steptrace__contiguous-cell:first-child {
   border-radius: calc(var(--steptrace-array-radius) - var(--_stroke-hair)) 0 0 calc(var(--steptrace-array-radius) - var(--_stroke-hair));
 }
 .steptrace .steptrace__pcells > .steptrace__pcell:last-child,
+.steptrace .steptrace__cells > .steptrace__cell:last-child,
+.steptrace .steptrace__bcells > .steptrace__bcell:last-child,
+.steptrace .steptrace__hash-buckets > .steptrace__hash-cell:last-child,
 .steptrace .steptrace__contiguous-array > .steptrace__contiguous-cell:last-child {
   border-radius: 0 calc(var(--steptrace-array-radius) - var(--_stroke-hair)) calc(var(--steptrace-array-radius) - var(--_stroke-hair)) 0;
 }
 .steptrace .steptrace__pcells > .steptrace__pcell:only-child,
+.steptrace .steptrace__cells > .steptrace__cell:only-child,
+.steptrace .steptrace__bcells > .steptrace__bcell:only-child,
+.steptrace .steptrace__hash-buckets > .steptrace__hash-cell:only-child,
 .steptrace .steptrace__contiguous-array > .steptrace__contiguous-cell:only-child {
   border-radius: calc(var(--steptrace-array-radius) - var(--_stroke-hair));
+}
+.steptrace :where(.steptrace__pcells, .steptrace__cells, .steptrace__bcells, .steptrace__hash-buckets, .steptrace__contiguous-array, .steptrace__btboard, .steptrace__btpath, .steptrace__stack-board, .steptrace__prefix-text-cell, .steptrace__coin-tray) {
+  background-color: var(--st-page, var(--_surface));
+}
+.steptrace :where(.steptrace__pcell, .steptrace__cell, .steptrace__bcell, .steptrace__contiguous-cell, .steptrace__hash-cell, .steptrace__btcell, .steptrace__dp th[data-role], .steptrace__dp td, .steptrace__warehouse-matrix td) {
+  box-shadow: inset 0 0 0 var(--_stroke-emphasis) var(--st-page, var(--_surface));
+}
+.steptrace .steptrace__btcell:first-child,
+.steptrace :is(.steptrace__dp, .steptrace__warehouse-matrix) > :nth-child(1 of thead, tbody, tfoot) > tr:first-child > :first-child {
+  border-top-left-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
+}
+.steptrace .steptrace__btcell:nth-child(4),
+.steptrace :is(.steptrace__dp, .steptrace__warehouse-matrix) > :nth-child(1 of thead, tbody, tfoot) > tr:first-child > :last-child {
+  border-top-right-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
+}
+.steptrace .steptrace__btcell:nth-last-child(4),
+.steptrace :is(.steptrace__dp, .steptrace__warehouse-matrix) > :nth-last-child(1 of thead, tbody, tfoot) > tr:last-child > :first-child {
+  border-bottom-left-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
+}
+.steptrace .steptrace__btcell:last-child,
+.steptrace :is(.steptrace__dp, .steptrace__warehouse-matrix) > :nth-last-child(1 of thead, tbody, tfoot) > tr:last-child > :last-child {
+  border-bottom-right-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
 }
 .steptrace--reduced * {
   animation: none !important;
@@ -185,10 +224,23 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.steptrace__phase-name:not(:empty)::after,
+.steptrace__rail-label-detail::before,
+.steptrace__status .steptrace__counts::before,
+span.steptrace__sep {
+  display: inline-block;
+  inline-size: var(--_stroke-hair);
+  block-size: 0.9em;
+  margin-inline: var(--_space-3);
+  vertical-align: -0.1em;
+  background: var(--_chrome-border-hover);
+  content: "";
+}
 .steptrace__phase-name:not(:empty)::after {
-  margin-left: var(--_space-4);
-  color: var(--_muted);
-  content: "·";
+  margin-inline-end: 0;
+}
+tspan.steptrace__sep {
+  fill: var(--_chrome-border-hover);
 }
 .steptrace__counter {
   justify-self: end;
@@ -410,6 +462,12 @@
   text-transform: uppercase;
   color: var(--_muted);
   margin-bottom: var(--_space-3);
+}
+.steptrace__rail-label-detail {
+  color: var(--_context-text);
+  font-weight: var(--_weight-regular);
+  letter-spacing: normal;
+  text-transform: none;
 }
 .steptrace__trace {
   display: flex;
@@ -1721,9 +1779,9 @@
   min-width: 0;
   min-height: 0;
   padding: var(--_space-0) var(--_space-1);
-  border: var(--_stroke-hair) solid var(--_hair);
+  border: var(--_stroke-hair) solid var(--_chrome-border);
   border-radius: var(--_radius-xs);
-  background: var(--_surface);
+  background: var(--st-page, var(--_surface));
   color: var(--_text);
   font: var(--_weight-strong) clamp(var(--_type-xs), 1.45vw, var(--_type-sm))/var(--_leading-readable) var(--_font-mono);
   font-variant-numeric: tabular-nums;
@@ -3355,7 +3413,7 @@
   padding: var(--_space-3);
   border: var(--_stroke-hair) solid var(--_boundary-border);
   border-radius: var(--_boundary-radius);
-  background: color-mix(in srgb, var(--_boundary-cell) 94%, var(--_text));
+  background: var(--_boundary-cell);
 }
 .steptrace .steptrace__boundary-lane[data-state=empty] {
   opacity: 0.58;
@@ -4931,7 +4989,7 @@
   justify-content: center;
   overflow: hidden;
   color: var(--_text);
-  background: color-mix(in srgb, var(--_neutral) 12%, var(--_surface));
+  background: var(--st-page, var(--_surface));
   font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
   white-space: nowrap;
   transform: translateY(-50%);
@@ -5120,7 +5178,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--_space-1);
-  background: var(--_surface);
+  background: var(--st-page, var(--_surface));
   font: var(--_weight-strong) var(--_type-xs)/var(--_leading-solid) var(--_font-mono);
   transition:
     inset-inline-start var(--_dur-move) var(--_spring-soft),
@@ -5185,7 +5243,7 @@
 .steptrace .steptrace__linked-list-node-card {
   position: relative;
   min-inline-size: 0;
-  max-inline-size: 5.25rem;
+  max-inline-size: 7rem;
   flex: 1 1 0;
 }
 .steptrace .steptrace__linked-list-node-card > .steptrace__contiguous-array {
@@ -5216,12 +5274,12 @@
 }
 .steptrace .steptrace__linked-list-board[data-variant=doubly] .steptrace__linked-list-cell {
   grid-template-rows: minmax(0, 1fr) auto auto;
-  block-size: calc(44px + 2rem);
+  block-size: calc(44px + 1.35rem);
 }
 .steptrace .steptrace__linked-list-pointer {
   position: relative;
   min-width: 0;
-  padding: var(--_space-0);
+  padding: var(--_space-1) var(--_space-2);
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -5234,12 +5292,15 @@
   position: absolute;
   inset-block-start: 0;
   inset-inline: var(--_stroke-hair);
-  border-block-start: var(--_stroke-hair) solid var(--_border);
+  border-block-start: var(--_stroke-hair) solid var(--_chrome-border);
   content: "";
 }
 .steptrace .steptrace__linked-list-value-field {
-  grid-template-rows: auto auto;
-  gap: var(--_space-0);
+  grid-auto-flow: column;
+  align-items: baseline;
+  align-content: center;
+  justify-content: center;
+  column-gap: var(--_space-2);
 }
 .steptrace .steptrace__linked-list-value {
   font: inherit;
@@ -5347,7 +5408,79 @@
   background: color-mix(in srgb, var(--_blue) 16%, transparent);
 }
 .steptrace .steptrace__lru-chain .steptrace__linked-list-board {
-  margin-inline: auto;
+  inline-size: 100%;
+  min-block-size: 0;
+}
+.steptrace .steptrace__lru-chain .steptrace__linked-list-node-card {
+  max-inline-size: none;
+}
+.steptrace .steptrace__lru-chain .steptrace__linked-list-board .steptrace__linked-list-cell {
+  grid-template-areas: "prev value next";
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  block-size: calc(44px + 1.35rem + 2 * var(--_stroke-hair));
+}
+.steptrace .steptrace__lru-chain .steptrace__linked-list-value-field {
+  grid-area: value;
+  grid-auto-flow: row;
+  align-items: center;
+  justify-items: center;
+  row-gap: var(--_space-0);
+}
+.steptrace .steptrace__lru-chain .steptrace__linked-list-pointer {
+  grid-template-columns: min-content;
+  place-content: center;
+  padding: var(--_space-1) var(--_space-2);
+  white-space: normal;
+  text-align: center;
+}
+.steptrace .steptrace__lru-chain .steptrace__linked-list-pointer::before {
+  display: none;
+}
+.steptrace .steptrace__lru-chain .steptrace__linked-list-pointer[data-pointer=prev] {
+  grid-area: prev;
+  border-inline-end: var(--_stroke-hair) solid var(--_chrome-border);
+}
+.steptrace .steptrace__lru-chain .steptrace__linked-list-pointer[data-pointer=next] {
+  grid-area: next;
+  border-inline-start: var(--_stroke-hair) solid var(--_chrome-border);
+}
+.steptrace .steptrace__lru-chain .steptrace__linked-list-board {
+  padding-block: var(--_space-5);
+}
+.steptrace .steptrace__lru-chain .steptrace__linked-list-board .steptrace__linked-list-link {
+  inline-size: calc(65.38% + var(--steptrace-linked-gap));
+  block-size: var(--_space-4);
+  border: 1.5px solid currentColor;
+}
+.steptrace .steptrace__lru-chain .steptrace__linked-list-board .steptrace__linked-list-link[data-pointer=next] {
+  inset-block: auto 100%;
+  inset-inline: 84.62% auto;
+  border-block-end: 0;
+  border-start-start-radius: var(--_radius-sm);
+  border-start-end-radius: var(--_radius-sm);
+}
+.steptrace .steptrace__lru-chain .steptrace__linked-list-board .steptrace__linked-list-link[data-pointer=prev] {
+  inset-block: 100% auto;
+  inset-inline: calc(-50% - var(--steptrace-linked-gap)) auto;
+  border-block-start: 0;
+  border-end-start-radius: var(--_radius-sm);
+  border-end-end-radius: var(--_radius-sm);
+}
+.steptrace .steptrace__lru-chain .steptrace__linked-list-board .steptrace__linked-list-link::after {
+  inset-block-start: auto;
+  border-block: 0;
+  border-inline: 4px solid transparent;
+}
+.steptrace .steptrace__lru-chain .steptrace__linked-list-board .steptrace__linked-list-link[data-pointer=next]::after {
+  inset-block-end: 0;
+  inset-inline: auto -3.25px;
+  border-block-start: 6px solid currentColor;
+}
+.steptrace .steptrace__lru-chain .steptrace__linked-list-board .steptrace__linked-list-link[data-pointer=prev]::after {
+  inset-block-start: 0;
+  inset-inline: -3.25px auto;
+  border-block-end: 6px solid currentColor;
 }
 @media (prefers-reduced-motion: reduce) {
   .steptrace .steptrace__linked-list-cell,
@@ -5489,7 +5622,7 @@
   min-block-size: 1.6rem;
   padding: var(--_space-1) var(--_space-2);
   border-inline-start: 3px solid var(--_neutral);
-  background: color-mix(in srgb, var(--_run-cell) 88%, var(--_surface));
+  background: var(--_run-cell);
   font-family: var(--_font-mono);
   font-variant-numeric: tabular-nums;
   transition:
@@ -5588,7 +5721,7 @@
   min-block-size: 1.8rem;
   padding: var(--_space-2) var(--_space-2);
   border-inline-start: 2px solid var(--_neutral);
-  background: color-mix(in srgb, var(--_run-cell) 86%, var(--_surface));
+  background: var(--_run-cell);
   color: var(--_muted);
   font: var(--_weight-strong) var(--_type-xs)/var(--_leading-readable) var(--_font-mono);
   font-variant-numeric: tabular-nums;
@@ -5986,9 +6119,6 @@
 .steptrace__contiguous-cell:last-child {
   border-inline-end: 0;
 }
-.steptrace__contiguous-cell[data-empty="0"] {
-  background: color-mix(in srgb, var(--_accent) 10%, transparent);
-}
 .steptrace__contiguous-cell[data-active="1"] {
   background: color-mix(in srgb, var(--_blue) 12%, transparent);
 }
@@ -6069,7 +6199,7 @@
   padding: var(--_space-3) var(--_space-4);
   border: var(--_stroke-hair) solid var(--_chrome-border);
   border-radius: var(--_radius-md);
-  background: color-mix(in srgb, var(--_surface) 78%, transparent);
+  background: var(--st-page, var(--_surface));
 }
 .steptrace__hash-token,
 .steptrace__hash-chain-slot {
@@ -6453,7 +6583,7 @@
 }
 .steptrace .steptrace__graph-rep-lists {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--_space-4);
 }
 .steptrace .steptrace__graph-rep-heading {
@@ -6485,8 +6615,7 @@
 }
 .steptrace .steptrace__graph-rep-list-row,
 .steptrace .steptrace__graph-rep-edge-row {
-  block-size: 2.4rem;
-  grid-template-rows: minmax(0, 1fr) 0.8rem;
+  block-size: calc(44px + 1.35rem);
 }
 .steptrace .steptrace__graph-rep-list-row[data-changed="1"],
 .steptrace .steptrace__graph-rep-edge-row[data-changed="1"] {
@@ -6495,12 +6624,9 @@
 }
 .steptrace .steptrace__graph-rep-list-row .steptrace__contiguous-value,
 .steptrace .steptrace__graph-rep-edge-row .steptrace__contiguous-value {
-  padding: var(--_space-1);
+  padding: var(--_space-2);
   font-size: var(--_type-sm);
   white-space: nowrap;
-}
-.steptrace .steptrace__graph-rep-edge-row .steptrace__contiguous-value {
-  padding-inline: var(--_space-0);
 }
 .steptrace .steptrace__graph-rep-list-row .steptrace__contiguous-index,
 .steptrace .steptrace__graph-rep-edge-row .steptrace__contiguous-index {
@@ -6511,9 +6637,6 @@
     min-block-size: 31rem;
   }
   .steptrace .steptrace__graph-rep-storage {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .steptrace .steptrace__graph-rep-lists {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -6545,7 +6668,7 @@
   overflow: hidden;
   border: var(--_stroke-hair) solid var(--_chrome-border);
   border-radius: var(--_radius-sm);
-  background: color-mix(in srgb, var(--_surface) 88%, transparent);
+  background: var(--st-page, var(--_surface));
   transition: background-color var(--_dur-quick) var(--_ease-decelerate), border-color var(--_dur-quick) var(--_ease-decelerate);
 }
 .steptrace__range-block-head {
@@ -6713,13 +6836,14 @@
   stroke-width: 2.4;
 }
 .steptrace .steptrace__binary-tree-node[data-color=black] .steptrace__ncirc {
-  fill: var(--_text);
+  fill: var(--_rb-black);
+  stroke: var(--_chrome-border-hover);
 }
 .steptrace .steptrace__binary-tree-node[data-color=red] .steptrace__ncirc {
   fill: var(--_red);
 }
 .steptrace .steptrace__binary-tree-node[data-color=black] .steptrace__id {
-  fill: var(--_surface);
+  fill: var(--_rb-black-ink);
 }
 .steptrace .steptrace__binary-tree-node[data-color=red] .steptrace__id {
   fill: var(--_on-red);
@@ -6775,6 +6899,7 @@
 }
 .steptrace .steptrace__multiway-tree-edge,
 .steptrace .steptrace__multiway-tree-link,
+.steptrace .steptrace__multiway-tree-frame,
 .steptrace .steptrace__multiway-tree-cell {
   transition:
     fill var(--_dur-quick) ease,
@@ -6788,29 +6913,40 @@
   stroke: var(--_green);
   stroke-width: 2.4;
 }
-.steptrace .steptrace__multiway-tree-cell {
-  fill: var(--_surface);
+.steptrace .steptrace__multiway-tree-frame {
+  fill: var(--st-page, var(--_surface));
   stroke: var(--_chrome-border);
   stroke-width: var(--_stroke-hair);
 }
-.steptrace .steptrace__multiway-tree-node[data-path="1"] .steptrace__multiway-tree-cell {
-  fill: color-mix(in srgb, var(--_green) 14%, var(--_surface));
+.steptrace .steptrace__multiway-tree-divider {
+  stroke: var(--_chrome-border);
+  stroke-width: var(--_stroke-hair);
+}
+.steptrace .steptrace__multiway-tree-cell {
+  fill: transparent;
+  stroke: none;
+}
+.steptrace .steptrace__multiway-tree-node[data-path="1"] .steptrace__multiway-tree-frame {
   stroke: var(--_green);
+}
+.steptrace .steptrace__multiway-tree-node[data-path="1"] .steptrace__multiway-tree-cell {
+  fill: color-mix(in srgb, var(--_green) 14%, var(--st-page, var(--_surface)));
+}
+.steptrace .steptrace__multiway-tree-node[data-affected="1"] .steptrace__multiway-tree-frame {
+  stroke: var(--_blue);
 }
 .steptrace .steptrace__multiway-tree-node[data-affected="1"] .steptrace__multiway-tree-cell {
-  fill: color-mix(in srgb, var(--_blue) 16%, var(--_surface));
-  stroke: var(--_blue);
-  stroke-width: 2;
+  fill: color-mix(in srgb, var(--_blue) 16%, var(--st-page, var(--_surface)));
 }
 .steptrace .steptrace__multiway-tree-node .steptrace__multiway-tree-cell[data-state=special] {
-  fill: color-mix(in srgb, var(--_blue) 24%, var(--_surface));
+  fill: color-mix(in srgb, var(--_blue) 24%, var(--st-page, var(--_surface)));
   stroke: var(--_blue);
-  stroke-width: 2.2;
+  stroke-width: var(--_stroke-emphasis);
 }
 .steptrace .steptrace__multiway-tree-node .steptrace__multiway-tree-cell[data-state=found] {
-  fill: color-mix(in srgb, var(--_green) 20%, var(--_surface));
+  fill: color-mix(in srgb, var(--_green) 20%, var(--st-page, var(--_surface)));
   stroke: var(--_green);
-  stroke-width: 2.2;
+  stroke-width: var(--_stroke-emphasis);
 }
 .steptrace .steptrace__multiway-tree-success {
   display: none;
@@ -6831,7 +6967,6 @@
   fill: none;
   stroke: var(--_muted);
   stroke-width: 1.4;
-  stroke-dasharray: 4 3;
 }
 .steptrace .steptrace__multiway-tree-link[data-state=active] {
   stroke: var(--_green);

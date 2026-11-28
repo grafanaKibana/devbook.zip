@@ -47,7 +47,7 @@ export const activitySelection = {
       0,
       accepted.id,
       pair(accepted),
-      `Accept [${accepted.start}, ${accepted.end}]; it finishes first.`,
+      `Accept [${accepted.start}, ${accepted.end}]. It finishes first.`,
     )
 
     for (let index = 1; index < sorted.length; index++) {
@@ -65,7 +65,7 @@ export const activitySelection = {
         ops.reject(
           index,
           next.id,
-          `Reject [${next.start}, ${next.end}]; accepting it would overlap [${accepted.start}, ${accepted.end}].`,
+          `Reject [${next.start}, ${next.end}]. Accepting it would overlap [${accepted.start}, ${accepted.end}].`,
         )
         continue
       }
@@ -79,7 +79,7 @@ export const activitySelection = {
       )
     }
 
-    ops.finish("Every meeting was considered; the accepted schedule is maximum-size.")
+    ops.finish("Every meeting was considered. The accepted schedule is maximum-size.")
   },
 } satisfies FamilyAlgorithmDefinition<
   "pointers",

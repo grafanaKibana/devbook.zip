@@ -64,7 +64,7 @@ export const binarySearchOnAnswer = {
   parse: parseBinarySearchOnAnswerConfig,
   run(input, ops) {
     ops.begin(
-      `Search capacities ${input.lower} through ${input.upper}; the first feasible value is the answer.`,
+      `Search capacities ${input.lower} through ${input.upper}. The first feasible value is the answer.`,
     )
 
     let lo = input.lower
@@ -86,8 +86,8 @@ export const binarySearchOnAnswer = {
         lo,
         hi,
         evaluation.feasible
-          ? `Keep ${lo} through ${hi}; a smaller feasible capacity may exist.`
-          : `Keep ${lo} through ${hi}; every smaller capacity is infeasible.`,
+          ? `Keep ${lo} through ${hi}. A smaller feasible capacity may exist.`
+          : `Keep ${lo} through ${hi}. Every smaller capacity is infeasible.`,
       )
     }
 

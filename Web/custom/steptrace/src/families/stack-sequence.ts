@@ -1,4 +1,4 @@
-import { el, ICON, makeArrayStrip, makeLegend, statusEl } from "../render"
+import { el, ICON, makeArrayStrip, makeLegend, setTextParts, statusEl } from "../render"
 import type { MountHandle, StepTraceView, VisualFamily, WatchRow } from "../types"
 import { createStructureShell, onEnter } from "./interactive-structure"
 
@@ -60,7 +60,7 @@ export function mountStack(root: HTMLElement, config: StackConfig): MountHandle 
       const item = values[index]
       const isTop = index === values.length - 1
       value.textContent = item ?? "·"
-      label.textContent = isTop ? `TOP · ${index}` : String(index)
+      setTextParts(label, isTop ? `TOP ${index}` : String(index))
       popGhost.textContent = index === changedIndex && operation === "pop" ? operationValue : ""
       cell.dataset.empty = item == null ? "1" : "0"
       cell.dataset.top = isTop ? "1" : "0"
@@ -334,7 +334,7 @@ export function makeStackSequenceView(
     stackCells.forEach((cell, slot) => {
       const index = frame.stack[slot]
       const visible = index != null
-      cell.textContent = visible ? `${frame.array[index]} · i${index}` : ""
+      setTextParts(cell, visible ? `${frame.array[index]} i${index}` : "")
       cell.dataset.visible = visible ? "1" : "0"
       cell.dataset.top = visible && slot === frame.stack.length - 1 ? "1" : "0"
       cell.setAttribute("aria-hidden", visible ? "false" : "true")
@@ -353,13 +353,13 @@ export function makeStackSequenceView(
   const watch = (frame: StackSequenceFrame): WatchRow[] => [
     {
       k: "scan",
-      v: frame.cursor == null ? "complete" : `i${frame.cursor} · ${frame.array[frame.cursor]}`,
+      v: frame.cursor == null ? "complete" : `i${frame.cursor}, ${frame.array[frame.cursor]}`,
       sw: "var(--_blue)",
       hint: "Value currently compared with the stack top.",
     },
     {
       k: "stack",
-      v: frame.stack.map((index) => frame.array[index]).join(" · ") || "empty",
+      v: frame.stack.map((index) => frame.array[index]).join(", ") || "empty",
       sw: "var(--_amber)",
       hint: "Unanswered values, decreasing from bottom to top.",
     },
@@ -370,7 +370,7 @@ export function makeStackSequenceView(
     },
     {
       k: "charges",
-      v: `${frame.pushes} push · ${frame.pops} pop`,
+      v: `${frame.pushes} push, ${frame.pops} pop`,
       sw: "var(--_neutral)",
       hint: "Every index is pushed once and popped at most once.",
     },
@@ -386,7 +386,7 @@ export function makeStackSequenceView(
       const answers = frame.answers
         .map((answer) => (answer == null ? "none" : String(frame.array[answer])))
         .join(", ")
-      return `Next greater values: [${answers}] · ${frame.pushes} pushes, ${frame.pops} pops.`
+      return `Next greater values: [${answers}], ${frame.pushes} pushes, ${frame.pops} pops.`
     },
   }
 }

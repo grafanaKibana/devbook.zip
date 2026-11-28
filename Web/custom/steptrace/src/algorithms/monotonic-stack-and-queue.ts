@@ -28,22 +28,22 @@ export const monotonicStackAndQueue = {
 
     for (let index = 0; index < input.array.length; index++) {
       const value = input.array[index]
-      ops.scan(index, `Scan i${index} = ${value}; compare it with the stack top.`)
+      ops.scan(index, `Scan i${index} = ${value}. Compare it with the stack top.`)
       while (stack.length && input.array[stack.at(-1)!] < value) {
         const popped = stack.pop()!
         ops.pop(
           index,
-          `${value} > ${input.array[popped]}, so pop i${popped}; ${value} is its next greater value.`,
+          `${value} > ${input.array[popped]}, so pop i${popped}. ${value} is its next greater value.`,
         )
       }
       stack.push(index)
       ops.push(
         index,
-        `Push i${index}; retained values are ${stack.map((item) => input.array[item]).join(" > ")}.`,
+        `Push i${index}. Retained values are ${stack.map((item) => input.array[item]).join(" > ")}.`,
       )
     }
 
-    ops.done("The scan is complete; retained indices have no greater value to their right.")
+    ops.done("The scan is complete. Retained indices have no greater value to their right.")
   },
 } satisfies FamilyAlgorithmDefinition<
   "pointers",

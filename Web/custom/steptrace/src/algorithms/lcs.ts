@@ -60,20 +60,20 @@ export const lcs = {
         path.unshift([r, c])
         ops.markPath(
           path,
-          `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' → dp[${r - 1}][${c - 1}] + 1; add '${A[r - 1]}' and move diagonally.`,
+          `dp[${r}][${c}]: '${A[r - 1]}' = '${B[c - 1]}' → dp[${r - 1}][${c - 1}] + 1. Add '${A[r - 1]}' and move diagonally.`,
         )
         r--
         c--
       } else if (dp[r - 1][c] >= dp[r][c - 1]) {
         ops.markPath(
           path,
-          `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' → inherit top dp[${r - 1}][${c}]; move up, add no letter.`,
+          `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' → inherit top dp[${r - 1}][${c}]. Move up, add no letter.`,
         )
         r--
       } else {
         ops.markPath(
           path,
-          `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' → inherit left dp[${r}][${c - 1}]; move left, add no letter.`,
+          `dp[${r}][${c}]: '${A[r - 1]}' ≠ '${B[c - 1]}' → inherit left dp[${r}][${c - 1}]. Move left, add no letter.`,
         )
         c--
       }
