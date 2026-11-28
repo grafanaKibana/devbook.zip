@@ -323,6 +323,8 @@ function enhancePicking(app, container, content, simulation, zoom) {
   const textColor = cssColor(container, "graph-view color-text")
   const overlay = document.createElement("div")
   overlay.className = "graph-hub-labels"
+  // The set of labels changes with the zoom and none of them is a link.
+  overlay.setAttribute("aria-hidden", "true")
   overlay.style.color = textColor.color
   overlay.style.opacity = String(textColor.alpha)
   container.append(overlay)

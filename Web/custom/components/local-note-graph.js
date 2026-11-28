@@ -474,14 +474,21 @@ export const PIXI_BUILD = {
 const loading = new Map()
 
 // The plugin treats any tag with its URL as already loaded. A tag carries the
-// exact URL only once it has loaded, and a failed tag is removed.
+// exact URL only once it has loaded, and a failed tag is removed. The tag
+// persists across navigation, or the router drops it and the plugin loads the
+// library again.
 export function loadLibrary({ global, src, integrity }) {
   if (window[global]) return Promise.resolve()
   if (!loading.has(src)) {
     loading.set(
       src,
       new Promise((resolve, reject) => {
-        const existing = document.querySelector(`script[src="${src}"]`)
+        let existing = document.querySelector(`script[src="${src}"]`)
+        // The plugin leaves a failed tag in place, and it will not fire again.
+        if (existing && performance.getEntriesByName(src).length) {
+          existing.remove()
+          existing = null
+        }
         const script = existing ?? document.createElement("script")
         script.addEventListener("load", () => {
           script.setAttribute("src", src)
@@ -496,6 +503,7 @@ export function loadLibrary({ global, src, integrity }) {
         script.src = src + "#pending"
         script.integrity = integrity
         script.crossOrigin = "anonymous"
+        script.dataset.persist = ""
         document.head.append(script)
       }),
     )
@@ -526,7 +534,8 @@ function setup() {
         const drawn = el.querySelector(".local-graph-label")
         if (el.isConnected && !drawn) draw(el, content, JSON.parse(el.dataset.cfg))
       })
-      .catch(() => {
+      .catch((error) => {
+        if (error) console.error(error)
         el.textContent = "Graph could not load."
       })
   }
