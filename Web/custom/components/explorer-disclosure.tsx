@@ -2,28 +2,46 @@ import type { QuartzComponent, QuartzComponentConstructor } from "@quartz-commun
 
 // Explorer toggle state for assistive tech.
 //
-// The community Explorer keeps its open state on the `.explorer` wrapper — the
-// `collapsed` class and a wrapper `aria-expanded` its click handler toggles —
-// but never on the controls: the desktop "Topics" button ships a static
-// aria-expanded="true", the tablet/mobile hamburger has none, and the list
-// carries a static aria-expanded="false". SPA navigation also patches the server
-// markup's attributes back in on every page. Same override strategy as the other
-// Explorer decorators: no fork, a script that mirrors the wrapper's real state
-// onto both toggles whenever the plugin, a nav patch, or a breakpoint crossing
-// changes it. Removing the hidden tree from the tab order is CSS (custom.scss,
-// Explorer section).
+// The community Explorer keeps its open state in the wrapper's `collapsed` class,
+// which the server markup omits, and sets `aria-expanded` on its toggles only
+// when one is clicked. The desktop "Topics" button ships a static
+// aria-expanded="true" and the tablet/mobile hamburger has none. SPA navigation
+// also patches the server markup's attributes back in on every page. Same
+// override strategy as the other Explorer decorators: no fork, a script that
+// mirrors the real state onto both toggles whenever the plugin, a nav patch, or
+// a breakpoint crossing changes it. Removing the hidden tree from the tab order
+// is CSS (custom.scss, Explorer section).
 
 const script = `
 (function () {
   // Below this width the tree is a drawer that opens only on a real toggle
-  // (custom.scss keys it off the wrapper's aria-expanded). Keep in sync with
+  // (custom.scss keys it off data-drawer-open). Keep in sync with
   // PANEL_MEDIA in nav-scope-dropdown.tsx and the $tablet/$mobile blocks.
   var panel = window.matchMedia("(max-width: 1200px)");
 
   function isOpen(explorer) {
     if (explorer.classList.contains("collapsed")) return false;
-    return !panel.matches || explorer.getAttribute("aria-expanded") === "true";
+    return !panel.matches || explorer.dataset.drawerOpen === "true";
   }
+
+  // Brackets the plugin's own toggle handler and records only a state it
+  // actually changed: before the plugin binds, a click must not open the
+  // drawer. SPA patches drop the flag.
+  var collapsedBefore = null;
+  function toggleExplorer(e) {
+    var toggle = e.target.closest && e.target.closest(".explorer-toggle");
+    return toggle && panel.matches ? toggle.closest("div.explorer") : null;
+  }
+  document.addEventListener("click", function (e) {
+    var explorer = toggleExplorer(e);
+    collapsedBefore = explorer ? explorer.classList.contains("collapsed") : null;
+  }, true);
+  document.addEventListener("click", function (e) {
+    var explorer = toggleExplorer(e);
+    if (!explorer || collapsedBefore === null) return;
+    var collapsed = explorer.classList.contains("collapsed");
+    if (collapsed !== collapsedBefore) explorer.dataset.drawerOpen = String(!collapsed);
+  });
 
   function sync() {
     document.querySelectorAll("div.explorer").forEach(function (explorer) {
@@ -57,7 +75,7 @@ const script = `
   function bind() {
     var obs = new MutationObserver(sync);
     document.querySelectorAll("div.explorer").forEach(function (explorer) {
-      obs.observe(explorer, { attributes: true, attributeFilter: ["class", "aria-expanded"] });
+      obs.observe(explorer, { attributes: true, attributeFilter: ["class", "data-drawer-open"] });
     });
     sync();
     document.addEventListener("keydown", onKeydown);

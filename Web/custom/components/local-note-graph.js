@@ -169,17 +169,47 @@ function draw(container, content, cfg) {
   window.addCleanup?.(() => resize.disconnect())
 }
 
-// Claim the small panel before Quartz starts its Pixi renderer. The same plugin
-// supplies D3 and continues to own the expanded graph and its keyboard shortcut.
-function setup() {
+// The graph plugin loads D3 only when it draws its own graph, and this panel
+// replaces its local graph. Load the same pinned build so the plugin reuses it.
+const D3_SRC = "https://cdn.jsdelivr.net/npm/d3@7.9.2/dist/d3.min.js"
+const D3_INTEGRITY = "sha384-LxfWGZyh6PaLjBRPf7NWiEYs9Mn0UQ6ZmqbLLZhxlOBBNWF2a2K0Pfc5efkrNnhQ"
+let d3Loaded
+
+function loadD3() {
+  if (window.d3) return Promise.resolve()
+  d3Loaded ??= new Promise((resolve, reject) => {
+    const existing = document.querySelector(`script[src="${D3_SRC}"]`)
+    const script = existing ?? document.createElement("script")
+    script.addEventListener("load", () => resolve())
+    // The plugin treats any matching tag as loaded, so a failed one must go.
+    script.addEventListener("error", () => {
+      script.remove()
+      d3Loaded = undefined
+      reject()
+    })
+    if (existing) return
+    script.src = D3_SRC
+    script.integrity = D3_INTEGRITY
+    script.crossOrigin = "anonymous"
+    document.head.append(script)
+  })
+  return d3Loaded
+}
+
+// Claim the small panel before Quartz starts its Pixi renderer. The plugin
+// continues to own the expanded graph and its keyboard shortcut.
+function claim() {
   for (const el of document.querySelectorAll(".graph-container")) {
     el.classList.replace("graph-container", "local-note-graph")
   }
-  if (!window.d3) return
+}
+
+function setup() {
+  claim()
   for (const el of document.querySelectorAll(".local-note-graph:not([data-initialized])")) {
     el.dataset.initialized = ""
-    fetchData
-      .then((content) => {
+    Promise.all([loadD3(), fetchData])
+      .then(([, content]) => {
         if (el.isConnected) draw(el, content, JSON.parse(el.dataset.cfg))
       })
       .catch(() => {
@@ -187,26 +217,10 @@ function setup() {
       })
   }
 }
+// Deferred plugin scripts may draw before DOMContentLoaded, but not before this.
+document.addEventListener("readystatechange", () => {
+  if (document.readyState === "interactive") claim()
+})
 document.addEventListener("nav", setup)
 document.addEventListener("render", setup)
 document.addEventListener("DOMContentLoaded", setup)
-document.addEventListener(
-  "load",
-  function onLoad(event) {
-    if (event.target.tagName === "SCRIPT" && window.d3) {
-      document.removeEventListener("load", onLoad, true)
-      setup()
-    }
-  },
-  true,
-)
-document.addEventListener(
-  "error",
-  (event) => {
-    if (event.target.tagName === "SCRIPT" && event.target.src.includes("/d3@")) {
-      for (const el of document.querySelectorAll(".local-note-graph"))
-        el.textContent = "Graph could not load."
-    }
-  },
-  true,
-)

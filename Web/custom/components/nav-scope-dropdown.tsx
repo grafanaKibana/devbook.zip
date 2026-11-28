@@ -135,14 +135,18 @@ const script = `
       inner + '</svg>';
   }
 
-  // Keep the original SVG elements: Explorer attaches its toggle listener to them.
+  // Keep the original elements: Explorer attaches its toggle listener to them.
+  // Explorer hijacks folder-title clicks when its indicator has no visible SVG,
+  // so a wrapped indicator keeps its SVG and only the glyph changes.
   function syncDisclosureChevrons() {
     var glyph = ICONS["chevron-down"];
     if (!glyph) return;
     document.querySelectorAll(".explorer .desktop-explorer .fold:not(.nav-chevron), .explorer .folder-icon:not(.nav-chevron), .toc-header .fold:not(.nav-chevron)").forEach(function (icon) {
-      icon.setAttribute("viewBox", "0 0 24 24");
-      icon.setAttribute("aria-hidden", "true");
-      icon.innerHTML = glyph;
+      var svg = icon instanceof SVGElement ? icon : icon.querySelector("svg");
+      if (!svg) return;
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("aria-hidden", "true");
+      svg.innerHTML = glyph;
       icon.classList.add("nav-chevron");
     });
   }

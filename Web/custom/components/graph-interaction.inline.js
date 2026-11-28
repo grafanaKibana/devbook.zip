@@ -67,7 +67,7 @@ document.addEventListener(
 )
 
 // Pixi's application extension runs for each new graph, including theme changes.
-// Wait one frame for the graph plugin to attach its canvas and populate the scene.
+// The graph plugin populates the scene synchronously after creating its simulation.
 function installGraphPicking() {
   const pixi = window.PIXI
   if (!pixi) return
@@ -85,12 +85,10 @@ function installGraphPicking() {
         const capture = (...args) => {
           d3.forceSimulation = create
           const simulation = create(...args)
-          this.ticker.addOnce(() => {
-            fetchData.then((content) => {
-              if (container.isConnected && this.stage && !this.stage.destroyed) {
-                enhancePicking(this, container, content, simulation)
-              }
-            })
+          fetchData.then((content) => {
+            if (container.isConnected && this.stage && !this.stage.destroyed) {
+              enhancePicking(this, container, content, simulation)
+            }
           })
           return simulation
         }
@@ -107,28 +105,41 @@ function installGraphPicking() {
 document.addEventListener("load", installGraphPicking, true)
 installGraphPicking()
 
+// Pixi cannot parse every computed CSS colour. Painting one pixel yields sRGB.
+function cssColor(container, className) {
+  const probe = document.createElement("div")
+  probe.className = className
+  probe.style.cssText = "position:absolute;visibility:hidden"
+  container.append(probe)
+  const style = getComputedStyle(probe)
+  const canvas = document.createElement("canvas")
+  canvas.width = canvas.height = 1
+  const context = canvas.getContext("2d", { willReadFrequently: true })
+  context.fillStyle = style.color
+  context.fillRect(0, 0, 1, 1)
+  const [r, g, b, a] = context.getImageData(0, 0, 1, 1).data
+  const opacity = Number.parseFloat(style.opacity)
+  probe.remove()
+  return {
+    color: `rgb(${r}, ${g}, ${b})`,
+    alpha: (a / 255) * (Number.isNaN(opacity) ? 1 : opacity),
+  }
+}
+
 function enhancePicking(app, container, content, simulation) {
   const graph = app.stage.children[0]
-  // Quartz draws one graphic per simulation link, in the same order.
   const links = simulation.force("link").links()
   const current = simplifySlug(document.body.dataset.slug)
-  const secondaryEdges = graph.children[0].children.filter((_, index) => {
-    const { source, target } = links[index]
-    return source.id !== current && target.id !== current
-  })
-  function setIdleEdges(idle) {
-    // Hover already applies 0.2 in the stroke, so only dim the graphics at rest.
-    for (const edge of secondaryEdges) edge.alpha = idle ? 0.2 : 1
-  }
-  setIdleEdges(true)
-  const layer = graph?.children.find((child) =>
+  // The plugin draws every resting link into one graphic, and hovered links into another.
+  const [linkGfx] = graph.children.filter((child) => child instanceof window.PIXI.Graphics)
+  const lineColor = cssColor(container, "graph-view color-line")
+  const layer = graph.children.find((child) =>
     child.children.some((node) => node.eventMode === "static" && node.cursor === "pointer"),
   )
-  // Transparent labels sit above the dots and must let pointer events through.
-  const labels = graph?.children.find((child) =>
-    child.children.some((item) => item instanceof window.PIXI.Text),
+  // The plugin creates labels lazily in a separate layer and positions them on their nodes.
+  const labels = graph.children.find(
+    (child) => child !== layer && !(child instanceof window.PIXI.Graphics),
   )
-  if (labels) labels.eventMode = "none"
   const nodes = (layer?.children ?? []).map((node) => ({
     node,
     radius: node.getLocalBounds().width / 2,
@@ -161,36 +172,56 @@ function enhancePicking(app, container, content, simulation) {
     neighbors.get(target.id).add(source.id)
   }
   const maxDegree = Math.max(1, ...Array.from(neighbors.values(), (set) => set.size))
-  const zoomLabels = (labels?.children ?? []).map((label, index) => {
-    const { node } = nodes[index]
-    const priority = neighbors.get(node.label).size / maxDegree
-    // First labels fade in above 1×; even isolated notes finish fading at 4×.
-    return { label, node, revealAt: 3.25 - 2.25 * priority }
-  })
+  // First labels fade in above 1×; even isolated notes finish fading at 4×.
+  const revealAt = (node) => 3.25 - (2.25 * neighbors.get(node.label).size) / maxDegree
+  const labelNodes = new Map()
+  function labelNode(label) {
+    if (!labelNodes.has(label)) {
+      const entry = nodes.find(({ node }) => node.x === label.x && node.y === label.y)
+      if (entry) labelNodes.set(label, entry.node)
+    }
+    return labelNodes.get(label)
+  }
   function updateLabels() {
-    for (const { label, node, revealAt } of zoomLabels) {
-      const opacity = (graph.scale.x - revealAt) / 0.75
-      label.alpha = node === highlighted ? 1 : Math.max(0, Math.min(1, opacity))
+    for (const label of labels?.children ?? []) {
+      if (!label.visible) continue
+      const node = labelNode(label)
+      if (!node || node === highlighted) continue
+      label.alpha = Math.max(0, Math.min(1, (graph.scale.x - revealAt(node)) / 0.75))
     }
   }
-  // Quartz writes a uniform opacity on every D3 zoom transform (including pans).
-  // Apply the per-note opacity before Pixi draws each changed transform.
-  let lastTransform
-  app.ticker.add(() => {
-    const transform = window.d3.zoomTransform(app.canvas)
-    if (transform !== lastTransform) {
-      lastTransform = transform
-      updateLabels()
+  // At rest only links to the current note keep full strength. Hover dims the rest itself.
+  function drawIdleLinks() {
+    if (highlighted || !linkGfx) return
+    const cx = app.screen.width / 2
+    const cy = app.screen.height / 2
+    linkGfx.clear()
+    for (const secondary of [false, true]) {
+      let drawn = false
+      for (const { source, target } of links) {
+        if ((source.id !== current && target.id !== current) !== secondary) continue
+        linkGfx.moveTo(source.x + cx, source.y + cy).lineTo(target.x + cx, target.y + cy)
+        drawn = true
+      }
+      if (drawn) {
+        const alpha = lineColor.alpha * (secondary ? 0.2 : 1)
+        linkGfx.stroke({ width: 1, color: lineColor.color, alpha })
+      }
     }
-  })
+  }
+  // The plugin renders on demand and rewrites label opacity and links before each frame.
+  const render = app.render.bind(app)
+  app.render = (...args) => {
+    updateLabels()
+    drawIdleLinks()
+    return render(...args)
+  }
   function updateHighlight() {
     const next = grabbed ?? hovered
     if (next === highlighted) return
-    if (!highlighted || !next) setIdleEdges(!next)
     highlighted?.emit("graph-unhighlight")
     highlighted = next
     highlighted?.emit("graph-highlight")
-    updateLabels()
   }
 
   for (const { node, radius } of nodes) {
