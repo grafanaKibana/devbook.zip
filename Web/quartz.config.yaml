@@ -6,6 +6,7 @@ configuration:
   enablePopovers: false
   prefetch: "off"
   publishAssets: all
+  fonts: false
   links:
     markdownLinkResolution: shortest
   drafts:

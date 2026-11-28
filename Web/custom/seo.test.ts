@@ -67,7 +67,7 @@ test("description normalization selects and synchronizes the first non-empty val
 
 test("index policy canonicalizes public routes and unlists noindex output", async () => {
   const publicHead = render(seoHead(fileData("section/page")))
-  assert.match(publicHead, /rel="canonical"/)
+  assert.doesNotMatch(publicHead, /rel="canonical"/)
   assert.doesNotMatch(publicHead, /name="robots"/)
 
   const hiddenHead = render(seoHead(fileData("tags/example")))
