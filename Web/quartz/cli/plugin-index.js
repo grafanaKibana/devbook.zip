@@ -156,15 +156,17 @@ export function collectPluginExports({ pluginsDir, npmPackages = [], verbose = f
 /** Source of the generated index for collected entries. */
 export function renderPluginIndex(entries, { warn = () => {} } = {}) {
   const nameCount = new Map()
-  for (const { overridable, passthrough } of entries.values()) {
-    for (const n of [...overridable, ...passthrough]) nameCount.set(n, (nameCount.get(n) ?? 0) + 1)
+  for (const { overridable, passthrough, types } of entries.values()) {
+    for (const n of [...overridable, ...passthrough, ...types])
+      nameCount.set(n, (nameCount.get(n) ?? 0) + 1)
   }
   const unique = (n) => (nameCount.get(n) ?? 0) === 1
 
   const lines = [`import { componentRegistry } from "../../quartz/components/registry"`, ""]
   for (const { types, importPath } of entries.values()) {
-    if (types.length > 0)
-      lines.push(`export type { ${types.join(", ")} } from ${jsString(importPath)}`)
+    const names = types.filter(unique)
+    if (names.length > 0)
+      lines.push(`export type { ${names.join(", ")} } from ${jsString(importPath)}`)
   }
   for (const { passthrough, importPath } of entries.values()) {
     const names = passthrough.filter(unique)

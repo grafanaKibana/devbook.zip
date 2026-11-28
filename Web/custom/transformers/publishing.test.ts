@@ -218,9 +218,9 @@ import { ClickableImages } from "./clickable-images"
     children: [],
   })
 
-  const callout = (className: string, withContent = true): Element => ({
+  const callout = (className: string, withContent = true, tagName = "div"): Element => ({
     type: "element",
-    tagName: "blockquote",
+    tagName,
     properties: { className },
     children: [
       { type: "text", value: "\n" },
@@ -257,6 +257,16 @@ import { ClickableImages } from "./clickable-images"
 
     assert.equal(title(folded).properties.role, "button")
     assert.equal(title(folded).properties.tabIndex, 0)
+    assert.equal(title(folded).properties.ariaExpanded, "false")
+    assert.equal(content(folded).properties.inert, true)
+  })
+
+  test("blockquote callouts get the same disclosure semantics", () => {
+    const folded = callout("callout question is-collapsible is-collapsed", true, "blockquote")
+
+    transform(folded)
+
+    assert.equal(title(folded).properties.role, "button")
     assert.equal(title(folded).properties.ariaExpanded, "false")
     assert.equal(content(folded).properties.inert, true)
   })

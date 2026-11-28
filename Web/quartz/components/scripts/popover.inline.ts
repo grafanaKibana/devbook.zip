@@ -32,7 +32,8 @@ async function mouseEnterHandler(
     if (hash !== "") {
       const inner = popoverElement.querySelector(".popover-inner") as HTMLElement | null
       if (inner) {
-        const targetAnchor = `#popover-internal-${hash.slice(1)}`
+        // ids are not CSS identifiers: block ids start with `^`, headings may start with a digit
+        const targetAnchor = `#${CSS.escape(`popover-internal-${hash.slice(1)}`)}`
         const heading = inner.querySelector(targetAnchor) as HTMLElement | null
         if (heading) {
           // leave ~12px of buffer when scrolling to a heading
@@ -71,9 +72,10 @@ async function mouseEnterHandler(
 
   const popoverElement = document.createElement("div")
   popoverElement.id = popoverId
-  popoverElement.classList.add("popover")
+  // `hover-popover` / `markdown-embed` mirror Obsidian's popover markup so Obsidian themes apply.
+  popoverElement.classList.add("popover", "hover-popover")
   const popoverInner = document.createElement("div")
-  popoverInner.classList.add("popover-inner")
+  popoverInner.classList.add("popover-inner", "markdown-embed")
   popoverInner.dataset.contentType = contentType ?? undefined
   popoverElement.appendChild(popoverInner)
 

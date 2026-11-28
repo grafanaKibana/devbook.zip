@@ -131,6 +131,25 @@ describe("plugin index", () => {
     )
   })
 
+  test("type names exported by several plugins are left out", () => {
+    const entry = (importPath: string, types: string[]) => ({
+      overridable: [],
+      passthrough: [],
+      types,
+      importPath,
+      registryKey: importPath,
+    })
+    const source = renderPluginIndex(
+      new Map([
+        ["bases-page", entry("./bases-page", ["SortDirection", "BasesView"])],
+        ["explorer", entry("./explorer", ["SortDirection", "SortRule"])],
+      ]),
+    )
+    assert.match(source, /export type \{ BasesView \} from "\.\/bases-page"/)
+    assert.match(source, /export type \{ SortRule \} from "\.\/explorer"/)
+    assert.doesNotMatch(source, /SortDirection/)
+  })
+
   test("plain values and unknown declarations are not wrapped", () => {
     assert.strictEqual(isOverridableExport("x", "declare const x: number;"), false)
     assert.strictEqual(

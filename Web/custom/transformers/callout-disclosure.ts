@@ -65,7 +65,7 @@ export const CalloutDisclosure: QuartzTransformerPlugin = () => ({
     return [
       () => (tree: Root) => {
         visit(tree, "element", (node: Element) => {
-          if (node.tagName !== "blockquote") return
+          if (node.tagName !== "div" && node.tagName !== "blockquote") return
           const classes = classList(node)
           if (!classes.includes("callout") || !classes.includes("is-collapsible")) return
           const title = childWithClass(node, "callout-title")

@@ -1,10 +1,17 @@
 import test, { describe, beforeEach, afterEach } from "node:test"
 import assert from "node:assert"
-import { execSync } from "child_process"
+import { execSync, spawnSync } from "child_process"
 import fs from "fs"
 import os from "os"
 import path from "path"
-import { buildPluginAsync, linkPeerPlugins, pluginSourceChanged } from "./plugin-git-handlers.js"
+import { pathToFileURL } from "url"
+import YAML from "yaml"
+import {
+  buildPluginAsync,
+  checkoutPinnedCommitAsync,
+  linkPeerPlugins,
+  pluginSourceChanged,
+} from "./plugin-git-handlers.js"
 
 let root
 let hostPreact
@@ -159,5 +166,195 @@ describe("pluginSourceChanged", () => {
   test("is true when the repo itself changed", () => {
     const priorEntry = { source: "github:owner/old-repo", resolved: "...", commit: "abc123" }
     assert.strictEqual(pluginSourceChanged(priorEntry, "github:owner/new-repo"), true)
+  })
+})
+
+describe("checkoutPinnedCommitAsync", () => {
+  const git = (cwd, cmd) =>
+    execSync(`git -c user.name=t -c user.email=t@t -c commit.gpgsign=false ${cmd}`, {
+      cwd,
+      stdio: "pipe",
+      timeout: 30000,
+    })
+      .toString()
+      .trim()
+
+  function makeRemote() {
+    const remote = path.join(root, "remote")
+    fs.mkdirSync(remote)
+    git(remote, "init -q -b main")
+    git(remote, "config uploadpack.allowAnySHA1InWant true")
+    fs.writeFileSync(path.join(remote, "package-lock.json"), `{ "v": 1 }`)
+    git(remote, "add -A")
+    git(remote, "commit -q -m one")
+    const first = git(remote, "rev-parse HEAD")
+    fs.writeFileSync(path.join(remote, "package-lock.json"), `{ "v": 2 }`)
+    git(remote, "commit -q -am two")
+    return { remote, first }
+  }
+
+  test("moves to a pinned commit that is not the branch tip", async () => {
+    const { remote, first } = makeRemote()
+    const dir = path.join(root, "plugin")
+    git(root, `clone -q --depth 1 ${pathToFileURL(remote).href} "${dir}"`)
+    await checkoutPinnedCommitAsync(dir, first)
+    assert.strictEqual(git(dir, "rev-parse HEAD"), first)
+  })
+
+  // a plugin's build (npm install) rewrites its tracked package-lock.json; a restored CI cache
+  // keeps that change, and the checkout refused to move ("commit your changes or stash them")
+  test("moves even when the plugin's build left tracked files changed (#2639)", async () => {
+    const { remote, first } = makeRemote()
+    const dir = path.join(root, "plugin")
+    git(root, `clone -q --depth 1 ${pathToFileURL(remote).href} "${dir}"`)
+    fs.writeFileSync(path.join(dir, "package-lock.json"), `{ "v": "rewritten by npm" }`)
+    await checkoutPinnedCommitAsync(dir, first)
+    assert.strictEqual(git(dir, "rev-parse HEAD"), first)
+    assert.strictEqual(fs.readFileSync(path.join(dir, "package-lock.json"), "utf-8"), `{ "v": 1 }`)
+  })
+})
+
+describe("plugin commands with an extending config", () => {
+  const cli = path.resolve(import.meta.dirname, "..", "bootstrap-cli.mjs")
+  // stdout and stderr, whatever the exit code (doctor fails on npm plugins that aren't installed)
+  const run = (dir, args) => {
+    const result = spawnSync(process.execPath, [cli, ...args.split(" ")], {
+      cwd: dir,
+      encoding: "utf-8",
+      timeout: 60_000,
+      env: { ...process.env, QUARTZ_CONFIG_PATH: "" },
+    })
+    return { output: result.stdout + result.stderr, status: result.status }
+  }
+  const site = () => {
+    const dir = path.join(root, "site")
+    fs.mkdirSync(dir, { recursive: true })
+    fs.writeFileSync(path.join(dir, "package.json"), `{ "name": "site", "version": "5.3.0" }`)
+    fs.writeFileSync(
+      path.join(dir, "quartz.config.default.yaml"),
+      [
+        "configuration:",
+        "  pageTitle: Default",
+        "plugins:",
+        '  - source: "@quartz-community/graph"',
+        "    enabled: true",
+        "    options: { depth: 1, scale: 2 }",
+        '  - source: "@quartz-community/comments"',
+        "    enabled: false",
+        "",
+      ].join("\n"),
+    )
+    fs.writeFileSync(
+      path.join(dir, "quartz.config.yaml"),
+      [
+        "extends: default",
+        "plugins:",
+        '  - source: "@quartz-community/graph"',
+        "    options: { depth: 3 }",
+        "",
+      ].join("\n"),
+    )
+    return dir
+  }
+  const read = (dir) => fs.readFileSync(path.join(dir, "quartz.config.yaml"), "utf-8")
+
+  test("list and doctor read the merged configuration", () => {
+    const dir = site()
+    const list = run(dir, "plugin list").output
+    assert.match(list, /@quartz-community\/comments .*disabled/)
+    assert.match(list, /@quartz-community\/graph .*enabled/)
+    const doctor = run(dir, "plugin doctor").output
+    assert.match(doctor, /Checking plugins/)
+    assert.doesNotMatch(doctor, /no `enabled` field/)
+  })
+
+  test("enable, disable and config change only the user's entries", () => {
+    const dir = site()
+    run(dir, "plugin enable comments")
+    run(dir, "plugin disable graph")
+    run(dir, "plugin config graph --unset scale")
+    run(dir, "plugin config graph --unset depth")
+    const out = read(dir)
+    assert.match(out, /^extends: default$/m)
+    assert.doesNotMatch(out, /pageTitle/) // the merged configuration is not written back
+    const data = YAML.parse(out)
+    assert.deepStrictEqual(data.plugins, [
+      // the base sets both: null drops them from the merged options, so the plugin's defaults
+      // apply (the user's own depth: 3 is gone too)
+      { source: "@quartz-community/graph", options: { depth: null, scale: null }, enabled: false },
+      { source: "@quartz-community/comments", enabled: true },
+    ])
+  })
+
+  test("remove refuses a plugin that comes from a base", () => {
+    const dir = site()
+    const { output, status } = run(dir, "plugin remove comments")
+    assert.match(output, /comes from the configuration/)
+    assert.strictEqual(status, 1)
+    assert.doesNotMatch(read(dir), /comments/)
+  })
+})
+
+describe("plugin install --latest with a plugin that can't be updated", () => {
+  const cli = path.resolve(import.meta.dirname, "..", "bootstrap-cli.mjs")
+  // A Git plugin whose repository no longer has the configured subdirectory (an old
+  // quartz-themes entry: the repository moved its plugin out of `plugin/`).
+  const site = (enabled) => {
+    const repo = path.join(root, "repo")
+    fs.mkdirSync(repo, { recursive: true })
+    fs.writeFileSync(path.join(repo, "README.md"), "no plugin/ here\n")
+    const git = (args) => execSync(`git ${args}`, { cwd: repo, stdio: "ignore", timeout: 30_000 })
+    git("init -q -b main")
+    git("-c user.name=t -c user.email=t@t add .")
+    git("-c user.name=t -c user.email=t@t commit -q -m init")
+    const url = pathToFileURL(repo).href
+    const dir = path.join(root, "site")
+    fs.mkdirSync(path.join(dir, ".quartz", "plugins", "old-theme"), { recursive: true })
+    fs.writeFileSync(path.join(dir, "package.json"), `{ "name": "site", "version": "5.3.1" }`)
+    fs.writeFileSync(
+      path.join(dir, "quartz.config.yaml"),
+      YAML.stringify({
+        configuration: { pageTitle: "t" },
+        plugins: [{ source: { name: "old-theme", repo: url, subdir: "plugin" }, enabled }],
+      }),
+    )
+    fs.writeFileSync(
+      path.join(dir, "quartz.lock.json"),
+      JSON.stringify({
+        version: "1.0.0",
+        plugins: {
+          "old-theme": {
+            source: url,
+            resolved: url,
+            subdir: "plugin",
+            commit: "0000000000000000000000000000000000000000",
+            installedAt: "2026-01-01T00:00:00.000Z",
+          },
+        },
+      }),
+    )
+    return dir
+  }
+  const run = (dir) => {
+    const result = spawnSync(process.execPath, [cli, "plugin", "install", "--latest"], {
+      cwd: dir,
+      encoding: "utf-8",
+      timeout: 60_000,
+      env: { ...process.env, QUARTZ_CONFIG_PATH: "" },
+    })
+    return { output: result.stdout + result.stderr, status: result.status }
+  }
+
+  test("a disabled plugin only warns: the build doesn't load it", () => {
+    const { output, status } = run(site(false))
+    assert.match(output, /Could not update old-theme \(disabled/)
+    assert.match(output, /npx quartz plugin remove old-theme/)
+    assert.strictEqual(status, 0)
+  })
+
+  test("an enabled plugin fails the update", () => {
+    const { output, status } = run(site(true))
+    assert.match(output, /Failed to update old-theme/)
+    assert.strictEqual(status, 1)
   })
 })

@@ -61,6 +61,9 @@ import {
 import { collectPluginConfigWarnings, printPluginConfigWarnings } from "./option-validation"
 import { componentRegistry, RegisteredComponent } from "../../components/registry"
 import { frameRegistry } from "../../components/frames/registry"
+import { OrderItem, constraintList, normalizePluginName, orderPlugins } from "./plugin-order"
+import { resolveExtends } from "./config-extends"
+import { setSlugOptions } from "../../util/path"
 import { getCondition, getAllConditionNames } from "./conditions"
 import {
   LAYOUT_SLOTS,
@@ -83,23 +86,27 @@ const DEFAULT_CONFIG_YAML_PATH = path.join(process.cwd(), "quartz.config.default
 const LEGACY_PLUGINS_JSON_PATH = path.join(process.cwd(), "quartz.plugins.json")
 const LEGACY_DEFAULT_PLUGINS_JSON_PATH = path.join(process.cwd(), "quartz.plugins.default.json")
 
-function resolveConfigPath(): string {
+/** @internal Exported for testing only. Honors QUARTZ_CONFIG_PATH, else falls back to cwd. */
+export function resolveConfigPath(): string {
+  if (process.env.QUARTZ_CONFIG_PATH) return path.resolve(process.env.QUARTZ_CONFIG_PATH)
   if (fs.existsSync(CONFIG_YAML_PATH)) return CONFIG_YAML_PATH
   if (fs.existsSync(LEGACY_PLUGINS_JSON_PATH)) return LEGACY_PLUGINS_JSON_PATH
   if (fs.existsSync(DEFAULT_CONFIG_YAML_PATH)) return DEFAULT_CONFIG_YAML_PATH
   if (fs.existsSync(LEGACY_DEFAULT_PLUGINS_JSON_PATH)) return LEGACY_DEFAULT_PLUGINS_JSON_PATH
   return CONFIG_YAML_PATH
 }
-function readPluginsJson(): QuartzPluginsJson | null {
+async function readPluginsJson(): Promise<QuartzPluginsJson | null> {
   const configPath = resolveConfigPath()
   if (!fs.existsSync(configPath)) {
     return null
   }
   const raw = fs.readFileSync(configPath, "utf-8")
-  if (configPath.endsWith(".yaml") || configPath.endsWith(".yml")) {
-    return YAML.parse(raw) as QuartzPluginsJson
-  }
-  return JSON.parse(raw) as QuartzPluginsJson
+  const data =
+    configPath.endsWith(".yaml") || configPath.endsWith(".yml") ? YAML.parse(raw) : JSON.parse(raw)
+  // `extends:` (#2440): merge onto the base config; a config without it is used as written
+  return data && typeof data === "object" && "extends" in data
+    ? resolveExtends(data, configPath)
+    : (data as QuartzPluginsJson)
 }
 
 function extractPluginName(source: PluginSource): string {
@@ -150,6 +157,22 @@ function sourceKey(source: PluginSource): string {
 interface DependencyValidationResult {
   errors: string[]
   warnings: string[]
+}
+
+/** The pipeline stages a plugin's `order` decides its place in (a component has none). */
+const ORDERED_STAGES = ["transformer", "filter", "emitter", "pageType"] as const
+
+/**
+ * Whether `order` decides between the two plugins: they run in a stage they share (all
+ * transformers run before any filter or emitter, whatever their order). Without a category on
+ * either side the stage is unknown, and they are compared.
+ */
+function sameStage(a: PluginManifest, b: PluginManifest | undefined): boolean {
+  if (!a.category || !b?.category) return true
+  const stagesOfB = [b.category].flat()
+  return [a.category]
+    .flat()
+    .some((c) => stagesOfB.includes(c) && (ORDERED_STAGES as readonly string[]).includes(c))
 }
 
 export function validateDependencies(
@@ -222,7 +245,7 @@ export function validateDependencies(
       const depManifest = manifests.get(dep)
       const depOrder = depEntry.order ?? depManifest?.defaultOrder ?? 50
 
-      if (pluginOrder < depOrder) {
+      if (pluginOrder < depOrder && sameStage(manifest, depManifest)) {
         errors.push(
           `Plugin "${pluginName}" (order: ${pluginOrder}) depends on "${depName}" (order: ${depOrder}), ` +
             `but "${pluginName}" is configured to run first. Either increase "${pluginName}"'s order above ${depOrder} ` +
@@ -358,11 +381,12 @@ async function getManifest(source: PluginSource): Promise<PluginManifest | null>
 export async function loadQuartzConfig(
   configOverrides?: Partial<GlobalConfiguration>,
 ): Promise<QuartzConfig> {
-  const json = readPluginsJson()
+  const json = await readPluginsJson()
 
   if (!json) {
     // Fallback: import old-style config directly
     const oldConfig = await import("../../../quartz")
+    setSlugOptions(oldConfig.default?.configuration?.slugs)
     return oldConfig.default
   }
 
@@ -370,6 +394,8 @@ export async function loadQuartzConfig(
     ...(json.configuration as unknown as GlobalConfiguration),
     ...configOverrides,
   }
+  // before anything computes a slug (this runs in the main thread and in every worker)
+  setSlugOptions(configuration.slugs)
 
   // Entries of official plugins that are now built into core (crawl-links, remove-draft,
   // content-index) are handled by the built-ins below and never installed or loaded.
@@ -654,7 +680,7 @@ export async function loadQuartzConfig(
     items: { entry: PluginJsonEntry; manifest: PluginManifest | undefined }[],
     expectedCategory: ProcessingCategory,
   ) => {
-    const instances: { order: number; instance: any }[] = []
+    const instances: OrderItem<any>[] = []
     for (const { entry, manifest } of items) {
       try {
         const spec = parsePluginSource(entry.source)
@@ -678,7 +704,8 @@ export async function loadQuartzConfig(
         }
         const pluginOverrides = componentRegistry.getOptionOverrides(spec.name)
         const options = { ...manifest?.defaultOptions, ...entry.options, ...pluginOverrides }
-        const instance = factory(Object.keys(options).length > 0 ? options : undefined)
+        // Factories may be async (e.g. a plugin that fetches remote data before the build).
+        const instance = await factory(Object.keys(options).length > 0 ? options : undefined)
         if (!instance || typeof instance !== "object") {
           pluginLoadFailed(
             entry,
@@ -712,7 +739,19 @@ export async function loadQuartzConfig(
           issues: manifest?.issues,
           quartzVersion: manifest?.quartzVersion,
         })
-        instances.push({ order: entry.order ?? manifest?.defaultOrder ?? 50, instance })
+        const label = extractPluginName(entry.source)
+        instances.push({
+          order: entry.order ?? manifest?.defaultOrder ?? 50,
+          instance,
+          label,
+          names: [
+            label,
+            manifest?.name,
+            typeof instance.name === "string" ? instance.name : "",
+          ].filter((n): n is string => typeof n === "string" && n !== ""),
+          before: constraintList(entry.before, "before", label),
+          after: constraintList(entry.after, "after", label),
+        })
       } catch (err) {
         pluginLoadFailed(entry, manifest, "was skipped: it failed to initialise", err)
       }
@@ -726,19 +765,38 @@ export async function loadQuartzConfig(
     builtinPlugins.ComponentResources(),
     builtinPlugins.Assets(),
     builtinPlugins.Static(),
+    builtinPlugins.SlugRedirects(),
   ]
   const builtinPageTypes = [builtinPlugins.PageTypes.NotFoundPageType()]
 
   // Built-in processing steps take their place in plugin order (frontmatter at 0, links at 60 …);
-  // on equal order a built-in runs before plugins (stable sort, built-ins listed first).
+  // on equal order a built-in runs before plugins (stable sort, built-ins listed first), unless
+  // `before`/`after` on an entry say otherwise (see plugin-order.ts).
+  const knownPluginNames = new Set(
+    [
+      ...json.plugins.map((e) => extractPluginName(e.source)),
+      ...builtinPlan.builtins.flatMap((b) => [b.spec.configKey, ...b.spec.absorbs]),
+      "Frontmatter",
+      "Links",
+      "Drafts",
+      "ContentIndex",
+      "Fonts",
+    ].map(normalizePluginName),
+  )
   const withBuiltins = <T>(
-    builtins: { order: number; instance: unknown }[],
-    instances: { order: number; instance: T }[],
+    builtins: { order: number; instance: unknown; names?: string[] }[],
+    instances: OrderItem<T>[],
   ): T[] =>
-    [...builtins, ...instances]
-      .map((item, index) => ({ ...item, index }))
-      .sort((a, b) => a.order - b.order || a.index - b.index)
-      .map((item) => item.instance as T)
+    orderPlugins(
+      [
+        ...builtins.map(({ order, instance, names }) => {
+          const name = (instance as { name: string }).name
+          return { order, instance: instance as T, label: name, names: names ?? [name] }
+        }),
+        ...instances,
+      ],
+      knownPluginNames,
+    )
 
   const plugins: PluginTypes = {
     transformers: withBuiltins(
@@ -757,7 +815,7 @@ export async function loadQuartzConfig(
       ),
     ],
     pageTypes: [
-      ...(await instantiate(pageTypes, "pageType")).map((item) => item.instance),
+      ...orderPlugins(await instantiate(pageTypes, "pageType"), knownPluginNames),
       ...builtinPageTypes,
     ],
   }
@@ -844,7 +902,11 @@ function validateCategory(
       return "shouldPublish" in instance
     case "transformer":
       return (
-        "textTransform" in instance || "markdownPlugins" in instance || "htmlPlugins" in instance
+        "textTransform" in instance ||
+        "markdownPlugins" in instance ||
+        "htmlPlugins" in instance ||
+        "virtualPageHtmlPlugins" in instance ||
+        "renderTransforms" in instance
       )
   }
 }
@@ -897,7 +959,7 @@ function findFactory(
   return null
 }
 
-function detectCategoryFromModule(module: unknown): ProcessingCategory | null {
+export function detectCategoryFromModule(module: unknown): ProcessingCategory | null {
   if (!module || typeof module !== "object") return null
   const mod = module as Record<string, unknown>
 
@@ -915,6 +977,12 @@ function detectCategoryFromModule(module: unknown): ProcessingCategory | null {
   if (typeof factory === "function") {
     try {
       const instance = factory()
+      // An async factory can't be inspected without running it; such plugins must declare
+      // their category in the manifest. Swallow its rejection so discovery has no side effects.
+      if (instance instanceof Promise) {
+        instance.catch(() => {})
+        return null
+      }
       if (instance && typeof instance === "object") {
         if ("match" in instance && "body" in instance && "layout" in instance) return "pageType"
         if ("emit" in instance) return "emitter"
@@ -922,7 +990,9 @@ function detectCategoryFromModule(module: unknown): ProcessingCategory | null {
         if (
           "textTransform" in instance ||
           "markdownPlugins" in instance ||
-          "htmlPlugins" in instance
+          "htmlPlugins" in instance ||
+          "virtualPageHtmlPlugins" in instance ||
+          "renderTransforms" in instance
         )
           return "transformer"
       }
@@ -1160,7 +1230,7 @@ export function buildQuartzLayout(
  * the renderer's layout is updated in place with the overrides applied.
  */
 export async function loadQuartzLayout(layoutOverrides?: LayoutOverrides): Promise<QuartzLayout> {
-  const json = readPluginsJson()
+  const json = await readPluginsJson()
 
   if (!json) {
     // Fallback: import old-style layout directly
