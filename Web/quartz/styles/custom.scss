@@ -347,6 +347,13 @@ figure[data-rehype-pretty-code-figure] > [data-rehype-pretty-code-title] {
   border-block-end: 1px solid var(--lightgray);
 }
 
+// Obsidian-flavored Markdown always renders fold arrows and expects newer Quartz
+// base styles to hide them unless folding is enabled.
+.markdown-preview-view:not(.allow-fold-headings) .heading-collapse-indicator,
+.markdown-preview-view:not(.allow-fold-lists) .list-collapse-indicator {
+  display: none;
+}
+
 @keyframes question-answer-reveal {
   from {
     opacity: 0;
@@ -742,13 +749,13 @@ pre > button.clipboard-button,
     display: none;
   }
 
-  // Same defaulting bug as the tablet drawer (see the `aria-expanded` note in
+  // Same defaulting bug as the tablet drawer (see the `data-drawer-open` note in
   // the tablet block): the plugin opens the drawer whenever `.collapsed` is
   // absent, which is the server markup's own state, so it flashes open on every
   // load and every SPA patch until the Explorer's async handler catches up.
   // Unlayered, so this beats the plugin's `quartz-base` open rule; the drawer is
   // 100vw wide here, making `-100%` the same offset the plugin slides.
-  .explorer:not([aria-expanded="true"]) > .explorer-content {
+  .explorer:is(:not([data-drawer-open="true"]), .collapsed) > .explorer-content {
     transform: translateX(-100%);
     visibility: hidden;
   }
@@ -907,7 +914,8 @@ pre:hover > button.clipboard-button {
 // Sizing and ink follow the scope trigger; each disclosure owns its open-state rotation.
 .ns-scope .ns-chev-svg,
 .explorer button.desktop-explorer .fold,
-.explorer .explorer-content .folder-container > svg.folder-icon,
+.explorer .explorer-content .folder-container > .folder-icon,
+.explorer .explorer-content .folder-container > .folder-icon > svg,
 .toc button.toc-header .fold {
   width: 15px;
   height: 15px;
@@ -916,9 +924,19 @@ pre:hover > button.clipboard-button {
   opacity: 1;
 }
 
-.explorer .explorer-content .folder-container > svg.folder-icon {
+.explorer .explorer-content .folder-container > .folder-icon {
+  flex: none;
   align-self: flex-start;
   margin-block-start: calc((var(--nav-line-height) - 15px) / 2);
+}
+
+.explorer .explorer-content .folder-container > .folder-icon > svg {
+  display: block;
+}
+
+// A folder's guide line runs through the centre of its chevron.
+.explorer .explorer-content .folder-outer > ul {
+  margin-left: calc(0.35rem + 7px);
 }
 
 // The row owns the state. Labels, topic glyphs and ToC markers consume it.
@@ -1186,13 +1204,18 @@ pre:hover > button.clipboard-button {
   // `.collapsed` is absent from the server markup and only added at the END of
   // the Explorer's async nav handler (after it awaits the content index), so
   // `:not(.collapsed)` reads as OPEN on every cold load and on every SPA patch
-  // — the drawer paints open for a frame, then slides shut. `aria-expanded` is
-  // set only by a real toggle click, so the resting state is closed.
+  // — the drawer paints open for a frame, then slides shut. `data-drawer-open`
+  // (explorer-disclosure.tsx) is set only by a real toggle click, so the resting
+  // state is closed.
   //
   // Must carry the full sidebar prefix: the closed-state rule above is more
   // specific than the plugin's bare `.explorer:not(.collapsed)`, so a shorter
   // selector here would lose and the drawer would never slide in.
-  .page > #quartz-body > .sidebar.left .explorer[aria-expanded="true"] > .explorer-content {
+  .page
+    > #quartz-body
+    > .sidebar.left
+    .explorer[data-drawer-open="true"]:not(.collapsed)
+    > .explorer-content {
     transform: translateX(0);
     visibility: visible;
   }

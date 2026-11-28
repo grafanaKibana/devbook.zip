@@ -65,6 +65,10 @@ dialog.graph-dialog {
   }
   line {
     stroke: color-mix(in srgb, var(--gray) 33%, var(--lightgray));
+    // Opacity is left out: the script drives it while a page change is in flight.
+    transition:
+      stroke var(--dur-2) var(--ease-out),
+      stroke-width var(--dur-2) var(--ease-out);
   }
   line.direct,
   line.highlight {
@@ -113,5 +117,41 @@ dialog.graph-dialog {
 
   &:empty {
     display: none;
+  }
+}
+
+.graph-hub-labels {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  font-family: var(--bodyFont);
+  line-height: 1;
+
+  > div {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+  }
+
+  span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+  }
+}
+
+// The first frames of the layout are a burst from one point. Arriving through
+// a fade keeps that burst faint.
+.global-graph-container > canvas,
+.graph-hub-labels {
+  animation: graph-arrive var(--dur-4) var(--ease-out) backwards;
+}
+
+@keyframes graph-arrive {
+  from {
+    opacity: 0;
   }
 }

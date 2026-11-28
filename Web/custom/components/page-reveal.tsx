@@ -9,6 +9,11 @@ import type { QuartzComponent, QuartzComponentConstructor } from "@quartz-commun
 // first layout settle. SPA navigations never re-arm it; they only replay the
 // shorter pass-through animation.
 
+// The first reveal is flagged on the root, not matched with body:has(article…):
+// a :has() on body restyles the whole document on every DOM insertion. The
+// selector keeps that form's specificity so the cascade is unchanged.
+const initial = 'html:root:where([data-page-reveal="initial"]) body'
+
 const css = `
 @keyframes page-reveal-in {
   from { opacity: 0; transform: translateY(4px); }
@@ -39,8 +44,8 @@ article[data-reveal] {
 article[data-reveal="initial"] {
   animation: page-reveal-first-in var(--dur-4) var(--ease-out) backwards;
 }
-body[data-slug="index"]:has(article[data-reveal="initial"]) .center > hr,
-body[data-slug="index"]:has(article[data-reveal="initial"]) .page > #quartz-body > footer {
+${initial}[data-slug="index"] .center > hr,
+${initial}[data-slug="index"] .page > #quartz-body > footer {
   animation: page-reveal-footer-in var(--dur-3) var(--ease-out)
     calc(var(--dur-3) + var(--stagger) * 6) backwards;
 }
@@ -55,50 +60,50 @@ body[data-slug="index"]:has(article[data-reveal="initial"]) .page > #quartz-body
     opacity: 0;
     pointer-events: none;
   }
-  body:has(article[data-reveal="initial"]) .site-header > *,
-  body:has(article[data-reveal="initial"]) .page-header > .popover-hint > *,
-  body:has(article[data-reveal="initial"]) .page > #quartz-body > .sidebar.right > *,
-  body:has(article[data-reveal="initial"]) .sidebar.left > .ns-scope,
-  body:has(article[data-reveal="initial"]) .sidebar.left .explorer button.desktop-explorer,
-  body:has(article[data-reveal="initial"]) .sidebar.left .explorer .explorer-ul > li {
+  ${initial} .site-header > *,
+  ${initial} .page-header > .popover-hint > *,
+  ${initial} .page > #quartz-body > .sidebar.right > *,
+  ${initial} .sidebar.left > .ns-scope,
+  ${initial} .sidebar.left .explorer button.desktop-explorer,
+  ${initial} .sidebar.left .explorer .explorer-ul > li {
     animation: page-reveal-sidebar-in var(--dur-3) var(--ease-out) backwards;
   }
-  body:has(article[data-reveal="initial"])
+  ${initial}
     :is(.site-header, .page-header > .popover-hint) > * {
     animation-delay: calc(var(--stagger) * var(--page-reveal-order, 0));
   }
-  body:has(article[data-reveal="initial"]) .page > #quartz-body > .sidebar.right > * {
+  ${initial} .page > #quartz-body > .sidebar.right > * {
     animation-delay: calc(var(--stagger) * var(--page-reveal-order, 0));
   }
-  body:has(article[data-reveal="initial"])
+  ${initial}
     :is(.site-header, .page-header > .popover-hint, .sidebar.right) > :nth-child(2) {
     --page-reveal-order: 1;
   }
-  body:has(article[data-reveal="initial"])
+  ${initial}
     :is(.site-header, .page-header > .popover-hint, .sidebar.right) > :nth-child(3) {
     --page-reveal-order: 2;
   }
-  body:has(article[data-reveal="initial"])
+  ${initial}
     :is(.site-header, .page-header > .popover-hint, .sidebar.right) > :nth-child(4) {
     --page-reveal-order: 3;
   }
-  body:has(article[data-reveal="initial"]) .sidebar.left .explorer button.desktop-explorer {
+  ${initial} .sidebar.left .explorer button.desktop-explorer {
     animation-delay: var(--stagger);
   }
-  body:has(article[data-reveal="initial"]) .sidebar.left .explorer .explorer-ul > li {
+  ${initial} .sidebar.left .explorer .explorer-ul > li {
     animation-delay: calc(var(--stagger) * var(--ns-reveal-order, 2));
   }
 }
 @media (prefers-reduced-motion: reduce) {
   article[data-reveal],
-  body[data-slug="index"]:has(article[data-reveal="initial"]) .center > hr,
-  body[data-slug="index"]:has(article[data-reveal="initial"]) .page > #quartz-body > footer,
-  body:has(article[data-reveal="initial"]) .site-header > *,
-  body:has(article[data-reveal="initial"]) .page-header > .popover-hint > *,
-  body:has(article[data-reveal="initial"]) .page > #quartz-body > .sidebar.right > *,
-  body:has(article[data-reveal="initial"]) .sidebar.left > .ns-scope,
-  body:has(article[data-reveal="initial"]) .sidebar.left .explorer button.desktop-explorer,
-  body:has(article[data-reveal="initial"]) .sidebar.left .explorer .explorer-ul > li {
+  ${initial}[data-slug="index"] .center > hr,
+  ${initial}[data-slug="index"] .page > #quartz-body > footer,
+  ${initial} .site-header > *,
+  ${initial} .page-header > .popover-hint > *,
+  ${initial} .page > #quartz-body > .sidebar.right > *,
+  ${initial} .sidebar.left > .ns-scope,
+  ${initial} .sidebar.left .explorer button.desktop-explorer,
+  ${initial} .sidebar.left .explorer .explorer-ul > li {
     animation: none;
   }
 }
@@ -134,6 +139,8 @@ const script = `
     article.removeAttribute("data-reveal");
     void article.offsetWidth;
     article.setAttribute("data-reveal", kind);
+    if (kind) document.documentElement.setAttribute("data-page-reveal", kind);
+    else document.documentElement.removeAttribute("data-page-reveal");
   }
 
   function initial() {
