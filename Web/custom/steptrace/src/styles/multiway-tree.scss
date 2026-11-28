@@ -36,8 +36,8 @@
 
 .steptrace .steptrace__multiway-tree-cell {
   fill: var(--_surface);
-  stroke: var(--_border);
-  stroke-width: 1.4;
+  stroke: var(--_chrome-border);
+  stroke-width: var(--_stroke-hair);
 }
 
 .steptrace .steptrace__multiway-tree-node[data-path="1"] .steptrace__multiway-tree-cell {

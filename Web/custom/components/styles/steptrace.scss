@@ -12,9 +12,13 @@
   // the text color lifts StepTrace's small secondary text over the AA line.
   --st-muted: color-mix(in srgb, var(--gray) 90%, var(--darkgray));
   --st-border: var(--gray);
+  // Same chrome as the site's explorer scope, search, graph and code controls.
+  --st-chrome-border: var(--lightgray);
+  --st-chrome-border-hover: var(--gray);
+  --st-chrome-radius: var(--surface-radius);
   --st-table-cell: var(--light);
   --st-table-header: var(--lightgray);
-  --st-table-border: var(--gray);
+  --st-table-border: var(--lightgray);
   --st-table-text: var(--darkgray);
   --st-accent: var(--secondary);
   --st-accent-gradient: var(--accent-gradient);

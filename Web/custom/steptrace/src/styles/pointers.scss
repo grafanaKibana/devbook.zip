@@ -7,7 +7,7 @@
 .steptrace__pcells {
   display: flex;
   height: 100%;
-  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border: var(--_stroke-hair) solid var(--_chrome-border);
 }
 .steptrace__pcell {
   flex: 1 1 0;

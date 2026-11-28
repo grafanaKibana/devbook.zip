@@ -50,7 +50,7 @@
   width: 100%;
   min-width: 0;
   grid-template-columns: repeat(var(--_n), minmax(0, 1fr));
-  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border: var(--_stroke-hair) solid var(--_chrome-border);
   border-radius: var(--_radius-container);
   overflow: hidden;
 }
@@ -146,7 +146,7 @@
   display: flex;
   width: 100%;
   min-width: 0;
-  border: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 22%, transparent);
+  border: var(--_stroke-hair) solid var(--_chrome-border);
   border-radius: var(--_radius-container);
   overflow: hidden;
 }
