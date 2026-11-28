@@ -22943,14 +22943,14 @@
     "status": "active",
     "phase": "selecting",
     "started_at": "2026-11-28T08:07:03.994766Z",
-    "elapsed_seconds": 0.0010204,
+    "elapsed_seconds": 4.9685667,
     "calls_reserved": 0,
     "responses_received": 0,
     "attempted_paths": [],
     "accepted_records": [],
     "outcomes": [],
     "feedback_pr": 0,
-    "checkpoint_at": "2026-11-28T08:07:03.995439Z"
+    "checkpoint_at": "2026-11-28T08:07:08.962851Z"
   },
   "review_evidence": {
     "9335687f85b8087165e09bbfce406a76c1a43405bfd1f73311124c497c86d5c2": {
