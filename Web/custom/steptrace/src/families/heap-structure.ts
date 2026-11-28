@@ -162,7 +162,7 @@ export function mountHeap(root: HTMLElement, config: HeapConfig): MountHandle {
     settled = child
     input.value = ""
     paint(
-      `Inserted ${value}; sift-up path ${path.join(" → ")}${
+      `Inserted ${value}. Sift-up path ${path.join(" → ")}${
         swaps ? ` with ${swaps} swap${swaps === 1 ? "" : "s"}` : " already satisfied heap order"
       }.`,
     )
@@ -670,7 +670,7 @@ export function mountFibonacciHeap(root: HTMLElement, config: FibonacciHeapConfi
       settled.add(minimum().id)
     }
     paint(
-      `Extracted minimum ${min.key}; promoted its children and consolidated equal degrees.${
+      `Extracted minimum ${min.key}. Promoted its children and consolidated equal degrees.${
         allNodes().some((node) => node.key === 41) && allNodes().some((node) => node.key === 52)
           ? " Next: decrease 41 to 5, then 52 to 4 to see a mark and cascading cut."
           : ""
@@ -869,10 +869,10 @@ function mountMergeHeap(root: HTMLElement, mode: "leftist" | "skew"): MountHandl
     result = mergeBinaryHeaps(cloneBinary(first), cloneBinary(second), mode, active, swapped)
     paint(
       mode === "leftist"
-        ? `Merged along the right spines; ${swapped.size} conditional child swap${
+        ? `Merged along the right spines. ${swapped.size} conditional child swap${
             swapped.size === 1 ? "" : "s"
           } restored the npl invariant.`
-        : `Merged along the right spines; all ${swapped.size} touched node${
+        : `Merged along the right spines. All ${swapped.size} touched node${
             swapped.size === 1 ? "" : "s"
           } swapped children unconditionally.`,
     )

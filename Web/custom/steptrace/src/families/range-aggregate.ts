@@ -201,7 +201,7 @@ export function mountFenwickTree(root: HTMLElement, config: FenwickTreeConfig): 
     roles = new Map(path.map((slot) => [slot, "update"]))
     delta.value = ""
     paint(
-      `Added ${parsed} at value[${index}]; updated ${path
+      `Added ${parsed} at value[${index}]. Updated ${path
         .map((slot) => `BIT[${slot}]`)
         .join(" → ")}.`,
     )

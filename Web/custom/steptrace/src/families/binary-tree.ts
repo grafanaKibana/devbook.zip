@@ -348,7 +348,7 @@ function createAvlModel(values: readonly number[]): TreeModel {
       return {
         changed: inserted,
         detail: inserted
-          ? `Inserted ${key} via ${state.path.join(" → ") || "the root"}; ${
+          ? `Inserted ${key} via ${state.path.join(" → ") || "the root"}, and ${
               repairs.length
                 ? `${repairs.join(", ")} restored |balance| ≤ 1.`
                 : "no rotation was needed."
@@ -379,7 +379,7 @@ function createAvlModel(values: readonly number[]): TreeModel {
       return {
         changed: removed,
         detail: removed
-          ? `Removed ${key} via ${state.path.join(" → ")}; ${
+          ? `Removed ${key} via ${state.path.join(" → ")}, and ${
               repairs.length
                 ? `${repairs.join(", ")} rebalanced the shortened path.`
                 : "all ancestors stayed within |balance| ≤ 1."
@@ -531,7 +531,7 @@ function createRedBlackModel(values: readonly number[]): TreeModel {
       return {
         changed: inserted,
         detail: inserted
-          ? `Inserted ${key}. ${events.join(", ") || "no fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.`
+          ? `Inserted ${key}. ${events.length ? `Fixup: ${events.join(", ")}` : "No fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.`
           : `Compared ${state.path.join(" → ")}. ${key} already exists, so the tree did not change.`,
       }
     },
@@ -565,7 +565,7 @@ function createRedBlackModel(values: readonly number[]): TreeModel {
       if (model.root) model.root.color = "black"
       return {
         changed: true,
-        detail: `Removed ${key}. ${events.join(", ") || "no fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.`,
+        detail: `Removed ${key}. ${events.length ? `Fixup: ${events.join(", ")}` : "No fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.`,
       }
     },
     meta: () => "",
@@ -690,7 +690,7 @@ function createSplayModel(values: readonly number[]): TreeModel {
     return {
       found: !!result.found,
       detail: result.found
-        ? `Search path ${state.path.join(" → ")} found ${key}. ${cases.join(" → ") || "already root"} moved it to the root.`
+        ? `Search path ${state.path.join(" → ")} found ${key}. ${cases.length ? `Splay steps ${cases.join(" → ")} moved it to the root` : "It was already the root"}.`
         : `Search path ${state.path.join(" → ")} missed ${key}. Canonical splay moves last accessed ${accessed?.key ?? "node"} to the root via ${cases.join(" → ") || "no rotation"}.`,
     }
   }
@@ -928,7 +928,9 @@ export function mountBinaryTree(
         "aria-label",
         kind === "avl-tree"
           ? `Key ${entry.node.key}, height ${entry.node.height}, balance factor ${balanceFactor(entry.node)}`
-          : `Key ${entry.node.key}${metadata ? `, ${metadata}` : ""}`,
+          : kind === "red-black-tree"
+            ? `Key ${entry.node.key}, ${entry.node.color}`
+            : `Key ${entry.node.key}${metadata ? `, ${metadata}` : ""}`,
       )
       value.textContent = String(entry.node.key)
       meta.textContent = metadata

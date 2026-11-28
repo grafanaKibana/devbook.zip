@@ -65,11 +65,11 @@
   transition: background var(--_tween) ease;
 }
 
-.steptrace__btcell:nth-child(4n) {
+.steptrace__btcell[data-edge~="right"] {
   border-right: 0;
 }
 
-.steptrace__btcell:nth-last-child(-n + 4) {
+.steptrace__btcell[data-edge~="bottom"] {
   border-bottom: 0;
 }
 

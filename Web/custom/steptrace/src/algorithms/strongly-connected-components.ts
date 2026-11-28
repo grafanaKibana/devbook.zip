@@ -130,7 +130,7 @@ function run(_: Config, recorder: Recorder) {
     low,
     stack,
     components,
-    "C→A reaches an active ancestor. Low[C] becomes 0.",
+    "C→A reaches an active ancestor, so low[C] becomes 0.",
   )
   visit("D", 3, "C")
   visit("E", 4, "D")
@@ -143,7 +143,7 @@ function run(_: Config, recorder: Recorder) {
     low,
     stack,
     components,
-    "E→D reaches an active ancestor. Low[E] becomes 3.",
+    "E→D reaches an active ancestor, so low[E] becomes 3.",
   )
   low["D"] = Math.min(low["D"], low["E"])
   recorder.record(

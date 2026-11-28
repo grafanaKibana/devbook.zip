@@ -236,7 +236,7 @@ export const memoizationTreeViewDescriptor: ExecutionTreeViewDescriptor = {
     { state: "split", label: "Expand New State" },
     { state: "base", label: "Base Result" },
     { state: "store", label: "Store First Result" },
-    { state: "cache", label: "Cache Hit. Skip Branch" },
+    { state: "cache", label: "Cache Hit, Skip Branch" },
   ],
   frameModel,
   nodeLines(node: ExecutionTreeNode) {

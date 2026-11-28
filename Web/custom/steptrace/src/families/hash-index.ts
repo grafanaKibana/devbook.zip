@@ -959,8 +959,8 @@ function mountHashTable(
             ? `Contains ${key}: true. Found in cell ${probe.found}.`
             : `Search ${key} found ${entry.value} in cell ${probe.found}.`
         : `${removeEntry ? "Remove" : content === "set" ? "Contains" : "Search"} ${key}${
-            content === "set" && !removeEntry ? ": false;" : ""
-          } missed after ${probe.path.length} probe${probe.path.length === 1 ? "" : "s"}.`,
+            content === "set" && !removeEntry ? ": false. Missed" : " missed"
+          } after ${probe.path.length} probe${probe.path.length === 1 ? "" : "s"}.`,
       commit:
         entry && removeEntry
           ? () => {

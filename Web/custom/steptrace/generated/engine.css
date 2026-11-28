@@ -104,7 +104,7 @@
 }
 .steptrace .steptrace__pcells,
 .steptrace .steptrace__cells,
-.steptrace .steptrace__bcells,
+.steptrace .steptrace__bcells:not(.steptrace__bcells--idx),
 .steptrace .steptrace__hash-buckets,
 .steptrace .steptrace__contiguous-array {
   --steptrace-array-radius: var(--_array-radius);
@@ -147,19 +147,19 @@
 .steptrace :where(.steptrace__pcell, .steptrace__cell, .steptrace__bcell, .steptrace__contiguous-cell, .steptrace__hash-cell, .steptrace__btcell, .steptrace__dp th[data-role], .steptrace__dp td, .steptrace__warehouse-matrix td) {
   box-shadow: inset 0 0 0 var(--_stroke-emphasis) var(--st-page, var(--_surface));
 }
-.steptrace .steptrace__btcell:first-child,
+.steptrace .steptrace__btcell[data-edge~=top][data-edge~=left],
 .steptrace :is(.steptrace__dp, .steptrace__warehouse-matrix) > :nth-child(1 of thead, tbody, tfoot) > tr:first-child > :first-child {
   border-top-left-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
 }
-.steptrace .steptrace__btcell:nth-child(4),
+.steptrace .steptrace__btcell[data-edge~=top][data-edge~=right],
 .steptrace :is(.steptrace__dp, .steptrace__warehouse-matrix) > :nth-child(1 of thead, tbody, tfoot) > tr:first-child > :last-child {
   border-top-right-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
 }
-.steptrace .steptrace__btcell:nth-last-child(4),
+.steptrace .steptrace__btcell[data-edge~=bottom][data-edge~=left],
 .steptrace :is(.steptrace__dp, .steptrace__warehouse-matrix) > :nth-last-child(1 of thead, tbody, tfoot) > tr:last-child > :first-child {
   border-bottom-left-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
 }
-.steptrace .steptrace__btcell:last-child,
+.steptrace .steptrace__btcell[data-edge~=bottom][data-edge~=right],
 .steptrace :is(.steptrace__dp, .steptrace__warehouse-matrix) > :nth-last-child(1 of thead, tbody, tfoot) > tr:last-child > :last-child {
   border-bottom-right-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
 }
@@ -238,6 +238,10 @@ span.steptrace__sep {
 }
 .steptrace__phase-name:not(:empty)::after {
   margin-inline-end: 0;
+}
+span.steptrace__sep {
+  overflow: hidden;
+  color: transparent;
 }
 tspan.steptrace__sep {
   fill: var(--_chrome-border-hover);
@@ -960,6 +964,7 @@ tspan.steptrace__sep {
 }
 .steptrace button.steptrace__btn:hover:not(:disabled) {
   border-color: var(--_chrome-border-hover);
+  background-color: transparent;
   box-shadow: none;
   color: var(--_text);
 }
@@ -3853,10 +3858,10 @@ tspan.steptrace__sep {
   border-bottom: var(--_stroke-hair) solid var(--_divider-faint);
   transition: background var(--_tween) ease;
 }
-.steptrace__btcell:nth-child(4n) {
+.steptrace__btcell[data-edge~=right] {
   border-right: 0;
 }
-.steptrace__btcell:nth-last-child(-n+4) {
+.steptrace__btcell[data-edge~=bottom] {
   border-bottom: 0;
 }
 .steptrace__btcell[data-parity="1"] {
@@ -6058,6 +6063,9 @@ tspan.steptrace__sep {
 .steptrace__structure-input:hover:not(:disabled),
 .steptrace__structure-action:hover:not(:disabled) {
   border-color: var(--_chrome-border-hover);
+}
+.steptrace__structure-action:hover:not(:disabled) {
+  background: transparent;
 }
 .steptrace .steptrace__structure-controls .steptrace__structure-action--primary {
   border-color: var(--_accent);

@@ -179,7 +179,7 @@ export const ternarySearchTree = {
   run(input, ops) {
     for (const [operation, key] of input.operations)
       traverse(input, ops, operation as "insert" | "search", key)
-    ops.done("Ternary search tree complete: lo/hi compared without consuming. Eq consumed.")
+    ops.done("Ternary search tree complete: lo/hi compared without consuming, and eq consumed.")
   },
 } satisfies FamilyAlgorithmDefinition<
   "string",

@@ -56,13 +56,19 @@
   border-color: var(--_chrome-border-hover);
 }
 
+.steptrace__structure-action:hover:not(:disabled) {
+  background: transparent;
+}
+
 .steptrace .steptrace__structure-controls .steptrace__structure-action--primary {
   border-color: var(--_accent);
   background: var(--_accent);
   color: var(--_on-accent);
 }
 
-.steptrace .steptrace__structure-controls .steptrace__structure-action--primary:hover:not(:disabled) {
+.steptrace
+  .steptrace__structure-controls
+  .steptrace__structure-action--primary:hover:not(:disabled) {
   border-color: var(--_accent);
   background: var(--_accent);
   filter: brightness(1.12);

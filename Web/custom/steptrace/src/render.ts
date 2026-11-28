@@ -2294,6 +2294,14 @@ export function makeBacktrackView(frames) {
     for (let c = 0; c < n; c++) {
       const cell = el("div", "steptrace__btcell")
       cell.dataset.parity = String((r + c) % 2)
+      cell.dataset.edge = [
+        r === 0 ? "top" : "",
+        r === n - 1 ? "bottom" : "",
+        c === 0 ? "left" : "",
+        c === n - 1 ? "right" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")
       cell.setAttribute("role", "gridcell")
       const glyph = el("div", "steptrace__btqueen")
       glyph.innerHTML = ICON.chessQueen
@@ -3237,7 +3245,9 @@ export function makeExecutionTreeView(frames, descriptor: ExecutionTreeViewDescr
         } else {
           setTextParts(
             elements.detail,
-            descriptor.preserveDetail ? elements.secondaryLine : resultText || elements.secondaryLine,
+            descriptor.preserveDetail
+              ? elements.secondaryLine
+              : resultText || elements.secondaryLine,
           )
         }
         elements.result.textContent = ""
@@ -3548,8 +3558,8 @@ export function setTextParts(node, text) {
   const children = []
   parts.forEach((part, index) => {
     if (index > 0) {
-      const sep = make("steptrace__sep", svg ? "\u2002|\u2002" : "")
-      sep.setAttribute("aria-hidden", "true")
+      const sep = make("steptrace__sep", svg ? "\u2002|\u2002" : "\u00a0")
+      if (svg) sep.setAttribute("aria-hidden", "true")
       children.push(sep)
     }
     children.push(make("", part))

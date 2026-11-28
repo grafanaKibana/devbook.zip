@@ -188,7 +188,7 @@
    off or be clipped when the first or last cell is active. */
 .steptrace .steptrace__pcells,
 .steptrace .steptrace__cells,
-.steptrace .steptrace__bcells,
+.steptrace .steptrace__bcells:not(.steptrace__bcells--idx),
 .steptrace .steptrace__hash-buckets,
 .steptrace .steptrace__contiguous-array {
   --steptrace-array-radius: var(--_array-radius);
@@ -268,7 +268,7 @@
 
 /* Matrix corner cells follow the frame's curve, so a corner highlight or
    inset ring stays concentric with it. */
-.steptrace .steptrace__btcell:first-child,
+.steptrace .steptrace__btcell[data-edge~="top"][data-edge~="left"],
 .steptrace
   :is(.steptrace__dp, .steptrace__warehouse-matrix)
   > :nth-child(1 of thead, tbody, tfoot)
@@ -276,7 +276,7 @@
   > :first-child {
   border-top-left-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
 }
-.steptrace .steptrace__btcell:nth-child(4),
+.steptrace .steptrace__btcell[data-edge~="top"][data-edge~="right"],
 .steptrace
   :is(.steptrace__dp, .steptrace__warehouse-matrix)
   > :nth-child(1 of thead, tbody, tfoot)
@@ -284,7 +284,7 @@
   > :last-child {
   border-top-right-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
 }
-.steptrace .steptrace__btcell:nth-last-child(4),
+.steptrace .steptrace__btcell[data-edge~="bottom"][data-edge~="left"],
 .steptrace
   :is(.steptrace__dp, .steptrace__warehouse-matrix)
   > :nth-last-child(1 of thead, tbody, tfoot)
@@ -292,7 +292,7 @@
   > :first-child {
   border-bottom-left-radius: calc(var(--_radius-container) - var(--_stroke-hair)) !important;
 }
-.steptrace .steptrace__btcell:last-child,
+.steptrace .steptrace__btcell[data-edge~="bottom"][data-edge~="right"],
 .steptrace
   :is(.steptrace__dp, .steptrace__warehouse-matrix)
   > :nth-last-child(1 of thead, tbody, tfoot)
@@ -375,6 +375,10 @@ span.steptrace__sep {
 }
 .steptrace__phase-name:not(:empty)::after {
   margin-inline-end: 0;
+}
+span.steptrace__sep {
+  overflow: hidden;
+  color: transparent;
 }
 tspan.steptrace__sep {
   fill: var(--_chrome-border-hover);
@@ -1181,6 +1185,7 @@ tspan.steptrace__sep {
 }
 .steptrace button.steptrace__btn:hover:not(:disabled) {
   border-color: var(--_chrome-border-hover);
+  background-color: transparent;
   box-shadow: none;
   color: var(--_text);
 }

@@ -494,7 +494,7 @@
 .steptrace .steptrace__lru-chain .steptrace__linked-list-board .steptrace__linked-list-link::after {
   inset-block-start: auto;
   border-block: 0;
-  /* steptrace-exception: lru-arc-head | category=geometry | rationale=triangle border width defines the accepted arrowhead silhouette | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json | properties=border-inline */
+  /* steptrace-exception: lru-arc-head | category=geometry | rationale=triangle border width defines the accepted arrowhead silhouette | evidence=.omx/evidence/steptrace-design-system-refactor/visual/candidate/g005-candidate-k/summary.json */
   border-inline: 4px solid transparent;
 }
 

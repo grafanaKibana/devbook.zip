@@ -1960,6 +1960,12 @@ function makeBacktrackView(frames) {
     for (let c = 0; c < n; c++) {
       const cell = el("div", "steptrace__btcell");
       cell.dataset.parity = String((r + c) % 2);
+      cell.dataset.edge = [
+        r === 0 ? "top" : "",
+        r === n - 1 ? "bottom" : "",
+        c === 0 ? "left" : "",
+        c === n - 1 ? "right" : ""
+      ].filter(Boolean).join(" ");
       cell.setAttribute("role", "gridcell");
       const glyph = el("div", "steptrace__btqueen");
       glyph.innerHTML = ICON.chessQueen;
@@ -2996,8 +3002,8 @@ function setTextParts(node2, text) {
   const children = [];
   parts.forEach((part, index) => {
     if (index > 0) {
-      const sep = make("steptrace__sep", svg ? " | " : "");
-      sep.setAttribute("aria-hidden", "true");
+      const sep = make("steptrace__sep", svg ? " | " : " ");
+      if (svg) sep.setAttribute("aria-hidden", "true");
       children.push(sep);
     }
     children.push(make("", part));
@@ -4476,7 +4482,7 @@ function createAvlModel(values) {
       if (inserted) state.success = key4;
       return {
         changed: inserted,
-        detail: inserted ? `Inserted ${key4} via ${state.path.join(" → ") || "the root"}; ${repairs.length ? `${repairs.join(", ")} restored |balance| ≤ 1.` : "no rotation was needed."}` : `Compared ${state.path.join(" → ")}. ${key4} already exists, so the tree did not change.`
+        detail: inserted ? `Inserted ${key4} via ${state.path.join(" → ") || "the root"}, and ${repairs.length ? `${repairs.join(", ")} restored |balance| ≤ 1.` : "no rotation was needed."}` : `Compared ${state.path.join(" → ")}. ${key4} already exists, so the tree did not change.`
       };
     },
     search(key4, state) {
@@ -4501,7 +4507,7 @@ function createAvlModel(values) {
       if (model.root) model.root.parent = null;
       return {
         changed: removed,
-        detail: removed ? `Removed ${key4} via ${state.path.join(" → ")}; ${repairs.length ? `${repairs.join(", ")} rebalanced the shortened path.` : "all ancestors stayed within |balance| ≤ 1."}` : `Compared ${state.path.join(" → ")}. ${key4} is absent, so the tree did not change.`
+        detail: removed ? `Removed ${key4} via ${state.path.join(" → ")}, and ${repairs.length ? `${repairs.join(", ")} rebalanced the shortened path.` : "all ancestors stayed within |balance| ≤ 1."}` : `Compared ${state.path.join(" → ")}. ${key4} is absent, so the tree did not change.`
       };
     },
     meta: (current) => `h${current.height} bf${balanceFactor(current)}`,
@@ -4631,7 +4637,7 @@ function createRedBlackModel(values) {
       if (inserted) state.success = key4;
       return {
         changed: inserted,
-        detail: inserted ? `Inserted ${key4}. ${events.join(", ") || "no fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.` : `Compared ${state.path.join(" → ")}. ${key4} already exists, so the tree did not change.`
+        detail: inserted ? `Inserted ${key4}. ${events.length ? `Fixup: ${events.join(", ")}` : "No fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.` : `Compared ${state.path.join(" → ")}. ${key4} already exists, so the tree did not change.`
       };
     },
     search(key4, state) {
@@ -4664,7 +4670,7 @@ function createRedBlackModel(values) {
       if (model.root) model.root.color = "black";
       return {
         changed: true,
-        detail: `Removed ${key4}. ${events.join(", ") || "no fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.`
+        detail: `Removed ${key4}. ${events.length ? `Fixup: ${events.join(", ")}` : "No fixup needed"}. Black-height ${blackHeight(model.root)} is equal on every path.`
       };
     },
     meta: () => "",
@@ -4782,7 +4788,7 @@ function createSplayModel(values) {
     if (result.found) state.success = key4;
     return {
       found: !!result.found,
-      detail: result.found ? `Search path ${state.path.join(" → ")} found ${key4}. ${cases.join(" → ") || "already root"} moved it to the root.` : `Search path ${state.path.join(" → ")} missed ${key4}. Canonical splay moves last accessed ${accessed?.key ?? "node"} to the root via ${cases.join(" → ") || "no rotation"}.`
+      detail: result.found ? `Search path ${state.path.join(" → ")} found ${key4}. ${cases.length ? `Splay steps ${cases.join(" → ")} moved it to the root` : "It was already the root"}.` : `Search path ${state.path.join(" → ")} missed ${key4}. Canonical splay moves last accessed ${accessed?.key ?? "node"} to the root via ${cases.join(" → ") || "no rotation"}.`
     };
   };
   model.remove = (key4, state) => {
@@ -4959,7 +4965,7 @@ function mountBinaryTree(rootElement, config, kind) {
       const metadata = model.meta(entry.node);
       group.setAttribute(
         "aria-label",
-        kind === "avl-tree" ? `Key ${entry.node.key}, height ${entry.node.height}, balance factor ${balanceFactor(entry.node)}` : `Key ${entry.node.key}${metadata ? `, ${metadata}` : ""}`
+        kind === "avl-tree" ? `Key ${entry.node.key}, height ${entry.node.height}, balance factor ${balanceFactor(entry.node)}` : kind === "red-black-tree" ? `Key ${entry.node.key}, ${entry.node.color}` : `Key ${entry.node.key}${metadata ? `, ${metadata}` : ""}`
       );
       value.textContent = String(entry.node.key);
       meta.textContent = metadata;
@@ -10383,7 +10389,7 @@ function mountHashTable(root, config, content) {
       calculation: calculationFor(key4),
       path: probe.path,
       target,
-      message: entry ? removeEntry ? `Removed key ${key4}. Cell ${probe.found} is now a tombstone.` : content === "set" ? `Contains ${key4}: true. Found in cell ${probe.found}.` : `Search ${key4} found ${entry.value} in cell ${probe.found}.` : `${removeEntry ? "Remove" : content === "set" ? "Contains" : "Search"} ${key4}${content === "set" && !removeEntry ? ": false;" : ""} missed after ${probe.path.length} probe${probe.path.length === 1 ? "" : "s"}.`,
+      message: entry ? removeEntry ? `Removed key ${key4}. Cell ${probe.found} is now a tombstone.` : content === "set" ? `Contains ${key4}: true. Found in cell ${probe.found}.` : `Search ${key4} found ${entry.value} in cell ${probe.found}.` : `${removeEntry ? "Remove" : content === "set" ? "Contains" : "Search"} ${key4}${content === "set" && !removeEntry ? ": false. Missed" : " missed"} after ${probe.path.length} probe${probe.path.length === 1 ? "" : "s"}.`,
       commit: entry && removeEntry ? () => {
         slots[probe.found] = null;
         tombstones[probe.found] = true;
@@ -11288,7 +11294,7 @@ function mountHeap(root, config) {
     settled = child;
     input.value = "";
     paint(
-      `Inserted ${value}; sift-up path ${path.join(" → ")}${swaps ? ` with ${swaps} swap${swaps === 1 ? "" : "s"}` : " already satisfied heap order"}.`
+      `Inserted ${value}. Sift-up path ${path.join(" → ")}${swaps ? ` with ${swaps} swap${swaps === 1 ? "" : "s"}` : " already satisfied heap order"}.`
     );
   }
   function onExtract() {
@@ -11718,7 +11724,7 @@ function mountFibonacciHeap(root, config) {
       settled.add(minimum().id);
     }
     paint(
-      `Extracted minimum ${min.key}; promoted its children and consolidated equal degrees.${allNodes().some((node2) => node2.key === 41) && allNodes().some((node2) => node2.key === 52) ? " Next: decrease 41 to 5, then 52 to 4 to see a mark and cascading cut." : ""}`
+      `Extracted minimum ${min.key}. Promoted its children and consolidated equal degrees.${allNodes().some((node2) => node2.key === 41) && allNodes().some((node2) => node2.key === 52) ? " Next: decrease 41 to 5, then 52 to 4 to see a mark and cascading cut." : ""}`
     );
   }
   function onDecrease() {
@@ -11875,7 +11881,7 @@ function mountMergeHeap(root, mode) {
     swapped = /* @__PURE__ */ new Set();
     result = mergeBinaryHeaps(cloneBinary(first), cloneBinary(second), mode, active, swapped);
     paint(
-      mode === "leftist" ? `Merged along the right spines; ${swapped.size} conditional child swap${swapped.size === 1 ? "" : "s"} restored the npl invariant.` : `Merged along the right spines; all ${swapped.size} touched node${swapped.size === 1 ? "" : "s"} swapped children unconditionally.`
+      mode === "leftist" ? `Merged along the right spines. ${swapped.size} conditional child swap${swapped.size === 1 ? "" : "s"} restored the npl invariant.` : `Merged along the right spines. All ${swapped.size} touched node${swapped.size === 1 ? "" : "s"} swapped children unconditionally.`
     );
   });
   shell.listen(reset, "click", () => {
@@ -12473,7 +12479,7 @@ var init_execution_tree = __esm({
         { state: "split", label: "Expand New State" },
         { state: "base", label: "Base Result" },
         { state: "store", label: "Store First Result" },
-        { state: "cache", label: "Cache Hit. Skip Branch" }
+        { state: "cache", label: "Cache Hit, Skip Branch" }
       ],
       frameModel,
       nodeLines(node2) {
@@ -17980,7 +17986,7 @@ function mountFenwickTree(root, config) {
     roles = new Map(path.map((slot) => [slot, "update"]));
     delta.value = "";
     paint(
-      `Added ${parsed} at value[${index}]; updated ${path.map((slot) => `BIT[${slot}]`).join(" → ")}.`
+      `Added ${parsed} at value[${index}]. Updated ${path.map((slot) => `BIT[${slot}]`).join(" → ")}.`
     );
   }
   function onQuery() {
@@ -21764,7 +21770,7 @@ function run6(_, recorder) {
     low,
     stack2,
     components,
-    "C→A reaches an active ancestor. Low[C] becomes 0."
+    "C→A reaches an active ancestor, so low[C] becomes 0."
   );
   visit("D", 3, "C");
   visit("E", 4, "D");
@@ -21777,7 +21783,7 @@ function run6(_, recorder) {
     low,
     stack2,
     components,
-    "E→D reaches an active ancestor. Low[E] becomes 3."
+    "E→D reaches an active ancestor, so low[E] becomes 3."
   );
   low["D"] = Math.min(low["D"], low["E"]);
   recorder.record(
@@ -21946,7 +21952,7 @@ var init_two_pointers = __esm({
         const a = ops.value;
         const target = input.target;
         ops.init(
-          `Two pointers on sorted data seek ${target}: left → raises the sum. Right ← lowers it.`
+          `Two pointers on sorted data seek ${target}: left → raises the sum, and right ← lowers it.`
         );
         let l = 0;
         let r = a.length - 1;
@@ -22532,7 +22538,7 @@ var init_ternary_search_tree = __esm({
       run(input, ops) {
         for (const [operation, key4] of input.operations)
           traverse(input, ops, operation, key4);
-        ops.done("Ternary search tree complete: lo/hi compared without consuming. Eq consumed.");
+        ops.done("Ternary search tree complete: lo/hi compared without consuming, and eq consumed.");
       }
     };
   }
