@@ -23,8 +23,8 @@
   --_chrome-border: var(--st-chrome-border, var(--_border));
   --_chrome-border-hover: var(--st-chrome-border-hover, var(--_muted));
   --_chrome-radius: var(--st-chrome-radius, var(--_radius-md));
-  --_divider: var(--st-divider, color-mix(in srgb, var(--_text) 13%, transparent));
-  --_divider-faint: var(--st-divider-faint, color-mix(in srgb, var(--_text) 10%, transparent));
+  --_divider: var(--st-divider, var(--_chrome-border));
+  --_divider-faint: var(--st-divider-faint, var(--_chrome-border));
   --_accent: var(--st-accent, #{tokens.$green-light});
   --_on-accent: var(--st-on-accent, #{tokens.$on-accent});
   --_panel-shadow: var(--st-panel-shadow, #{tokens.$panel-shadow-light});

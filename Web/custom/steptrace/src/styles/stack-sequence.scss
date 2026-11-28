@@ -203,7 +203,7 @@
   flex: 0 0 2.35rem;
   grid-template-rows: minmax(0, 1fr) 0.85rem;
   border-inline-end: 0;
-  border-block-end: var(--_stroke-hair) solid color-mix(in srgb, var(--_text) 13%, transparent);
+  border-block-end: var(--_stroke-hair) solid var(--_chrome-border);
   transform-origin: bottom center;
 }
 
